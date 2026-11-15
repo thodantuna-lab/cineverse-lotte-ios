@@ -1979,8 +1979,8 @@
         <div id="theater-left-movie-list" class="flex-1 overflow-y-auto space-y-1 pb-3 max-h-[360px] lg:max-h-none"></div>
       </aside>
 
-      <!-- CỘT GIỮA (7/12): KHÁN PHÒNG LOTTE CINEMA NHÌN TỪ HÀNG F GIỮA RẠP -->
-      <div class="lg:col-span-7 order-1 lg:order-2 auditorium-wrapper rounded-3xl p-3 sm:p-5 space-y-2.5">
+      <!-- CỘT GIỮA (7/12, mở rộng 9/12 trong Phòng Stream): KHÁN PHÒNG LOTTE CINEMA NHÌN TỪ HÀNG F GIỮA RẠP -->
+      <div id="theater-center-auditorium" class="lg:col-span-7 order-1 lg:order-2 auditorium-wrapper rounded-3xl p-3 sm:p-5 space-y-2.5">
 
         <!-- KIẾN TRÚC RẠP PHIM NHÌN TỪ HÀNG F -->
         <div class="relative z-20 pt-1 pb-1">
@@ -4252,7 +4252,7 @@
                 <span class="px-2.5 py-1 rounded-xl text-xs font-extrabold ${isShowing ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'}">
                   ${isShowing ? '🟢 Đang chiếu' : '⏳ Sắp chiếu'}
                 </span>
-                ${isLocked ? `<span class="px-2 py-1 rounded-xl bg-black/75 border border-rose-500/40 text-rose-300 text-[10px] font-black"><i class="fa-solid fa-lock mr-1"></i>PIN</span>` : ""}
+                ${isLocked ? `<span class="px-2 py-1 rounded-xl bg-black/75 border border-rose-500/40 text-rose-300 text-[10px] font-black"><i class="fa-solid fa-lock mr-1"></i>${state.isAdminUnlocked ? `PIN: ${escapeHTML(state.roomLocks[room.id])}` : "PIN"}</span>` : ""}
               </div>
 
               <div class="absolute top-3 right-3 px-2.5 py-1 rounded-xl bg-black/75 border border-white/15 text-xs font-bold text-amber-300">
@@ -4316,14 +4316,19 @@
       const room = getEffectiveRoom(roomId);
       const requiredPin = state.roomLocks[roomId];
       if (requiredPin && state.unlockedRooms[roomId] !== requiredPin) {
-        const entered = window.prompt(`🔒 ${room.number} đang bật Khóa PIN Riêng Tư.\nVui lòng nhập mã PIN 4 số để vào phòng:`);
-        if (entered === null) return;
-        if (String(entered).trim() !== String(requiredPin)) {
-          showToast("❌ Mã PIN không đúng! Không thể vào phòng.", "error");
-          return;
+        if (state.isAdminUnlocked) {
+          state.unlockedRooms[roomId] = requiredPin;
+          showToast(`👑 Admin vào phòng (Mã PIN phòng: ${requiredPin})`, "info");
+        } else {
+          const entered = window.prompt(`🔒 ${room.number} đang bật Khóa PIN Riêng Tư.\nVui lòng nhập mã PIN 4 số để vào phòng:`);
+          if (entered === null) return;
+          if (String(entered).trim() !== String(requiredPin)) {
+            showToast("❌ Mã PIN không đúng! Không thể vào phòng.", "error");
+            return;
+          }
+          state.unlockedRooms[roomId] = requiredPin;
+          showToast("🔓 Mã PIN chính xác! Chào mừng vào phòng.", "success");
         }
-        state.unlockedRooms[roomId] = requiredPin;
-        showToast("🔓 Mã PIN chính xác! Chào mừng vào phòng.", "success");
       }
 
       const currentSeats = state.seatsByRoom[roomId] || {};
@@ -4635,7 +4640,7 @@
           if (!occupant) {
             return `
               <button type="button" data-seat-id="${seatId}"
-                class="relative aspect-video rounded-xl border border-dashed border-white/15 bg-stone-900/50 hover:border-indigo-400/60 hover:bg-stone-900/85 flex flex-col items-center justify-center gap-1 cursor-pointer transition select-none">
+                class="no-holo relative aspect-video rounded-xl border border-dashed border-white/15 bg-stone-900/50 hover:border-indigo-400/60 hover:bg-stone-900/85 flex flex-col items-center justify-center gap-1 cursor-pointer transition select-none">
                 <span class="w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 text-xs font-bold">+</span>
                 <span class="text-[10px] font-bold text-slate-400">Ô ${seatId}</span>
               </button>
@@ -4650,7 +4655,7 @@
             <button type="button"
               data-seat-id="${seatId}"
               data-occupant-uid="${escapeHTML(occupant.uid)}"
-              class="discord-seat-tile relative aspect-video rounded-xl overflow-hidden bg-gradient-to-br ${bgGrad} border-2 ${isSpeakingNow ? 'speaking-active border-emerald-500' : isMine ? 'border-amber-400/75' : 'border-white/10 hover:border-white/30'} cursor-pointer transition-all duration-150 select-none text-left">
+              class="discord-seat-tile no-holo relative aspect-video rounded-xl overflow-hidden bg-gradient-to-br ${bgGrad} border-2 ${isSpeakingNow ? 'speaking-active border-emerald-500' : isMine ? 'border-amber-400/75' : 'border-white/10 hover:border-white/30'} cursor-pointer transition-all duration-150 select-none text-left">
               <video data-tile-cam-uid="${escapeHTML(occupant.uid)}" autoplay playsinline muted
                 class="hidden absolute inset-0 w-full h-full object-cover pointer-events-none ${isMine ? 'scale-x-[-1]' : ''}"></video>
               <div data-tile-avatar-uid="${escapeHTML(occupant.uid)}"
@@ -5510,6 +5515,15 @@
       stopRoomVideoPlayer();
       resetPlayerControlButtons();
       syncCurrentRoomSubtitleOffset(room);
+
+      // Ẩn danh sách phim bên trái & mở rộng màn hình lấp khoảng trống CHỈ TRONG Phòng Stream
+      const leftMoviesAside = document.getElementById("theater-left-movies-aside");
+      const centerAuditorium = document.getElementById("theater-center-auditorium");
+      if (leftMoviesAside) leftMoviesAside.classList.toggle("hidden", Boolean(room.isDiscordRoom));
+      if (centerAuditorium) {
+        centerAuditorium.classList.toggle("lg:col-span-9", Boolean(room.isDiscordRoom));
+        centerAuditorium.classList.toggle("lg:col-span-7", !Boolean(room.isDiscordRoom));
+      }
 
       // Ẩn/hiện thanh điều khiển rạp vs thanh Discord Dock bên dưới màn hình
       const cinemaBar = document.getElementById("cinema-control-bar");
@@ -12628,6 +12642,7 @@
       }
       state.isAdminUnlocked = true;
       try { localStorage.setItem("cineverse_admin_unlocked", "1"); } catch (err) {}
+      renderLobby();
       showToast("👑 Đã mở khóa quyền Admin!", "success");
       openAdminPanelModal();
     }
