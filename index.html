@@ -13090,7 +13090,7 @@
       const ripples = [];
 
       const tunaImg = new Image();
-      tunaImg.src = "./assets/tuna-avt-sprite.png";
+      tunaImg.src = "./assets/tuna-swim-sprite.png";
 
       // Tạo sẵn quầng sáng Crimson 1 lần duy nhất để không cấp phát gradient mỗi frame (tránh GC khựng nhịp)
       const haloCanvas = document.createElement("canvas");
@@ -13099,8 +13099,8 @@
       const haloCtx = haloCanvas.getContext("2d");
       if (haloCtx) {
         const g = haloCtx.createRadialGradient(128, 128, 12, 128, 128, 126);
-        g.addColorStop(0, "rgba(229, 9, 20, 0.34)");
-        g.addColorStop(0.5, "rgba(180, 7, 16, 0.12)");
+        g.addColorStop(0, "rgba(229, 9, 20, 0.32)");
+        g.addColorStop(0.5, "rgba(180, 7, 16, 0.11)");
         g.addColorStop(1, "rgba(0, 0, 0, 0)");
         haloCtx.fillStyle = g;
         haloCtx.fillRect(0, 0, 256, 256);
@@ -13109,29 +13109,49 @@
       function drawTunaFish(fish) {
         if (!tunaImg.complete || tunaImg.naturalWidth === 0) return;
 
-        const W = fish.size * 1.15;
+        const L = fish.size * 1.48;
         const aspect = tunaImg.naturalHeight / tunaImg.naturalWidth;
-        const H = W * aspect;
-        const boostFactor = Math.min(fish.boostSpeed / 240, 1.2);
-        const pulse = Math.sin(fish.tailPhase);
-        const squeezeX = 1 + pulse * (0.045 + boostFactor * 0.035);
-        const squeezeY = 1 - pulse * (0.042 + boostFactor * 0.03);
-        const bobAngle = Math.sin(fish.tailPhase * 0.5) * 0.10;
+        const H = L * aspect;
+        const boostFactor = Math.min(fish.boostSpeed / 240, 1.15);
+        const waveAmp = (0.048 + boostFactor * 0.045) * H;
 
         ctx.save();
         ctx.translate(fish.x, fish.y);
-        // Lật ngang theo hướng bơi trái/phải và nghiêng theo nhịp sóng
+        // Lật ngang theo hướng bơi trái/phải nhưng giữ vây lưng luôn hướng lên trên
         ctx.scale(fish.dir, 1);
-        ctx.rotate(fish.pitch + bobAngle + (fish.spinAngle || 0));
+        ctx.rotate(fish.pitch);
         ctx.globalAlpha = fish.alpha;
 
-        // Quầng sáng đỏ cache siêu nhẹ
-        const haloSize = Math.max(W, H) * 1.48;
-        ctx.drawImage(haloCanvas, -haloSize * 0.5, -haloSize * 0.5, haloSize, haloSize);
+        // Vẽ lại quầng sáng cache bằng 1 lệnh drawImage siêu nhẹ
+        ctx.drawImage(haloCanvas, -L * 0.68, -L * 0.68, L * 1.36, L * 1.36);
 
-        // Co giãn đàn hồi nhẹ như cá đang uốn mình lướt trong nước
-        ctx.scale(squeezeX, squeezeY);
-        ctx.drawImage(tunaImg, -W * 0.5, -H * 0.5, W, H);
+        // Uốn sóng mềm mại theo 16 lát cắt dọc từ mũi (u=1) về đuôi (u=0)
+        const slices = 16;
+        const sw = tunaImg.naturalWidth;
+        const sh = tunaImg.naturalHeight;
+        const srcSliceW = sw / slices;
+        const dstSliceW = L / slices;
+
+        for (let i = 0; i < slices; i++) {
+          const u0 = i / slices;
+          const uMid = (i + 0.5) / slices;
+          const tailFactor = Math.pow(1 - uMid, 1.85);
+          const waveY = Math.sin(fish.tailPhase - (1 - uMid) * 3.4) * waveAmp * tailFactor;
+          const sx = u0 * sw;
+          const dx = -L * 0.5 + i * dstSliceW;
+          const dy = -H * 0.5 + waveY;
+          ctx.drawImage(
+            tunaImg,
+            sx,
+            0,
+            srcSliceW + 0.6,
+            sh,
+            dx,
+            dy,
+            dstSliceW + 0.9,
+            H
+          );
+        }
 
         ctx.restore();
       }
@@ -13229,8 +13249,6 @@
           fish.targetPitch = Math.max(-0.38, Math.min(0.38, Math.atan2(dy, Math.max(40, Math.abs(dx))) + (Math.random() - 0.5) * 0.16));
           fish.fleePitchBlend = 1;
           fish.boostSpeed = 290 + Math.random() * 90;
-          fish.spinAngle = 0;
-          fish.spinVel = 7.5;
           ripples.push({ x: fish.x, y: fish.y, radius: 10, alpha: 0.72 });
         }
 
