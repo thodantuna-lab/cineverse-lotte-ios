@@ -3823,7 +3823,7 @@
         }))
       ],
       lobbyConfigRooms: {},
-      isAdminUnlocked: (() => { try { return localStorage.getItem("cineverse_admin_unlocked") === "1"; } catch (e) { return false; } })(),
+      isAdminUnlocked: (() => { try { localStorage.removeItem("cineverse_admin_unlocked"); } catch (e) {} return false; })(),
       seatsByRoom: {
         "room-1": {
           "C4": { uid: "bot_1", userName: "Minh Anh", snack: "🍿🥤" },
@@ -12643,7 +12643,6 @@
         return;
       }
       state.isAdminUnlocked = true;
-      try { localStorage.setItem("cineverse_admin_unlocked", "1"); } catch (err) {}
       renderLobby();
       showToast("👑 Đã mở khóa quyền Admin!", "success");
       openAdminPanelModal();
