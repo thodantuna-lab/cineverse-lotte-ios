@@ -9574,22 +9574,7 @@
       const rkPlugin = window.Capacitor?.Plugins?.ReplayKitBridge;
       if (!rkPlugin) return null;
 
-      let outStream = new MediaStream();
-      let audioCtx = null;
-      let audioDest = null;
-      let nextAudioTime = 0;
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (AudioCtx) {
-          audioCtx = new AudioCtx();
-          if (audioCtx.state === "suspended") {
-            await audioCtx.resume().catch(() => {});
-          }
-          audioDest = audioCtx.createMediaStreamDestination();
-          audioDest.stream.getAudioTracks().forEach((t) => outStream.addTrack(t));
-        }
-      } catch (_) {}
-
+      const outStream = new MediaStream();
       window.__nativeReplayKitActive = true;
       window.__onNativeWebRTCIce = (viewerUid, cand) => {
         if (!cand || !liveScreenRoomId || !rtdb || !rtdbMod || !state.uid) return;
@@ -9597,46 +9582,9 @@
         rtdbMod.push(iceRef, cand).catch(() => {});
       };
 
-      window.__onNativeReplayKitAudio = (b64, sampleRate, channels) => {
-        if (!audioCtx || !audioDest || !b64) return;
-        try {
-          if (audioCtx.state === "suspended") {
-            audioCtx.resume().catch(() => {});
-          }
-          const bin = atob(b64);
-          const len = bin.length;
-          const bytes = new Uint8Array(len);
-          for (let i = 0; i < len; i++) bytes[i] = bin.charCodeAt(i);
-          const int16 = new Int16Array(bytes.buffer);
-          const ch = Math.max(1, Math.min(2, channels || 2));
-          const sr = sampleRate || 44100;
-          const frames = Math.floor(int16.length / ch);
-          if (frames <= 0) return;
-
-          const audioBuf = audioCtx.createBuffer(ch, frames, sr);
-          for (let c = 0; c < ch; c++) {
-            const channelData = audioBuf.getChannelData(c);
-            for (let i = 0; i < frames; i++) {
-              channelData[i] = int16[i * ch + c] / 32768.0;
-            }
-          }
-          const src = audioCtx.createBufferSource();
-          src.buffer = audioBuf;
-          src.connect(audioDest);
-          const now = audioCtx.currentTime;
-          if (nextAudioTime < now || nextAudioTime > now + 0.35) {
-            nextAudioTime = now + 0.02;
-          }
-          src.start(nextAudioTime);
-          nextAudioTime += audioBuf.duration;
-        } catch (_) {}
-      };
-
       iosFallbackCleanup = () => {
         window.__nativeReplayKitActive = false;
         window.__onNativeWebRTCIce = null;
-        window.__onNativeReplayKitAudio = null;
-        try { audioCtx?.close?.().catch?.(() => {}); } catch (_) {}
         try { rkPlugin.closeAllPeers?.().catch?.(() => {}); } catch (_) {}
         try { rkPlugin.stopBroadcast?.().catch?.(() => {}); } catch (_) {}
       };
@@ -10004,8 +9952,8 @@
           const res = await rkPlugin.createPeerOffer({
             viewerUid,
             iceServers: VOICE_ICE_CONFIG.iceServers || [],
-            maxBitrate: cfg.maxBitrate || 6000000,
-            maxFramerate: 60
+            maxBitrate: cfg.maxBitrate || 8000000,
+            maxFramerate: 30
           });
           if (res?.sdp) {
             await rtdbMod.set(rtdbMod.ref(rtdb, `voice/${roomId}/screen_signals/${viewerUid}/offer`), {
@@ -10016,26 +9964,6 @@
           }
         } catch (err) {
           console.warn("[NativeWebRTC] createPeerOffer error:", err);
-        }
-
-        const audioTracks = liveScreenStream.getAudioTracks();
-        if (audioTracks.length > 0) {
-          const audioPc = new RTCPeerConnection(VOICE_ICE_CONFIG);
-          entry.audioPc = audioPc;
-          audioPc.onicecandidate = (ev) => {
-            if (!ev.candidate || !rtdb || !rtdbMod || !state.uid) return;
-            rtdbMod.push(rtdbMod.ref(rtdb, `voice/${roomId}/screen_audio_ice/${viewerUid}/${state.uid}`), ev.candidate.toJSON()).catch(() => {});
-          };
-          audioTracks.forEach((t) => audioPc.addTrack(t, liveScreenStream));
-          try {
-            const aOffer = await audioPc.createOffer({ offerToReceiveAudio: false, offerToReceiveVideo: false });
-            await audioPc.setLocalDescription(aOffer);
-            await rtdbMod.set(rtdbMod.ref(rtdb, `voice/${roomId}/screen_audio_signals/${viewerUid}/offer`), {
-              from: state.uid,
-              sdp: audioPc.localDescription.toJSON(),
-              ts: Date.now()
-            }).catch(() => {});
-          } catch (_) {}
         }
         return;
       }
@@ -10065,6 +9993,44 @@
       await ensureVoiceTurnLoaded();
       const broadcasterUid = offerData.from;
       const entry = createDiscordPeerConnection(roomId, broadcasterUid);
+
+      entry.pc.ondatachannel = (ev) => {
+        if (ev.channel?.label !== "screen_audio") return;
+        const dc = ev.channel;
+        dc.binaryType = "arraybuffer";
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+        let nextTime = 0;
+        dc.onclose = () => { try { audioCtx?.close?.().catch?.(() => {}); } catch (_) {} };
+        dc.onmessage = (msgEv) => {
+          if (isDiscordViewerMuted || !AudioCtx || !(msgEv.data instanceof ArrayBuffer) || msgEv.data.byteLength <= 6) return;
+          try {
+            if (!audioCtx) audioCtx = new AudioCtx();
+            if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
+            const view = new DataView(msgEv.data);
+            const sr = view.getUint32(0, true) || 44100;
+            const ch = Math.max(1, Math.min(2, view.getUint16(4, true) || 2));
+            const int16 = new Int16Array(msgEv.data, 6);
+            const frames = Math.floor(int16.length / ch);
+            if (frames <= 0) return;
+
+            const audioBuf = audioCtx.createBuffer(ch, frames, sr);
+            for (let c = 0; c < ch; c++) {
+              const chData = audioBuf.getChannelData(c);
+              for (let i = 0; i < frames; i++) {
+                chData[i] = int16[i * ch + c] / 32768.0;
+              }
+            }
+            const src = audioCtx.createBufferSource();
+            src.buffer = audioBuf;
+            src.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+            if (nextTime < now || nextTime > now + 0.3) nextTime = now + 0.02;
+            src.start(nextTime);
+            nextTime += audioBuf.duration;
+          } catch (_) {}
+        };
+      };
 
       entry.pc.ontrack = (ev) => {
         applyDiscordZeroJitter(ev.receiver);

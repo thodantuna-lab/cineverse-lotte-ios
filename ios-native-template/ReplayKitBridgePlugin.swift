@@ -10,6 +10,7 @@ import WebRTC
 private final class NativeScreenPeer: NSObject, RTCPeerConnectionDelegate {
     let viewerUid: String
     let pc: RTCPeerConnection
+    var audioDataChannel: RTCDataChannel?
     var pendingIce: [RTCIceCandidate] = []
     weak var plugin: ReplayKitBridgePlugin?
 
@@ -192,7 +193,9 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
                 conn.cancel()
                 return
             }
-            self.readExactPayload(packetType: packetType, length: length, accumulated: Data(), on: conn)
+            var payload = Data()
+            payload.reserveCapacity(length)
+            self.readExactPayload(packetType: packetType, length: length, accumulated: payload, on: conn)
         }
     }
 
@@ -225,7 +228,7 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
                 self.pendingAudioPCM.append(pcmChunk)
 
                 let now = CACurrentMediaTime()
-                if self.pendingAudioPCM.count >= 12288 || (now - self.lastAudioFlushTime) >= 0.08 {
+                if self.pendingAudioPCM.count >= 8192 || (now - self.lastAudioFlushTime) >= 0.04 {
                     self.flushPendingAudio()
                 }
             }
@@ -320,16 +323,23 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
 
     private func flushPendingAudio() {
         guard !pendingAudioPCM.isEmpty else { return }
-        let pcmB64 = pendingAudioPCM.base64EncodedString()
-        let sr = pendingAudioSampleRate
-        let ch = pendingAudioChannels
+        var packet = Data(capacity: 6 + pendingAudioPCM.count)
+        var srLE = pendingAudioSampleRate.littleEndian
+        var chLE = pendingAudioChannels.littleEndian
+        packet.append(Data(bytes: &srLE, count: 4))
+        packet.append(Data(bytes: &chLE, count: 2))
+        packet.append(pendingAudioPCM)
         pendingAudioPCM.removeAll(keepingCapacity: true)
         lastAudioFlushTime = CACurrentMediaTime()
-        DispatchQueue.main.async {
-            self.bridge?.webView?.evaluateJavaScript(
-                "window.__onNativeReplayKitAudio && window.__onNativeReplayKitAudio('\(pcmB64)', \(sr), \(ch));",
-                completionHandler: nil
-            )
+
+        webrtcQueue.async { [weak self] in
+            guard let self = self else { return }
+            let rtcBuf = RTCDataBuffer(data: packet, isBinary: true)
+            for peer in self.peers.values {
+                if let dc = peer.audioDataChannel, dc.readyState == .open {
+                    dc.sendData(rtcBuf)
+                }
+            }
         }
     }
 
@@ -451,6 +461,11 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
 
             let peer = NativeScreenPeer(viewerUid: viewerUid, pc: pc, plugin: self)
             self.peers[viewerUid] = peer
+
+            let dcConfig = RTCDataChannelConfiguration()
+            dcConfig.isOrdered = false
+            dcConfig.maxRetransmits = 0
+            peer.audioDataChannel = pc.dataChannel(forLabel: "screen_audio", configuration: dcConfig)
 
             if let sender = pc.add(videoTrack, streamIds: ["cineverse_screen"]) {
                 let params = sender.parameters
