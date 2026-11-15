@@ -702,7 +702,7 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
                     enc.maxBitrateBps = NSNumber(value: maxBitrate)
                     enc.maxFramerate = NSNumber(value: maxFramerate)
                 }
-                params.degradationPreference = NSNumber(value: RTCDegradationPreference.maintainFramerate.rawValue)
+                params.degradationPreference = NSNumber(value: RTCDegradationPreference.balanced.rawValue)
                 sender.parameters = params
             }
 

@@ -115,9 +115,9 @@ class SampleHandler: RPBroadcastSampleHandler {
 
     private func targetFrameInterval() -> CFTimeInterval {
         switch ProcessInfo.processInfo.thermalState {
-        case .critical: return 1.0 / 26.0
-        case .serious:  return 1.0 / 48.0
-        default:        return 1.0 / 66.0
+        case .critical: return 1.0 / 24.0
+        case .serious:  return 1.0 / 35.0
+        default:        return 1.0 / 62.0
         }
     }
 
@@ -130,7 +130,7 @@ class SampleHandler: RPBroadcastSampleHandler {
             if (now - lastSentTime) < targetFrameInterval() { return }
 
             stateLock.lock()
-            let busy = isEncodingVideo || inFlightPackets >= 6
+            let busy = isEncodingVideo || inFlightPackets >= 3
             if !busy { isEncodingVideo = true }
             stateLock.unlock()
             if busy { return }
@@ -198,7 +198,7 @@ class SampleHandler: RPBroadcastSampleHandler {
         VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_ProfileLevel, value: kVTProfileLevel_H264_High_AutoLevel)
         VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_ExpectedFrameRate, value: 60 as CFNumber)
         VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_MaxKeyFrameInterval, value: 30 as CFNumber)
-        VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_AverageBitRate, value: 4_000_000 as CFNumber)
+        VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_AverageBitRate, value: 3_500_000 as CFNumber)
         VTCompressionSessionPrepareToEncodeFrames(comp)
 
         if #available(iOS 16.0, *) {
@@ -231,7 +231,7 @@ class SampleHandler: RPBroadcastSampleHandler {
         let srcH = CVPixelBufferGetHeight(pixelBuffer)
         guard srcW > 0, srcH > 0 else { return }
 
-        let maxDim = 1280
+        let maxDim = 1080
         let longest = max(srcW, srcH)
         let needsScale = longest > maxDim
         let dstW = (needsScale ? (srcW * maxDim / longest) : srcW) & ~1
@@ -266,7 +266,7 @@ class SampleHandler: RPBroadcastSampleHandler {
             : nil
 
         frameIndex += 1
-        let pts = CMTime(seconds: CACurrentMediaTime(), preferredTimescale: 1000)
+        let pts = CMTime(value: frameIndex, timescale: 60)
         let refCon = UnsafeMutableRawPointer(bitPattern: Int(rotation) + 1)
         let encStatus = VTCompressionSessionEncodeFrame(
             session,
