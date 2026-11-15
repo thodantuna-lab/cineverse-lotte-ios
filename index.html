@@ -8377,8 +8377,131 @@
     }
 
     // =========================================================
-    // 7B. MICRO TRỰC TUYẾN WEBRTC QUA FIREBASE RTDB
+    // 7B. MICRO TRỰC TUYẾN WEBRTC QUA FIREBASE RTDB & LIVEKIT SFU
     // =========================================================
+    let livekitRoom = null;
+    let livekitVoiceActive = false;
+    let livekitSdkPromise = null;
+    const livekitRemoteAudioEls = {};
+
+    function ensureLiveKitLoaded() {
+      if (window.LivekitClient) return Promise.resolve(window.LivekitClient);
+      if (livekitSdkPromise) return livekitSdkPromise;
+      livekitSdkPromise = new Promise((resolve) => {
+        const s = document.createElement("script");
+        s.src = "https://cdn.jsdelivr.net/npm/livekit-client@2/dist/livekit-client.umd.min.js";
+        s.async = true;
+        s.onload = () => resolve(window.LivekitClient || null);
+        s.onerror = () => resolve(null);
+        document.head.appendChild(s);
+      });
+      return livekitSdkPromise;
+    }
+
+    async function disconnectLiveKitRoom() {
+      livekitVoiceActive = false;
+      Object.values(livekitRemoteAudioEls).forEach(el => {
+        try { el.srcObject = null; el.remove(); } catch (e) {}
+      });
+      Object.keys(livekitRemoteAudioEls).forEach(k => delete livekitRemoteAudioEls[k]);
+      if (livekitRoom) {
+        try { await livekitRoom.disconnect(); } catch (e) {}
+        livekitRoom = null;
+      }
+    }
+
+    async function connectLiveKitRoom(roomId) {
+      try {
+        const workerBase = typeof getR2WorkerUrl === "function" ? getR2WorkerUrl() : DEFAULT_R2_WORKER_URL;
+        if (!workerBase) return false;
+        const resp = await fetch(`${workerBase.replace(/\/+$/, "")}/livekit-token`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ roomId, uid: state.uid, name: state.userName }),
+          signal: AbortSignal.timeout(5000)
+        });
+        const data = await resp.json();
+        if (!data || !data.ok || !data.token || !data.url) return false;
+        const LK = await ensureLiveKitLoaded();
+        if (!LK || !LK.Room) return false;
+
+        await disconnectLiveKitRoom();
+        const room = new LK.Room({
+          adaptiveStream: true,
+          dynacast: true,
+          audioCaptureDefaults: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          }
+        });
+
+        room.on(LK.RoomEvent.TrackSubscribed, (track, pub, participant) => {
+          const pUid = participant?.identity || "";
+          if (track.kind === "audio") {
+            const isScreenAudio = pub?.source === LK.Track.Source.ScreenShareAudio;
+            const elKey = `${pUid}_${isScreenAudio ? "sa" : "mic"}`;
+            const el = track.attach();
+            el.autoplay = true;
+            el.playsInline = true;
+            el.volume = 1;
+            el.muted = isScreenAudio ? !!isDiscordViewerMuted : false;
+            el.style.display = "none";
+            document.body.appendChild(el);
+            livekitRemoteAudioEls[elKey] = el;
+            const playRes = el.play();
+            if (playRes && typeof playRes.catch === "function") {
+              playRes.catch(() => { pendingVoiceAudios.add(el); });
+            }
+          } else if (track.kind === "video" && pub?.source === LK.Track.Source.ScreenShare) {
+            const videoEl = document.getElementById("discord-live-video");
+            if (videoEl) {
+              remoteScreenStream = new MediaStream([track.mediaStreamTrack]);
+              videoEl.srcObject = remoteScreenStream;
+              videoEl.muted = !!isDiscordViewerMuted;
+              videoEl.play().catch(() => {});
+              updateDiscordLiveUI();
+            }
+          }
+        });
+
+        room.on(LK.RoomEvent.TrackUnsubscribed, (track, pub, participant) => {
+          const pUid = participant?.identity || "";
+          if (track.kind === "audio") {
+            const isScreenAudio = pub?.source === LK.Track.Source.ScreenShareAudio;
+            const elKey = `${pUid}_${isScreenAudio ? "sa" : "mic"}`;
+            if (livekitRemoteAudioEls[elKey]) {
+              try { track.detach(livekitRemoteAudioEls[elKey]); } catch (e) {}
+              try { livekitRemoteAudioEls[elKey].remove(); } catch (e) {}
+              delete livekitRemoteAudioEls[elKey];
+            }
+          } else if (track.kind === "video" && pub?.source === LK.Track.Source.ScreenShare) {
+            if (!liveScreenStream) {
+              remoteScreenStream = null;
+              const videoEl = document.getElementById("discord-live-video");
+              if (videoEl) videoEl.srcObject = null;
+              updateDiscordLiveUI();
+            }
+          }
+        });
+
+        room.on(LK.RoomEvent.ActiveSpeakersChanged, (speakers) => {
+          const activeSet = new Set((speakers || []).map(p => p.identity));
+          document.querySelectorAll("[data-seat-uid]").forEach(node => {
+            const uid = node.getAttribute("data-seat-uid");
+            if (uid) setSpeakingState(uid, activeSet.has(uid));
+          });
+        });
+
+        await room.connect(data.url, data.token);
+        livekitRoom = room;
+        livekitVoiceActive = true;
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
     const BASE_VOICE_STUN_SERVERS = [
       { urls: "stun:stun.l.google.com:19302" },
       { urls: "stun:stun1.l.google.com:19302" },
@@ -8497,6 +8620,12 @@
       voiceStatsTimer = setInterval(async () => {
         const badge = document.getElementById("voice-diag-badge");
         const dBadge = document.getElementById("discord-voice-diag-badge");
+        if (livekitVoiceActive && livekitRoom && state.currentRoomId) {
+          const diagText = livekitRoom.state === "connected" ? "Mic:SFU-OK" : "Mic:SFU...";
+          if (badge) { badge.textContent = diagText; badge.classList.remove("hidden"); }
+          if (dBadge) { dBadge.textContent = diagText; dBadge.classList.remove("hidden"); }
+          return;
+        }
         const entries = Object.values(voicePeers);
         if (!state.currentRoomId || entries.length === 0) {
           if (badge) badge.classList.add("hidden");
@@ -8837,6 +8966,26 @@
       await ensureVoiceTurnLoaded();
       if (isNativeAndroidVoiceAvailable()) {
         await window.Capacitor.Plugins.ReplayKitBridge.voiceStartService().catch(() => {});
+      }
+      const sfuConnected = await connectLiveKitRoom(roomId);
+      if (sfuConnected) {
+        const myPeerRef = rtdbMod.ref(rtdb, `voice/${roomId}/peers/${state.uid}`);
+        myVoiceDisconnect = rtdbMod.onDisconnect(myPeerRef);
+        myVoiceDisconnect.remove().catch(() => {});
+        rtdbMod.set(myPeerRef, {
+          uid: state.uid,
+          userName: state.userName,
+          micOn: voiceMicActive,
+          sessionId: currentVoiceSessionId,
+          sfu: true,
+          updatedAt: Date.now()
+        }).catch(() => {});
+        roomVoiceUnsub = () => {
+          stopVoiceStatsMonitor();
+          disconnectLiveKitRoom();
+        };
+        startVoiceStatsMonitor();
+        return;
       }
       await Promise.all([
         rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${roomId}/signals/${state.uid}`)).catch(() => {}),
@@ -9825,6 +9974,36 @@
       const cfg = DISCORD_QUALITY_PRESETS[liveScreenQuality] || DISCORD_QUALITY_PRESETS.fhd1080_60;
       let stream = null;
 
+      if (livekitVoiceActive && livekitRoom && !window.Capacitor?.Plugins?.ReplayKitBridge && navigator.mediaDevices?.getDisplayMedia) {
+        try {
+          const pub = await livekitRoom.localParticipant.setScreenShareEnabled(true, {
+            audio: true,
+            resolution: { width: cfg.width, height: cfg.height, frameRate: cfg.frameRate }
+          });
+          const track = pub?.track?.mediaStreamTrack;
+          if (!track) {
+            showToast("Không thể bật Chia sẻ màn hình SFU.", "error");
+            return;
+          }
+          liveScreenStream = new MediaStream([track]);
+          liveScreenRoomId = room.id;
+          liveScreenBroadcaster = { uid: state.uid, name: state.userName, quality: liveScreenQuality, sfu: true, startedAt: Date.now() };
+          track.onended = () => { stopDiscordScreenShare(); };
+          if (rtdb && rtdbMod) {
+            const bRef = rtdbMod.ref(rtdb, `voice/${room.id}/screen_broadcaster`);
+            try { rtdbMod.onDisconnect(bRef).remove().catch(() => {}); } catch (e) {}
+            await rtdbMod.set(bRef, liveScreenBroadcaster);
+          }
+          updateDiscordLiveUI();
+          renderSeatingMap();
+          pushMessageToRoom(`🖥️ ${state.userName} đã bật Chia sẻ màn hình SFU (${cfg.label})!`);
+          showToast(`Đã bật Chia sẻ màn hình SFU (${cfg.label})!`, "success");
+        } catch (err) {
+          showToast("Đã hủy hoặc không thể chia sẻ màn hình.", "info");
+        }
+        return;
+      }
+
       if (window.Capacitor?.Plugins?.ReplayKitBridge) {
         stream = await startNativeIOSReplayKitShare();
         if (!stream) {
@@ -9989,6 +10168,9 @@
     // Dừng phát màn hình và dọn dẹp kết nối P2P
     async function stopDiscordScreenShare() {
       const wasStreaming = Boolean(liveScreenStream);
+      if (livekitVoiceActive && livekitRoom) {
+        try { await livekitRoom.localParticipant.setScreenShareEnabled(false); } catch (e) {}
+      }
       if (liveScreenStream) {
         liveScreenStream.getTracks().forEach((t) => { try { t.stop(); } catch (_) {} });
         liveScreenStream = null;
@@ -11163,6 +11345,7 @@
       }
       Object.keys(voicePeers).forEach(closeVoicePeer);
       earlyIceByPeer = {};
+      disconnectLiveKitRoom();
       if (isNativeAndroidVoiceAvailable()) {
         try { window.Capacitor.Plugins.ReplayKitBridge.voiceStopService().catch(() => {}); } catch (e) {}
       }
@@ -11187,6 +11370,26 @@
       if (!state.currentRoomId) return;
       const roomId = state.currentRoomId;
       resumePendingVoiceAudio();
+
+      if (livekitVoiceActive && livekitRoom) {
+        const nextMic = !voiceMicActive;
+        try {
+          await livekitRoom.localParticipant.setMicrophoneEnabled(nextMic);
+          voiceMicActive = nextMic;
+          if (!nextMic) setSpeakingState(state.uid, false);
+          updateVoiceMicButtonUI();
+          if (rtdb && rtdbMod) {
+            rtdbMod.update(rtdbMod.ref(rtdb, `voice/${roomId}/peers/${state.uid}`), {
+              micOn: nextMic,
+              updatedAt: Date.now()
+            }).catch(() => {});
+          }
+          showToast(nextMic ? "🎙️ Micro SFU đã bật!" : "🔇 Đã tắt micro của bạn.", nextMic ? "success" : "info");
+        } catch (err) {
+          showToast("Không thể bật Micro (kiểm tra quyền Micro)!", "error");
+        }
+        return;
+      }
 
       if (isNativeAndroidVoiceAvailable()) {
         if (voiceMicActive) {
