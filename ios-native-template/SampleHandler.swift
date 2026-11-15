@@ -231,8 +231,8 @@ class SampleHandler: RPBroadcastSampleHandler {
               let dataBuffer = CMSampleBufferGetDataBuffer(sampleBuffer) else { return }
 
         var isKeyFrame = true
-        if let attachments = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: false) as? [[CFString: Any]],
-           let first = attachments.first,
+        if let attachments = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: false) as NSArray?,
+           let first = attachments.firstObject as? NSDictionary,
            let notSync = first[kCMSampleAttachmentKey_NotSync] as? Bool {
             isKeyFrame = !notSync
         }

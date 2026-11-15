@@ -312,7 +312,7 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
         VTDecompressionSessionDecodeFrame(
             session,
             sampleBuffer: sb,
-            flags: [._EnableAsynchronousDecompression],
+            flags: [],
             frameRefcon: refCon,
             infoFlagsOut: nil
         )
