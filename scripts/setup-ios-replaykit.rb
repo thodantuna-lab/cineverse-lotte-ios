@@ -88,4 +88,16 @@ if File.exist?(ios_cap_cfg_path)
   puts "Updated #{ios_cap_cfg_path} with ReplayKitBridgePlugin"
 end
 
+# 5. Add WebRTC-lib pod to App target in ios/App/Podfile & run pod install
+podfile_path = 'ios/App/Podfile'
+if File.exist?(podfile_path)
+  podfile = File.read(podfile_path)
+  unless podfile.include?("WebRTC-lib")
+    podfile.sub!(/target 'App' do\s*\n\s*capacitor_pods/, "target 'App' do\n  capacitor_pods\n  pod 'WebRTC-lib', '~> 156.0'")
+    File.write(podfile_path, podfile)
+    puts 'Added WebRTC-lib to Podfile, running pod install...'
+    system('cd ios/App && pod install') || raise('pod install failed')
+  end
+end
+
 puts 'Successfully configured ReplayKitBridgePlugin and ReplayKitExtension!'

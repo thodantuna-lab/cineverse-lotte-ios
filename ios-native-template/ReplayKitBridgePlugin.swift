@@ -3,7 +3,50 @@ import Capacitor
 import ReplayKit
 import Network
 import AVFoundation
+import CoreVideo
 import UIKit
+import WebRTC
+
+private final class NativeScreenPeer: NSObject, RTCPeerConnectionDelegate {
+    let viewerUid: String
+    let pc: RTCPeerConnection
+    var pendingIce: [RTCIceCandidate] = []
+    weak var plugin: ReplayKitBridgePlugin?
+
+    init(viewerUid: String, pc: RTCPeerConnection, plugin: ReplayKitBridgePlugin) {
+        self.viewerUid = viewerUid
+        self.pc = pc
+        self.plugin = plugin
+        super.init()
+        pc.delegate = self
+    }
+
+    func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {}
+    func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {}
+    func peerConnection(_ peerConnection: RTCPeerConnection, didRemove stream: RTCMediaStream) {}
+    func peerConnectionShouldNegotiate(_ peerConnection: RTCPeerConnection) {}
+    func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {}
+    func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceGatheringState) {}
+    func peerConnection(_ peerConnection: RTCPeerConnection, didRemove candidates: [RTCIceCandidate]) {}
+    func peerConnection(_ peerConnection: RTCPeerConnection, didOpen dataChannel: RTCDataChannel) {}
+
+    func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
+        let candDict: [String: Any] = [
+            "candidate": candidate.sdp,
+            "sdpMid": candidate.sdpMid ?? "",
+            "sdpMLineIndex": candidate.sdpMLineIndex
+        ]
+        guard let data = try? JSONSerialization.data(withJSONObject: candDict),
+              let jsonStr = String(data: data, encoding: .utf8) else { return }
+        let uidEscaped = viewerUid.replacingOccurrences(of: "'", with: "\\'")
+        DispatchQueue.main.async { [weak self] in
+            self?.plugin?.bridge?.webView?.evaluateJavaScript(
+                "window.__onNativeWebRTCIce && window.__onNativeWebRTCIce('\(uidEscaped)', \(jsonStr));",
+                completionHandler: nil
+            )
+        }
+    }
+}
 
 @objc(ReplayKitBridgePlugin)
 public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
@@ -11,14 +54,19 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
     public let jsName = "ReplayKitBridge"
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "startBroadcast", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "stopBroadcast", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "stopBroadcast", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "createPeerOffer", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "setRemoteAnswer", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "addIceCandidate", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "closePeer", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "closeAllPeers", returnType: CAPPluginReturnPromise)
     ]
 
     private var listener: NWListener?
-    private let queue = DispatchQueue(label: "com.cineverse.lotte.replaykit.server")
+    private let queue = DispatchQueue(label: "com.cineverse.lotte.replaykit.server", qos: .userInteractive)
     private var pickerView: RPSystemBroadcastPickerView?
     private var activeConnection: NWConnection?
-    private var isEvaluatingVideo = false
+
     private var audioEngine: AVAudioEngine?
     private var audioSourceNode: AVAudioSourceNode?
     private var pendingAudioPCM = Data()
@@ -26,8 +74,43 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
     private var pendingAudioChannels: UInt16 = 2
     private var lastAudioFlushTime: CFTimeInterval = 0
 
+    // Native WebRTC (Hardware H.264 VideoToolbox 60fps)
+    private static var sslInitialized = false
+    private var pcFactory: RTCPeerConnectionFactory?
+    private var videoSource: RTCVideoSource?
+    private var videoCapturer: RTCVideoCapturer?
+    private var localVideoTrack: RTCVideoTrack?
+    private var peers: [String: NativeScreenPeer] = [:]
+    private let webrtcQueue = DispatchQueue(label: "com.cineverse.lotte.webrtc", qos: .userInteractive)
+
+    // Reusable CVPixelBufferPool
+    private var pixelBufferPool: CVPixelBufferPool?
+    private var poolWidth: Int = 0
+    private var poolHeight: Int = 0
+    private var poolFormat: OSType = 0
+
     public override func load() {
+        initWebRTCIfNeeded()
         startLocalReceiver()
+    }
+
+    private func initWebRTCIfNeeded() {
+        if !ReplayKitBridgePlugin.sslInitialized {
+            RTCInitializeSSL()
+            ReplayKitBridgePlugin.sslInitialized = true
+        }
+        if pcFactory == nil {
+            let encoderFactory = RTCDefaultVideoEncoderFactory()
+            let decoderFactory = RTCDefaultVideoDecoderFactory()
+            let factory = RTCPeerConnectionFactory(encoderFactory: encoderFactory, decoderFactory: decoderFactory)
+            let source = factory.videoSource()
+            let capturer = RTCVideoCapturer(delegate: source)
+            let track = factory.videoTrack(with: source, trackId: "screen0")
+            self.pcFactory = factory
+            self.videoSource = source
+            self.videoCapturer = capturer
+            self.localVideoTrack = track
+        }
     }
 
     private func startLocalReceiver() {
@@ -60,7 +143,7 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
         if audioEngine != nil { return }
         let engine = AVAudioEngine()
         let format = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 1)!
-        let node = AVAudioSourceNode { _, _, frameCount, audioBufferList -> OSStatus in
+        let node = AVAudioSourceNode { _, _, _, audioBufferList -> OSStatus in
             let abl = UnsafeMutableAudioBufferListPointer(audioBufferList)
             for buf in abl {
                 if let ptr = buf.mData {
@@ -98,7 +181,6 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     private func readNextPacket(on conn: NWConnection) {
-        // Header: [1-byte type][4-byte big-endian length]
         conn.receive(minimumIncompleteLength: 5, maximumLength: 5) { [weak self] headerData, _, isComplete, error in
             guard let self = self, error == nil, let header = headerData, header.count == 5 else {
                 if isComplete || error != nil { conn.cancel() }
@@ -106,7 +188,7 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
             }
             let packetType = header[0]
             let length = Int(header.subdata(in: 1..<5).withUnsafeBytes { $0.load(as: UInt32.self).bigEndian })
-            guard length > 0 && length < 8_000_000 else {
+            guard length > 0 && length < 20_000_000 else {
                 conn.cancel()
                 return
             }
@@ -128,19 +210,8 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
                 return
             }
 
-            if packetType == 0x01 {
-                if !self.isEvaluatingVideo {
-                    self.isEvaluatingVideo = true
-                    let b64 = buffer.base64EncodedString()
-                    DispatchQueue.main.async {
-                        self.bridge?.webView?.evaluateJavaScript(
-                            "window.__onNativeReplayKitFrame && window.__onNativeReplayKitFrame('data:image/jpeg;base64,\(b64)');",
-                            completionHandler: { [weak self] _, _ in
-                                self?.isEvaluatingVideo = false
-                            }
-                        )
-                    }
-                }
+            if packetType == 0x03 && buffer.count > 10 {
+                self.feedRawVideoPacketToWebRTC(buffer)
             } else if packetType == 0x02 && buffer.count > 6 {
                 let sampleRate = buffer.subdata(in: 0..<4).withUnsafeBytes { $0.load(as: UInt32.self).littleEndian }
                 let channels = buffer.subdata(in: 4..<6).withUnsafeBytes { $0.load(as: UInt16.self).littleEndian }
@@ -161,6 +232,90 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
 
             self.readNextPacket(on: conn)
         }
+    }
+
+    private func feedRawVideoPacketToWebRTC(_ buffer: Data) {
+        guard let source = videoSource, let capturer = videoCapturer else { return }
+
+        let width = Int(buffer.subdata(in: 0..<4).withUnsafeBytes { $0.load(as: UInt32.self).littleEndian })
+        let height = Int(buffer.subdata(in: 4..<8).withUnsafeBytes { $0.load(as: UInt32.self).littleEndian })
+        let rotByte = buffer[8]
+        let fmtByte = buffer[9]
+        guard width > 0, height > 0 else { return }
+
+        let osFmt: OSType = (fmtByte == 1)
+            ? kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
+            : kCVPixelFormatType_32BGRA
+
+        if pixelBufferPool == nil || poolWidth != width || poolHeight != height || poolFormat != osFmt {
+            let attrs: [String: Any] = [
+                kCVPixelBufferPixelFormatTypeKey as String: osFmt,
+                kCVPixelBufferWidthKey as String: width,
+                kCVPixelBufferHeightKey as String: height,
+                kCVPixelBufferIOSurfacePropertiesKey as String: [:]
+            ]
+            var newPool: CVPixelBufferPool?
+            CVPixelBufferPoolCreate(kCFAllocatorDefault, nil, attrs as CFDictionary, &newPool)
+            pixelBufferPool = newPool
+            poolWidth = width
+            poolHeight = height
+            poolFormat = osFmt
+        }
+
+        guard let pool = pixelBufferPool else { return }
+        var outPixelBuffer: CVPixelBuffer?
+        guard CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pool, &outPixelBuffer) == kCVReturnSuccess,
+              let pixelBuffer = outPixelBuffer else { return }
+
+        CVPixelBufferLockBaseAddress(pixelBuffer, [])
+        buffer.withUnsafeBytes { rawBuf in
+            guard let src = rawBuf.baseAddress?.assumingMemoryBound(to: UInt8.self) else { return }
+            let payloadPtr = src + 10
+            let payloadCount = buffer.count - 10
+
+            if fmtByte == 1 {
+                let ySize = width * height
+                let uvSize = width * (height / 2)
+                guard payloadCount >= ySize + uvSize,
+                      let yDstBase = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0),
+                      let uvDstBase = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1) else { return }
+                let yDstStride = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0)
+                let uvDstStride = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1)
+                let yDst = yDstBase.assumingMemoryBound(to: UInt8.self)
+                let uvDst = uvDstBase.assumingMemoryBound(to: UInt8.self)
+
+                for row in 0..<height {
+                    memcpy(yDst + row * yDstStride, payloadPtr + row * width, width)
+                }
+                let uvSrc = payloadPtr + ySize
+                for row in 0..<(height / 2) {
+                    memcpy(uvDst + row * uvDstStride, uvSrc + row * width, width)
+                }
+            } else if fmtByte == 2 {
+                let rowBytes = width * 4
+                guard payloadCount >= rowBytes * height,
+                      let dstBase = CVPixelBufferGetBaseAddress(pixelBuffer) else { return }
+                let dstStride = CVPixelBufferGetBytesPerRow(pixelBuffer)
+                let dst = dstBase.assumingMemoryBound(to: UInt8.self)
+                for row in 0..<height {
+                    memcpy(dst + row * dstStride, payloadPtr + row * rowBytes, rowBytes)
+                }
+            }
+        }
+        CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
+
+        let rotation: RTCVideoRotation
+        switch rotByte {
+        case 1: rotation = ._90
+        case 2: rotation = ._180
+        case 3: rotation = ._270
+        default: rotation = ._0
+        }
+
+        let rtcBuf = RTCCVPixelBuffer(pixelBuffer: pixelBuffer)
+        let tsNs = Int64(CACurrentMediaTime() * 1_000_000_000)
+        let frame = RTCVideoFrame(buffer: rtcBuf, rotation: rotation, timeStampNs: tsNs)
+        source.capturer(capturer, didCapture: frame)
     }
 
     private func flushPendingAudio() {
@@ -194,6 +349,7 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     @objc func startBroadcast(_ call: CAPPluginCall) {
+        initWebRTCIfNeeded()
         startLocalReceiver()
         do {
             let session = AVAudioSession.sharedInstance()
@@ -229,11 +385,182 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
         queue.async { [weak self] in
             self?.pendingAudioPCM.removeAll(keepingCapacity: false)
         }
+        webrtcQueue.async { [weak self] in
+            self?.peers.values.forEach { $0.pc.close() }
+            self?.peers.removeAll()
+        }
         stopBackgroundKeepAlive()
         DispatchQueue.main.async { [weak self] in
             self?.pickerView?.removeFromSuperview()
             self?.pickerView = nil
             call.resolve(["stopped": true])
+        }
+    }
+
+    @objc func createPeerOffer(_ call: CAPPluginCall) {
+        guard let viewerUid = call.getString("viewerUid"), !viewerUid.isEmpty else {
+            call.reject("Missing viewerUid")
+            return
+        }
+        initWebRTCIfNeeded()
+        let iceList = call.getArray("iceServers", [String: Any].self) ?? []
+        let maxBitrate = call.getInt("maxBitrate") ?? 6_000_000
+        let maxFramerate = call.getInt("maxFramerate") ?? 60
+
+        webrtcQueue.async { [weak self] in
+            guard let self = self, let factory = self.pcFactory, let videoTrack = self.localVideoTrack else {
+                call.reject("WebRTC not initialized")
+                return
+            }
+
+            if let existing = self.peers.removeValue(forKey: viewerUid) {
+                existing.pc.close()
+            }
+
+            var rtcServers: [RTCIceServer] = []
+            for item in iceList {
+                var urls: [String] = []
+                if let u = item["urls"] as? String {
+                    urls = [u]
+                } else if let arr = item["urls"] as? [String] {
+                    urls = arr
+                }
+                guard !urls.isEmpty else { continue }
+                let username = item["username"] as? String
+                let credential = item["credential"] as? String
+                if let u = username, let c = credential {
+                    rtcServers.append(RTCIceServer(urlStrings: urls, username: u, credential: c))
+                } else {
+                    rtcServers.append(RTCIceServer(urlStrings: urls))
+                }
+            }
+            if rtcServers.isEmpty {
+                rtcServers.append(RTCIceServer(urlStrings: ["stun:stun.l.google.com:19302"]))
+            }
+
+            let config = RTCConfiguration()
+            config.iceServers = rtcServers
+            config.sdpSemantics = .unifiedPlan
+            config.continualGatheringPolicy = .gatherContinually
+
+            let constraints = RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: nil)
+            guard let pc = factory.peerConnection(with: config, constraints: constraints, delegate: nil) else {
+                call.reject("Failed to create RTCPeerConnection")
+                return
+            }
+
+            let peer = NativeScreenPeer(viewerUid: viewerUid, pc: pc, plugin: self)
+            self.peers[viewerUid] = peer
+
+            if let sender = pc.add(videoTrack, streamIds: ["cineverse_screen"]) {
+                let params = sender.parameters
+                if let enc = params.encodings.first {
+                    enc.maxBitrateBps = NSNumber(value: maxBitrate)
+                    enc.maxFramerate = NSNumber(value: maxFramerate)
+                }
+                params.degradationPreference = NSNumber(value: RTCDegradationPreference.maintainFramerate.rawValue)
+                sender.parameters = params
+            }
+
+            let offerConstraints = RTCMediaConstraints(
+                mandatoryConstraints: [
+                    "OfferToReceiveAudio": "false",
+                    "OfferToReceiveVideo": "false"
+                ],
+                optionalConstraints: nil
+            )
+            pc.offer(for: offerConstraints) { sdp, error in
+                guard let sdp = sdp, error == nil else {
+                    call.reject("Failed to create offer: \(error?.localizedDescription ?? "unknown")")
+                    return
+                }
+                pc.setLocalDescription(sdp) { err in
+                    if let err = err {
+                        call.reject("Failed to set local description: \(err.localizedDescription)")
+                        return
+                    }
+                    call.resolve([
+                        "sdp": [
+                            "type": RTCSessionDescription.string(for: sdp.type),
+                            "sdp": sdp.sdp
+                        ]
+                    ])
+                }
+            }
+        }
+    }
+
+    @objc func setRemoteAnswer(_ call: CAPPluginCall) {
+        guard let viewerUid = call.getString("viewerUid"),
+              let sdpDict = call.getObject("sdp"),
+              let sdpStr = sdpDict["sdp"] as? String else {
+            call.reject("Missing answer payload")
+            return
+        }
+        webrtcQueue.async { [weak self] in
+            guard let peer = self?.peers[viewerUid] else {
+                call.resolve(["ok": false])
+                return
+            }
+            let desc = RTCSessionDescription(type: .answer, sdp: sdpStr)
+            peer.pc.setRemoteDescription(desc) { err in
+                if err == nil {
+                    self?.webrtcQueue.async {
+                        let pending = peer.pendingIce
+                        peer.pendingIce.removeAll()
+                        for cand in pending {
+                            peer.pc.add(cand) { _ in }
+                        }
+                    }
+                }
+                call.resolve(["ok": err == nil])
+            }
+        }
+    }
+
+    @objc func addIceCandidate(_ call: CAPPluginCall) {
+        guard let viewerUid = call.getString("viewerUid"),
+              let candDict = call.getObject("candidate"),
+              let sdp = candDict["candidate"] as? String else {
+            call.resolve(["ok": false])
+            return
+        }
+        let sdpMid = candDict["sdpMid"] as? String
+        let mLine = (candDict["sdpMLineIndex"] as? NSNumber)?.int32Value ?? 0
+        let cand = RTCIceCandidate(sdp: sdp, sdpMLineIndex: mLine, sdpMid: sdpMid)
+
+        webrtcQueue.async { [weak self] in
+            guard let peer = self?.peers[viewerUid] else {
+                call.resolve(["ok": false])
+                return
+            }
+            if peer.pc.remoteDescription != nil {
+                peer.pc.add(cand) { _ in }
+            } else {
+                peer.pendingIce.append(cand)
+            }
+            call.resolve(["ok": true])
+        }
+    }
+
+    @objc func closePeer(_ call: CAPPluginCall) {
+        guard let viewerUid = call.getString("viewerUid") else {
+            call.resolve(["ok": true])
+            return
+        }
+        webrtcQueue.async { [weak self] in
+            if let peer = self?.peers.removeValue(forKey: viewerUid) {
+                peer.pc.close()
+            }
+            call.resolve(["ok": true])
+        }
+    }
+
+    @objc func closeAllPeers(_ call: CAPPluginCall) {
+        webrtcQueue.async { [weak self] in
+            self?.peers.values.forEach { $0.pc.close() }
+            self?.peers.removeAll()
+            call.resolve(["ok": true])
         }
     }
 }

@@ -9573,23 +9573,8 @@
     async function startNativeIOSReplayKitShare() {
       const rkPlugin = window.Capacitor?.Plugins?.ReplayKitBridge;
       if (!rkPlugin) return null;
-      const canvas = document.createElement("canvas");
-      canvas.width = 1920;
-      canvas.height = 1080;
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = "high";
-        ctx.fillStyle = "#090809";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "#e2e8f0";
-        ctx.font = "bold 34px sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText("Hãy bấm Bắt đầu phát sóng (ReplayKit) trên iPad/iPhone...", canvas.width / 2, canvas.height / 2);
-      }
-      const outStream = canvas.captureStream ? canvas.captureStream(20) : null;
-      if (!outStream) return null;
 
+      let outStream = new MediaStream();
       let audioCtx = null;
       let audioDest = null;
       let nextAudioTime = 0;
@@ -9605,34 +9590,11 @@
         }
       } catch (_) {}
 
-      let decoding = false;
-      let decodeStartedAt = 0;
-      let lastFrameImg = null;
-      const keepAliveTimer = setInterval(() => {
-        if (lastFrameImg && ctx && !decoding) {
-          try { ctx.drawImage(lastFrameImg, 0, 0, canvas.width, canvas.height); } catch (_) {}
-        }
-      }, 900);
-
-      window.__onNativeReplayKitFrame = (dataUrl) => {
-        if (!ctx) return;
-        if (decoding && (Date.now() - decodeStartedAt) < 500) return;
-        decoding = true;
-        decodeStartedAt = Date.now();
-        const img = new Image();
-        img.onload = () => {
-          if (img.width > 0 && img.height > 0 && (canvas.width !== img.width || canvas.height !== img.height)) {
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = "high";
-          }
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          lastFrameImg = img;
-          decoding = false;
-        };
-        img.onerror = () => { decoding = false; };
-        img.src = dataUrl;
+      window.__nativeReplayKitActive = true;
+      window.__onNativeWebRTCIce = (viewerUid, cand) => {
+        if (!cand || !liveScreenRoomId || !rtdb || !rtdbMod || !state.uid) return;
+        const iceRef = rtdbMod.ref(rtdb, `voice/${liveScreenRoomId}/screen_ice/${viewerUid}/${state.uid}`);
+        rtdbMod.push(iceRef, cand).catch(() => {});
       };
 
       window.__onNativeReplayKitAudio = (b64, sampleRate, channels) => {
@@ -9671,11 +9633,11 @@
       };
 
       iosFallbackCleanup = () => {
-        clearInterval(keepAliveTimer);
-        lastFrameImg = null;
-        window.__onNativeReplayKitFrame = null;
+        window.__nativeReplayKitActive = false;
+        window.__onNativeWebRTCIce = null;
         window.__onNativeReplayKitAudio = null;
         try { audioCtx?.close?.().catch?.(() => {}); } catch (_) {}
+        try { rkPlugin.closeAllPeers?.().catch?.(() => {}); } catch (_) {}
         try { rkPlugin.stopBroadcast?.().catch?.(() => {}); } catch (_) {}
       };
 
@@ -9881,6 +9843,8 @@
         await rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${targetRoomId}/screen_broadcaster`)).catch(() => {});
         await rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${targetRoomId}/screen_signals`)).catch(() => {});
         await rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${targetRoomId}/screen_ice`)).catch(() => {});
+        await rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${targetRoomId}/screen_audio_signals`)).catch(() => {});
+        await rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${targetRoomId}/screen_audio_ice`)).catch(() => {});
       }
       if (liveScreenBroadcaster && liveScreenBroadcaster.uid === state.uid) {
         liveScreenBroadcaster = null;
@@ -9950,6 +9914,10 @@
       const entry = liveScreenPeers.get(uid);
       if (!entry) return;
       try { entry.pc.close(); } catch (_) {}
+      try { entry.audioPc?.close?.(); } catch (_) {}
+      if (entry.isNativeWebRTC) {
+        try { window.Capacitor?.Plugins?.ReplayKitBridge?.closePeer?.({ viewerUid: uid }).catch?.(() => {}); } catch (_) {}
+      }
       liveScreenPeers.delete(uid);
     }
 
@@ -9957,6 +9925,7 @@
       for (const uid of Array.from(liveScreenPeers.keys())) {
         closeDiscordPeer(uid);
       }
+      try { window.Capacitor?.Plugins?.ReplayKitBridge?.closeAllPeers?.().catch?.(() => {}); } catch (_) {}
     }
 
     function createDiscordPeerConnection(roomId, remoteUid) {
@@ -10016,9 +9985,63 @@
     async function initiateOfferToDiscordViewer(roomId, viewerUid, viewerJoinedAt = 0) {
       if (!liveScreenStream || !rtdb || !rtdbMod || !state.uid) return;
       await ensureVoiceTurnLoaded();
+      const cfg = DISCORD_QUALITY_PRESETS[liveScreenQuality] || DISCORD_QUALITY_PRESETS.fhd1080_60;
+
+      const rkPlugin = window.Capacitor?.Plugins?.ReplayKitBridge;
+      if (window.__nativeReplayKitActive && rkPlugin?.createPeerOffer) {
+        closeDiscordPeer(viewerUid);
+        const entry = {
+          isNativeWebRTC: true,
+          pc: { connectionState: "connected", signalingState: "have-local-offer", close: () => {} },
+          audioPc: null,
+          audioPendingIce: [],
+          pendingIce: [],
+          viewerJoinedAt
+        };
+        liveScreenPeers.set(viewerUid, entry);
+
+        try {
+          const res = await rkPlugin.createPeerOffer({
+            viewerUid,
+            iceServers: VOICE_ICE_CONFIG.iceServers || [],
+            maxBitrate: cfg.maxBitrate || 6000000,
+            maxFramerate: 60
+          });
+          if (res?.sdp) {
+            await rtdbMod.set(rtdbMod.ref(rtdb, `voice/${roomId}/screen_signals/${viewerUid}/offer`), {
+              from: state.uid,
+              sdp: res.sdp,
+              ts: Date.now()
+            }).catch(() => {});
+          }
+        } catch (err) {
+          console.warn("[NativeWebRTC] createPeerOffer error:", err);
+        }
+
+        const audioTracks = liveScreenStream.getAudioTracks();
+        if (audioTracks.length > 0) {
+          const audioPc = new RTCPeerConnection(VOICE_ICE_CONFIG);
+          entry.audioPc = audioPc;
+          audioPc.onicecandidate = (ev) => {
+            if (!ev.candidate || !rtdb || !rtdbMod || !state.uid) return;
+            rtdbMod.push(rtdbMod.ref(rtdb, `voice/${roomId}/screen_audio_ice/${viewerUid}/${state.uid}`), ev.candidate.toJSON()).catch(() => {});
+          };
+          audioTracks.forEach((t) => audioPc.addTrack(t, liveScreenStream));
+          try {
+            const aOffer = await audioPc.createOffer({ offerToReceiveAudio: false, offerToReceiveVideo: false });
+            await audioPc.setLocalDescription(aOffer);
+            await rtdbMod.set(rtdbMod.ref(rtdb, `voice/${roomId}/screen_audio_signals/${viewerUid}/offer`), {
+              from: state.uid,
+              sdp: audioPc.localDescription.toJSON(),
+              ts: Date.now()
+            }).catch(() => {});
+          } catch (_) {}
+        }
+        return;
+      }
+
       const entry = createDiscordPeerConnection(roomId, viewerUid);
       entry.viewerJoinedAt = viewerJoinedAt;
-      const cfg = DISCORD_QUALITY_PRESETS[liveScreenQuality] || DISCORD_QUALITY_PRESETS.hd720_60;
 
       for (const track of liveScreenStream.getTracks()) {
         const sender = entry.pc.addTrack(track, liveScreenStream);
@@ -10045,10 +10068,12 @@
 
       entry.pc.ontrack = (ev) => {
         applyDiscordZeroJitter(ev.receiver);
-        if (ev.streams && ev.streams[0]) {
-          remoteScreenStream = ev.streams[0];
-        } else {
-          if (!remoteScreenStream) remoteScreenStream = new MediaStream();
+        if (!remoteScreenStream || remoteScreenStream._broadcasterUid !== broadcasterUid) {
+          remoteScreenStream = new MediaStream();
+          remoteScreenStream._broadcasterUid = broadcasterUid;
+        }
+        const alreadyHas = remoteScreenStream.getTracks().some((t) => t.id === ev.track.id || t.kind === ev.track.kind);
+        if (!alreadyHas) {
           remoteScreenStream.addTrack(ev.track);
         }
         updateDiscordLiveUI();
@@ -10062,6 +10087,46 @@
       await rtdbMod.set(rtdbMod.ref(rtdb, `voice/${roomId}/screen_signals/${broadcasterUid}/answers/${state.uid}`), {
         from: state.uid,
         sdp: entry.pc.localDescription.toJSON(),
+        ts: Date.now()
+      }).catch(() => {});
+    }
+
+    async function handleDiscordAudioOfferFromBroadcaster(roomId, offerData) {
+      if (!offerData || !offerData.sdp || !offerData.from || offerData.from === state.uid) return;
+      await ensureVoiceTurnLoaded();
+      const broadcasterUid = offerData.from;
+      const entry = liveScreenPeers.get(broadcasterUid) || createDiscordPeerConnection(roomId, broadcasterUid);
+      try { entry.audioPc?.close?.(); } catch (_) {}
+      const audioPc = new RTCPeerConnection(VOICE_ICE_CONFIG);
+      entry.audioPc = audioPc;
+      entry.audioPendingIce = entry.audioPendingIce || [];
+
+      audioPc.onicecandidate = (ev) => {
+        if (!ev.candidate || !rtdb || !rtdbMod || !state.uid) return;
+        rtdbMod.push(rtdbMod.ref(rtdb, `voice/${roomId}/screen_audio_ice/${broadcasterUid}/${state.uid}`), ev.candidate.toJSON()).catch(() => {});
+      };
+      audioPc.ontrack = (ev) => {
+        applyDiscordZeroJitter(ev.receiver);
+        if (!remoteScreenStream || remoteScreenStream._broadcasterUid !== broadcasterUid) {
+          remoteScreenStream = new MediaStream();
+          remoteScreenStream._broadcasterUid = broadcasterUid;
+        }
+        if (!remoteScreenStream.getAudioTracks().some((t) => t.id === ev.track.id)) {
+          remoteScreenStream.addTrack(ev.track);
+        }
+        updateDiscordLiveUI();
+      };
+
+      await audioPc.setRemoteDescription(new RTCSessionDescription(offerData.sdp));
+      while (entry.audioPendingIce.length > 0) {
+        const cand = entry.audioPendingIce.shift();
+        await audioPc.addIceCandidate(new RTCIceCandidate(cand)).catch(() => {});
+      }
+      const answer = await audioPc.createAnswer();
+      await audioPc.setLocalDescription(answer);
+      await rtdbMod.set(rtdbMod.ref(rtdb, `voice/${roomId}/screen_audio_signals/${broadcasterUid}/answers/${state.uid}`), {
+        from: state.uid,
+        sdp: audioPc.localDescription.toJSON(),
         ts: Date.now()
       }).catch(() => {});
     }
@@ -10228,7 +10293,9 @@
         const entry = liveScreenPeers.get(viewerUid);
         if (!entry || !data || !data.sdp) return;
         try {
-          if (entry.pc.signalingState === "have-local-offer") {
+          if (entry.isNativeWebRTC) {
+            await window.Capacitor?.Plugins?.ReplayKitBridge?.setRemoteAnswer?.({ viewerUid, sdp: data.sdp });
+          } else if (entry.pc.signalingState === "have-local-offer") {
             await entry.pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
             await flushDiscordPendingIce(entry);
           }
@@ -10250,7 +10317,9 @@
           for (const [cId, cand] of Object.entries(candMap)) {
             if (!cand || handledScreenIceIds.has(cId)) continue;
             handledScreenIceIds.add(cId);
-            if (entry.pc.remoteDescription) {
+            if (entry.isNativeWebRTC) {
+              window.Capacitor?.Plugins?.ReplayKitBridge?.addIceCandidate?.({ viewerUid: fromUid, candidate: cand }).catch?.(() => {});
+            } else if (entry.pc.remoteDescription) {
               entry.pc.addIceCandidate(new RTCIceCandidate(cand)).catch(() => {});
             } else {
               entry.pendingIce.push(cand);
@@ -10259,6 +10328,57 @@
         }
       });
       liveScreenUnsubs.push(unsubIce);
+
+      // Lắng nghe kênh Audio phụ cho Native 60fps Screen Share
+      let lastAudioOfferTs = 0;
+      const audioOfferRef = rtdbMod.ref(rtdb, `voice/${roomId}/screen_audio_signals/${state.uid}/offer`);
+      const unsubAudioOffer = rtdbMod.onValue(audioOfferRef, (snap) => {
+        const data = snap.val();
+        if (!data || !data.sdp) return;
+        const ts = data.ts || 0;
+        if (ts && ts <= lastAudioOfferTs) return;
+        lastAudioOfferTs = ts || Date.now();
+        handleDiscordAudioOfferFromBroadcaster(roomId, data);
+      });
+      const audioAnswersRef = rtdbMod.ref(rtdb, `voice/${roomId}/screen_audio_signals/${state.uid}/answers`);
+      const handleAudioAnswer = async (snap) => {
+        const viewerUid = snap.key;
+        const data = snap.val();
+        const entry = liveScreenPeers.get(viewerUid);
+        if (!entry?.audioPc || !data?.sdp) return;
+        try {
+          if (entry.audioPc.signalingState === "have-local-offer") {
+            await entry.audioPc.setRemoteDescription(new RTCSessionDescription(data.sdp));
+            while ((entry.audioPendingIce || []).length > 0) {
+              const cand = entry.audioPendingIce.shift();
+              await entry.audioPc.addIceCandidate(new RTCIceCandidate(cand)).catch(() => {});
+            }
+          }
+        } catch (_) {}
+      };
+      const unsubAudioAns1 = rtdbMod.onChildAdded(audioAnswersRef, handleAudioAnswer);
+      const unsubAudioAns2 = rtdbMod.onChildChanged(audioAnswersRef, handleAudioAnswer);
+      const handledAudioIceIds = new Set();
+      const audioIceRef = rtdbMod.ref(rtdb, `voice/${roomId}/screen_audio_ice/${state.uid}`);
+      const unsubAudioIce = rtdbMod.onValue(audioIceRef, (snap) => {
+        const bySender = snap.val() || {};
+        for (const [fromUid, candMap] of Object.entries(bySender)) {
+          if (!candMap) continue;
+          const entry = liveScreenPeers.get(fromUid);
+          if (!entry?.audioPc) continue;
+          entry.audioPendingIce = entry.audioPendingIce || [];
+          for (const [cId, cand] of Object.entries(candMap)) {
+            if (!cand || handledAudioIceIds.has(cId)) continue;
+            handledAudioIceIds.add(cId);
+            if (entry.audioPc.remoteDescription) {
+              entry.audioPc.addIceCandidate(new RTCIceCandidate(cand)).catch(() => {});
+            } else {
+              entry.audioPendingIce.push(cand);
+            }
+          }
+        }
+      });
+      liveScreenUnsubs.push(unsubAudioOffer, unsubAudioAns1, unsubAudioAns2, unsubAudioIce);
     }
 
     // Dọn dẹp toàn bộ phiên chia sẻ màn hình khi rời phòng

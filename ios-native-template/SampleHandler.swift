@@ -1,22 +1,16 @@
 import ReplayKit
 import Network
-import CoreImage
 import CoreMedia
+import CoreVideo
 import AudioToolbox
 import ImageIO
-import UIKit
 
 class SampleHandler: RPBroadcastSampleHandler {
     private var connection: NWConnection?
     private let sendQueue = DispatchQueue(label: "com.cineverse.lotte.replaykit.sender", qos: .userInteractive)
-    private let ciContext = CIContext(options: [
-        .useSoftwareRenderer: false,
-        .cacheIntermediates: false
-    ])
     private var lastSentTime: CFTimeInterval = 0
     private var isSendingVideo = false
     private var videoSendStartedAt: CFTimeInterval = 0
-    private var frameCounter: Int = 0
     private var isBroadcastActive = false
 
     override func broadcastStarted(withSetupInfo setupInfo: [String : NSObject]?) {
@@ -53,59 +47,43 @@ class SampleHandler: RPBroadcastSampleHandler {
         connection = nil
     }
 
+    private func mapOrientation(_ cg: CGImagePropertyOrientation) -> UInt8 {
+        switch cg {
+        case .right, .rightMirrored: return 1 // 90 deg
+        case .down, .downMirrored:   return 2 // 180 deg
+        case .left, .leftMirrored:   return 3 // 270 deg
+        default:                     return 0 // 0 deg
+        }
+    }
+
     override func processSampleBuffer(_ sampleBuffer: CMSampleBuffer, with sampleBufferType: RPSampleBufferType) {
         guard let conn = connection, conn.state == .ready else { return }
 
         switch sampleBufferType {
         case .video:
             let now = CACurrentMediaTime()
-            if isSendingVideo && (now - videoSendStartedAt) > 1.0 {
+            if isSendingVideo && (now - videoSendStartedAt) > 0.5 {
                 isSendingVideo = false
             }
-            if isSendingVideo || (now - lastSentTime) < (1.0 / 20.0) { return }
+            if isSendingVideo || (now - lastSentTime) < (1.0 / 60.0) { return }
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 
-            var cgOrientation: CGImagePropertyOrientation = .up
+            var rotByte: UInt8 = 0
             if let orientationAttachment = CMGetAttachment(sampleBuffer, key: RPVideoSampleOrientationKey as CFString, attachmentModeOut: nil) as? NSNumber,
                let parsed = CGImagePropertyOrientation(rawValue: orientationAttachment.uint32Value) {
-                cgOrientation = parsed
+                rotByte = mapOrientation(parsed)
             }
 
             lastSentTime = now
             videoSendStartedAt = now
             isSendingVideo = true
 
+            // Retain pixelBuffer safely across async dispatch
             sendQueue.async { [weak self] in
                 guard let self = self else { return }
                 var didDispatchSend = false
                 autoreleasepool {
-                    var ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-                    if cgOrientation != .up {
-                        ciImage = ciImage.oriented(cgOrientation)
-                    }
-                    let extent = ciImage.extent
-                    let maxDim: CGFloat = 1280.0
-                    let longest = max(extent.width, extent.height)
-                    let scale = longest > maxDim ? (maxDim / longest) : 1.0
-                    let scaled = scale < 1.0
-                        ? ciImage.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
-                        : ciImage
-
-                    guard let cgImage = self.ciContext.createCGImage(scaled, from: scaled.extent) else { return }
-                    let uiImage = UIImage(cgImage: cgImage)
-                    guard let jpegData = uiImage.jpegData(compressionQuality: 0.72) else { return }
-
-                    self.frameCounter += 1
-                    if self.frameCounter % 40 == 0 {
-                        self.ciContext.clearCaches()
-                    }
-
-                    var packet = Data(capacity: 5 + jpegData.count)
-                    packet.append(0x01) // 0x01 = Video JPEG frame
-                    var len = UInt32(jpegData.count).bigEndian
-                    packet.append(Data(bytes: &len, count: 4))
-                    packet.append(jpegData)
-
+                    guard let packet = self.buildRawVideoPacket(pixelBuffer: pixelBuffer, rotation: rotByte) else { return }
                     didDispatchSend = true
                     conn.send(content: packet, completion: .contentProcessed { [weak self] _ in
                         self?.isSendingVideo = false
@@ -127,6 +105,125 @@ class SampleHandler: RPBroadcastSampleHandler {
         default:
             break
         }
+    }
+
+    private func buildRawVideoPacket(pixelBuffer: CVPixelBuffer, rotation: UInt8) -> Data? {
+        CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
+        defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly) }
+
+        let srcW = CVPixelBufferGetWidth(pixelBuffer)
+        let srcH = CVPixelBufferGetHeight(pixelBuffer)
+        guard srcW > 0, srcH > 0 else { return nil }
+
+        let fmt = CVPixelBufferGetPixelFormatType(pixelBuffer)
+        let isNV12 = (fmt == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange || fmt == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)
+
+        // Subsample 2x if > 1920px so loopback bandwidth & RAM stay tiny even on Pro Max / iPad
+        let step = max(srcW, srcH) > 1920 ? 2 : 1
+        let dstW = (srcW / step) & ~1
+        let dstH = (srcH / step) & ~1
+        guard dstW > 0, dstH > 0 else { return nil }
+
+        if isNV12 && CVPixelBufferGetPlaneCount(pixelBuffer) >= 2 {
+            guard let yBase = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0),
+                  let uvBase = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1) else { return nil }
+            let yStride = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0)
+            let uvStride = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1)
+
+            let ySize = dstW * dstH
+            let uvSize = dstW * (dstH / 2)
+            let payloadLen = 10 + ySize + uvSize
+
+            var packet = Data(count: 5 + payloadLen)
+            packet.withUnsafeMutableBytes { rawBuf in
+                guard let dst = rawBuf.baseAddress?.assumingMemoryBound(to: UInt8.self) else { return }
+                dst[0] = 0x03 // 0x03 = Raw Video frame
+                var lenBE = UInt32(payloadLen).bigEndian
+                memcpy(dst + 1, &lenBE, 4)
+
+                var wLE = UInt32(dstW).littleEndian
+                var hLE = UInt32(dstH).littleEndian
+                memcpy(dst + 5, &wLE, 4)
+                memcpy(dst + 9, &hLE, 4)
+                dst[13] = rotation
+                dst[14] = 1 // 1 = NV12
+
+                let ySrc = yBase.assumingMemoryBound(to: UInt8.self)
+                let uvSrc = uvBase.assumingMemoryBound(to: UInt8.self)
+                var yDst = dst + 15
+                var uvDst = dst + 15 + ySize
+
+                if step == 1 {
+                    for row in 0..<dstH {
+                        memcpy(yDst, ySrc + row * yStride, dstW)
+                        yDst += dstW
+                    }
+                    for row in 0..<(dstH / 2) {
+                        memcpy(uvDst, uvSrc + row * uvStride, dstW)
+                        uvDst += dstW
+                    }
+                } else {
+                    for row in 0..<dstH {
+                        let sRow = ySrc + (row * 2) * yStride
+                        for col in 0..<dstW {
+                            yDst[col] = sRow[col * 2]
+                        }
+                        yDst += dstW
+                    }
+                    for row in 0..<(dstH / 2) {
+                        let sRow = uvSrc + (row * 2) * uvStride
+                        let pairs = dstW / 2
+                        for p in 0..<pairs {
+                            uvDst[p * 2] = sRow[p * 4]
+                            uvDst[p * 2 + 1] = sRow[p * 4 + 1]
+                        }
+                        uvDst += dstW
+                    }
+                }
+            }
+            return packet
+        } else if fmt == kCVPixelFormatType_32BGRA, let base = CVPixelBufferGetBaseAddress(pixelBuffer) {
+            let stride = CVPixelBufferGetBytesPerRow(pixelBuffer)
+            let rowBytes = dstW * 4
+            let pixelBytes = rowBytes * dstH
+            let payloadLen = 10 + pixelBytes
+
+            var packet = Data(count: 5 + payloadLen)
+            packet.withUnsafeMutableBytes { rawBuf in
+                guard let dst = rawBuf.baseAddress?.assumingMemoryBound(to: UInt8.self) else { return }
+                dst[0] = 0x03
+                var lenBE = UInt32(payloadLen).bigEndian
+                memcpy(dst + 1, &lenBE, 4)
+
+                var wLE = UInt32(dstW).littleEndian
+                var hLE = UInt32(dstH).littleEndian
+                memcpy(dst + 5, &wLE, 4)
+                memcpy(dst + 9, &hLE, 4)
+                dst[13] = rotation
+                dst[14] = 2 // 2 = BGRA
+
+                let src = base.assumingMemoryBound(to: UInt8.self)
+                var pDst = dst + 15
+                if step == 1 {
+                    for row in 0..<dstH {
+                        memcpy(pDst, src + row * stride, rowBytes)
+                        pDst += rowBytes
+                    }
+                } else {
+                    let dst32 = UnsafeMutableRawPointer(pDst).assumingMemoryBound(to: UInt32.self)
+                    for row in 0..<dstH {
+                        let sRow = UnsafeRawPointer(src + (row * 2) * stride).assumingMemoryBound(to: UInt32.self)
+                        let dRow = dst32 + row * dstW
+                        for col in 0..<dstW {
+                            dRow[col] = sRow[col * 2]
+                        }
+                    }
+                }
+            }
+            return packet
+        }
+
+        return nil
     }
 
     private func sendAudioSampleBuffer(_ sampleBuffer: CMSampleBuffer, on conn: NWConnection) {
