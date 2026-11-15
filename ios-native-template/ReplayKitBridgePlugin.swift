@@ -98,7 +98,6 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
     private var currentPPS = Data()
 
     public override func load() {
-        initWebRTCIfNeeded()
         startLocalReceiver()
     }
 
@@ -107,7 +106,6 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
             RTCInitializeSSL()
             ReplayKitBridgePlugin.sslInitialized = true
         }
-        RTCAudioSession.sharedInstance().useManualAudio = true
         if pcFactory == nil {
             let encoderFactory = RTCDefaultVideoEncoderFactory()
             let decoderFactory = RTCDefaultVideoDecoderFactory()
