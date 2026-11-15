@@ -189,9 +189,12 @@ public class ReplayKitBridgePlugin extends Plugin {
     @ActivityCallback
     private void onMediaProjectionResult(PluginCall call, ActivityResult result) {
         if (result.getResultCode() != Activity.RESULT_OK || result.getData() == null) {
+            pendingStartCall = null;
             call.reject("User cancelled screen capture");
             return;
         }
+        call.setKeepAlive(true);
+        pendingStartCall = call;
         Intent serviceIntent = new Intent(getContext(), ScreenCaptureService.class);
         serviceIntent.putExtra(ScreenCaptureService.EXTRA_RESULT_CODE, result.getResultCode());
         serviceIntent.putExtra(ScreenCaptureService.EXTRA_RESULT_DATA, result.getData());
@@ -306,20 +309,21 @@ public class ReplayKitBridgePlugin extends Plugin {
             audioRecord.startRecording();
             isAudioCapturing = true;
             audioCaptureThread = new Thread(() -> {
-                byte[] pcmBuf = new byte[4096];
+                byte[] pcmBuf = new byte[8192];
                 while (isAudioCapturing && audioRecord != null) {
                     int read = audioRecord.read(pcmBuf, 0, pcmBuf.length);
+                    if (read < 0) {
+                        Log.w(TAG, "AudioRecord read error: " + read);
+                        break;
+                    }
                     if (read > 0 && !peers.isEmpty()) {
-                        ByteBuffer pkt = ByteBuffer.allocateDirect(6 + read).order(ByteOrder.LITTLE_ENDIAN);
-                        pkt.putInt(sampleRate);
-                        pkt.putShort((short) channels);
-                        pkt.put(pcmBuf, 0, read);
-                        pkt.flip();
                         for (NativePeer peer : peers.values()) {
                             DataChannel dc = peer.audioDataChannel;
                             if (dc != null && dc.state() == DataChannel.State.OPEN && dc.bufferedAmount() < 262_144) {
-                                ByteBuffer copy = ByteBuffer.allocateDirect(pkt.remaining());
-                                copy.put(pkt.duplicate());
+                                ByteBuffer copy = ByteBuffer.allocateDirect(6 + read).order(ByteOrder.LITTLE_ENDIAN);
+                                copy.putInt(sampleRate);
+                                copy.putShort((short) channels);
+                                copy.put(pcmBuf, 0, read);
                                 copy.flip();
                                 dc.send(new DataChannel.Buffer(copy, true));
                             }
