@@ -13279,32 +13279,43 @@
         ctx.arc(len * 0.05, 0, len * 1.15, 0, Math.PI * 2);
         ctx.fill();
 
-        // 2. Vây ngực dài sắc lẹm hai bên (Pectoral Fins) neo ở vai khớp i=4
+        // 2. Vây ngực dài sắc lẹm hai bên (Pectoral Fins) neo ở vai khớp i=4 theo trục trực giao thân
         const pecJoint = spine[4];
         const pecNorm = tangents[4];
         const pecHW = tunaHalfWidth(pecJoint.t, len) * 0.72;
-        const pecSweep = Math.sin(fish.tailPhase - 0.85) * 0.08;
+        const pecSweep = Math.sin(fish.tailPhase - 0.85) * 0.045;
         for (const side of [-1, 1]) {
-          const baseX = pecJoint.x + pecNorm.nx * pecHW * side;
-          const baseY = pecJoint.y + pecNorm.ny * pecHW * side;
-          const finGrad = ctx.createLinearGradient(baseX, baseY, baseX - len * 0.25, baseY + len * 0.28 * side);
+          const ox = pecNorm.nx * side;
+          const oy = pecNorm.ny * side;
+          const bx = pecNorm.dx;
+          const by = pecNorm.dy;
+          const baseX = pecJoint.x + ox * pecHW;
+          const baseY = pecJoint.y + oy * pecHW;
+          const tipSpan = 0.25 + pecSweep * side;
+          const ctrlSpan = 0.28 + pecSweep * side;
+          const finGrad = ctx.createLinearGradient(
+            baseX,
+            baseY,
+            baseX + bx * len * 0.26 + ox * len * tipSpan,
+            baseY + by * len * 0.26 + oy * len * tipSpan
+          );
           finGrad.addColorStop(0, "#e50914");
           finGrad.addColorStop(0.65, "#99050d");
           finGrad.addColorStop(1, "#ff4752");
           ctx.fillStyle = finGrad;
           ctx.beginPath();
-          ctx.moveTo(baseX + len * 0.03, baseY);
+          ctx.moveTo(baseX - bx * len * 0.03, baseY - by * len * 0.03);
           ctx.quadraticCurveTo(
-            baseX - len * 0.09,
-            baseY + len * (0.28 + pecSweep * side) * side,
-            baseX - len * 0.28,
-            baseY + len * (0.25 + pecSweep * side) * side
+            baseX + bx * len * 0.09 + ox * len * ctrlSpan,
+            baseY + by * len * 0.09 + oy * len * ctrlSpan,
+            baseX + bx * len * 0.28 + ox * len * tipSpan,
+            baseY + by * len * 0.28 + oy * len * tipSpan
           );
           ctx.quadraticCurveTo(
-            baseX - len * 0.11,
-            baseY + len * 0.09 * side,
-            baseX - len * 0.08,
-            baseY - len * 0.01 * side
+            baseX + bx * len * 0.11 + ox * len * 0.08,
+            baseY + by * len * 0.11 + oy * len * 0.08,
+            baseX + bx * len * 0.08 - ox * len * 0.01,
+            baseY + by * len * 0.08 - oy * len * 0.01
           );
           ctx.closePath();
           ctx.fill();
@@ -13316,30 +13327,48 @@
         const pelHW = tunaHalfWidth(pelJoint.t, len) * 0.78;
         ctx.fillStyle = "#a3060f";
         for (const side of [-1, 1]) {
-          const bx = pelJoint.x + pelNorm.nx * pelHW * side;
-          const by = pelJoint.y + pelNorm.ny * pelHW * side;
+          const ox = pelNorm.nx * side;
+          const oy = pelNorm.ny * side;
+          const bx = pelNorm.dx;
+          const by = pelNorm.dy;
+          const pBaseX = pelJoint.x + ox * pelHW;
+          const pBaseY = pelJoint.y + oy * pelHW;
           ctx.beginPath();
-          ctx.moveTo(bx + len * 0.02, by);
-          ctx.quadraticCurveTo(bx - len * 0.05, by + len * 0.11 * side, bx - len * 0.14, by + len * 0.08 * side);
-          ctx.quadraticCurveTo(bx - len * 0.06, by + len * 0.02 * side, bx - len * 0.05, by);
+          ctx.moveTo(pBaseX - bx * len * 0.02, pBaseY - by * len * 0.02);
+          ctx.quadraticCurveTo(
+            pBaseX + bx * len * 0.05 + ox * len * 0.11,
+            pBaseY + by * len * 0.05 + oy * len * 0.11,
+            pBaseX + bx * len * 0.14 + ox * len * 0.08,
+            pBaseY + by * len * 0.14 + oy * len * 0.08
+          );
+          ctx.quadraticCurveTo(
+            pBaseX + bx * len * 0.06 + ox * len * 0.02,
+            pBaseY + by * len * 0.06 + oy * len * 0.02,
+            pBaseX + bx * len * 0.05,
+            pBaseY + by * len * 0.05
+          );
           ctx.closePath();
           ctx.fill();
         }
 
-        // 4. Hàng 5 cặp vây phụ (Caudal Finlets) đặc sản nhận diện Cá Ngừ dọc cuống đuôi (i=11..14)
-        for (let k = 11; k <= 14; k++) {
+        // 4. Hàng 5 cặp vây phụ (Caudal Finlets) đặc sản nhận diện Cá Ngừ dọc cuống đuôi (i=10..14)
+        for (let k = 10; k <= 14; k++) {
           const sp = spine[k];
           const tn = tangents[k];
-          const hw = tunaHalfWidth(sp.t, len);
-          const fSize = len * (0.044 - (k - 11) * 0.005);
+          const hw = tunaHalfWidth(sp.t, len) * 0.92;
+          const fSize = len * (0.044 - (k - 10) * 0.0045);
           ctx.fillStyle = k % 2 === 0 ? "#ff6b74" : "#f87171";
           for (const side of [-1, 1]) {
-            const fx = sp.x + tn.nx * hw * side;
-            const fy = sp.y + tn.ny * hw * side;
+            const ox = tn.nx * side;
+            const oy = tn.ny * side;
+            const bx = tn.dx;
+            const by = tn.dy;
+            const fx = sp.x + ox * hw;
+            const fy = sp.y + oy * hw;
             ctx.beginPath();
-            ctx.moveTo(fx + fSize * 0.4, fy);
-            ctx.lineTo(fx - fSize * 0.65, fy + fSize * 0.95 * side);
-            ctx.lineTo(fx - fSize * 0.9, fy + fSize * 0.05 * side);
+            ctx.moveTo(fx - bx * fSize * 0.4, fy - by * fSize * 0.4);
+            ctx.lineTo(fx + bx * fSize * 0.65 + ox * fSize * 0.95, fy + by * fSize * 0.65 + oy * fSize * 0.95);
+            ctx.lineTo(fx + bx * fSize * 0.9 + ox * fSize * 0.05, fy + by * fSize * 0.9 + oy * fSize * 0.05);
             ctx.closePath();
             ctx.fill();
           }
@@ -13352,8 +13381,8 @@
         const tailWhip = Math.cos(fish.tailPhase - 3.85) * 0.22 * waveAmp;
 
         ctx.save();
-        ctx.translate(tailBase.x + 2, tailBase.y);
-        ctx.rotate(spineTailAngle + Math.PI + tailWhip);
+        ctx.translate(tailBase.x + len * 0.02, tailBase.y);
+        ctx.rotate(spineTailAngle + tailWhip);
         const tailGrad = ctx.createLinearGradient(0, -len * 0.34, -len * 0.24, len * 0.34);
         tailGrad.addColorStop(0, "#ff3b47");
         tailGrad.addColorStop(0.5, "#E50914");
@@ -13412,23 +13441,25 @@
         ctx.fillStyle = ridgeGrad;
         ctx.fill();
 
-        // 8. Đường bên ánh kim + khe mang sắc nét tạo chất cá ngừ săn mồi
-        ctx.beginPath();
-        for (let i = 3; i <= 13; i++) {
-          const lx = spine[i].x;
-          const ly = spine[i].y + tunaHalfWidth(spine[i].t, len) * 0.36;
-          if (i === 3) ctx.moveTo(lx, ly);
-          else ctx.lineTo(lx, ly);
+        // 8. Cặp đường bên ánh kim (Lateral Lines) + khe mang sắc nét tạo chất cá ngừ săn mồi
+        for (const side of [-1, 1]) {
+          ctx.beginPath();
+          for (let i = 3; i <= 13; i++) {
+            const lx = spine[i].x + tangents[i].nx * tunaHalfWidth(spine[i].t, len) * 0.44 * side;
+            const ly = spine[i].y + tangents[i].ny * tunaHalfWidth(spine[i].t, len) * 0.44 * side;
+            if (i === 3) ctx.moveTo(lx, ly);
+            else ctx.lineTo(lx, ly);
+          }
+          ctx.strokeStyle = side === 1 ? "rgba(255, 220, 224, 0.42)" : "rgba(255, 160, 168, 0.28)";
+          ctx.lineWidth = Math.max(0.85, len * 0.012);
+          ctx.stroke();
         }
-        ctx.strokeStyle = "rgba(255, 210, 214, 0.38)";
-        ctx.lineWidth = Math.max(0.9, len * 0.013);
-        ctx.stroke();
 
-        // Khe mang (Gill arc) ở khớp i=3
+        // Đường cong khe mang (Gill Operculum) ngay sau đầu khớp i=3
         ctx.beginPath();
-        ctx.arc(spine[3].x + len * 0.02, spine[3].y, tunaHalfWidth(spine[3].t, len) * 0.78, Math.PI * 0.68, Math.PI * 1.32);
-        ctx.strokeStyle = "rgba(75, 2, 6, 0.75)";
-        ctx.lineWidth = Math.max(1.1, len * 0.018);
+        ctx.arc(spine[3].x + len * 0.08, spine[3].y, tunaHalfWidth(spine[3].t, len) * 0.82, Math.PI * 0.68, Math.PI * 1.32);
+        ctx.strokeStyle = "rgba(68, 2, 6, 0.72)";
+        ctx.lineWidth = Math.max(1.1, len * 0.017);
         ctx.stroke();
 
         // 9. Đôi mắt cá ngừ có chiều sâu & điểm sáng phản chiếu
