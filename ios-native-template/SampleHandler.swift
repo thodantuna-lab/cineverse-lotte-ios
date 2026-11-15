@@ -34,6 +34,11 @@ class SampleHandler: RPBroadcastSampleHandler {
     private var encHeight: Int = 0
     private var frameIndex: Int64 = 0
 
+    private let stateLock = NSLock()
+    private var isEncodingVideo = false
+    private var forceNextKeyFrame = false
+    private var inFlightPackets = 0
+
     override func broadcastStarted(withSetupInfo setupInfo: [String : NSObject]?) {
         isBroadcastActive = true
         connectToApp()
@@ -46,7 +51,9 @@ class SampleHandler: RPBroadcastSampleHandler {
         let conn = NWConnection(to: endpoint, using: .tcp)
         conn.stateUpdateHandler = { [weak self] state in
             guard let self = self, self.isBroadcastActive else { return }
-            if case .failed = state {
+            if case .ready = state {
+                self.receiveCommands(on: conn)
+            } else if case .failed = state {
                 self.sendQueue.asyncAfter(deadline: .now() + 0.5) {
                     self.connectToApp()
                 }
@@ -54,6 +61,20 @@ class SampleHandler: RPBroadcastSampleHandler {
         }
         conn.start(queue: sendQueue)
         self.connection = conn
+    }
+
+    private func receiveCommands(on conn: NWConnection) {
+        conn.receive(minimumIncompleteLength: 1, maximumLength: 16) { [weak self] data, _, isComplete, error in
+            guard let self = self, self.isBroadcastActive else { return }
+            if let data = data, data.contains(0x05) {
+                self.stateLock.lock()
+                self.forceNextKeyFrame = true
+                self.stateLock.unlock()
+            }
+            if error == nil && !isComplete {
+                self.receiveCommands(on: conn)
+            }
+        }
     }
 
     override func broadcastPaused() {}
@@ -107,7 +128,19 @@ class SampleHandler: RPBroadcastSampleHandler {
         case .video:
             let now = CACurrentMediaTime()
             if (now - lastSentTime) < targetFrameInterval() { return }
-            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+
+            stateLock.lock()
+            let busy = isEncodingVideo || inFlightPackets >= 4
+            if !busy { isEncodingVideo = true }
+            stateLock.unlock()
+            if busy { return }
+
+            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+                stateLock.lock()
+                isEncodingVideo = false
+                stateLock.unlock()
+                return
+            }
 
             var rotByte: UInt8 = 0
             if let orientationAttachment = CMGetAttachment(sampleBuffer, key: RPVideoSampleOrientationKey as CFString, attachmentModeOut: nil) as? NSNumber,
@@ -117,7 +150,13 @@ class SampleHandler: RPBroadcastSampleHandler {
             lastSentTime = now
 
             sendQueue.async { [weak self] in
-                guard let self = self, self.isBroadcastActive else { return }
+                guard let self = self else { return }
+                defer {
+                    self.stateLock.lock()
+                    self.isEncodingVideo = false
+                    self.stateLock.unlock()
+                }
+                guard self.isBroadcastActive else { return }
                 autoreleasepool {
                     self.encodeFrameHardware(pixelBuffer: pixelBuffer, rotation: rotByte)
                 }
@@ -158,8 +197,8 @@ class SampleHandler: RPBroadcastSampleHandler {
         VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_AllowFrameReordering, value: kCFBooleanFalse)
         VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_ProfileLevel, value: kVTProfileLevel_H264_High_AutoLevel)
         VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_ExpectedFrameRate, value: 60 as CFNumber)
-        VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_MaxKeyFrameInterval, value: 60 as CFNumber)
-        VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_AverageBitRate, value: 6_000_000 as CFNumber)
+        VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_MaxKeyFrameInterval, value: 30 as CFNumber)
+        VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_AverageBitRate, value: 4_000_000 as CFNumber)
         VTCompressionSessionPrepareToEncodeFrames(comp)
 
         if #available(iOS 16.0, *) {
@@ -192,7 +231,7 @@ class SampleHandler: RPBroadcastSampleHandler {
         let srcH = CVPixelBufferGetHeight(pixelBuffer)
         guard srcW > 0, srcH > 0 else { return }
 
-        let maxDim = 1600
+        let maxDim = 1280
         let longest = max(srcW, srcH)
         let needsScale = longest > maxDim
         let dstW = (needsScale ? (srcW * maxDim / longest) : srcW) & ~1
@@ -217,18 +256,30 @@ class SampleHandler: RPBroadcastSampleHandler {
             }
         }
 
+        stateLock.lock()
+        let shouldForceKey = forceNextKeyFrame
+        forceNextKeyFrame = false
+        stateLock.unlock()
+
+        let frameProps: CFDictionary? = shouldForceKey
+            ? ([kVTEncodeFrameOptionKey_ForceKeyFrame as String: true] as CFDictionary)
+            : nil
+
         frameIndex += 1
         let pts = CMTime(value: frameIndex, timescale: 60)
         let refCon = UnsafeMutableRawPointer(bitPattern: Int(rotation) + 1)
-        VTCompressionSessionEncodeFrame(
+        let encStatus = VTCompressionSessionEncodeFrame(
             session,
             imageBuffer: inputBuffer,
             presentationTimeStamp: pts,
             duration: .invalid,
-            frameProperties: nil,
+            frameProperties: frameProps,
             sourceFrameRefcon: refCon,
             infoFlagsOut: nil
         )
+        if encStatus != noErr {
+            teardownEncoder()
+        }
     }
 
     fileprivate func handleEncodedSampleBuffer(_ sampleBuffer: CMSampleBuffer, rotation: UInt8) {
@@ -303,7 +354,15 @@ class SampleHandler: RPBroadcastSampleHandler {
             memcpy(dst + offset, ptr, totalLength)
         }
 
-        conn.send(content: packet, completion: .contentProcessed { _ in })
+        stateLock.lock()
+        inFlightPackets += 1
+        stateLock.unlock()
+        conn.send(content: packet, completion: .contentProcessed { [weak self] _ in
+            guard let self = self else { return }
+            self.stateLock.lock()
+            self.inFlightPackets = max(0, self.inFlightPackets - 1)
+            self.stateLock.unlock()
+        })
     }
 
     private func sendAudioSampleBuffer(_ sampleBuffer: CMSampleBuffer, on conn: NWConnection) {
@@ -429,6 +488,14 @@ class SampleHandler: RPBroadcastSampleHandler {
         packet.append(Data(bytes: &chLE, count: 2))
         packet.append(pcm)
 
-        conn.send(content: packet, completion: .contentProcessed { _ in })
+        stateLock.lock()
+        inFlightPackets += 1
+        stateLock.unlock()
+        conn.send(content: packet, completion: .contentProcessed { [weak self] _ in
+            guard let self = self else { return }
+            self.stateLock.lock()
+            self.inFlightPackets = max(0, self.inFlightPackets - 1)
+            self.stateLock.unlock()
+        })
     }
 }

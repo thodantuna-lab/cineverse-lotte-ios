@@ -71,10 +71,12 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
 
     private var audioEngine: AVAudioEngine?
     private var audioSourceNode: AVAudioSourceNode?
+    private var audioObservers: [NSObjectProtocol] = []
     private var pendingAudioPCM = Data()
     private var pendingAudioSampleRate: UInt32 = 44100
     private var pendingAudioChannels: UInt16 = 2
     private var lastAudioFlushTime: CFTimeInterval = 0
+    private var lastKeyFrameRequestTime: CFTimeInterval = 0
 
     // Native WebRTC (Hardware H.264 VideoToolbox 60fps)
     private static var sslInitialized = false
@@ -105,6 +107,7 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
             RTCInitializeSSL()
             ReplayKitBridgePlugin.sslInitialized = true
         }
+        RTCAudioSession.sharedInstance().useManualAudio = true
         if pcFactory == nil {
             let encoderFactory = RTCDefaultVideoEncoderFactory()
             let decoderFactory = RTCDefaultVideoDecoderFactory()
@@ -146,7 +149,27 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     private func startBackgroundKeepAlive() {
-        if audioEngine != nil { return }
+        if audioObservers.isEmpty {
+            let nc = NotificationCenter.default
+            let intObs = nc.addObserver(forName: AVAudioSession.interruptionNotification, object: nil, queue: .main) { [weak self] note in
+                guard let self = self,
+                      let info = note.userInfo,
+                      let typeVal = info[AVAudioSessionInterruptionTypeKey] as? UInt,
+                      let type = AVAudioSession.InterruptionType(rawValue: typeVal) else { return }
+                if type == .ended {
+                    self.ensureAudioKeepAliveRunning()
+                }
+            }
+            let cfgObs = nc.addObserver(forName: .AVAudioEngineConfigurationChange, object: nil, queue: .main) { [weak self] _ in
+                self?.ensureAudioKeepAliveRunning()
+            }
+            audioObservers = [intObs, cfgObs]
+        }
+
+        if audioEngine != nil {
+            ensureAudioKeepAliveRunning()
+            return
+        }
         let engine = AVAudioEngine()
         let format = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 1)!
         let node = AVAudioSourceNode { _, _, _, audioBufferList -> OSStatus in
@@ -170,7 +193,24 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
+    private func ensureAudioKeepAliveRunning() {
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            try session.setActive(true)
+            if let engine = audioEngine, !engine.isRunning {
+                try engine.start()
+            }
+        } catch {
+            NSLog("[ReplayKitBridge] Audio keepalive restart error: \(error)")
+        }
+    }
+
     private func stopBackgroundKeepAlive() {
+        for obs in audioObservers {
+            NotificationCenter.default.removeObserver(obs)
+        }
+        audioObservers.removeAll()
         audioEngine?.stop()
         if let node = audioSourceNode {
             audioEngine?.detach(node)
@@ -268,7 +308,10 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
         if isKeyFrame && !sps.isEmpty && !pps.isEmpty && (decompressionSession == nil || sps != currentSPS || pps != currentPPS) {
             setupDecompressionSession(sps: sps, pps: pps)
         }
-        guard let session = decompressionSession, let fmtDesc = videoFormatDesc else { return }
+        guard let session = decompressionSession, let fmtDesc = videoFormatDesc else {
+            requestKeyFrameFromExtension()
+            return
+        }
 
         var blockBuffer: CMBlockBuffer?
         let avccCount = avccData.count
@@ -309,13 +352,31 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
         guard sbStatus == noErr, let sb = sampleBuffer else { return }
 
         let refCon = UnsafeMutableRawPointer(bitPattern: Int(rotByte) + 1)
-        VTDecompressionSessionDecodeFrame(
+        let decStatus = VTDecompressionSessionDecodeFrame(
             session,
             sampleBuffer: sb,
             flags: [],
             frameRefcon: refCon,
             infoFlagsOut: nil
         )
+        if decStatus != noErr {
+            VTDecompressionSessionInvalidate(session)
+            decompressionSession = nil
+            videoFormatDesc = nil
+            currentSPS.removeAll(keepingCapacity: false)
+            currentPPS.removeAll(keepingCapacity: false)
+            requestKeyFrameFromExtension()
+        }
+    }
+
+    private func requestKeyFrameFromExtension() {
+        let now = CACurrentMediaTime()
+        guard (now - lastKeyFrameRequestTime) >= 0.4 else { return }
+        lastKeyFrameRequestTime = now
+        queue.async { [weak self] in
+            guard let conn = self?.activeConnection, conn.state == .ready else { return }
+            conn.send(content: Data([0x05]), completion: .contentProcessed { _ in })
+        }
     }
 
     private func setupDecompressionSession(sps: Data, pps: Data) {
@@ -518,7 +579,7 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
         startLocalReceiver()
         do {
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playAndRecord, mode: .videoChat, options: [.mixWithOthers, .defaultToSpeaker, .allowBluetooth])
+            try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
             try session.setActive(true)
         } catch {
             NSLog("[ReplayKitBridge] AVAudioSession error: \(error)")
@@ -568,6 +629,7 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
             return
         }
         initWebRTCIfNeeded()
+        requestKeyFrameFromExtension()
         let iceList = call.getArray("iceServers", [String: Any].self) ?? []
         let maxBitrate = call.getInt("maxBitrate") ?? 6_000_000
         let maxFramerate = call.getInt("maxFramerate") ?? 60
