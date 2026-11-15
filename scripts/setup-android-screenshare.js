@@ -20,10 +20,22 @@ if (!mainActivity.includes("ReplayKitBridgePlugin.class")) {
   if (!mainActivity.includes("import android.os.Bundle;")) {
     mainActivity = mainActivity.replace(
       "import com.getcapacitor.BridgeActivity;",
-      "import android.media.AudioManager;\nimport android.os.Bundle;\nimport com.getcapacitor.BridgeActivity;"
+      "import android.Manifest;\nimport android.content.pm.PackageManager;\nimport android.media.AudioManager;\nimport android.os.Build;\nimport android.os.Bundle;\nimport androidx.core.app.ActivityCompat;\nimport androidx.core.content.ContextCompat;\nimport com.getcapacitor.BridgeActivity;"
     );
   }
-  const onCreateBody = "registerPlugin(ReplayKitBridgePlugin.class);\n        super.onCreate(savedInstanceState);\n        setVolumeControlStream(AudioManager.STREAM_MUSIC);\n        if (getBridge() != null && getBridge().getWebView() != null) {\n            getBridge().getWebView().getSettings().setMediaPlaybackRequiresUserGesture(false);\n        }";
+  const onCreateBody = `registerPlugin(ReplayKitBridgePlugin.class);
+        super.onCreate(savedInstanceState);
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        if (getBridge() != null && getBridge().getWebView() != null) {
+            getBridge().getWebView().getSettings().setMediaPlaybackRequiresUserGesture(false);
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ActivityCompat.requestPermissions(this, new String[]{ Manifest.permission.RECORD_AUDIO, Manifest.permission.POST_NOTIFICATIONS }, 9420);
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{ Manifest.permission.RECORD_AUDIO }, 9420);
+            }
+        }`;
   if (mainActivity.includes("super.onCreate(savedInstanceState);")) {
     mainActivity = mainActivity.replace(
       "super.onCreate(savedInstanceState);",
@@ -49,6 +61,7 @@ const requiredPermissions = [
   "android.permission.MODIFY_AUDIO_SETTINGS",
   "android.permission.FOREGROUND_SERVICE",
   "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION",
+  "android.permission.FOREGROUND_SERVICE_MICROPHONE",
   "android.permission.POST_NOTIFICATIONS",
   "android.permission.WAKE_LOCK"
 ];
@@ -65,7 +78,7 @@ for (const perm of requiredPermissions) {
 if (!manifest.includes("ScreenCaptureService")) {
   manifest = manifest.replace(
     "</application>",
-    `        <service\n            android:name=".ScreenCaptureService"\n            android:exported="false"\n            android:foregroundServiceType="mediaProjection" />\n    </application>`
+    `        <service\n            android:name=".ScreenCaptureService"\n            android:exported="false"\n            android:foregroundServiceType="mediaProjection|microphone" />\n    </application>`
   );
 }
 fs.writeFileSync(manifestPath, manifest, "utf8");
