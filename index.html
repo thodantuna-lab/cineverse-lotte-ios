@@ -4311,7 +4311,7 @@
       return /^khán\s*giả(\s*\d+)?$/i.test(String(name || "").trim());
     }
 
-    function enterRoom(roomId) {
+    async function enterRoom(roomId) {
       if (!state.hasCustomName || isDefaultGuestName(state.userName)) {
         pendingEnterRoomId = roomId;
         openNameModal(true);
