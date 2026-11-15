@@ -56,7 +56,7 @@
       top: -12%;
       left: -8%;
       background: radial-gradient(circle, rgba(160, 174, 192, 0.22) 0%, rgba(160, 174, 192, 0.06) 48%, transparent 72%);
-      animation: ambientMistOrbit1 26s ease-in-out infinite;
+      animation: ambientMistOrbit1 28s linear infinite;
     }
     .ambient-mist-blob.blob-crimson {
       width: 52vw;
@@ -65,8 +65,8 @@
       max-height: 700px;
       top: 18%;
       right: -10%;
-      background: radial-gradient(circle, rgba(229, 9, 20, 0.20) 0%, rgba(229, 9, 20, 0.05) 50%, transparent 72%);
-      animation: ambientMistOrbit2 31s ease-in-out infinite;
+      background: radial-gradient(circle, rgba(229, 9, 20, 0.22) 0%, rgba(229, 9, 20, 0.06) 50%, transparent 72%);
+      animation: ambientMistOrbit2 33s linear infinite;
     }
     .ambient-mist-blob.blob-amber {
       width: 48vw;
@@ -75,8 +75,8 @@
       max-height: 640px;
       bottom: -14%;
       left: 18%;
-      background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.04) 50%, transparent 72%);
-      animation: ambientMistOrbit3 29s ease-in-out infinite;
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.14) 0%, rgba(245, 158, 11, 0.04) 50%, transparent 72%);
+      animation: ambientMistOrbit3 31s linear infinite;
     }
     .ambient-mist-blob.blob-rose {
       width: 50vw;
@@ -85,36 +85,40 @@
       max-height: 680px;
       bottom: 8%;
       right: 12%;
-      background: radial-gradient(circle, rgba(190, 18, 60, 0.17) 0%, rgba(190, 18, 60, 0.04) 50%, transparent 72%);
-      animation: ambientMistOrbit4 34s ease-in-out infinite;
+      background: radial-gradient(circle, rgba(190, 18, 60, 0.18) 0%, rgba(190, 18, 60, 0.05) 50%, transparent 72%);
+      animation: ambientMistOrbit4 36s linear infinite;
     }
     @keyframes ambientMistOrbit1 {
       0%, 100% { transform: translate3d(0%, 0%, 0) scale(1); }
-      33% { transform: translate3d(26%, 16%, 0) scale(1.12); }
-      66% { transform: translate3d(10%, 34%, 0) scale(0.94); }
+      25% { transform: translate3d(20%, 12%, 0) scale(1.08); }
+      50% { transform: translate3d(16%, 28%, 0) scale(1.02); }
+      75% { transform: translate3d(-6%, 16%, 0) scale(0.95); }
     }
     @keyframes ambientMistOrbit2 {
-      0%, 100% { transform: translate3d(0%, 0%, 0) scale(1.04); }
-      33% { transform: translate3d(-24%, 22%, 0) scale(0.92); }
-      66% { transform: translate3d(-12%, -18%, 0) scale(1.14); }
+      0%, 100% { transform: translate3d(0%, 0%, 0) scale(1.02); }
+      25% { transform: translate3d(-18%, 16%, 0) scale(0.95); }
+      50% { transform: translate3d(-24%, -8%, 0) scale(1.06); }
+      75% { transform: translate3d(-8%, -18%, 0) scale(1.10); }
     }
     @keyframes ambientMistOrbit3 {
-      0%, 100% { transform: translate3d(0%, 0%, 0) scale(0.96); }
-      33% { transform: translate3d(22%, -20%, 0) scale(1.1); }
-      66% { transform: translate3d(-18%, -10%, 0) scale(1.02); }
+      0%, 100% { transform: translate3d(0%, 0%, 0) scale(0.98); }
+      25% { transform: translate3d(18%, -14%, 0) scale(1.06); }
+      50% { transform: translate3d(4%, -24%, 0) scale(1.08); }
+      75% { transform: translate3d(-16%, -10%, 0) scale(1.00); }
     }
     @keyframes ambientMistOrbit4 {
       0%, 100% { transform: translate3d(0%, 0%, 0) scale(1); }
-      33% { transform: translate3d(-20%, -24%, 0) scale(1.12); }
-      66% { transform: translate3d(16%, -12%, 0) scale(0.95); }
+      25% { transform: translate3d(-16%, -18%, 0) scale(1.08); }
+      50% { transform: translate3d(6%, -22%, 0) scale(1.03); }
+      75% { transform: translate3d(16%, -8%, 0) scale(0.95); }
     }
     #ambient-tuna-canvas {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
-      filter: blur(4.5px);
-      opacity: 0.82;
+      filter: blur(1.2px) drop-shadow(0 0 14px rgba(229, 9, 20, 0.35));
+      opacity: 0.92;
       pointer-events: none;
     }
 
@@ -13168,35 +13172,32 @@
       resizeCanvas();
       window.addEventListener("resize", resizeCanvas);
 
-      const palette = [
-        { body: "rgba(229, 9, 20, 0.85)", glow: "rgba(229, 9, 20, 0.35)" },
-        { body: "rgba(239, 68, 68, 0.78)", glow: "rgba(239, 68, 68, 0.30)" },
-        { body: "rgba(245, 158, 11, 0.76)", glow: "rgba(245, 158, 11, 0.28)" },
-        { body: "rgba(203, 213, 225, 0.72)", glow: "rgba(203, 213, 225, 0.25)" }
-      ];
-
       function spawnSideX() {
-        if (width > 900 && Math.random() < 0.65) {
-          return Math.random() < 0.5 ? Math.random() * (width * 0.22) : width - Math.random() * (width * 0.22);
+        if (width > 900 && Math.random() < 0.62) {
+          return Math.random() < 0.5 ? Math.random() * (width * 0.24) : width - Math.random() * (width * 0.24);
         }
         return Math.random() * width;
       }
 
+      // Tất cả cá ngừ đồng bộ 100% dải màu Đỏ Crimson 3D chuẩn Logo CineVerse-Lotte
       const tunaFlock = Array.from({ length: 9 }, (_, i) => {
         const angle = Math.random() * Math.PI * 2;
-        const c = palette[i % palette.length];
+        const sizeScale = i === 0 || i === 4 ? 98 + Math.random() * 18 : 64 + Math.random() * 26;
         return {
           x: spawnSideX(),
           y: Math.random() * height,
           angle,
-          targetAngle: angle,
-          baseSpeed: 0.45 + Math.random() * 0.4,
+          fleeAngle: angle,
+          fleeBlend: 0,
+          angularVel: 0,
+          baseSpeed: 40 + Math.random() * 26,
           boostSpeed: 0,
-          size: 26 + Math.random() * 22,
+          size: sizeScale,
+          alpha: i < 2 ? 0.94 : 0.72 + Math.random() * 0.18,
           tailPhase: Math.random() * Math.PI * 2,
-          turnTimer: Math.random() * 140,
-          bodyColor: c.body,
-          glowColor: c.glow
+          seed1: Math.random() * Math.PI * 2,
+          seed2: Math.random() * Math.PI * 2,
+          seed3: Math.random() * Math.PI * 2
         };
       });
 
@@ -13208,103 +13209,303 @@
         return a;
       }
 
+      // Biên độ bề ngang cơ thể cá ngừ đại dương (mũi nhọn -> vai lực lưỡng -> cuống đuôi cực thon)
+      function tunaHalfWidth(t, len) {
+        if (t <= 0.30) {
+          return Math.pow(Math.sin((t / 0.30) * (Math.PI / 2)), 0.76) * 0.215 * len;
+        }
+        const tailRatio = (t - 0.30) / 0.70;
+        return (0.025 + 0.19 * Math.pow(Math.cos(tailRatio * (Math.PI / 2)), 1.38)) * len;
+      }
+
+      function drawSmoothHalfContour(pts, moveFirst) {
+        if (moveFirst) ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length - 1; i++) {
+          const xc = (pts[i].x + pts[i + 1].x) * 0.5;
+          const yc = (pts[i].y + pts[i + 1].y) * 0.5;
+          ctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
+        }
+        const last = pts[pts.length - 1];
+        ctx.lineTo(last.x, last.y);
+      }
+
       function drawTunaFish(fish) {
-        const s = fish.size;
-        const wag = Math.sin(fish.tailPhase) * (0.28 + Math.min(fish.boostSpeed * 0.08, 0.35));
-        const spine = Math.sin(fish.tailPhase) * s * 0.09;
+        const len = fish.size;
+        const boostFactor = Math.min(fish.boostSpeed / 220, 1.25);
+        const waveAmp = 1 + boostFactor * 0.75;
+        const turnCurve = Math.max(-2.2, Math.min(2.2, fish.angularVel)) * 0.08 * len;
+
+        const joints = 16;
+        const spine = new Array(joints);
+        for (let i = 0; i < joints; i++) {
+          const t = i / (joints - 1);
+          const x = len * (0.48 - t * 0.96);
+          const sway = (0.01 + Math.pow(t, 1.48) * 0.135 * waveAmp) * len * Math.sin(fish.tailPhase - t * 3.85);
+          const y = sway + turnCurve * t * t;
+          spine[i] = { x, y, t };
+        }
+
+        const leftPts = new Array(joints);
+        const rightPts = new Array(joints);
+        const tangents = new Array(joints);
+
+        for (let i = 0; i < joints; i++) {
+          const prev = spine[Math.max(0, i - 1)];
+          const next = spine[Math.min(joints - 1, i + 1)];
+          let dx = next.x - prev.x;
+          let dy = next.y - prev.y;
+          const mag = Math.hypot(dx, dy) || 1;
+          dx /= mag;
+          dy /= mag;
+          tangents[i] = { dx, dy, nx: -dy, ny: dx };
+
+          const hw = tunaHalfWidth(spine[i].t, len);
+          leftPts[i] = { x: spine[i].x + tangents[i].nx * hw, y: spine[i].y + tangents[i].ny * hw };
+          rightPts[i] = { x: spine[i].x - tangents[i].nx * hw, y: spine[i].y - tangents[i].ny * hw };
+        }
 
         ctx.save();
         ctx.translate(fish.x, fish.y);
         ctx.rotate(fish.angle);
+        ctx.globalAlpha = fish.alpha;
 
-        // Quầng mờ hòa vào nền khói Gemini
-        const halo = ctx.createRadialGradient(0, 0, s * 0.1, 0, 0, s * 1.45);
-        halo.addColorStop(0, fish.glowColor);
-        halo.addColorStop(1, "rgba(0,0,0,0)");
+        // 1. Quầng sáng Crimson đặc trưng logo hòa nền khói
+        const halo = ctx.createRadialGradient(len * 0.05, 0, len * 0.06, len * 0.05, 0, len * 1.15);
+        halo.addColorStop(0, "rgba(229, 9, 20, 0.34)");
+        halo.addColorStop(0.55, "rgba(180, 7, 16, 0.11)");
+        halo.addColorStop(1, "rgba(0, 0, 0, 0)");
         ctx.fillStyle = halo;
         ctx.beginPath();
-        ctx.arc(0, 0, s * 1.45, 0, Math.PI * 2);
+        ctx.arc(len * 0.05, 0, len * 1.15, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = fish.bodyColor;
+        // 2. Vây ngực dài sắc lẹm hai bên (Pectoral Fins) neo ở vai khớp i=4
+        const pecJoint = spine[4];
+        const pecNorm = tangents[4];
+        const pecHW = tunaHalfWidth(pecJoint.t, len) * 0.72;
+        const pecSweep = Math.sin(fish.tailPhase - 0.85) * 0.08;
+        for (const side of [-1, 1]) {
+          const baseX = pecJoint.x + pecNorm.nx * pecHW * side;
+          const baseY = pecJoint.y + pecNorm.ny * pecHW * side;
+          const finGrad = ctx.createLinearGradient(baseX, baseY, baseX - len * 0.25, baseY + len * 0.28 * side);
+          finGrad.addColorStop(0, "#e50914");
+          finGrad.addColorStop(0.65, "#99050d");
+          finGrad.addColorStop(1, "#ff4752");
+          ctx.fillStyle = finGrad;
+          ctx.beginPath();
+          ctx.moveTo(baseX + len * 0.03, baseY);
+          ctx.quadraticCurveTo(
+            baseX - len * 0.09,
+            baseY + len * (0.28 + pecSweep * side) * side,
+            baseX - len * 0.28,
+            baseY + len * (0.25 + pecSweep * side) * side
+          );
+          ctx.quadraticCurveTo(
+            baseX - len * 0.11,
+            baseY + len * 0.09 * side,
+            baseX - len * 0.08,
+            baseY - len * 0.01 * side
+          );
+          ctx.closePath();
+          ctx.fill();
+        }
 
-        // Thân cá ngừ thuôn dài
-        ctx.beginPath();
-        ctx.moveTo(s * 0.95, 0);
-        ctx.bezierCurveTo(s * 0.55, -s * 0.34, -s * 0.18, -s * 0.32 + spine * 0.4, -s * 0.72, spine * 0.8);
-        ctx.lineTo(-s * 0.85, spine * 0.95);
-        ctx.lineTo(-s * 0.72, spine * 0.8);
-        ctx.bezierCurveTo(-s * 0.18, s * 0.32 + spine * 0.4, s * 0.55, s * 0.34, s * 0.95, 0);
-        ctx.closePath();
-        ctx.fill();
+        // 3. Vây bụng / vây thứ cấp sau thân khớp i=9
+        const pelJoint = spine[9];
+        const pelNorm = tangents[9];
+        const pelHW = tunaHalfWidth(pelJoint.t, len) * 0.78;
+        ctx.fillStyle = "#a3060f";
+        for (const side of [-1, 1]) {
+          const bx = pelJoint.x + pelNorm.nx * pelHW * side;
+          const by = pelJoint.y + pelNorm.ny * pelHW * side;
+          ctx.beginPath();
+          ctx.moveTo(bx + len * 0.02, by);
+          ctx.quadraticCurveTo(bx - len * 0.05, by + len * 0.11 * side, bx - len * 0.14, by + len * 0.08 * side);
+          ctx.quadraticCurveTo(bx - len * 0.06, by + len * 0.02 * side, bx - len * 0.05, by);
+          ctx.closePath();
+          ctx.fill();
+        }
 
-        // Vây lưng sắc đặc trưng của cá ngừ
-        ctx.beginPath();
-        ctx.moveTo(s * 0.22, -s * 0.24);
-        ctx.quadraticCurveTo(-s * 0.05, -s * 0.62, -s * 0.22, -s * 0.20 + spine * 0.25);
-        ctx.closePath();
-        ctx.fill();
+        // 4. Hàng 5 cặp vây phụ (Caudal Finlets) đặc sản nhận diện Cá Ngừ dọc cuống đuôi (i=11..14)
+        for (let k = 11; k <= 14; k++) {
+          const sp = spine[k];
+          const tn = tangents[k];
+          const hw = tunaHalfWidth(sp.t, len);
+          const fSize = len * (0.044 - (k - 11) * 0.005);
+          ctx.fillStyle = k % 2 === 0 ? "#ff6b74" : "#f87171";
+          for (const side of [-1, 1]) {
+            const fx = sp.x + tn.nx * hw * side;
+            const fy = sp.y + tn.ny * hw * side;
+            ctx.beginPath();
+            ctx.moveTo(fx + fSize * 0.4, fy);
+            ctx.lineTo(fx - fSize * 0.65, fy + fSize * 0.95 * side);
+            ctx.lineTo(fx - fSize * 0.9, fy + fSize * 0.05 * side);
+            ctx.closePath();
+            ctx.fill();
+          }
+        }
 
-        // Vây ngực hai bên
-        ctx.beginPath();
-        ctx.moveTo(s * 0.28, s * 0.16);
-        ctx.quadraticCurveTo(s * 0.02, s * 0.46, -s * 0.08, s * 0.20);
-        ctx.closePath();
-        ctx.fill();
+        // 5. Đuôi lưỡi liềm chẻ đôi (Crescent Forked Caudal Fin) gắn liền khớp cuối i=15
+        const tailBase = spine[joints - 1];
+        const tailPrev = spine[joints - 2];
+        const spineTailAngle = Math.atan2(tailPrev.y - tailBase.y, tailPrev.x - tailBase.x);
+        const tailWhip = Math.cos(fish.tailPhase - 3.85) * 0.22 * waveAmp;
 
-        // Đuôi lưỡi liềm chẻ đôi của cá ngừ vẫy theo nhịp bơi
         ctx.save();
-        ctx.translate(-s * 0.78, spine * 0.9);
-        ctx.rotate(wag);
+        ctx.translate(tailBase.x + 2, tailBase.y);
+        ctx.rotate(spineTailAngle + Math.PI + tailWhip);
+        const tailGrad = ctx.createLinearGradient(0, -len * 0.34, -len * 0.24, len * 0.34);
+        tailGrad.addColorStop(0, "#ff3b47");
+        tailGrad.addColorStop(0.5, "#E50914");
+        tailGrad.addColorStop(1, "#7f030a");
+        ctx.fillStyle = tailGrad;
         ctx.beginPath();
-        ctx.moveTo(s * 0.06, 0);
-        ctx.quadraticCurveTo(-s * 0.28, -s * 0.42, -s * 0.52, -s * 0.48);
-        ctx.quadraticCurveTo(-s * 0.24, -s * 0.10, -s * 0.20, 0);
-        ctx.quadraticCurveTo(-s * 0.24, s * 0.10, -s * 0.52, s * 0.48);
-        ctx.quadraticCurveTo(-s * 0.28, s * 0.42, s * 0.06, 0);
+        ctx.moveTo(len * 0.03, -len * 0.024);
+        ctx.bezierCurveTo(-len * 0.07, -len * 0.14, -len * 0.19, -len * 0.33, -len * 0.31, -len * 0.35);
+        ctx.bezierCurveTo(-len * 0.17, -len * 0.20, -len * 0.12, -len * 0.07, -len * 0.10, 0);
+        ctx.bezierCurveTo(-len * 0.12, len * 0.07, -len * 0.17, len * 0.20, -len * 0.31, len * 0.35);
+        ctx.bezierCurveTo(-len * 0.19, len * 0.33, -len * 0.07, len * 0.14, len * 0.03, len * 0.024);
         ctx.closePath();
         ctx.fill();
+        ctx.strokeStyle = "rgba(255, 165, 172, 0.45)";
+        ctx.lineWidth = Math.max(0.8, len * 0.012);
+        ctx.stroke();
         ctx.restore();
+
+        // 6. Thân cá ngừ 3D (màu Đỏ Ribbon Logo: #ff3b47 -> #E50914 -> #7f030a)
+        const bodyGrad = ctx.createLinearGradient(len * 0.15, -len * 0.22, -len * 0.15, len * 0.22);
+        bodyGrad.addColorStop(0, "#ff404d");
+        bodyGrad.addColorStop(0.32, "#E50914");
+        bodyGrad.addColorStop(0.75, "#b20710");
+        bodyGrad.addColorStop(1, "#6b0308");
+        ctx.fillStyle = bodyGrad;
+
+        ctx.beginPath();
+        drawSmoothHalfContour(leftPts, true);
+        const reversedRight = rightPts.slice().reverse();
+        drawSmoothHalfContour(reversedRight, false);
+        ctx.closePath();
+        ctx.fill();
+
+        // Viền ánh sáng nhẹ ôm thân cá
+        ctx.strokeStyle = "rgba(255, 130, 140, 0.42)";
+        ctx.lineWidth = Math.max(0.8, len * 0.012);
+        ctx.stroke();
+
+        // 7. Vây lưng chữ S nổi bật chạy dọc sống lưng 3D (Sickle Dorsal Ridge)
+        ctx.beginPath();
+        for (let i = 3; i <= 11; i++) {
+          const offsetScale = i <= 6 ? (i - 3) * 0.016 : (11 - i) * 0.008;
+          const px = spine[i].x;
+          const py = spine[i].y - len * offsetScale;
+          if (i === 3) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        for (let i = 11; i >= 3; i--) {
+          ctx.lineTo(spine[i].x, spine[i].y + len * 0.015);
+        }
+        ctx.closePath();
+        const ridgeGrad = ctx.createLinearGradient(spine[3].x, spine[3].y, spine[11].x, spine[11].y);
+        ridgeGrad.addColorStop(0, "rgba(255, 150, 158, 0.85)");
+        ridgeGrad.addColorStop(0.45, "rgba(255, 65, 76, 0.72)");
+        ridgeGrad.addColorStop(1, "rgba(229, 9, 20, 0.25)");
+        ctx.fillStyle = ridgeGrad;
+        ctx.fill();
+
+        // 8. Đường bên ánh kim + khe mang sắc nét tạo chất cá ngừ săn mồi
+        ctx.beginPath();
+        for (let i = 3; i <= 13; i++) {
+          const lx = spine[i].x;
+          const ly = spine[i].y + tunaHalfWidth(spine[i].t, len) * 0.36;
+          if (i === 3) ctx.moveTo(lx, ly);
+          else ctx.lineTo(lx, ly);
+        }
+        ctx.strokeStyle = "rgba(255, 210, 214, 0.38)";
+        ctx.lineWidth = Math.max(0.9, len * 0.013);
+        ctx.stroke();
+
+        // Khe mang (Gill arc) ở khớp i=3
+        ctx.beginPath();
+        ctx.arc(spine[3].x + len * 0.02, spine[3].y, tunaHalfWidth(spine[3].t, len) * 0.78, Math.PI * 0.68, Math.PI * 1.32);
+        ctx.strokeStyle = "rgba(75, 2, 6, 0.75)";
+        ctx.lineWidth = Math.max(1.1, len * 0.018);
+        ctx.stroke();
+
+        // 9. Đôi mắt cá ngừ có chiều sâu & điểm sáng phản chiếu
+        const eyeSpine = spine[2];
+        const eyeNorm = tangents[2];
+        const eyeOffset = tunaHalfWidth(eyeSpine.t, len) * 0.56;
+        const eyeR = Math.max(1.8, len * 0.025);
+        for (const side of [-1, 1]) {
+          const ex = eyeSpine.x + eyeNorm.nx * eyeOffset * side;
+          const ey = eyeSpine.y + eyeNorm.ny * eyeOffset * side;
+          ctx.fillStyle = "#1a0305";
+          ctx.beginPath();
+          ctx.arc(ex, ey, eyeR, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = "rgba(255, 225, 228, 0.9)";
+          ctx.beginPath();
+          ctx.arc(ex + eyeR * 0.28, ey - eyeR * 0.28, eyeR * 0.38, 0, Math.PI * 2);
+          ctx.fill();
+        }
 
         ctx.restore();
       }
 
-      function tick() {
+      let lastTime = performance.now();
+
+      function tick(now) {
+        const dt = Math.min(0.05, Math.max(0.001, (now - lastTime) / 1000));
+        lastTime = now;
+        const tSec = now * 0.001;
+
         ctx.clearRect(0, 0, width, height);
 
         for (let i = ripples.length - 1; i >= 0; i--) {
           const r = ripples[i];
-          r.radius += 2.2;
-          r.alpha *= 0.94;
+          r.radius += 135 * dt;
+          r.alpha *= Math.exp(-3.6 * dt);
           if (r.alpha < 0.02) {
             ripples.splice(i, 1);
             continue;
           }
           ctx.beginPath();
           ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(248, 113, 113, ${r.alpha.toFixed(3)})`;
-          ctx.lineWidth = 3;
+          ctx.strokeStyle = `rgba(255, 59, 71, ${r.alpha.toFixed(3)})`;
+          ctx.lineWidth = 2.6;
           ctx.stroke();
         }
 
         for (const fish of tunaFlock) {
-          fish.turnTimer -= 1;
-          if (fish.turnTimer <= 0) {
-            fish.targetAngle = fish.angle + (Math.random() - 0.5) * 0.9;
-            fish.turnTimer = 90 + Math.random() * 140;
-          }
-          const diff = normalizeAngle(fish.targetAngle - fish.angle);
-          fish.angle = normalizeAngle(fish.angle + diff * 0.045);
+          const prevAngle = fish.angle;
 
-          fish.boostSpeed *= 0.94;
-          if (fish.boostSpeed < 0.02) fish.boostSpeed = 0;
+          // Uốn hướng mượt liên tục bằng đa tần số lượng giác — tuyệt đối không khựng nhịp
+          const wanderRate =
+            0.26 * Math.sin(tSec * 0.43 + fish.seed1) +
+            0.18 * Math.cos(tSec * 0.29 + fish.seed2) +
+            0.11 * Math.sin(tSec * 0.67 + fish.seed3);
+          fish.angle = normalizeAngle(fish.angle + wanderRate * dt);
+
+          // Nếu vừa bị click hoảng, xoay mượt về fleeAngle thay vì giật khung hình
+          if (fish.fleeBlend > 0.002) {
+            const diff = normalizeAngle(fish.fleeAngle - fish.angle);
+            fish.angle = normalizeAngle(fish.angle + diff * (1 - Math.exp(-9.5 * dt)) * fish.fleeBlend);
+            fish.fleeBlend *= Math.exp(-3.2 * dt);
+          }
+
+          const rawTurnRate = normalizeAngle(fish.angle - prevAngle) / dt;
+          fish.angularVel += (rawTurnRate - fish.angularVel) * (1 - Math.exp(-8 * dt));
+
+          fish.boostSpeed *= Math.exp(-2.1 * dt);
+          if (fish.boostSpeed < 0.5) fish.boostSpeed = 0;
 
           const speed = fish.baseSpeed + fish.boostSpeed;
-          fish.x += Math.cos(fish.angle) * speed;
-          fish.y += Math.sin(fish.angle) * speed;
-          fish.tailPhase += 0.11 + fish.boostSpeed * 0.075;
+          fish.x += Math.cos(fish.angle) * speed * dt;
+          fish.y += Math.sin(fish.angle) * speed * dt;
+          fish.tailPhase += (5.8 + fish.boostSpeed * 0.036) * dt;
 
-          const pad = fish.size * 2.2;
+          const pad = fish.size * 1.45;
           if (fish.x < -pad) fish.x = width + pad;
           else if (fish.x > width + pad) fish.x = -pad;
           if (fish.y < -pad) fish.y = height + pad;
@@ -13326,19 +13527,18 @@
           const dx = fish.x - cx;
           const dy = fish.y - cy;
           const dist = Math.hypot(dx, dy);
-          if (dist <= 130) {
+          if (dist <= 135) {
             hitAny = true;
-            const fleeAngle = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.7;
-            fish.targetAngle = fleeAngle;
-            fish.angle = fleeAngle;
-            fish.boostSpeed = 5.2 + Math.random() * 2.0;
-            ripples.push({ x: fish.x, y: fish.y, radius: 10, alpha: 0.65 });
+            fish.fleeAngle = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.65;
+            fish.fleeBlend = 1;
+            fish.boostSpeed = 290 + Math.random() * 90;
+            ripples.push({ x: fish.x, y: fish.y, radius: 10, alpha: 0.72 });
           }
         }
 
         if (!hitAny && !interactiveTarget) {
           let closest = null;
-          let minDist = 240;
+          let minDist = 250;
           for (const fish of tunaFlock) {
             const d = Math.hypot(fish.x - cx, fish.y - cy);
             if (d < minDist) {
@@ -13347,11 +13547,10 @@
             }
           }
           if (closest) {
-            const fleeAngle = Math.atan2(closest.y - cy, closest.x - cx) + (Math.random() - 0.5) * 0.7;
-            closest.targetAngle = fleeAngle;
-            closest.angle = fleeAngle;
-            closest.boostSpeed = 5.2 + Math.random() * 2.0;
-            ripples.push({ x: closest.x, y: closest.y, radius: 10, alpha: 0.65 });
+            closest.fleeAngle = Math.atan2(closest.y - cy, closest.x - cx) + (Math.random() - 0.5) * 0.65;
+            closest.fleeBlend = 1;
+            closest.boostSpeed = 290 + Math.random() * 90;
+            ripples.push({ x: closest.x, y: closest.y, radius: 10, alpha: 0.72 });
           }
         }
       }, { passive: true });
