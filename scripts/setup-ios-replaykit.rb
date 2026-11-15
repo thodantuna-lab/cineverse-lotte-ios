@@ -33,6 +33,8 @@ plist = Plist.parse_xml(plist_path) || {}
 plist['NSCameraUsageDescription'] ||= 'CineVerse dùng Camera để bạn bật Cam cùng bạn bè trong Phòng Stream.'
 plist['NSMicrophoneUsageDescription'] ||= 'CineVerse dùng Micro để bạn nói chuyện trực tiếp trong Phòng Stream.'
 plist['NSLocalNetworkUsageDescription'] ||= 'CineVerse dùng kết nối nội bộ để nhận khung hình ReplayKit khi chia sẻ màn hình.'
+plist['UIBackgroundModes'] ||= []
+plist['UIBackgroundModes'] << 'audio' unless plist['UIBackgroundModes'].include?('audio')
 File.write(plist_path, plist.to_plist)
 
 # 3. Create ReplayKitExtension target if not present

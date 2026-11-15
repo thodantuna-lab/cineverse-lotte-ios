@@ -2,6 +2,7 @@ import Foundation
 import Capacitor
 import ReplayKit
 import Network
+import AVFoundation
 import UIKit
 
 @objc(ReplayKitBridgePlugin)
@@ -35,27 +36,33 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
+    private var activeConnection: NWConnection?
+
     private func handleExtensionConnection(_ conn: NWConnection) {
+        activeConnection?.cancel()
+        activeConnection = conn
         conn.start(queue: queue)
-        readNextFrame(on: conn)
+        readNextPacket(on: conn)
     }
 
-    private func readNextFrame(on conn: NWConnection) {
-        conn.receive(minimumIncompleteLength: 4, maximumLength: 4) { [weak self] headerData, _, isComplete, error in
-            guard let self = self, error == nil, let header = headerData, header.count == 4 else {
+    private func readNextPacket(on conn: NWConnection) {
+        // Header: [1-byte type][4-byte big-endian length]
+        conn.receive(minimumIncompleteLength: 5, maximumLength: 5) { [weak self] headerData, _, isComplete, error in
+            guard let self = self, error == nil, let header = headerData, header.count == 5 else {
                 if isComplete || error != nil { conn.cancel() }
                 return
             }
-            let length = Int(header.withUnsafeBytes { $0.load(as: UInt32.self).bigEndian })
-            guard length > 0 && length < 5_000_000 else {
+            let packetType = header[0]
+            let length = Int(header.subdata(in: 1..<5).withUnsafeBytes { $0.load(as: UInt32.self).bigEndian })
+            guard length > 0 && length < 8_000_000 else {
                 conn.cancel()
                 return
             }
-            self.readExactPayload(length: length, accumulated: Data(), on: conn)
+            self.readExactPayload(packetType: packetType, length: length, accumulated: Data(), on: conn)
         }
     }
 
-    private func readExactPayload(length: Int, accumulated: Data, on conn: NWConnection) {
+    private func readExactPayload(packetType: UInt8, length: Int, accumulated: Data, on conn: NWConnection) {
         let remaining = length - accumulated.count
         conn.receive(minimumIncompleteLength: 1, maximumLength: remaining) { [weak self] chunk, _, isComplete, error in
             guard let self = self, error == nil, let chunk = chunk else {
@@ -65,17 +72,31 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
             var buffer = accumulated
             buffer.append(chunk)
             if buffer.count < length {
-                self.readExactPayload(length: length, accumulated: buffer, on: conn)
+                self.readExactPayload(packetType: packetType, length: length, accumulated: buffer, on: conn)
                 return
             }
-            let b64 = buffer.base64EncodedString()
-            DispatchQueue.main.async {
-                self.bridge?.webView?.evaluateJavaScript(
-                    "window.__onNativeReplayKitFrame && window.__onNativeReplayKitFrame('data:image/jpeg;base64,\(b64)');",
-                    completionHandler: nil
-                )
+
+            if packetType == 0x01 {
+                let b64 = buffer.base64EncodedString()
+                DispatchQueue.main.async {
+                    self.bridge?.webView?.evaluateJavaScript(
+                        "window.__onNativeReplayKitFrame && window.__onNativeReplayKitFrame('data:image/jpeg;base64,\(b64)');",
+                        completionHandler: nil
+                    )
+                }
+            } else if packetType == 0x02 && buffer.count > 6 {
+                let sampleRate = buffer.subdata(in: 0..<4).withUnsafeBytes { $0.load(as: UInt32.self).littleEndian }
+                let channels = buffer.subdata(in: 4..<6).withUnsafeBytes { $0.load(as: UInt16.self).littleEndian }
+                let pcmB64 = buffer.subdata(in: 6..<buffer.count).base64EncodedString()
+                DispatchQueue.main.async {
+                    self.bridge?.webView?.evaluateJavaScript(
+                        "window.__onNativeReplayKitAudio && window.__onNativeReplayKitAudio('\(pcmB64)', \(sampleRate), \(channels));",
+                        completionHandler: nil
+                    )
+                }
             }
-            self.readNextFrame(on: conn)
+
+            self.readNextPacket(on: conn)
         }
     }
 
@@ -96,6 +117,13 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
 
     @objc func startBroadcast(_ call: CAPPluginCall) {
         startLocalReceiver()
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playAndRecord, mode: .videoChat, options: [.mixWithOthers, .defaultToSpeaker, .allowBluetooth])
+            try session.setActive(true)
+        } catch {
+            NSLog("[ReplayKitBridge] AVAudioSession error: \(error)")
+        }
         DispatchQueue.main.async { [weak self] in
             guard let self = self, let rootView = self.bridge?.viewController?.view else {
                 call.reject("Missing root view")
