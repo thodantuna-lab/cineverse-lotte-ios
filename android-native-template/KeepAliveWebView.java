@@ -4,9 +4,9 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.getcapacitor.BridgeWebView;
+import com.getcapacitor.CapacitorWebView;
 
-public class KeepAliveWebView extends BridgeWebView {
+public class KeepAliveWebView extends CapacitorWebView {
     public KeepAliveWebView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }

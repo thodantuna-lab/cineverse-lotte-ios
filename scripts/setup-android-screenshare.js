@@ -19,7 +19,7 @@ if (fs.existsSync(capLayoutSrc)) {
   const layoutDstDir = path.join(root, "android", "app", "src", "main", "res", "layout");
   fs.mkdirSync(layoutDstDir, { recursive: true });
   let layoutXml = fs.readFileSync(capLayoutSrc, "utf8");
-  layoutXml = layoutXml.replace(/com\.getcapacitor\.BridgeWebView/g, "com.cineverse.lotte.KeepAliveWebView");
+  layoutXml = layoutXml.replace(/com\.getcapacitor\.CapacitorWebView/g, "com.cineverse.lotte.KeepAliveWebView");
   fs.writeFileSync(path.join(layoutDstDir, "capacitor_bridge_layout_main.xml"), layoutXml, "utf8");
 }
 
