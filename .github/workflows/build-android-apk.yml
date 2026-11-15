@@ -1,0 +1,65 @@
+name: Build Android APK (MediaProjection + WebRTC)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'index.html'
+      - 'package.json'
+      - 'capacitor.config.json'
+      - 'android-native-template/**'
+      - 'scripts/setup-android-screenshare.js'
+      - '.github/workflows/build-android-apk.yml'
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install dependencies & prepare web assets
+        run: |
+          npm install
+          npm install @capacitor/android@^6.1.2 --no-save
+          npm run prepare:www
+
+      - name: Add & Sync Capacitor Android project
+        run: |
+          npx cap add android
+          npx cap sync android
+
+      - name: Configure Android Screen Share & Audio Capture
+        run: |
+          node scripts/setup-android-screenshare.js
+
+      - name: Build Debug APK (Installable directly on any Android)
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Prepare APK Artifact
+        run: |
+          mkdir -p output
+          cp android/app/build/outputs/apk/debug/app-debug.apk output/CineVerse-Lotte-Android.apk
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CineVerse-Lotte-Android-APK
+          path: output/CineVerse-Lotte-Android.apk
+          retention-days: 30
