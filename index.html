@@ -8649,7 +8649,7 @@
           return;
         }
         const triggerIceRestart = () => {
-          if (state.uid < remoteUid && pc.signalingState === "stable") {
+          if (pc.signalingState === "stable") {
             try {
               pc.restartIce();
               pc.createOffer({ iceRestart: true }).then(offer =>
@@ -8658,6 +8658,7 @@
                     type: "offer",
                     sdp: offer.sdp,
                     from: state.uid,
+                    sessionId: currentVoiceSessionId,
                     ts: Date.now()
                   })
                 )
@@ -8670,19 +8671,26 @@
             clearTimeout(entry.iceDisconnectTimer);
             entry.iceDisconnectTimer = null;
           }
-          triggerIceRestart();
+          if (state.uid < remoteUid) {
+            triggerIceRestart();
+          } else {
+            entry.iceDisconnectTimer = setTimeout(triggerIceRestart, 2000);
+          }
         } else if (pc.iceConnectionState === "disconnected") {
           if (entry.iceDisconnectTimer) clearTimeout(entry.iceDisconnectTimer);
+          const delayMs = state.uid < remoteUid ? 2500 : 4500;
           entry.iceDisconnectTimer = setTimeout(() => {
             if (pc.iceConnectionState === "disconnected" || pc.iceConnectionState === "failed") {
               triggerIceRestart();
             }
-          }, 3000);
+          }, delayMs);
         }
       };
 
       return entry;
     }
+
+    let currentVoiceSessionId = "";
 
     async function rebuildVoiceConnections(roomId, peersMap) {
       Object.keys(voicePeers).forEach(rUid => {
@@ -8690,15 +8698,26 @@
       });
       for (const [rUid, info] of Object.entries(peersMap)) {
         if (!info || rUid === state.uid) continue;
+        const existing = voicePeers[rUid];
+        if (existing) {
+          if (info.sessionId && existing.remoteSessionId && existing.remoteSessionId !== info.sessionId) {
+            closeVoicePeer(rUid);
+          } else if (info.sessionId && !existing.remoteSessionId) {
+            existing.remoteSessionId = info.sessionId;
+          }
+        }
         if (!voicePeers[rUid] && state.uid < rUid) {
           try {
             const entry = getOrCreateVoicePeer(roomId, rUid);
+            entry.remoteSessionId = info.sessionId || "";
             const offer = await entry.pc.createOffer();
             await entry.pc.setLocalDescription(offer);
             await rtdbMod.set(rtdbMod.ref(rtdb, `voice/${roomId}/signals/${rUid}/${state.uid}`), {
               type: "offer",
+              fresh: true,
               sdp: offer.sdp,
               from: state.uid,
+              sessionId: currentVoiceSessionId,
               ts: Date.now()
             });
           } catch (e) {}
@@ -8712,7 +8731,14 @@
         roomVoiceUnsub = null;
       }
       if (!rtdb || !rtdbMod || !roomId) return;
+      Object.keys(voicePeers).forEach(closeVoicePeer);
+      currentVoiceSessionId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const voiceJoinedAt = Date.now();
       await ensureVoiceTurnLoaded();
+      await Promise.all([
+        rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${roomId}/signals/${state.uid}`)).catch(() => {}),
+        rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${roomId}/ice/${state.uid}`)).catch(() => {})
+      ]);
 
       const myPeerRef = rtdbMod.ref(rtdb, `voice/${roomId}/peers/${state.uid}`);
       myVoiceDisconnect = rtdbMod.onDisconnect(myPeerRef);
@@ -8721,6 +8747,7 @@
         uid: state.uid,
         userName: state.userName,
         micOn: voiceMicActive,
+        sessionId: currentVoiceSessionId,
         updatedAt: Date.now()
       }).catch(() => {});
 
@@ -8744,6 +8771,7 @@
         const signals = snap.val() || {};
         for (const [fromUid, sig] of Object.entries(signals)) {
           if (!sig || !sig.type || !sig.sdp) continue;
+          if (sig.ts && sig.ts < voiceJoinedAt - 10000) continue;
           const sigKey = `${fromUid}_${sig.type}_${sig.ts || ""}`;
           if (handledSignals[sigKey]) continue;
           handledSignals[sigKey] = true;
@@ -8754,6 +8782,7 @@
                 await rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${roomId}/ice/${fromUid}/${state.uid}`)).catch(() => {});
               }
               const entry = getOrCreateVoicePeer(roomId, fromUid);
+              if (sig.sessionId) entry.remoteSessionId = sig.sessionId;
               const polite = state.uid > fromUid;
               if (entry.pc.signalingState === "have-local-offer") {
                 if (!polite) continue;
@@ -11092,10 +11121,11 @@
       }
 
       if (rtdb && rtdbMod) {
-        rtdbMod.set(rtdbMod.ref(rtdb, `voice/${roomId}/peers/${state.uid}`), {
+        rtdbMod.update(rtdbMod.ref(rtdb, `voice/${roomId}/peers/${state.uid}`), {
           uid: state.uid,
           userName: state.userName,
           micOn: true,
+          sessionId: currentVoiceSessionId,
           updatedAt: Date.now()
         }).catch(() => {});
       }
