@@ -50,12 +50,17 @@ unless ext_target
   ext_target.source_build_phase.add_file_reference(sample_ref, true)
 
   ext_target.build_configurations.each do |cfg|
+    cfg.build_settings['PRODUCT_NAME'] = '$(TARGET_NAME)'
     cfg.build_settings['PRODUCT_BUNDLE_IDENTIFIER'] = 'com.cineverse.lotte.ReplayKitExtension'
     cfg.build_settings['INFOPLIST_FILE'] = "#{ext_name}/Info.plist"
+    cfg.build_settings['GENERATE_INFOPLIST_FILE'] = 'NO'
+    cfg.build_settings['SDKROOT'] = 'iphoneos'
+    cfg.build_settings['TARGETED_DEVICE_FAMILY'] = '1,2'
     cfg.build_settings['SWIFT_VERSION'] = '5.0'
     cfg.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
     cfg.build_settings['CODE_SIGN_STYLE'] = 'Automatic'
     cfg.build_settings['SKIP_INSTALL'] = 'YES'
+    cfg.build_settings['LD_RUNPATH_SEARCH_PATHS'] = ['$(inherited)', '@executable_path/Frameworks', '@executable_path/../../Frameworks']
   end
 
   # Embed extension in App target
