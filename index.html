@@ -90,36 +90,53 @@
     }
     @keyframes ambientMistOrbit1 {
       0%, 100% { transform: translate3d(0%, 0%, 0) scale(1); }
-      25% { transform: translate3d(20%, 12%, 0) scale(1.08); }
-      50% { transform: translate3d(16%, 28%, 0) scale(1.02); }
+      12.5% { transform: translate3d(11%, 5%, 0) scale(1.04); }
+      25% { transform: translate3d(20%, 14%, 0) scale(1.07); }
+      37.5% { transform: translate3d(21%, 24%, 0) scale(1.05); }
+      50% { transform: translate3d(14%, 29%, 0) scale(1.01); }
+      62.5% { transform: translate3d(3%, 25%, 0) scale(0.97); }
       75% { transform: translate3d(-6%, 16%, 0) scale(0.95); }
+      87.5% { transform: translate3d(-6%, 6%, 0) scale(0.97); }
     }
     @keyframes ambientMistOrbit2 {
       0%, 100% { transform: translate3d(0%, 0%, 0) scale(1.02); }
+      12.5% { transform: translate3d(-10%, 9%, 0) scale(0.98); }
       25% { transform: translate3d(-18%, 16%, 0) scale(0.95); }
+      37.5% { transform: translate3d(-24%, 6%, 0) scale(0.99); }
       50% { transform: translate3d(-24%, -8%, 0) scale(1.06); }
-      75% { transform: translate3d(-8%, -18%, 0) scale(1.10); }
+      62.5% { transform: translate3d(-17%, -16%, 0) scale(1.09); }
+      75% { transform: translate3d(-8%, -18%, 0) scale(1.09); }
+      87.5% { transform: translate3d(-2%, -10%, 0) scale(1.06); }
     }
     @keyframes ambientMistOrbit3 {
       0%, 100% { transform: translate3d(0%, 0%, 0) scale(0.98); }
+      12.5% { transform: translate3d(10%, -7%, 0) scale(1.02); }
       25% { transform: translate3d(18%, -14%, 0) scale(1.06); }
-      50% { transform: translate3d(4%, -24%, 0) scale(1.08); }
+      37.5% { transform: translate3d(14%, -22%, 0) scale(1.08); }
+      50% { transform: translate3d(4%, -24%, 0) scale(1.07); }
+      62.5% { transform: translate3d(-8%, -19%, 0) scale(1.04); }
       75% { transform: translate3d(-16%, -10%, 0) scale(1.00); }
+      87.5% { transform: translate3d(-10%, -3%, 0) scale(0.98); }
     }
     @keyframes ambientMistOrbit4 {
       0%, 100% { transform: translate3d(0%, 0%, 0) scale(1); }
+      12.5% { transform: translate3d(-9%, -10%, 0) scale(1.04); }
       25% { transform: translate3d(-16%, -18%, 0) scale(1.08); }
+      37.5% { transform: translate3d(-6%, -23%, 0) scale(1.06); }
       50% { transform: translate3d(6%, -22%, 0) scale(1.03); }
+      62.5% { transform: translate3d(14%, -16%, 0) scale(0.98); }
       75% { transform: translate3d(16%, -8%, 0) scale(0.95); }
+      87.5% { transform: translate3d(9%, -2%, 0) scale(0.97); }
     }
     #ambient-tuna-canvas {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
-      filter: blur(0.6px) drop-shadow(0 0 12px rgba(229, 9, 20, 0.38));
       opacity: 0.94;
       pointer-events: none;
+      will-change: transform;
+      transform: translateZ(0);
     }
 
     /* Tối ưu hiển thị Mobile (< 640px): chống tràn ngang cho sơ đồ 48 ghế và menu thả */
@@ -13075,6 +13092,20 @@
       const tunaImg = new Image();
       tunaImg.src = "./assets/tuna-sprite.png";
 
+      // Tạo sẵn quầng sáng Crimson 1 lần duy nhất để không cấp phát gradient mỗi frame (tránh GC khựng nhịp)
+      const haloCanvas = document.createElement("canvas");
+      haloCanvas.width = 256;
+      haloCanvas.height = 256;
+      const haloCtx = haloCanvas.getContext("2d");
+      if (haloCtx) {
+        const g = haloCtx.createRadialGradient(128, 128, 12, 128, 128, 126);
+        g.addColorStop(0, "rgba(229, 9, 20, 0.32)");
+        g.addColorStop(0.5, "rgba(180, 7, 16, 0.11)");
+        g.addColorStop(1, "rgba(0, 0, 0, 0)");
+        haloCtx.fillStyle = g;
+        haloCtx.fillRect(0, 0, 256, 256);
+      }
+
       function drawTunaFish(fish) {
         if (!tunaImg.complete || tunaImg.naturalWidth === 0) return;
 
@@ -13082,7 +13113,7 @@
         const aspect = tunaImg.naturalHeight / tunaImg.naturalWidth;
         const H = L * aspect;
         const boostFactor = Math.min(fish.boostSpeed / 240, 1.15);
-        const waveAmp = (0.048 + boostFactor * 0.045) * H;
+        const waveAmp = (0.045 + boostFactor * 0.042) * H;
 
         ctx.save();
         ctx.translate(fish.x, fish.y);
@@ -13091,18 +13122,11 @@
         ctx.rotate(fish.pitch);
         ctx.globalAlpha = fish.alpha;
 
-        // Quầng sáng Crimson đặc trưng logo hòa nền khói Gemini
-        const halo = ctx.createRadialGradient(0, 0, L * 0.06, 0, 0, L * 0.68);
-        halo.addColorStop(0, "rgba(229, 9, 20, 0.28)");
-        halo.addColorStop(0.55, "rgba(180, 7, 16, 0.09)");
-        halo.addColorStop(1, "rgba(0, 0, 0, 0)");
-        ctx.fillStyle = halo;
-        ctx.beginPath();
-        ctx.arc(0, 0, L * 0.68, 0, Math.PI * 2);
-        ctx.fill();
+        // Vẽ lại quầng sáng cache bằng 1 lệnh drawImage siêu nhẹ
+        ctx.drawImage(haloCanvas, -L * 0.68, -L * 0.68, L * 1.36, L * 1.36);
 
-        // Uốn sóng mềm mại theo 28 lát cắt dọc từ mũi (u=1) về đuôi (u=0)
-        const slices = 28;
+        // Uốn sóng mềm mại theo 16 lát cắt dọc từ mũi (u=1) về đuôi (u=0)
+        const slices = 16;
         const sw = tunaImg.naturalWidth;
         const sh = tunaImg.naturalHeight;
         const srcSliceW = sw / slices;
@@ -13111,7 +13135,6 @@
         for (let i = 0; i < slices; i++) {
           const u0 = i / slices;
           const uMid = (i + 0.5) / slices;
-          // Phần đầu (uMid -> 1) giữ vững, thân sau và đuôi (uMid -> 0) vẫy uốn lượn tự nhiên
           const tailFactor = Math.pow(1 - uMid, 1.85);
           const waveY = Math.sin(fish.tailPhase - (1 - uMid) * 3.4) * waveAmp * tailFactor;
           const sx = u0 * sw;
@@ -13121,11 +13144,11 @@
             tunaImg,
             sx,
             0,
-            srcSliceW + 0.5,
+            srcSliceW + 0.6,
             sh,
             dx,
             dy,
-            dstSliceW + 0.75,
+            dstSliceW + 0.9,
             H
           );
         }
@@ -13134,10 +13157,13 @@
       }
 
       let lastTime = performance.now();
+      let smoothDt = 1 / 60;
 
       function tick(now) {
-        const dt = Math.min(0.05, Math.max(0.001, (now - lastTime) / 1000));
+        const rawDt = Math.min(0.035, Math.max(0.001, (now - lastTime) / 1000));
         lastTime = now;
+        smoothDt += (rawDt - smoothDt) * 0.25;
+        const dt = smoothDt;
         const tSec = now * 0.001;
 
         ctx.clearRect(0, 0, width, height);
