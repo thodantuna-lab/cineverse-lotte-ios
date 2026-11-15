@@ -1,0 +1,62 @@
+name: Build iOS IPA (CineVerse Lotte)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies & prepare web assets
+        run: |
+          npm install
+          npm run prepare:www
+
+      - name: Add & Sync Capacitor iOS project
+        run: |
+          npx cap add ios
+          npx cap sync ios
+
+      - name: Configure ReplayKit Bridge & Broadcast Extension
+        run: |
+          gem install xcodeproj plist --no-document
+          ruby scripts/setup-ios-replaykit.rb
+
+      - name: Build unsigned iOS App (.xcarchive)
+        run: |
+          cd ios/App
+          xcodebuild -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath "$PWD/build/CineVerseLotte.xcarchive" \
+            archive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM=""
+
+      - name: Package unsigned .ipa
+        run: |
+          mkdir -p ios_output/Payload
+          cp -R ios/App/build/CineVerseLotte.xcarchive/Products/Applications/App.app ios_output/Payload/
+          cd ios_output
+          zip -r CineVerse-Lotte-unsigned.ipa Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CineVerse-Lotte-iOS-IPA
+          path: ios_output/CineVerse-Lotte-unsigned.ipa
+          retention-days: 30

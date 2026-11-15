@@ -1,0 +1,15 @@
+{
+  "name": "cineverse-lotte",
+  "version": "1.0.0",
+  "description": "CineVerse Lotte - Watch Party & Discord Live Stream iOS App",
+  "private": true,
+  "scripts": {
+    "prepare:www": "node -e \"const fs=require('fs');fs.mkdirSync('www',{recursive:true});fs.copyFileSync('index.html','www/index.html');\"",
+    "cap:sync": "npm run prepare:www && npx cap sync ios"
+  },
+  "dependencies": {
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/ios": "^6.1.2"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "appId": "com.cineverse.lotte",
+  "appName": "CineVerse Lotte",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "https"
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "allowsLinkPreview": false
+  }
+}
