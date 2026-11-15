@@ -276,7 +276,7 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
             guard let base = rawPtr.baseAddress else { return -1 }
             var bb: CMBlockBuffer?
             let s1 = CMBlockBufferCreateWithMemoryBlock(
-                structureAllocator: kCFAllocatorDefault,
+                allocator: kCFAllocatorDefault,
                 memoryBlock: nil,
                 blockLength: avccCount,
                 blockAllocator: kCFAllocatorDefault,
@@ -365,7 +365,7 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
             allocator: kCFAllocatorDefault,
             formatDescription: fmtDesc,
             decoderSpecification: nil,
-            destinationImageBufferAttributes: attrs as CFDictionary,
+            imageBufferAttributes: attrs as CFDictionary,
             outputCallback: &callback,
             decompressionSessionOut: &session
         )
