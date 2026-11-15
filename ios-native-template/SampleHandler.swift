@@ -146,7 +146,7 @@ class SampleHandler: RPBroadcastSampleHandler {
             height: Int32(height),
             codecType: kCMVideoCodecType_H264,
             encoderSpecification: nil,
-            sourceImageBufferAttributes: nil,
+            imageBufferAttributes: nil,
             compressedDataAllocator: nil,
             outputCallback: vtCompressionCallback,
             refcon: Unmanaged.passUnretained(self).toOpaque(),
