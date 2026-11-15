@@ -8540,6 +8540,9 @@
       ["pointerdown", "touchstart", "click", "keydown"].forEach(evt => {
         document.addEventListener(evt, resumePendingVoiceAudio, { passive: true });
       });
+      document.addEventListener("visibilitychange", () => {
+        setTimeout(resumePendingVoiceAudio, 150);
+      });
     }
 
     function closeVoicePeer(remoteUid) {

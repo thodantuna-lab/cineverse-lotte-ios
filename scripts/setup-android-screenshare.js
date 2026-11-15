@@ -36,6 +36,22 @@ if (!mainActivity.includes("ReplayKitBridgePlugin.class")) {
                 ActivityCompat.requestPermissions(this, new String[]{ Manifest.permission.RECORD_AUDIO }, 9420);
             }
         }`;
+  const keepAliveOverrides = `
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (getBridge() != null && getBridge().getWebView() != null) {
+            getBridge().getWebView().resumeTimers();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (getBridge() != null && getBridge().getWebView() != null) {
+            getBridge().getWebView().resumeTimers();
+        }
+    }`;
   if (mainActivity.includes("super.onCreate(savedInstanceState);")) {
     mainActivity = mainActivity.replace(
       "super.onCreate(savedInstanceState);",
@@ -44,7 +60,7 @@ if (!mainActivity.includes("ReplayKitBridgePlugin.class")) {
   } else {
     mainActivity = mainActivity.replace(
       "public class MainActivity extends BridgeActivity {",
-      `public class MainActivity extends BridgeActivity {\n    @Override\n    public void onCreate(Bundle savedInstanceState) {\n        ${onCreateBody}\n    }`
+      `public class MainActivity extends BridgeActivity {\n    @Override\n    public void onCreate(Bundle savedInstanceState) {\n        ${onCreateBody}\n    }${keepAliveOverrides}`
     );
   }
   fs.writeFileSync(mainActivityPath, mainActivity, "utf8");
