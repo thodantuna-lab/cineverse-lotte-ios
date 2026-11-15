@@ -2,17 +2,37 @@ import ReplayKit
 import Network
 import CoreMedia
 import CoreVideo
+import VideoToolbox
 import AudioToolbox
 import ImageIO
-import Accelerate
+
+private let vtCompressionCallback: VTCompressionOutputCallback = { (
+    outputCallbackRefCon,
+    sourceFrameRefCon,
+    status,
+    _,
+    sampleBuffer
+) in
+    guard status == noErr,
+          let refCon = outputCallbackRefCon,
+          let sb = sampleBuffer else { return }
+    let handler = Unmanaged<SampleHandler>.fromOpaque(refCon).takeUnretainedValue()
+    let rotByte = UInt8(max(0, (sourceFrameRefCon.map { Int(bitPattern: $0) } ?? 1) - 1))
+    handler.handleEncodedSampleBuffer(sb, rotation: rotByte)
+}
 
 class SampleHandler: RPBroadcastSampleHandler {
     private var connection: NWConnection?
     private let sendQueue = DispatchQueue(label: "com.cineverse.lotte.replaykit.sender", qos: .userInteractive)
     private var lastSentTime: CFTimeInterval = 0
-    private var isSendingVideo = false
-    private var videoSendStartedAt: CFTimeInterval = 0
     private var isBroadcastActive = false
+
+    private var compressionSession: VTCompressionSession?
+    private var transferSession: VTPixelTransferSession?
+    private var scaledPool: CVPixelBufferPool?
+    private var encWidth: Int = 0
+    private var encHeight: Int = 0
+    private var frameIndex: Int64 = 0
 
     override func broadcastStarted(withSetupInfo setupInfo: [String : NSObject]?) {
         isBroadcastActive = true
@@ -27,12 +47,9 @@ class SampleHandler: RPBroadcastSampleHandler {
         conn.stateUpdateHandler = { [weak self] state in
             guard let self = self, self.isBroadcastActive else { return }
             if case .failed = state {
-                self.isSendingVideo = false
                 self.sendQueue.asyncAfter(deadline: .now() + 0.5) {
                     self.connectToApp()
                 }
-            } else if case .waiting = state {
-                self.isSendingVideo = false
             }
         }
         conn.start(queue: sendQueue)
@@ -44,8 +61,26 @@ class SampleHandler: RPBroadcastSampleHandler {
 
     override func broadcastFinished() {
         isBroadcastActive = false
+        sendQueue.async { [weak self] in
+            self?.teardownEncoder()
+        }
         connection?.cancel()
         connection = nil
+    }
+
+    private func teardownEncoder() {
+        if let session = compressionSession {
+            VTCompressionSessionCompleteFrames(session, untilPresentationTimeStamp: .invalid)
+            VTCompressionSessionInvalidate(session)
+            compressionSession = nil
+        }
+        if let transfer = transferSession {
+            VTPixelTransferSessionInvalidate(transfer)
+            transferSession = nil
+        }
+        scaledPool = nil
+        encWidth = 0
+        encHeight = 0
     }
 
     private func mapOrientation(_ cg: CGImagePropertyOrientation) -> UInt8 {
@@ -57,16 +92,21 @@ class SampleHandler: RPBroadcastSampleHandler {
         }
     }
 
+    private func targetFrameInterval() -> CFTimeInterval {
+        switch ProcessInfo.processInfo.thermalState {
+        case .critical: return 1.0 / 20.0
+        case .serious:  return 1.0 / 30.0
+        default:        return 1.0 / 60.0
+        }
+    }
+
     override func processSampleBuffer(_ sampleBuffer: CMSampleBuffer, with sampleBufferType: RPSampleBufferType) {
         guard let conn = connection, conn.state == .ready else { return }
 
         switch sampleBufferType {
         case .video:
             let now = CACurrentMediaTime()
-            if isSendingVideo && (now - videoSendStartedAt) > 0.5 {
-                isSendingVideo = false
-            }
-            if isSendingVideo || (now - lastSentTime) < (1.0 / 30.0) { return }
+            if (now - lastSentTime) < targetFrameInterval() { return }
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 
             var rotByte: UInt8 = 0
@@ -74,30 +114,18 @@ class SampleHandler: RPBroadcastSampleHandler {
                let parsed = CGImagePropertyOrientation(rawValue: orientationAttachment.uint32Value) {
                 rotByte = mapOrientation(parsed)
             }
-
             lastSentTime = now
-            videoSendStartedAt = now
-            isSendingVideo = true
 
-            // Retain pixelBuffer safely across async dispatch
             sendQueue.async { [weak self] in
-                guard let self = self else { return }
-                var didDispatchSend = false
+                guard let self = self, self.isBroadcastActive else { return }
                 autoreleasepool {
-                    guard let packet = self.buildRawVideoPacket(pixelBuffer: pixelBuffer, rotation: rotByte) else { return }
-                    didDispatchSend = true
-                    conn.send(content: packet, completion: .contentProcessed { [weak self] _ in
-                        self?.isSendingVideo = false
-                    })
-                }
-                if !didDispatchSend {
-                    self.isSendingVideo = false
+                    self.encodeFrameHardware(pixelBuffer: pixelBuffer, rotation: rotByte)
                 }
             }
 
         case .audioApp:
             sendQueue.async { [weak self] in
-                guard let self = self else { return }
+                guard let self = self, self.isBroadcastActive else { return }
                 autoreleasepool {
                     self.sendAudioSampleBuffer(sampleBuffer, on: conn)
                 }
@@ -108,108 +136,169 @@ class SampleHandler: RPBroadcastSampleHandler {
         }
     }
 
-    private func buildRawVideoPacket(pixelBuffer: CVPixelBuffer, rotation: UInt8) -> Data? {
-        CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
-        defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly) }
+    private func setupEncoder(width: Int, height: Int) -> Bool {
+        teardownEncoder()
 
+        var session: VTCompressionSession?
+        let status = VTCompressionSessionCreate(
+            allocator: kCFAllocatorDefault,
+            width: Int32(width),
+            height: Int32(height),
+            codecType: kCMVideoCodecType_H264,
+            encoderSpecification: nil,
+            imageBufferAttributes: nil,
+            compressedDataAllocator: nil,
+            outputCallback: vtCompressionCallback,
+            refcon: Unmanaged.passUnretained(self).toOpaque(),
+            compressionSessionOut: &session
+        )
+        guard status == noErr, let comp = session else { return false }
+
+        VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_RealTime, value: kCFBooleanTrue)
+        VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_AllowFrameReordering, value: kCFBooleanFalse)
+        VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_ProfileLevel, value: kVTProfileLevel_H264_High_AutoLevel)
+        VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_ExpectedFrameRate, value: 60 as CFNumber)
+        VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_MaxKeyFrameInterval, value: 60 as CFNumber)
+        VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_AverageBitRate, value: 6_000_000 as CFNumber)
+        VTCompressionSessionPrepareToEncodeFrames(comp)
+
+        var transfer: VTPixelTransferSession?
+        VTPixelTransferSessionCreate(allocator: kCFAllocatorDefault, pixelTransferSessionOut: &transfer)
+        if let t = transfer {
+            VTSessionSetProperty(t, key: kVTPixelTransferPropertyKey_ScalingMode, value: kVTScalingMode_Trim)
+        }
+
+        let poolAttrs: [String: Any] = [
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange,
+            kCVPixelBufferWidthKey as String: width,
+            kCVPixelBufferHeightKey as String: height,
+            kCVPixelBufferIOSurfacePropertiesKey as String: [:]
+        ]
+        var pool: CVPixelBufferPool?
+        CVPixelBufferPoolCreate(kCFAllocatorDefault, nil, poolAttrs as CFDictionary, &pool)
+
+        self.compressionSession = comp
+        self.transferSession = transfer
+        self.scaledPool = pool
+        self.encWidth = width
+        self.encHeight = height
+        return true
+    }
+
+    private func encodeFrameHardware(pixelBuffer: CVPixelBuffer, rotation: UInt8) {
         let srcW = CVPixelBufferGetWidth(pixelBuffer)
         let srcH = CVPixelBufferGetHeight(pixelBuffer)
-        guard srcW > 0, srcH > 0 else { return nil }
+        guard srcW > 0, srcH > 0 else { return }
 
-        let fmt = CVPixelBufferGetPixelFormatType(pixelBuffer)
-        let isNV12 = (fmt == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange || fmt == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)
-
-        // Scale proportionally so longest side <= 1280px (smooth TikTok/Game + crisp 720p H.264)
-        let maxDim = 1280
+        let maxDim = 1600
         let longest = max(srcW, srcH)
         let needsScale = longest > maxDim
         let dstW = (needsScale ? (srcW * maxDim / longest) : srcW) & ~1
         let dstH = (needsScale ? (srcH * maxDim / longest) : srcH) & ~1
-        guard dstW > 0, dstH > 0 else { return nil }
+        guard dstW > 0, dstH > 0 else { return }
 
-        if isNV12 && CVPixelBufferGetPlaneCount(pixelBuffer) >= 2 {
-            guard let yBase = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0),
-                  let uvBase = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1) else { return nil }
-            let yStride = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0)
-            let uvStride = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1)
+        if compressionSession == nil || encWidth != dstW || encHeight != dstH {
+            guard setupEncoder(width: dstW, height: dstH) else { return }
+        }
+        guard let session = compressionSession else { return }
 
-            let ySize = dstW * dstH
-            let uvSize = dstW * (dstH / 2)
-            let payloadLen = 10 + ySize + uvSize
-
-            var packet = Data(count: 5 + payloadLen)
-            packet.withUnsafeMutableBytes { rawBuf in
-                guard let dst = rawBuf.baseAddress?.assumingMemoryBound(to: UInt8.self) else { return }
-                dst[0] = 0x03 // 0x03 = Raw Video frame
-                var lenBE = UInt32(payloadLen).bigEndian
-                memcpy(dst + 1, &lenBE, 4)
-
-                var wLE = UInt32(dstW).littleEndian
-                var hLE = UInt32(dstH).littleEndian
-                memcpy(dst + 5, &wLE, 4)
-                memcpy(dst + 9, &hLE, 4)
-                dst[13] = rotation
-                dst[14] = 1 // 1 = NV12
-
-                let yDst = dst + 15
-                let uvDst = dst + 15 + ySize
-
-                if !needsScale {
-                    let ySrc = yBase.assumingMemoryBound(to: UInt8.self)
-                    let uvSrc = uvBase.assumingMemoryBound(to: UInt8.self)
-                    for row in 0..<dstH {
-                        memcpy(yDst + row * dstW, ySrc + row * yStride, dstW)
-                    }
-                    for row in 0..<(dstH / 2) {
-                        memcpy(uvDst + row * dstW, uvSrc + row * uvStride, dstW)
-                    }
-                } else {
-                    var srcYBuf = vImage_Buffer(data: yBase, height: vImagePixelCount(srcH), width: vImagePixelCount(srcW), rowBytes: yStride)
-                    var dstYBuf = vImage_Buffer(data: yDst, height: vImagePixelCount(dstH), width: vImagePixelCount(dstW), rowBytes: dstW)
-                    vImageScale_Planar8(&srcYBuf, &dstYBuf, nil, vImage_Flags(kvImageNoFlags))
-
-                    var srcUVBuf = vImage_Buffer(data: uvBase, height: vImagePixelCount(srcH / 2), width: vImagePixelCount(srcW / 2), rowBytes: uvStride)
-                    var dstUVBuf = vImage_Buffer(data: uvDst, height: vImagePixelCount(dstH / 2), width: vImagePixelCount(dstW / 2), rowBytes: dstW)
-                    vImageScale_CbCr8(&srcUVBuf, &dstUVBuf, nil, vImage_Flags(kvImageNoFlags))
-                }
+        var inputBuffer: CVPixelBuffer = pixelBuffer
+        if needsScale, let transfer = transferSession, let pool = scaledPool {
+            var outBuf: CVPixelBuffer?
+            if CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pool, &outBuf) == kCVReturnSuccess,
+               let dst = outBuf,
+               VTPixelTransferSessionTransferImage(transfer, from: pixelBuffer, to: dst) == noErr {
+                inputBuffer = dst
             }
-            return packet
-        } else if fmt == kCVPixelFormatType_32BGRA, let base = CVPixelBufferGetBaseAddress(pixelBuffer) {
-            let stride = CVPixelBufferGetBytesPerRow(pixelBuffer)
-            let rowBytes = dstW * 4
-            let pixelBytes = rowBytes * dstH
-            let payloadLen = 10 + pixelBytes
-
-            var packet = Data(count: 5 + payloadLen)
-            packet.withUnsafeMutableBytes { rawBuf in
-                guard let dst = rawBuf.baseAddress?.assumingMemoryBound(to: UInt8.self) else { return }
-                dst[0] = 0x03
-                var lenBE = UInt32(payloadLen).bigEndian
-                memcpy(dst + 1, &lenBE, 4)
-
-                var wLE = UInt32(dstW).littleEndian
-                var hLE = UInt32(dstH).littleEndian
-                memcpy(dst + 5, &wLE, 4)
-                memcpy(dst + 9, &hLE, 4)
-                dst[13] = rotation
-                dst[14] = 2 // 2 = BGRA
-
-                let pDst = dst + 15
-                if !needsScale {
-                    let src = base.assumingMemoryBound(to: UInt8.self)
-                    for row in 0..<dstH {
-                        memcpy(pDst + row * rowBytes, src + row * stride, rowBytes)
-                    }
-                } else {
-                    var srcBuf = vImage_Buffer(data: base, height: vImagePixelCount(srcH), width: vImagePixelCount(srcW), rowBytes: stride)
-                    var dstBuf = vImage_Buffer(data: pDst, height: vImagePixelCount(dstH), width: vImagePixelCount(dstW), rowBytes: rowBytes)
-                    vImageScale_ARGB8888(&srcBuf, &dstBuf, nil, vImage_Flags(kvImageHighQualityResampling))
-                }
-            }
-            return packet
         }
 
-        return nil
+        frameIndex += 1
+        let pts = CMTime(value: frameIndex, timescale: 60)
+        let refCon = UnsafeMutableRawPointer(bitPattern: Int(rotation) + 1)
+        VTCompressionSessionEncodeFrame(
+            session,
+            imageBuffer: inputBuffer,
+            presentationTimeStamp: pts,
+            duration: .invalid,
+            frameProperties: nil,
+            sourceFrameRefcon: refCon,
+            infoFlagsOut: nil
+        )
+    }
+
+    fileprivate func handleEncodedSampleBuffer(_ sampleBuffer: CMSampleBuffer, rotation: UInt8) {
+        guard let conn = connection, conn.state == .ready,
+              let dataBuffer = CMSampleBufferGetDataBuffer(sampleBuffer) else { return }
+
+        var isKeyFrame = true
+        if let attachments = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, createIfNecessary: false) as? [[CFString: Any]],
+           let first = attachments.first,
+           let notSync = first[kCMSampleAttachmentKey_NotSync] as? Bool {
+            isKeyFrame = !notSync
+        }
+
+        var spsData = Data()
+        var ppsData = Data()
+        if isKeyFrame, let fmtDesc = CMSampleBufferGetFormatDescription(sampleBuffer) {
+            var spsPtr: UnsafePointer<UInt8>?
+            var spsSize: Int = 0
+            if CMVideoFormatDescriptionGetH264ParameterSetAtIndex(fmtDesc, parameterSetIndex: 0, parameterSetPointerOut: &spsPtr, parameterSetSizeOut: &spsSize, parameterSetCountOut: nil, nalUnitHeaderLengthOut: nil) == noErr,
+               let sp = spsPtr, spsSize > 0 {
+                spsData = Data(bytes: sp, count: spsSize)
+            }
+            var ppsPtr: UnsafePointer<UInt8>?
+            var ppsSize: Int = 0
+            if CMVideoFormatDescriptionGetH264ParameterSetAtIndex(fmtDesc, parameterSetIndex: 1, parameterSetPointerOut: &ppsPtr, parameterSetSizeOut: &ppsSize, parameterSetCountOut: nil, nalUnitHeaderLengthOut: nil) == noErr,
+               let pp = ppsPtr, ppsSize > 0 {
+                ppsData = Data(bytes: pp, count: ppsSize)
+            }
+        }
+
+        var totalLength: Int = 0
+        var dataPointer: UnsafeMutablePointer<Int8>?
+        guard CMBlockBufferGetDataPointer(dataBuffer, atOffset: 0, lengthAtOffsetOut: nil, totalLengthOut: &totalLength, dataPointerOut: &dataPointer) == noErr,
+              let ptr = dataPointer, totalLength > 0 else { return }
+
+        // Packet 0x04: [0x04][4B len BE][4B w LE][4B h LE][1B rot][1B key][2B spsLen LE][sps][2B ppsLen LE][pps][AVCC bytes]
+        let payloadLen = 14 + spsData.count + ppsData.count + totalLength
+        var packet = Data(count: 5 + payloadLen)
+        packet.withUnsafeMutableBytes { rawBuf in
+            guard let dst = rawBuf.baseAddress?.assumingMemoryBound(to: UInt8.self) else { return }
+            dst[0] = 0x04
+            var lenBE = UInt32(payloadLen).bigEndian
+            memcpy(dst + 1, &lenBE, 4)
+
+            var wLE = UInt32(encWidth).littleEndian
+            var hLE = UInt32(encHeight).littleEndian
+            memcpy(dst + 5, &wLE, 4)
+            memcpy(dst + 9, &hLE, 4)
+            dst[13] = rotation
+            dst[14] = isKeyFrame ? 1 : 0
+
+            var spsLenLE = UInt16(spsData.count).littleEndian
+            memcpy(dst + 15, &spsLenLE, 2)
+            var offset = 17
+            if !spsData.isEmpty {
+                spsData.withUnsafeBytes { s in
+                    if let sb = s.baseAddress { memcpy(dst + offset, sb, spsData.count) }
+                }
+                offset += spsData.count
+            }
+
+            var ppsLenLE = UInt16(ppsData.count).littleEndian
+            memcpy(dst + offset, &ppsLenLE, 2)
+            offset += 2
+            if !ppsData.isEmpty {
+                ppsData.withUnsafeBytes { p in
+                    if let pb = p.baseAddress { memcpy(dst + offset, pb, ppsData.count) }
+                }
+                offset += ppsData.count
+            }
+
+            memcpy(dst + offset, ptr, totalLength)
+        }
+
+        conn.send(content: packet, completion: .contentProcessed { _ in })
     }
 
     private func sendAudioSampleBuffer(_ sampleBuffer: CMSampleBuffer, on conn: NWConnection) {

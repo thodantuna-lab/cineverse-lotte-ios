@@ -4,6 +4,7 @@ import ReplayKit
 import Network
 import AVFoundation
 import CoreVideo
+import VideoToolbox
 import UIKit
 import WebRTC
 
@@ -84,11 +85,15 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
     private var peers: [String: NativeScreenPeer] = [:]
     private let webrtcQueue = DispatchQueue(label: "com.cineverse.lotte.webrtc", qos: .userInteractive)
 
-    // Reusable CVPixelBufferPool
+    // Reusable CVPixelBufferPool & Hardware H.264 VTDecompressionSession
     private var pixelBufferPool: CVPixelBufferPool?
     private var poolWidth: Int = 0
     private var poolHeight: Int = 0
     private var poolFormat: OSType = 0
+    private var decompressionSession: VTDecompressionSession?
+    private var videoFormatDesc: CMVideoFormatDescription?
+    private var currentSPS = Data()
+    private var currentPPS = Data()
 
     public override func load() {
         initWebRTCIfNeeded()
@@ -213,7 +218,9 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
                 return
             }
 
-            if packetType == 0x03 && buffer.count > 10 {
+            if packetType == 0x04 && buffer.count > 14 {
+                self.decodeH264PacketToWebRTC(buffer)
+            } else if packetType == 0x03 && buffer.count > 10 {
                 self.feedRawVideoPacketToWebRTC(buffer)
             } else if packetType == 0x02 && buffer.count > 6 {
                 let sampleRate = buffer.subdata(in: 0..<4).withUnsafeBytes { $0.load(as: UInt32.self).littleEndian }
@@ -235,6 +242,154 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
 
             self.readNextPacket(on: conn)
         }
+    }
+
+    private func decodeH264PacketToWebRTC(_ buffer: Data) {
+        guard !peers.isEmpty, videoSource != nil, videoCapturer != nil else { return }
+        guard buffer.count >= 14 else { return }
+
+        let rotByte = buffer[8]
+        let isKeyFrame = buffer[9] == 1
+        let spsLen = Int(buffer.subdata(in: 10..<12).withUnsafeBytes { $0.load(as: UInt16.self).littleEndian })
+        var offset = 12
+        guard buffer.count >= offset + spsLen + 2 else { return }
+        let sps = spsLen > 0 ? buffer.subdata(in: offset..<(offset + spsLen)) : Data()
+        offset += spsLen
+
+        let ppsLen = Int(buffer.subdata(in: offset..<(offset + 2)).withUnsafeBytes { $0.load(as: UInt16.self).littleEndian })
+        offset += 2
+        guard buffer.count > offset + ppsLen else { return }
+        let pps = ppsLen > 0 ? buffer.subdata(in: offset..<(offset + ppsLen)) : Data()
+        offset += ppsLen
+
+        let avccData = buffer.subdata(in: offset..<buffer.count)
+        guard !avccData.isEmpty else { return }
+
+        if isKeyFrame && !sps.isEmpty && !pps.isEmpty && (decompressionSession == nil || sps != currentSPS || pps != currentPPS) {
+            setupDecompressionSession(sps: sps, pps: pps)
+        }
+        guard let session = decompressionSession, let fmtDesc = videoFormatDesc else { return }
+
+        var blockBuffer: CMBlockBuffer?
+        let avccCount = avccData.count
+        let status = avccData.withUnsafeBytes { rawPtr -> OSStatus in
+            guard let base = rawPtr.baseAddress else { return -1 }
+            var bb: CMBlockBuffer?
+            let s1 = CMBlockBufferCreateWithMemoryBlock(
+                allocator: kCFAllocatorDefault,
+                memoryBlock: nil,
+                blockLength: avccCount,
+                blockAllocator: kCFAllocatorDefault,
+                customBlockSource: nil,
+                offsetToData: 0,
+                dataLength: avccCount,
+                flags: 0,
+                blockBufferOut: &bb
+            )
+            guard s1 == kCMBlockBufferNoErr, let created = bb else { return s1 }
+            let s2 = CMBlockBufferReplaceDataBytes(with: base, blockBuffer: created, offsetIntoDestination: 0, dataLength: avccCount)
+            blockBuffer = created
+            return s2
+        }
+        guard status == noErr, let bb = blockBuffer else { return }
+
+        var sampleBuffer: CMSampleBuffer?
+        var sampleSize = avccCount
+        let sbStatus = CMSampleBufferCreateReady(
+            allocator: kCFAllocatorDefault,
+            dataBuffer: bb,
+            formatDescription: fmtDesc,
+            sampleCount: 1,
+            sampleTimingEntryCount: 0,
+            sampleTimingArray: nil,
+            sampleSizeEntryCount: 1,
+            sampleSizeArray: &sampleSize,
+            sampleBufferOut: &sampleBuffer
+        )
+        guard sbStatus == noErr, let sb = sampleBuffer else { return }
+
+        let refCon = UnsafeMutableRawPointer(bitPattern: Int(rotByte) + 1)
+        VTDecompressionSessionDecodeFrame(
+            session,
+            sampleBuffer: sb,
+            flags: [._EnableAsynchronousDecompression],
+            frameRefcon: refCon,
+            infoFlagsOut: nil
+        )
+    }
+
+    private func setupDecompressionSession(sps: Data, pps: Data) {
+        if let old = decompressionSession {
+            VTDecompressionSessionWaitForAsynchronousFrames(old)
+            VTDecompressionSessionInvalidate(old)
+            decompressionSession = nil
+        }
+        videoFormatDesc = nil
+
+        var newFmt: CMVideoFormatDescription?
+        let status = sps.withUnsafeBytes { spsRaw in
+            pps.withUnsafeBytes { ppsRaw -> OSStatus in
+                guard let spsPtr = spsRaw.bindMemory(to: UInt8.self).baseAddress,
+                      let ppsPtr = ppsRaw.bindMemory(to: UInt8.self).baseAddress else { return -1 }
+                let pointers: [UnsafePointer<UInt8>] = [spsPtr, ppsPtr]
+                let sizes: [Int] = [sps.count, pps.count]
+                return CMVideoFormatDescriptionCreateFromH264ParameterSets(
+                    allocator: kCFAllocatorDefault,
+                    parameterSetCount: 2,
+                    parameterSetPointers: pointers,
+                    parameterSetSizes: sizes,
+                    nalUnitHeaderLength: 4,
+                    formatDescriptionOut: &newFmt
+                )
+            }
+        }
+        guard status == noErr, let fmtDesc = newFmt else { return }
+
+        let attrs: [String: Any] = [
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange,
+            kCVPixelBufferIOSurfacePropertiesKey as String: [:]
+        ]
+        var callback = VTDecompressionOutputCallbackRecord(
+            decompressionOutputCallback: { (decompressionOutputRefCon, sourceFrameRefCon, status, _, imageBuffer, _, _) in
+                guard status == noErr,
+                      let refCon = decompressionOutputRefCon,
+                      let imgBuf = imageBuffer else { return }
+                let plugin = Unmanaged<ReplayKitBridgePlugin>.fromOpaque(refCon).takeUnretainedValue()
+                let rotByte = UInt8(max(0, (sourceFrameRefCon.map { Int(bitPattern: $0) } ?? 1) - 1))
+                plugin.pushDecodedPixelBuffer(imgBuf, rotByte: rotByte)
+            },
+            decompressionOutputRefCon: Unmanaged.passUnretained(self).toOpaque()
+        )
+        var session: VTDecompressionSession?
+        let decStatus = VTDecompressionSessionCreate(
+            allocator: kCFAllocatorDefault,
+            formatDescription: fmtDesc,
+            decoderSpecification: nil,
+            imageBufferAttributes: attrs as CFDictionary,
+            outputCallback: &callback,
+            decompressionSessionOut: &session
+        )
+        if decStatus == noErr, let s = session {
+            self.videoFormatDesc = fmtDesc
+            self.decompressionSession = s
+            self.currentSPS = sps
+            self.currentPPS = pps
+        }
+    }
+
+    fileprivate func pushDecodedPixelBuffer(_ pixelBuffer: CVPixelBuffer, rotByte: UInt8) {
+        guard let source = videoSource, let capturer = videoCapturer else { return }
+        let rotation: RTCVideoRotation
+        switch rotByte {
+        case 1: rotation = ._90
+        case 2: rotation = ._180
+        case 3: rotation = ._270
+        default: rotation = ._0
+        }
+        let rtcBuf = RTCCVPixelBuffer(pixelBuffer: pixelBuffer)
+        let tsNs = Int64(CACurrentMediaTime() * 1_000_000_000)
+        let frame = RTCVideoFrame(buffer: rtcBuf, rotation: rotation, timeStampNs: tsNs)
+        source.capturer(capturer, didCapture: frame)
     }
 
     private func feedRawVideoPacketToWebRTC(_ buffer: Data) {
