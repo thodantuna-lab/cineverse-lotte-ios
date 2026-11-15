@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioPlaybackCaptureConfiguration;
 import android.media.AudioRecord;
 import android.media.projection.MediaProjection;
@@ -157,6 +158,11 @@ public class ReplayKitBridgePlugin extends Plugin {
                 .createPeerConnectionFactory();
         videoSource = pcFactory.createVideoSource(true);
         localVideoTrack = pcFactory.createVideoTrack("screen0", videoSource);
+
+        AudioManager am = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+        if (am != null) {
+            am.setMode(AudioManager.MODE_NORMAL);
+        }
     }
 
     @PluginMethod

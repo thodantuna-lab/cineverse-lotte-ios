@@ -20,18 +20,19 @@ if (!mainActivity.includes("ReplayKitBridgePlugin.class")) {
   if (!mainActivity.includes("import android.os.Bundle;")) {
     mainActivity = mainActivity.replace(
       "import com.getcapacitor.BridgeActivity;",
-      "import android.os.Bundle;\nimport com.getcapacitor.BridgeActivity;"
+      "import android.media.AudioManager;\nimport android.os.Bundle;\nimport com.getcapacitor.BridgeActivity;"
     );
   }
+  const onCreateBody = "registerPlugin(ReplayKitBridgePlugin.class);\n        super.onCreate(savedInstanceState);\n        setVolumeControlStream(AudioManager.STREAM_MUSIC);\n        if (getBridge() != null && getBridge().getWebView() != null) {\n            getBridge().getWebView().getSettings().setMediaPlaybackRequiresUserGesture(false);\n        }";
   if (mainActivity.includes("super.onCreate(savedInstanceState);")) {
     mainActivity = mainActivity.replace(
       "super.onCreate(savedInstanceState);",
-      "registerPlugin(ReplayKitBridgePlugin.class);\n        super.onCreate(savedInstanceState);"
+      onCreateBody
     );
   } else {
     mainActivity = mainActivity.replace(
       "public class MainActivity extends BridgeActivity {",
-      "public class MainActivity extends BridgeActivity {\n    @Override\n    public void onCreate(Bundle savedInstanceState) {\n        registerPlugin(ReplayKitBridgePlugin.class);\n        super.onCreate(savedInstanceState);\n    }"
+      `public class MainActivity extends BridgeActivity {\n    @Override\n    public void onCreate(Bundle savedInstanceState) {\n        ${onCreateBody}\n    }`
     );
   }
   fs.writeFileSync(mainActivityPath, mainActivity, "utf8");

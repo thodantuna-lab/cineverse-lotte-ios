@@ -9600,6 +9600,7 @@
 
     // Bắt đầu chia sẻ màn hình máy tính / điện thoại trực tiếp lên phòng Discord
     async function startDiscordScreenShare() {
+      if (typeof resumePendingVoiceAudio === "function") resumePendingVoiceAudio();
       const room = getEffectiveRoom(state.currentRoomId);
       if (!room || !room.isDiscordRoom) {
         showToast("Hãy vào Phòng Stream để sử dụng tính năng này!", "warning");

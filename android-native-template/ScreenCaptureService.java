@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.PowerManager;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -17,6 +18,7 @@ public class ScreenCaptureService extends Service {
     public static final int NOTIFICATION_ID = 9421;
     public static final String EXTRA_RESULT_CODE = "resultCode";
     public static final String EXTRA_RESULT_DATA = "resultData";
+    private PowerManager.WakeLock wakeLock;
 
     @Override
     public void onCreate() {
@@ -40,6 +42,14 @@ public class ScreenCaptureService extends Service {
             startForeground(NOTIFICATION_ID, notification);
         }
 
+        if (wakeLock == null) {
+            PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+            if (pm != null) {
+                wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CineVerse::ScreenShareWakeLock");
+                wakeLock.acquire();
+            }
+        }
+
         if (intent != null && intent.hasExtra(EXTRA_RESULT_CODE)) {
             int resultCode = intent.getIntExtra(EXTRA_RESULT_CODE, 0);
             Intent resultData = intent.getParcelableExtra(EXTRA_RESULT_DATA);
@@ -51,6 +61,10 @@ public class ScreenCaptureService extends Service {
 
     @Override
     public void onDestroy() {
+        if (wakeLock != null && wakeLock.isHeld()) {
+            try { wakeLock.release(); } catch (Exception ignored) {}
+            wakeLock = null;
+        }
         ReplayKitBridgePlugin.onForegroundServiceStopped();
         super.onDestroy();
     }
