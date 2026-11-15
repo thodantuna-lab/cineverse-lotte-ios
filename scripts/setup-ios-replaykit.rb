@@ -1,6 +1,7 @@
 require 'xcodeproj'
 require 'fileutils'
 require 'plist'
+require 'json'
 
 project_path = 'ios/App/App.xcodeproj'
 project = Xcodeproj::Project.open(project_path)
@@ -72,4 +73,17 @@ unless ext_target
 end
 
 project.save
+
+# 4. Register ReplayKitBridgePlugin in ios/App/App/capacitor.config.json (required for Capacitor 6)
+ios_cap_cfg_path = "#{app_dir}/capacitor.config.json"
+if File.exist?(ios_cap_cfg_path)
+  cap_cfg = JSON.parse(File.read(ios_cap_cfg_path))
+  cap_cfg['packageClassList'] ||= []
+  unless cap_cfg['packageClassList'].include?('ReplayKitBridgePlugin')
+    cap_cfg['packageClassList'] << 'ReplayKitBridgePlugin'
+  end
+  File.write(ios_cap_cfg_path, JSON.pretty_generate(cap_cfg))
+  puts "Updated #{ios_cap_cfg_path} with ReplayKitBridgePlugin"
+end
+
 puts 'Successfully configured ReplayKitBridgePlugin and ReplayKitExtension!'

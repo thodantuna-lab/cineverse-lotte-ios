@@ -5,7 +5,14 @@ import Network
 import UIKit
 
 @objc(ReplayKitBridgePlugin)
-public class ReplayKitBridgePlugin: CAPPlugin {
+public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "ReplayKitBridgePlugin"
+    public let jsName = "ReplayKitBridge"
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "startBroadcast", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "stopBroadcast", returnType: CAPPluginReturnPromise)
+    ]
+
     private var listener: NWListener?
     private let queue = DispatchQueue(label: "com.cineverse.lotte.replaykit.server")
     private var pickerView: RPSystemBroadcastPickerView?
@@ -72,6 +79,21 @@ public class ReplayKitBridgePlugin: CAPPlugin {
         }
     }
 
+    private func findReplayKitExtensionBundleID() -> String {
+        if let plugInsURL = Bundle.main.builtInPlugInsURL,
+           let urls = try? FileManager.default.contentsOfDirectory(at: plugInsURL, includingPropertiesForKeys: nil) {
+            for url in urls where url.pathExtension == "appex" {
+                if let bundle = Bundle(url: url), let bid = bundle.bundleIdentifier {
+                    return bid
+                }
+            }
+        }
+        if let mainId = Bundle.main.bundleIdentifier {
+            return "\(mainId).ReplayKitExtension"
+        }
+        return "com.cineverse.lotte.ReplayKitExtension"
+    }
+
     @objc func startBroadcast(_ call: CAPPluginCall) {
         startLocalReceiver()
         DispatchQueue.main.async { [weak self] in
@@ -79,8 +101,9 @@ public class ReplayKitBridgePlugin: CAPPlugin {
                 call.reject("Missing root view")
                 return
             }
-            let picker = RPSystemBroadcastPickerView(frame: CGRect(x: -100, y: -100, width: 44, height: 44))
-            picker.preferredExtension = "com.cineverse.lotte.ReplayKitExtension"
+            let picker = RPSystemBroadcastPickerView(frame: CGRect(x: 0, y: 0, width: 1, height: 1))
+            picker.alpha = 0.01
+            picker.preferredExtension = self.findReplayKitExtensionBundleID()
             picker.showsMicrophoneButton = false
             rootView.addSubview(picker)
             self.pickerView = picker
