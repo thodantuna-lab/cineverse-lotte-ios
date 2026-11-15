@@ -103,7 +103,7 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
             let encoderFactory = RTCDefaultVideoEncoderFactory()
             let decoderFactory = RTCDefaultVideoDecoderFactory()
             let factory = RTCPeerConnectionFactory(encoderFactory: encoderFactory, decoderFactory: decoderFactory)
-            let source = factory.videoSource()
+            let source = factory.videoSource(forScreenCast: true)
             let capturer = RTCVideoCapturer(delegate: source)
             let track = factory.videoTrack(with: source, trackId: "screen0")
             self.pcFactory = factory
@@ -455,10 +455,11 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
             if let sender = pc.add(videoTrack, streamIds: ["cineverse_screen"]) {
                 let params = sender.parameters
                 if let enc = params.encodings.first {
+                    enc.minBitrateBps = NSNumber(value: max(2_000_000, maxBitrate / 3))
                     enc.maxBitrateBps = NSNumber(value: maxBitrate)
                     enc.maxFramerate = NSNumber(value: maxFramerate)
                 }
-                params.degradationPreference = NSNumber(value: RTCDegradationPreference.maintainFramerate.rawValue)
+                params.degradationPreference = NSNumber(value: RTCDegradationPreference.maintainResolution.rawValue)
                 sender.parameters = params
             }
 
@@ -474,15 +475,34 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
                     call.reject("Failed to create offer: \(error?.localizedDescription ?? "unknown")")
                     return
                 }
-                pc.setLocalDescription(sdp) { err in
+                // Boost initial WebRTC bitrate so stream is razor sharp from frame #1
+                let boostedSdpStr = sdp.sdp.replacingOccurrences(
+                    of: "a=fmtp:(\\d+) (.*)",
+                    with: "a=fmtp:$1 $2;x-google-start-bitrate=5000;x-google-min-bitrate=2000;x-google-max-bitrate=8000",
+                    options: .regularExpression
+                )
+                let boostedSdp = RTCSessionDescription(type: sdp.type, sdp: boostedSdpStr)
+                pc.setLocalDescription(boostedSdp) { err in
                     if let err = err {
-                        call.reject("Failed to set local description: \(err.localizedDescription)")
+                        // Fallback to unmodified SDP if fmtp rewrite fails
+                        pc.setLocalDescription(sdp) { err2 in
+                            if let err2 = err2 {
+                                call.reject("Failed to set local description: \(err2.localizedDescription)")
+                                return
+                            }
+                            call.resolve([
+                                "sdp": [
+                                    "type": RTCSessionDescription.string(for: sdp.type),
+                                    "sdp": sdp.sdp
+                                ]
+                            ])
+                        }
                         return
                     }
                     call.resolve([
                         "sdp": [
-                            "type": RTCSessionDescription.string(for: sdp.type),
-                            "sdp": sdp.sdp
+                            "type": RTCSessionDescription.string(for: boostedSdp.type),
+                            "sdp": boostedSdp.sdp
                         ]
                     ])
                 }

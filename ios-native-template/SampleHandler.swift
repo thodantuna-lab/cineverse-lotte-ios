@@ -4,6 +4,7 @@ import CoreMedia
 import CoreVideo
 import AudioToolbox
 import ImageIO
+import Accelerate
 
 class SampleHandler: RPBroadcastSampleHandler {
     private var connection: NWConnection?
@@ -118,10 +119,12 @@ class SampleHandler: RPBroadcastSampleHandler {
         let fmt = CVPixelBufferGetPixelFormatType(pixelBuffer)
         let isNV12 = (fmt == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange || fmt == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)
 
-        // Subsample 2x if > 1920px so loopback bandwidth & RAM stay tiny even on Pro Max / iPad
-        let step = max(srcW, srcH) > 1920 ? 2 : 1
-        let dstW = (srcW / step) & ~1
-        let dstH = (srcH / step) & ~1
+        // Scale proportionally so longest side <= 1920px (e.g. 1290x2796 -> 886x1920 Full HD crispness)
+        let maxDim = 1920
+        let longest = max(srcW, srcH)
+        let needsScale = longest > maxDim
+        let dstW = (needsScale ? (srcW * maxDim / longest) : srcW) & ~1
+        let dstH = (needsScale ? (srcH * maxDim / longest) : srcH) & ~1
         guard dstW > 0, dstH > 0 else { return nil }
 
         if isNV12 && CVPixelBufferGetPlaneCount(pixelBuffer) >= 2 {
@@ -148,37 +151,26 @@ class SampleHandler: RPBroadcastSampleHandler {
                 dst[13] = rotation
                 dst[14] = 1 // 1 = NV12
 
-                let ySrc = yBase.assumingMemoryBound(to: UInt8.self)
-                let uvSrc = uvBase.assumingMemoryBound(to: UInt8.self)
-                var yDst = dst + 15
-                var uvDst = dst + 15 + ySize
+                let yDst = dst + 15
+                let uvDst = dst + 15 + ySize
 
-                if step == 1 {
+                if !needsScale {
+                    let ySrc = yBase.assumingMemoryBound(to: UInt8.self)
+                    let uvSrc = uvBase.assumingMemoryBound(to: UInt8.self)
                     for row in 0..<dstH {
-                        memcpy(yDst, ySrc + row * yStride, dstW)
-                        yDst += dstW
+                        memcpy(yDst + row * dstW, ySrc + row * yStride, dstW)
                     }
                     for row in 0..<(dstH / 2) {
-                        memcpy(uvDst, uvSrc + row * uvStride, dstW)
-                        uvDst += dstW
+                        memcpy(uvDst + row * dstW, uvSrc + row * uvStride, dstW)
                     }
                 } else {
-                    for row in 0..<dstH {
-                        let sRow = ySrc + (row * 2) * yStride
-                        for col in 0..<dstW {
-                            yDst[col] = sRow[col * 2]
-                        }
-                        yDst += dstW
-                    }
-                    for row in 0..<(dstH / 2) {
-                        let sRow = uvSrc + (row * 2) * uvStride
-                        let pairs = dstW / 2
-                        for p in 0..<pairs {
-                            uvDst[p * 2] = sRow[p * 4]
-                            uvDst[p * 2 + 1] = sRow[p * 4 + 1]
-                        }
-                        uvDst += dstW
-                    }
+                    var srcYBuf = vImage_Buffer(data: yBase, height: vImagePixelCount(srcH), width: vImagePixelCount(srcW), rowBytes: yStride)
+                    var dstYBuf = vImage_Buffer(data: yDst, height: vImagePixelCount(dstH), width: vImagePixelCount(dstW), rowBytes: dstW)
+                    vImageScale_Planar8(&srcYBuf, &dstYBuf, nil, vImage_Flags(kvImageHighQualityResampling))
+
+                    var srcUVBuf = vImage_Buffer(data: uvBase, height: vImagePixelCount(srcH / 2), width: vImagePixelCount(srcW / 2), rowBytes: uvStride)
+                    var dstUVBuf = vImage_Buffer(data: uvDst, height: vImagePixelCount(dstH / 2), width: vImagePixelCount(dstW / 2), rowBytes: dstW)
+                    vImageScale_CbCr8(&srcUVBuf, &dstUVBuf, nil, vImage_Flags(kvImageHighQualityResampling))
                 }
             }
             return packet
@@ -202,22 +194,16 @@ class SampleHandler: RPBroadcastSampleHandler {
                 dst[13] = rotation
                 dst[14] = 2 // 2 = BGRA
 
-                let src = base.assumingMemoryBound(to: UInt8.self)
-                var pDst = dst + 15
-                if step == 1 {
+                let pDst = dst + 15
+                if !needsScale {
+                    let src = base.assumingMemoryBound(to: UInt8.self)
                     for row in 0..<dstH {
-                        memcpy(pDst, src + row * stride, rowBytes)
-                        pDst += rowBytes
+                        memcpy(pDst + row * rowBytes, src + row * stride, rowBytes)
                     }
                 } else {
-                    let dst32 = UnsafeMutableRawPointer(pDst).assumingMemoryBound(to: UInt32.self)
-                    for row in 0..<dstH {
-                        let sRow = UnsafeRawPointer(src + (row * 2) * stride).assumingMemoryBound(to: UInt32.self)
-                        let dRow = dst32 + row * dstW
-                        for col in 0..<dstW {
-                            dRow[col] = sRow[col * 2]
-                        }
-                    }
+                    var srcBuf = vImage_Buffer(data: base, height: vImagePixelCount(srcH), width: vImagePixelCount(srcW), rowBytes: stride)
+                    var dstBuf = vImage_Buffer(data: pDst, height: vImagePixelCount(dstH), width: vImagePixelCount(dstW), rowBytes: rowBytes)
+                    vImageScale_ARGB8888(&srcBuf, &dstBuf, nil, vImage_Flags(kvImageHighQualityResampling))
                 }
             }
             return packet
