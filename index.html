@@ -10005,6 +10005,11 @@
         if (ev.channel?.label !== "screen_audio") return;
         const dc = ev.channel;
         dc.binaryType = "arraybuffer";
+        window.__screenAudioDcState = dc.readyState || "init";
+        window.__screenAudioRxCount = 0;
+        dc.onopen = () => { window.__screenAudioDcState = "open"; };
+        dc.onclose = () => { window.__screenAudioDcState = "closed"; };
+        dc.onerror = () => { window.__screenAudioDcState = "err"; };
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         let nextTime = 0;
 
@@ -10036,6 +10041,8 @@
               window.__sharedScreenAudioCtx = new AudioCtx();
             }
             const audioCtx = window.__sharedScreenAudioCtx;
+            window.__screenAudioCtxState = audioCtx.state;
+            window.__screenAudioRxCount = (window.__screenAudioRxCount || 0) + 1;
             if (audioCtx.state === "suspended") {
               audioCtx.resume().catch(() => {});
               if (audioCtx.state === "suspended") {
@@ -10047,6 +10054,7 @@
             const view = new DataView(buf);
             const sr = view.getUint32(0, true) || 44100;
             const ch = Math.max(1, Math.min(2, view.getUint16(4, true) || 2));
+            window.__screenAudioFormat = `${sr}/${ch}ch`;
             const int16 = new Int16Array(buf, 6);
             const frames = Math.floor(int16.length / ch);
             if (frames <= 0) return;
@@ -10198,7 +10206,11 @@
           }
           const rttText = rttMs !== null ? `${rttMs}ms` : "~0ms";
           const resText = height ? `${height}p${fps || ""}` : "";
-          statsEl.textContent = resText ? `⚡ ${rttText} • ${resText}${mbpsText}` : `⚡ ${rttText}`;
+          const dcState = window.__screenAudioDcState;
+          const audioDiag = (!liveScreenStream && dcState)
+            ? ` • 🔊${window.__screenAudioRxCount || 0}(${dcState}/${window.__screenAudioCtxState || "noctx"}${window.__screenAudioFormat ? "/" + window.__screenAudioFormat : ""})`
+            : "";
+          statsEl.textContent = (resText ? `⚡ ${rttText} • ${resText}${mbpsText}` : `⚡ ${rttText}`) + audioDiag;
         } catch (_) {}
       };
       pollStats();
