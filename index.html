@@ -3824,6 +3824,9 @@
       ],
       lobbyConfigRooms: {},
       isAdminUnlocked: (() => { try { localStorage.removeItem("cineverse_admin_unlocked"); } catch (e) {} return false; })(),
+      adminSessionPin: "",
+      adminRoomPins: {},
+      myHostRoomPins: {},
       seatsByRoom: {
         "room-1": {
           "C4": { uid: "bot_1", userName: "Minh Anh", snack: "🍿🥤" },
@@ -4253,7 +4256,7 @@
                   <span class="px-2.5 py-1 rounded-xl text-xs font-extrabold ${isShowing ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'}">
                     ${isShowing ? '🟢 Đang chiếu' : '⏳ Sắp chiếu'}
                   </span>
-                  ${isLocked ? `<span class="px-2 py-1 rounded-xl bg-black/80 border border-rose-500/50 text-rose-300 text-[10px] font-black"><i class="fa-solid fa-lock mr-1"></i>${state.isAdminUnlocked ? `PIN: ${escapeHTML(state.roomLocks[room.id])}` : "PIN"}</span>` : ""}
+                  ${isLocked ? `<span class="px-2 py-1 rounded-xl bg-black/80 border border-rose-500/50 text-rose-300 text-[10px] font-black"><i class="fa-solid fa-lock mr-1"></i>${(state.isAdminUnlocked && state.adminRoomPins[room.id]) ? `PIN: ${escapeHTML(state.adminRoomPins[room.id])}` : "PIN"}</span>` : ""}
                 </div>
 
                 <div class="shrink-0 px-2.5 py-1 rounded-xl bg-black/75 border border-white/15 text-xs font-bold text-amber-300">
@@ -4316,19 +4319,25 @@
       }
 
       const room = getEffectiveRoom(roomId);
-      const requiredPin = state.roomLocks[roomId];
-      if (requiredPin && state.unlockedRooms[roomId] !== requiredPin) {
+      const lockObj = state.roomLocks[roomId];
+      const lockToken = lockObj ? (lockObj.pinHash || lockObj.legacyPin || "") : "";
+      if (lockObj && lockToken && state.unlockedRooms[roomId] !== lockToken) {
         if (state.isAdminUnlocked) {
-          state.unlockedRooms[roomId] = requiredPin;
-          showToast(`👑 Admin vào phòng (Mã PIN phòng: ${requiredPin})`, "info");
+          state.unlockedRooms[roomId] = lockToken;
+          const adminPinHint = state.adminRoomPins[roomId];
+          showToast(adminPinHint ? `👑 Admin vào phòng (Mã PIN phòng: ${adminPinHint})` : `👑 Admin vào phòng đã khóa`, "info");
         } else {
           const entered = window.prompt(`🔒 ${room.number} đang bật Khóa PIN Riêng Tư.\nVui lòng nhập mã PIN 4 số để vào phòng:`);
           if (entered === null) return;
-          if (String(entered).trim() !== String(requiredPin)) {
+          const enteredClean = String(entered).trim();
+          const okPin = lockObj.pinHash
+            ? ((await sha256Hex(`${roomId}:${enteredClean}`)) === lockObj.pinHash)
+            : (enteredClean === String(lockObj.legacyPin || ""));
+          if (!okPin) {
             showToast("❌ Mã PIN không đúng! Không thể vào phòng.", "error");
             return;
           }
-          state.unlockedRooms[roomId] = requiredPin;
+          state.unlockedRooms[roomId] = lockToken;
           showToast("🔓 Mã PIN chính xác! Chào mừng vào phòng.", "success");
         }
       }
@@ -4469,13 +4478,20 @@
         statusEl.className = "px-2.5 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs";
       }
 
-      // Đồng bộ nút trạng thái khóa PIN của phòng hiện tại
+      // Đồng bộ nút trạng thái khóa PIN của phòng hiện tại (chỉ Admin/Host mới thấy 4 số PIN)
       const lockBtn = document.getElementById("btn-room-lock");
-      const pin = state.roomLocks[state.currentRoomId];
+      const lockObj = state.roomLocks[state.currentRoomId];
       if (lockBtn) {
-        lockBtn.innerHTML = pin
-          ? `<i class="fa-solid fa-lock mr-1 text-rose-400"></i>Khóa PIN: ${pin}`
-          : `<i class="fa-solid fa-lock-open mr-1 text-emerald-400"></i>Phòng Công Khai`;
+        if (lockObj) {
+          const visiblePin = state.isAdminUnlocked
+            ? (state.adminRoomPins[state.currentRoomId] || state.myHostRoomPins[state.currentRoomId] || "")
+            : (isIAmHost() ? (state.myHostRoomPins[state.currentRoomId] || "") : "");
+          lockBtn.innerHTML = visiblePin
+            ? `<i class="fa-solid fa-lock mr-1 text-rose-400"></i>Khóa PIN: ${escapeHTML(visiblePin)}`
+            : `<i class="fa-solid fa-lock mr-1 text-rose-400"></i>Đã Khóa PIN`;
+        } else {
+          lockBtn.innerHTML = `<i class="fa-solid fa-lock-open mr-1 text-emerald-400"></i>Phòng Công Khai`;
+        }
       }
     }
 
@@ -7516,7 +7532,7 @@
       }
     }
 
-    function toggleRoomPinLock() {
+    async function toggleRoomPinLock() {
       if (!state.currentRoomId) return;
       if (currentRoomHost && currentRoomHost.uid && currentRoomHost.uid !== state.uid) {
         showToast("Chỉ Chủ phòng (Host) mới có quyền khóa hoặc mở khóa PIN!", "error");
@@ -7527,6 +7543,8 @@
       if (state.roomLocks[rId]) {
         delete state.roomLocks[rId];
         delete state.unlockedRooms[rId];
+        delete state.myHostRoomPins[rId];
+        delete state.adminRoomPins[rId];
         if (rtdb && rtdbMod) {
           rtdbMod.remove(rtdbMod.ref(rtdb, `room_locks/${rId}`)).catch(() => {});
         }
@@ -7535,17 +7553,35 @@
         showToast("Đã mở khóa phòng về chế độ Công khai!", "info");
       } else {
         const pin = String(Math.floor(1000 + Math.random() * 9000));
-        state.roomLocks[rId] = pin;
-        state.unlockedRooms[rId] = pin;
+        const pinHash = await sha256Hex(`${rId}:${pin}`);
+        let pinSealed = "";
+        try {
+          const workerBase = (typeof getR2WorkerUrl === "function" ? getR2WorkerUrl() : DEFAULT_R2_WORKER_URL).replace(/\/+$/, "");
+          const sealRes = await fetch(`${workerBase}/room-lock-seal`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ roomId: rId, pin }),
+            signal: AbortSignal.timeout(5000)
+          });
+          const sealData = await sealRes.json();
+          if (sealData && sealData.ok && sealData.sealed) pinSealed = sealData.sealed;
+        } catch (e) {}
+
+        state.myHostRoomPins[rId] = pin;
+        if (state.isAdminUnlocked) state.adminRoomPins[rId] = pin;
+        state.roomLocks[rId] = { pinHash, pinSealed, hostUid: state.uid };
+        state.unlockedRooms[rId] = pinHash;
         if (rtdb && rtdbMod) {
           rtdbMod.set(rtdbMod.ref(rtdb, `room_locks/${rId}`), {
-            pin,
+            locked: true,
+            pinHash,
+            pinSealed,
             hostUid: state.uid,
             updatedAt: Date.now()
           }).catch(() => {});
         }
         if (btn) btn.innerHTML = `<i class="fa-solid fa-lock mr-1 text-rose-400"></i>Khóa PIN: ${pin}`;
-        pushMessageToRoom(`🔒 Chủ phòng đã bật chế độ Phòng Riêng Tư (Mã PIN: ${pin}).`);
+        pushMessageToRoom(`🔒 Chủ phòng đã bật chế độ Phòng Riêng Tư (Yêu cầu mã PIN).`);
         showToast(`Đã khóa phòng riêng tư! Mã PIN của phòng là: ${pin}`, "success");
       }
       renderLobby();
@@ -11587,23 +11623,43 @@
           }
         }, 60000);
 
-        // Lắng nghe trạng thái Khóa PIN của các phòng theo thời gian thực
-        rtdbMod.onValue(rtdbMod.ref(rtdb, "room_locks"), (snap) => {
+        // Lắng nghe trạng thái Khóa PIN của các phòng theo thời gian thực (mã hóa chống soi F12)
+        rtdbMod.onValue(rtdbMod.ref(rtdb, "room_locks"), async (snap) => {
           const rawLocks = snap.val() || {};
           const nextLocks = {};
           Object.entries(rawLocks).forEach(([rId, info]) => {
-            if (info && info.pin) {
-              nextLocks[rId] = String(info.pin);
+            if (!info) return;
+            if (info.pinHash) {
+              nextLocks[rId] = {
+                pinHash: String(info.pinHash),
+                pinSealed: String(info.pinSealed || ""),
+                hostUid: info.hostUid || ""
+              };
+            } else if (info.pin) {
+              nextLocks[rId] = {
+                legacyPin: String(info.pin),
+                hostUid: info.hostUid || ""
+              };
+              if (state.isAdminUnlocked) state.adminRoomPins[rId] = String(info.pin);
             }
           });
           state.roomLocks = nextLocks;
+          if (state.isAdminUnlocked && typeof refreshAdminRoomPins === "function") {
+            await refreshAdminRoomPins();
+          }
           if (state.currentRoomId) {
-            const activePin = nextLocks[state.currentRoomId];
-            const lockInfo = rawLocks[state.currentRoomId];
-            if (activePin && state.unlockedRooms[state.currentRoomId] !== activePin && lockInfo?.hostUid !== state.uid && !isIAmHost()) {
+            const lockObj = nextLocks[state.currentRoomId];
+            const lockToken = lockObj ? (lockObj.pinHash || lockObj.legacyPin || "") : "";
+            if (lockObj && lockToken && !state.isAdminUnlocked && state.unlockedRooms[state.currentRoomId] !== lockToken && lockObj.hostUid !== state.uid && !isIAmHost()) {
               const entered = window.prompt(`🔒 Phòng này đang bật Khóa PIN Riêng Tư.\nVui lòng nhập mã PIN 4 số để tiếp tục xem:`);
-              if (entered !== null && String(entered).trim() === activePin) {
-                state.unlockedRooms[state.currentRoomId] = activePin;
+              const enteredClean = entered !== null ? String(entered).trim() : "";
+              const okPin = entered !== null && (
+                lockObj.pinHash
+                  ? ((await sha256Hex(`${state.currentRoomId}:${enteredClean}`)) === lockObj.pinHash)
+                  : (enteredClean === String(lockObj.legacyPin || ""))
+              );
+              if (okPin) {
+                state.unlockedRooms[state.currentRoomId] = lockToken;
                 showToast("🔓 Mã PIN chính xác!", "success");
               } else {
                 showToast("❌ Mã PIN không đúng hoặc đã bị khóa phòng!", "error");
@@ -12643,10 +12699,54 @@
         return;
       }
       state.isAdminUnlocked = true;
+      state.adminSessionPin = pin;
+      await refreshAdminRoomPins();
       renderLobby();
+      if (state.currentRoomId) updateRoomHeaderUI();
       showToast("👑 Đã mở khóa quyền Admin!", "success");
       openAdminPanelModal();
     }
+
+    async function refreshAdminRoomPins() {
+      if (!state.isAdminUnlocked || !state.adminSessionPin) return;
+      const sealedMap = {};
+      Object.entries(state.roomLocks || {}).forEach(([rId, lockObj]) => {
+        if (lockObj && lockObj.pinSealed) sealedMap[rId] = lockObj.pinSealed;
+        else if (lockObj && lockObj.legacyPin) state.adminRoomPins[rId] = lockObj.legacyPin;
+      });
+      if (Object.keys(sealedMap).length === 0) return;
+      try {
+        const workerBase = (typeof getR2WorkerUrl === "function" ? getR2WorkerUrl() : DEFAULT_R2_WORKER_URL).replace(/\/+$/, "");
+        const res = await fetch(`${workerBase}/room-locks-unseal`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ adminPin: state.adminSessionPin, locks: sealedMap }),
+          signal: AbortSignal.timeout(5000)
+        });
+        const data = await res.json();
+        if (data && data.ok && data.pins) {
+          Object.assign(state.adminRoomPins, data.pins);
+        }
+      } catch (e) {}
+    }
+
+    // Chặn F12 / Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+U / chuột phải ngoài ô nhập liệu
+    document.addEventListener("keydown", (e) => {
+      const k = String(e.key || "").toUpperCase();
+      if (
+        k === "F12" ||
+        (e.ctrlKey && e.shiftKey && (k === "I" || k === "J" || k === "C")) ||
+        (e.ctrlKey && k === "U")
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+    document.addEventListener("contextmenu", (e) => {
+      const tag = (e.target?.tagName || "").toLowerCase();
+      if (tag === "input" || tag === "textarea") return;
+      e.preventDefault();
+    }, true);
 
     function renderAdminRoomsEditor() {
       const container = document.getElementById("admin-rooms-editor");

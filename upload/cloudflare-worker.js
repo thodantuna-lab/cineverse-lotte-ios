@@ -86,6 +86,38 @@ async function handleLiveKitTokenRequest(request, env) {
   }
 }
 
+async function getRoomSealKey(env) {
+  const secret = String(env.ADMIN_PIN || "2026").trim() + "::cineverse-room-seal-v1";
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(secret));
+  return crypto.subtle.importKey("raw", digest, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+}
+
+async function sealRoomPin(env, roomId, pin) {
+  const key = await getRoomSealKey(env);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const plain = new TextEncoder().encode(JSON.stringify({ roomId, pin }));
+  const cipher = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, plain);
+  const combined = new Uint8Array(iv.length + cipher.byteLength);
+  combined.set(iv, 0);
+  combined.set(new Uint8Array(cipher), iv.length);
+  return base64UrlEncode(combined);
+}
+
+async function unsealRoomPin(env, sealed, expectedRoomId) {
+  const b64 = String(sealed || "").replace(/-/g, "+").replace(/_/g, "/");
+  const pad = "=".repeat((4 - (b64.length % 4)) % 4);
+  const bin = atob(b64 + pad);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  const iv = bytes.slice(0, 12);
+  const cipher = bytes.slice(12);
+  const key = await getRoomSealKey(env);
+  const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, cipher);
+  const parsed = JSON.parse(new TextDecoder().decode(plain));
+  if (expectedRoomId && parsed.roomId !== expectedRoomId) return null;
+  return String(parsed.pin || "");
+}
+
 function jsonResponse(payload, status = 200) {
   return new Response(JSON.stringify(payload), {
     status,
@@ -501,6 +533,39 @@ export default {
         const pin = String(body?.pin || "").trim();
         const expected = String(env.ADMIN_PIN || "2026").trim();
         return jsonResponse({ ok: Boolean(pin && pin === expected), usingSecret: Boolean(env.ADMIN_PIN) }, 200);
+      } catch (e) {
+        return jsonResponse({ ok: false }, 200);
+      }
+    }
+    if (request.method === "POST" && url.pathname.endsWith("/room-lock-seal")) {
+      try {
+        const body = await request.json();
+        const roomId = String(body?.roomId || "").trim();
+        const pin = String(body?.pin || "").trim();
+        if (!roomId || !pin) return jsonResponse({ ok: false }, 200);
+        const sealed = await sealRoomPin(env, roomId, pin);
+        return jsonResponse({ ok: true, sealed }, 200);
+      } catch (e) {
+        return jsonResponse({ ok: false }, 200);
+      }
+    }
+    if (request.method === "POST" && url.pathname.endsWith("/room-locks-unseal")) {
+      try {
+        const body = await request.json();
+        const adminPin = String(body?.adminPin || "").trim();
+        const expected = String(env.ADMIN_PIN || "2026").trim();
+        if (!adminPin || adminPin !== expected) {
+          return jsonResponse({ ok: false, error: "UNAUTHORIZED" }, 200);
+        }
+        const locks = body?.locks && typeof body.locks === "object" ? body.locks : {};
+        const pins = {};
+        for (const [rId, sealed] of Object.entries(locks)) {
+          try {
+            const p = await unsealRoomPin(env, sealed, rId);
+            if (p) pins[rId] = p;
+          } catch (e) {}
+        }
+        return jsonResponse({ ok: true, pins }, 200);
       } catch (e) {
         return jsonResponse({ ok: false }, 200);
       }
