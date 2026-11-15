@@ -115,9 +115,9 @@ class SampleHandler: RPBroadcastSampleHandler {
 
     private func targetFrameInterval() -> CFTimeInterval {
         switch ProcessInfo.processInfo.thermalState {
-        case .critical: return 1.0 / 20.0
-        case .serious:  return 1.0 / 30.0
-        default:        return 1.0 / 60.0
+        case .critical: return 1.0 / 26.0
+        case .serious:  return 1.0 / 48.0
+        default:        return 1.0 / 66.0
         }
     }
 
@@ -130,7 +130,7 @@ class SampleHandler: RPBroadcastSampleHandler {
             if (now - lastSentTime) < targetFrameInterval() { return }
 
             stateLock.lock()
-            let busy = isEncodingVideo || inFlightPackets >= 4
+            let busy = isEncodingVideo || inFlightPackets >= 6
             if !busy { isEncodingVideo = true }
             stateLock.unlock()
             if busy { return }
@@ -266,7 +266,7 @@ class SampleHandler: RPBroadcastSampleHandler {
             : nil
 
         frameIndex += 1
-        let pts = CMTime(value: frameIndex, timescale: 60)
+        let pts = CMTime(seconds: CACurrentMediaTime(), preferredTimescale: 1000)
         let refCon = UnsafeMutableRawPointer(bitPattern: Int(rotation) + 1)
         let encStatus = VTCompressionSessionEncodeFrame(
             session,
