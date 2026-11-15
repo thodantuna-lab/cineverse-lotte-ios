@@ -14,6 +14,15 @@ app_dir = 'ios/App/App'
 FileUtils.cp('ios-native-template/ReplayKitBridgePlugin.swift', "#{app_dir}/ReplayKitBridgePlugin.swift")
 FileUtils.cp('ios-native-template/ReplayKitBridgePlugin.m', "#{app_dir}/ReplayKitBridgePlugin.m")
 
+# 1b. Replace default Capacitor AppIcon with custom CineVerse Lotte Netflix-style icon
+appicon_dst = "#{app_dir}/Assets.xcassets/AppIcon.appiconset"
+if Dir.exist?('assets/icons/ios')
+  FileUtils.mkdir_p(appicon_dst)
+  Dir.glob("#{appicon_dst}/*.png").each { |f| FileUtils.rm_f(f) }
+  FileUtils.cp_r(Dir.glob('assets/icons/ios/*'), appicon_dst)
+  puts "[setup-ios-replaykit] Installed custom CineVerse Lotte AppIcon."
+end
+
 app_group = project.main_group.find_subpath('App', true)
 swift_ref = app_group.files.find { |f| f.path == 'ReplayKitBridgePlugin.swift' } || app_group.new_file('ReplayKitBridgePlugin.swift')
 m_ref = app_group.files.find { |f| f.path == 'ReplayKitBridgePlugin.m' } || app_group.new_file('ReplayKitBridgePlugin.m')

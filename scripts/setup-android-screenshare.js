@@ -13,6 +13,28 @@ for (const file of ["ReplayKitBridgePlugin.java", "ScreenCaptureService.java", "
   );
 }
 
+// 1a. Replace default Capacitor launcher icons with custom CineVerse Lotte Netflix-style icons
+const androidIconsSrc = path.join(root, "assets", "icons", "android");
+const androidResDir = path.join(root, "android", "app", "src", "main", "res");
+if (fs.existsSync(androidIconsSrc)) {
+  for (const density of fs.readdirSync(androidIconsSrc)) {
+    const srcFolder = path.join(androidIconsSrc, density);
+    const dstFolder = path.join(androidResDir, density);
+    if (!fs.statSync(srcFolder).isDirectory()) continue;
+    fs.mkdirSync(dstFolder, { recursive: true });
+    for (const file of fs.readdirSync(srcFolder)) {
+      fs.copyFileSync(path.join(srcFolder, file), path.join(dstFolder, file));
+    }
+  }
+  const bgValuesDir = path.join(androidResDir, "values");
+  fs.mkdirSync(bgValuesDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(bgValuesDir, "ic_launcher_background.xml"),
+    `<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#000000</color>\n</resources>\n`,
+    "utf8"
+  );
+}
+
 // 1b. Override capacitor_bridge_layout_main.xml to use KeepAliveWebView so WebRTC voice audio never pauses in background
 const capLayoutSrc = path.join(root, "node_modules", "@capacitor", "android", "capacitor", "src", "main", "res", "layout", "capacitor_bridge_layout_main.xml");
 if (fs.existsSync(capLayoutSrc)) {

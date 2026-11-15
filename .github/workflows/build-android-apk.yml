@@ -8,6 +8,7 @@ on:
       - 'package.json'
       - 'capacitor.config.json'
       - 'android-native-template/**'
+      - 'assets/**'
       - 'scripts/setup-android-screenshare.js'
       - '.github/workflows/build-android-apk.yml'
   workflow_dispatch:
