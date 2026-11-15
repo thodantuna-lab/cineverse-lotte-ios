@@ -21,6 +21,7 @@ public class ScreenCaptureService extends Service {
     public static final int NOTIFICATION_ID = 9421;
     public static final String EXTRA_RESULT_CODE = "resultCode";
     public static final String EXTRA_RESULT_DATA = "resultData";
+    public static final String EXTRA_VOICE_ONLY = "voiceOnly";
     private PowerManager.WakeLock wakeLock;
 
     @Override
@@ -31,19 +32,26 @@ public class ScreenCaptureService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        boolean voiceOnly = intent != null && intent.getBooleanExtra(EXTRA_VOICE_ONLY, false);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("CineVerse Lotte")
-                .setContentText("Đang chia sẻ màn hình & âm thanh trực tiếp...")
+                .setContentText(voiceOnly ? "Đang kết nối Voice Chat nền..." : "Đang chia sẻ màn hình & âm thanh trực tiếp...")
                 .setSmallIcon(android.R.drawable.ic_menu_camera)
                 .setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .build();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            int fgType = ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION;
+            int fgType = 0;
+            if (!voiceOnly) {
+                fgType |= ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION;
+            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
                     && ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
                 fgType |= ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
+            }
+            if (fgType == 0) {
+                fgType = ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION;
             }
             startForeground(NOTIFICATION_ID, notification, fgType);
         } else {

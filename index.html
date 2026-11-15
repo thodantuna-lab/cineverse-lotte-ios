@@ -8434,6 +8434,64 @@
       if (dBadge) dBadge.classList.add("hidden");
     }
 
+    function isNativeAndroidVoiceAvailable() {
+      return !!(
+        window.Capacitor &&
+        typeof window.Capacitor.getPlatform === "function" &&
+        window.Capacitor.getPlatform() === "android" &&
+        window.Capacitor.Plugins &&
+        window.Capacitor.Plugins.ReplayKitBridge &&
+        typeof window.Capacitor.Plugins.ReplayKitBridge.voiceCreateOffer === "function"
+      );
+    }
+
+    window.__onNativeVoiceIce = (remoteUid, cand) => {
+      if (!state.currentRoomId || !rtdb || !rtdbMod || !remoteUid || !cand) return;
+      rtdbMod.push(rtdbMod.ref(rtdb, `voice/${state.currentRoomId}/ice/${remoteUid}/${state.uid}`), cand).catch(() => {});
+    };
+
+    window.__onNativeVoiceIceState = (remoteUid, iceState) => {
+      const entry = voicePeers[remoteUid];
+      const roomId = state.currentRoomId;
+      if (!entry || !entry.native || !roomId) return;
+      if (iceState === "connected" || iceState === "completed") {
+        if (entry.iceDisconnectTimer) {
+          clearTimeout(entry.iceDisconnectTimer);
+          entry.iceDisconnectTimer = null;
+        }
+        return;
+      }
+      const triggerNativeRestart = async () => {
+        try {
+          const res = await window.Capacitor.Plugins.ReplayKitBridge.voiceCreateOffer({
+            remoteUid,
+            iceServers: VOICE_ICE_CONFIG.iceServers || [],
+            iceRestart: true
+          });
+          if (res?.sdp?.sdp && rtdbMod && rtdb) {
+            await rtdbMod.set(rtdbMod.ref(rtdb, `voice/${roomId}/signals/${remoteUid}/${state.uid}`), {
+              type: "offer",
+              sdp: res.sdp.sdp,
+              from: state.uid,
+              sessionId: currentVoiceSessionId,
+              ts: Date.now()
+            });
+          }
+        } catch (e) {}
+      };
+      if (iceState === "failed") {
+        if (entry.iceDisconnectTimer) {
+          clearTimeout(entry.iceDisconnectTimer);
+          entry.iceDisconnectTimer = null;
+        }
+        if (state.uid < remoteUid) triggerNativeRestart();
+        else entry.iceDisconnectTimer = setTimeout(triggerNativeRestart, 2000);
+      } else if (iceState === "disconnected") {
+        if (entry.iceDisconnectTimer) clearTimeout(entry.iceDisconnectTimer);
+        entry.iceDisconnectTimer = setTimeout(triggerNativeRestart, state.uid < remoteUid ? 2500 : 4500);
+      }
+    };
+
     function startVoiceStatsMonitor() {
       stopVoiceStatsMonitor();
       voiceStatsTimer = setInterval(async () => {
@@ -8450,21 +8508,36 @@
         let anyFailed = false;
         let totalSent = 0;
         let totalRecv = 0;
-        for (const entry of entries) {
-          if (!entry || !entry.pc) continue;
-          const st = entry.pc.iceConnectionState;
-          if (st === "connected" || st === "completed") anyConnected = true;
-          if (st === "failed") anyFailed = true;
+        if (isNativeAndroidVoiceAvailable()) {
           try {
-            const stats = await entry.pc.getStats();
-            stats.forEach(rep => {
-              if (rep.type === "outbound-rtp" && rep.kind === "audio") {
-                totalSent += Number(rep.bytesSent || 0);
-              } else if (rep.type === "inbound-rtp" && rep.kind === "audio") {
-                totalRecv += Number(rep.bytesReceived || 0);
-              }
-            });
+            const res = await window.Capacitor.Plugins.ReplayKitBridge.voiceGetStats();
+            const peersMap = res?.peers || {};
+            for (const pStat of Object.values(peersMap)) {
+              if (!pStat) continue;
+              const st = String(pStat.iceState || "").toLowerCase();
+              if (st === "connected" || st === "completed") anyConnected = true;
+              if (st === "failed") anyFailed = true;
+              totalSent += Number(pStat.bytesSent || 0);
+              totalRecv += Number(pStat.bytesReceived || 0);
+            }
           } catch (e) {}
+        } else {
+          for (const entry of entries) {
+            if (!entry || !entry.pc) continue;
+            const st = entry.pc.iceConnectionState;
+            if (st === "connected" || st === "completed") anyConnected = true;
+            if (st === "failed") anyFailed = true;
+            try {
+              const stats = await entry.pc.getStats();
+              stats.forEach(rep => {
+                if (rep.type === "outbound-rtp" && rep.kind === "audio") {
+                  totalSent += Number(rep.bytesSent || 0);
+                } else if (rep.type === "inbound-rtp" && rep.kind === "audio") {
+                  totalRecv += Number(rep.bytesReceived || 0);
+                }
+              });
+            } catch (e) {}
+          }
         }
         const iceText = anyConnected ? "OK" : (anyFailed ? "LỖI" : "ĐANG NỐI");
         const sentKb = (totalSent / 1024).toFixed(0);
@@ -8561,10 +8634,18 @@
     function closeVoicePeer(remoteUid) {
       const entry = voicePeers[remoteUid];
       if (!entry) return;
-      try { entry.pc.close(); } catch (e) {}
-      if (entry.audioEl) {
-        entry.audioEl.srcObject = null;
-        entry.audioEl.remove();
+      if (entry.iceDisconnectTimer) {
+        clearTimeout(entry.iceDisconnectTimer);
+        entry.iceDisconnectTimer = null;
+      }
+      if (entry.native) {
+        try { window.Capacitor?.Plugins?.ReplayKitBridge?.voiceClosePeer?.({ remoteUid }); } catch (e) {}
+      } else {
+        try { entry.pc.close(); } catch (e) {}
+        if (entry.audioEl) {
+          entry.audioEl.srcObject = null;
+          entry.audioEl.remove();
+        }
       }
       delete voicePeers[remoteUid];
     }
@@ -8708,18 +8789,37 @@
         }
         if (!voicePeers[rUid] && state.uid < rUid) {
           try {
-            const entry = getOrCreateVoicePeer(roomId, rUid);
-            entry.remoteSessionId = info.sessionId || "";
-            const offer = await entry.pc.createOffer();
-            await entry.pc.setLocalDescription(offer);
-            await rtdbMod.set(rtdbMod.ref(rtdb, `voice/${roomId}/signals/${rUid}/${state.uid}`), {
-              type: "offer",
-              fresh: true,
-              sdp: offer.sdp,
-              from: state.uid,
-              sessionId: currentVoiceSessionId,
-              ts: Date.now()
-            });
+            if (isNativeAndroidVoiceAvailable()) {
+              voicePeers[rUid] = { native: true, remoteSessionId: info.sessionId || "", iceDisconnectTimer: null };
+              const res = await window.Capacitor.Plugins.ReplayKitBridge.voiceCreateOffer({
+                remoteUid: rUid,
+                iceServers: VOICE_ICE_CONFIG.iceServers || [],
+                iceRestart: false
+              });
+              if (res?.sdp?.sdp) {
+                await rtdbMod.set(rtdbMod.ref(rtdb, `voice/${roomId}/signals/${rUid}/${state.uid}`), {
+                  type: "offer",
+                  fresh: true,
+                  sdp: res.sdp.sdp,
+                  from: state.uid,
+                  sessionId: currentVoiceSessionId,
+                  ts: Date.now()
+                });
+              }
+            } else {
+              const entry = getOrCreateVoicePeer(roomId, rUid);
+              entry.remoteSessionId = info.sessionId || "";
+              const offer = await entry.pc.createOffer();
+              await entry.pc.setLocalDescription(offer);
+              await rtdbMod.set(rtdbMod.ref(rtdb, `voice/${roomId}/signals/${rUid}/${state.uid}`), {
+                type: "offer",
+                fresh: true,
+                sdp: offer.sdp,
+                from: state.uid,
+                sessionId: currentVoiceSessionId,
+                ts: Date.now()
+              });
+            }
           } catch (e) {}
         }
       }
@@ -8735,6 +8835,9 @@
       currentVoiceSessionId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       const voiceJoinedAt = Date.now();
       await ensureVoiceTurnLoaded();
+      if (isNativeAndroidVoiceAvailable()) {
+        await window.Capacitor.Plugins.ReplayKitBridge.voiceStartService().catch(() => {});
+      }
       await Promise.all([
         rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${roomId}/signals/${state.uid}`)).catch(() => {}),
         rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${roomId}/ice/${state.uid}`)).catch(() => {})
@@ -8776,7 +8879,43 @@
           if (handledSignals[sigKey]) continue;
           handledSignals[sigKey] = true;
           try {
-            if (sig.type === "offer") {
+            if (isNativeAndroidVoiceAvailable()) {
+              if (sig.type === "offer") {
+                if (sig.fresh) {
+                  closeVoicePeer(fromUid);
+                  await rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${roomId}/ice/${fromUid}/${state.uid}`)).catch(() => {});
+                }
+                voicePeers[fromUid] = {
+                  native: true,
+                  remoteSessionId: sig.sessionId || voicePeers[fromUid]?.remoteSessionId || "",
+                  iceDisconnectTimer: null
+                };
+                const res = await window.Capacitor.Plugins.ReplayKitBridge.voiceHandleOffer({
+                  remoteUid: fromUid,
+                  sdp: sig.sdp,
+                  iceServers: VOICE_ICE_CONFIG.iceServers || [],
+                  fresh: !!sig.fresh
+                });
+                const earlyList = earlyIceByPeer[fromUid] || [];
+                delete earlyIceByPeer[fromUid];
+                for (const c of earlyList) {
+                  await window.Capacitor.Plugins.ReplayKitBridge.voiceAddIceCandidate({ remoteUid: fromUid, candidate: c }).catch(() => {});
+                }
+                if (res?.sdp?.sdp) {
+                  await rtdbMod.set(rtdbMod.ref(rtdb, `voice/${roomId}/signals/${fromUid}/${state.uid}`), {
+                    type: "answer",
+                    sdp: res.sdp.sdp,
+                    from: state.uid,
+                    ts: Date.now()
+                  });
+                }
+              } else if (sig.type === "answer") {
+                await window.Capacitor.Plugins.ReplayKitBridge.voiceSetRemoteAnswer({
+                  remoteUid: fromUid,
+                  sdp: sig.sdp
+                });
+              }
+            } else if (sig.type === "offer") {
               if (sig.fresh) {
                 closeVoicePeer(fromUid);
                 await rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${roomId}/ice/${fromUid}/${state.uid}`)).catch(() => {});
@@ -8825,7 +8964,9 @@
             handledIce[cId] = true;
             const entry = voicePeers[fromUid];
             if (entry) {
-              if (entry.pc.remoteDescription) {
+              if (entry.native) {
+                await window.Capacitor.Plugins.ReplayKitBridge.voiceAddIceCandidate({ remoteUid: fromUid, candidate: cand }).catch(() => {});
+              } else if (entry.pc.remoteDescription) {
                 await entry.pc.addIceCandidate(new RTCIceCandidate(cand)).catch(() => {});
               } else {
                 entry.pendingIce.push(cand);
@@ -9165,6 +9306,7 @@
         await stopDiscordCamera();
         return;
       }
+
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         showToast(
           !window.isSecureContext
@@ -11021,6 +11163,9 @@
       }
       Object.keys(voicePeers).forEach(closeVoicePeer);
       earlyIceByPeer = {};
+      if (isNativeAndroidVoiceAvailable()) {
+        try { window.Capacitor.Plugins.ReplayKitBridge.voiceStopService().catch(() => {}); } catch (e) {}
+      }
       if (localVoiceStream) {
         localVoiceStream.getTracks().forEach(t => t.stop());
         localVoiceStream = null;
@@ -11042,6 +11187,39 @@
       if (!state.currentRoomId) return;
       const roomId = state.currentRoomId;
       resumePendingVoiceAudio();
+
+      if (isNativeAndroidVoiceAvailable()) {
+        if (voiceMicActive) {
+          voiceMicActive = false;
+          setSpeakingState(state.uid, false);
+          await window.Capacitor.Plugins.ReplayKitBridge.voiceSetMicEnabled({ enabled: false }).catch(() => {});
+          updateVoiceMicButtonUI();
+          if (rtdb && rtdbMod) {
+            rtdbMod.update(rtdbMod.ref(rtdb, `voice/${roomId}/peers/${state.uid}`), { micOn: false, updatedAt: Date.now() }).catch(() => {});
+          }
+          showToast("🔇 Đã tắt micro của bạn.", "info");
+          return;
+        }
+        try {
+          await window.Capacitor.Plugins.ReplayKitBridge.voiceStartService();
+          await window.Capacitor.Plugins.ReplayKitBridge.voiceSetMicEnabled({ enabled: true });
+          voiceMicActive = true;
+          updateVoiceMicButtonUI();
+          if (rtdb && rtdbMod) {
+            rtdbMod.update(rtdbMod.ref(rtdb, `voice/${roomId}/peers/${state.uid}`), {
+              uid: state.uid,
+              userName: state.userName,
+              micOn: true,
+              sessionId: currentVoiceSessionId,
+              updatedAt: Date.now()
+            }).catch(() => {});
+          }
+          showToast("🎙️ Micro Native Android đã bật! Chạy ổn định ngay cả khi chia sẻ màn hình.", "success");
+        } catch (err) {
+          showToast("Bạn chưa cấp quyền Micro cho ứng dụng Android!", "error");
+        }
+        return;
+      }
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         showToast("Trình duyệt này không hỗ trợ micro trực tuyến (cần HTTPS hoặc localhost).", "error");
