@@ -24,7 +24,7 @@ app_target.source_build_phase.add_file_reference(m_ref, true)
 # Ensure bridging header / Swift version & ReplayKit/Network frameworks on App
 app_target.build_configurations.each do |cfg|
   cfg.build_settings['SWIFT_VERSION'] = '5.0'
-  cfg.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+  cfg.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
 end
 
 # 2. Update App Info.plist with Camera, Mic & Local Network permissions
@@ -46,7 +46,7 @@ FileUtils.cp('ios-native-template/Extension-Info.plist', "#{ext_dir}/Info.plist"
 
 ext_target = project.targets.find { |t| t.name == ext_name }
 unless ext_target
-  ext_target = project.new_target(:app_extension, ext_name, :ios, '14.0')
+  ext_target = project.new_target(:app_extension, ext_name, :ios, '15.0')
   ext_group = project.main_group.new_group(ext_name, ext_name)
   sample_ref = ext_group.new_file('SampleHandler.swift')
   ext_group.new_file('Info.plist')
@@ -60,7 +60,7 @@ unless ext_target
     cfg.build_settings['SDKROOT'] = 'iphoneos'
     cfg.build_settings['TARGETED_DEVICE_FAMILY'] = '1,2'
     cfg.build_settings['SWIFT_VERSION'] = '5.0'
-    cfg.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+    cfg.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
     cfg.build_settings['CODE_SIGN_STYLE'] = 'Automatic'
     cfg.build_settings['SKIP_INSTALL'] = 'YES'
     cfg.build_settings['LD_RUNPATH_SEARCH_PATHS'] = ['$(inherited)', '@executable_path/Frameworks', '@executable_path/../../Frameworks']
@@ -92,11 +92,12 @@ end
 podfile_path = 'ios/App/Podfile'
 if File.exist?(podfile_path)
   podfile = File.read(podfile_path)
+  podfile.gsub!(/platform :ios,\s*'[^']+'/, "platform :ios, '15.0'")
   unless podfile.include?("WebRTC-lib")
     podfile.sub!(/target 'App' do\s*\n\s*capacitor_pods/, "target 'App' do\n  capacitor_pods\n  pod 'WebRTC-lib', '~> 156.0'")
     File.write(podfile_path, podfile)
-    puts 'Added WebRTC-lib to Podfile, running pod install...'
-    system('cd ios/App && pod install') || raise('pod install failed')
+    puts 'Added WebRTC-lib (iOS 15.0) to Podfile, running pod install...'
+    system('cd ios/App && pod install --repo-update') || raise('pod install failed')
   end
 end
 
