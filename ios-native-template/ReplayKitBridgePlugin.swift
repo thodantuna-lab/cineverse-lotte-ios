@@ -539,22 +539,33 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
 
     private func flushPendingAudio() {
         guard !pendingAudioPCM.isEmpty else { return }
-        var packet = Data(capacity: 6 + pendingAudioPCM.count)
-        var srLE = pendingAudioSampleRate.littleEndian
-        var chLE = pendingAudioChannels.littleEndian
-        packet.append(Data(bytes: &srLE, count: 4))
-        packet.append(Data(bytes: &chLE, count: 2))
-        packet.append(pendingAudioPCM)
+        let pcmToSend = pendingAudioPCM
+        let sr = pendingAudioSampleRate
+        let ch = pendingAudioChannels
         pendingAudioPCM.removeAll(keepingCapacity: true)
         lastAudioFlushTime = CACurrentMediaTime()
 
+        let frameAlign = max(2, Int(ch) * 2)
+        let maxChunkBytes = (12288 / frameAlign) * frameAlign
+
         webrtcQueue.async { [weak self] in
-            guard let self = self else { return }
-            let rtcBuf = RTCDataBuffer(data: packet, isBinary: true)
-            for peer in self.peers.values {
-                if let dc = peer.audioDataChannel, dc.readyState == .open {
-                    dc.sendData(rtcBuf)
+            guard let self = self, !self.peers.isEmpty else { return }
+            var offset = 0
+            while offset < pcmToSend.count {
+                let end = min(pcmToSend.count, offset + maxChunkBytes)
+                var packet = Data(capacity: 6 + (end - offset))
+                var srLE = sr.littleEndian
+                var chLE = ch.littleEndian
+                packet.append(Data(bytes: &srLE, count: 4))
+                packet.append(Data(bytes: &chLE, count: 2))
+                packet.append(pcmToSend[offset..<end])
+                let rtcBuf = RTCDataBuffer(data: packet, isBinary: true)
+                for peer in self.peers.values {
+                    if let dc = peer.audioDataChannel, dc.readyState == .open, dc.bufferedAmount < 262_144 {
+                        dc.sendData(rtcBuf)
+                    }
                 }
+                offset = end
             }
         }
     }

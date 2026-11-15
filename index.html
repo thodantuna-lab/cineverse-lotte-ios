@@ -10007,18 +10007,47 @@
         dc.binaryType = "arraybuffer";
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         let nextTime = 0;
-        dc.onmessage = (msgEv) => {
-          if (isDiscordViewerMuted || !AudioCtx || !(msgEv.data instanceof ArrayBuffer) || msgEv.data.byteLength <= 6) return;
+
+        if (!window.__screenAudioGestureHooked) {
+          window.__screenAudioGestureHooked = true;
+          const unlockAudio = () => {
+            if (window.__sharedScreenAudioCtx?.state === "suspended") {
+              window.__sharedScreenAudioCtx.resume().then(() => {
+                if (!isDiscordViewerMuted) {
+                  document.getElementById("discord-unmute-pill")?.classList.add("hidden");
+                }
+              }).catch(() => {});
+            }
+          };
+          window.addEventListener("pointerdown", unlockAudio, { passive: true });
+          window.addEventListener("keydown", unlockAudio, { passive: true });
+          window.addEventListener("touchstart", unlockAudio, { passive: true });
+        }
+
+        dc.onmessage = async (msgEv) => {
+          if (isDiscordViewerMuted || !AudioCtx) return;
+          let buf = msgEv.data;
+          if (buf instanceof Blob) {
+            try { buf = await buf.arrayBuffer(); } catch (_) { return; }
+          }
+          if (!(buf instanceof ArrayBuffer) || buf.byteLength <= 6) return;
           try {
             if (!window.__sharedScreenAudioCtx) {
               window.__sharedScreenAudioCtx = new AudioCtx();
             }
             const audioCtx = window.__sharedScreenAudioCtx;
-            if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
-            const view = new DataView(msgEv.data);
+            if (audioCtx.state === "suspended") {
+              audioCtx.resume().catch(() => {});
+              if (audioCtx.state === "suspended") {
+                const pill = document.getElementById("discord-unmute-pill");
+                if (pill) pill.classList.remove("hidden");
+                return;
+              }
+            }
+            const view = new DataView(buf);
             const sr = view.getUint32(0, true) || 44100;
             const ch = Math.max(1, Math.min(2, view.getUint16(4, true) || 2));
-            const int16 = new Int16Array(msgEv.data, 6);
+            const int16 = new Int16Array(buf, 6);
             const frames = Math.floor(int16.length / ch);
             if (frames <= 0) return;
 

@@ -429,6 +429,21 @@ class SampleHandler: RPBroadcastSampleHandler {
                     }
                 }
                 pcm16Data = out
+            } else if !isFloat && asbd.mBitsPerChannel == 32 {
+                let frameCount = min(Int(buffers[0].mDataByteSize), Int(buffers[1].mDataByteSize)) / 4
+                let lPtr = lRaw.bindMemory(to: Int32.self, capacity: frameCount)
+                let rPtr = rRaw.bindMemory(to: Int32.self, capacity: frameCount)
+                var out = Data(count: frameCount * 4)
+                out.withUnsafeMutableBytes { dstBytes in
+                    let dst = dstBytes.bindMemory(to: Int16.self)
+                    for i in 0..<frameCount {
+                        let lv = isBigEndian ? Int32(bigEndian: lPtr[i]) : Int32(littleEndian: lPtr[i])
+                        let rv = isBigEndian ? Int32(bigEndian: rPtr[i]) : Int32(littleEndian: rPtr[i])
+                        dst[i * 2] = Int16(truncatingIfNeeded: lv >> 16).littleEndian
+                        dst[i * 2 + 1] = Int16(truncatingIfNeeded: rv >> 16).littleEndian
+                    }
+                }
+                pcm16Data = out
             } else if !isFloat && asbd.mBitsPerChannel == 16 {
                 let frameCount = min(Int(buffers[0].mDataByteSize), Int(buffers[1].mDataByteSize)) / 2
                 let lPtr = lRaw.bindMemory(to: UInt16.self, capacity: frameCount)
@@ -454,6 +469,18 @@ class SampleHandler: RPBroadcastSampleHandler {
                     for i in 0..<count {
                         let clamped = max(-1.0, min(1.0, floatPtr[i]))
                         dst[i] = Int16(clamped * 32767.0).littleEndian
+                    }
+                }
+                pcm16Data = out
+            } else if !isFloat && asbd.mBitsPerChannel == 32 {
+                let count = byteSize / 4
+                let srcPtr = rawPtr.bindMemory(to: Int32.self, capacity: count)
+                var out = Data(count: count * 2)
+                out.withUnsafeMutableBytes { dstBytes in
+                    let dst = dstBytes.bindMemory(to: Int16.self)
+                    for i in 0..<count {
+                        let v = isBigEndian ? Int32(bigEndian: srcPtr[i]) : Int32(littleEndian: srcPtr[i])
+                        dst[i] = Int16(truncatingIfNeeded: v >> 16).littleEndian
                     }
                 }
                 pcm16Data = out
