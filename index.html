@@ -23,6 +23,101 @@
       transition: background-color 0.65s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    /* LỚP NỀN CHUYỂN ĐỘNG MỜ VÔ TẬN KIỂU GEMINI + CÁ NGỪ BƠI */
+    #ambient-tuna-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 20%, rgba(24, 20, 24, 0.55), #070608 75%);
+    }
+    #lobby-view, #room-view, footer {
+      position: relative;
+      z-index: 1;
+    }
+    .ambient-mist-layer {
+      position: absolute;
+      inset: -15%;
+      filter: blur(72px);
+      opacity: 0.85;
+      will-change: transform;
+    }
+    .ambient-mist-blob {
+      position: absolute;
+      border-radius: 9999px;
+      will-change: transform;
+    }
+    .ambient-mist-blob.blob-smoky {
+      width: 56vw;
+      height: 56vw;
+      max-width: 760px;
+      max-height: 760px;
+      top: -12%;
+      left: -8%;
+      background: radial-gradient(circle, rgba(160, 174, 192, 0.22) 0%, rgba(160, 174, 192, 0.06) 48%, transparent 72%);
+      animation: ambientMistOrbit1 26s ease-in-out infinite;
+    }
+    .ambient-mist-blob.blob-crimson {
+      width: 52vw;
+      height: 52vw;
+      max-width: 700px;
+      max-height: 700px;
+      top: 18%;
+      right: -10%;
+      background: radial-gradient(circle, rgba(229, 9, 20, 0.20) 0%, rgba(229, 9, 20, 0.05) 50%, transparent 72%);
+      animation: ambientMistOrbit2 31s ease-in-out infinite;
+    }
+    .ambient-mist-blob.blob-amber {
+      width: 48vw;
+      height: 48vw;
+      max-width: 640px;
+      max-height: 640px;
+      bottom: -14%;
+      left: 18%;
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.04) 50%, transparent 72%);
+      animation: ambientMistOrbit3 29s ease-in-out infinite;
+    }
+    .ambient-mist-blob.blob-rose {
+      width: 50vw;
+      height: 50vw;
+      max-width: 680px;
+      max-height: 680px;
+      bottom: 8%;
+      right: 12%;
+      background: radial-gradient(circle, rgba(190, 18, 60, 0.17) 0%, rgba(190, 18, 60, 0.04) 50%, transparent 72%);
+      animation: ambientMistOrbit4 34s ease-in-out infinite;
+    }
+    @keyframes ambientMistOrbit1 {
+      0%, 100% { transform: translate3d(0%, 0%, 0) scale(1); }
+      33% { transform: translate3d(26%, 16%, 0) scale(1.12); }
+      66% { transform: translate3d(10%, 34%, 0) scale(0.94); }
+    }
+    @keyframes ambientMistOrbit2 {
+      0%, 100% { transform: translate3d(0%, 0%, 0) scale(1.04); }
+      33% { transform: translate3d(-24%, 22%, 0) scale(0.92); }
+      66% { transform: translate3d(-12%, -18%, 0) scale(1.14); }
+    }
+    @keyframes ambientMistOrbit3 {
+      0%, 100% { transform: translate3d(0%, 0%, 0) scale(0.96); }
+      33% { transform: translate3d(22%, -20%, 0) scale(1.1); }
+      66% { transform: translate3d(-18%, -10%, 0) scale(1.02); }
+    }
+    @keyframes ambientMistOrbit4 {
+      0%, 100% { transform: translate3d(0%, 0%, 0) scale(1); }
+      33% { transform: translate3d(-20%, -24%, 0) scale(1.12); }
+      66% { transform: translate3d(16%, -12%, 0) scale(0.95); }
+    }
+    #ambient-tuna-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      filter: blur(4.5px);
+      opacity: 0.82;
+      pointer-events: none;
+    }
+
     /* Tối ưu hiển thị Mobile (< 640px): chống tràn ngang cho sơ đồ 48 ghế và menu thả */
     @media (max-width: 640px) {
       .floating-dropdown-panel {
@@ -1410,6 +1505,17 @@
   </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-rose-500 selection:text-white">
+
+  <!-- LỚP NỀN CHUYỂN ĐỘNG MỜ VÔ TẬN + CÁ NGỪ BƠI TƯƠNG TÁC -->
+  <div id="ambient-tuna-backdrop" aria-hidden="true">
+    <div class="ambient-mist-layer">
+      <div class="ambient-mist-blob blob-smoky"></div>
+      <div class="ambient-mist-blob blob-crimson"></div>
+      <div class="ambient-mist-blob blob-amber"></div>
+      <div class="ambient-mist-blob blob-rose"></div>
+    </div>
+    <canvas id="ambient-tuna-canvas"></canvas>
+  </div>
 
   <!-- HEADER CHUNG -->
   <header class="sticky top-0 z-40 bg-stone-950/90 backdrop-blur-md border-b border-white/10">
@@ -13041,6 +13147,229 @@
     if (!state.currentRoomId && persistedBootState?.currentRoomId && state.hasCustomName) {
       enterRoom(persistedBootState.currentRoomId);
     }
+    function initAmbientTunaBackground() {
+      const canvas = document.getElementById("ambient-tuna-canvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      let width = window.innerWidth;
+      let height = window.innerHeight;
+      let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.max(1, Math.floor(width * dpr));
+        canvas.height = Math.max(1, Math.floor(height * dpr));
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      resizeCanvas();
+      window.addEventListener("resize", resizeCanvas);
+
+      const palette = [
+        { body: "rgba(229, 9, 20, 0.85)", glow: "rgba(229, 9, 20, 0.35)" },
+        { body: "rgba(239, 68, 68, 0.78)", glow: "rgba(239, 68, 68, 0.30)" },
+        { body: "rgba(245, 158, 11, 0.76)", glow: "rgba(245, 158, 11, 0.28)" },
+        { body: "rgba(203, 213, 225, 0.72)", glow: "rgba(203, 213, 225, 0.25)" }
+      ];
+
+      function spawnSideX() {
+        if (width > 900 && Math.random() < 0.65) {
+          return Math.random() < 0.5 ? Math.random() * (width * 0.22) : width - Math.random() * (width * 0.22);
+        }
+        return Math.random() * width;
+      }
+
+      const tunaFlock = Array.from({ length: 9 }, (_, i) => {
+        const angle = Math.random() * Math.PI * 2;
+        const c = palette[i % palette.length];
+        return {
+          x: spawnSideX(),
+          y: Math.random() * height,
+          angle,
+          targetAngle: angle,
+          baseSpeed: 0.45 + Math.random() * 0.4,
+          boostSpeed: 0,
+          size: 26 + Math.random() * 22,
+          tailPhase: Math.random() * Math.PI * 2,
+          turnTimer: Math.random() * 140,
+          bodyColor: c.body,
+          glowColor: c.glow
+        };
+      });
+
+      const ripples = [];
+
+      function normalizeAngle(a) {
+        while (a > Math.PI) a -= Math.PI * 2;
+        while (a < -Math.PI) a += Math.PI * 2;
+        return a;
+      }
+
+      function drawTunaFish(fish) {
+        const s = fish.size;
+        const wag = Math.sin(fish.tailPhase) * (0.28 + Math.min(fish.boostSpeed * 0.08, 0.35));
+        const spine = Math.sin(fish.tailPhase) * s * 0.09;
+
+        ctx.save();
+        ctx.translate(fish.x, fish.y);
+        ctx.rotate(fish.angle);
+
+        // Quầng mờ hòa vào nền khói Gemini
+        const halo = ctx.createRadialGradient(0, 0, s * 0.1, 0, 0, s * 1.45);
+        halo.addColorStop(0, fish.glowColor);
+        halo.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(0, 0, s * 1.45, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = fish.bodyColor;
+
+        // Thân cá ngừ thuôn dài
+        ctx.beginPath();
+        ctx.moveTo(s * 0.95, 0);
+        ctx.bezierCurveTo(s * 0.55, -s * 0.34, -s * 0.18, -s * 0.32 + spine * 0.4, -s * 0.72, spine * 0.8);
+        ctx.lineTo(-s * 0.85, spine * 0.95);
+        ctx.lineTo(-s * 0.72, spine * 0.8);
+        ctx.bezierCurveTo(-s * 0.18, s * 0.32 + spine * 0.4, s * 0.55, s * 0.34, s * 0.95, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        // Vây lưng sắc đặc trưng của cá ngừ
+        ctx.beginPath();
+        ctx.moveTo(s * 0.22, -s * 0.24);
+        ctx.quadraticCurveTo(-s * 0.05, -s * 0.62, -s * 0.22, -s * 0.20 + spine * 0.25);
+        ctx.closePath();
+        ctx.fill();
+
+        // Vây ngực hai bên
+        ctx.beginPath();
+        ctx.moveTo(s * 0.28, s * 0.16);
+        ctx.quadraticCurveTo(s * 0.02, s * 0.46, -s * 0.08, s * 0.20);
+        ctx.closePath();
+        ctx.fill();
+
+        // Đuôi lưỡi liềm chẻ đôi của cá ngừ vẫy theo nhịp bơi
+        ctx.save();
+        ctx.translate(-s * 0.78, spine * 0.9);
+        ctx.rotate(wag);
+        ctx.beginPath();
+        ctx.moveTo(s * 0.06, 0);
+        ctx.quadraticCurveTo(-s * 0.28, -s * 0.42, -s * 0.52, -s * 0.48);
+        ctx.quadraticCurveTo(-s * 0.24, -s * 0.10, -s * 0.20, 0);
+        ctx.quadraticCurveTo(-s * 0.24, s * 0.10, -s * 0.52, s * 0.48);
+        ctx.quadraticCurveTo(-s * 0.28, s * 0.42, s * 0.06, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        ctx.restore();
+      }
+
+      function tick() {
+        ctx.clearRect(0, 0, width, height);
+
+        for (let i = ripples.length - 1; i >= 0; i--) {
+          const r = ripples[i];
+          r.radius += 2.2;
+          r.alpha *= 0.94;
+          if (r.alpha < 0.02) {
+            ripples.splice(i, 1);
+            continue;
+          }
+          ctx.beginPath();
+          ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(248, 113, 113, ${r.alpha.toFixed(3)})`;
+          ctx.lineWidth = 3;
+          ctx.stroke();
+        }
+
+        for (const fish of tunaFlock) {
+          fish.turnTimer -= 1;
+          if (fish.turnTimer <= 0) {
+            fish.targetAngle = fish.angle + (Math.random() - 0.5) * 0.9;
+            fish.turnTimer = 90 + Math.random() * 140;
+          }
+          const diff = normalizeAngle(fish.targetAngle - fish.angle);
+          fish.angle = normalizeAngle(fish.angle + diff * 0.045);
+
+          fish.boostSpeed *= 0.94;
+          if (fish.boostSpeed < 0.02) fish.boostSpeed = 0;
+
+          const speed = fish.baseSpeed + fish.boostSpeed;
+          fish.x += Math.cos(fish.angle) * speed;
+          fish.y += Math.sin(fish.angle) * speed;
+          fish.tailPhase += 0.11 + fish.boostSpeed * 0.075;
+
+          const pad = fish.size * 2.2;
+          if (fish.x < -pad) fish.x = width + pad;
+          else if (fish.x > width + pad) fish.x = -pad;
+          if (fish.y < -pad) fish.y = height + pad;
+          else if (fish.y > height + pad) fish.y = -pad;
+
+          drawTunaFish(fish);
+        }
+
+        requestAnimationFrame(tick);
+      }
+
+      window.addEventListener("pointerdown", (e) => {
+        const cx = e.clientX;
+        const cy = e.clientY;
+        const interactiveTarget = e.target && e.target.closest ? e.target.closest("button, a, input, select, textarea, [onclick], [data-seat-id]") : null;
+        let hitAny = false;
+
+        for (const fish of tunaFlock) {
+          const dx = fish.x - cx;
+          const dy = fish.y - cy;
+          const dist = Math.hypot(dx, dy);
+          if (dist <= 130) {
+            hitAny = true;
+            const fleeAngle = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.7;
+            fish.targetAngle = fleeAngle;
+            fish.angle = fleeAngle;
+            fish.boostSpeed = 5.2 + Math.random() * 2.0;
+            ripples.push({ x: fish.x, y: fish.y, radius: 10, alpha: 0.65 });
+          }
+        }
+
+        if (!hitAny && !interactiveTarget) {
+          let closest = null;
+          let minDist = 240;
+          for (const fish of tunaFlock) {
+            const d = Math.hypot(fish.x - cx, fish.y - cy);
+            if (d < minDist) {
+              minDist = d;
+              closest = fish;
+            }
+          }
+          if (closest) {
+            const fleeAngle = Math.atan2(closest.y - cy, closest.x - cx) + (Math.random() - 0.5) * 0.7;
+            closest.targetAngle = fleeAngle;
+            closest.angle = fleeAngle;
+            closest.boostSpeed = 5.2 + Math.random() * 2.0;
+            ripples.push({ x: closest.x, y: closest.y, radius: 10, alpha: 0.65 });
+          }
+        }
+      }, { passive: true });
+
+      window.addEventListener("mousemove", (e) => {
+        const interactiveTarget = e.target && e.target.closest ? e.target.closest("button, a, input, select, textarea, [onclick], [data-seat-id]") : null;
+        if (interactiveTarget) {
+          if (document.body.style.cursor === "pointer") document.body.style.cursor = "";
+          return;
+        }
+        const nearFish = tunaFlock.some(f => Math.hypot(f.x - e.clientX, f.y - e.clientY) <= 95);
+        document.body.style.cursor = nearFish ? "pointer" : "";
+      }, { passive: true });
+
+      requestAnimationFrame(tick);
+    }
+
+    initAmbientTunaBackground();
     initFirebase();
   </script>
 </body>
