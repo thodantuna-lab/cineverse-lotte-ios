@@ -9,13 +9,13 @@ import UIKit
 class SampleHandler: RPBroadcastSampleHandler {
     private var connection: NWConnection?
     private let sendQueue = DispatchQueue(label: "com.cineverse.lotte.replaykit.sender", qos: .userInteractive)
-    private let audioQueue = DispatchQueue(label: "com.cineverse.lotte.replaykit.audio", qos: .userInteractive)
     private let ciContext = CIContext(options: [
         .useSoftwareRenderer: false,
         .cacheIntermediates: false
     ])
     private var lastSentTime: CFTimeInterval = 0
     private var isSendingVideo = false
+    private var frameCounter: Int = 0
 
     override func broadcastStarted(withSetupInfo setupInfo: [String : NSObject]?) {
         let endpoint = NWEndpoint.hostPort(host: "127.0.0.1", port: 49321)
@@ -38,7 +38,7 @@ class SampleHandler: RPBroadcastSampleHandler {
         switch sampleBufferType {
         case .video:
             let now = CACurrentMediaTime()
-            if isSendingVideo || (now - lastSentTime) < (1.0 / 30.0) { return }
+            if isSendingVideo || (now - lastSentTime) < (1.0 / 20.0) { return }
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 
             var cgOrientation: CGImagePropertyOrientation = .up
@@ -59,7 +59,7 @@ class SampleHandler: RPBroadcastSampleHandler {
                         ciImage = ciImage.oriented(cgOrientation)
                     }
                     let extent = ciImage.extent
-                    let maxDim: CGFloat = 1600.0
+                    let maxDim: CGFloat = 1280.0
                     let longest = max(extent.width, extent.height)
                     let scale = longest > maxDim ? (maxDim / longest) : 1.0
                     let scaled = scale < 1.0
@@ -68,7 +68,12 @@ class SampleHandler: RPBroadcastSampleHandler {
 
                     guard let cgImage = self.ciContext.createCGImage(scaled, from: scaled.extent) else { return }
                     let uiImage = UIImage(cgImage: cgImage)
-                    guard let jpegData = uiImage.jpegData(compressionQuality: 0.78) else { return }
+                    guard let jpegData = uiImage.jpegData(compressionQuality: 0.72) else { return }
+
+                    self.frameCounter += 1
+                    if self.frameCounter % 40 == 0 {
+                        self.ciContext.clearCaches()
+                    }
 
                     var packet = Data(capacity: 5 + jpegData.count)
                     packet.append(0x01) // 0x01 = Video JPEG frame
@@ -87,7 +92,7 @@ class SampleHandler: RPBroadcastSampleHandler {
             }
 
         case .audioApp:
-            audioQueue.async { [weak self] in
+            sendQueue.async { [weak self] in
                 guard let self = self else { return }
                 autoreleasepool {
                     self.sendAudioSampleBuffer(sampleBuffer, on: conn)
@@ -163,7 +168,6 @@ class SampleHandler: RPBroadcastSampleHandler {
 
         guard let pcm = pcm16Data, !pcm.isEmpty else { return }
 
-        // Payload: [4-byte sampleRate LE][2-byte channels LE][Int16 LE PCM]
         let payloadLen = 6 + pcm.count
         var packet = Data(capacity: 5 + payloadLen)
         packet.append(0x02) // 0x02 = Audio PCM frame

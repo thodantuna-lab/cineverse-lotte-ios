@@ -9606,9 +9606,19 @@
       } catch (_) {}
 
       let decoding = false;
+      let decodeStartedAt = 0;
+      let lastFrameImg = null;
+      const keepAliveTimer = setInterval(() => {
+        if (lastFrameImg && ctx && !decoding) {
+          try { ctx.drawImage(lastFrameImg, 0, 0, canvas.width, canvas.height); } catch (_) {}
+        }
+      }, 900);
+
       window.__onNativeReplayKitFrame = (dataUrl) => {
-        if (decoding || !ctx) return;
+        if (!ctx) return;
+        if (decoding && (Date.now() - decodeStartedAt) < 500) return;
         decoding = true;
+        decodeStartedAt = Date.now();
         const img = new Image();
         img.onload = () => {
           if (img.width > 0 && img.height > 0 && (canvas.width !== img.width || canvas.height !== img.height)) {
@@ -9618,6 +9628,7 @@
             ctx.imageSmoothingQuality = "high";
           }
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          lastFrameImg = img;
           decoding = false;
         };
         img.onerror = () => { decoding = false; };
@@ -9660,6 +9671,8 @@
       };
 
       iosFallbackCleanup = () => {
+        clearInterval(keepAliveTimer);
+        lastFrameImg = null;
         window.__onNativeReplayKitFrame = null;
         window.__onNativeReplayKitAudio = null;
         try { audioCtx?.close?.().catch?.(() => {}); } catch (_) {}

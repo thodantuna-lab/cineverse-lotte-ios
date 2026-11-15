@@ -37,6 +37,7 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     private var activeConnection: NWConnection?
+    private var isEvaluatingVideo = false
 
     private func handleExtensionConnection(_ conn: NWConnection) {
         activeConnection?.cancel()
@@ -77,12 +78,17 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
             }
 
             if packetType == 0x01 {
-                let b64 = buffer.base64EncodedString()
-                DispatchQueue.main.async {
-                    self.bridge?.webView?.evaluateJavaScript(
-                        "window.__onNativeReplayKitFrame && window.__onNativeReplayKitFrame('data:image/jpeg;base64,\(b64)');",
-                        completionHandler: nil
-                    )
+                if !self.isEvaluatingVideo {
+                    self.isEvaluatingVideo = true
+                    let b64 = buffer.base64EncodedString()
+                    DispatchQueue.main.async {
+                        self.bridge?.webView?.evaluateJavaScript(
+                            "window.__onNativeReplayKitFrame && window.__onNativeReplayKitFrame('data:image/jpeg;base64,\(b64)');",
+                            completionHandler: { [weak self] _, _ in
+                                self?.isEvaluatingVideo = false
+                            }
+                        )
+                    }
                 }
             } else if packetType == 0x02 && buffer.count > 6 {
                 let sampleRate = buffer.subdata(in: 0..<4).withUnsafeBytes { $0.load(as: UInt32.self).littleEndian }
