@@ -19,4 +19,13 @@ public class KeepAliveWebView extends CapacitorWebView {
         }
         super.onWindowVisibilityChanged(visibility);
     }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        if (ReplayKitBridgePlugin.isScreenSharingActive() && !hasWindowFocus) {
+            super.onWindowFocusChanged(true);
+            return;
+        }
+        super.onWindowFocusChanged(hasWindowFocus);
+    }
 }
