@@ -3,6 +3,7 @@ import Network
 import CoreImage
 import CoreMedia
 import AudioToolbox
+import ImageIO
 import UIKit
 
 class SampleHandler: RPBroadcastSampleHandler {
@@ -40,6 +41,12 @@ class SampleHandler: RPBroadcastSampleHandler {
             if isSendingVideo || (now - lastSentTime) < (1.0 / 30.0) { return }
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 
+            var cgOrientation: CGImagePropertyOrientation = .up
+            if let orientationAttachment = CMGetAttachment(sampleBuffer, key: RPVideoSampleOrientationKey as CFString, attachmentModeOut: nil) as? NSNumber,
+               let parsed = CGImagePropertyOrientation(rawValue: orientationAttachment.uint32Value) {
+                cgOrientation = parsed
+            }
+
             lastSentTime = now
             isSendingVideo = true
 
@@ -47,7 +54,10 @@ class SampleHandler: RPBroadcastSampleHandler {
                 guard let self = self else { return }
                 var didDispatchSend = false
                 autoreleasepool {
-                    let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+                    var ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+                    if cgOrientation != .up {
+                        ciImage = ciImage.oriented(cgOrientation)
+                    }
                     let extent = ciImage.extent
                     let maxDim: CGFloat = 1600.0
                     let longest = max(extent.width, extent.height)
