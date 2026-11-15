@@ -117,8 +117,8 @@
       inset: 0;
       width: 100%;
       height: 100%;
-      filter: blur(1.2px) drop-shadow(0 0 14px rgba(229, 9, 20, 0.35));
-      opacity: 0.92;
+      filter: blur(0.6px) drop-shadow(0 0 12px rgba(229, 9, 20, 0.38));
+      opacity: 0.94;
       pointer-events: none;
     }
 
@@ -1719,97 +1719,6 @@
       </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!-- QUẦY ĐẶT VÉ TRỰC TUYẾN NHƯ RẠP THẬT (LOTTE IMAX BOX OFFICE TICKET BAR)    -->
-    <!-- ========================================================================= -->
-    <div class="relative rounded-3xl bg-gradient-to-r from-stone-900 via-stone-950 to-stone-900 border border-amber-500/35 p-4 sm:p-5 shadow-2xl overflow-hidden">
-      <div class="absolute -right-12 -top-12 w-44 h-44 rounded-full bg-amber-500/10 blur-2xl pointer-events-none"></div>
-
-      <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3.5 border-b border-white/10">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-rose-600 flex items-center justify-center text-slate-950 font-black shadow-md">
-            <i class="fa-solid fa-ticket text-base"></i>
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h2 class="text-sm sm:text-base font-black text-white uppercase tracking-wide">Quầy Đặt Vé Trực Tuyến Lotte IMAX</h2>
-              <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10px] font-extrabold">Mở bán 24/7</span>
-            </div>
-            <p class="text-[11px] text-slate-400">Chọn phim, suất chiếu, hạng ghế da thật (A1–F8) & nhận ngay Thẻ Ký Ức Điện Ảnh NFT độc bản</p>
-          </div>
-        </div>
-
-        <button type="button" onclick="window.appActions.openMemoryCapsuleModal()"
-          class="px-3 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/35 border border-purple-400/40 text-purple-200 text-xs font-extrabold flex items-center gap-1.5 transition cursor-pointer">
-          <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
-          <span>Xem Tủ Vé NFT Của Tôi</span>
-        </button>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
-        <!-- Bước 1: Chọn Phim / Phòng chiếu -->
-        <div class="lg:col-span-4 space-y-1">
-          <label class="text-[11px] font-extrabold uppercase tracking-wider text-amber-400 block">
-            <i class="fa-solid fa-clapperboard mr-1"></i>1. Chọn Phim & Phòng Chiếu
-          </label>
-          <select id="lobby-book-room"
-            class="w-full px-3 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-xs text-white font-bold focus:outline-none focus:border-amber-400">
-            <option value="room-1">Phòng 01 • Godzilla vs. Kong (2021)</option>
-            <option value="room-2">Phòng 02 • Hà Anh Tuấn - Tháng Tư Là Lời Nói Dối Của Em</option>
-            <option value="room-3">Phòng 03 • Tears of Steel: Chiến Binh Tương Lai</option>
-            <option value="room-4">Phòng 04 • Sintel: Hành Trình Đi Tìm Rồng Thiêng</option>
-            <option value="room-5">Phòng 05 • Big Buck Bunny: Khu Rừng Vui Nhộn</option>
-            <option value="room-6">Phòng 06 • Elephants Dream: Thế Giới Cơ Khí</option>
-          </select>
-        </div>
-
-        <!-- Bước 2: Chọn Giờ Suất Chiếu -->
-        <div class="lg:col-span-2 space-y-1">
-          <label class="text-[11px] font-extrabold uppercase tracking-wider text-amber-400 block">
-            <i class="fa-regular fa-clock mr-1"></i>2. Suất Chiếu
-          </label>
-          <select id="lobby-book-time"
-            class="w-full px-3 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-xs text-white font-bold focus:outline-none focus:border-amber-400">
-            <option value="19:30 • IMAX Laser 70mm">19:30 • IMAX 70mm</option>
-            <option value="20:15 • Live 3D POV">20:15 • 3D POV</option>
-            <option value="21:30 • Sweetbox Night">21:30 • Sweetbox</option>
-            <option value="22:45 • Suất Đêm VIP">22:45 • Suất Đêm</option>
-          </select>
-        </div>
-
-        <!-- Bước 3: Chọn Hạng Ghế Ưa Thích -->
-        <div class="lg:col-span-3 space-y-1">
-          <label class="text-[11px] font-extrabold uppercase tracking-wider text-amber-400 block">
-            <i class="fa-solid fa-couch mr-1"></i>3. Hạng Ghế & Vị Trí
-          </label>
-          <select id="lobby-book-seat"
-            class="w-full px-3 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-xs text-white font-bold focus:outline-none focus:border-amber-400">
-            <option value="F4">Ghế F4 • Sweetbox Đôi Giữa Rạp (160.000đ)</option>
-            <option value="F5">Ghế F5 • Sweetbox Đôi Giữa Rạp (160.000đ)</option>
-            <option value="E4">Ghế E4 • VIP Da Bò Cognac (125.000đ)</option>
-            <option value="D4">Ghế D4 • VIP Da Bò Cognac (125.000đ)</option>
-            <option value="C4">Ghế C4 • Standard Trung Tâm (95.000đ)</option>
-            <option value="B4">Ghế B4 • Standard Gần Màn Hình (95.000đ)</option>
-          </select>
-        </div>
-
-        <!-- Bước 4: Nút mở Sơ đồ chọn ghế hoặc Đặt nhanh 1 chạm -->
-        <div class="lg:col-span-3 flex gap-2">
-          <button type="button" onclick="window.appActions.openBookingModalFromBar()"
-            class="flex-1 py-2.5 px-3 rounded-xl bg-stone-800 hover:bg-stone-700 border border-amber-400/40 text-amber-300 font-extrabold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
-            title="Mở sơ đồ 48 ghế trực quan như ngoài rạp để tự chọn ghế & combo bắp nước">
-            <i class="fa-solid fa-table-cells"></i>
-            <span>Sơ Đồ Ghế</span>
-          </button>
-          <button type="button" onclick="window.appActions.quickBookFromLobbyBar()"
-            class="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-rose-600/30 transition cursor-pointer">
-            <i class="fa-solid fa-bolt"></i>
-            <span>Đặt Vé Ngay</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- Bộ phim độc quyền 12 tập (Cloudflare R2 HD) -->
     <div class="rounded-3xl bg-gradient-to-r from-[#1a0b1e] via-stone-950 to-[#1c1008] border border-amber-500/35 p-4 sm:p-5 shadow-2xl space-y-3">
       <div class="flex flex-wrap items-center justify-between gap-2">
@@ -1863,46 +1772,6 @@
 
     <!-- Danh sách 6 Phòng chiếu -->
     <div id="lobby-rooms-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-
-    <!-- ========================================================================= -->
-    <!-- TỦ TRƯNG BÀY VÉ SỐ CÁ NHÂN: CINEMATIC NFT & MEMORY CAPSULE SHOWCASE       -->
-    <!-- ========================================================================= -->
-    <div class="rounded-3xl bg-gradient-to-br from-[#130d1e] via-stone-950 to-[#190d14] border border-purple-500/35 p-5 sm:p-6 space-y-4 shadow-2xl">
-      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3.5">
-        <div class="flex items-center gap-3">
-          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-500 via-rose-500 to-amber-400 flex items-center justify-center text-white text-xl shadow-lg shadow-purple-600/30">
-            🎴
-          </div>
-          <div>
-            <div class="flex flex-wrap items-center gap-2">
-              <h2 class="text-base sm:text-lg font-black text-white">Cinematic NFT & Memory Capsule</h2>
-              <span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[10px] font-black uppercase tracking-wider">
-                Hộp Thời Gian Ký Ức Vĩnh Viễn
-              </span>
-            </div>
-            <p class="text-xs text-slate-300 mt-0.5">
-              Tự động tổng hợp: <strong class="text-amber-300">Tên bạn + Số ghế (VD: F4) + Khoảnh khắc câu chat ("Phim hay quá") + Bài hát đang phát</strong> thành Thẻ Ký Ức Điện Ảnh độc bản có Mã Bảo Mật.
-            </p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="window.appActions.mintCurrentMomentCapsule(true)"
-            class="px-3.5 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-amber-400/40 text-amber-300 text-xs font-extrabold flex items-center gap-1.5 transition cursor-pointer">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-            <span>Đúc Nhanh Thẻ Ký Ức</span>
-          </button>
-          <button type="button" onclick="window.appActions.openMemoryCapsuleModal()"
-            class="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-rose-600 hover:from-purple-500 hover:to-rose-500 text-white text-xs font-black flex items-center gap-1.5 shadow-lg transition cursor-pointer">
-            <i class="fa-solid fa-award"></i>
-            <span>Mở Tủ Trưng Bày Cá Nhân</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Lưới hiển thị nhanh 3 Thẻ Ký Ức Điện Ảnh gần nhất ngay tại Sảnh Chính -->
-      <div id="lobby-capsules-preview" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-    </div>
   </main>
 
   <!-- ========================================================= -->
@@ -13203,13 +13072,17 @@
 
       const ripples = [];
 
+      const tunaImg = new Image();
+      tunaImg.src = "./assets/tuna-sprite.png";
+
       function drawTunaFish(fish) {
-        const L = fish.size;
+        if (!tunaImg.complete || tunaImg.naturalWidth === 0) return;
+
+        const L = fish.size * 1.45;
+        const aspect = tunaImg.naturalHeight / tunaImg.naturalWidth;
+        const H = L * aspect;
         const boostFactor = Math.min(fish.boostSpeed / 240, 1.15);
-        const wag = Math.sin(fish.tailPhase);
-        const pedY = wag * (0.032 + boostFactor * 0.025) * L;
-        const tailLagY = Math.sin(fish.tailPhase - 0.65) * (0.045 + boostFactor * 0.035) * L;
-        const tailScaleX = 0.84 + 0.16 * Math.abs(Math.cos(fish.tailPhase));
+        const waveAmp = (0.048 + boostFactor * 0.045) * H;
 
         ctx.save();
         ctx.translate(fish.x, fish.y);
@@ -13218,219 +13091,44 @@
         ctx.rotate(fish.pitch);
         ctx.globalAlpha = fish.alpha;
 
-        // 1. Quầng sáng Crimson đặc trưng logo hòa nền khói Gemini
-        const halo = ctx.createRadialGradient(0, 0, L * 0.08, 0, 0, L * 0.95);
-        halo.addColorStop(0, "rgba(229, 9, 20, 0.30)");
-        halo.addColorStop(0.55, "rgba(180, 7, 16, 0.10)");
+        // Quầng sáng Crimson đặc trưng logo hòa nền khói Gemini
+        const halo = ctx.createRadialGradient(0, 0, L * 0.06, 0, 0, L * 0.68);
+        halo.addColorStop(0, "rgba(229, 9, 20, 0.28)");
+        halo.addColorStop(0.55, "rgba(180, 7, 16, 0.09)");
         halo.addColorStop(1, "rgba(0, 0, 0, 0)");
         ctx.fillStyle = halo;
         ctx.beginPath();
-        ctx.arc(0, 0, L * 0.95, 0, Math.PI * 2);
+        ctx.arc(0, 0, L * 0.68, 0, Math.PI * 2);
         ctx.fill();
 
-        // 2. Vây lưng thứ nhất (First Dorsal Fin - Lưỡi liềm cao đặc trưng)
-        ctx.fillStyle = "#b90610";
-        ctx.beginPath();
-        ctx.moveTo(L * 0.14, -L * 0.165);
-        ctx.quadraticCurveTo(L * 0.06, -L * 0.32, -L * 0.02, -L * 0.335);
-        ctx.quadraticCurveTo(L * 0.01, -L * 0.22, -L * 0.04, -L * 0.168);
-        ctx.closePath();
-        ctx.fill();
+        // Uốn sóng mềm mại theo 28 lát cắt dọc từ mũi (u=1) về đuôi (u=0)
+        const slices = 28;
+        const sw = tunaImg.naturalWidth;
+        const sh = tunaImg.naturalHeight;
+        const srcSliceW = sw / slices;
+        const dstSliceW = L / slices;
 
-        // 3. Vây lưng thứ hai (Second Dorsal Fin) & Vây hậu môn (Anal Fin)
-        ctx.fillStyle = "#d90813";
-        ctx.beginPath();
-        ctx.moveTo(-L * 0.08, -L * 0.152);
-        ctx.quadraticCurveTo(-L * 0.13, -L * 0.28, -L * 0.195, -L * 0.30);
-        ctx.quadraticCurveTo(-L * 0.16, -L * 0.19, -L * 0.17, -L * 0.125 + pedY * 0.2);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.fillStyle = "#91040c";
-        ctx.beginPath();
-        ctx.moveTo(-L * 0.08, L * 0.145);
-        ctx.quadraticCurveTo(-L * 0.13, L * 0.265, -L * 0.195, L * 0.285);
-        ctx.quadraticCurveTo(-L * 0.16, L * 0.18, -L * 0.17, L * 0.115 + pedY * 0.2);
-        ctx.closePath();
-        ctx.fill();
-
-        // 4. Vây bụng nhỏ (Pelvic Fin)
-        ctx.fillStyle = "#8a040b";
-        ctx.beginPath();
-        ctx.moveTo(L * 0.14, L * 0.155);
-        ctx.quadraticCurveTo(L * 0.09, L * 0.225, L * 0.04, L * 0.23);
-        ctx.quadraticCurveTo(L * 0.075, L * 0.18, L * 0.08, L * 0.155);
-        ctx.closePath();
-        ctx.fill();
-
-        // 5. Hàng vây phụ trên & dưới (Caudal Finlets - Dấu hiệu nhận biết Cá Ngừ)
-        const finletCount = 5;
-        for (let k = 0; k < finletCount; k++) {
-          const u = k / (finletCount - 1);
-          const fx = -L * (0.205 + u * 0.11);
-          const fSpreadY = L * (0.095 - u * 0.062);
-          const pyLocal = pedY * (0.35 + u * 0.55);
-          const fh = L * (0.036 - u * 0.004);
-          ctx.fillStyle = k % 2 === 0 ? "#ff6b74" : "#f87171";
-
-          // Vây phụ lưng trên
-          ctx.beginPath();
-          ctx.moveTo(fx + fh * 0.4, -fSpreadY + pyLocal);
-          ctx.lineTo(fx - fh * 0.75, -fSpreadY - fh * 0.9 + pyLocal);
-          ctx.lineTo(fx - fh * 0.8, -fSpreadY + fh * 0.1 + pyLocal);
-          ctx.closePath();
-          ctx.fill();
-
-          // Vây phụ bụng dưới
-          ctx.beginPath();
-          ctx.moveTo(fx + fh * 0.4, fSpreadY + pyLocal);
-          ctx.lineTo(fx - fh * 0.75, fSpreadY + fh * 0.9 + pyLocal);
-          ctx.lineTo(fx - fh * 0.8, fSpreadY - fh * 0.1 + pyLocal);
-          ctx.closePath();
-          ctx.fill();
+        for (let i = 0; i < slices; i++) {
+          const u0 = i / slices;
+          const uMid = (i + 0.5) / slices;
+          // Phần đầu (uMid -> 1) giữ vững, thân sau và đuôi (uMid -> 0) vẫy uốn lượn tự nhiên
+          const tailFactor = Math.pow(1 - uMid, 1.85);
+          const waveY = Math.sin(fish.tailPhase - (1 - uMid) * 3.4) * waveAmp * tailFactor;
+          const sx = u0 * sw;
+          const dx = -L * 0.5 + i * dstSliceW;
+          const dy = -H * 0.5 + waveY;
+          ctx.drawImage(
+            tunaImg,
+            sx,
+            0,
+            srcSliceW + 0.5,
+            sh,
+            dx,
+            dy,
+            dstSliceW + 0.75,
+            H
+          );
         }
-
-        // 6. Đuôi Lưỡi Liềm Chẻ Đôi (Crescent Forked Tail) luôn hướng ra sau (-x), không bao giờ ngược
-        const px = -L * 0.335;
-        const py = pedY;
-        const tipX = px - L * 0.245 * tailScaleX;
-        const forkX = px - L * 0.095 * tailScaleX;
-
-        const tailGrad = ctx.createLinearGradient(px, py - L * 0.25, tipX, py + L * 0.25);
-        tailGrad.addColorStop(0, "#E50914");
-        tailGrad.addColorStop(0.5, "#ff3b47");
-        tailGrad.addColorStop(1, "#7f030a");
-        ctx.fillStyle = tailGrad;
-
-        ctx.beginPath();
-        ctx.moveTo(px + L * 0.012, py - L * 0.025);
-        ctx.bezierCurveTo(
-          px - L * 0.065 * tailScaleX,
-          py - L * 0.075,
-          px - L * 0.155 * tailScaleX,
-          py - L * 0.205 + tailLagY * 0.4,
-          tipX,
-          py - L * 0.265 + tailLagY * 0.65
-        );
-        ctx.bezierCurveTo(
-          px - L * 0.145 * tailScaleX,
-          py - L * 0.145 + tailLagY * 0.35,
-          px - L * 0.105 * tailScaleX,
-          py - L * 0.045,
-          forkX,
-          py + tailLagY * 0.25
-        );
-        ctx.bezierCurveTo(
-          px - L * 0.105 * tailScaleX,
-          py + L * 0.045,
-          px - L * 0.145 * tailScaleX,
-          py + L * 0.145 + tailLagY * 0.35,
-          tipX,
-          py + L * 0.265 + tailLagY * 0.65
-        );
-        ctx.bezierCurveTo(
-          px - L * 0.155 * tailScaleX,
-          py + L * 0.205 + tailLagY * 0.4,
-          px - L * 0.065 * tailScaleX,
-          py + L * 0.075,
-          px + L * 0.012,
-          py + L * 0.025
-        );
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = "rgba(255, 165, 172, 0.45)";
-        ctx.lineWidth = Math.max(0.8, L * 0.01);
-        ctx.stroke();
-
-        // 7. Thân Cá Ngừ hình thoi khí động học 3D (màu Đỏ Ribbon Logo)
-        const bodyGrad = ctx.createLinearGradient(0, -L * 0.20, 0, L * 0.20);
-        bodyGrad.addColorStop(0, "#ff4b56");
-        bodyGrad.addColorStop(0.28, "#E50914");
-        bodyGrad.addColorStop(0.72, "#a3060e");
-        bodyGrad.addColorStop(1, "#5c0207");
-        ctx.fillStyle = bodyGrad;
-
-        ctx.beginPath();
-        ctx.moveTo(L * 0.50, 0);
-        ctx.bezierCurveTo(L * 0.36, -L * 0.115, L * 0.20, -L * 0.19, L * 0.04, -L * 0.185);
-        ctx.bezierCurveTo(-L * 0.12, -L * 0.175, -L * 0.24, -L * 0.095 + pedY * 0.45, -L * 0.34, -L * 0.026 + pedY);
-        ctx.lineTo(-L * 0.34, L * 0.026 + pedY);
-        ctx.bezierCurveTo(-L * 0.24, L * 0.095 + pedY * 0.45, -L * 0.10, L * 0.175, L * 0.08, L * 0.172);
-        ctx.bezierCurveTo(L * 0.25, L * 0.17, L * 0.38, L * 0.088, L * 0.50, 0);
-        ctx.closePath();
-        ctx.fill();
-
-        // Viền ánh sáng nhẹ dọc sống lưng & lườn bụng
-        ctx.strokeStyle = "rgba(255, 145, 154, 0.42)";
-        ctx.lineWidth = Math.max(0.8, L * 0.01);
-        ctx.stroke();
-
-        // Dải bóng khối 3D Ribbon lướt dọc thân trên
-        ctx.beginPath();
-        ctx.moveTo(L * 0.43, -L * 0.025);
-        ctx.bezierCurveTo(L * 0.24, -L * 0.135, -L * 0.02, -L * 0.14, -L * 0.29, -L * 0.02 + pedY * 0.85);
-        ctx.bezierCurveTo(-L * 0.02, -L * 0.09, L * 0.22, -L * 0.085, L * 0.43, -L * 0.025);
-        ctx.closePath();
-        ctx.fillStyle = "rgba(255, 200, 205, 0.24)";
-        ctx.fill();
-
-        // Đường bên ánh kim chạy mượt dọc giữa thân
-        ctx.beginPath();
-        ctx.moveTo(L * 0.25, -L * 0.015);
-        ctx.bezierCurveTo(L * 0.08, -L * 0.045, -L * 0.12, -L * 0.01 + pedY * 0.3, -L * 0.31, pedY * 0.9);
-        ctx.strokeStyle = "rgba(255, 220, 224, 0.35)";
-        ctx.lineWidth = Math.max(0.85, L * 0.011);
-        ctx.stroke();
-
-        // 8. Chi tiết đầu: Miệng sắc + Nắp mang cong chữ ) + Mắt nhìn ngang
-        // Khe miệng
-        ctx.beginPath();
-        ctx.moveTo(L * 0.495, L * 0.002);
-        ctx.quadraticCurveTo(L * 0.43, L * 0.02, L * 0.39, L * 0.026);
-        ctx.strokeStyle = "rgba(62, 2, 6, 0.82)";
-        ctx.lineWidth = Math.max(1, L * 0.013);
-        ctx.stroke();
-
-        // Nắp mang cong thanh thoát ngay sau đầu
-        ctx.beginPath();
-        ctx.moveTo(L * 0.255, -L * 0.095);
-        ctx.quadraticCurveTo(L * 0.31, L * 0.0, L * 0.24, L * 0.105);
-        ctx.strokeStyle = "rgba(75, 2, 6, 0.72)";
-        ctx.lineWidth = Math.max(1.1, L * 0.015);
-        ctx.stroke();
-
-        // 1 mắt nhìn ngang sắc nét
-        const ex = L * 0.365;
-        const ey = -L * 0.032;
-        const eyeR = Math.max(2.1, L * 0.024);
-        ctx.fillStyle = "rgba(255, 190, 196, 0.65)";
-        ctx.beginPath();
-        ctx.arc(ex, ey, eyeR * 1.25, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = "#180204";
-        ctx.beginPath();
-        ctx.arc(ex, ey, eyeR, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = "rgba(255, 235, 238, 0.95)";
-        ctx.beginPath();
-        ctx.arc(ex + eyeR * 0.3, ey - eyeR * 0.3, eyeR * 0.38, 0, Math.PI * 2);
-        ctx.fill();
-
-        // 9. Vây ngực dài vát nhọn đè nhẹ lên sườn (Pectoral Fin) tạo chiều sâu 3D
-        const pecTipY = L * 0.135 + wag * L * 0.014;
-        const pecGrad = ctx.createLinearGradient(L * 0.21, L * 0.02, -L * 0.02, pecTipY);
-        pecGrad.addColorStop(0, "#ff4b56");
-        pecGrad.addColorStop(0.55, "#c40711");
-        pecGrad.addColorStop(1, "#700308");
-        ctx.fillStyle = pecGrad;
-        ctx.beginPath();
-        ctx.moveTo(L * 0.215, L * 0.025);
-        ctx.quadraticCurveTo(L * 0.11, L * 0.11, -L * 0.015, pecTipY);
-        ctx.quadraticCurveTo(L * 0.08, L * 0.055, L * 0.17, L * 0.055);
-        ctx.closePath();
-        ctx.fill();
 
         ctx.restore();
       }
