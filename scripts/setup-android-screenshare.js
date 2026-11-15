@@ -6,11 +6,21 @@ const androidJavaDir = path.join(root, "android", "app", "src", "main", "java", 
 fs.mkdirSync(androidJavaDir, { recursive: true });
 
 // 1. Copy native Android Java files
-for (const file of ["ReplayKitBridgePlugin.java", "ScreenCaptureService.java"]) {
+for (const file of ["ReplayKitBridgePlugin.java", "ScreenCaptureService.java", "KeepAliveWebView.java"]) {
   fs.copyFileSync(
     path.join(root, "android-native-template", file),
     path.join(androidJavaDir, file)
   );
+}
+
+// 1b. Override capacitor_bridge_layout_main.xml to use KeepAliveWebView so WebRTC voice audio never pauses in background
+const capLayoutSrc = path.join(root, "node_modules", "@capacitor", "android", "capacitor", "src", "main", "res", "layout", "capacitor_bridge_layout_main.xml");
+if (fs.existsSync(capLayoutSrc)) {
+  const layoutDstDir = path.join(root, "android", "app", "src", "main", "res", "layout");
+  fs.mkdirSync(layoutDstDir, { recursive: true });
+  let layoutXml = fs.readFileSync(capLayoutSrc, "utf8");
+  layoutXml = layoutXml.replace(/com\.getcapacitor\.BridgeWebView/g, "com.cineverse.lotte.KeepAliveWebView");
+  fs.writeFileSync(path.join(layoutDstDir, "capacitor_bridge_layout_main.xml"), layoutXml, "utf8");
 }
 
 // 2. Register ReplayKitBridgePlugin in MainActivity.java

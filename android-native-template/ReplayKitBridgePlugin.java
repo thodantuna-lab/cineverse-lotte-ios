@@ -201,6 +201,10 @@ public class ReplayKitBridgePlugin extends Plugin {
         ContextCompat.startForegroundService(getContext(), serviceIntent);
     }
 
+    public static boolean isScreenSharingActive() {
+        return activeInstance != null && activeInstance.isBroadcasting;
+    }
+
     public static void onForegroundServiceReady(Context ctx, int resultCode, Intent resultData) {
         ReplayKitBridgePlugin inst = activeInstance;
         if (inst == null || resultData == null) return;
