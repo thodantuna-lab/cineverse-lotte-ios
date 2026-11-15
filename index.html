@@ -9587,7 +9587,7 @@
         ctx.textAlign = "center";
         ctx.fillText("Hãy bấm Bắt đầu phát sóng (ReplayKit) trên iPad/iPhone...", canvas.width / 2, canvas.height / 2);
       }
-      const outStream = canvas.captureStream ? canvas.captureStream(30) : null;
+      const outStream = canvas.captureStream ? canvas.captureStream(20) : null;
       if (!outStream) return null;
 
       let audioCtx = null;

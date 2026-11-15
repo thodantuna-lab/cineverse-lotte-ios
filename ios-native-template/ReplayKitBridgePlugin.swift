@@ -17,6 +17,14 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
     private var listener: NWListener?
     private let queue = DispatchQueue(label: "com.cineverse.lotte.replaykit.server")
     private var pickerView: RPSystemBroadcastPickerView?
+    private var activeConnection: NWConnection?
+    private var isEvaluatingVideo = false
+    private var audioEngine: AVAudioEngine?
+    private var audioSourceNode: AVAudioSourceNode?
+    private var pendingAudioPCM = Data()
+    private var pendingAudioSampleRate: UInt32 = 44100
+    private var pendingAudioChannels: UInt16 = 2
+    private var lastAudioFlushTime: CFTimeInterval = 0
 
     public override func load() {
         startLocalReceiver()
@@ -26,18 +34,61 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
         guard listener == nil else { return }
         do {
             let params = NWParameters.tcp
-            listener = try NWListener(using: params, on: 49321)
-            listener?.newConnectionHandler = { [weak self] conn in
+            let newListener = try NWListener(using: params, on: 49321)
+            newListener.stateUpdateHandler = { [weak self] state in
+                switch state {
+                case .failed, .cancelled:
+                    self?.listener = nil
+                    self?.queue.asyncAfter(deadline: .now() + 0.5) {
+                        self?.startLocalReceiver()
+                    }
+                default:
+                    break
+                }
+            }
+            newListener.newConnectionHandler = { [weak self] conn in
                 self?.handleExtensionConnection(conn)
             }
-            listener?.start(queue: queue)
+            newListener.start(queue: queue)
+            listener = newListener
         } catch {
             NSLog("[ReplayKitBridge] NWListener error: \(error)")
         }
     }
 
-    private var activeConnection: NWConnection?
-    private var isEvaluatingVideo = false
+    private func startBackgroundKeepAlive() {
+        if audioEngine != nil { return }
+        let engine = AVAudioEngine()
+        let format = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 1)!
+        let node = AVAudioSourceNode { _, _, frameCount, audioBufferList -> OSStatus in
+            let abl = UnsafeMutableAudioBufferListPointer(audioBufferList)
+            for buf in abl {
+                if let ptr = buf.mData {
+                    memset(ptr, 0, Int(buf.mDataByteSize))
+                }
+            }
+            return noErr
+        }
+        engine.attach(node)
+        engine.connect(node, to: engine.mainMixerNode, format: format)
+        engine.mainMixerNode.outputVolume = 0.0
+        do {
+            try engine.start()
+            self.audioSourceNode = node
+            self.audioEngine = engine
+        } catch {
+            NSLog("[ReplayKitBridge] Background keepalive engine error: \(error)")
+        }
+    }
+
+    private func stopBackgroundKeepAlive() {
+        audioEngine?.stop()
+        if let node = audioSourceNode {
+            audioEngine?.detach(node)
+        }
+        audioSourceNode = nil
+        audioEngine = nil
+    }
 
     private func handleExtensionConnection(_ conn: NWConnection) {
         activeConnection?.cancel()
@@ -93,16 +144,37 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
             } else if packetType == 0x02 && buffer.count > 6 {
                 let sampleRate = buffer.subdata(in: 0..<4).withUnsafeBytes { $0.load(as: UInt32.self).littleEndian }
                 let channels = buffer.subdata(in: 4..<6).withUnsafeBytes { $0.load(as: UInt16.self).littleEndian }
-                let pcmB64 = buffer.subdata(in: 6..<buffer.count).base64EncodedString()
-                DispatchQueue.main.async {
-                    self.bridge?.webView?.evaluateJavaScript(
-                        "window.__onNativeReplayKitAudio && window.__onNativeReplayKitAudio('\(pcmB64)', \(sampleRate), \(channels));",
-                        completionHandler: nil
-                    )
+                let pcmChunk = buffer.subdata(in: 6..<buffer.count)
+
+                if self.pendingAudioSampleRate != sampleRate || self.pendingAudioChannels != channels {
+                    self.flushPendingAudio()
+                    self.pendingAudioSampleRate = sampleRate
+                    self.pendingAudioChannels = channels
+                }
+                self.pendingAudioPCM.append(pcmChunk)
+
+                let now = CACurrentMediaTime()
+                if self.pendingAudioPCM.count >= 12288 || (now - self.lastAudioFlushTime) >= 0.08 {
+                    self.flushPendingAudio()
                 }
             }
 
             self.readNextPacket(on: conn)
+        }
+    }
+
+    private func flushPendingAudio() {
+        guard !pendingAudioPCM.isEmpty else { return }
+        let pcmB64 = pendingAudioPCM.base64EncodedString()
+        let sr = pendingAudioSampleRate
+        let ch = pendingAudioChannels
+        pendingAudioPCM.removeAll(keepingCapacity: true)
+        lastAudioFlushTime = CACurrentMediaTime()
+        DispatchQueue.main.async {
+            self.bridge?.webView?.evaluateJavaScript(
+                "window.__onNativeReplayKitAudio && window.__onNativeReplayKitAudio('\(pcmB64)', \(sr), \(ch));",
+                completionHandler: nil
+            )
         }
     }
 
@@ -130,6 +202,7 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
         } catch {
             NSLog("[ReplayKitBridge] AVAudioSession error: \(error)")
         }
+        startBackgroundKeepAlive()
         DispatchQueue.main.async { [weak self] in
             guard let self = self, let rootView = self.bridge?.viewController?.view else {
                 call.reject("Missing root view")
@@ -153,6 +226,10 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     @objc func stopBroadcast(_ call: CAPPluginCall) {
+        queue.async { [weak self] in
+            self?.pendingAudioPCM.removeAll(keepingCapacity: false)
+        }
+        stopBackgroundKeepAlive()
         DispatchQueue.main.async { [weak self] in
             self?.pickerView?.removeFromSuperview()
             self?.pickerView = nil

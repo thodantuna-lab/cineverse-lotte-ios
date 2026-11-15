@@ -15,11 +15,31 @@ class SampleHandler: RPBroadcastSampleHandler {
     ])
     private var lastSentTime: CFTimeInterval = 0
     private var isSendingVideo = false
+    private var videoSendStartedAt: CFTimeInterval = 0
     private var frameCounter: Int = 0
+    private var isBroadcastActive = false
 
     override func broadcastStarted(withSetupInfo setupInfo: [String : NSObject]?) {
+        isBroadcastActive = true
+        connectToApp()
+    }
+
+    private func connectToApp() {
+        guard isBroadcastActive else { return }
+        connection?.cancel()
         let endpoint = NWEndpoint.hostPort(host: "127.0.0.1", port: 49321)
         let conn = NWConnection(to: endpoint, using: .tcp)
+        conn.stateUpdateHandler = { [weak self] state in
+            guard let self = self, self.isBroadcastActive else { return }
+            if case .failed = state {
+                self.isSendingVideo = false
+                self.sendQueue.asyncAfter(deadline: .now() + 0.5) {
+                    self.connectToApp()
+                }
+            } else if case .waiting = state {
+                self.isSendingVideo = false
+            }
+        }
         conn.start(queue: sendQueue)
         self.connection = conn
     }
@@ -28,6 +48,7 @@ class SampleHandler: RPBroadcastSampleHandler {
     override func broadcastResumed() {}
 
     override func broadcastFinished() {
+        isBroadcastActive = false
         connection?.cancel()
         connection = nil
     }
@@ -38,6 +59,9 @@ class SampleHandler: RPBroadcastSampleHandler {
         switch sampleBufferType {
         case .video:
             let now = CACurrentMediaTime()
+            if isSendingVideo && (now - videoSendStartedAt) > 1.0 {
+                isSendingVideo = false
+            }
             if isSendingVideo || (now - lastSentTime) < (1.0 / 20.0) { return }
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 
@@ -48,6 +72,7 @@ class SampleHandler: RPBroadcastSampleHandler {
             }
 
             lastSentTime = now
+            videoSendStartedAt = now
             isSendingVideo = true
 
             sendQueue.async { [weak self] in
