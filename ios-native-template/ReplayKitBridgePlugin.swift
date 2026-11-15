@@ -365,7 +365,7 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
             allocator: kCFAllocatorDefault,
             formatDescription: fmtDesc,
             decoderSpecification: nil,
-            imageBufferAttributes: attrs as CFDictionary,
+            destinationImageBufferAttributes: attrs as CFDictionary,
             outputCallback: &callback,
             decompressionSessionOut: &session
         )
