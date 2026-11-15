@@ -9817,6 +9817,13 @@
         }
       }
       if (typeof resumePendingVoiceAudio === "function") resumePendingVoiceAudio();
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC && !window.__sharedScreenAudioCtx) window.__sharedScreenAudioCtx = new AC();
+        if (window.__sharedScreenAudioCtx?.state === "suspended") {
+          window.__sharedScreenAudioCtx.resume().catch(() => {});
+        }
+      } catch (_) {}
       updateDiscordLiveUI();
     }
 
@@ -9999,13 +10006,14 @@
         const dc = ev.channel;
         dc.binaryType = "arraybuffer";
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        let audioCtx = null;
         let nextTime = 0;
-        dc.onclose = () => { try { audioCtx?.close?.().catch?.(() => {}); } catch (_) {} };
         dc.onmessage = (msgEv) => {
           if (isDiscordViewerMuted || !AudioCtx || !(msgEv.data instanceof ArrayBuffer) || msgEv.data.byteLength <= 6) return;
           try {
-            if (!audioCtx) audioCtx = new AudioCtx();
+            if (!window.__sharedScreenAudioCtx) {
+              window.__sharedScreenAudioCtx = new AudioCtx();
+            }
+            const audioCtx = window.__sharedScreenAudioCtx;
             if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
             const view = new DataView(msgEv.data);
             const sr = view.getUint32(0, true) || 44100;

@@ -238,7 +238,7 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     private func feedRawVideoPacketToWebRTC(_ buffer: Data) {
-        guard let source = videoSource, let capturer = videoCapturer else { return }
+        guard !peers.isEmpty, let source = videoSource, let capturer = videoCapturer else { return }
 
         let width = Int(buffer.subdata(in: 0..<4).withUnsafeBytes { $0.load(as: UInt32.self).littleEndian })
         let height = Int(buffer.subdata(in: 4..<8).withUnsafeBytes { $0.load(as: UInt32.self).littleEndian })

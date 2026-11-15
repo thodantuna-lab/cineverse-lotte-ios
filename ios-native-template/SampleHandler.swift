@@ -66,7 +66,7 @@ class SampleHandler: RPBroadcastSampleHandler {
             if isSendingVideo && (now - videoSendStartedAt) > 0.5 {
                 isSendingVideo = false
             }
-            if isSendingVideo || (now - lastSentTime) < (1.0 / 60.0) { return }
+            if isSendingVideo || (now - lastSentTime) < (1.0 / 30.0) { return }
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 
             var rotByte: UInt8 = 0
@@ -119,8 +119,8 @@ class SampleHandler: RPBroadcastSampleHandler {
         let fmt = CVPixelBufferGetPixelFormatType(pixelBuffer)
         let isNV12 = (fmt == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange || fmt == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)
 
-        // Scale proportionally so longest side <= 1600px (sharp 60fps under 50MB Jetsam limit)
-        let maxDim = 1600
+        // Scale proportionally so longest side <= 1280px (smooth TikTok/Game + crisp 720p H.264)
+        let maxDim = 1280
         let longest = max(srcW, srcH)
         let needsScale = longest > maxDim
         let dstW = (needsScale ? (srcW * maxDim / longest) : srcW) & ~1
@@ -166,11 +166,11 @@ class SampleHandler: RPBroadcastSampleHandler {
                 } else {
                     var srcYBuf = vImage_Buffer(data: yBase, height: vImagePixelCount(srcH), width: vImagePixelCount(srcW), rowBytes: yStride)
                     var dstYBuf = vImage_Buffer(data: yDst, height: vImagePixelCount(dstH), width: vImagePixelCount(dstW), rowBytes: dstW)
-                    vImageScale_Planar8(&srcYBuf, &dstYBuf, nil, vImage_Flags(kvImageHighQualityResampling))
+                    vImageScale_Planar8(&srcYBuf, &dstYBuf, nil, vImage_Flags(kvImageNoFlags))
 
                     var srcUVBuf = vImage_Buffer(data: uvBase, height: vImagePixelCount(srcH / 2), width: vImagePixelCount(srcW / 2), rowBytes: uvStride)
                     var dstUVBuf = vImage_Buffer(data: uvDst, height: vImagePixelCount(dstH / 2), width: vImagePixelCount(dstW / 2), rowBytes: dstW)
-                    vImageScale_CbCr8(&srcUVBuf, &dstUVBuf, nil, vImage_Flags(kvImageHighQualityResampling))
+                    vImageScale_CbCr8(&srcUVBuf, &dstUVBuf, nil, vImage_Flags(kvImageNoFlags))
                 }
             }
             return packet
@@ -218,17 +218,29 @@ class SampleHandler: RPBroadcastSampleHandler {
         let asbd = asbdPtr.pointee
         guard asbd.mFormatID == kAudioFormatLinearPCM else { return }
 
-        var blockBuffer: CMBlockBuffer?
-        var audioBufferList = AudioBufferList(
-            mNumberBuffers: 1,
-            mBuffers: AudioBuffer(mNumberChannels: 0, mDataByteSize: 0, mData: nil)
+        var sizeNeeded: Int = 0
+        CMSampleBufferGetAudioBufferListWithRetainedBlockBuffer(
+            sampleBuffer,
+            bufferListSizeNeededOut: &sizeNeeded,
+            bufferListOut: nil,
+            bufferListSize: 0,
+            blockBufferAllocator: nil,
+            blockBufferMemoryAllocator: nil,
+            flags: 0,
+            blockBufferOut: nil
         )
-        let listSize = MemoryLayout<AudioBufferList>.size
+        guard sizeNeeded > 0 else { return }
+
+        let ablRaw = UnsafeMutableRawPointer.allocate(byteCount: sizeNeeded, alignment: MemoryLayout<AudioBufferList>.alignment)
+        defer { ablRaw.deallocate() }
+        let ablPtr = ablRaw.assumingMemoryBound(to: AudioBufferList.self)
+
+        var blockBuffer: CMBlockBuffer?
         let status = CMSampleBufferGetAudioBufferListWithRetainedBlockBuffer(
             sampleBuffer,
             bufferListSizeNeededOut: nil,
-            bufferListOut: &audioBufferList,
-            bufferListSize: listSize,
+            bufferListOut: ablPtr,
+            bufferListSize: sizeNeeded,
             blockBufferAllocator: nil,
             blockBufferMemoryAllocator: nil,
             flags: kCMSampleBufferFlag_AudioBufferList_Assure16ByteAlignment,
@@ -236,41 +248,77 @@ class SampleHandler: RPBroadcastSampleHandler {
         )
         guard status == noErr else { return }
 
-        let buf = audioBufferList.mBuffers
-        guard let rawPtr = buf.mData, buf.mDataByteSize > 0 else { return }
+        let buffers = UnsafeMutableAudioBufferListPointer(ablPtr)
+        guard !buffers.isEmpty else { return }
 
         let isFloat = (asbd.mFormatFlags & kAudioFormatFlagIsFloat) != 0
         let isBigEndian = (asbd.mFormatFlags & kAudioFormatFlagIsBigEndian) != 0
-        let channels = max(1, min(2, Int(asbd.mChannelsPerFrame)))
+        let isNonInterleaved = buffers.count >= 2
+        let channels = isNonInterleaved ? 2 : max(1, min(2, Int(asbd.mChannelsPerFrame)))
         let sampleRate = UInt32(asbd.mSampleRate > 0 ? asbd.mSampleRate : 44100)
 
         var pcm16Data: Data?
-        if isFloat && asbd.mBitsPerChannel == 32 {
-            let count = Int(buf.mDataByteSize) / 4
-            let floatPtr = rawPtr.bindMemory(to: Float32.self, capacity: count)
-            var out = Data(count: count * 2)
-            out.withUnsafeMutableBytes { dstBytes in
-                let dst = dstBytes.bindMemory(to: Int16.self)
-                for i in 0..<count {
-                    let clamped = max(-1.0, min(1.0, floatPtr[i]))
-                    dst[i] = Int16(clamped * 32767.0).littleEndian
-                }
-            }
-            pcm16Data = out
-        } else if !isFloat && asbd.mBitsPerChannel == 16 {
-            let count = Int(buf.mDataByteSize) / 2
-            let srcPtr = rawPtr.bindMemory(to: UInt16.self, capacity: count)
-            if isBigEndian {
-                var out = Data(count: count * 2)
+
+        if isNonInterleaved, let lRaw = buffers[0].mData, let rRaw = buffers[1].mData,
+           buffers[0].mDataByteSize > 0, buffers[1].mDataByteSize > 0 {
+            if isFloat && asbd.mBitsPerChannel == 32 {
+                let frameCount = min(Int(buffers[0].mDataByteSize), Int(buffers[1].mDataByteSize)) / 4
+                let lPtr = lRaw.bindMemory(to: Float32.self, capacity: frameCount)
+                let rPtr = rRaw.bindMemory(to: Float32.self, capacity: frameCount)
+                var out = Data(count: frameCount * 4)
                 out.withUnsafeMutableBytes { dstBytes in
-                    let dst = dstBytes.bindMemory(to: UInt16.self)
-                    for i in 0..<count {
-                        dst[i] = srcPtr[i].byteSwapped
+                    let dst = dstBytes.bindMemory(to: Int16.self)
+                    for i in 0..<frameCount {
+                        let lVal = max(-1.0, min(1.0, lPtr[i]))
+                        let rVal = max(-1.0, min(1.0, rPtr[i]))
+                        dst[i * 2] = Int16(lVal * 32767.0).littleEndian
+                        dst[i * 2 + 1] = Int16(rVal * 32767.0).littleEndian
                     }
                 }
                 pcm16Data = out
-            } else {
-                pcm16Data = Data(bytes: rawPtr, count: Int(buf.mDataByteSize))
+            } else if !isFloat && asbd.mBitsPerChannel == 16 {
+                let frameCount = min(Int(buffers[0].mDataByteSize), Int(buffers[1].mDataByteSize)) / 2
+                let lPtr = lRaw.bindMemory(to: UInt16.self, capacity: frameCount)
+                let rPtr = rRaw.bindMemory(to: UInt16.self, capacity: frameCount)
+                var out = Data(count: frameCount * 4)
+                out.withUnsafeMutableBytes { dstBytes in
+                    let dst = dstBytes.bindMemory(to: UInt16.self)
+                    for i in 0..<frameCount {
+                        dst[i * 2] = isBigEndian ? lPtr[i].byteSwapped : lPtr[i]
+                        dst[i * 2 + 1] = isBigEndian ? rPtr[i].byteSwapped : rPtr[i]
+                    }
+                }
+                pcm16Data = out
+            }
+        } else if let rawPtr = buffers[0].mData, buffers[0].mDataByteSize > 0 {
+            let byteSize = Int(buffers[0].mDataByteSize)
+            if isFloat && asbd.mBitsPerChannel == 32 {
+                let count = byteSize / 4
+                let floatPtr = rawPtr.bindMemory(to: Float32.self, capacity: count)
+                var out = Data(count: count * 2)
+                out.withUnsafeMutableBytes { dstBytes in
+                    let dst = dstBytes.bindMemory(to: Int16.self)
+                    for i in 0..<count {
+                        let clamped = max(-1.0, min(1.0, floatPtr[i]))
+                        dst[i] = Int16(clamped * 32767.0).littleEndian
+                    }
+                }
+                pcm16Data = out
+            } else if !isFloat && asbd.mBitsPerChannel == 16 {
+                let count = byteSize / 2
+                let srcPtr = rawPtr.bindMemory(to: UInt16.self, capacity: count)
+                if isBigEndian {
+                    var out = Data(count: count * 2)
+                    out.withUnsafeMutableBytes { dstBytes in
+                        let dst = dstBytes.bindMemory(to: UInt16.self)
+                        for i in 0..<count {
+                            dst[i] = srcPtr[i].byteSwapped
+                        }
+                    }
+                    pcm16Data = out
+                } else {
+                    pcm16Data = Data(bytes: rawPtr, count: byteSize)
+                }
             }
         }
 
