@@ -28,7 +28,7 @@ class SampleHandler: RPBroadcastSampleHandler {
     private var isBroadcastActive = false
 
     private var compressionSession: VTCompressionSession?
-    private var transferSession: VTPixelTransferSession?
+    private var transferSessionObj: AnyObject?
     private var scaledPool: CVPixelBufferPool?
     private var encWidth: Int = 0
     private var encHeight: Int = 0
@@ -74,10 +74,10 @@ class SampleHandler: RPBroadcastSampleHandler {
             VTCompressionSessionInvalidate(session)
             compressionSession = nil
         }
-        if let transfer = transferSession {
-            VTPixelTransferSessionInvalidate(transfer)
-            transferSession = nil
+        if #available(iOS 16.0, *), let obj = transferSessionObj {
+            VTPixelTransferSessionInvalidate(obj as! VTPixelTransferSession)
         }
+        transferSessionObj = nil
         scaledPool = nil
         encWidth = 0
         encHeight = 0
@@ -162,10 +162,13 @@ class SampleHandler: RPBroadcastSampleHandler {
         VTSessionSetProperty(comp, key: kVTCompressionPropertyKey_AverageBitRate, value: 6_000_000 as CFNumber)
         VTCompressionSessionPrepareToEncodeFrames(comp)
 
-        var transfer: VTPixelTransferSession?
-        VTPixelTransferSessionCreate(allocator: kCFAllocatorDefault, pixelTransferSessionOut: &transfer)
-        if let t = transfer {
-            VTSessionSetProperty(t, key: kVTPixelTransferPropertyKey_ScalingMode, value: kVTScalingMode_Trim)
+        if #available(iOS 16.0, *) {
+            var transfer: VTPixelTransferSession?
+            VTPixelTransferSessionCreate(allocator: kCFAllocatorDefault, pixelTransferSessionOut: &transfer)
+            if let t = transfer {
+                VTSessionSetProperty(t, key: kVTPixelTransferPropertyKey_ScalingMode, value: kVTScalingMode_Trim)
+                self.transferSessionObj = t as AnyObject
+            }
         }
 
         let poolAttrs: [String: Any] = [
@@ -178,7 +181,6 @@ class SampleHandler: RPBroadcastSampleHandler {
         CVPixelBufferPoolCreate(kCFAllocatorDefault, nil, poolAttrs as CFDictionary, &pool)
 
         self.compressionSession = comp
-        self.transferSession = transfer
         self.scaledPool = pool
         self.encWidth = width
         self.encHeight = height
@@ -203,7 +205,10 @@ class SampleHandler: RPBroadcastSampleHandler {
         guard let session = compressionSession else { return }
 
         var inputBuffer: CVPixelBuffer = pixelBuffer
-        if needsScale, let transfer = transferSession, let pool = scaledPool {
+        if #available(iOS 16.0, *), needsScale,
+           let obj = transferSessionObj,
+           let pool = scaledPool {
+            let transfer = obj as! VTPixelTransferSession
             var outBuf: CVPixelBuffer?
             if CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pool, &outBuf) == kCVReturnSuccess,
                let dst = outBuf,
