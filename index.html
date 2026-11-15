@@ -2247,6 +2247,10 @@
                     <i class="fa-solid fa-video-slash text-slate-400"></i>
                     <span class="hidden sm:inline text-[11px]">Cam</span>
                   </button>
+                  <button type="button" id="discord-voice-diag-badge" onclick="window.appActions.resumePendingVoiceAudio && window.appActions.resumePendingVoiceAudio()"
+                    class="hidden px-2 py-1 rounded-lg bg-stone-950/90 border border-white/15 text-[10px] font-mono text-slate-300 cursor-pointer" title="Trạng thái Mic WebRTC (Bấm để mở khóa loa)">
+                    Mic:--
+                  </button>
                 </div>
 
                 <!-- Cụm giữa: Share màn hình, Chọn FPS & Độ phân giải (tối thiểu 720p/1080p), Phụ đề giọng nói -->
@@ -8426,15 +8430,19 @@
       }
       const badge = document.getElementById("voice-diag-badge");
       if (badge) badge.classList.add("hidden");
+      const dBadge = document.getElementById("discord-voice-diag-badge");
+      if (dBadge) dBadge.classList.add("hidden");
     }
 
     function startVoiceStatsMonitor() {
       stopVoiceStatsMonitor();
       voiceStatsTimer = setInterval(async () => {
         const badge = document.getElementById("voice-diag-badge");
+        const dBadge = document.getElementById("discord-voice-diag-badge");
         const entries = Object.values(voicePeers);
         if (!state.currentRoomId || entries.length === 0) {
           if (badge) badge.classList.add("hidden");
+          if (dBadge) dBadge.classList.add("hidden");
           return;
         }
         resumePendingVoiceAudio();
@@ -8458,12 +8466,17 @@
             });
           } catch (e) {}
         }
+        const iceText = anyConnected ? "OK" : (anyFailed ? "LỖI" : "ĐANG NỐI");
+        const sentKb = (totalSent / 1024).toFixed(0);
+        const recvKb = (totalRecv / 1024).toFixed(0);
+        const diagText = `Mic:${iceText} ↑${sentKb}K ↓${recvKb}K`;
         if (badge) {
-          const iceText = anyConnected ? "OK" : (anyFailed ? "LỖI" : "ĐANG NỐI");
-          const sentKb = (totalSent / 1024).toFixed(0);
-          const recvKb = (totalRecv / 1024).toFixed(0);
-          badge.textContent = `Mic:${iceText} ↑${sentKb}K ↓${recvKb}K`;
+          badge.textContent = diagText;
           badge.classList.remove("hidden");
+        }
+        if (dBadge) {
+          dBadge.textContent = diagText;
+          dBadge.classList.remove("hidden");
         }
       }, 2500);
     }
