@@ -9953,7 +9953,7 @@
             viewerUid,
             iceServers: VOICE_ICE_CONFIG.iceServers || [],
             maxBitrate: cfg.maxBitrate || 8000000,
-            maxFramerate: 30
+            maxFramerate: 60
           });
           if (res?.sdp) {
             await rtdbMod.set(rtdbMod.ref(rtdb, `voice/${roomId}/screen_signals/${viewerUid}/offer`), {

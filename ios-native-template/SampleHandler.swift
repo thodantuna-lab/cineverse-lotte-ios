@@ -66,7 +66,7 @@ class SampleHandler: RPBroadcastSampleHandler {
             if isSendingVideo && (now - videoSendStartedAt) > 0.5 {
                 isSendingVideo = false
             }
-            if isSendingVideo || (now - lastSentTime) < (1.0 / 30.0) { return }
+            if isSendingVideo || (now - lastSentTime) < (1.0 / 60.0) { return }
             guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 
             var rotByte: UInt8 = 0
@@ -119,8 +119,8 @@ class SampleHandler: RPBroadcastSampleHandler {
         let fmt = CVPixelBufferGetPixelFormatType(pixelBuffer)
         let isNV12 = (fmt == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange || fmt == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)
 
-        // Scale proportionally so longest side <= 1440px (crisp text + low RAM under 50MB Jetsam limit)
-        let maxDim = 1440
+        // Scale proportionally so longest side <= 1600px (sharp 60fps under 50MB Jetsam limit)
+        let maxDim = 1600
         let longest = max(srcW, srcH)
         let needsScale = longest > maxDim
         let dstW = (needsScale ? (srcW * maxDim / longest) : srcW) & ~1
