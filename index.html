@@ -4406,10 +4406,13 @@
       document.getElementById("room-view").classList.remove("hidden");
       document.getElementById("header-lobby-actions")?.classList.add("hidden");
 
-      // Nếu khán giả chưa chọn ghế trong phòng này, tự động xếp ngồi ghế phù hợp
+      // Nếu khán giả chưa ngồi trên sơ đồ phòng này -> xếp ngồi đúng ghế đã đặt vé
       if (!getMySeatInRoom(roomId)) {
         const roomSeats = state.seatsByRoom[roomId] || {};
-        if (room.isDiscordRoom) {
+        const bookedSeatId = state.bookedTicketsByRoom?.[roomId]?.seatId;
+        if (bookedSeatId && (!roomSeats[bookedSeatId] || roomSeats[bookedSeatId].uid === state.uid)) {
+          assignSeat(roomId, bookedSeatId, false);
+        } else if (room.isDiscordRoom) {
           const discordSeats = ["F4", "F5", "F3", "F2", "F6", "E4", "E5", "E3", "E2", "E6"];
           const freeSeat = discordSeats.find(s => !roomSeats[s]);
           if (freeSeat) assignSeat(roomId, freeSeat, false);
@@ -4539,6 +4542,15 @@
       const roomSeats = state.seatsByRoom[roomId];
       const existing = roomSeats[seatId];
 
+      // Khóa cố định ghế theo vé đã đặt — không cho chuyển sang ghế khác hoặc đứng dậy đổi ghế
+      const bookedTicket = state.bookedTicketsByRoom?.[roomId];
+      if (bookedTicket && bookedTicket.seatId && bookedTicket.seatId !== seatId) {
+        if (notify) {
+          showToast(`🔒 Vé của bạn cố định ở ghế ${bookedTicket.seatId}, không thể chuyển sang ghế ${seatId}!`, "warning");
+        }
+        return;
+      }
+
       // Nếu ghế đã có người khác ngồi
       if (existing && existing.uid !== state.uid) {
         showToast(`Ghế ${seatId} đang có ${existing.userName} ngồi!`, "error");
@@ -4547,8 +4559,12 @@
 
       const prevSeat = getMySeatInRoom(roomId);
 
-      // Nếu bấm lại vào chính ghế đang ngồi -> đứng dậy
+      // Nếu bấm lại vào chính ghế đang ngồi -> không cho đứng dậy nếu đã cố định theo vé
       if (prevSeat === seatId && notify) {
+        if (bookedTicket && bookedTicket.seatId === seatId) {
+          showToast(`🔒 Bạn đang ngồi cố định tại ghế ${seatId} theo vé đã đặt!`, "info");
+          return;
+        }
         delete roomSeats[seatId];
         renderSeatingMap();
         renderAudienceList();
@@ -4653,7 +4669,8 @@
       const badge = document.getElementById("my-seat-badge");
       const standBtn = document.getElementById("btn-stand-up");
       if (badge) badge.textContent = mySeat ? `${mySeat} (${state.userName})` : "Chưa chọn";
-      if (standBtn) standBtn.classList.toggle("hidden", !mySeat);
+      const isSeatLockedByTicket = Boolean(state.bookedTicketsByRoom?.[roomId]?.seatId);
+      if (standBtn) standBtn.classList.toggle("hidden", !mySeat || isSeatLockedByTicket);
 
       const now = Date.now();
       const effectiveRoom = getEffectiveRoom(roomId);
