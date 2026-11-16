@@ -783,6 +783,57 @@ export default {
       }
     }
 
+    // Gửi Key Chủ Trì về Gmail tài khoản người đặt vé khi chọn Bao Nguyên Rạp
+    if (request.method === "POST" && url.pathname === "/booking/send-host-key") {
+      try {
+        const body = await request.json().catch(() => ({}));
+        const email = String(body.email || "").trim().toLowerCase();
+        const userName = String(body.userName || "Khán giả").trim();
+        const roomNumber = String(body.roomNumber || "Phòng chiếu").trim();
+        const movieTitle = String(body.movieTitle || "").trim();
+        const hostKey = String(body.hostKey || "").trim().toUpperCase();
+        const totalAmount = Number(body.totalAmount || 0);
+        if (!email || !hostKey) {
+          return jsonResponse({ ok: false, error: "Thiếu email hoặc hostKey." }, 400);
+        }
+        if (!env.RESEND_API_KEY) {
+          return jsonResponse({ ok: false, error: "Chưa cấu hình RESEND_API_KEY." }, 500);
+        }
+        const formattedTotal = totalAmount.toLocaleString("vi-VN") + "đ";
+        const mailRes = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${env.RESEND_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            from: env.RESEND_FROM || "CineVerse Box Office <onboarding@resend.dev>",
+            to: [email],
+            subject: `[CineVerse] Xác nhận Bao Nguyên Rạp & Key Chủ Trì: ${hostKey}`,
+            html: `<div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:24px;background:#0c0a09;color:#f8fafc;border-radius:16px;border:1px solid #f59e0b">
+              <h2 style="margin:0 0 8px;color:#fbbf24">👑 Xác Nhận Bao Nguyên Rạp CineVerse</h2>
+              <p style="font-size:14px;color:#cbd5e1;margin:0 0 14px">Xin chào <b>${userName}</b>, cảm ơn bạn đã đặt gói <b>Bao Nguyên Rạp</b>!</p>
+              <div style="background:#1c1917;padding:14px;border-radius:12px;border:1px solid #292524;font-size:13px;line-height:1.7">
+                <div>• <b>Phòng:</b> ${roomNumber}</div>
+                <div>• <b>Phim:</b> ${movieTitle}</div>
+                <div>• <b>Tổng thanh toán:</b> <span style="color:#34d399;font-weight:bold">${formattedTotal}</span></div>
+              </div>
+              <p style="font-size:13px;color:#cbd5e1;margin:16px 0 8px">🔑 <b>Key Chủ Trì Phòng Của Bạn (dùng để mở khóa điều khiển &amp; tua phim đồng bộ):</b></p>
+              <div style="font-size:28px;font-weight:900;letter-spacing:4px;text-align:center;padding:14px;background:#1c1917;border:2px dashed #fbbf24;border-radius:12px;color:#fbbf24">${hostKey}</div>
+              <p style="font-size:12px;color:#94a3b8;margin:14px 0 0">Khi vào phòng, hãy bấm nút <b>Làm Chủ Trì</b> và nhập mã Key trên để toàn quyền phát/dừng/tua phim đồng bộ với cả rạp.</p>
+            </div>`
+          })
+        });
+        const mailJson = await mailRes.json().catch(() => ({}));
+        if (!mailRes.ok) {
+          return jsonResponse({ ok: false, error: mailJson?.message || `Resend ${mailRes.status}` }, 400);
+        }
+        return jsonResponse({ ok: true, id: mailJson?.id || "" }, 200);
+      } catch (e) {
+        return jsonResponse({ ok: false, error: String(e?.message || e) }, 500);
+      }
+    }
+
     if (!env.MY_BUCKET) {
       return new Response(
         JSON.stringify({

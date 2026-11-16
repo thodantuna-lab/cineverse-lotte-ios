@@ -3347,11 +3347,24 @@
                   <span class="text-amber-300 font-semibold">⚡ Phụ thu Vào Rạp Ngay:</span>
                   <strong class="text-amber-300 font-bold">+50.000đ</strong>
                 </div>
+                <div id="booking-buyout-fee-row" class="hidden flex justify-between items-center">
+                  <span class="text-purple-300 font-semibold">👑 Bao Nguyên Rạp (Tặng Key Chủ Trì):</span>
+                  <strong class="text-purple-300 font-bold">+500.000đ</strong>
+                </div>
                 <div class="border-t border-dashed border-white/15 pt-2 flex justify-between items-center text-sm">
                   <span class="font-black text-white">TỔNG CỘNG:</span>
                   <strong id="booking-total-price" class="text-amber-400 font-black text-base">205.000đ</strong>
                 </div>
               </div>
+
+              <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-amber-500/10 border border-amber-400/35 cursor-pointer hover:bg-amber-500/15 transition">
+                <input id="booking-private-buyout-chk" type="checkbox" onchange="window.appActions.toggleBookingBuyout(this.checked)"
+                  class="mt-0.5 accent-amber-500 w-4 h-4 shrink-0 cursor-pointer" />
+                <div class="text-[11px] leading-relaxed">
+                  <span class="font-black text-amber-300">👑 Bao Nguyên Rạp (+500.000đ)</span>
+                  <p class="text-[10px] text-slate-300">Tặng ngay <b>Key Chủ Trì</b> để toàn quyền phát/tua phim đồng bộ và gửi thẳng thông tin qua <b>Gmail tài khoản</b> của bạn.</p>
+                </div>
+              </label>
 
               <div class="p-2.5 rounded-xl bg-purple-950/40 border border-purple-400/35 text-[11px] text-purple-200 flex items-start gap-2">
                 <i class="fa-solid fa-wand-magic-sparkles text-amber-400 mt-0.5"></i>
@@ -6257,7 +6270,14 @@
       }
     }
 
+    function requireHostPlaybackControl() {
+      if (isIAmHost()) return true;
+      showToast("🔒 Chỉ Chủ Trì (có Key Chủ Trì) mới có quyền phát/dừng/tua video đồng bộ!", "warning");
+      return false;
+    }
+
     function togglePlayPause() {
+      if (!requireHostPlaybackControl()) return;
       const videoEl = document.getElementById("html5-video-player");
       const ytWrapper = document.getElementById("youtube-wrapper");
       const btn = document.getElementById("btn-play-pause");
@@ -6338,6 +6358,13 @@
 
     function seekVideo(percent) {
       const videoEl = document.getElementById("html5-video-player");
+      if (!requireHostPlaybackControl()) {
+        const sliderEl = document.getElementById("video-seek-slider");
+        if (sliderEl && videoEl && videoEl.duration) {
+          sliderEl.value = Math.min(100, ((videoEl.currentTime || 0) / videoEl.duration) * 100);
+        }
+        return;
+      }
       if (videoEl && videoEl.duration) {
         videoEl.currentTime = (parseFloat(percent) / 100) * videoEl.duration;
         broadcastRoomVideoSync("seek");
@@ -6345,6 +6372,7 @@
     }
 
     function seekBySeconds(delta = 5) {
+      if (!requireHostPlaybackControl()) return;
       const videoEl = document.getElementById("html5-video-player");
       if (!videoEl || videoEl.classList.contains("hidden") || !videoEl.duration) return;
       const nextTime = Math.max(0, Math.min(videoEl.duration, (videoEl.currentTime || 0) + delta));
@@ -9006,6 +9034,18 @@
       } else {
         btn.innerHTML = `<i class="fa-solid fa-crown mr-1 text-amber-400"></i>Chủ Trì: ${escapeHTML(currentRoomHost.userName || "Host")}`;
         btn.className = "px-2 py-0.5 rounded-lg bg-purple-600/25 text-purple-200 border border-purple-400/40 font-bold text-[11px] cursor-pointer";
+      }
+      const canControl = isIAmHost();
+      const seekSlider = document.getElementById("video-seek-slider");
+      const playBtn = document.getElementById("btn-play-pause");
+      if (seekSlider) {
+        seekSlider.disabled = !canControl;
+        seekSlider.classList.toggle("opacity-50", !canControl);
+        seekSlider.classList.toggle("cursor-not-allowed", !canControl);
+      }
+      if (playBtn) {
+        playBtn.classList.toggle("opacity-50", !canControl);
+        playBtn.classList.toggle("cursor-not-allowed", !canControl);
       }
     }
 
@@ -13174,7 +13214,8 @@
       const comboPrice = state.bookingDraft.comboPrice || 0;
       const showtimeInfo = getShowtimeSurchargeAndUnlock(state.bookingDraft.showtime);
       const surcharge = showtimeInfo.surcharge || 0;
-      const total = seatPrice + comboPrice + surcharge;
+      const buyoutFee = state.bookingDraft.privateBuyout ? 500000 : 0;
+      const total = seatPrice + comboPrice + surcharge + buyoutFee;
 
       const seatPreviewEl = document.getElementById("booking-preview-seat");
       if (seatPreviewEl) seatPreviewEl.textContent = `${selectedSeat} (${tier.split("•")[0].trim()})`;
@@ -13184,6 +13225,10 @@
       if (comboPriceEl) comboPriceEl.textContent = formatVND(comboPrice);
       const instantRow = document.getElementById("booking-instant-fee-row");
       if (instantRow) instantRow.classList.toggle("hidden", surcharge <= 0);
+      const buyoutRow = document.getElementById("booking-buyout-fee-row");
+      if (buyoutRow) buyoutRow.classList.toggle("hidden", buyoutFee <= 0);
+      const buyoutChk = document.getElementById("booking-private-buyout-chk");
+      if (buyoutChk) buyoutChk.checked = Boolean(state.bookingDraft.privateBuyout);
       const totalPriceEl = document.getElementById("booking-total-price");
       if (totalPriceEl) totalPriceEl.textContent = formatVND(total);
 
@@ -13399,6 +13444,11 @@
       document.getElementById("booking-summary-view")?.classList.remove("hidden");
     }
 
+    function toggleBookingBuyout(checked) {
+      state.bookingDraft.privateBuyout = Boolean(checked);
+      renderBookingModalUI();
+    }
+
     function selectPaymentMethod(method) {
       state.paymentMethod = (method === "zalopay" || method === "shopeepay") ? method : "vietqr";
       updateInlinePaymentQrView();
@@ -13537,7 +13587,8 @@
       const { price: seatPrice, tier } = getSeatPriceAndTier(targetSeatId);
       const comboPrice = state.bookingDraft.comboPrice || 0;
       const showtimeInfo = getShowtimeSurchargeAndUnlock(showtime);
-      const totalAmount = seatPrice + comboPrice + (showtimeInfo.surcharge || 0);
+      const buyoutFee = state.bookingDraft.privateBuyout ? 500000 : 0;
+      const totalAmount = seatPrice + comboPrice + (showtimeInfo.surcharge || 0) + buyoutFee;
 
       if (state.paymentMode === "paid" && !options?.paymentVerified) {
         await startPaidTicketFlow({
@@ -13566,6 +13617,38 @@
         }
       }
 
+      let grantedHostKey = "";
+      if (state.bookingDraft.privateBuyout) {
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        const arr = new Uint8Array(6);
+        crypto.getRandomValues(arr);
+        grantedHostKey = "VIP-" + Array.from(arr, b => chars[b % chars.length]).join("");
+        if (rtdb && rtdbMod) {
+          rtdbMod.set(rtdbMod.ref(rtdb, `host_keys/${targetRoomId}`), {
+            key: grantedHostKey,
+            ownerEmail: state.userEmail || "",
+            ownerName: state.userName,
+            createdAt: Date.now()
+          }).catch(() => {});
+        }
+        const workerBase = (state.r2WorkerUrl || "").replace(/\/+$/, "");
+        if (workerBase && state.userEmail) {
+          fetch(`${workerBase}/booking/send-host-key`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: state.userEmail,
+              userName: state.userName,
+              roomNumber: roomObj.number,
+              movieTitle: roomObj.movieTitle,
+              hostKey: grantedHostKey,
+              totalAmount
+            })
+          }).catch(() => {});
+        }
+        state.bookingDraft.privateBuyout = false;
+      }
+
       state.bookedTicketsByRoom[targetRoomId] = {
         seatId: targetSeatId,
         showtime,
@@ -13575,6 +13658,8 @@
         ticketPrice: seatPrice,
         comboPrice,
         surcharge: showtimeInfo.surcharge || 0,
+        buyoutFee,
+        hostKey: grantedHostKey,
         totalAmount,
         bookedAt: Date.now()
       };
@@ -13640,7 +13725,11 @@
       // Tự động đúc Thẻ Ký Ức Điện Ảnh NFT cho vé vừa đặt
       const capsule = autoSyncMemoryCapsule(targetRoomId, targetSeatId, "Phim hay quá", showtime, true);
       playCinemaBellSFX();
-      showToast(`🎟️ Đặt vé thành công (${formatVND(totalAmount)})! Ghế ${targetSeatId} & Đã đúc Thẻ Ký Ức NFT #${capsule.securityCode}!`, "success");
+      if (grantedHostKey) {
+        showToast(`👑 Bao Nguyên Rạp thành công! Key Chủ Trì ${grantedHostKey} đã được gửi về Gmail ${state.userEmail || ""}!`, "success");
+      } else {
+        showToast(`🎟️ Đặt vé thành công (${formatVND(totalAmount)})! Ghế ${targetSeatId} & Đã đúc Thẻ Ký Ức NFT #${capsule.securityCode}!`, "success");
+      }
     }
 
     // =========================================================
@@ -14956,6 +15045,7 @@
       selectUpgradePayMethod,
       copyPaymentText,
       selectPaymentMethod,
+      toggleBookingBuyout,
       unlockSiteMaintenanceGate,
       toggleVoiceMic,
       resumePendingVoiceAudio,
