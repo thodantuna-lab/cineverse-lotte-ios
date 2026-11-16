@@ -2,7 +2,7 @@
 <html lang="vi" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>CineVerse Lotte — Rạp Chiếu Phim Trực Tuyến Góc Nhìn Hàng F</title>
@@ -21,9 +21,22 @@
     html, body {
       background-color: #090809;
       color: #f8fafc;
-      overflow-x: hidden;
-      max-width: 100%;
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: clip;
+      -webkit-text-size-adjust: 100%;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
       transition: background-color 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @media (max-width: 768px) {
+      header, main, section, #lobby-view, #room-view {
+        max-width: 100vw !important;
+        overflow-x: clip !important;
+      }
+      .grid > *, .flex > * {
+        min-width: 0;
+      }
     }
 
     /* LỚP NỀN CHUYỂN ĐỘNG MỜ VÔ TẬN KIỂU GEMINI + CÁ NGỪ BƠI */
