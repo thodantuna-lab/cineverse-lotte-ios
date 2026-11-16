@@ -2864,6 +2864,64 @@
     </div>
   </div>
 
+  <!-- MODAL ĐỔI VÉ VÀO RẠP NGAY (+50.000Đ) KHI CHƯA TỚI GIỜ CHIẾU -->
+  <div id="ticket-upgrade-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-stone-900 border border-amber-400/40 rounded-3xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <img src="./assets/web-logo.png" alt="CineVerse" class="w-9 h-9 rounded-xl object-cover border border-amber-400/40" />
+          <div>
+            <h3 class="text-sm sm:text-base font-black text-white">Chưa Đến Giờ Chiếu Vé Của Bạn</h3>
+            <p id="upgrade-room-info" class="text-[11px] text-amber-300 font-bold">Phòng 01 • Ghế B3</p>
+          </div>
+        </div>
+        <button type="button" onclick="window.appActions.closeTicketUpgradeModal()" class="text-slate-400 hover:text-white cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div id="upgrade-options-view" class="space-y-4">
+        <div class="p-3.5 rounded-2xl bg-stone-950 border border-white/10 space-y-1.5 text-xs">
+          <p class="text-slate-300">Vé hiện tại của bạn thuộc khung giờ đã chọn. Còn <strong id="upgrade-remain-time" class="text-amber-300">...</strong> nữa mới tới giờ mở cửa rạp.</p>
+          <p class="text-[11px] text-slate-400">Nếu không muốn đợi, bạn có thể nâng cấp sang suất <strong class="text-emerald-300">⚡ Vào Rạp Ngay</strong> bằng cách thanh toán thêm <strong class="text-amber-300">50.000đ</strong>.</p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <button type="button" onclick="window.appActions.closeTicketUpgradeModal()"
+            class="flex-1 py-2.5 px-3 rounded-xl bg-stone-800 hover:bg-stone-700 text-slate-200 text-xs font-bold cursor-pointer transition">
+            ⏳ Đợi đến giờ chiếu
+          </button>
+          <button type="button" onclick="window.appActions.confirmUpgradeTicketNow()"
+            class="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-white text-xs font-black shadow-lg cursor-pointer transition">
+            ⚡ Đổi vé Vào Luôn (+50.000đ)
+          </button>
+        </div>
+      </div>
+
+      <div id="upgrade-qr-view" class="hidden space-y-3">
+        <div class="flex items-center justify-between text-xs border-b border-white/10 pb-2">
+          <button type="button" onclick="window.appActions.backToUpgradeOptions()" class="px-2.5 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-slate-200 text-[11px] font-bold cursor-pointer">
+            <i class="fa-solid fa-arrow-left mr-1"></i>Quay lại
+          </button>
+          <span class="font-black text-amber-300">Thanh Toán Phí Đổi Vé: 50.000đ</span>
+          <span id="upgrade-qr-code-badge" class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono font-black text-[11px]">CV000000</span>
+        </div>
+        <div class="grid grid-cols-3 gap-1.5">
+          <button type="button" id="up-pay-vietqr" onclick="window.appActions.selectUpgradePayMethod('vietqr')" class="py-1.5 px-2 rounded-xl text-[11px] font-black border cursor-pointer bg-amber-500 text-slate-950 border-amber-300">🏦 VietQR</button>
+          <button type="button" id="up-pay-zalopay" onclick="window.appActions.selectUpgradePayMethod('zalopay')" class="py-1.5 px-2 rounded-xl text-[11px] font-bold border cursor-pointer bg-stone-950 text-sky-300 border-white/10">💙 ZaloPay</button>
+          <button type="button" id="up-pay-shopeepay" onclick="window.appActions.selectUpgradePayMethod('shopeepay')" class="py-1.5 px-2 rounded-xl text-[11px] font-bold border cursor-pointer bg-stone-950 text-orange-300 border-white/10">🧡 ShopeePay</button>
+        </div>
+        <div class="bg-white rounded-2xl p-2.5 flex flex-col items-center gap-1">
+          <img id="upgrade-qr-img" src="./assets/techcombank-qr.jpg" onerror="this.onerror=null;this.src='./assets/techcombank-qr.jpg'" alt="QR Đổi Vé" class="w-40 h-40 object-contain rounded-xl" />
+          <p class="text-[10px] font-black text-slate-800">TECHCOMBANK • TRAN MINH QUAN • 9999 9920 072</p>
+        </div>
+        <div class="px-3 py-2 rounded-xl bg-sky-500/15 border border-sky-400/35 text-[11px] text-sky-200 font-semibold flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-sky-400 animate-ping shrink-0"></span>
+          <span>Đang chờ hệ thống xác nhận 50.000đ... (Tự động mở cửa vào rạp ngay sau khi nhận tiền)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL ĐỔI PHIM / DÁN LINK YOUTUBE HOẶC MP4 -->
   <div id="custom-video-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-stone-900 border border-white/15 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
@@ -4793,7 +4851,7 @@
         const mins = Math.floor((remainSec % 3600) / 60);
         const secs = remainSec % 60;
         const remainStr = hrs > 0 ? `${hrs} giờ ${mins} phút` : `${mins} phút ${secs} giây`;
-        showToast(`⏰ Vé của bạn thuộc suất ${myTicket.showtime}. Còn ${remainStr} nữa mới tới giờ vào rạp! (Hoặc đặt suất 'Vào Rạp Ngay' để vào liền)`, "warning");
+        openTicketUpgradeModal(roomId, myTicket, remainStr);
         return;
       }
       const lockObj = state.roomLocks[roomId];
@@ -13166,6 +13224,172 @@
       }
     }
 
+    let upgradeTargetRoomId = "";
+    let upgradePayUnsub = null;
+    let upgradePayPoll = null;
+    let upgradeOrderCode = "";
+
+    function openTicketUpgradeModal(roomId, ticket, remainStr) {
+      upgradeTargetRoomId = roomId;
+      backToUpgradeOptions();
+      const room = getEffectiveRoom(roomId);
+      const infoEl = document.getElementById("upgrade-room-info");
+      const remEl = document.getElementById("upgrade-remain-time");
+      if (infoEl) infoEl.textContent = `${room.number} • Ghế ${ticket.seatId} • ${ticket.showtime || ""}`;
+      if (remEl) remEl.textContent = remainStr;
+      document.getElementById("ticket-upgrade-modal")?.classList.remove("hidden");
+    }
+
+    function backToUpgradeOptions() {
+      if (upgradePayUnsub) { try { upgradePayUnsub(); } catch (_) {} upgradePayUnsub = null; }
+      if (upgradePayPoll) { clearInterval(upgradePayPoll); upgradePayPoll = null; }
+      upgradeOrderCode = "";
+      document.getElementById("upgrade-qr-view")?.classList.add("hidden");
+      document.getElementById("upgrade-options-view")?.classList.remove("hidden");
+    }
+
+    function closeTicketUpgradeModal() {
+      backToUpgradeOptions();
+      upgradeTargetRoomId = "";
+      document.getElementById("ticket-upgrade-modal")?.classList.add("hidden");
+    }
+
+    function selectUpgradePayMethod(method) {
+      state.paymentMethod = (method === "zalopay" || method === "shopeepay") ? method : "vietqr";
+      const idleCls = "py-1.5 px-2 rounded-xl text-[11px] font-bold border cursor-pointer bg-stone-950 text-slate-300 border-white/10";
+      const map = [
+        { id: "vietqr", el: "up-pay-vietqr", cls: "py-1.5 px-2 rounded-xl text-[11px] font-black border cursor-pointer bg-amber-500 text-slate-950 border-amber-300" },
+        { id: "zalopay", el: "up-pay-zalopay", cls: "py-1.5 px-2 rounded-xl text-[11px] font-black border cursor-pointer bg-sky-500 text-slate-950 border-sky-300" },
+        { id: "shopeepay", el: "up-pay-shopeepay", cls: "py-1.5 px-2 rounded-xl text-[11px] font-black border cursor-pointer bg-orange-500 text-slate-950 border-orange-300" }
+      ];
+      map.forEach(m => {
+        const b = document.getElementById(m.el);
+        if (b) b.className = m.id === state.paymentMethod ? m.cls : idleCls;
+      });
+    }
+
+    async function applyUpgradedTicketAndEnter(roomId) {
+      const ticket = state.bookedTicketsByRoom?.[roomId];
+      if (ticket) {
+        ticket.showtimeUnlockAt = 0;
+        ticket.showtime = "⚡ Vào Rạp Ngay • Suất VIP (+50.000đ)";
+        ticket.surcharge = (Number(ticket.surcharge) || 0) + INSTANT_ENTRY_SURCHARGE;
+        ticket.totalAmount = (Number(ticket.totalAmount) || 0) + INSTANT_ENTRY_SURCHARGE;
+      }
+      const room = getEffectiveRoom(roomId);
+      const revOrder = {
+        id: "UPG_" + Date.now() + "_" + Math.random().toString(36).slice(2, 5),
+        roomId,
+        roomNumber: room.number,
+        movieTitle: room.movieTitle,
+        seatId: ticket?.seatId || "F4",
+        tier: "Đổi vé Vào Ngay",
+        ticketPrice: INSTANT_ENTRY_SURCHARGE,
+        comboName: "Phụ thu đổi suất",
+        comboPrice: 0,
+        totalAmount: INSTANT_ENTRY_SURCHARGE,
+        uid: state.uid,
+        userName: state.userName,
+        userEmail: state.userEmail || "",
+        gmailVerified: Boolean(state.gmailVerified),
+        createdAt: Date.now()
+      };
+      state.revenueOrders = [revOrder, ...(state.revenueOrders || [])];
+      if (rtdb && rtdbMod) {
+        rtdbMod.set(rtdbMod.ref(rtdb, `revenue_orders/${revOrder.id}`), revOrder).catch(() => {});
+      }
+      saveAppStateToStorage();
+      closeTicketUpgradeModal();
+      showToast("⚡ Đổi vé Vào Rạp Ngay thành công! Đang mở cửa phòng chiếu...", "success");
+      await enterRoom(roomId, { fromBooking: true });
+      if (ticket?.seatId) await assignSeat(roomId, ticket.seatId, false);
+    }
+
+    async function confirmUpgradeTicketNow() {
+      const roomId = upgradeTargetRoomId;
+      if (!roomId) return;
+      if (state.paymentMode !== "paid") {
+        await applyUpgradedTicketAndEnter(roomId);
+        return;
+      }
+      if (!rtdb || !rtdbMod) {
+        showToast("Đang kết nối máy chủ thanh toán, vui lòng thử lại sau 2 giây!", "warning");
+        return;
+      }
+      backToUpgradeOptions();
+      const orderCode = "UP" + String(Date.now()).slice(-6);
+      upgradeOrderCode = orderCode;
+      const room = getEffectiveRoom(roomId);
+      const ticket = state.bookedTicketsByRoom?.[roomId];
+
+      await rtdbMod.set(rtdbMod.ref(rtdb, `payment_requests/${orderCode}`), {
+        id: orderCode,
+        uid: state.uid,
+        userName: state.userName,
+        userEmail: state.userEmail || "",
+        paymentMethod: state.paymentMethod || "vietqr",
+        roomId,
+        roomNumber: room.number,
+        movieTitle: `${room.movieTitle} (Đổi vé Vào Ngay)`,
+        seatId: ticket?.seatId || "F4",
+        totalAmount: INSTANT_ENTRY_SURCHARGE,
+        status: "pending",
+        createdAt: Date.now()
+      });
+
+      const badge = document.getElementById("upgrade-qr-code-badge");
+      if (badge) badge.textContent = orderCode;
+      const img = document.getElementById("upgrade-qr-img");
+      if (img) {
+        img.onerror = () => { img.onerror = null; img.src = "./assets/techcombank-qr.jpg"; };
+        img.src = `https://img.vietqr.io/image/TCB-99999920072-compact2.png?amount=${INSTANT_ENTRY_SURCHARGE}&addInfo=${encodeURIComponent(orderCode)}&accountName=${encodeURIComponent("TRAN MINH QUAN")}`;
+      }
+      selectUpgradePayMethod(state.paymentMethod || "vietqr");
+      document.getElementById("upgrade-options-view")?.classList.add("hidden");
+      document.getElementById("upgrade-qr-view")?.classList.remove("hidden");
+
+      let done = false;
+      const finish = async () => {
+        if (done) return;
+        done = true;
+        await applyUpgradedTicketAndEnter(roomId);
+      };
+
+      upgradePayUnsub = rtdbMod.onValue(rtdbMod.ref(rtdb, `payment_requests/${orderCode}`), (snap) => {
+        const v = snap.val();
+        if (!v) return;
+        if (v.status === "paid") finish();
+        else if (v.status === "rejected") {
+          backToUpgradeOptions();
+          showToast("❌ Giao dịch đổi vé đã bị hủy.", "error");
+        }
+      });
+
+      const workerBase = (state.r2WorkerUrl || "").replace(/\/+$/, "");
+      if (workerBase) {
+        upgradePayPoll = setInterval(async () => {
+          if (done || !upgradeOrderCode) return;
+          try {
+            const res = await fetch(`${workerBase}/payment/check`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ orderCode, amount: INSTANT_ENTRY_SURCHARGE })
+            });
+            const d = await res.json().catch(() => ({}));
+            if (d?.ok && d?.paid) {
+              await rtdbMod.update(rtdbMod.ref(rtdb, `payment_requests/${orderCode}`), {
+                status: "paid",
+                paidAt: Date.now(),
+                confirmedBy: "sepay_auto",
+                txId: d.txId || ""
+              }).catch(() => {});
+              finish();
+            }
+          } catch (_) {}
+        }, 4000);
+      }
+    }
+
     function backToBookingSummary() {
       if (activePaymentUnsub) { try { activePaymentUnsub(); } catch (_) {} activePaymentUnsub = null; }
       if (activePaymentPollTimer) { clearInterval(activePaymentPollTimer); activePaymentPollTimer = null; }
@@ -14726,6 +14950,10 @@
       confirmHostKeyModal,
       closePaymentQrModal,
       backToBookingSummary,
+      closeTicketUpgradeModal,
+      backToUpgradeOptions,
+      confirmUpgradeTicketNow,
+      selectUpgradePayMethod,
       copyPaymentText,
       selectPaymentMethod,
       unlockSiteMaintenanceGate,
