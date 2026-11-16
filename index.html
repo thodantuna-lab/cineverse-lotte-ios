@@ -4181,7 +4181,7 @@
       authTab: "login",
       paymentMode: "free",
       paymentMethod: "vietqr",
-      siteLock: { enabled: false, keyHash: "" },
+      siteLock: { enabled: false, keyHash: "", updatedAt: 0 },
       otpToken: "",
       otpPendingEmail: "",
       otpCooldownSec: 0,
@@ -12910,7 +12910,8 @@
           const val = snap.val() || {};
           state.siteLock = {
             enabled: Boolean(val.enabled),
-            keyHash: String(val.keyHash || "")
+            keyHash: String(val.keyHash || ""),
+            updatedAt: Number(val.updatedAt || 0)
           };
           applySiteLockState();
         }, () => {});
@@ -12940,23 +12941,6 @@
           if (state.isAdminUnlocked) {
             renderAdminVisitorsPanel();
           }
-        }, () => {});
-
-        rtdbMod.onValue(rtdbMod.ref(rtdb, "lobby_config/payment_mode"), (snap) => {
-          const val = snap.val() || {};
-          state.paymentMode = val.mode === "paid" ? "paid" : "free";
-          if (!document.getElementById("booking-modal")?.classList.contains("hidden")) {
-            renderBookingModalUI();
-          }
-        }, () => {});
-
-        rtdbMod.onValue(rtdbMod.ref(rtdb, "lobby_config/site_lock"), (snap) => {
-          const val = snap.val() || {};
-          state.siteLock = {
-            enabled: Boolean(val.enabled),
-            keyHash: String(val.keyHash || "")
-          };
-          applySiteLockState();
         }, () => {});
 
         // Nếu người dùng đã vào phòng trước khi Firebase SDK tải xong thì đồng bộ ngay
@@ -14907,9 +14891,15 @@
       }
     }
 
+    function getExpectedSiteUnlockToken() {
+      const h = String(state.siteLock?.keyHash || "");
+      const u = Number(state.siteLock?.updatedAt || 0);
+      return h ? `${h}:${u}` : "";
+    }
+
     function isSiteLockedForCurrentUser() {
       if (!state.siteLock?.enabled) return false;
-      const expected = String(state.siteLock.keyHash || "");
+      const expected = getExpectedSiteUnlockToken();
       if (!expected) return true;
       return getSiteUnlockHashStored() !== expected;
     }
@@ -14925,13 +14915,13 @@
           gate = document.getElementById("site-maintenance-gate");
         }
       }
-      if (gate) gate.classList.remove("hidden");
+      if (gate && gate.classList.contains("hidden")) gate.classList.remove("hidden");
       const header = document.querySelector("header");
       const lobby = document.getElementById("lobby-view");
       const room = document.getElementById("room-view");
-      if (header) header.style.display = "none";
-      if (lobby) lobby.style.display = "none";
-      if (room) room.style.display = "none";
+      if (header && header.style.display !== "none") header.style.display = "none";
+      if (lobby && lobby.style.display !== "none") lobby.style.display = "none";
+      if (room && room.style.display !== "none") room.style.display = "none";
       const vid = document.getElementById("html5-video-player");
       if (vid && !vid.paused) { try { vid.pause(); } catch (_) {} }
     }
@@ -14995,11 +14985,42 @@
         return;
       }
       if (err) err.classList.add("hidden");
-      setMemberCookie("cv_site_unlock_hash", h, 7);
-      try { localStorage.setItem("cv_site_unlock_hash", h); } catch (_) {}
+      const token = getExpectedSiteUnlockToken();
+      setMemberCookie("cv_site_unlock_hash", token, 7);
+      try { localStorage.setItem("cv_site_unlock_hash", token); } catch (_) {}
+      if (inp) inp.value = "";
       applySiteLockState();
       showToast("🔓 Mở khóa truy cập thành công!", "success");
     }
+
+    async function pollSiteLockRealtimeFallback() {
+      try {
+        const res = await fetch(`${RTDB_URL}/lobby_config/site_lock.json?t=${Date.now()}`, {
+          cache: "no-store",
+          signal: AbortSignal.timeout(4000)
+        });
+        if (!res.ok) return;
+        const val = await res.json();
+        const nextEnabled = Boolean(val?.enabled);
+        const nextHash = String(val?.keyHash || "");
+        const nextUpdated = Number(val?.updatedAt || 0);
+        if (
+          state.siteLock?.enabled !== nextEnabled ||
+          state.siteLock?.keyHash !== nextHash ||
+          state.siteLock?.updatedAt !== nextUpdated
+        ) {
+          state.siteLock = {
+            enabled: nextEnabled,
+            keyHash: nextHash,
+            updatedAt: nextUpdated
+          };
+          applySiteLockState();
+        }
+      } catch (_) {}
+    }
+
+    pollSiteLockRealtimeFallback();
+    setInterval(pollSiteLockRealtimeFallback, 1500);
 
     // Chống chuột phải & phím tắt F12 / DevTools / View-Source trên Web & App Member
     document.addEventListener("contextmenu", (e) => {
