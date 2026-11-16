@@ -2689,22 +2689,53 @@
     </div>
   </section>
 
-  <!-- MODAL ĐỔI TÊN KHÁN GIẢ -->
+  <!-- MODAL ĐĂNG NHẬP GMAIL & XÁC THỰC OTP -->
   <div id="name-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-stone-900 border border-white/15 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
-        <h3 class="text-base font-black text-white"><i class="fa-solid fa-user-pen text-amber-400 mr-2"></i>Đặt Tên Khán Giả Của Bạn</h3>
+        <h3 class="text-base font-black text-white"><i class="fa-brands fa-google text-amber-400 mr-2"></i>Đăng Nhập Gmail &amp; Xác Thực OTP</h3>
         <button type="button" onclick="window.appActions.closeNameModal()" class="text-slate-400 hover:text-white cursor-pointer">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
-      <p class="text-xs text-slate-300">Tên này sẽ hiển thị trực tiếp trên chiếc ghế bạn ngồi và trong kênh chat của phòng chiếu.</p>
-      <input id="modal-name-input" type="text" maxlength="20" placeholder="Ví dụ: Minh Tuấn, Lan Anh..."
-        onkeydown="if(event.key==='Enter'){event.preventDefault();window.appActions.confirmNameModal();}"
-        class="w-full px-4 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-sm text-white font-bold focus:outline-none focus:border-amber-400" />
-      <div class="flex justify-end gap-2 pt-2">
-        <button type="button" onclick="window.appActions.closeNameModal()" class="px-4 py-2 rounded-xl bg-stone-800 text-slate-300 text-xs font-bold cursor-pointer">Hủy</button>
-        <button id="name-modal-confirm-btn" type="button" onclick="window.appActions.confirmNameModal()" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold cursor-pointer">Lưu tên</button>
+      <p class="text-xs text-slate-300 leading-relaxed">Để chống tài khoản ảo, vui lòng nhập tên hiển thị và xác thực địa chỉ <strong class="text-amber-300">@gmail.com</strong> bằng mã OTP 6 số gửi về hộp thư của bạn.</p>
+
+      <div id="gmail-auth-status" class="hidden px-3 py-2 rounded-xl bg-emerald-500/15 border border-emerald-400/40 text-xs text-emerald-300 font-semibold flex items-center justify-between gap-2"></div>
+
+      <div class="space-y-1">
+        <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Tên hiển thị trên ghế &amp; chat</label>
+        <input id="modal-name-input" type="text" maxlength="20" placeholder="Ví dụ: Minh Tuấn, Lan Anh..."
+          class="w-full px-4 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-sm text-white font-bold focus:outline-none focus:border-amber-400" />
+      </div>
+
+      <div class="space-y-1">
+        <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Địa chỉ Gmail</label>
+        <div class="flex gap-2">
+          <input id="modal-gmail-input" type="email" placeholder="tenban@gmail.com"
+            class="flex-1 min-w-0 px-4 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-sm text-white font-semibold focus:outline-none focus:border-amber-400" />
+          <button id="send-otp-btn" type="button" onclick="window.appActions.sendGmailOtp()"
+            class="shrink-0 px-3.5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 disabled:opacity-50 text-slate-950 text-xs font-extrabold cursor-pointer transition">
+            Gửi mã OTP
+          </button>
+        </div>
+      </div>
+
+      <div id="modal-otp-wrap" class="space-y-1">
+        <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Mã xác thực OTP (6 số trong Gmail)</label>
+        <input id="modal-otp-input" type="text" inputmode="numeric" maxlength="6" placeholder="Nhập 6 chữ số (vd: 482910)"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();window.appActions.confirmNameModal();}"
+          class="w-full px-4 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-sm text-amber-300 tracking-[0.35em] font-black text-center focus:outline-none focus:border-amber-400" />
+        <p id="modal-otp-hint" class="text-[11px] text-slate-400">Kiểm tra cả mục Thư rác (Spam) hoặc Quảng cáo nếu chưa thấy email.</p>
+      </div>
+
+      <div class="flex items-center justify-between gap-2 pt-2">
+        <button id="gmail-logout-btn" type="button" onclick="window.appActions.logoutGmailAccount()" class="hidden px-3 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/40 text-rose-300 text-xs font-bold cursor-pointer">
+          Đổi Gmail
+        </button>
+        <div class="flex justify-end gap-2 ml-auto">
+          <button type="button" onclick="window.appActions.closeNameModal()" class="px-4 py-2 rounded-xl bg-stone-800 text-slate-300 text-xs font-bold cursor-pointer">Hủy</button>
+          <button id="name-modal-confirm-btn" type="button" onclick="window.appActions.confirmNameModal()" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold cursor-pointer">Xác thực &amp; Lưu</button>
+        </div>
       </div>
     </div>
   </div>
@@ -3769,11 +3800,48 @@
       }
     }
 
+    function loadSavedEmail() {
+      try {
+        return (localStorage.getItem("cineverse_user_email") || "").trim().toLowerCase();
+      } catch (e) {
+        return "";
+      }
+    }
+
+    function loadGmailVerified() {
+      try {
+        return Boolean(loadSavedEmail() && localStorage.getItem("cineverse_gmail_verified") === "1");
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function saveVerifiedEmail(email, verifiedUid) {
+      try {
+        localStorage.setItem("cineverse_user_email", email);
+        localStorage.setItem("cineverse_gmail_verified", "1");
+        if (verifiedUid) localStorage.setItem("cineverse_verified_uid", verifiedUid);
+      } catch (e) {}
+    }
+
+    function clearVerifiedEmailStorage() {
+      try {
+        localStorage.removeItem("cineverse_user_email");
+        localStorage.removeItem("cineverse_gmail_verified");
+        localStorage.removeItem("cineverse_verified_uid");
+      } catch (e) {}
+    }
+
     // Trạng thái toàn cục của ứng dụng
     const state = {
       uid: loadOrCreateUid(),
       userName: loadSavedName() || ("Khán giả " + Math.floor(100 + Math.random() * 899)),
       hasCustomName: Boolean(loadSavedName()),
+      userEmail: loadSavedEmail(),
+      gmailVerified: loadGmailVerified(),
+      otpToken: "",
+      otpPendingEmail: "",
+      otpCooldownSec: 0,
       povZoom: "rowF",
       roomFilter: "all",
       searchQuery: "",
@@ -4064,7 +4132,14 @@
       const modalInput = document.getElementById("modal-name-input");
       const bookingName = document.getElementById("booking-user-name");
       const profileCapsuleName = document.getElementById("profile-capsule-username");
-      if (headerName) headerName.textContent = state.userName;
+      if (headerName) {
+        headerName.textContent = state.gmailVerified && state.userEmail
+          ? `${state.userName} ✓`
+          : state.userName;
+        headerName.title = state.gmailVerified && state.userEmail
+          ? `Đã xác thực Gmail: ${state.userEmail}`
+          : "Chưa xác thực Gmail";
+      }
       if (hostBadge) hostBadge.textContent = state.userName;
       if (inlineInput && document.activeElement !== inlineInput) inlineInput.value = state.userName;
       if (modalInput && document.activeElement !== modalInput) modalInput.value = state.userName;
@@ -4420,7 +4495,7 @@
     }
 
     async function enterRoom(roomId, options = {}) {
-      if (!state.hasCustomName || isDefaultGuestName(state.userName)) {
+      if (!state.hasCustomName || isDefaultGuestName(state.userName) || !state.gmailVerified || !state.userEmail) {
         pendingEnterRoomId = roomId;
         openNameModal(true);
         return;
@@ -7984,21 +8059,65 @@
       applyNewUserName(val);
     }
 
+    let otpCooldownTimer = null;
+
+    function refreshGmailModalUI() {
+      const gmailInput = document.getElementById("modal-gmail-input");
+      const otpWrap = document.getElementById("modal-otp-wrap");
+      const statusEl = document.getElementById("gmail-auth-status");
+      const logoutBtn = document.getElementById("gmail-logout-btn");
+      const sendBtn = document.getElementById("send-otp-btn");
+
+      if (state.gmailVerified && state.userEmail) {
+        if (gmailInput) {
+          gmailInput.value = state.userEmail;
+          gmailInput.readOnly = true;
+          gmailInput.classList.add("opacity-75");
+        }
+        if (sendBtn) sendBtn.classList.add("hidden");
+        if (otpWrap) otpWrap.classList.add("hidden");
+        if (logoutBtn) logoutBtn.classList.remove("hidden");
+        if (statusEl) {
+          statusEl.classList.remove("hidden");
+          statusEl.innerHTML = `<span>✅ Đã xác thực Gmail: <b>${escapeHtml(state.userEmail)}</b></span><span class="text-[10px] uppercase tracking-wider bg-emerald-500/25 px-2 py-0.5 rounded-full">Verified</span>`;
+        }
+      } else {
+        if (gmailInput) {
+          gmailInput.readOnly = false;
+          gmailInput.classList.remove("opacity-75");
+          if (state.userEmail && !gmailInput.value) gmailInput.value = state.userEmail;
+        }
+        if (sendBtn) sendBtn.classList.remove("hidden");
+        if (otpWrap) otpWrap.classList.remove("hidden");
+        if (logoutBtn) logoutBtn.classList.add("hidden");
+        if (statusEl) statusEl.classList.add("hidden");
+      }
+    }
+
     function openNameModal(requireForRoom = false) {
       updateNameUI();
       const input = document.getElementById("modal-name-input");
       const btn = document.getElementById("name-modal-confirm-btn");
+      const otpInput = document.getElementById("modal-otp-input");
+      if (otpInput) otpInput.value = "";
       if (requireForRoom) {
         if (input) {
           const saved = loadSavedName();
           input.value = (saved && !isDefaultGuestName(saved)) ? saved : "";
         }
-        if (btn) btn.textContent = "Xác nhận & Vào Phòng";
+        if (btn) btn.textContent = state.gmailVerified ? "Xác nhận & Vào Phòng" : "Xác thực OTP & Vào Phòng";
       } else {
-        if (btn) btn.textContent = "Lưu tên";
+        if (btn) btn.textContent = state.gmailVerified ? "Lưu tên" : "Xác thực & Lưu";
       }
+      refreshGmailModalUI();
       document.getElementById("name-modal")?.classList.remove("hidden");
-      setTimeout(() => input?.focus(), 60);
+      setTimeout(() => {
+        if (!state.gmailVerified && !document.getElementById("modal-gmail-input")?.value) {
+          document.getElementById("modal-gmail-input")?.focus();
+        } else {
+          input?.focus();
+        }
+      }, 60);
     }
 
     function closeNameModal() {
@@ -8006,15 +8125,160 @@
       document.getElementById("name-modal")?.classList.add("hidden");
     }
 
+    function logoutGmailAccount() {
+      state.userEmail = "";
+      state.gmailVerified = false;
+      state.otpToken = "";
+      state.otpPendingEmail = "";
+      clearVerifiedEmailStorage();
+      const gmailInput = document.getElementById("modal-gmail-input");
+      const otpInput = document.getElementById("modal-otp-input");
+      if (gmailInput) gmailInput.value = "";
+      if (otpInput) otpInput.value = "";
+      updateNameUI();
+      refreshGmailModalUI();
+      syncMyOnlinePresence();
+      showToast("Đã đăng xuất Gmail. Vui lòng xác thực lại Gmail mới.", "info");
+    }
+
+    async function sendGmailOtp() {
+      const gmailInput = document.getElementById("modal-gmail-input");
+      const nameInput = document.getElementById("modal-name-input");
+      const sendBtn = document.getElementById("send-otp-btn");
+      const hintEl = document.getElementById("modal-otp-hint");
+      const email = (gmailInput?.value || "").trim().toLowerCase();
+      const displayName = (nameInput?.value || state.userName || "").trim();
+
+      if (!/^[a-z0-9._%+-]+@gmail\.com$/i.test(email)) {
+        showToast("Vui lòng nhập đúng địa chỉ @gmail.com hợp lệ!", "error");
+        gmailInput?.focus();
+        return;
+      }
+      if (state.otpCooldownSec > 0) return;
+
+      const workerBase = (state.r2WorkerUrl || "").replace(/\/+$/, "");
+      if (!workerBase) {
+        showToast("Chưa cấu hình URL Cloudflare Worker để gửi OTP!", "error");
+        return;
+      }
+
+      if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.textContent = "Đang gửi...";
+      }
+      try {
+        const res = await fetch(`${workerBase}/auth/send-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, displayName })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok || !data.otpToken) {
+          throw new Error(data.error || `Lỗi gửi OTP (${res.status})`);
+        }
+        state.otpToken = data.otpToken;
+        state.otpPendingEmail = email;
+        if (hintEl) {
+          hintEl.innerHTML = `<span class="text-emerald-300 font-semibold">📧 Đã gửi mã 6 số tới <b>${escapeHtml(email)}</b> (hết hạn sau 5 phút).</span>`;
+        }
+        showToast(`📧 Đã gửi mã OTP 6 số tới ${email}!`, "success");
+        document.getElementById("modal-otp-input")?.focus();
+
+        state.otpCooldownSec = 45;
+        if (otpCooldownTimer) clearInterval(otpCooldownTimer);
+        otpCooldownTimer = setInterval(() => {
+          state.otpCooldownSec = Math.max(0, state.otpCooldownSec - 1);
+          const btnNow = document.getElementById("send-otp-btn");
+          if (btnNow) {
+            if (state.otpCooldownSec > 0) {
+              btnNow.disabled = true;
+              btnNow.textContent = `Gửi lại (${state.otpCooldownSec}s)`;
+            } else {
+              btnNow.disabled = false;
+              btnNow.textContent = "Gửi lại mã";
+              clearInterval(otpCooldownTimer);
+              otpCooldownTimer = null;
+            }
+          }
+        }, 1000);
+      } catch (err) {
+        showToast(`❌ ${err.message || "Không thể gửi mã OTP"}`, "error");
+        if (sendBtn) {
+          sendBtn.disabled = false;
+          sendBtn.textContent = "Gửi mã OTP";
+        }
+      }
+    }
+
     async function confirmNameModal() {
       const input = document.getElementById("modal-name-input");
+      const gmailInput = document.getElementById("modal-gmail-input");
+      const otpInput = document.getElementById("modal-otp-input");
+      const btn = document.getElementById("name-modal-confirm-btn");
+
       const val = (input?.value || "").trim();
       if (!val || isDefaultGuestName(val)) {
         showToast("Vui lòng nhập tên riêng của bạn (không dùng tên mặc định 'Khán giả') để vào phòng!", "error");
         input?.focus();
         return;
       }
+
+      const email = (gmailInput?.value || state.userEmail || "").trim().toLowerCase();
+      if (!/^[a-z0-9._%+-]+@gmail\.com$/i.test(email)) {
+        showToast("Vui lòng nhập đúng địa chỉ @gmail.com!", "error");
+        gmailInput?.focus();
+        return;
+      }
+
+      if (!state.gmailVerified || state.userEmail !== email) {
+        const otp = (otpInput?.value || "").trim();
+        if (!state.otpToken || state.otpPendingEmail !== email) {
+          showToast("Vui lòng bấm 'Gửi mã OTP' tới Gmail của bạn trước!", "warning");
+          return;
+        }
+        if (!/^\d{6}$/.test(otp)) {
+          showToast("Vui lòng nhập đủ 6 chữ số mã OTP trong Gmail!", "error");
+          otpInput?.focus();
+          return;
+        }
+        const workerBase = (state.r2WorkerUrl || "").replace(/\/+$/, "");
+        const prevText = btn ? btn.textContent : "";
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Đang xác thực...";
+        }
+        try {
+          const res = await fetch(`${workerBase}/auth/verify-otp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, otp, otpToken: state.otpToken })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) {
+            throw new Error(data.error || "Xác thực OTP thất bại");
+          }
+          state.userEmail = data.email || email;
+          state.gmailVerified = true;
+          state.otpToken = "";
+          state.otpPendingEmail = "";
+          saveVerifiedEmail(state.userEmail, data.verifiedUid);
+          showToast(`✅ Xác thực thành công Gmail: ${state.userEmail}`, "success");
+        } catch (err) {
+          showToast(`❌ ${err.message || "Mã OTP không đúng"}`, "error");
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = prevText;
+          }
+          return;
+        }
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = prevText;
+        }
+      }
+
       await applyNewUserName(val);
+      syncMyOnlinePresence();
       const targetRoom = pendingEnterRoomId;
       pendingEnterRoomId = null;
       const inviteInfo = pendingInviteSeat;
@@ -12030,6 +12294,8 @@
               id: vId,
               uid: state.uid,
               userName: state.userName || "Khách",
+              userEmail: state.userEmail || "",
+              gmailVerified: Boolean(state.gmailVerified),
               device: detectDeviceLabel(),
               createdAt: Date.now()
             }).catch(() => {});
@@ -12406,6 +12672,8 @@
         totalAmount,
         uid: state.uid,
         userName: state.userName,
+        userEmail: state.userEmail || "",
+        gmailVerified: Boolean(state.gmailVerified),
         createdAt: Date.now()
       };
       state.revenueOrders = [orderRecord, ...(state.revenueOrders || [])];
@@ -13091,6 +13359,8 @@
       rtdbMod.set(rtdbMod.ref(rtdb, `online_visitors/${state.uid}`), {
         uid: state.uid,
         userName: state.userName || "Khách",
+        userEmail: state.userEmail || "",
+        gmailVerified: Boolean(state.gmailVerified),
         device: detectDeviceLabel(),
         currentRoomId: state.currentRoomId || "lobby",
         updatedAt: Date.now()
@@ -13645,6 +13915,8 @@
       openNameModal,
       closeNameModal,
       confirmNameModal,
+      sendGmailOtp,
+      logoutGmailAccount,
       saveInlineName,
       openCustomVideoModal,
       closeCustomVideoModal,

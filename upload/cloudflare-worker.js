@@ -634,6 +634,121 @@ export default {
       }
     }
 
+    // Gmail OTP Auth (stateless HMAC-SHA256 signed token + Resend)
+    if (request.method === "POST" && url.pathname === "/auth/send-otp") {
+      try {
+        const body = await request.json().catch(() => ({}));
+        const email = String(body.email || "").trim().toLowerCase();
+        const displayName = String(body.displayName || "").trim().slice(0, 30);
+        if (!/^[a-z0-9._%+-]+@gmail\.com$/i.test(email)) {
+          return jsonResponse({ ok: false, error: "Vui lòng nhập địa chỉ Gmail hợp lệ (@gmail.com)." }, 400);
+        }
+        if (!env.RESEND_API_KEY) {
+          return jsonResponse({ ok: false, error: "Worker chưa cấu hình RESEND_API_KEY." }, 500);
+        }
+        const arr = new Uint32Array(1);
+        crypto.getRandomValues(arr);
+        const otp = String(100000 + (arr[0] % 900000));
+        const exp = Date.now() + 5 * 60 * 1000;
+        const secret = env.OTP_SECRET || env.ADMIN_PIN || env.RESEND_API_KEY || "cineverse-otp-fallback";
+        const enc = new TextEncoder();
+
+        const hashBuf = await crypto.subtle.digest("SHA-256", enc.encode(`${email}:${otp}:${secret}`));
+        const otpHash = Array.from(new Uint8Array(hashBuf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+
+        const payloadJson = JSON.stringify({ email, otpHash, exp });
+        const payloadB64 = btoa(unescape(encodeURIComponent(payloadJson)))
+          .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+        const key = await crypto.subtle.importKey(
+          "raw",
+          enc.encode(secret),
+          { name: "HMAC", hash: "SHA-256" },
+          false,
+          ["sign"]
+        );
+        const sigBuf = await crypto.subtle.sign("HMAC", key, enc.encode(payloadB64));
+        const sigB64 = btoa(String.fromCharCode(...new Uint8Array(sigBuf)))
+          .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+        const otpToken = `${payloadB64}.${sigB64}`;
+
+        const mailRes = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${env.RESEND_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            from: env.RESEND_FROM || "CineVerse Security <onboarding@resend.dev>",
+            to: [email],
+            subject: `[CineVerse] Mã xác thực đăng nhập: ${otp}`,
+            html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;background:#0c0a09;color:#f8fafc;border-radius:16px;border:1px solid #292524">
+              <h2 style="margin:0 0 8px;color:#fbbf24">🔐 Xác thực tài khoản CineVerse</h2>
+              <p style="font-size:14px;color:#cbd5e1;margin:0 0 16px">Xin chào ${displayName || "bạn"}, mã xác thực 6 số của bạn là:</p>
+              <div style="font-size:32px;font-weight:900;letter-spacing:8px;text-align:center;padding:16px;background:#1c1917;border:1px solid #f59e0b;border-radius:12px;color:#fbbf24">${otp}</div>
+              <p style="font-size:12px;color:#94a3b8;margin:16px 0 0">Mã có hiệu lực trong <b>5 phút</b>. Nếu bạn không yêu cầu đăng nhập, vui lòng bỏ qua email này.</p>
+            </div>`
+          })
+        });
+        const mailJson = await mailRes.json().catch(() => ({}));
+        if (!mailRes.ok) {
+          return jsonResponse({
+            ok: false,
+            error: mailJson?.message || `Không thể gửi email (${mailRes.status}).`,
+            resendStatus: mailRes.status
+          }, 400);
+        }
+        return jsonResponse({ ok: true, email, otpToken, expiresInSec: 300 }, 200);
+      } catch (e) {
+        return jsonResponse({ ok: false, error: String(e?.message || e) }, 500);
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/auth/verify-otp") {
+      try {
+        const body = await request.json().catch(() => ({}));
+        const email = String(body.email || "").trim().toLowerCase();
+        const otp = String(body.otp || "").trim();
+        const otpToken = String(body.otpToken || "").trim();
+        if (!/^[a-z0-9._%+-]+@gmail\.com$/i.test(email) || !/^\d{6}$/.test(otp) || !otpToken.includes(".")) {
+          return jsonResponse({ ok: false, error: "Thông tin xác thực không hợp lệ (cần Gmail & mã 6 số)." }, 400);
+        }
+        const [payloadB64, sigB64] = otpToken.split(".");
+        const secret = env.OTP_SECRET || env.ADMIN_PIN || env.RESEND_API_KEY || "cineverse-otp-fallback";
+        const enc = new TextEncoder();
+        const key = await crypto.subtle.importKey(
+          "raw",
+          enc.encode(secret),
+          { name: "HMAC", hash: "SHA-256" },
+          false,
+          ["sign"]
+        );
+        const expectedSigBuf = await crypto.subtle.sign("HMAC", key, enc.encode(payloadB64));
+        const expectedSigB64 = btoa(String.fromCharCode(...new Uint8Array(expectedSigBuf)))
+          .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+        if (sigB64 !== expectedSigB64) {
+          return jsonResponse({ ok: false, error: "Phiên OTP không hợp lệ hoặc đã bị chỉnh sửa." }, 400);
+        }
+        const b64Norm = payloadB64.replace(/-/g, "+").replace(/_/g, "/");
+        const payload = JSON.parse(decodeURIComponent(escape(atob(b64Norm))));
+        if (!payload || payload.email !== email) {
+          return jsonResponse({ ok: false, error: "Gmail không khớp với mã OTP đã gửi." }, 400);
+        }
+        if (Date.now() > Number(payload.exp || 0)) {
+          return jsonResponse({ ok: false, error: "Mã OTP đã hết hạn (5 phút). Vui lòng bấm gửi lại mã." }, 400);
+        }
+        const hashBuf = await crypto.subtle.digest("SHA-256", enc.encode(`${email}:${otp}:${secret}`));
+        const otpHash = Array.from(new Uint8Array(hashBuf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+        if (otpHash !== payload.otpHash) {
+          return jsonResponse({ ok: false, error: "Mã OTP không đúng. Vui lòng kiểm tra lại Gmail." }, 400);
+        }
+        const uidBuf = await crypto.subtle.digest("SHA-256", enc.encode(`uid:${email}:${secret}`));
+        const verifiedUid = "gm_" + Array.from(new Uint8Array(uidBuf)).slice(0, 8).map((b) => b.toString(16).padStart(2, "0")).join("");
+        return jsonResponse({ ok: true, email, verifiedUid, verifiedAt: Date.now() }, 200);
+      } catch (e) {
+        return jsonResponse({ ok: false, error: String(e?.message || e) }, 500);
+      }
+    }
+
     if (!env.MY_BUCKET) {
       return new Response(
         JSON.stringify({
