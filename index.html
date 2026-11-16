@@ -4405,6 +4405,14 @@
       if (!roomId) return false;
       const ticket = state.bookedTicketsByRoom?.[roomId];
       if (!ticket || !ticket.seatId) return false;
+      const room = getEffectiveRoom(roomId);
+      const curVer = String(room?.movieVersion || "");
+      const tickVer = String(ticket.movieVersion || "");
+      if ((curVer && curVer !== tickVer) || (ticket.movieTitle && room?.movieTitle && ticket.movieTitle !== room.movieTitle)) {
+        delete state.bookedTicketsByRoom[roomId];
+        saveAppStateToStorage();
+        return false;
+      }
       const roomSeats = state.seatsByRoom[roomId] || {};
       const occupant = roomSeats[ticket.seatId];
       if (occupant && occupant.uid && occupant.uid !== state.uid) return false;
@@ -11769,9 +11777,34 @@
         rtdbMod.onValue(rtdbMod.ref(rtdb, "lobby_config/rooms"), (snap) => {
           const val = snap.val() || {};
           state.lobbyConfigRooms = val;
+
+          // Kiểm tra nếu Admin đổi phim ở phòng nào -> tự động reset vé của phòng đó và yêu cầu đặt lại
+          let ticketsReset = false;
+          let activeRoomInvalidated = false;
+          Object.keys(state.bookedTicketsByRoom || {}).forEach(rId => {
+            const ticket = state.bookedTicketsByRoom[rId];
+            if (!ticket) return;
+            const room = getEffectiveRoom(rId);
+            const curVer = String(room?.movieVersion || "");
+            const tickVer = String(ticket.movieVersion || "");
+            if ((curVer && curVer !== tickVer) || (ticket.movieTitle && room?.movieTitle && ticket.movieTitle !== room.movieTitle)) {
+              delete state.bookedTicketsByRoom[rId];
+              ticketsReset = true;
+              if (state.currentRoomId === rId) {
+                activeRoomInvalidated = true;
+              }
+            }
+          });
+          if (ticketsReset) saveAppStateToStorage();
+
           renderHeroBillboard();
           renderLobby();
-          if (state.currentRoomId) {
+          if (activeRoomInvalidated && state.currentRoomId) {
+            const changedId = state.currentRoomId;
+            leaveRoom();
+            showToast("🎬 Phòng chiếu vừa đổi sang phim mới! Vui lòng đặt vé lại cho suất chiếu mới.", "info");
+            openBookingModal(changedId);
+          } else if (state.currentRoomId) {
             const room = getEffectiveRoom(state.currentRoomId);
             const titleEl = document.getElementById("room-header-title");
             if (titleEl) titleEl.textContent = room.movieTitle;
@@ -12352,6 +12385,8 @@
       state.bookedTicketsByRoom[targetRoomId] = {
         seatId: targetSeatId,
         showtime,
+        movieVersion: String(roomObj.movieVersion || ""),
+        movieTitle: roomObj.movieTitle || "",
         ticketPrice: seatPrice,
         comboPrice,
         totalAmount,
