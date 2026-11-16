@@ -99,10 +99,13 @@ jobs:
           make_latest: true
 
       - name: Auto-sync IPA to Project_Ca_Nhan repo
-        if: ${{ secrets.PROJECT_CA_NHAN_TOKEN != '' }}
         env:
           TARGET_TOKEN: ${{ secrets.PROJECT_CA_NHAN_TOKEN }}
         run: |
+          if [ -z "$TARGET_TOKEN" ]; then
+            echo "PROJECT_CA_NHAN_TOKEN not set; skipping cross-repo push."
+            exit 0
+          fi
           git clone --depth 1 "https://x-access-token:${TARGET_TOKEN}@github.com/thodantuna-lab/Project_Ca_Nhan.git" target_repo
           cp ios_output/CineVerse-Lotte-unsigned.ipa target_repo/CineVerse-Lotte-unsigned.ipa
           cd target_repo

@@ -96,10 +96,13 @@ jobs:
           make_latest: true
 
       - name: Auto-sync APK to Project_Ca_Nhan repo
-        if: ${{ secrets.PROJECT_CA_NHAN_TOKEN != '' }}
         env:
           TARGET_TOKEN: ${{ secrets.PROJECT_CA_NHAN_TOKEN }}
         run: |
+          if [ -z "$TARGET_TOKEN" ]; then
+            echo "PROJECT_CA_NHAN_TOKEN not set; skipping cross-repo push."
+            exit 0
+          fi
           git clone --depth 1 "https://x-access-token:${TARGET_TOKEN}@github.com/thodantuna-lab/Project_Ca_Nhan.git" target_repo
           cp output/CineVerse-Lotte-Android.apk target_repo/CineVerse-Lotte-Android.apk
           cd target_repo
