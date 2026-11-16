@@ -8205,7 +8205,7 @@
         if (logoutBtn) logoutBtn.classList.remove("hidden");
         if (statusEl) {
           statusEl.classList.remove("hidden");
-          statusEl.innerHTML = `<span>✅ Đã đăng nhập: <b>${escapeHtml(state.userEmail)}</b></span><span class="text-[10px] uppercase tracking-wider bg-emerald-500/25 px-2 py-0.5 rounded-full">Verified</span>`;
+          statusEl.innerHTML = `<span>✅ Đã đăng nhập: <b>${escapeHTML(state.userEmail)}</b></span><span class="text-[10px] uppercase tracking-wider bg-emerald-500/25 px-2 py-0.5 rounded-full">Verified</span>`;
         }
         if (btn) btn.textContent = pendingEnterRoomId ? "Xác nhận & Vào Phòng" : "Lưu tên";
       } else {
@@ -8312,7 +8312,7 @@
         state.otpToken = data.otpToken;
         state.otpPendingEmail = email;
         if (hintEl) {
-          hintEl.innerHTML = `<span class="text-emerald-300 font-semibold">📧 Đã gửi mã 6 số tới <b>${escapeHtml(email)}</b> (hết hạn sau 5 phút).</span>`;
+          hintEl.innerHTML = `<span class="text-emerald-300 font-semibold">📧 Đã gửi mã 6 số tới <b>${escapeHTML(email)}</b> (hết hạn sau 5 phút).</span>`;
         }
         showToast(`📧 Đã gửi mã OTP 6 số tới ${email}!`, "success");
         document.getElementById("modal-otp-input")?.focus();
