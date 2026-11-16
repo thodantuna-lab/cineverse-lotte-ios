@@ -1597,6 +1597,30 @@
     </div>
   </header>
 
+  <!-- MÀN HÌNH TẠM KHÓA TRUY CẬP (BẬT TỪ ADMIN + CHỐNG F12) -->
+  <div id="site-maintenance-gate" class="hidden fixed inset-0 z-[99999] bg-stone-950/98 backdrop-blur-2xl flex items-center justify-center p-4 select-none">
+    <div class="max-w-md w-full bg-stone-900 border border-rose-500/40 rounded-3xl p-6 sm:p-7 space-y-5 shadow-[0_0_80px_rgba(244,63,94,0.2)] text-center">
+      <div class="flex flex-col items-center gap-3">
+        <img src="./assets/web-logo.png" alt="CineVerse" class="w-16 h-16 rounded-2xl object-cover border border-amber-400/50 shadow-xl" />
+        <span class="px-3 py-1 rounded-full bg-rose-500/20 border border-rose-400/40 text-rose-300 text-[11px] font-black uppercase tracking-wider">
+          <i class="fa-solid fa-lock mr-1"></i>Hệ Thống Đang Tạm Khóa
+        </span>
+        <h2 class="text-xl font-black text-white">CineVerse Tạm Dừng Truy Cập</h2>
+        <p class="text-xs text-slate-300 leading-relaxed">Web / App hiện đang được Admin tạm khóa bảo trì hoặc giới hạn người xem. Vui lòng nhập <strong class="text-amber-300">Key mở khóa</strong> do Admin cung cấp để tiếp tục.</p>
+      </div>
+      <div class="space-y-2.5 text-left">
+        <input id="site-lock-key-input" type="password" maxlength="24" placeholder="Nhập Key mở khóa (vd: LOCK-XXXXXX)..."
+          onkeydown="if(event.key==='Enter'){event.preventDefault();window.appActions.unlockSiteMaintenanceGate();}"
+          class="w-full px-4 py-3 rounded-xl bg-stone-950 border border-white/15 text-sm text-amber-300 font-mono uppercase tracking-widest text-center font-black focus:outline-none focus:border-amber-400" />
+        <p id="site-lock-error" class="hidden text-xs text-rose-400 font-bold text-center"></p>
+        <button type="button" onclick="window.appActions.unlockSiteMaintenanceGate()"
+          class="w-full py-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm shadow-lg cursor-pointer transition">
+          <i class="fa-solid fa-key mr-1.5"></i>Mở Khóa Truy Cập
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ========================================================= -->
   <!-- VIEW 1: SẢNH CHỜ 6 PHÒNG CHIẾU (LOBBY VIEW)               -->
   <!-- ========================================================= -->
@@ -4084,6 +4108,7 @@
       authTab: "login",
       paymentMode: "free",
       paymentMethod: "vietqr",
+      siteLock: { enabled: false, keyHash: "" },
       otpToken: "",
       otpPendingEmail: "",
       otpCooldownSec: 0,
@@ -12769,6 +12794,15 @@
           }
         }, () => {});
 
+        rtdbMod.onValue(rtdbMod.ref(rtdb, "lobby_config/site_lock"), (snap) => {
+          const val = snap.val() || {};
+          state.siteLock = {
+            enabled: Boolean(val.enabled),
+            keyHash: String(val.keyHash || "")
+          };
+          applySiteLockState();
+        }, () => {});
+
         const seenVisitIds = new Set();
         let hasInitVisits = false;
         const visitQuery = rtdbMod.query(rtdbMod.ref(rtdb, "visit_logs"), rtdbMod.limitToLast(40));
@@ -12802,6 +12836,15 @@
           if (!document.getElementById("booking-modal")?.classList.contains("hidden")) {
             renderBookingModalUI();
           }
+        }, () => {});
+
+        rtdbMod.onValue(rtdbMod.ref(rtdb, "lobby_config/site_lock"), (snap) => {
+          const val = snap.val() || {};
+          state.siteLock = {
+            enabled: Boolean(val.enabled),
+            keyHash: String(val.keyHash || "")
+          };
+          applySiteLockState();
         }, () => {});
 
         // Nếu người dùng đã vào phòng trước khi Firebase SDK tải xong thì đồng bộ ngay
@@ -14525,6 +14568,131 @@
       showToast("👑 Đã lưu & đồng bộ lịch chiếu mới tới toàn bộ người xem!", "success");
     }
 
+    let siteLockWatchdogTimer = null;
+    let siteLockObserver = null;
+    let siteLockGateHtmlBackup = "";
+
+    function getSiteUnlockHashStored() {
+      try {
+        return getMemberCookie("cv_site_unlock_hash") || localStorage.getItem("cv_site_unlock_hash") || "";
+      } catch (_) {
+        return "";
+      }
+    }
+
+    function isSiteLockedForCurrentUser() {
+      if (!state.siteLock?.enabled) return false;
+      const expected = String(state.siteLock.keyHash || "");
+      if (!expected) return true;
+      return getSiteUnlockHashStored() !== expected;
+    }
+
+    function enforceLockedDom() {
+      if (!isSiteLockedForCurrentUser()) return;
+      let gate = document.getElementById("site-maintenance-gate");
+      if (!gate && siteLockGateHtmlBackup) {
+        const wrap = document.createElement("div");
+        wrap.innerHTML = siteLockGateHtmlBackup;
+        if (wrap.firstElementChild) {
+          document.body.appendChild(wrap.firstElementChild);
+          gate = document.getElementById("site-maintenance-gate");
+        }
+      }
+      if (gate) gate.classList.remove("hidden");
+      const header = document.querySelector("header");
+      const lobby = document.getElementById("lobby-view");
+      const room = document.getElementById("room-view");
+      if (header) header.style.display = "none";
+      if (lobby) lobby.style.display = "none";
+      if (room) room.style.display = "none";
+      const vid = document.getElementById("html5-video-player");
+      if (vid && !vid.paused) { try { vid.pause(); } catch (_) {} }
+    }
+
+    function applySiteLockState() {
+      const gate = document.getElementById("site-maintenance-gate");
+      if (gate && !siteLockGateHtmlBackup) {
+        siteLockGateHtmlBackup = gate.outerHTML;
+      }
+      const locked = isSiteLockedForCurrentUser();
+      const header = document.querySelector("header");
+      const lobby = document.getElementById("lobby-view");
+      const room = document.getElementById("room-view");
+
+      if (locked) {
+        enforceLockedDom();
+        if (!siteLockWatchdogTimer) {
+          siteLockWatchdogTimer = setInterval(() => {
+            if (!isSiteLockedForCurrentUser()) return;
+            enforceLockedDom();
+            const wDiff = Math.abs((window.outerWidth || 0) - (window.innerWidth || 0));
+            const hDiff = Math.abs((window.outerHeight || 0) - (window.innerHeight || 0));
+            if (wDiff > 220 || hDiff > 220) {
+              const err = document.getElementById("site-lock-error");
+              if (err) {
+                err.textContent = "⚠️ Vui lòng đóng công cụ kiểm tra (F12 / DevTools) để tiếp tục.";
+                err.classList.remove("hidden");
+              }
+            }
+          }, 400);
+        }
+        if (!siteLockObserver && document.body) {
+          siteLockObserver = new MutationObserver(() => {
+            if (isSiteLockedForCurrentUser()) enforceLockedDom();
+          });
+          siteLockObserver.observe(document.body, { childList: true, attributes: true, subtree: false });
+        }
+      } else {
+        if (siteLockWatchdogTimer) { clearInterval(siteLockWatchdogTimer); siteLockWatchdogTimer = null; }
+        if (siteLockObserver) { siteLockObserver.disconnect(); siteLockObserver = null; }
+        if (gate) gate.classList.add("hidden");
+        if (header) header.style.display = "";
+        if (lobby) lobby.style.display = "";
+        if (room) room.style.display = "";
+      }
+    }
+
+    async function unlockSiteMaintenanceGate() {
+      const inp = document.getElementById("site-lock-key-input");
+      const err = document.getElementById("site-lock-error");
+      const raw = (inp?.value || "").trim().toUpperCase();
+      if (!raw) {
+        if (err) { err.textContent = "Vui lòng nhập Key mở khóa!"; err.classList.remove("hidden"); }
+        inp?.focus();
+        return;
+      }
+      const h = await sha256HexClient(raw);
+      if (!state.siteLock?.keyHash || h !== state.siteLock.keyHash) {
+        if (err) { err.textContent = "❌ Key mở khóa không chính xác!"; err.classList.remove("hidden"); }
+        inp?.focus();
+        return;
+      }
+      if (err) err.classList.add("hidden");
+      setMemberCookie("cv_site_unlock_hash", h, 7);
+      try { localStorage.setItem("cv_site_unlock_hash", h); } catch (_) {}
+      applySiteLockState();
+      showToast("🔓 Mở khóa truy cập thành công!", "success");
+    }
+
+    // Chống chuột phải & phím tắt F12 / DevTools / View-Source trên Web & App Member
+    document.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+    });
+    document.addEventListener("keydown", (e) => {
+      const k = (e.key || "").toUpperCase();
+      const ctrlOrCmd = e.ctrlKey || e.metaKey;
+      if (
+        e.key === "F12" ||
+        e.keyCode === 123 ||
+        (ctrlOrCmd && e.shiftKey && (k === "I" || k === "J" || k === "C" || k === "K")) ||
+        (ctrlOrCmd && (k === "U" || k === "S"))
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    }, true);
+
     window.appActions = {
       setRoomFilter,
       setSearchQuery,
@@ -14560,6 +14728,7 @@
       backToBookingSummary,
       copyPaymentText,
       selectPaymentMethod,
+      unlockSiteMaintenanceGate,
       toggleVoiceMic,
       resumePendingVoiceAudio,
       cycleSubtitleMode,
