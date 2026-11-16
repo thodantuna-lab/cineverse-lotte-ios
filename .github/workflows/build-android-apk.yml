@@ -16,6 +16,8 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -64,3 +66,31 @@ jobs:
           name: CineVerse-Lotte-Android-APK
           path: output/CineVerse-Lotte-Android.apk
           retention-days: 30
+
+      - name: Auto-commit APK to releases folder
+        run: |
+          FILE_SIZE=$(wc -c < output/CineVerse-Lotte-Android.apk)
+          if [ "$FILE_SIZE" -lt 99614720 ]; then
+            mkdir -p releases
+            cp output/CineVerse-Lotte-Android.apk releases/CineVerse-Lotte-Android.apk
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add releases/CineVerse-Lotte-Android.apk
+            if ! git diff --cached --quiet; then
+              git commit -m "chore(release): update Android APK (${GITHUB_SHA::7}) [skip ci]"
+              for i in 1 2 3 4; do
+                git pull --rebase origin main && git push origin main && break
+                sleep 3
+              done
+            fi
+          else
+            echo "APK exceeds 95MB ($FILE_SIZE bytes), skipping git commit and publishing to Release only."
+          fi
+
+      - name: Publish APK to GitHub Release (latest)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: CineVerse Lotte Latest Builds
+          files: output/CineVerse-Lotte-Android.apk
+          make_latest: true

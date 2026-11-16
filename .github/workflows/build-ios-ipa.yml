@@ -4,10 +4,19 @@ on:
   workflow_dispatch:
   push:
     branches: [ main, master ]
+    paths:
+      - 'index.html'
+      - 'package.json'
+      - 'capacitor.config.json'
+      - 'scripts/**'
+      - 'assets/**'
+      - '.github/workflows/build-ios-ipa.yml'
 
 jobs:
   build-ios:
     runs-on: macos-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -60,3 +69,31 @@ jobs:
           name: CineVerse-Lotte-iOS-IPA
           path: ios_output/CineVerse-Lotte-unsigned.ipa
           retention-days: 30
+
+      - name: Auto-commit IPA to releases folder
+        run: |
+          FILE_SIZE=$(wc -c < ios_output/CineVerse-Lotte-unsigned.ipa)
+          if [ "$FILE_SIZE" -lt 99614720 ]; then
+            mkdir -p releases
+            cp ios_output/CineVerse-Lotte-unsigned.ipa releases/CineVerse-Lotte-unsigned.ipa
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add releases/CineVerse-Lotte-unsigned.ipa
+            if ! git diff --cached --quiet; then
+              git commit -m "chore(release): update iOS IPA (${GITHUB_SHA::7}) [skip ci]"
+              for i in 1 2 3 4; do
+                git pull --rebase origin main && git push origin main && break
+                sleep 3
+              done
+            fi
+          else
+            echo "IPA exceeds 95MB ($FILE_SIZE bytes), skipping git commit and publishing to Release only."
+          fi
+
+      - name: Publish IPA to GitHub Release (latest)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: CineVerse Lotte Latest Builds
+          files: ios_output/CineVerse-Lotte-unsigned.ipa
+          make_latest: true
