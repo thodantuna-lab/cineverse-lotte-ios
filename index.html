@@ -7,6 +7,7 @@
   <link rel="icon" type="image/png" href="assets/web-logo.png" />
   <link rel="apple-touch-icon" href="assets/web-logo.png" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
@@ -4363,6 +4364,7 @@
       if (heroVid) heroVid.pause();
 
       state.currentRoomId = roomId;
+      try { window.__setAmbientTunaPaused?.(true); } catch (_) {}
 
       document.getElementById("lobby-view").classList.add("hidden");
       document.getElementById("room-view").classList.remove("hidden");
@@ -4447,6 +4449,7 @@
       }
       latestRoomSyncState = null;
       state.currentRoomId = null;
+      try { window.__setAmbientTunaPaused?.(false); } catch (_) {}
       document.getElementById("room-view").classList.add("hidden");
       document.getElementById("lobby-view").classList.remove("hidden");
       document.getElementById("header-lobby-actions")?.classList.remove("hidden");
@@ -5619,12 +5622,24 @@
         return;
       }
 
-      // Nếu phòng chiếu MP4 hoặc file tải lên từ máy
+      // Nếu phòng chiếu MP4, HLS (.m3u8) hoặc file tải lên từ máy
       if (room.videoUrl) {
         tryAutoLoadMatchingR2Subtitle(room);
         videoEl.classList.remove("hidden");
         seekContainer.classList.remove("hidden");
-        videoEl.src = room.videoUrl;
+        const isHlsUrl = /\.m3u8(\?|$)/i.test(room.videoUrl);
+        if (isHlsUrl && window.Hls && window.Hls.isSupported()) {
+          window.__activeHlsInstance = new window.Hls({
+            maxBufferLength: 20,
+            maxMaxBufferLength: 40,
+            backBufferLength: 15,
+            enableWorker: true
+          });
+          window.__activeHlsInstance.loadSource(room.videoUrl);
+          window.__activeHlsInstance.attachMedia(videoEl);
+        } else {
+          videoEl.src = room.videoUrl;
+        }
         videoEl.loop = true;
         videoEl.volume = 0.85;
 
@@ -5655,6 +5670,10 @@
     }
 
     function stopRoomVideoPlayer() {
+      if (window.__activeHlsInstance) {
+        try { window.__activeHlsInstance.destroy(); } catch (_) {}
+        window.__activeHlsInstance = null;
+      }
       if (lyricTimer) {
         clearInterval(lyricTimer);
         lyricTimer = null;
@@ -6671,7 +6690,10 @@
     function spawnFloatingEmojis(emoji) {
       const layer = document.getElementById("floating-reactions-layer");
       if (!layer) return;
-      for (let i = 0; i < 4; i++) {
+      while (layer.children.length >= 14) {
+        layer.firstElementChild.remove();
+      }
+      for (let i = 0; i < 3; i++) {
         const span = document.createElement("span");
         span.className = "floating-emoji";
         span.style.left = `${15 + Math.random() * 70}%`;
@@ -7597,20 +7619,23 @@
         "rgba(168, 85, 247, 0.28)"
       ];
       let step = 0;
+      let frameEl = null;
+      let canopyEl = null;
       ambilightInterval = setInterval(() => {
-        const frame = document.querySelector(".lotte-screen-frame");
-        const canopy = document.querySelector(".ceiling-canopy");
-        if (!frame || !canopy) return;
-        if (!state.ambilightEnabled || !state.currentRoomId) {
-          frame.style.boxShadow = "0 22px 55px rgba(0,0,0,0.95), 0 12px 45px rgba(254,243,199,0.18)";
-          canopy.style.borderBottomColor = "#352c28";
+        if (!state.currentRoomId) return;
+        if (!frameEl || !frameEl.isConnected) frameEl = document.querySelector(".lotte-screen-frame");
+        if (!canopyEl || !canopyEl.isConnected) canopyEl = document.querySelector(".ceiling-canopy");
+        if (!frameEl || !canopyEl) return;
+        if (!state.ambilightEnabled) {
+          frameEl.style.boxShadow = "0 22px 55px rgba(0,0,0,0.95), 0 12px 45px rgba(254,243,199,0.18)";
+          canopyEl.style.borderBottomColor = "#352c28";
           return;
         }
         step = (step + 1) % palette.length;
         const glow = palette[step];
-        frame.style.boxShadow = `0 22px 60px rgba(0,0,0,0.95), 0 0 75px 14px ${glow}`;
-        canopy.style.borderBottomColor = glow;
-      }, 1600);
+        frameEl.style.boxShadow = `0 22px 60px rgba(0,0,0,0.95), 0 0 75px 14px ${glow}`;
+        canopyEl.style.borderBottomColor = glow;
+      }, 2200);
     }
 
     function applyAmbilightState(enabled, silent = false) {
@@ -7716,30 +7741,55 @@
       } catch (e) {}
     }
 
+    function buildChatMessageHTML(m) {
+      const isMe = m.uid === state.uid;
+      return `
+        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}" data-msg-id="${escapeHTML(m.id || '')}">
+          <div class="flex items-center gap-1.5 mb-0.5">
+            <span class="px-1.5 py-0.2 rounded bg-stone-800 text-amber-400 font-black text-[10px]">Ghế ${escapeHTML(m.seatId || 'F4')}</span>
+            <span class="font-bold text-[11px] ${isMe ? 'text-amber-300' : 'text-slate-300'}">${escapeHTML(m.userName)}</span>
+          </div>
+          <div class="max-w-[88%] px-3 py-2 rounded-2xl text-xs font-medium ${isMe ? 'bg-amber-500 text-slate-950 font-bold rounded-tr-none' : 'bg-stone-800 text-white rounded-tl-none'}">
+            ${escapeHTML(m.text)}
+          </div>
+        </div>
+      `;
+    }
+
+    let chatScrollRaf = 0;
+    function appendChatMessageNode(m) {
+      const box = document.getElementById("chat-messages");
+      if (!box || !state.currentRoomId || !m) return;
+      const placeholder = box.querySelector("[data-chat-empty]");
+      if (placeholder) placeholder.remove();
+      if (m.id && box.querySelector(`[data-msg-id="${CSS.escape(m.id)}"]`)) return;
+      const tmp = document.createElement("div");
+      tmp.innerHTML = buildChatMessageHTML(m).trim();
+      if (tmp.firstElementChild) {
+        box.appendChild(tmp.firstElementChild);
+      }
+      while (box.children.length > 60) {
+        box.firstElementChild.remove();
+      }
+      if (!chatScrollRaf) {
+        chatScrollRaf = requestAnimationFrame(() => {
+          chatScrollRaf = 0;
+          box.scrollTop = box.scrollHeight;
+        });
+      }
+    }
+
     function renderChatMessages() {
       const box = document.getElementById("chat-messages");
       if (!box || !state.currentRoomId) return;
 
       const list = state.chatByRoom[state.currentRoomId] || [];
       if (list.length === 0) {
-        box.innerHTML = `<p class="text-center text-slate-500 italic py-8">Hãy gửi tin nhắn đầu tiên trong phòng chiếu này!</p>`;
+        box.innerHTML = `<p data-chat-empty="1" class="text-center text-slate-500 italic py-8">Hãy gửi tin nhắn đầu tiên trong phòng chiếu này!</p>`;
         return;
       }
 
-      box.innerHTML = list.map(m => {
-        const isMe = m.uid === state.uid;
-        return `
-          <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
-            <div class="flex items-center gap-1.5 mb-0.5">
-              <span class="px-1.5 py-0.2 rounded bg-stone-800 text-amber-400 font-black text-[10px]">Ghế ${escapeHTML(m.seatId || 'F4')}</span>
-              <span class="font-bold text-[11px] ${isMe ? 'text-amber-300' : 'text-slate-300'}">${escapeHTML(m.userName)}</span>
-            </div>
-            <div class="max-w-[88%] px-3 py-2 rounded-2xl text-xs font-medium ${isMe ? 'bg-amber-500 text-slate-950 font-bold rounded-tr-none' : 'bg-stone-800 text-white rounded-tl-none'}">
-              ${escapeHTML(m.text)}
-            </div>
-          </div>
-        `;
-      }).join("");
+      box.innerHTML = list.map(buildChatMessageHTML).join("");
       box.scrollTop = box.scrollHeight;
     }
 
@@ -8024,37 +8074,28 @@
         roomChatUnsub = null;
       }
       if (!rtdb || !rtdbMod) return;
+      state.chatByRoom[roomId] = [];
+      if (state.currentRoomId === roomId) {
+        renderChatMessages();
+      }
       const chatRef = rtdbMod.query(rtdbMod.ref(rtdb, `chat/${roomId}`), rtdbMod.limitToLast(60));
-      roomChatUnsub = rtdbMod.onValue(chatRef, (snap) => {
-        const val = snap.val();
-        if (!val) {
-          state.chatByRoom[roomId] = [];
-          if (state.currentRoomId === roomId) {
-            renderChatMessages();
-          }
-          return;
-        }
+      roomChatUnsub = rtdbMod.onChildAdded(chatRef, (snap) => {
+        const data = snap.val();
+        if (!data || !data.id) return;
         if (!state.chatByRoom[roomId]) state.chatByRoom[roomId] = [];
-        let changed = false;
+        if (state.chatByRoom[roomId].some(m => m.id === data.id)) return;
+        state.chatByRoom[roomId].push(data);
+        if (state.chatByRoom[roomId].length > 60) {
+          state.chatByRoom[roomId].shift();
+        }
         const now = Date.now();
-        Object.values(val).forEach(data => {
-          if (!data || !data.id) return;
-          const exists = state.chatByRoom[roomId].some(m => m.id === data.id);
-          if (!exists) {
-            state.chatByRoom[roomId].push(data);
-            changed = true;
-            if (state.currentRoomId === roomId && data.uid !== state.uid && now - (data.createdAt || 0) < 15000) {
-              triggerSeatBubble(roomId, data.seatId || "F4", data.userName, data.text, false);
-              if (state.sidebarTab !== "chat") {
-                showToast(`💬 ${data.userName} (Ghế ${data.seatId || "F4"}): ${data.text}`, "info");
-              }
+        if (state.currentRoomId === roomId) {
+          appendChatMessageNode(data);
+          if (data.uid !== state.uid && now - (data.createdAt || 0) < 15000) {
+            triggerSeatBubble(roomId, data.seatId || "F4", data.userName, data.text, false);
+            if (state.sidebarTab !== "chat") {
+              showToast(`💬 ${data.userName} (Ghế ${data.seatId || "F4"}): ${data.text}`, "info");
             }
-          }
-        });
-        if (changed) {
-          state.chatByRoom[roomId].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-          if (state.currentRoomId === roomId) {
-            renderChatMessages();
           }
         }
       }, () => {});
@@ -8952,11 +8993,16 @@
     let currentVoiceSessionId = "";
 
     async function rebuildVoiceConnections(roomId, peersMap) {
+      const peerCount = Object.keys(peersMap || {}).length;
       Object.keys(voicePeers).forEach(rUid => {
-        if (!peersMap[rUid]) closeVoicePeer(rUid);
+        if (!peersMap[rUid] || (peerCount > 6 && !peersMap[rUid].micOn && !voiceMicActive)) {
+          closeVoicePeer(rUid);
+        }
       });
       for (const [rUid, info] of Object.entries(peersMap)) {
         if (!info || rUid === state.uid) continue;
+        // Nếu fallback sang mesh P2P khi phòng > 6 người, chỉ kết nối những người đang bật mic để tránh O(N^2)
+        if (peerCount > 6 && !info.micOn && !voiceMicActive) continue;
         const existing = voicePeers[rUid];
         if (existing) {
           if (info.sessionId && existing.remoteSessionId && existing.remoteSessionId !== info.sessionId) {
@@ -11669,7 +11715,10 @@
           renderLobby();
         }, () => {});
 
-        // Lắng nghe ghế ngồi của các phòng theo thời gian thực + tự dọn ghế treo quá 2 giờ
+        // Lắng nghe ghế ngồi của các phòng theo thời gian thực + debounce + dirty-check tránh vẽ lại thừa khi đông người
+        let seatsRenderTimer = null;
+        let lastRoomSeatsSig = "";
+        let lastLobbySeatsSig = "";
         rtdbMod.onValue(rtdbMod.ref(rtdb, "seats"), (snap) => {
           const allRemote = snap.val() || {};
           const nowTs = Date.now();
@@ -11731,14 +11780,30 @@
 
           hasSyncedInitialSeats = true;
 
-          if (state.currentRoomId) {
-            renderSeatingMap();
-            renderAudienceList();
-            updateRoomHeaderUI();
-          } else {
-            renderHeroBillboard();
-            renderLobby();
-          }
+          if (seatsRenderTimer) clearTimeout(seatsRenderTimer);
+          seatsRenderTimer = setTimeout(() => {
+            seatsRenderTimer = null;
+            if (state.currentRoomId) {
+              const curSeats = state.seatsByRoom[state.currentRoomId] || {};
+              const sig = state.currentRoomId + "|" + Object.entries(curSeats)
+                .sort((a, b) => a[0].localeCompare(b[0]))
+                .map(([sid, s]) => `${sid}:${s?.uid || ""}:${s?.userName || ""}:${s?.snack || ""}`)
+                .join(",");
+              if (sig !== lastRoomSeatsSig) {
+                lastRoomSeatsSig = sig;
+                renderSeatingMap();
+                renderAudienceList();
+                updateRoomHeaderUI();
+              }
+            } else {
+              const lobbySig = DEFAULT_ROOMS.map(r => `${r.id}:${Object.keys(state.seatsByRoom[r.id] || {}).length}`).join("|");
+              if (lobbySig !== lastLobbySeatsSig) {
+                lastLobbySeatsSig = lobbySig;
+                renderHeroBillboard();
+                renderLobby();
+              }
+            }
+          }, 180);
         }, () => {});
 
         // Nếu người dùng đã vào phòng trước khi Firebase SDK tải xong thì đồng bộ ngay
@@ -13158,8 +13223,31 @@
 
       let lastTime = performance.now();
       let smoothDt = 1 / 60;
+      let ambientTunaRafId = null;
+      let ambientTunaPaused = Boolean(state.currentRoomId);
+      const backdropEl = document.getElementById("ambient-tuna-backdrop");
+
+      window.__setAmbientTunaPaused = (paused) => {
+        ambientTunaPaused = Boolean(paused);
+        if (backdropEl) {
+          backdropEl.style.display = ambientTunaPaused ? "none" : "";
+        }
+        if (ambientTunaPaused) {
+          if (ambientTunaRafId) {
+            cancelAnimationFrame(ambientTunaRafId);
+            ambientTunaRafId = null;
+          }
+        } else if (!ambientTunaRafId) {
+          lastTime = performance.now();
+          ambientTunaRafId = requestAnimationFrame(tick);
+        }
+      };
 
       function tick(now) {
+        if (ambientTunaPaused) {
+          ambientTunaRafId = null;
+          return;
+        }
         const rawDt = Math.min(0.035, Math.max(0.001, (now - lastTime) / 1000));
         lastTime = now;
         smoothDt += (rawDt - smoothDt) * 0.25;
@@ -13233,10 +13321,15 @@
           drawTunaFish(fish);
         }
 
-        requestAnimationFrame(tick);
+        if (!ambientTunaPaused) {
+          ambientTunaRafId = requestAnimationFrame(tick);
+        } else {
+          ambientTunaRafId = null;
+        }
       }
 
       window.addEventListener("pointerdown", (e) => {
+        if (ambientTunaPaused) return;
         const cx = e.clientX;
         const cy = e.clientY;
         const interactiveTarget = e.target && e.target.closest ? e.target.closest("button, a, input, select, textarea, [onclick], [data-seat-id]") : null;
@@ -13274,6 +13367,7 @@
       }, { passive: true });
 
       window.addEventListener("mousemove", (e) => {
+        if (ambientTunaPaused) return;
         const interactiveTarget = e.target && e.target.closest ? e.target.closest("button, a, input, select, textarea, [onclick], [data-seat-id]") : null;
         if (interactiveTarget) {
           if (document.body.style.cursor === "pointer") document.body.style.cursor = "";
@@ -13283,7 +13377,11 @@
         document.body.style.cursor = nearFish ? "pointer" : "";
       }, { passive: true });
 
-      requestAnimationFrame(tick);
+      if (!ambientTunaPaused) {
+        ambientTunaRafId = requestAnimationFrame(tick);
+      } else if (backdropEl) {
+        backdropEl.style.display = "none";
+      }
     }
 
     initAmbientTunaBackground();
