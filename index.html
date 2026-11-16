@@ -1688,18 +1688,12 @@
             <p><span class="text-slate-500 font-semibold">Thể loại:</span> <span id="hero-genre" class="text-amber-300 font-semibold">Hành động • Kỳ ảo • Quái vật Khổng lồ</span></p>
           </div>
 
-          <!-- Cụm nút hành động chuẩn Netflix + Đặt Vé Rạp Thật -->
+          <!-- Cụm nút hành động chuẩn Netflix + Bắt buộc Đặt Vé trước khi vào phòng -->
           <div class="pt-2 flex flex-wrap items-center gap-3 relative z-20">
             <button type="button" onclick="window.appActions.openBookingModalForHero()" style="touch-action: manipulation;"
               class="px-5 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-[0_10px_30px_rgba(225,29,72,0.4)] transition transform hover:scale-[1.02] cursor-pointer">
               <i class="fa-solid fa-ticket text-sm"></i>
               <span>Đặt Vé & Chọn Ghế Ngay</span>
-            </button>
-
-            <button type="button" id="hero-btn-watch" onclick="window.appActions.enterHeroRoom()" style="touch-action: manipulation;"
-              class="px-5 py-3 rounded-xl bg-white hover:bg-amber-400 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-2 shadow-[0_10px_30px_rgba(255,255,255,0.2)] transition transform hover:scale-[1.02] cursor-pointer">
-              <i class="fa-solid fa-play text-sm"></i>
-              <span id="hero-btn-watch-text">Vào Phòng Chiếu Ngay</span>
             </button>
 
             <button type="button" onclick="window.appActions.openHeroDetailModal()"
@@ -1751,14 +1745,9 @@
                 Cloudflare R2 HD • 12 Tập
               </span>
             </div>
-            <p class="text-[11px] text-slate-300">Bấm vào bất kỳ tập nào dưới đây để vào thẳng phòng chiếu IMAX màn hình cong (chạy mượt trên mọi máy).</p>
+            <p class="text-[11px] text-slate-300">Bấm vào bất kỳ tập nào dưới đây để đặt vé & chọn ghế vào phòng chiếu IMAX màn hình cong.</p>
           </div>
         </div>
-        <button type="button" onclick="window.appActions.playVaultItemInRoom('jjk_s3_ep48', 'room-1')"
-          class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white font-black text-xs shadow-lg cursor-pointer flex items-center gap-1.5">
-          <i class="fa-solid fa-play"></i>
-          <span>Xem Từ Tập 48</span>
-        </button>
       </div>
       <div id="lobby-jjk-episodes" class="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-12 gap-2"></div>
     </div>
@@ -2784,9 +2773,9 @@
             class="px-4 py-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-slate-300 text-xs font-bold cursor-pointer">
             Đóng
           </button>
-          <button type="button" onclick="window.appActions.enterHeroRoomFromModal()"
-            class="px-6 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-black flex items-center gap-2 shadow-lg cursor-pointer">
-            <i class="fa-solid fa-door-open"></i> Vào Phòng Chiếu & Chọn Ghế Ngay
+          <button type="button" onclick="window.appActions.closeHeroDetailModal(); window.appActions.openBookingModalForHero();"
+            class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white text-xs font-black flex items-center gap-2 shadow-lg cursor-pointer">
+            <i class="fa-solid fa-ticket"></i> Đặt Vé & Chọn Ghế Ngay
           </button>
         </div>
       </div>
@@ -3286,8 +3275,26 @@
           </form>
         </div>
 
-        <!-- Bảng Setup 7 Phòng -->
+        <!-- Thanh chuyển Tab Admin (Chỉ hiện sau khi mở khóa PIN Admin) -->
+        <div id="admin-tabs-bar" class="hidden flex flex-wrap items-center gap-2 border-b border-white/10 pb-3">
+          <button type="button" id="admin-tab-rooms" onclick="window.appActions.switchAdminTab('rooms')"
+            class="px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 cursor-pointer transition">
+            <i class="fa-solid fa-film"></i>
+            <span>Setup Phim Các Phòng</span>
+          </button>
+          <button type="button" id="admin-tab-revenue" onclick="window.appActions.switchAdminTab('revenue')"
+            class="px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs flex items-center gap-1.5 cursor-pointer transition">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Thống Kê Doanh Thu Rạp</span>
+            <span id="admin-tab-revenue-badge" class="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-200 text-[10px] font-black">0đ</span>
+          </button>
+        </div>
+
+        <!-- Bảng Setup Phòng -->
         <div id="admin-rooms-editor" class="hidden space-y-3"></div>
+
+        <!-- Bảng Thống Kê Doanh Thu (Chỉ Admin mới xem được) -->
+        <div id="admin-revenue-panel" class="hidden space-y-4"></div>
       </div>
 
       <div id="admin-panel-footer" class="hidden px-5 py-3.5 bg-stone-900/95 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
@@ -3688,7 +3695,8 @@
           roomLocks: state.roomLocks,
           unlockedRooms: state.unlockedRooms,
           playlistByRoom: state.playlistByRoom,
-          bookingDraft: state.bookingDraft
+          bookingDraft: state.bookingDraft,
+          bookedTicketsByRoom: state.bookedTicketsByRoom
         };
         localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(payload));
       } catch (e) {}
@@ -3739,6 +3747,9 @@
         }
         if (parsed.playlistByRoom && typeof parsed.playlistByRoom === "object") {
           state.playlistByRoom = parsed.playlistByRoom;
+        }
+        if (parsed.bookedTicketsByRoom && typeof parsed.bookedTicketsByRoom === "object") {
+          state.bookedTicketsByRoom = parsed.bookedTicketsByRoom;
         }
         if (parsed.bookingDraft && typeof parsed.bookingDraft === "object") {
           state.bookingDraft = { ...state.bookingDraft, ...parsed.bookingDraft };
@@ -3880,7 +3891,10 @@
         comboName: "Combo Bắp Rang Bơ & Pepsi Lớn"
       },
       r2WorkerUrl: loadSavedR2WorkerUrl(),
-      memoryCapsules: []
+      memoryCapsules: [],
+      bookedTicketsByRoom: {},
+      revenueOrders: [],
+      adminTab: "rooms"
     };
     state.memoryCapsules = loadSavedCapsules(state.userName);
 
@@ -4055,7 +4069,6 @@
       setTxt("hero-synopsis", room.synopsis || "");
       setTxt("hero-cast", room.cast || "CineVerse Lotte");
       setTxt("hero-genre", room.genre || "");
-      setTxt("hero-btn-watch-text", `Vào ${room.number} Xem Ngay`);
       setTxt("hero-slide-counter", `${String(idx + 1).padStart(2, "0")} / ${String(rooms.length).padStart(2, "0")}`);
 
       const viewersEl = document.getElementById("hero-live-viewers");
@@ -4082,7 +4095,7 @@
           const active = i === idx;
           return `
             <button type="button"
-                    onclick="${active ? `window.appActions.enterRoom('${r.id}')` : `window.appActions.selectHeroSlide(${i})`}"
+                    onclick="${active ? `window.appActions.openBookingModal('${r.id}')` : `window.appActions.selectHeroSlide(${i})`}"
                     style="touch-action: manipulation;"
                     class="group relative h-20 rounded-xl overflow-hidden border transition-all duration-300 text-left cursor-pointer ${
                       active
@@ -4276,20 +4289,29 @@
                 </div>
               </div>
 
-              <div class="grid grid-cols-2 gap-2">
-                <button type="button"
-                  onclick="event.stopPropagation(); window.appActions.openBookingModal('${room.id}')"
-                  class="py-2.5 px-2 rounded-xl bg-amber-500/15 hover:bg-amber-500 text-amber-300 hover:text-slate-950 border border-amber-400/50 font-black text-[11px] shadow transition cursor-pointer flex items-center justify-center gap-1.5">
-                  <i class="fa-solid fa-ticket"></i>
-                  <span>Đặt Vé & Ghế</span>
-                </button>
-                <button type="button"
-                  onclick="event.stopPropagation(); window.appActions.enterRoom('${room.id}')"
-                  style="touch-action: manipulation;"
-                  class="py-2.5 px-2 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white font-extrabold text-[11px] shadow-lg transition cursor-pointer flex items-center justify-center gap-1.5">
-                  <i class="fa-solid fa-door-open"></i>
-                  <span>Vào Rạp Ngay</span>
-                </button>
+              <div>
+                ${(() => {
+                  const ticket = state.bookedTicketsByRoom?.[room.id];
+                  if (ticket && ticket.seatId) {
+                    return `
+                      <button type="button"
+                        onclick="event.stopPropagation(); window.appActions.enterRoom('${room.id}')"
+                        style="touch-action: manipulation;"
+                        class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black text-[11px] shadow-lg transition cursor-pointer flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-ticket"></i>
+                        <span>Đã Có Vé (Ghế ${escapeHTML(ticket.seatId)}) • Vào Phòng</span>
+                      </button>
+                    `;
+                  }
+                  return `
+                    <button type="button"
+                      onclick="event.stopPropagation(); window.appActions.openBookingModal('${room.id}')"
+                      class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white font-black text-[11px] shadow-lg transition cursor-pointer flex items-center justify-center gap-1.5">
+                      <i class="fa-solid fa-ticket"></i>
+                      <span>Đặt Vé & Chọn Ghế</span>
+                    </button>
+                  `;
+                })()}
               </div>
             </div>
           </div>
@@ -4306,7 +4328,17 @@
       return /^khán\s*giả(\s*\d+)?$/i.test(String(name || "").trim());
     }
 
-    async function enterRoom(roomId) {
+    function hasValidTicketForRoom(roomId) {
+      if (!roomId) return false;
+      const ticket = state.bookedTicketsByRoom?.[roomId];
+      if (!ticket || !ticket.seatId) return false;
+      const roomSeats = state.seatsByRoom[roomId] || {};
+      const occupant = roomSeats[ticket.seatId];
+      if (occupant && occupant.uid && occupant.uid !== state.uid) return false;
+      return true;
+    }
+
+    async function enterRoom(roomId, options = {}) {
       if (!state.hasCustomName || isDefaultGuestName(state.userName)) {
         pendingEnterRoomId = roomId;
         openNameModal(true);
@@ -4314,6 +4346,13 @@
       }
 
       const room = getEffectiveRoom(roomId);
+
+      // Bắt buộc phải đặt vé & chọn ghế trước khi vào bất kỳ phòng nào
+      if (!options?.fromBooking && !hasValidTicketForRoom(roomId)) {
+        showToast(`🎟️ Vui lòng đặt vé & chọn ghế để vào ${room.number}!`, "info");
+        openBookingModal(roomId);
+        return;
+      }
       const lockObj = state.roomLocks[roomId];
       const lockToken = lockObj ? (lockObj.pinHash || lockObj.legacyPin || "") : "";
       if (lockObj && lockToken && state.unlockedRooms[roomId] !== lockToken) {
@@ -11803,6 +11842,21 @@
           }, 180);
         }, () => {});
 
+        // Đồng bộ danh sách đặt vé & doanh thu rạp theo thời gian thực (chỉ hiển thị trong Admin Panel đã mở khóa)
+        rtdbMod.onValue(rtdbMod.ref(rtdb, "revenue_orders"), (snap) => {
+          const val = snap.val();
+          if (!val || typeof val !== "object") {
+            state.revenueOrders = [];
+          } else {
+            state.revenueOrders = Object.values(val)
+              .filter(o => o && o.id && typeof o.totalAmount === "number")
+              .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          }
+          if (state.isAdminUnlocked) {
+            renderAdminRevenueDashboard();
+          }
+        }, () => {});
+
         // Nếu người dùng đã vào phòng trước khi Firebase SDK tải xong thì đồng bộ ngay
         if (state.currentRoomId) {
           const mySeat = getMySeatInRoom(state.currentRoomId);
@@ -12031,32 +12085,79 @@
     async function confirmCinemaBooking(fromQuickBar = false) {
       const nameInput = document.getElementById("booking-user-name");
       if (!fromQuickBar && nameInput && nameInput.value.trim()) {
-        state.userName = nameInput.value.trim().slice(0, 28);
-        saveStoredName(state.userName);
-        updateNameUI();
-        state.memoryCapsules = loadSavedCapsules(state.userName);
-        renderMemoryCapsulesUI();
+        const cleanName = nameInput.value.trim().slice(0, 28);
+        if (!isDefaultGuestName(cleanName)) {
+          state.userName = cleanName;
+          state.hasCustomName = true;
+          saveStoredName(cleanName);
+          updateNameUI();
+          state.memoryCapsules = loadSavedCapsules(state.userName);
+          renderMemoryCapsulesUI();
+        }
+      }
+
+      if (!state.hasCustomName || isDefaultGuestName(state.userName)) {
+        showToast("Vui lòng nhập tên riêng của bạn trước khi đặt vé!", "warning");
+        nameInput?.focus();
+        return;
       }
 
       const targetRoomId = state.bookingDraft.roomId || "room-1";
       const targetSeatId = state.bookingDraft.seatId || "F4";
       const showtime = state.bookingDraft.showtime || "19:30 • IMAX Laser 70mm";
+      const roomObj = getEffectiveRoom(targetRoomId);
+      const { price: seatPrice, tier } = getSeatPriceAndTier(targetSeatId);
+      const comboPrice = state.bookingDraft.comboPrice || 0;
+      const totalAmount = seatPrice + comboPrice;
 
       if (state.bookingDraft.comboIcon) {
         state.mySnack = state.bookingDraft.comboIcon;
       }
 
+      state.bookedTicketsByRoom[targetRoomId] = {
+        seatId: targetSeatId,
+        showtime,
+        ticketPrice: seatPrice,
+        comboPrice,
+        totalAmount,
+        bookedAt: Date.now()
+      };
+
+      const orderRecord = {
+        id: "ORD_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+        roomId: targetRoomId,
+        roomNumber: roomObj.number,
+        movieTitle: roomObj.movieTitle,
+        seatId: targetSeatId,
+        tier: tier.split("•")[0].trim(),
+        ticketPrice: seatPrice,
+        comboName: state.bookingDraft.comboName || "Không combo",
+        comboPrice,
+        totalAmount,
+        uid: state.uid,
+        userName: state.userName,
+        createdAt: Date.now()
+      };
+      state.revenueOrders = [orderRecord, ...(state.revenueOrders || [])];
+      if (rtdb && rtdbMod) {
+        rtdbMod.set(rtdbMod.ref(rtdb, `revenue_orders/${orderRecord.id}`), orderRecord).catch(() => {});
+      }
+      if (state.isAdminUnlocked) {
+        renderAdminRevenueDashboard();
+      }
+
       closeBookingModal();
-      enterRoom(targetRoomId);
+      await enterRoom(targetRoomId, { fromBooking: true });
       await assignSeat(targetRoomId, targetSeatId, false);
       updateMySnackStatusUI();
       renderSeatingMap();
       renderAudienceList();
+      renderLobby();
 
       // Tự động đúc Thẻ Ký Ức Điện Ảnh NFT cho vé vừa đặt
       const capsule = autoSyncMemoryCapsule(targetRoomId, targetSeatId, "Phim hay quá", showtime, true);
       playCinemaBellSFX();
-      showToast(`🎟️ Đặt vé thành công! Ghế ${targetSeatId} (${showtime}) & Đã đúc Thẻ Ký Ức NFT #${capsule.securityCode}!`, "success");
+      showToast(`🎟️ Đặt vé thành công (${formatVND(totalAmount)})! Ghế ${targetSeatId} & Đã đúc Thẻ Ký Ức NFT #${capsule.securityCode}!`, "success");
     }
 
     // =========================================================
@@ -12689,21 +12790,173 @@
       return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
     }
 
+    function switchAdminTab(tab = "rooms") {
+      if (!state.isAdminUnlocked) return;
+      state.adminTab = tab === "revenue" ? "revenue" : "rooms";
+      const tabRooms = document.getElementById("admin-tab-rooms");
+      const tabRev = document.getElementById("admin-tab-revenue");
+      const editor = document.getElementById("admin-rooms-editor");
+      const revPanel = document.getElementById("admin-revenue-panel");
+      const footer = document.getElementById("admin-panel-footer");
+
+      if (state.adminTab === "revenue") {
+        if (tabRooms) tabRooms.className = "px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-white/10 text-slate-300 font-bold text-xs flex items-center gap-1.5 cursor-pointer transition";
+        if (tabRev) tabRev.className = "px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs flex items-center gap-1.5 cursor-pointer transition";
+        editor?.classList.add("hidden");
+        revPanel?.classList.remove("hidden");
+        footer?.classList.add("hidden");
+        renderAdminRevenueDashboard();
+      } else {
+        if (tabRooms) tabRooms.className = "px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 cursor-pointer transition";
+        if (tabRev) tabRev.className = "px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs flex items-center gap-1.5 cursor-pointer transition";
+        editor?.classList.remove("hidden");
+        revPanel?.classList.add("hidden");
+        footer?.classList.remove("hidden");
+        renderAdminRoomsEditor();
+      }
+    }
+
+    function renderAdminRevenueDashboard() {
+      if (!state.isAdminUnlocked) return;
+      const panel = document.getElementById("admin-revenue-panel");
+      const orders = state.revenueOrders || [];
+      const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+      const totalTickets = orders.length;
+      const totalCombo = orders.reduce((sum, o) => sum + (Number(o.comboPrice) || 0), 0);
+
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+      const todayTs = startOfToday.getTime();
+      const todayRevenue = orders
+        .filter(o => (o.createdAt || 0) >= todayTs)
+        .reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+
+      const badge = document.getElementById("admin-tab-revenue-badge");
+      if (badge) badge.textContent = formatVND(totalRevenue);
+
+      if (!panel) return;
+
+      const byRoomMap = {};
+      DEFAULT_ROOMS.forEach(r => {
+        const eff = getEffectiveRoom(r.id);
+        byRoomMap[r.id] = { number: eff.number, movieTitle: eff.movieTitle, tickets: 0, amount: 0 };
+      });
+      orders.forEach(o => {
+        if (!byRoomMap[o.roomId]) {
+          byRoomMap[o.roomId] = { number: o.roomNumber || o.roomId, movieTitle: o.movieTitle || "", tickets: 0, amount: 0 };
+        }
+        byRoomMap[o.roomId].tickets += 1;
+        byRoomMap[o.roomId].amount += Number(o.totalAmount) || 0;
+      });
+      const maxRoomAmount = Math.max(1, ...Object.values(byRoomMap).map(x => x.amount));
+
+      panel.innerHTML = `
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-950/70 to-stone-900 border border-emerald-500/35">
+            <p class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-300">Tổng Doanh Thu Rạp</p>
+            <p class="text-lg sm:text-xl font-black text-white mt-1">${formatVND(totalRevenue)}</p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-gradient-to-br from-amber-950/60 to-stone-900 border border-amber-500/35">
+            <p class="text-[10px] font-extrabold uppercase tracking-wider text-amber-300">Doanh Thu Hôm Nay</p>
+            <p class="text-lg sm:text-xl font-black text-white mt-1">${formatVND(todayRevenue)}</p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-gradient-to-br from-rose-950/60 to-stone-900 border border-rose-500/35">
+            <p class="text-[10px] font-extrabold uppercase tracking-wider text-rose-300">Tổng Vé Đã Bán</p>
+            <p class="text-lg sm:text-xl font-black text-white mt-1">${totalTickets} vé</p>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-gradient-to-br from-purple-950/60 to-stone-900 border border-purple-500/35">
+            <p class="text-[10px] font-extrabold uppercase tracking-wider text-purple-300">Doanh Thu Combo</p>
+            <p class="text-lg sm:text-xl font-black text-white mt-1">${formatVND(totalCombo)}</p>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-stone-900/90 border border-white/10 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-black uppercase tracking-wider text-amber-300">
+              <i class="fa-solid fa-building-columns mr-1.5"></i>Doanh Thu Theo Từng Phòng Chiếu
+            </h4>
+            <button type="button" onclick="window.appActions.clearRevenueStatsAdmin()"
+              class="px-2.5 py-1 rounded-lg bg-stone-800 hover:bg-rose-600 text-slate-300 hover:text-white text-[10px] font-bold transition cursor-pointer">
+              <i class="fa-solid fa-trash-can mr-1"></i>Reset Thống Kê
+            </button>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+            ${Object.values(byRoomMap).map(rm => {
+              const pct = Math.round((rm.amount / maxRoomAmount) * 100);
+              return `
+                <div class="p-2.5 rounded-xl bg-stone-950/80 border border-white/10 space-y-1.5">
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="font-black text-white">${escapeHTML(rm.number)} <span class="text-slate-400 font-normal">(${rm.tickets} vé)</span></span>
+                    <span class="font-black text-emerald-300">${formatVND(rm.amount)}</span>
+                  </div>
+                  <div class="w-full h-1.5 rounded-full bg-stone-800 overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-emerald-400 to-amber-400" style="width:${rm.amount > 0 ? Math.max(6, pct) : 0}%"></div>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-stone-900/90 border border-white/10 space-y-2.5">
+          <h4 class="text-xs font-black uppercase tracking-wider text-emerald-300">
+            <i class="fa-solid fa-receipt mr-1.5"></i>Lịch Sử Đặt Vé Đồng Bộ Thời Gian Thực (${totalTickets})
+          </h4>
+          ${orders.length === 0 ? `
+            <p class="text-center text-xs text-slate-500 italic py-6">Chưa có giao dịch đặt vé nào.</p>
+          ` : `
+            <div class="max-h-64 overflow-y-auto space-y-1.5 pr-1">
+              ${orders.slice(0, 50).map(o => `
+                <div class="px-3 py-2 rounded-xl bg-stone-950/90 border border-white/5 flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <div class="min-w-0">
+                    <span class="font-black text-white">${escapeHTML(o.userName || "Khách")}</span>
+                    <span class="text-slate-400"> • </span>
+                    <span class="text-amber-300 font-bold">${escapeHTML(o.roomNumber || o.roomId)}</span>
+                    <span class="text-slate-400"> • Ghế </span>
+                    <span class="px-1.5 py-0.5 rounded bg-rose-600/25 text-rose-300 font-black text-[10px]">${escapeHTML(o.seatId)}</span>
+                    ${o.comboPrice > 0 ? `<span class="text-[10px] text-slate-400 ml-1">+ ${escapeHTML(o.comboName)}</span>` : ""}
+                  </div>
+                  <div class="flex items-center gap-2.5 shrink-0">
+                    <span class="text-[10px] text-slate-500 font-mono">${new Date(o.createdAt || Date.now()).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}</span>
+                    <span class="font-black text-emerald-400">${formatVND(o.totalAmount)}</span>
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          `}
+        </div>
+      `;
+    }
+
+    async function clearRevenueStatsAdmin() {
+      if (!state.isAdminUnlocked) return;
+      if (!window.confirm("Bạn có chắc muốn xóa toàn bộ lịch sử thống kê doanh thu rạp?")) return;
+      state.revenueOrders = [];
+      if (rtdb && rtdbMod) {
+        await rtdbMod.remove(rtdbMod.ref(rtdb, "revenue_orders")).catch(() => {});
+      }
+      renderAdminRevenueDashboard();
+      showToast("🗑️ Đã reset toàn bộ thống kê doanh thu rạp.", "info");
+    }
+
     function openAdminPanelModal() {
       const modal = document.getElementById("admin-panel-modal");
       if (!modal) return;
       modal.classList.remove("hidden");
       const lockScreen = document.getElementById("admin-lock-screen");
+      const tabsBar = document.getElementById("admin-tabs-bar");
       const editor = document.getElementById("admin-rooms-editor");
+      const revPanel = document.getElementById("admin-revenue-panel");
       const footer = document.getElementById("admin-panel-footer");
       if (state.isAdminUnlocked) {
         if (lockScreen) lockScreen.classList.add("hidden");
-        if (editor) editor.classList.remove("hidden");
-        if (footer) footer.classList.remove("hidden");
-        renderAdminRoomsEditor();
+        if (tabsBar) tabsBar.classList.remove("hidden");
+        switchAdminTab(state.adminTab || "rooms");
       } else {
         if (lockScreen) lockScreen.classList.remove("hidden");
+        if (tabsBar) tabsBar.classList.add("hidden");
         if (editor) editor.classList.add("hidden");
+        if (revPanel) revPanel.classList.add("hidden");
         if (footer) footer.classList.add("hidden");
         setTimeout(() => document.getElementById("admin-pin-input")?.focus(), 100);
       }
@@ -13048,6 +13301,8 @@
       openAdminPanelModal,
       closeAdminPanelModal,
       unlockAdminPanel,
+      switchAdminTab,
+      clearRevenueStatsAdmin,
       applyAdminVaultPick,
       clearRoomSeatsAdmin,
       saveAdminLobbyConfig,
