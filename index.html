@@ -4427,7 +4427,7 @@
       const base = DEFAULT_ROOMS.find(r => r.id === roomId) || DEFAULT_ROOMS[0];
       const adminCfg = (state.lobbyConfigRooms && state.lobbyConfigRooms[roomId]) || {};
       const custom = state.roomsCustom[roomId] || {};
-      const merged = { ...base, ...adminCfg, ...custom };
+      const merged = { ...base, ...custom, ...adminCfg };
       if (merged.status === "upcoming" && Number(merged.scheduledAt) > 0 && Date.now() >= Number(merged.scheduledAt)) {
         merged.status = "showing";
       }
@@ -6928,38 +6928,50 @@
     }
 
     function resolveMoviePoster(title = "", existingPoster = "", youtubeId = "") {
-      try {
-        const rawCache = localStorage.getItem("cineverse_poster_cache_v1");
-        if (rawCache && title) {
-          const map = JSON.parse(rawCache);
-          if (map && map[title]) return map[title];
-        }
-      } catch (e) {}
-      const t = (title || "").toLowerCase();
-      if (t.includes("meg 2") || t.includes("cá mập siêu bạo chúa 2") || t.includes("vực sâu")) {
+      const t = String(title || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/Đ/g, "d")
+        .toLowerCase();
+      if (t.includes("meg 2") || t.includes("ca map sieu bao chua") || t.includes("vuc sau")) {
         return "https://image.tmdb.org/t/p/w780/6x2CNod5RB3NkXSBJ81Y8KNy4g3.jpg";
       }
-      if (t.includes("cơn thịnh nộ") || t.includes("wrath of man")) {
+      if (t.includes("con thinh no") || t.includes("wrath of man")) {
         return "https://image.tmdb.org/t/p/w780/xNxcKSJc9wWpMMyr6spKIucUNop.jpg";
       }
-      if (t.includes("đảo đầu lâu") || t.includes("skull island")) {
-        return "https://static.tvmaze.com/uploads/images/original_untouched/462/1156006.jpg";
+      if (t.includes("dao dau lau") || t.includes("skull island")) {
+        return "https://image.tmdb.org/t/p/w780/ktotbBFrmO58kAKoPvpbChy53EB.jpg";
       }
-      if (t.includes("godzilla") || t.includes("kong")) {
-        return "https://upload.wikimedia.org/wikipedia/en/6/63/Godzilla_vs._Kong.png";
+      if (t.includes("godzilla")) {
+        return "https://image.tmdb.org/t/p/w780/ayKhR40ClDEivfmubfcXeyNPo2r.jpg";
       }
-      if (t.includes("resident evil") || t.includes("vùng đất quỷ dữ") || t.includes("quy du")) {
-        return "https://www.sonypictures.com/sites/default/files/banner-images/2026-10/residentevil_banner_2572x1100_pvod.jpg";
+      if (t.includes("resident evil") || t.includes("vung dat quy du")) {
+        return "https://image.tmdb.org/t/p/w780/jlFMvLuzjwt7aI1QVtiNVnFHNBe.jpg";
       }
-      if (t.includes("chú thuật") || t.includes("jujutsu") || t.includes("tử diệt")) {
-        return "https://upload.wikimedia.org/wikipedia/en/7/7a/Jujutsu_Kaisen_S3_V1_BD.png";
+      if (t.includes("chu thuat") || t.includes("jujutsu") || t.includes("tu diet")) {
+        return "https://image.tmdb.org/t/p/w780/pERBi1D8NNpK1q7dEnXDhrLz3le.jpg";
+      }
+      if (t.includes("3 idiots") || t.includes("3_idiots")) {
+        return "https://image.tmdb.org/t/p/w780/gmSRHU1Wtiatj8KoyVt8rT9ockx.jpg";
+      }
+      if (t.includes("avengers") || t.includes("endgame")) {
+        return "https://image.tmdb.org/t/p/w780/8go3YE9sBMQaCXEx23j6BAfeuxd.jpg";
+      }
+      if (t.includes("chu he") || t.includes("clown in a cornfield") || t.includes("canh dong ngo")) {
+        return "https://image.tmdb.org/t/p/w780/rBDroMiMkt42qFTch488h63kPXR.jpg";
+      }
+      if (t.includes("other mommy") || t.includes("other.mommy")) {
+        return "https://image.tmdb.org/t/p/w780/nZYi7HeXJVfJmZ0kprb1cJBHN2g.jpg";
+      }
+      if (t.includes("venom") || t.includes("carnage")) {
+        return "https://image.tmdb.org/t/p/w780/1eMkZ0AdaSwjrUUjONJwE6xogwK.jpg";
+      }
+      if (existingPoster && !existingPoster.includes("placehold.co")) {
+        return existingPoster;
       }
       if (youtubeId) {
         return `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
-      }
-      const isGenericJjk = existingPoster && existingPoster.includes("Jujutsu_Kaisen_S3_V1_BD.png");
-      if (existingPoster && !isGenericJjk) {
-        return existingPoster;
       }
       return "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80";
     }
