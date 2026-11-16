@@ -749,6 +749,40 @@ export default {
       }
     }
 
+    // Tự động kiểm tra chuyển khoản ngân hàng qua SePay API (nếu đã gắn SEPAY_API_TOKEN)
+    if (request.method === "POST" && url.pathname === "/payment/check") {
+      try {
+        const body = await request.json().catch(() => ({}));
+        const orderCode = String(body.orderCode || "").trim().toUpperCase();
+        const amount = Number(body.amount || 0);
+        if (!orderCode || amount <= 0) {
+          return jsonResponse({ ok: false, error: "Thiếu mã đơn hoặc số tiền." }, 400);
+        }
+        if (!env.SEPAY_API_TOKEN) {
+          return jsonResponse({ ok: true, paid: false, mode: "admin_realtime" }, 200);
+        }
+        const sepayRes = await fetch("https://my.sepay.vn/userapi/transactions/list?account_number=99999920072&limit=20", {
+          headers: {
+            "Authorization": `Bearer ${env.SEPAY_API_TOKEN}`,
+            "Content-Type": "application/json"
+          }
+        });
+        const sepayJson = await sepayRes.json().catch(() => ({}));
+        const txs = Array.isArray(sepayJson?.transactions) ? sepayJson.transactions : [];
+        const matched = txs.find((tx) => {
+          const content = String(tx?.transaction_content || "").toUpperCase();
+          const inAmt = Number(tx?.amount_in || 0);
+          return inAmt >= amount && content.includes(orderCode);
+        });
+        if (matched) {
+          return jsonResponse({ ok: true, paid: true, txId: matched.id, amountIn: matched.amount_in }, 200);
+        }
+        return jsonResponse({ ok: true, paid: false, mode: "sepay_polling" }, 200);
+      } catch (e) {
+        return jsonResponse({ ok: true, paid: false, error: String(e?.message || e) }, 200);
+      }
+    }
+
     if (!env.MY_BUCKET) {
       return new Response(
         JSON.stringify({
