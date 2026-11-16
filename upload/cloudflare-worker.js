@@ -571,6 +571,69 @@ export default {
       }
     }
 
+    if (request.method === "POST" && url.pathname.endsWith("/notify-admin-booking")) {
+      try {
+        const body = await request.json();
+        const userName = String(body?.userName || "Khách").slice(0, 60);
+        const roomNumber = String(body?.roomNumber || body?.roomId || "Phòng chiếu").slice(0, 40);
+        const movieTitle = String(body?.movieTitle || "").slice(0, 120);
+        const seatId = String(body?.seatId || "").slice(0, 16);
+        const tier = String(body?.tier || "").slice(0, 32);
+        const comboName = String(body?.comboName || "Không combo").slice(0, 80);
+        const totalAmount = Number(body?.totalAmount) || 0;
+        const formattedTotal = new Intl.NumberFormat("vi-VN").format(totalAmount) + "đ";
+        const timeStr = new Date(body?.createdAt || Date.now()).toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" });
+
+        const results = { ok: true, channels: [] };
+
+        if (env.RESEND_API_KEY && env.ADMIN_EMAIL) {
+          const fromEmail = String(env.RESEND_FROM || "CineVerse Lotte <onboarding@resend.dev>").trim();
+          const emailRes = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${env.RESEND_API_KEY}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              from: fromEmail,
+              to: [String(env.ADMIN_EMAIL).trim()],
+              subject: `[CineVerse] ${userName} vừa đặt vé ${roomNumber} • Ghế ${seatId} (${formattedTotal})`,
+              html: `
+                <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:20px;background:#111;color:#f8fafc;border-radius:16px;border:1px solid #333;">
+                  <h2 style="color:#fbbf24;margin:0 0 12px;">🎟️ Có khách đặt vé mới!</h2>
+                  <p style="margin:6px 0;"><strong>Khách hàng:</strong> ${userName}</p>
+                  <p style="margin:6px 0;"><strong>Phòng chiếu:</strong> ${roomNumber} ${movieTitle ? `(${movieTitle})` : ""}</p>
+                  <p style="margin:6px 0;"><strong>Ghế ngồi:</strong> ${seatId} ${tier ? `(${tier})` : ""}</p>
+                  <p style="margin:6px 0;"><strong>Combo:</strong> ${comboName}</p>
+                  <p style="margin:10px 0;font-size:18px;color:#34d399;"><strong>Tổng thanh toán: ${formattedTotal}</strong></p>
+                  <p style="margin:6px 0;color:#94a3b8;font-size:12px;">Thời gian: ${timeStr}</p>
+                </div>
+              `
+            })
+          });
+          results.channels.push({ type: "email", status: emailRes.status });
+        }
+
+        if (env.ADMIN_WEBHOOK_URL) {
+          const hookRes = await fetch(String(env.ADMIN_WEBHOOK_URL).trim(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              content: `🎟️ **Khách mới đặt vé!**\n• Khách: **${userName}**\n• Phòng: **${roomNumber}** (${movieTitle})\n• Ghế: **${seatId}** (${tier})\n• Combo: ${comboName}\n• Tổng tiền: **${formattedTotal}**\n• Lúc: ${timeStr}`
+            })
+          });
+          results.channels.push({ type: "webhook", status: hookRes.status });
+        }
+
+        if (results.channels.length === 0) {
+          results.skipped = "NO_ADMIN_EMAIL_OR_WEBHOOK_SECRET";
+        }
+        return jsonResponse(results, 200);
+      } catch (e) {
+        return jsonResponse({ ok: false, error: String(e?.message || e) }, 200);
+      }
+    }
+
     if (!env.MY_BUCKET) {
       return new Response(
         JSON.stringify({

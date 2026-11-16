@@ -11860,15 +11860,42 @@
           }, 180);
         }, () => {});
 
-        // Đồng bộ danh sách đặt vé & doanh thu rạp theo thời gian thực (chỉ hiển thị trong Admin Panel đã mở khóa)
+        // Đồng bộ danh sách đặt vé & doanh thu rạp theo thời gian thực + cảnh báo tức thì cho Admin (App iOS & Web)
+        const seenRevenueOrderIds = new Set();
+        let hasInitRevenueOrders = false;
         rtdbMod.onValue(rtdbMod.ref(rtdb, "revenue_orders"), (snap) => {
           const val = snap.val();
           if (!val || typeof val !== "object") {
             state.revenueOrders = [];
+            hasInitRevenueOrders = true;
           } else {
-            state.revenueOrders = Object.values(val)
+            const sorted = Object.values(val)
               .filter(o => o && o.id && typeof o.totalAmount === "number")
               .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            state.revenueOrders = sorted;
+
+            if (!hasInitRevenueOrders) {
+              sorted.forEach(o => seenRevenueOrderIds.add(o.id));
+              hasInitRevenueOrders = true;
+            } else {
+              const newOrders = sorted.filter(o => !seenRevenueOrderIds.has(o.id));
+              newOrders.forEach(o => {
+                seenRevenueOrderIds.add(o.id);
+                if (state.isAdminUnlocked && o.uid !== state.uid && Date.now() - (o.createdAt || 0) < 60000) {
+                  playCinemaBellSFX();
+                  const msg = `🔔 ${o.userName || "Khách"} vừa đặt vé ${o.roomNumber || o.roomId} • Ghế ${o.seatId} (${formatVND(o.totalAmount)})`;
+                  showToast(msg, "success");
+                  try {
+                    if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+                      new Notification("CineVerse Admin • Có khách đặt vé mới!", {
+                        body: `${o.userName || "Khách"} đặt ${o.roomNumber || o.roomId} • Ghế ${o.seatId} (${formatVND(o.totalAmount)})`,
+                        icon: "assets/web-logo.png"
+                      });
+                    }
+                  } catch (_) {}
+                }
+              });
+            }
           }
           if (state.isAdminUnlocked) {
             renderAdminRevenueDashboard();
@@ -12169,6 +12196,14 @@
       state.revenueOrders = [orderRecord, ...(state.revenueOrders || [])];
       if (rtdb && rtdbMod) {
         rtdbMod.set(rtdbMod.ref(rtdb, `revenue_orders/${orderRecord.id}`), orderRecord).catch(() => {});
+      }
+      const workerNotifyBase = (state.r2WorkerUrl || "").replace(/\/+$/, "");
+      if (workerNotifyBase) {
+        fetch(`${workerNotifyBase}/notify-admin-booking`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(orderRecord)
+        }).catch(() => {});
       }
       if (state.isAdminUnlocked) {
         renderAdminRevenueDashboard();
@@ -13042,6 +13077,11 @@
       }
       state.isAdminUnlocked = true;
       state.adminSessionPin = pin;
+      try {
+        if (typeof Notification !== "undefined" && Notification.permission === "default") {
+          Notification.requestPermission().catch(() => {});
+        }
+      } catch (_) {}
       await refreshAdminRoomPins();
       renderLobby();
       if (state.currentRoomId) updateRoomHeaderUI();
