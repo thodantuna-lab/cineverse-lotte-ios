@@ -3272,12 +3272,40 @@
               <i class="fa-solid fa-wand-magic-sparkles text-amber-400 mt-0.5"></i>
               <span>Đặc quyền: Sau khi đặt vé, hệ thống tự động đúc <strong>1 Thẻ Ký Ức Điện Ảnh NFT</strong> (Tên bạn + Ghế ngồi + Câu chat + Bài hát đang phát) lưu vào Tủ Trưng Bày Cá Nhân!</span>
             </div>
+
+            <!-- KHU VỰC THANH TOÁN TRẢ PHÍ (HIỆN TỰ ĐỘNG KHI ADMIN BẬT CHẾ ĐỘ TRẢ PHÍ) -->
+            <div id="booking-paid-panel" class="hidden rounded-2xl bg-stone-950 border border-amber-400/40 p-3 space-y-2.5">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[11px] font-black uppercase tracking-wider text-amber-300"><i class="fa-solid fa-wallet mr-1"></i>Chọn hình thức thanh toán</span>
+                <span class="px-2 py-0.5 rounded bg-rose-600/20 text-rose-300 text-[10px] font-bold">Chế độ Trả phí</span>
+              </div>
+              <div class="grid grid-cols-3 gap-1.5">
+                <button type="button" id="pay-method-vietqr" onclick="window.appActions.selectPaymentMethod('vietqr')"
+                  class="py-1.5 px-2 rounded-xl text-[11px] font-black border cursor-pointer transition bg-amber-500 text-slate-950 border-amber-300">
+                  🏦 VietQR
+                </button>
+                <button type="button" id="pay-method-zalopay" onclick="window.appActions.selectPaymentMethod('zalopay')"
+                  class="py-1.5 px-2 rounded-xl text-[11px] font-bold border cursor-pointer transition bg-stone-900 text-sky-300 border-white/10 hover:border-sky-400/40">
+                  💙 ZaloPay
+                </button>
+                <button type="button" id="pay-method-shopeepay" onclick="window.appActions.selectPaymentMethod('shopeepay')"
+                  class="py-1.5 px-2 rounded-xl text-[11px] font-bold border cursor-pointer transition bg-stone-900 text-orange-300 border-white/10 hover:border-orange-400/40">
+                  🧡 ShopeePay
+                </button>
+              </div>
+              <div class="flex flex-col sm:flex-row items-center gap-3 bg-stone-900/90 rounded-xl p-2.5 border border-white/10">
+                <div class="bg-white rounded-xl p-1.5 shrink-0 shadow">
+                  <img id="booking-inline-qr-img" src="./assets/techcombank-qr.jpg" onerror="this.onerror=null;this.src='./assets/techcombank-qr.jpg'" alt="QR Thanh toán" class="w-28 h-28 object-contain rounded-lg" />
+                </div>
+                <div id="booking-payment-guide" class="text-[11px] text-slate-300 space-y-1 leading-relaxed min-w-0"></div>
+              </div>
+            </div>
           </div>
 
-          <button type="button" onclick="window.appActions.confirmCinemaBooking()"
+          <button id="booking-confirm-btn" type="button" onclick="window.appActions.confirmCinemaBooking()"
             class="w-full py-3 rounded-xl bg-gradient-to-r from-rose-600 via-amber-500 to-rose-600 hover:from-rose-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm shadow-xl transition cursor-pointer flex items-center justify-center gap-2">
             <i class="fa-solid fa-check-double"></i>
-            <span>Xác Nhận Đặt Vé & Vào Ghế Ngồi Ngay</span>
+            <span id="booking-confirm-btn-text">Xác Nhận Đặt Vé &amp; Vào Ghế Ngồi Ngay</span>
           </button>
         </div>
       </div>
@@ -3997,6 +4025,7 @@
       accountLoggedIn: Boolean(initialMemberSession?.email || loadGmailVerified()),
       authTab: "login",
       paymentMode: "free",
+      paymentMethod: "vietqr",
       otpToken: "",
       otpPendingEmail: "",
       otpCooldownSec: 0,
@@ -12667,6 +12696,9 @@
         rtdbMod.onValue(rtdbMod.ref(rtdb, "lobby_config/payment_mode"), (snap) => {
           const val = snap.val() || {};
           state.paymentMode = val.mode === "paid" ? "paid" : "free";
+          if (!document.getElementById("booking-modal")?.classList.contains("hidden")) {
+            renderBookingModalUI();
+          }
         }, () => {});
 
         const seenVisitIds = new Set();
@@ -12699,6 +12731,9 @@
         rtdbMod.onValue(rtdbMod.ref(rtdb, "lobby_config/payment_mode"), (snap) => {
           const val = snap.val() || {};
           state.paymentMode = val.mode === "paid" ? "paid" : "free";
+          if (!document.getElementById("booking-modal")?.classList.contains("hidden")) {
+            renderBookingModalUI();
+          }
         }, () => {});
 
         // Nếu người dùng đã vào phòng trước khi Firebase SDK tải xong thì đồng bộ ngay
@@ -12977,6 +13012,55 @@
       if (comboPriceEl) comboPriceEl.textContent = formatVND(comboPrice);
       const totalPriceEl = document.getElementById("booking-total-price");
       if (totalPriceEl) totalPriceEl.textContent = formatVND(total);
+
+      // 5. Tự động hiển thị QR & hình thức thanh toán khi Admin bật chế độ Trả phí
+      const paidPanel = document.getElementById("booking-paid-panel");
+      const btnTextEl = document.getElementById("booking-confirm-btn-text");
+      if (paidPanel) {
+        if (state.paymentMode === "paid") {
+          paidPanel.classList.remove("hidden");
+          const method = state.paymentMethod || "vietqr";
+          const methods = [
+            { id: "vietqr", el: "pay-method-vietqr", activeCls: "py-1.5 px-2 rounded-xl text-[11px] font-black border cursor-pointer transition bg-amber-500 text-slate-950 border-amber-300" },
+            { id: "zalopay", el: "pay-method-zalopay", activeCls: "py-1.5 px-2 rounded-xl text-[11px] font-black border cursor-pointer transition bg-sky-500 text-slate-950 border-sky-300" },
+            { id: "shopeepay", el: "pay-method-shopeepay", activeCls: "py-1.5 px-2 rounded-xl text-[11px] font-black border cursor-pointer transition bg-orange-500 text-slate-950 border-orange-300" }
+          ];
+          const idleCls = "py-1.5 px-2 rounded-xl text-[11px] font-bold border cursor-pointer transition bg-stone-900 text-slate-300 border-white/10 hover:border-white/30";
+          methods.forEach(m => {
+            const b = document.getElementById(m.el);
+            if (b) b.className = m.id === method ? m.activeCls : idleCls;
+          });
+
+          const qrImg = document.getElementById("booking-inline-qr-img");
+          if (qrImg) {
+            qrImg.onerror = () => { qrImg.onerror = null; qrImg.src = "./assets/techcombank-qr.jpg"; };
+            qrImg.src = `https://img.vietqr.io/image/TCB-99999920072-compact2.png?amount=${encodeURIComponent(total)}&accountName=${encodeURIComponent("TRAN MINH QUAN")}`;
+          }
+
+          const guideEl = document.getElementById("booking-payment-guide");
+          if (guideEl) {
+            const methodLabel = method === "zalopay" ? "ZaloPay (Quét VietQR)" : (method === "shopeepay" ? "ShopeePay (Quét VietQR)" : "App Ngân hàng (VietQR)");
+            guideEl.innerHTML = `
+              <p class="font-black text-amber-300">TECHCOMBANK • 9999 9920 072</p>
+              <p class="text-[10px] text-slate-400">Chủ TK: <b class="text-white">TRAN MINH QUAN</b> • Số tiền: <b class="text-emerald-400">${formatVND(total)}</b></p>
+              <p class="text-[10px] text-sky-300"><b>Hướng dẫn (${escapeHTML(methodLabel)}):</b></p>
+              <ol class="list-decimal list-inside text-[10px] text-slate-300 space-y-0.5">
+                <li>Mở <b>${escapeHTML(methodLabel)}</b> &amp; quét mã QR bên cạnh.</li>
+                <li>Bấm nút bên dưới để lấy <b>Mã đơn</b> &amp; hệ thống tự xác nhận vào rạp!</li>
+              </ol>
+            `;
+          }
+          if (btnTextEl) btnTextEl.textContent = "Thanh Toán & Tự Động Xác Nhận Vào Rạp";
+        } else {
+          paidPanel.classList.add("hidden");
+          if (btnTextEl) btnTextEl.textContent = "Xác Nhận Đặt Vé & Vào Ghế Ngồi Ngay";
+        }
+      }
+    }
+
+    function selectPaymentMethod(method) {
+      state.paymentMethod = (method === "zalopay" || method === "shopeepay") ? method : "vietqr";
+      renderBookingModalUI();
     }
 
     let activePaymentUnsub = null;
@@ -13013,6 +13097,7 @@
         uid: state.uid,
         userName: state.userName,
         userEmail: state.userEmail || "",
+        paymentMethod: state.paymentMethod || "vietqr",
         roomId: targetRoomId,
         roomNumber: roomObj.number,
         movieTitle: roomObj.movieTitle,
@@ -14390,6 +14475,7 @@
       confirmHostKeyModal,
       closePaymentQrModal,
       copyPaymentText,
+      selectPaymentMethod,
       toggleVoiceMic,
       resumePendingVoiceAudio,
       cycleSubtitleMode,
