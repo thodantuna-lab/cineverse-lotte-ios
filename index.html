@@ -2776,6 +2776,26 @@
     </div>
   </div>
 
+  <!-- MODAL NHẬP KEY CHỦ TRÌ PHÒNG CHIẾU -->
+  <div id="host-key-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-stone-900 border border-amber-400/30 rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-black text-white"><i class="fa-solid fa-crown text-amber-400 mr-2"></i>Xác Thực Key Chủ Trì</h3>
+        <button type="button" onclick="window.appActions.closeHostKeyModal()" class="text-slate-400 hover:text-white cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-300 leading-relaxed">Để nhận quyền <strong class="text-amber-300">Chủ Trì (điều khiển phát/tua phim)</strong> cho phòng này, vui lòng nhập mã Key do Admin cung cấp.</p>
+      <input id="host-key-input" type="text" maxlength="24" placeholder="Ví dụ: CV-8A4K9P"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();window.appActions.confirmHostKeyModal();}"
+        class="w-full px-4 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-sm text-amber-300 font-mono uppercase tracking-widest text-center font-black focus:outline-none focus:border-amber-400" />
+      <div class="flex justify-end gap-2 pt-1">
+        <button type="button" onclick="window.appActions.closeHostKeyModal()" class="px-4 py-2 rounded-xl bg-stone-800 text-slate-300 text-xs font-bold cursor-pointer">Hủy</button>
+        <button id="host-key-confirm-btn" type="button" onclick="window.appActions.confirmHostKeyModal()" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold cursor-pointer">Xác nhận làm Chủ Trì</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL ĐỔI PHIM / DÁN LINK YOUTUBE HOẶC MP4 -->
   <div id="custom-video-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-stone-900 border border-white/15 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
@@ -8795,6 +8815,79 @@
       renderRoomHostBadge();
     }
 
+    function openHostKeyModal() {
+      const inp = document.getElementById("host-key-input");
+      if (inp) inp.value = "";
+      document.getElementById("host-key-modal")?.classList.remove("hidden");
+      setTimeout(() => inp?.focus(), 60);
+    }
+
+    function closeHostKeyModal() {
+      document.getElementById("host-key-modal")?.classList.add("hidden");
+    }
+
+    async function confirmHostKeyModal() {
+      if (!state.currentRoomId || !rtdb || !rtdbMod) return;
+      const roomId = state.currentRoomId;
+      const inp = document.getElementById("host-key-input");
+      const btn = document.getElementById("host-key-confirm-btn");
+      const enteredKey = (inp?.value || "").trim().toUpperCase();
+      if (!enteredKey) {
+        showToast("Vui lòng nhập Key Chủ Trì do Admin cấp!", "error");
+        inp?.focus();
+        return;
+      }
+      if (btn) { btn.disabled = true; btn.textContent = "Đang kiểm tra..."; }
+      try {
+        const snap = await rtdbMod.get(rtdbMod.ref(rtdb, `host_keys/${roomId}`));
+        const keyData = snap?.val();
+        const expectedKey = String(keyData?.key || "").trim().toUpperCase();
+        if (!expectedKey) {
+          showToast("⚠️ Admin chưa tạo Key Chủ Trì cho phòng này!", "warning");
+          return;
+        }
+        if (enteredKey !== expectedKey) {
+          showToast("❌ Key Chủ Trì không đúng! Vui lòng liên hệ Admin.", "error");
+          inp?.focus();
+          return;
+        }
+        closeHostKeyModal();
+        await claimRoomHostNow(roomId);
+      } catch (e) {
+        showToast("Không thể kiểm tra Key Chủ Trì lúc này, vui lòng thử lại.", "error");
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = "Xác nhận làm Chủ Trì"; }
+      }
+    }
+
+    async function claimRoomHostNow(roomId) {
+      try {
+        const hostRef = rtdbMod.ref(rtdb, `host/${roomId}`);
+        myHostRoomId = roomId;
+        myHostDisconnect = rtdbMod.onDisconnect(hostRef);
+        await myHostDisconnect.remove();
+        const hostObj = {
+          uid: state.uid,
+          userName: state.userName,
+          userEmail: state.userEmail || "",
+          claimedAt: Date.now(),
+          updatedAt: Date.now()
+        };
+        await rtdbMod.set(hostRef, hostObj);
+        currentRoomHost = hostObj;
+        renderRoomHostBadge();
+        startHostHeartbeat();
+        broadcastRoomVideoSync("host");
+        broadcastRoomEffectsSync();
+        if (state.customSubtitlesByRoom[roomId]?.length) {
+          syncRoomSubtitlesToRTDB(roomId, state.customSubtitlesByRoom[roomId], "Host .SRT");
+        }
+        showToast("👑 Xác thực Key thành công! Bạn đã làm Chủ Trì phòng.", "success");
+      } catch (e) {
+        showToast("Không thể nhận quyền Chủ Trì lúc này, vui lòng thử lại.", "error");
+      }
+    }
+
     async function toggleRoomHost() {
       if (!state.currentRoomId || !rtdb || !rtdbMod) {
         showToast("Đang kết nối máy chủ, vui lòng thử lại sau 1 giây!", "info");
@@ -8810,29 +8903,7 @@
         showToast(`👑 ${currentRoomHost.userName} đang làm Chủ Trì phòng này!`, "info");
         return;
       }
-      try {
-        const hostRef = rtdbMod.ref(rtdb, `host/${roomId}`);
-        myHostRoomId = roomId;
-        myHostDisconnect = rtdbMod.onDisconnect(hostRef);
-        await myHostDisconnect.remove();
-        const hostObj = {
-          uid: state.uid,
-          userName: state.userName,
-          updatedAt: Date.now()
-        };
-        await rtdbMod.set(hostRef, hostObj);
-        currentRoomHost = hostObj;
-        renderRoomHostBadge();
-        startHostHeartbeat();
-        broadcastRoomVideoSync("host");
-        broadcastRoomEffectsSync();
-        if (state.customSubtitlesByRoom[roomId]?.length) {
-          syncRoomSubtitlesToRTDB(roomId, state.customSubtitlesByRoom[roomId], "Host .SRT");
-        }
-        showToast("👑 Bạn đã làm Chủ Trì! Mọi người trong phòng sẽ tự động chạy theo thời gian của bạn.", "success");
-      } catch (e) {
-        showToast("Không thể nhận quyền Chủ Trì lúc này, vui lòng thử lại.", "error");
-      }
+      openHostKeyModal();
     }
 
     function broadcastRoomEffectsSync() {
@@ -14139,6 +14210,8 @@
       seekBySeconds,
       syncLiveTime,
       toggleRoomHost,
+      closeHostKeyModal,
+      confirmHostKeyModal,
       toggleVoiceMic,
       resumePendingVoiceAudio,
       cycleSubtitleMode,
