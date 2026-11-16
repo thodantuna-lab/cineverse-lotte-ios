@@ -3288,6 +3288,12 @@
             <span>Thống Kê Doanh Thu Rạp</span>
             <span id="admin-tab-revenue-badge" class="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-200 text-[10px] font-black">0đ</span>
           </button>
+          <button type="button" id="admin-tab-visitors" onclick="window.appActions.switchAdminTab('visitors')"
+            class="px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-sky-500/40 text-sky-300 font-extrabold text-xs flex items-center gap-1.5 cursor-pointer transition">
+            <i class="fa-solid fa-users-viewfinder"></i>
+            <span>Khách Truy Cập</span>
+            <span id="admin-tab-visitors-badge" class="px-1.5 py-0.5 rounded-md bg-sky-500/20 text-sky-200 text-[10px] font-black">0</span>
+          </button>
         </div>
 
         <!-- Bảng Setup Phòng -->
@@ -3295,6 +3301,9 @@
 
         <!-- Bảng Thống Kê Doanh Thu (Chỉ Admin mới xem được) -->
         <div id="admin-revenue-panel" class="hidden space-y-4"></div>
+
+        <!-- Bảng Theo Dõi Khách Đang Online & Lịch Sử Truy Cập (Chỉ Admin mới xem được) -->
+        <div id="admin-visitors-panel" class="hidden space-y-4"></div>
       </div>
 
       <div id="admin-panel-footer" class="hidden px-5 py-3.5 bg-stone-900/95 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
@@ -3894,6 +3903,8 @@
       memoryCapsules: [],
       bookedTicketsByRoom: {},
       revenueOrders: [],
+      onlineVisitors: [],
+      visitLogs: [],
       adminTab: "rooms"
     };
     state.memoryCapsules = loadSavedCapsules(state.userName);
@@ -4401,6 +4412,7 @@
 
       state.currentRoomId = roomId;
       try { window.__setAmbientTunaPaused?.(true); } catch (_) {}
+      try { syncMyOnlinePresence?.(); } catch (_) {}
 
       document.getElementById("lobby-view").classList.add("hidden");
       document.getElementById("room-view").classList.remove("hidden");
@@ -4489,6 +4501,7 @@
       latestRoomSyncState = null;
       state.currentRoomId = null;
       try { window.__setAmbientTunaPaused?.(false); } catch (_) {}
+      try { syncMyOnlinePresence?.(); } catch (_) {}
       document.getElementById("room-view").classList.add("hidden");
       document.getElementById("lobby-view").classList.remove("hidden");
       document.getElementById("header-lobby-actions")?.classList.remove("hidden");
@@ -11902,6 +11915,63 @@
           }
         }, () => {});
 
+        // Theo dõi khách đang mở web & lịch sử truy cập (chỉ Admin mới xem được)
+        const myOnlineRef = rtdbMod.ref(rtdb, `online_visitors/${state.uid}`);
+        try { rtdbMod.onDisconnect(myOnlineRef).remove().catch(() => {}); } catch (_) {}
+        syncMyOnlinePresence();
+
+        try {
+          if (!sessionStorage.getItem("cv_visit_logged")) {
+            sessionStorage.setItem("cv_visit_logged", "1");
+            const vId = "V_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
+            rtdbMod.set(rtdbMod.ref(rtdb, `visit_logs/${vId}`), {
+              id: vId,
+              uid: state.uid,
+              userName: state.userName || "Khách",
+              device: detectDeviceLabel(),
+              createdAt: Date.now()
+            }).catch(() => {});
+          }
+        } catch (_) {}
+
+        rtdbMod.onValue(rtdbMod.ref(rtdb, "online_visitors"), (snap) => {
+          const val = snap.val() || {};
+          const nowTs = Date.now();
+          state.onlineVisitors = Object.values(val)
+            .filter(v => v && v.uid && (!v.updatedAt || nowTs - v.updatedAt < 1800000))
+            .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+          if (state.isAdminUnlocked) {
+            renderAdminVisitorsPanel();
+          }
+        }, () => {});
+
+        const seenVisitIds = new Set();
+        let hasInitVisits = false;
+        const visitQuery = rtdbMod.query(rtdbMod.ref(rtdb, "visit_logs"), rtdbMod.limitToLast(40));
+        rtdbMod.onValue(visitQuery, (snap) => {
+          const val = snap.val() || {};
+          const list = Object.values(val)
+            .filter(v => v && v.id)
+            .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          state.visitLogs = list;
+          if (!hasInitVisits) {
+            list.forEach(v => seenVisitIds.add(v.id));
+            hasInitVisits = true;
+          } else {
+            list.forEach(v => {
+              if (!seenVisitIds.has(v.id)) {
+                seenVisitIds.add(v.id);
+                if (state.isAdminUnlocked && v.uid !== state.uid && Date.now() - (v.createdAt || 0) < 60000) {
+                  showToast(`👀 ${v.userName || "Khách"} (${v.device || "Web"}) vừa truy cập vào web!`, "info");
+                }
+              }
+            });
+          }
+          if (state.isAdminUnlocked) {
+            renderAdminVisitorsPanel();
+          }
+        }, () => {});
+
         // Nếu người dùng đã vào phòng trước khi Firebase SDK tải xong thì đồng bộ ngay
         if (state.currentRoomId) {
           const mySeat = getMySeatInRoom(state.currentRoomId);
@@ -12855,30 +12925,56 @@
       return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
     }
 
+    function detectDeviceLabel() {
+      const ua = navigator.userAgent || "";
+      if (/iPhone/i.test(ua)) return "iPhone";
+      if (/iPad/i.test(ua)) return "iPad";
+      if (/Android/i.test(ua)) return "Android";
+      if (/Mac/i.test(ua)) return "Mac";
+      if (/Windows/i.test(ua)) return "Windows PC";
+      return "Trình duyệt Web";
+    }
+
+    function syncMyOnlinePresence() {
+      if (!rtdb || !rtdbMod || !state.uid) return;
+      rtdbMod.set(rtdbMod.ref(rtdb, `online_visitors/${state.uid}`), {
+        uid: state.uid,
+        userName: state.userName || "Khách",
+        device: detectDeviceLabel(),
+        currentRoomId: state.currentRoomId || "lobby",
+        updatedAt: Date.now()
+      }).catch(() => {});
+    }
+
     function switchAdminTab(tab = "rooms") {
       if (!state.isAdminUnlocked) return;
-      state.adminTab = tab === "revenue" ? "revenue" : "rooms";
+      state.adminTab = (tab === "revenue" || tab === "visitors") ? tab : "rooms";
       const tabRooms = document.getElementById("admin-tab-rooms");
       const tabRev = document.getElementById("admin-tab-revenue");
+      const tabVis = document.getElementById("admin-tab-visitors");
       const editor = document.getElementById("admin-rooms-editor");
       const revPanel = document.getElementById("admin-revenue-panel");
+      const visPanel = document.getElementById("admin-visitors-panel");
       const footer = document.getElementById("admin-panel-footer");
 
-      if (state.adminTab === "revenue") {
-        if (tabRooms) tabRooms.className = "px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-white/10 text-slate-300 font-bold text-xs flex items-center gap-1.5 cursor-pointer transition";
-        if (tabRev) tabRev.className = "px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs flex items-center gap-1.5 cursor-pointer transition";
-        editor?.classList.add("hidden");
-        revPanel?.classList.remove("hidden");
-        footer?.classList.add("hidden");
-        renderAdminRevenueDashboard();
-      } else {
-        if (tabRooms) tabRooms.className = "px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 cursor-pointer transition";
-        if (tabRev) tabRev.className = "px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs flex items-center gap-1.5 cursor-pointer transition";
-        editor?.classList.remove("hidden");
-        revPanel?.classList.add("hidden");
-        footer?.classList.remove("hidden");
-        renderAdminRoomsEditor();
-      }
+      if (tabRooms) tabRooms.className = state.adminTab === "rooms"
+        ? "px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 cursor-pointer transition"
+        : "px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-white/10 text-slate-300 font-bold text-xs flex items-center gap-1.5 cursor-pointer transition";
+      if (tabRev) tabRev.className = state.adminTab === "revenue"
+        ? "px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs flex items-center gap-1.5 cursor-pointer transition"
+        : "px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs flex items-center gap-1.5 cursor-pointer transition";
+      if (tabVis) tabVis.className = state.adminTab === "visitors"
+        ? "px-4 py-2 rounded-xl bg-sky-500 text-slate-950 font-black text-xs flex items-center gap-1.5 cursor-pointer transition"
+        : "px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-sky-500/40 text-sky-300 font-extrabold text-xs flex items-center gap-1.5 cursor-pointer transition";
+
+      editor?.classList.toggle("hidden", state.adminTab !== "rooms");
+      revPanel?.classList.toggle("hidden", state.adminTab !== "revenue");
+      visPanel?.classList.toggle("hidden", state.adminTab !== "visitors");
+      footer?.classList.toggle("hidden", state.adminTab !== "rooms");
+
+      if (state.adminTab === "revenue") renderAdminRevenueDashboard();
+      else if (state.adminTab === "visitors") renderAdminVisitorsPanel();
+      else renderAdminRoomsEditor();
     }
 
     function renderAdminRevenueDashboard() {
@@ -13004,6 +13100,92 @@
       showToast("🗑️ Đã reset toàn bộ thống kê doanh thu rạp.", "info");
     }
 
+    function renderAdminVisitorsPanel() {
+      if (!state.isAdminUnlocked) return;
+      const online = state.onlineVisitors || [];
+      const logs = state.visitLogs || [];
+      const badge = document.getElementById("admin-tab-visitors-badge");
+      if (badge) badge.textContent = String(online.length);
+
+      const panel = document.getElementById("admin-visitors-panel");
+      if (!panel) return;
+
+      panel.innerHTML = `
+        <div class="p-4 rounded-2xl bg-stone-900/90 border border-sky-500/30 space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-black uppercase tracking-wider text-sky-300">
+              <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-1.5 animate-ping"></span>Đang Mở Web Ngay Lúc Này (${online.length})
+            </h4>
+          </div>
+          ${online.length === 0 ? `
+            <p class="text-center text-xs text-slate-500 italic py-4">Chưa có người dùng nào đang mở web.</p>
+          ` : `
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              ${online.map(v => {
+                const isMe = v.uid === state.uid;
+                const loc = v.currentRoomId && v.currentRoomId !== "lobby"
+                  ? (getEffectiveRoom(v.currentRoomId)?.number || v.currentRoomId)
+                  : "Sảnh chính";
+                return `
+                  <div class="px-3 py-2.5 rounded-xl bg-stone-950/90 border border-white/10 flex items-center justify-between gap-2 text-xs">
+                    <div class="min-w-0">
+                      <p class="font-black text-white truncate">
+                        ${escapeHTML(v.userName || "Khách")} ${isMe ? `<span class="text-[10px] text-amber-300">(Bạn)</span>` : ""}
+                      </p>
+                      <p class="text-[10px] text-slate-400">${escapeHTML(v.device || "Web")}</p>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-lg bg-sky-500/20 border border-sky-400/30 text-sky-200 font-bold text-[10px] shrink-0">
+                      ${escapeHTML(loc)}
+                    </span>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          `}
+        </div>
+
+        <div class="p-4 rounded-2xl bg-stone-900/90 border border-white/10 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-black uppercase tracking-wider text-amber-300">
+              <i class="fa-solid fa-clock-rotate-left mr-1.5"></i>Lịch Sử Người Truy Cập Web (${logs.length})
+            </h4>
+            <button type="button" onclick="window.appActions.clearVisitLogsAdmin()"
+              class="px-2.5 py-1 rounded-lg bg-stone-800 hover:bg-rose-600 text-slate-300 hover:text-white text-[10px] font-bold transition cursor-pointer">
+              <i class="fa-solid fa-trash-can mr-1"></i>Xóa Lịch Sử
+            </button>
+          </div>
+          ${logs.length === 0 ? `
+            <p class="text-center text-xs text-slate-500 italic py-4">Chưa ghi nhận lượt truy cập nào.</p>
+          ` : `
+            <div class="max-h-60 overflow-y-auto space-y-1.5 pr-1">
+              ${logs.map(v => `
+                <div class="px-3 py-2 rounded-xl bg-stone-950/90 border border-white/5 flex items-center justify-between gap-2 text-xs">
+                  <div class="min-w-0">
+                    <span class="font-bold text-white">${escapeHTML(v.userName || "Khách")}</span>
+                    <span class="text-slate-400"> • </span>
+                    <span class="text-sky-300 text-[11px]">${escapeHTML(v.device || "Web")}</span>
+                  </div>
+                  <span class="text-[10px] text-slate-500 font-mono shrink-0">
+                    ${new Date(v.createdAt || Date.now()).toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" })}
+                  </span>
+                </div>
+              `).join("")}
+            </div>
+          `}
+        </div>
+      `;
+    }
+
+    async function clearVisitLogsAdmin() {
+      if (!state.isAdminUnlocked) return;
+      state.visitLogs = [];
+      if (rtdb && rtdbMod) {
+        await rtdbMod.remove(rtdbMod.ref(rtdb, "visit_logs")).catch(() => {});
+      }
+      renderAdminVisitorsPanel();
+      showToast("🗑️ Đã xóa lịch sử khách truy cập.", "info");
+    }
+
     function openAdminPanelModal() {
       const modal = document.getElementById("admin-panel-modal");
       if (!modal) return;
@@ -13012,6 +13194,7 @@
       const tabsBar = document.getElementById("admin-tabs-bar");
       const editor = document.getElementById("admin-rooms-editor");
       const revPanel = document.getElementById("admin-revenue-panel");
+      const visPanel = document.getElementById("admin-visitors-panel");
       const footer = document.getElementById("admin-panel-footer");
       if (state.isAdminUnlocked) {
         if (lockScreen) lockScreen.classList.add("hidden");
@@ -13022,6 +13205,7 @@
         if (tabsBar) tabsBar.classList.add("hidden");
         if (editor) editor.classList.add("hidden");
         if (revPanel) revPanel.classList.add("hidden");
+        if (visPanel) visPanel.classList.add("hidden");
         if (footer) footer.classList.add("hidden");
         setTimeout(() => document.getElementById("admin-pin-input")?.focus(), 100);
       }
@@ -13373,6 +13557,7 @@
       unlockAdminPanel,
       switchAdminTab,
       clearRevenueStatsAdmin,
+      clearVisitLogsAdmin,
       applyAdminVaultPick,
       clearRoomSeatsAdmin,
       saveAdminLobbyConfig,
