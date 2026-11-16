@@ -4542,18 +4542,19 @@
       const roomSeats = state.seatsByRoom[roomId];
       const existing = roomSeats[seatId];
 
-      // Khóa cố định ghế theo vé đã đặt — không cho chuyển sang ghế khác hoặc đứng dậy đổi ghế
-      const bookedTicket = state.bookedTicketsByRoom?.[roomId];
-      if (bookedTicket && bookedTicket.seatId && bookedTicket.seatId !== seatId) {
-        if (notify) {
-          showToast(`🔒 Vé của bạn cố định ở ghế ${bookedTicket.seatId}, không thể chuyển sang ghế ${seatId}!`, "warning");
-        }
-        return;
-      }
-
       // Nếu ghế đã có người khác ngồi
       if (existing && existing.uid !== state.uid) {
         showToast(`Ghế ${seatId} đang có ${existing.userName} ngồi!`, "error");
+        return;
+      }
+
+      // Khóa cố định ghế theo vé đã đặt — muốn chuyển sang ghế khác phải mua vé mới cho ghế đó
+      const bookedTicket = state.bookedTicketsByRoom?.[roomId];
+      if (bookedTicket && bookedTicket.seatId && bookedTicket.seatId !== seatId) {
+        if (notify) {
+          showToast(`🎫 Để chuyển từ ghế ${bookedTicket.seatId} sang ghế ${seatId}, vui lòng đặt mua vé mới cho ghế ${seatId}!`, "info");
+          openBookingModal(roomId, null, seatId);
+        }
         return;
       }
 
@@ -12131,6 +12132,16 @@
         state.mySnack = state.bookingDraft.comboIcon;
       }
 
+      const prevBookedSeat = state.bookedTicketsByRoom?.[targetRoomId]?.seatId || getMySeatInRoom(targetRoomId);
+      if (prevBookedSeat && prevBookedSeat !== targetSeatId) {
+        if (state.seatsByRoom[targetRoomId]?.[prevBookedSeat]?.uid === state.uid) {
+          delete state.seatsByRoom[targetRoomId][prevBookedSeat];
+        }
+        if (rtdb && rtdbMod) {
+          rtdbMod.remove(rtdbMod.ref(rtdb, `seats/${targetRoomId}/${prevBookedSeat}`)).catch(() => {});
+        }
+      }
+
       state.bookedTicketsByRoom[targetRoomId] = {
         seatId: targetSeatId,
         showtime,
@@ -12164,7 +12175,9 @@
       }
 
       closeBookingModal();
-      await enterRoom(targetRoomId, { fromBooking: true });
+      if (state.currentRoomId !== targetRoomId) {
+        await enterRoom(targetRoomId, { fromBooking: true });
+      }
       await assignSeat(targetRoomId, targetSeatId, false);
       updateMySnackStatusUI();
       renderSeatingMap();
