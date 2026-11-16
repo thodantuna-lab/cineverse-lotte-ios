@@ -12008,16 +12008,27 @@
       return Number(amount || 0).toLocaleString("vi-VN") + "đ";
     }
 
+    function getValidSeatsForRoom(room) {
+      if (room && room.isCoupleRoom) return ["F4", "F5"];
+      if (room && room.isDiscordRoom) return ["E2", "E3", "E4", "E5", "E6", "F2", "F3", "F4", "F5", "F6"];
+      const all = [];
+      ROWS.forEach(r => { for (let c = 1; c <= 8; c++) all.push(`${r}${c}`); });
+      return all;
+    }
+
     function openBookingModal(preselectRoomId = null, preselectShowtime = null, preselectSeat = null) {
       const targetRoomId = preselectRoomId || state.currentRoomId || state.bookingDraft.roomId || "room-1";
       state.bookingDraft.roomId = targetRoomId;
       if (preselectShowtime) state.bookingDraft.showtime = preselectShowtime;
 
+      const room = getEffectiveRoom(targetRoomId);
+      const validSeats = getValidSeatsForRoom(room);
       const roomSeats = state.seatsByRoom[targetRoomId] || {};
       const myExistingSeat = getMySeatInRoom(targetRoomId);
-      let candidateSeat = preselectSeat || myExistingSeat || state.bookingDraft.seatId || "F4";
-      if (roomSeats[candidateSeat] && roomSeats[candidateSeat].uid !== state.uid) {
-        candidateSeat = (!roomSeats["F4"] || roomSeats["F4"].uid === state.uid) ? "F4" : "F5";
+      let candidateSeat = preselectSeat || myExistingSeat || state.bookingDraft.seatId || validSeats[0];
+      if (!validSeats.includes(candidateSeat) || (roomSeats[candidateSeat] && roomSeats[candidateSeat].uid !== state.uid)) {
+        const freeSeat = validSeats.find(s => !roomSeats[s] || roomSeats[s].uid === state.uid);
+        candidateSeat = freeSeat || validSeats[0];
       }
       state.bookingDraft.seatId = candidateSeat;
 
@@ -12057,10 +12068,13 @@
 
     function onBookingRoomChange(roomId) {
       state.bookingDraft.roomId = roomId || "room-1";
+      const room = getEffectiveRoom(state.bookingDraft.roomId);
+      const validSeats = getValidSeatsForRoom(room);
       const roomSeats = state.seatsByRoom[state.bookingDraft.roomId] || {};
-      const curSeat = state.bookingDraft.seatId || "F4";
-      if (roomSeats[curSeat] && roomSeats[curSeat].uid !== state.uid) {
-        state.bookingDraft.seatId = "F4";
+      const curSeat = state.bookingDraft.seatId || validSeats[0];
+      if (!validSeats.includes(curSeat) || (roomSeats[curSeat] && roomSeats[curSeat].uid !== state.uid)) {
+        const freeSeat = validSeats.find(s => !roomSeats[s] || roomSeats[s].uid === state.uid);
+        state.bookingDraft.seatId = freeSeat || validSeats[0];
       }
       renderBookingModalUI();
     }
@@ -12096,7 +12110,13 @@
       const roomId = state.bookingDraft.roomId || "room-1";
       const room = getEffectiveRoom(roomId);
       const roomSeats = state.seatsByRoom[roomId] || {};
-      const selectedSeat = state.bookingDraft.seatId || "F4";
+      const validSeats = getValidSeatsForRoom(room);
+      let selectedSeat = state.bookingDraft.seatId || validSeats[0];
+      if (!validSeats.includes(selectedSeat)) {
+        const freeSeat = validSeats.find(s => !roomSeats[s] || roomSeats[s].uid === state.uid);
+        selectedSeat = freeSeat || validSeats[0];
+        state.bookingDraft.seatId = selectedSeat;
+      }
 
       // 1. Render dropdown chọn phòng phim
       const roomSelect = document.getElementById("booking-room-select");
@@ -12126,51 +12146,72 @@
         }).join("");
       }
 
-      // 3. Render sơ đồ 48 ghế trực quan (A1 -> F8) trong modal đặt vé
+      // 3. Render sơ đồ đúng số ghế thực tế của từng phòng (2 ghế Đôi / 10 ghế Stream / 48 ghế Tiêu chuẩn)
       const seatGrid = document.getElementById("booking-seat-grid");
       if (seatGrid) {
-        seatGrid.innerHTML = ROWS.map(row => {
-          const isVIP = row === "D" || row === "E";
-          const isCouple = row === "F";
-          const renderSide = (cols) => cols.map(col => {
-            const sId = `${row}${col}`;
-            const occ = roomSeats[sId];
-            const isOccupiedOther = occ && occ.uid !== state.uid;
-            const isSelected = sId === selectedSeat;
+        const makeSeatBtn = (sId, isVIP, isCouple, extraCls = "") => {
+          const occ = roomSeats[sId];
+          const isOccupiedOther = occ && occ.uid !== state.uid;
+          const isSelected = sId === selectedSeat;
 
-            let cls = "booking-mini-seat h-8 rounded-lg text-[10px] font-black border flex flex-col items-center justify-center select-none ";
-            if (isSelected) {
-              cls += "seat-selected";
-            } else if (isOccupiedOther) {
-              cls += "seat-taken bg-stone-900 border-white/5 text-slate-600";
-            } else if (isCouple) {
-              cls += "bg-rose-950/80 hover:bg-rose-900/90 border-amber-400/50 text-amber-200";
-            } else if (isVIP) {
-              cls += "bg-amber-950/50 hover:bg-amber-900/70 border-amber-500/40 text-amber-300";
-            } else {
-              cls += "bg-stone-900 hover:bg-stone-800 border-white/10 text-slate-300";
-            }
-
-            return `
-              <button type="button"
-                onclick="window.appActions.selectBookingSeat('${sId}')"
-                title="${isOccupiedOther ? `Ghế ${sId} đã có ${escapeHTML(occ.userName)} ngồi` : `Chọn ghế ${sId}`}"
-                class="flex-1 ${cls}">
-                <span>${sId}</span>
-              </button>
-            `;
-          }).join("");
+          let cls = "booking-mini-seat h-8 rounded-lg text-[10px] font-black border flex flex-col items-center justify-center select-none ";
+          if (isSelected) cls += "seat-selected";
+          else if (isOccupiedOther) cls += "seat-taken bg-stone-900 border-white/5 text-slate-600";
+          else if (isCouple) cls += "bg-rose-950/80 hover:bg-rose-900/90 border-amber-400/50 text-amber-200";
+          else if (isVIP) cls += "bg-amber-950/50 hover:bg-amber-900/70 border-amber-500/40 text-amber-300";
+          else cls += "bg-stone-900 hover:bg-stone-800 border-white/10 text-slate-300";
 
           return `
-            <div class="flex items-center gap-2">
-              <span class="w-5 text-center text-[10px] font-black ${isCouple ? 'text-amber-400' : isVIP ? 'text-rose-400' : 'text-slate-500'}">${row}</span>
-              <div class="flex-1 flex items-center gap-1">${renderSide([1, 2, 3, 4])}</div>
-              <div class="w-4 text-center text-[8px] font-mono text-emerald-400/70">||</div>
-              <div class="flex-1 flex items-center gap-1">${renderSide([5, 6, 7, 8])}</div>
-              <span class="w-5 text-center text-[10px] font-black ${isCouple ? 'text-amber-400' : isVIP ? 'text-rose-400' : 'text-slate-500'}">${row}</span>
+            <button type="button"
+              onclick="window.appActions.selectBookingSeat('${sId}')"
+              title="${isOccupiedOther ? `Ghế ${sId} đã có ${escapeHTML(occ.userName)} ngồi` : `Chọn ghế ${sId}`}"
+              class="${extraCls || "flex-1"} ${cls}">
+              <span>${sId}</span>
+            </button>
+          `;
+        };
+
+        if (room && room.isCoupleRoom) {
+          seatGrid.innerHTML = `
+            <div class="py-4 px-2 space-y-3 text-center">
+              <p class="text-[11px] font-bold text-pink-300">💕 Phòng Sweetbox Đôi VIP (Tổng cộng 2 ghế)</p>
+              <div class="flex items-center justify-center gap-4 max-w-xs mx-auto">
+                ${makeSeatBtn("F4", false, true, "flex-1 h-12 text-xs")}
+                ${makeSeatBtn("F5", false, true, "flex-1 h-12 text-xs")}
+              </div>
             </div>
           `;
-        }).join("");
+        } else if (room && room.isDiscordRoom) {
+          seatGrid.innerHTML = `
+            <div class="py-2 space-y-2">
+              <p class="text-center text-[11px] font-bold text-indigo-300">🖥️ Phòng Stream Trực Tiếp (10 Ghế VIP)</p>
+              ${["E", "F"].map(row => `
+                <div class="flex items-center gap-2 max-w-md mx-auto">
+                  <span class="w-5 text-center text-[10px] font-black ${row === "F" ? "text-amber-400" : "text-rose-400"}">${row}</span>
+                  <div class="flex-1 flex items-center gap-1.5">
+                    ${[2, 3, 4, 5, 6].map(col => makeSeatBtn(`${row}${col}`, row === "E", row === "F")).join("")}
+                  </div>
+                  <span class="w-5 text-center text-[10px] font-black ${row === "F" ? "text-amber-400" : "text-rose-400"}">${row}</span>
+                </div>
+              `).join("")}
+            </div>
+          `;
+        } else {
+          seatGrid.innerHTML = ROWS.map(row => {
+            const isVIP = row === "D" || row === "E";
+            const isCouple = row === "F";
+            const renderSide = (cols) => cols.map(col => makeSeatBtn(`${row}${col}`, isVIP, isCouple)).join("");
+            return `
+              <div class="flex items-center gap-2">
+                <span class="w-5 text-center text-[10px] font-black ${isCouple ? 'text-amber-400' : isVIP ? 'text-rose-400' : 'text-slate-500'}">${row}</span>
+                <div class="flex-1 flex items-center gap-1">${renderSide([1, 2, 3, 4])}</div>
+                <div class="w-4 text-center text-[8px] font-mono text-emerald-400/70">||</div>
+                <div class="flex-1 flex items-center gap-1">${renderSide([5, 6, 7, 8])}</div>
+                <span class="w-5 text-center text-[10px] font-black ${isCouple ? 'text-amber-400' : isVIP ? 'text-rose-400' : 'text-slate-500'}">${row}</span>
+              </div>
+            `;
+          }).join("");
+        }
       }
 
       // 4. Cập nhật cuống vé preview bên phải
