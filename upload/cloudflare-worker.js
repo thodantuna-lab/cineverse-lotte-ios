@@ -18,12 +18,107 @@
 const R2_PUBLIC_BASE = "https://pub-c634cb0eca714151876c408aa346c6b5.r2.dev";
 const VIDEO_EXT_RE = /\.(mp4|webm|mov|mkv|m4v)$/i;
 
+const SECURITY_HEADERS = {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "geolocation=(), payment=()"
+};
+
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, HEAD, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
-  "Cache-Control": "no-store"
+  "Cache-Control": "no-store",
+  ...SECURITY_HEADERS
 };
+
+function getCorsHeaders(request, env) {
+  const allowedRaw = String(env?.ALLOWED_ORIGINS || "").trim();
+  if (!allowedRaw) return CORS_HEADERS;
+  const origin = String(request?.headers?.get("Origin") || "").trim();
+  const allowList = allowedRaw.split(",").map((s) => s.trim()).filter(Boolean);
+  const matched = allowList.includes(origin) ? origin : allowList[0];
+  return {
+    ...CORS_HEADERS,
+    "Access-Control-Allow-Origin": matched,
+    "Vary": "Origin"
+  };
+}
+
+// Edge in-memory rate limiters & caches (per isolate)
+const RATE_BUCKETS = new Map();
+const ADMIN_FAIL_BUCKETS = new Map();
+let R2_CATALOG_CACHE = { ts: 0, data: null };
+
+function getClientIp(request) {
+  return (
+    request?.headers?.get("CF-Connecting-IP") ||
+    String(request?.headers?.get("X-Forwarded-For") || "").split(",")[0].trim() ||
+    "unknown"
+  );
+}
+
+function checkRateLimit(ip, bucketName, maxReq, windowMs) {
+  const now = Date.now();
+  if (RATE_BUCKETS.size > 2000) {
+    for (const [k, v] of RATE_BUCKETS) {
+      if (now - v.start > v.windowMs) RATE_BUCKETS.delete(k);
+    }
+  }
+  const key = `${bucketName}:${ip}`;
+  const entry = RATE_BUCKETS.get(key);
+  if (!entry || now - entry.start > windowMs) {
+    RATE_BUCKETS.set(key, { count: 1, start: now, windowMs });
+    return { allowed: true, retryAfterSec: 0 };
+  }
+  entry.count += 1;
+  if (entry.count > maxReq) {
+    const retryAfterSec = Math.max(1, Math.ceil((entry.start + windowMs - now) / 1000));
+    return { allowed: false, retryAfterSec };
+  }
+  return { allowed: true, retryAfterSec: 0 };
+}
+
+function checkAdminBan(ip) {
+  const now = Date.now();
+  if (ADMIN_FAIL_BUCKETS.size > 1000) {
+    for (const [k, v] of ADMIN_FAIL_BUCKETS) {
+      if (now > v.until) ADMIN_FAIL_BUCKETS.delete(k);
+    }
+  }
+  const rec = ADMIN_FAIL_BUCKETS.get(ip);
+  if (rec && rec.count >= 5 && now < rec.until) {
+    return { banned: true, retryAfterSec: Math.max(1, Math.ceil((rec.until - now) / 1000)) };
+  }
+  if (rec && now >= rec.until) ADMIN_FAIL_BUCKETS.delete(ip);
+  return { banned: false, retryAfterSec: 0 };
+}
+
+function recordAdminFail(ip) {
+  const now = Date.now();
+  const windowMs = 10 * 60 * 1000;
+  const rec = ADMIN_FAIL_BUCKETS.get(ip);
+  if (!rec || now >= rec.until) {
+    ADMIN_FAIL_BUCKETS.set(ip, { count: 1, until: now + windowMs });
+  } else {
+    rec.count += 1;
+    if (rec.count >= 5) rec.until = now + windowMs;
+  }
+}
+
+async function constantTimeEqual(a, b) {
+  const enc = new TextEncoder();
+  const [d1, d2] = await Promise.all([
+    crypto.subtle.digest("SHA-256", enc.encode(String(a || ""))),
+    crypto.subtle.digest("SHA-256", enc.encode(String(b || "")))
+  ]);
+  const u1 = new Uint8Array(d1);
+  const u2 = new Uint8Array(d2);
+  let diff = 0;
+  for (let i = 0; i < u1.length; i++) diff |= u1[i] ^ u2[i];
+  return diff === 0;
+}
 
 function base64UrlEncode(bytesOrStr) {
   const bytes = typeof bytesOrStr === "string"
@@ -420,13 +515,59 @@ async function handlePosterLookup(request, env) {
   return response;
 }
 
-export default {
-  async fetch(request, env) {
+async function handleWorkerFetch(request, env, corsHdrs) {
     if (request.method === "OPTIONS") {
-      return new Response(null, { status: 204, headers: CORS_HEADERS });
+      return new Response(null, { status: 204, headers: corsHdrs });
+    }
+
+    const clientIp = getClientIp(request);
+    const contentLen = Number(request.headers.get("content-length") || 0);
+    if (contentLen > 65536) {
+      return new Response(
+        JSON.stringify({ ok: false, error: "PAYLOAD_TOO_LARGE", maxBytes: 65536 }),
+        { status: 413, headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8" } }
+      );
+    }
+
+    const globalRl = checkRateLimit(clientIp, "global", 120, 60000);
+    if (!globalRl.allowed) {
+      return new Response(
+        JSON.stringify({ ok: false, error: "RATE_LIMIT_EXCEEDED", retryAfterSec: globalRl.retryAfterSec }),
+        {
+          status: 429,
+          headers: { ...corsHdrs, "Retry-After": String(globalRl.retryAfterSec), "Content-Type": "application/json; charset=utf-8" }
+        }
+      );
     }
 
     const url = new URL(request.url);
+    const path = url.pathname;
+
+    if (request.method === "POST" && (path.endsWith("/ai") || path.endsWith("/translate-srt"))) {
+      const aiRl = checkRateLimit(clientIp, "ai", 20, 60000);
+      if (!aiRl.allowed) {
+        return new Response(
+          JSON.stringify({ ok: false, error: "AI_RATE_LIMIT_EXCEEDED", retryAfterSec: aiRl.retryAfterSec }),
+          {
+            status: 429,
+            headers: { ...corsHdrs, "Retry-After": String(aiRl.retryAfterSec), "Content-Type": "application/json; charset=utf-8" }
+          }
+        );
+      }
+    }
+
+    if (request.method === "POST" && (path === "/auth/send-otp" || path === "/booking/send-host-key" || path.endsWith("/notify-admin-booking"))) {
+      const mailRl = checkRateLimit(clientIp, "mail", 6, 600000);
+      if (!mailRl.allowed) {
+        return new Response(
+          JSON.stringify({ ok: false, error: "EMAIL_RATE_LIMIT_EXCEEDED", retryAfterSec: mailRl.retryAfterSec }),
+          {
+            status: 429,
+            headers: { ...corsHdrs, "Retry-After": String(mailRl.retryAfterSec), "Content-Type": "application/json; charset=utf-8" }
+          }
+        );
+      }
+    }
     if (request.method === "GET" && url.pathname.endsWith("/sub")) {
       const srtUrl = (url.searchParams.get("url") || "").trim();
       let objectKey = (url.searchParams.get("key") || "").trim();
@@ -528,12 +669,20 @@ export default {
       return handleLiveKitTokenRequest(request, env);
     }
     if (request.method === "POST" && url.pathname.endsWith("/admin-verify")) {
+      const ban = checkAdminBan(clientIp);
+      if (ban.banned) {
+        return jsonResponse({ ok: false, error: "TOO_MANY_FAILED_ATTEMPTS", retryAfterSec: ban.retryAfterSec }, 429);
+      }
       try {
         const body = await request.json();
         const pin = String(body?.pin || "").trim();
         const expected = String(env.ADMIN_PIN || "2026").trim();
-        return jsonResponse({ ok: Boolean(pin && pin === expected), usingSecret: Boolean(env.ADMIN_PIN) }, 200);
+        const valid = Boolean(pin && (await constantTimeEqual(pin, expected)));
+        if (!valid) recordAdminFail(clientIp);
+        else ADMIN_FAIL_BUCKETS.delete(clientIp);
+        return jsonResponse({ ok: valid, usingSecret: Boolean(env.ADMIN_PIN) }, 200);
       } catch (e) {
+        recordAdminFail(clientIp);
         return jsonResponse({ ok: false }, 200);
       }
     }
@@ -550,13 +699,19 @@ export default {
       }
     }
     if (request.method === "POST" && url.pathname.endsWith("/room-locks-unseal")) {
+      const ban = checkAdminBan(clientIp);
+      if (ban.banned) {
+        return jsonResponse({ ok: false, error: "TOO_MANY_FAILED_ATTEMPTS", retryAfterSec: ban.retryAfterSec }, 429);
+      }
       try {
         const body = await request.json();
         const adminPin = String(body?.adminPin || "").trim();
         const expected = String(env.ADMIN_PIN || "2026").trim();
-        if (!adminPin || adminPin !== expected) {
+        if (!adminPin || !(await constantTimeEqual(adminPin, expected))) {
+          recordAdminFail(clientIp);
           return jsonResponse({ ok: false, error: "UNAUTHORIZED" }, 200);
         }
+        ADMIN_FAIL_BUCKETS.delete(clientIp);
         const locks = body?.locks && typeof body.locks === "object" ? body.locks : {};
         const pins = {};
         for (const [rId, sealed] of Object.entries(locks)) {
@@ -847,6 +1002,18 @@ export default {
       );
     }
 
+    const forceRefresh = url.searchParams.get("refresh") === "1";
+    const nowTs = Date.now();
+    if (!forceRefresh && R2_CATALOG_CACHE.data && nowTs - R2_CATALOG_CACHE.ts < 30000) {
+      return new Response(
+        JSON.stringify({ ok: true, cached: true, count: R2_CATALOG_CACHE.data.length, videos: R2_CATALOG_CACHE.data }),
+        {
+          status: 200,
+          headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8" }
+        }
+      );
+    }
+
     const videos = [];
     let cursor = undefined;
 
@@ -878,13 +1045,25 @@ export default {
     } while (cursor);
 
     videos.sort((a, b) => a.key.localeCompare(b.key, "vi"));
+    R2_CATALOG_CACHE = { ts: Date.now(), data: videos };
 
     return new Response(
       JSON.stringify({ ok: true, count: videos.length, videos }),
       {
         status: 200,
-        headers: { ...CORS_HEADERS, "Content-Type": "application/json; charset=utf-8" }
+        headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8" }
       }
     );
+}
+
+export default {
+  async fetch(request, env) {
+    const corsHdrs = getCorsHeaders(request, env);
+    const raw = await handleWorkerFetch(request, env, corsHdrs);
+    const res = new Response(raw.body, raw);
+    for (const [k, v] of Object.entries(corsHdrs)) {
+      res.headers.set(k, v);
+    }
+    return res;
   }
 };

@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>CineVerse Lotte — Rạp Chiếu Phim Trực Tuyến Góc Nhìn Hàng F</title>
   <link rel="icon" type="image/png" href="assets/web-logo.png" />
   <link rel="apple-touch-icon" href="assets/web-logo.png" />
@@ -7210,8 +7212,17 @@
       }
     }
 
+    let lastChatSentAt = 0;
+    let lastReactionSentAt = 0;
+
     async function pushMessageToRoom(text) {
       if (!state.currentRoomId || !text.trim()) return;
+      const now = Date.now();
+      if (now - lastChatSentAt < 1200) {
+        showToast("⏳ Bạn đang nhắn quá nhanh, vui lòng đợi 1 giây!", "warning");
+        return;
+      }
+      lastChatSentAt = now;
       const roomId = state.currentRoomId;
       let mySeat = getMySeatInRoom(roomId);
 
@@ -7224,9 +7235,9 @@
       const msg = {
         id: "msg_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
         uid: state.uid,
-        userName: state.userName,
+        userName: String(state.userName || "Khán giả").trim().slice(0, 28),
         seatId: mySeat || "F4",
-        text: text.trim(),
+        text: text.trim().slice(0, 240),
         createdAt: Date.now()
       };
 
@@ -7290,17 +7301,20 @@
     }
 
     function sendReaction(emoji) {
+      const now = Date.now();
+      if (now - lastReactionSentAt < 900) return;
+      lastReactionSentAt = now;
       if (state.currentRoomId) {
         const roomId = state.currentRoomId;
         const mySeat = getMySeatInRoom(roomId) || "F4";
-        triggerSeatBubble(roomId, mySeat, state.userName, `${emoji} ${emoji} ${emoji}`, true);
+        triggerSeatBubble(roomId, mySeat, String(state.userName || "Khán giả").slice(0, 28), `${emoji} ${emoji} ${emoji}`, true);
         if (rtdb && rtdbMod) {
           rtdbMod.set(rtdbMod.ref(rtdb, `reactions/${roomId}`), {
             id: Date.now() + "_" + Math.random().toString(36).slice(2, 6),
-            emoji,
+            emoji: String(emoji || "👍").slice(0, 8),
             seatId: mySeat,
             uid: state.uid,
-            userName: state.userName,
+            userName: String(state.userName || "Khán giả").slice(0, 28),
             createdAt: Date.now()
           }).catch(() => {});
         }

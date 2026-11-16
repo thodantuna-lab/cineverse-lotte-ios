@@ -1,0 +1,130 @@
+{
+  "rules": {
+    "lobby_config": {
+      ".read": true,
+      ".write": true,
+      "site_lock": {
+        ".read": true,
+        ".write": true
+      },
+      "payment_mode": {
+        ".read": true,
+        ".write": true
+      }
+    },
+    "site_lock_admin": {
+      ".read": true,
+      ".write": true
+    },
+    "host": {
+      "$roomId": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.val() === null || (newData.hasChildren(['uid', 'userName']) && newData.child('userName').isString() && newData.child('userName').val().length <= 40)"
+      }
+    },
+    "host_keys": {
+      "$roomId": {
+        ".read": true,
+        ".write": true
+      }
+    },
+    "chat": {
+      "$roomId": {
+        ".read": true,
+        "$msgId": {
+          ".write": true,
+          ".validate": "newData.hasChildren(['uid', 'userName', 'text', 'createdAt']) && newData.child('userName').isString() && newData.child('userName').val().length <= 40 && newData.child('text').isString() && newData.child('text').val().length <= 300"
+        }
+      }
+    },
+    "seats": {
+      "$roomId": {
+        ".read": true,
+        "$seatId": {
+          ".write": true,
+          ".validate": "newData.val() === null || (newData.hasChildren(['uid', 'userName']) && newData.child('userName').isString() && newData.child('userName').val().length <= 40)"
+        }
+      }
+    },
+    "reactions": {
+      "$roomId": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.hasChildren(['emoji', 'uid', 'createdAt']) && newData.child('emoji').isString() && newData.child('emoji').val().length <= 16"
+      }
+    },
+    "online_visitors": {
+      "$uid": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.val() === null || (newData.hasChildren(['uid', 'userName']) && newData.child('userName').isString() && newData.child('userName').val().length <= 40)"
+      },
+      ".read": true
+    },
+    "visit_logs": {
+      ".read": true,
+      "$visitId": {
+        ".write": true,
+        ".validate": "newData.hasChildren(['id', 'uid', 'createdAt'])"
+      },
+      ".write": "newData.val() === null"
+    },
+    "revenue_orders": {
+      ".read": true,
+      "$orderId": {
+        ".write": true,
+        ".validate": "newData.hasChildren(['id', 'roomId', 'totalAmount', 'createdAt']) && newData.child('totalAmount').isNumber() && newData.child('totalAmount').val() >= 0 && newData.child('totalAmount').val() <= 50000000"
+      },
+      ".write": "newData.val() === null"
+    },
+    "payment_requests": {
+      ".read": true,
+      "$orderCode": {
+        ".write": true,
+        ".validate": "newData.hasChildren(['id', 'totalAmount', 'status']) && newData.child('totalAmount').isNumber() && newData.child('totalAmount').val() >= 0 && newData.child('totalAmount').val() <= 50000000"
+      }
+    },
+    "registered_accounts": {
+      "$accountKey": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.hasChildren(['email', 'displayName', 'passwordHash']) && newData.child('email').isString() && newData.child('email').val().length <= 80 && newData.child('displayName').isString() && newData.child('displayName').val().length <= 40"
+      }
+    },
+    "room_locks": {
+      ".read": true,
+      ".write": true
+    },
+    "sync": {
+      ".read": true,
+      ".write": true
+    },
+    "effects": {
+      ".read": true,
+      ".write": true
+    },
+    "subtitles": {
+      ".read": true,
+      ".write": true
+    },
+    "webrtc_voice": {
+      ".read": true,
+      ".write": true
+    },
+    "webrtc_screen": {
+      ".read": true,
+      ".write": true
+    },
+    "webrtc_cam": {
+      ".read": true,
+      ".write": true
+    },
+    "custom_vault": {
+      ".read": true,
+      ".write": true
+    },
+    ".read": false,
+    ".write": false
+  }
+}
