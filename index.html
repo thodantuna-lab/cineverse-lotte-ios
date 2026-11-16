@@ -7017,7 +7017,6 @@
     }
 
     function sendReaction(emoji) {
-      spawnFloatingEmojis(emoji);
       if (state.currentRoomId) {
         const roomId = state.currentRoomId;
         const mySeat = getMySeatInRoom(roomId) || "F4";
@@ -9099,7 +9098,6 @@
         if (!data || !data.id || data.id === lastReactionId) return;
         lastReactionId = data.id;
         if (data.uid === state.uid || Date.now() - (data.createdAt || 0) > 8000) return;
-        spawnFloatingEmojis(data.emoji);
         triggerSeatBubble(roomId, data.seatId || "F4", data.userName, `${data.emoji} ${data.emoji} ${data.emoji}`, false);
       }, () => {});
       roomSyncUnsub = () => {
