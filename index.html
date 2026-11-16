@@ -3155,9 +3155,7 @@
       <!-- Header Đặt Vé -->
       <div class="px-5 py-3.5 bg-gradient-to-r from-stone-900 via-stone-950 to-stone-900 border-b border-white/10 flex items-center justify-between gap-3">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-600 to-amber-500 flex items-center justify-center text-white text-lg font-black shadow-lg">
-            <i class="fa-solid fa-ticket"></i>
-          </div>
+          <img src="./assets/web-logo.png" alt="CineVerse Logo" class="w-10 h-10 rounded-2xl object-cover border border-amber-400/40 shadow-lg shrink-0" />
           <div>
             <div class="flex items-center gap-2">
               <h3 class="text-base sm:text-lg font-black text-white">Đặt Vé Rạp Chiếu Phim Trực Tuyến (Box Office)</h3>
@@ -3230,83 +3228,122 @@
           </div>
         </div>
 
-        <!-- Cột Phải: Cuống Vé Rạp Thật & Xác Nhận Đặt Vé -->
-        <div class="lg:col-span-5 flex flex-col justify-between bg-stone-900 border border-amber-400/35 rounded-2xl p-4 space-y-4">
-          <div class="space-y-3">
-            <div class="flex gap-3 items-center border-b border-white/10 pb-3">
-              <img id="booking-preview-poster" src="" alt="Poster"
-                class="w-16 h-22 rounded-xl object-cover border border-white/15 bg-black shrink-0" />
-              <div class="min-w-0 space-y-1">
-                <span id="booking-preview-room" class="px-2 py-0.5 rounded bg-rose-600 text-white font-black text-[10px]">Phòng 01</span>
-                <h4 id="booking-preview-title" class="text-sm font-black text-white line-clamp-2">Tên bộ phim</h4>
-                <p id="booking-preview-time" class="text-[11px] text-amber-300 font-bold">Suất: 19:30 • IMAX Laser 70mm</p>
+        <!-- Cột Phải: Cuống Vé Rạp Thật & Thanh Toán QR (thay thế tại chỗ khi bấm Thanh Toán) -->
+        <div class="lg:col-span-5 flex flex-col justify-between bg-stone-900 border border-amber-400/35 rounded-2xl p-4">
+          <div id="booking-summary-view" class="flex flex-col justify-between h-full space-y-4">
+            <div class="space-y-3">
+              <div class="flex gap-3 items-center border-b border-white/10 pb-3">
+                <img id="booking-preview-poster" src="" alt="Poster"
+                  class="w-16 h-22 rounded-xl object-cover border border-white/15 bg-black shrink-0" />
+                <div class="min-w-0 space-y-1">
+                  <span id="booking-preview-room" class="px-2 py-0.5 rounded bg-rose-600 text-white font-black text-[10px]">Phòng 01</span>
+                  <h4 id="booking-preview-title" class="text-sm font-black text-white line-clamp-2">Tên bộ phim</h4>
+                  <p id="booking-preview-time" class="text-[11px] text-amber-300 font-bold">Suất: 19:30 • IMAX Laser 70mm</p>
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <label class="text-[11px] font-bold text-slate-300">Tên người đặt vé (in lên Vé &amp; Thẻ NFT):</label>
+                <input id="booking-user-name" type="text" maxlength="24" placeholder="Nhập tên của bạn..."
+                  class="w-full px-3 py-2 rounded-xl bg-stone-950 border border-white/15 text-white font-bold text-xs focus:outline-none focus:border-amber-400" />
+              </div>
+
+              <div class="bg-stone-950 rounded-2xl p-3 border border-white/10 space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-slate-400">Ghế đã chọn:</span>
+                  <strong id="booking-preview-seat" class="text-amber-400 text-sm font-black">F4 (Sweetbox Đôi)</strong>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-slate-400">Giá vé ghế:</span>
+                  <strong id="booking-seat-price" class="text-white font-bold">160.000đ</strong>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-slate-400">Combo Bắp Nước:</span>
+                  <strong id="booking-combo-price" class="text-rose-300 font-bold">🍿🥤 +45.000đ</strong>
+                </div>
+                <div id="booking-instant-fee-row" class="hidden flex justify-between items-center">
+                  <span class="text-amber-300 font-semibold">⚡ Phụ thu Vào Rạp Ngay:</span>
+                  <strong class="text-amber-300 font-bold">+50.000đ</strong>
+                </div>
+                <div class="border-t border-dashed border-white/15 pt-2 flex justify-between items-center text-sm">
+                  <span class="font-black text-white">TỔNG CỘNG:</span>
+                  <strong id="booking-total-price" class="text-amber-400 font-black text-base">205.000đ</strong>
+                </div>
+              </div>
+
+              <div class="p-2.5 rounded-xl bg-purple-950/40 border border-purple-400/35 text-[11px] text-purple-200 flex items-start gap-2">
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-400 mt-0.5"></i>
+                <span>Đặc quyền: Sau khi đặt vé, hệ thống tự động đúc <strong>1 Thẻ Ký Ức Điện Ảnh NFT</strong> (Tên bạn + Ghế ngồi + Câu chat + Bài hát đang phát) lưu vào Tủ Trưng Bày Cá Nhân!</span>
               </div>
             </div>
 
-            <div class="space-y-1">
-              <label class="text-[11px] font-bold text-slate-300">Tên người đặt vé (in lên Vé & Thẻ NFT):</label>
-              <input id="booking-user-name" type="text" maxlength="24" placeholder="Nhập tên của bạn..."
-                class="w-full px-3 py-2 rounded-xl bg-stone-950 border border-white/15 text-white font-bold text-xs focus:outline-none focus:border-amber-400" />
-            </div>
+            <button id="booking-confirm-btn" type="button" onclick="window.appActions.confirmCinemaBooking()"
+              class="w-full py-3 rounded-xl bg-gradient-to-r from-rose-600 via-amber-500 to-rose-600 hover:from-rose-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm shadow-xl transition cursor-pointer flex items-center justify-center gap-2">
+              <i class="fa-solid fa-check-double"></i>
+              <span id="booking-confirm-btn-text">Xác Nhận Đặt Vé &amp; Vào Ghế Ngồi Ngay</span>
+            </button>
+          </div>
 
-            <div class="bg-stone-950 rounded-2xl p-3 border border-white/10 space-y-2">
-              <div class="flex justify-between items-center">
-                <span class="text-slate-400">Ghế đã chọn:</span>
-                <strong id="booking-preview-seat" class="text-amber-400 text-sm font-black">F4 (Sweetbox Đôi)</strong>
+          <!-- Cửa sổ QR thanh toán (thay thế cột phải khi bấm Thanh Toán ở Chế độ Trả Phí) -->
+          <div id="booking-qr-view" class="hidden flex flex-col justify-between h-full space-y-3">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between gap-2 border-b border-white/10 pb-2.5">
+                <button type="button" onclick="window.appActions.backToBookingSummary()" class="px-2.5 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-slate-200 text-[11px] font-bold cursor-pointer">
+                  <i class="fa-solid fa-arrow-left mr-1"></i>Quay lại
+                </button>
+                <span class="text-xs font-black text-amber-300 uppercase tracking-wider">Thanh Toán Vé</span>
+                <span id="booking-qr-code-badge" class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono font-black text-[11px]">CV000000</span>
               </div>
-              <div class="flex justify-between items-center">
-                <span class="text-slate-400">Giá vé ghế:</span>
-                <strong id="booking-seat-price" class="text-white font-bold">160.000đ</strong>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="text-slate-400">Combo Bắp Nước:</span>
-                <strong id="booking-combo-price" class="text-rose-300 font-bold">🍿🥤 +45.000đ</strong>
-              </div>
-              <div class="border-t border-dashed border-white/15 pt-2 flex justify-between items-center text-sm">
-                <span class="font-black text-white">TỔNG CỘNG:</span>
-                <strong id="booking-total-price" class="text-amber-400 font-black text-base">205.000đ</strong>
-              </div>
-            </div>
 
-            <div class="p-2.5 rounded-xl bg-purple-950/40 border border-purple-400/35 text-[11px] text-purple-200 flex items-start gap-2">
-              <i class="fa-solid fa-wand-magic-sparkles text-amber-400 mt-0.5"></i>
-              <span>Đặc quyền: Sau khi đặt vé, hệ thống tự động đúc <strong>1 Thẻ Ký Ức Điện Ảnh NFT</strong> (Tên bạn + Ghế ngồi + Câu chat + Bài hát đang phát) lưu vào Tủ Trưng Bày Cá Nhân!</span>
-            </div>
-
-            <!-- KHU VỰC THANH TOÁN TRẢ PHÍ (HIỆN TỰ ĐỘNG KHI ADMIN BẬT CHẾ ĐỘ TRẢ PHÍ) -->
-            <div id="booking-paid-panel" class="hidden rounded-2xl bg-stone-950 border border-amber-400/40 p-3 space-y-2.5">
-              <div class="flex items-center justify-between gap-2">
-                <span class="text-[11px] font-black uppercase tracking-wider text-amber-300"><i class="fa-solid fa-wallet mr-1"></i>Chọn hình thức thanh toán</span>
-                <span class="px-2 py-0.5 rounded bg-rose-600/20 text-rose-300 text-[10px] font-bold">Chế độ Trả phí</span>
-              </div>
               <div class="grid grid-cols-3 gap-1.5">
                 <button type="button" id="pay-method-vietqr" onclick="window.appActions.selectPaymentMethod('vietqr')"
                   class="py-1.5 px-2 rounded-xl text-[11px] font-black border cursor-pointer transition bg-amber-500 text-slate-950 border-amber-300">
                   🏦 VietQR
                 </button>
                 <button type="button" id="pay-method-zalopay" onclick="window.appActions.selectPaymentMethod('zalopay')"
-                  class="py-1.5 px-2 rounded-xl text-[11px] font-bold border cursor-pointer transition bg-stone-900 text-sky-300 border-white/10 hover:border-sky-400/40">
+                  class="py-1.5 px-2 rounded-xl text-[11px] font-bold border cursor-pointer transition bg-stone-950 text-sky-300 border-white/10">
                   💙 ZaloPay
                 </button>
                 <button type="button" id="pay-method-shopeepay" onclick="window.appActions.selectPaymentMethod('shopeepay')"
-                  class="py-1.5 px-2 rounded-xl text-[11px] font-bold border cursor-pointer transition bg-stone-900 text-orange-300 border-white/10 hover:border-orange-400/40">
+                  class="py-1.5 px-2 rounded-xl text-[11px] font-bold border cursor-pointer transition bg-stone-950 text-orange-300 border-white/10">
                   🧡 ShopeePay
                 </button>
               </div>
-              <div class="flex flex-col sm:flex-row items-center gap-3 bg-stone-900/90 rounded-xl p-2.5 border border-white/10">
-                <div class="bg-white rounded-xl p-1.5 shrink-0 shadow">
-                  <img id="booking-inline-qr-img" src="./assets/techcombank-qr.jpg" onerror="this.onerror=null;this.src='./assets/techcombank-qr.jpg'" alt="QR Thanh toán" class="w-28 h-28 object-contain rounded-lg" />
-                </div>
-                <div id="booking-payment-guide" class="text-[11px] text-slate-300 space-y-1 leading-relaxed min-w-0"></div>
+
+              <div class="bg-white rounded-2xl p-2.5 flex flex-col items-center gap-1 shadow-inner">
+                <img id="booking-inline-qr-img" src="./assets/techcombank-qr.jpg" onerror="this.onerror=null;this.src='./assets/techcombank-qr.jpg'" alt="QR Thanh toán" class="w-40 h-40 object-contain rounded-xl" />
+                <p class="text-[10px] font-black text-slate-800">TECHCOMBANK • TRAN MINH QUAN</p>
+                <p class="text-[11px] font-mono font-black text-rose-600">9999 9920 072</p>
               </div>
+
+              <div class="bg-stone-950 rounded-xl p-2.5 border border-white/10 space-y-1.5 text-[11px]">
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400">Số tiền:</span>
+                  <strong id="booking-qr-amount" class="text-emerald-400 font-black text-xs">0đ</strong>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400">Nội dung CK:</span>
+                  <div class="flex items-center gap-1.5">
+                    <span id="booking-qr-memo" class="font-mono font-black text-amber-300">CV000000</span>
+                    <button type="button" onclick="window.appActions.copyPaymentText('code')" class="px-1.5 py-0.5 rounded bg-stone-800 hover:bg-stone-700 text-[10px] text-white cursor-pointer">Copy</button>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400">STK Techcombank:</span>
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-mono font-bold text-white">99999920072</span>
+                    <button type="button" onclick="window.appActions.copyPaymentText('stk')" class="px-1.5 py-0.5 rounded bg-stone-800 hover:bg-stone-700 text-[10px] text-white cursor-pointer">Copy</button>
+                  </div>
+                </div>
+              </div>
+              <div id="booking-payment-guide" class="text-[10px] text-slate-300 leading-relaxed"></div>
+            </div>
+
+            <div class="px-3 py-2.5 rounded-xl bg-sky-500/15 border border-sky-400/35 text-[11px] text-sky-200 font-semibold flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-sky-400 animate-ping shrink-0"></span>
+              <span>Đang chờ hệ thống tự động xác nhận chuyển khoản... (Vé tự mở ngay khi hoàn tất)</span>
             </div>
           </div>
-
-          <button id="booking-confirm-btn" type="button" onclick="window.appActions.confirmCinemaBooking()"
-            class="w-full py-3 rounded-xl bg-gradient-to-r from-rose-600 via-amber-500 to-rose-600 hover:from-rose-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm shadow-xl transition cursor-pointer flex items-center justify-center gap-2">
-            <i class="fa-solid fa-check-double"></i>
-            <span id="booking-confirm-btn-text">Xác Nhận Đặt Vé &amp; Vào Ghế Ngồi Ngay</span>
-          </button>
         </div>
       </div>
     </div>
@@ -3529,13 +3566,34 @@
       "room-6": "Jujutsu Kaisen: Culling Game - Ending Theme"
     };
 
+    const INSTANT_ENTRY_SURCHARGE = 50000;
     const BOOKING_SHOWTIMES = [
+      "⚡ Vào Rạp Ngay • Suất VIP (+50.000đ)",
       "18:00 • 2D Phụ đề",
       "19:30 • IMAX Laser 70mm",
       "21:15 • Dolby Atmos VIP",
       "22:45 • Suất Đêm Sweetbox",
       "23:55 • Midnight Premiere"
     ];
+
+    function getShowtimeSurchargeAndUnlock(showtime = "") {
+      const st = String(showtime || "").trim();
+      if (st.includes("Vào Rạp Ngay")) {
+        return { surcharge: INSTANT_ENTRY_SURCHARGE, unlockAt: 0, isInstant: true };
+      }
+      const m = st.match(/^(\d{1,2}):(\d{2})/);
+      if (m) {
+        const hh = Math.min(23, Math.max(0, Number(m[1])));
+        const mm = Math.min(59, Math.max(0, Number(m[2])));
+        const d = new Date();
+        d.setHours(hh, mm, 0, 0);
+        const targetTs = d.getTime();
+        if (targetTs > Date.now()) {
+          return { surcharge: 0, unlockAt: targetTs, isInstant: false, hhmm: `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}` };
+        }
+      }
+      return { surcharge: 0, unlockAt: 0, isInstant: false };
+    }
 
     function generateCapsuleSecurityHash(seedStr = "") {
       let h1 = 0xdeadbeef ^ seedStr.length;
@@ -4701,6 +4759,16 @@
       if (!options?.fromBooking && !hasValidTicketForRoom(roomId)) {
         showToast(`🎟️ Vui lòng đặt vé & chọn ghế để vào ${room.number}!`, "info");
         openBookingModal(roomId);
+        return;
+      }
+      const myTicket = state.bookedTicketsByRoom?.[roomId];
+      if (!options?.fromBooking && myTicket?.showtimeUnlockAt && Date.now() < myTicket.showtimeUnlockAt) {
+        const remainSec = Math.max(1, Math.ceil((myTicket.showtimeUnlockAt - Date.now()) / 1000));
+        const hrs = Math.floor(remainSec / 3600);
+        const mins = Math.floor((remainSec % 3600) / 60);
+        const secs = remainSec % 60;
+        const remainStr = hrs > 0 ? `${hrs} giờ ${mins} phút` : `${mins} phút ${secs} giây`;
+        showToast(`⏰ Vé của bạn thuộc suất ${myTicket.showtime}. Còn ${remainStr} nữa mới tới giờ vào rạp! (Hoặc đặt suất 'Vào Rạp Ngay' để vào liền)`, "warning");
         return;
       }
       const lockObj = state.roomLocks[roomId];
@@ -12811,6 +12879,7 @@
     }
 
     function closeBookingModal() {
+      backToBookingSummary();
       document.getElementById("booking-modal")?.classList.add("hidden");
     }
 
@@ -13002,7 +13071,9 @@
 
       const { price: seatPrice, tier } = getSeatPriceAndTier(selectedSeat);
       const comboPrice = state.bookingDraft.comboPrice || 0;
-      const total = seatPrice + comboPrice;
+      const showtimeInfo = getShowtimeSurchargeAndUnlock(state.bookingDraft.showtime);
+      const surcharge = showtimeInfo.surcharge || 0;
+      const total = seatPrice + comboPrice + surcharge;
 
       const seatPreviewEl = document.getElementById("booking-preview-seat");
       if (seatPreviewEl) seatPreviewEl.textContent = `${selectedSeat} (${tier.split("•")[0].trim()})`;
@@ -13010,67 +13081,69 @@
       if (seatPriceEl) seatPriceEl.textContent = formatVND(seatPrice);
       const comboPriceEl = document.getElementById("booking-combo-price");
       if (comboPriceEl) comboPriceEl.textContent = formatVND(comboPrice);
+      const instantRow = document.getElementById("booking-instant-fee-row");
+      if (instantRow) instantRow.classList.toggle("hidden", surcharge <= 0);
       const totalPriceEl = document.getElementById("booking-total-price");
       if (totalPriceEl) totalPriceEl.textContent = formatVND(total);
 
-      // 5. Tự động hiển thị QR & hình thức thanh toán khi Admin bật chế độ Trả phí
-      const paidPanel = document.getElementById("booking-paid-panel");
       const btnTextEl = document.getElementById("booking-confirm-btn-text");
-      if (paidPanel) {
-        if (state.paymentMode === "paid") {
-          paidPanel.classList.remove("hidden");
-          const method = state.paymentMethod || "vietqr";
-          const methods = [
-            { id: "vietqr", el: "pay-method-vietqr", activeCls: "py-1.5 px-2 rounded-xl text-[11px] font-black border cursor-pointer transition bg-amber-500 text-slate-950 border-amber-300" },
-            { id: "zalopay", el: "pay-method-zalopay", activeCls: "py-1.5 px-2 rounded-xl text-[11px] font-black border cursor-pointer transition bg-sky-500 text-slate-950 border-sky-300" },
-            { id: "shopeepay", el: "pay-method-shopeepay", activeCls: "py-1.5 px-2 rounded-xl text-[11px] font-black border cursor-pointer transition bg-orange-500 text-slate-950 border-orange-300" }
-          ];
-          const idleCls = "py-1.5 px-2 rounded-xl text-[11px] font-bold border cursor-pointer transition bg-stone-900 text-slate-300 border-white/10 hover:border-white/30";
-          methods.forEach(m => {
-            const b = document.getElementById(m.el);
-            if (b) b.className = m.id === method ? m.activeCls : idleCls;
-          });
-
-          const qrImg = document.getElementById("booking-inline-qr-img");
-          if (qrImg) {
-            qrImg.onerror = () => { qrImg.onerror = null; qrImg.src = "./assets/techcombank-qr.jpg"; };
-            qrImg.src = `https://img.vietqr.io/image/TCB-99999920072-compact2.png?amount=${encodeURIComponent(total)}&accountName=${encodeURIComponent("TRAN MINH QUAN")}`;
-          }
-
-          const guideEl = document.getElementById("booking-payment-guide");
-          if (guideEl) {
-            const methodLabel = method === "zalopay" ? "ZaloPay (Quét VietQR)" : (method === "shopeepay" ? "ShopeePay (Quét VietQR)" : "App Ngân hàng (VietQR)");
-            guideEl.innerHTML = `
-              <p class="font-black text-amber-300">TECHCOMBANK • 9999 9920 072</p>
-              <p class="text-[10px] text-slate-400">Chủ TK: <b class="text-white">TRAN MINH QUAN</b> • Số tiền: <b class="text-emerald-400">${formatVND(total)}</b></p>
-              <p class="text-[10px] text-sky-300"><b>Hướng dẫn (${escapeHTML(methodLabel)}):</b></p>
-              <ol class="list-decimal list-inside text-[10px] text-slate-300 space-y-0.5">
-                <li>Mở <b>${escapeHTML(methodLabel)}</b> &amp; quét mã QR bên cạnh.</li>
-                <li>Bấm nút bên dưới để lấy <b>Mã đơn</b> &amp; hệ thống tự xác nhận vào rạp!</li>
-              </ol>
-            `;
-          }
-          if (btnTextEl) btnTextEl.textContent = "Thanh Toán & Tự Động Xác Nhận Vào Rạp";
-        } else {
-          paidPanel.classList.add("hidden");
-          if (btnTextEl) btnTextEl.textContent = "Xác Nhận Đặt Vé & Vào Ghế Ngồi Ngay";
-        }
+      if (btnTextEl) {
+        btnTextEl.textContent = state.paymentMode === "paid"
+          ? `Thanh Toán (${formatVND(total)})`
+          : "Xác Nhận Đặt Vé & Vào Ghế Ngồi Ngay";
       }
+      updateInlinePaymentQrView(total);
+    }
+
+    function updateInlinePaymentQrView(totalOverride = null) {
+      const method = state.paymentMethod || "vietqr";
+      const methods = [
+        { id: "vietqr", el: "pay-method-vietqr", activeCls: "py-1.5 px-2 rounded-xl text-[11px] font-black border cursor-pointer transition bg-amber-500 text-slate-950 border-amber-300" },
+        { id: "zalopay", el: "pay-method-zalopay", activeCls: "py-1.5 px-2 rounded-xl text-[11px] font-black border cursor-pointer transition bg-sky-500 text-slate-950 border-sky-300" },
+        { id: "shopeepay", el: "pay-method-shopeepay", activeCls: "py-1.5 px-2 rounded-xl text-[11px] font-black border cursor-pointer transition bg-orange-500 text-slate-950 border-orange-300" }
+      ];
+      const idleCls = "py-1.5 px-2 rounded-xl text-[11px] font-bold border cursor-pointer transition bg-stone-950 text-slate-300 border-white/10 hover:border-white/30";
+      methods.forEach(m => {
+        const b = document.getElementById(m.el);
+        if (b) b.className = m.id === method ? m.activeCls : idleCls;
+      });
+
+      const total = totalOverride !== null ? totalOverride : (activePaymentAmount || 0);
+      const qrImg = document.getElementById("booking-inline-qr-img");
+      if (qrImg && total > 0) {
+        const addInfoPart = activePaymentOrderCode ? `&addInfo=${encodeURIComponent(activePaymentOrderCode)}` : "";
+        qrImg.onerror = () => { qrImg.onerror = null; qrImg.src = "./assets/techcombank-qr.jpg"; };
+        qrImg.src = `https://img.vietqr.io/image/TCB-99999920072-compact2.png?amount=${encodeURIComponent(total)}${addInfoPart}&accountName=${encodeURIComponent("TRAN MINH QUAN")}`;
+      }
+
+      const guideEl = document.getElementById("booking-payment-guide");
+      if (guideEl) {
+        const methodLabel = method === "zalopay" ? "ZaloPay (Quét VietQR)" : (method === "shopeepay" ? "ShopeePay (Quét VietQR)" : "App Ngân hàng (VietQR)");
+        guideEl.innerHTML = `<span class="text-sky-300 font-bold">Hướng dẫn (${escapeHTML(methodLabel)}):</span> Mở ứng dụng <b>${escapeHTML(methodLabel)}</b> → Quét mã QR bên trên → Kiểm tra đúng số tiền &amp; nội dung chuyển khoản → Hệ thống tự xác nhận vào rạp.`;
+      }
+    }
+
+    function backToBookingSummary() {
+      if (activePaymentUnsub) { try { activePaymentUnsub(); } catch (_) {} activePaymentUnsub = null; }
+      if (activePaymentPollTimer) { clearInterval(activePaymentPollTimer); activePaymentPollTimer = null; }
+      activePaymentOrderCode = "";
+      activePaymentAmount = 0;
+      document.getElementById("booking-qr-view")?.classList.add("hidden");
+      document.getElementById("booking-summary-view")?.classList.remove("hidden");
     }
 
     function selectPaymentMethod(method) {
       state.paymentMethod = (method === "zalopay" || method === "shopeepay") ? method : "vietqr";
-      renderBookingModalUI();
+      updateInlinePaymentQrView();
     }
 
     let activePaymentUnsub = null;
     let activePaymentPollTimer = null;
     let activePaymentOrderCode = "";
+    let activePaymentAmount = 0;
 
     function closePaymentQrModal() {
-      if (activePaymentUnsub) { try { activePaymentUnsub(); } catch (_) {} activePaymentUnsub = null; }
-      if (activePaymentPollTimer) { clearInterval(activePaymentPollTimer); activePaymentPollTimer = null; }
-      activePaymentOrderCode = "";
+      backToBookingSummary();
       document.getElementById("payment-qr-modal")?.classList.add("hidden");
     }
 
@@ -13088,9 +13161,10 @@
         showToast("Đang kết nối máy chủ thanh toán, vui lòng thử lại sau 2 giây!", "warning");
         return;
       }
-      closePaymentQrModal();
+      backToBookingSummary();
       const orderCode = "CV" + String(Date.now()).slice(-6);
       activePaymentOrderCode = orderCode;
+      activePaymentAmount = totalAmount;
 
       await rtdbMod.set(rtdbMod.ref(rtdb, `payment_requests/${orderCode}`), {
         id: orderCode,
@@ -13110,29 +13184,26 @@
         createdAt: Date.now()
       });
 
-      const qrUrl = `https://img.vietqr.io/image/TCB-99999920072-compact2.png?amount=${encodeURIComponent(totalAmount)}&addInfo=${encodeURIComponent(orderCode)}&accountName=${encodeURIComponent("TRAN MINH QUAN")}`;
-      const imgEl = document.getElementById("payment-qr-img");
-      const amtEl = document.getElementById("payment-qr-amount");
-      const codeEl = document.getElementById("payment-qr-code");
-      const statusEl = document.getElementById("payment-qr-status");
-      if (imgEl) {
-        imgEl.onerror = () => { imgEl.onerror = null; imgEl.src = "./assets/techcombank-qr.jpg"; };
-        imgEl.src = qrUrl;
-      }
+      const amtEl = document.getElementById("booking-qr-amount");
+      const memoEl = document.getElementById("booking-qr-memo");
+      const badgeEl = document.getElementById("booking-qr-code-badge");
       if (amtEl) amtEl.textContent = formatVND(totalAmount);
-      if (codeEl) codeEl.textContent = orderCode;
-      if (statusEl) {
-        statusEl.className = "px-3 py-2.5 rounded-xl bg-sky-500/15 border border-sky-400/35 text-xs text-sky-200 font-semibold flex items-center gap-2";
-        statusEl.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-sky-400 animate-ping shrink-0"></span><span>Đang chờ hệ thống tự động xác nhận chuyển khoản... (Vé sẽ tự mở ngay khi hoàn tất)</span>`;
+      if (memoEl) memoEl.textContent = orderCode;
+      if (badgeEl) badgeEl.textContent = orderCode;
+      updateInlinePaymentQrView(totalAmount);
+
+      document.getElementById("booking-summary-view")?.classList.add("hidden");
+      document.getElementById("booking-qr-view")?.classList.remove("hidden");
+      if (fromQuickBar) {
+        document.getElementById("booking-modal")?.classList.remove("hidden");
       }
-      document.getElementById("payment-qr-modal")?.classList.remove("hidden");
 
       let completed = false;
       const finalizePaidOrder = async () => {
         if (completed) return;
         completed = true;
-        closePaymentQrModal();
-        showToast(`✅ Đã xác nhận thanh toán ${formatVND(totalAmount)}! Đang xuất vé & vào rạp...`, "success");
+        backToBookingSummary();
+        showToast(`✅ Đã xác nhận thanh toán ${formatVND(totalAmount)}! Đang xuất vé...`, "success");
         await confirmCinemaBooking(fromQuickBar, { paymentVerified: true, paidOrderCode: orderCode });
       };
 
@@ -13142,7 +13213,7 @@
         if (val.status === "paid") {
           finalizePaidOrder();
         } else if (val.status === "rejected") {
-          closePaymentQrModal();
+          backToBookingSummary();
           showToast("❌ Giao dịch đã bị hủy hoặc chưa hợp lệ.", "error");
         }
       });
@@ -13198,7 +13269,8 @@
       const roomObj = getEffectiveRoom(targetRoomId);
       const { price: seatPrice, tier } = getSeatPriceAndTier(targetSeatId);
       const comboPrice = state.bookingDraft.comboPrice || 0;
-      const totalAmount = seatPrice + comboPrice;
+      const showtimeInfo = getShowtimeSurchargeAndUnlock(showtime);
+      const totalAmount = seatPrice + comboPrice + (showtimeInfo.surcharge || 0);
 
       if (state.paymentMode === "paid" && !options?.paymentVerified) {
         await startPaidTicketFlow({
@@ -13230,10 +13302,12 @@
       state.bookedTicketsByRoom[targetRoomId] = {
         seatId: targetSeatId,
         showtime,
+        showtimeUnlockAt: showtimeInfo.unlockAt || 0,
         movieVersion: String(roomObj.movieVersion || ""),
         movieTitle: roomObj.movieTitle || "",
         ticketPrice: seatPrice,
         comboPrice,
+        surcharge: showtimeInfo.surcharge || 0,
         totalAmount,
         bookedAt: Date.now()
       };
@@ -13276,6 +13350,15 @@
       if (waitMsgAfterBook) {
         renderLobby();
         showToast(`🎟️ Đã giữ vé ghế ${targetSeatId}! ${waitMsgAfterBook}`, "info");
+        return;
+      }
+      if (showtimeInfo.unlockAt && Date.now() < showtimeInfo.unlockAt) {
+        const remainSec = Math.max(1, Math.ceil((showtimeInfo.unlockAt - Date.now()) / 1000));
+        const hrs = Math.floor(remainSec / 3600);
+        const mins = Math.floor((remainSec % 3600) / 60);
+        const remainStr = hrs > 0 ? `${hrs} giờ ${mins} phút` : `${mins} phút`;
+        renderLobby();
+        showToast(`🎟️ Đặt vé suất ${showtime} thành công! Rạp sẽ mở vào đúng ${showtimeInfo.hhmm} (còn ${remainStr}).`, "success");
         return;
       }
       if (state.currentRoomId !== targetRoomId) {
@@ -14474,6 +14557,7 @@
       closeHostKeyModal,
       confirmHostKeyModal,
       closePaymentQrModal,
+      backToBookingSummary,
       copyPaymentText,
       selectPaymentMethod,
       toggleVoiceMic,
