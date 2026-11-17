@@ -173,8 +173,8 @@
       width: 100%;
       height: 100%;
       z-index: 0 !important;
-      opacity: 0.06 !important;
-      filter: saturate(0.55) brightness(0.48);
+      opacity: 0.42 !important;
+      filter: saturate(0.92) brightness(0.88);
       pointer-events: none !important;
       will-change: transform;
       transform: translateZ(0);
@@ -2248,22 +2248,22 @@
   <section id="room-view" class="hidden flex-1 max-w-[1620px] w-full mx-auto px-3 sm:px-4 py-3 space-y-3">
 
     <!-- THANH ĐIỀU HƯỚNG & FLOATING DROPDOWN GỌN GÀNG TRÊN CÙNG -->
-    <div class="relative z-40 dimmable-ui flex flex-wrap items-center justify-between gap-2 bg-stone-900/90 backdrop-blur-md border border-white/10 rounded-2xl px-3 py-2 shadow-xl">
+    <div class="relative z-40 dimmable-ui liquid-glass-card flex flex-wrap items-center justify-between gap-2 rounded-2xl px-3.5 py-2.5 shadow-xl">
       <!-- Trái: Nút quay lại + Thông tin phòng đang chiếu -->
       <div class="flex items-center gap-2.5 min-w-0">
         <button type="button" onclick="window.appActions.leaveRoom()"
-          class="px-3 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shrink-0">
+          class="cv-smooth-btn liquid-glass-pill px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shrink-0">
           <i class="fa-solid fa-arrow-left"></i>
           <span class="hidden sm:inline">Sảnh chờ</span>
         </button>
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-1.5">
-            <span id="room-header-number" class="px-2 py-0.5 rounded-lg bg-rose-600 text-white font-black text-[11px]">Phòng 01</span>
-            <span id="room-header-status" class="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold text-[11px]">Đang chiếu</span>
-            <span class="text-[11px] text-slate-400"><i class="fa-solid fa-users mr-1 text-amber-400"></i><strong id="room-header-count" class="text-white">1</strong> khách</span>
+            <span id="room-header-number" class="px-2.5 py-0.5 rounded-full bg-rose-600 text-white font-black text-[11px]">Phòng 01</span>
+            <span id="room-header-status" class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/35 font-bold text-[11px]">Đang chiếu</span>
+            <span class="monochrome-pill px-2 py-0.5 rounded-full text-[11px]"><i class="fa-solid fa-users mr-1 text-slate-300"></i><strong id="room-header-count" class="text-white">1</strong> khách</span>
             <button type="button" id="btn-room-host" onclick="window.appActions.toggleRoomHost()"
-              class="px-2 py-0.5 rounded-lg bg-stone-800 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-[11px] transition cursor-pointer">
-              <i class="fa-solid fa-crown mr-1"></i>Nhận Chủ Trì
+              class="cv-smooth-btn liquid-glass-pill px-2.5 py-0.5 rounded-full font-bold text-[11px] transition cursor-pointer">
+              <i class="fa-solid fa-crown mr-1 text-slate-300"></i>Nhận Chủ Trì
             </button>
             <div id="voice-audio-container" class="fixed -left-[9999px] top-0 w-px h-px opacity-0 pointer-events-none" aria-hidden="true"></div>
           </div>
@@ -2277,34 +2277,34 @@
         <!-- 1. Dropdown: Tiện ích (Bắp nước, Vé QR, Rủ bạn) -->
         <div class="relative" data-dropdown-root>
           <button type="button" onclick="window.appActions.toggleRoomDropdown('service')"
-            class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-200 text-xs font-extrabold flex items-center gap-1.5 transition cursor-pointer">
-            <i class="fa-solid fa-popcorn text-amber-400"></i>
+            class="cv-smooth-btn liquid-glass-pill px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition cursor-pointer">
+            <i class="fa-solid fa-popcorn text-slate-300"></i>
             <span>Tiện ích</span>
             <i class="fa-solid fa-chevron-down text-[10px] opacity-80"></i>
           </button>
 
           <div id="dropdown-service"
-            class="hidden floating-dropdown-panel absolute right-0 top-full mt-2 w-72 p-3 rounded-2xl bg-stone-950/95 border border-amber-500/25 shadow-2xl z-50 space-y-2 text-xs">
-            <div id="my-snack-status" class="px-2.5 py-1.5 rounded-xl bg-stone-900 border border-white/10 text-amber-300 font-bold text-[11px]">
+            class="hidden floating-dropdown-panel liquid-glass-card absolute right-0 top-full mt-2 w-72 p-3 rounded-2xl shadow-2xl z-50 space-y-2 text-xs">
+            <div id="my-snack-status" class="px-2.5 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-slate-200 font-bold text-[11px]">
               🍿 Tay vịn ghế: Chưa có bắp nước
             </div>
             <button type="button" onclick="window.appActions.openConcessionModal(); window.appActions.closeAllDropdowns();"
-              class="w-full px-3 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold flex items-center justify-between transition cursor-pointer">
+              class="cv-smooth-btn cta-primary-btn w-full px-3 py-2 rounded-xl font-extrabold flex items-center justify-between transition cursor-pointer">
               <span><i class="fa-solid fa-popcorn mr-1.5"></i>🍿 Quầy Bắp Nước</span>
               <i class="fa-solid fa-chevron-right text-[10px]"></i>
             </button>
             <button type="button" onclick="window.appActions.openTicketModal(); window.appActions.closeAllDropdowns();"
-              class="w-full px-3 py-2 rounded-xl bg-rose-600/90 hover:bg-rose-500 text-white font-extrabold flex items-center justify-between transition cursor-pointer">
+              class="cv-smooth-btn liquid-glass-pill w-full px-3 py-2 rounded-xl font-extrabold flex items-center justify-between transition cursor-pointer">
               <span><i class="fa-solid fa-ticket mr-1.5"></i>Vé QR Check-in</span>
               <i class="fa-solid fa-chevron-right text-[10px]"></i>
             </button>
             <button type="button" onclick="window.appActions.openMemoryCapsuleModal(); window.appActions.closeAllDropdowns();"
-              class="w-full px-3 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-extrabold flex items-center justify-between transition cursor-pointer">
+              class="cv-smooth-btn liquid-glass-pill w-full px-3 py-2 rounded-xl font-extrabold flex items-center justify-between transition cursor-pointer">
               <span><i class="fa-solid fa-id-card-clip mr-1.5"></i>🎴 Hộp Ký Ức NFT Vĩnh Viễn</span>
               <i class="fa-solid fa-chevron-right text-[10px]"></i>
             </button>
             <button type="button" onclick="window.appActions.copyInviteNextSeatLink(); window.appActions.closeAllDropdowns();"
-              class="w-full px-3 py-2 rounded-xl bg-indigo-600/90 hover:bg-indigo-500 text-white font-extrabold flex items-center justify-between transition cursor-pointer" title="Rủ bạn bè vào ngồi ngay ghế bên cạnh bạn">
+              class="cv-smooth-btn liquid-glass-pill w-full px-3 py-2 rounded-xl font-extrabold flex items-center justify-between transition cursor-pointer" title="Rủ bạn bè vào ngồi ngay ghế bên cạnh bạn">
               <span><i class="fa-solid fa-user-group mr-1.5"></i>Rủ Bạn Ngồi Cạnh</span>
               <i class="fa-solid fa-link text-[10px]"></i>
             </button>
@@ -2314,32 +2314,32 @@
         <!-- 3. Dropdown: Chủ phòng (Host Controls) -->
         <div class="relative" data-dropdown-root>
           <button type="button" onclick="window.appActions.toggleRoomDropdown('host')"
-            class="px-2.5 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 border border-amber-400/35 text-amber-300 text-xs font-extrabold flex items-center gap-1.5 transition cursor-pointer">
-            <i class="fa-solid fa-crown text-amber-400"></i>
+            class="cv-smooth-btn liquid-glass-pill px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition cursor-pointer">
+            <i class="fa-solid fa-crown text-slate-300"></i>
             <span class="hidden sm:inline">Chủ phòng</span>
             <i class="fa-solid fa-chevron-down text-[10px] opacity-80"></i>
           </button>
 
           <div id="dropdown-host"
-            class="hidden floating-dropdown-panel absolute right-0 top-full mt-2 w-72 p-3 rounded-2xl bg-stone-950/95 border border-amber-500/30 shadow-2xl z-50 space-y-2 text-xs">
-            <div class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 border border-amber-400/30 text-amber-300 font-black flex items-center gap-1.5">
-              <i class="fa-solid fa-crown text-amber-400"></i>
+            class="hidden floating-dropdown-panel liquid-glass-card absolute right-0 top-full mt-2 w-72 p-3 rounded-2xl shadow-2xl z-50 space-y-2 text-xs">
+            <div class="px-2.5 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-slate-200 font-black flex items-center gap-1.5">
+              <i class="fa-solid fa-crown text-slate-300"></i>
               <span>Chủ phòng (Host): <strong id="host-name-badge" class="text-white">Bạn</strong></span>
             </div>
             <button type="button" onclick="window.appActions.hostBroadcastSync('play')"
-              class="w-full px-3 py-2 rounded-xl bg-stone-900 hover:bg-emerald-600 text-slate-200 hover:text-white font-bold flex items-center gap-2 transition cursor-pointer">
+              class="cv-smooth-btn liquid-glass-pill w-full px-3 py-2 rounded-xl font-bold flex items-center gap-2 transition cursor-pointer">
               <i class="fa-solid fa-tower-broadcast text-emerald-400"></i>Đồng bộ Phát Cả Phòng
             </button>
             <button type="button" onclick="window.appActions.hostBroadcastSync('pause')"
-              class="w-full px-3 py-2 rounded-xl bg-stone-900 hover:bg-amber-600 text-slate-200 hover:text-white font-bold flex items-center gap-2 transition cursor-pointer">
-              <i class="fa-solid fa-mug-hot text-amber-400"></i>Giải Lao Cả Phòng
+              class="cv-smooth-btn liquid-glass-pill w-full px-3 py-2 rounded-xl font-bold flex items-center gap-2 transition cursor-pointer">
+              <i class="fa-solid fa-mug-hot text-slate-300"></i>Giải Lao Cả Phòng
             </button>
             <button type="button" onclick="window.appActions.playCinemaBellSFX()"
-              class="w-full px-3 py-2 rounded-xl bg-stone-900 hover:bg-rose-600 text-slate-200 hover:text-white font-bold flex items-center gap-2 transition cursor-pointer">
+              class="cv-smooth-btn liquid-glass-pill w-full px-3 py-2 rounded-xl font-bold flex items-center gap-2 transition cursor-pointer">
               <i class="fa-solid fa-bell text-rose-400"></i>Chuông Vào Suất Chiếu
             </button>
             <button type="button" onclick="window.appActions.toggleRoomPinLock()" id="btn-room-lock"
-              class="w-full px-3 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-slate-300 font-bold border border-white/10 flex items-center gap-2 transition cursor-pointer">
+              class="cv-smooth-btn liquid-glass-pill w-full px-3 py-2 rounded-xl font-bold flex items-center gap-2 transition cursor-pointer">
               <i class="fa-solid fa-lock-open text-emerald-400"></i>Phòng Công Khai
             </button>
           </div>
@@ -2348,7 +2348,7 @@
         <!-- 4. Dropdown: Rạp & Góc nhìn (POV + Ambilight + SFX) -->
         <div class="relative" data-dropdown-root>
           <button type="button" onclick="window.appActions.toggleRoomDropdown('view')"
-            class="px-2.5 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 border border-white/15 text-slate-200 text-xs font-extrabold flex items-center gap-1.5 transition cursor-pointer">
+            class="cv-smooth-btn liquid-glass-pill px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition cursor-pointer">
             <i class="fa-solid fa-eye text-rose-400"></i>
             <span class="hidden md:inline">Góc nhìn & Hiệu ứng</span>
             <span class="md:hidden">Góc nhìn</span>
@@ -2356,20 +2356,20 @@
           </button>
 
           <div id="dropdown-view"
-            class="hidden floating-dropdown-panel absolute right-0 top-full mt-2 w-72 p-3 rounded-2xl bg-stone-950/95 border border-white/15 shadow-2xl z-50 space-y-3 text-xs">
+            class="hidden floating-dropdown-panel liquid-glass-card absolute right-0 top-full mt-2 w-72 p-3 rounded-2xl shadow-2xl z-50 space-y-3 text-xs">
             <div class="space-y-1.5">
-              <span class="text-[10px] font-black uppercase tracking-wider text-amber-400 block">Góc nhìn khán giả (POV)</span>
+              <span class="text-[10px] font-black uppercase tracking-wider text-slate-300 block">Góc nhìn khán giả (POV)</span>
               <div class="grid grid-cols-3 gap-1">
                 <button type="button" onclick="window.appActions.setPOVZoom('rowF')" id="pov-btn-rowF"
-                  class="px-2 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold text-[11px] cursor-pointer">
+                  class="px-2 py-1.5 rounded-lg cta-primary-btn font-bold text-[11px] cursor-pointer">
                   Hàng F
                 </button>
                 <button type="button" onclick="window.appActions.setPOVZoom('rowD')" id="pov-btn-rowD"
-                  class="px-2 py-1.5 rounded-lg bg-stone-800 text-slate-300 font-semibold text-[11px] cursor-pointer">
+                  class="px-2 py-1.5 rounded-lg liquid-glass-pill font-semibold text-[11px] cursor-pointer">
                   Hàng D
                 </button>
                 <button type="button" onclick="window.appActions.setPOVZoom('front')" id="pov-btn-front"
-                  class="px-2 py-1.5 rounded-lg bg-stone-800 text-slate-300 font-semibold text-[11px] cursor-pointer">
+                  class="px-2 py-1.5 rounded-lg liquid-glass-pill font-semibold text-[11px] cursor-pointer">
                   Cận màn
                 </button>
               </div>
@@ -2378,11 +2378,11 @@
             <div class="space-y-1.5 pt-2 border-t border-white/10">
               <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Hiệu ứng không gian rạp</span>
               <button type="button" onclick="window.appActions.toggleAmbilight()" id="btn-ambilight"
-                class="w-full px-3 py-2 rounded-xl bg-amber-500/20 border border-amber-400/50 text-amber-300 text-xs font-extrabold flex items-center gap-2 transition cursor-pointer">
+                class="w-full px-3 py-2 rounded-xl liquid-glass-pill text-xs font-extrabold flex items-center gap-2 transition cursor-pointer">
                 <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Ambilight: BẬT</span>
               </button>
               <button type="button" onclick="window.appActions.toggleCinemaSFX()" id="btn-sfx"
-                class="w-full px-3 py-2 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-extrabold flex items-center gap-2 transition cursor-pointer" title="Âm thanh vòm & chuông rạp thực tế">
+                class="w-full px-3 py-2 rounded-xl liquid-glass-pill text-xs font-extrabold flex items-center gap-2 transition cursor-pointer" title="Âm thanh vòm & chuông rạp thực tế">
                 <i class="fa-solid fa-volume-high"></i> <span>SFX Rạp: BẬT</span>
               </button>
             </div>
@@ -2391,8 +2391,8 @@
 
         <!-- 5. Nút tắt/bật đèn rạp nhanh 1 chạm -->
         <button type="button" onclick="window.appActions.toggleDimLights()" id="btn-dim-lights"
-          class="px-2.5 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 border border-white/10 transition cursor-pointer" title="Tắt/bật ánh sáng rạp">
-          <i class="fa-solid fa-lightbulb text-amber-400"></i> <span class="hidden lg:inline">Tắt đèn rạp</span>
+          class="cv-smooth-btn liquid-glass-pill px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer" title="Tắt/bật ánh sáng rạp">
+          <i class="fa-solid fa-lightbulb text-slate-300"></i> <span class="hidden lg:inline">Tắt đèn rạp</span>
         </button>
       </div>
     </div>
@@ -2401,22 +2401,22 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
 
       <!-- CỘT TRÁI (2/12): DANH SÁCH PHIM ĐANG CÓ (TRÀN VIỀN, ẨN THANH CUỘN) -->
-      <aside id="theater-left-movies-aside" class="lg:col-span-2 order-2 lg:order-1 dimmable-ui bg-stone-950/95 border border-white/10 rounded-2xl overflow-hidden shadow-xl flex flex-col lg:h-[660px]">
-        <div class="flex items-center justify-between gap-1.5 px-3 pt-2.5 pb-2 border-b border-white/10 shrink-0 bg-stone-900/80">
+      <aside id="theater-left-movies-aside" class="lg:col-span-2 order-2 lg:order-1 dimmable-ui liquid-glass-card rounded-2xl overflow-hidden shadow-xl flex flex-col lg:h-[660px]">
+        <div class="flex items-center justify-between gap-1.5 px-3 pt-2.5 pb-2 border-b border-white/10 shrink-0 bg-white/[0.02]">
           <div class="flex items-center gap-1.5 min-w-0">
-            <i class="fa-solid fa-clapperboard text-amber-400 text-xs"></i>
+            <i class="fa-solid fa-clapperboard text-rose-400 text-xs"></i>
             <span class="text-xs font-black text-white truncate">Phim Đang Có</span>
           </div>
-          <span id="theater-left-movie-count" class="px-1.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[10px] font-black">0</span>
+          <span id="theater-left-movie-count" class="monochrome-pill px-2 py-0.5 rounded-full text-[10px] font-black">0</span>
         </div>
         <!-- Ô tìm kiếm tên phim trong danh sách phim -->
-        <div class="px-2 py-2 border-b border-white/10 bg-stone-950/90 shrink-0">
+        <div class="px-2 py-2 border-b border-white/10 bg-white/[0.01] shrink-0">
           <div class="relative flex items-center">
             <i class="fa-solid fa-magnifying-glass text-[10px] text-slate-400 absolute left-2.5 pointer-events-none"></i>
             <input id="theater-movie-search-input" type="text"
               oninput="window.appActions.setTheaterMovieSearch(this.value)"
               placeholder="Tìm tên phim..."
-              class="w-full pl-7 pr-6 py-1.5 rounded-xl bg-stone-900 border border-white/10 text-[11px] text-white placeholder-slate-500 font-semibold focus:outline-none focus:border-amber-400/70 transition" />
+              class="w-full pl-7 pr-6 py-1.5 rounded-xl bg-black/50 border border-white/10 text-[11px] text-white placeholder-slate-500 font-semibold focus:outline-none focus:border-rose-500/70 transition" />
             <button type="button" id="theater-movie-search-clear"
               onclick="window.appActions.setTheaterMovieSearch('')"
               class="hidden absolute right-2 text-[10px] text-slate-400 hover:text-white cursor-pointer" title="Xóa tìm kiếm">
@@ -2612,7 +2612,7 @@
 
             <!-- Thanh điều khiển Video + Floating Popover Phụ đề nằm nổi không đẩy layout -->
             <div class="relative z-30 mt-2">
-              <div id="cinema-control-bar" class="dimmable-ui flex flex-col gap-2 px-3.5 py-2.5 rounded-2xl bg-stone-950/90 backdrop-blur-md border border-white/10 shadow-2xl text-xs">
+              <div id="cinema-control-bar" class="dimmable-ui liquid-glass-card flex flex-col gap-2 px-3.5 py-2.5 rounded-2xl shadow-2xl text-xs">
                 <!-- Hàng 1: Thanh tua toàn chiều ngang chuyên nghiệp -->
                 <div id="mp4-seek-container" class="w-full flex items-center gap-2.5">
                   <span id="video-time-current" class="text-[11px] font-mono font-bold text-slate-300 w-11 text-right shrink-0">00:00</span>
@@ -2627,15 +2627,15 @@
                   <div class="flex items-center gap-1.5">
                     <div id="cinema-playback-controls" class="flex items-center gap-1.5">
                       <button type="button" onclick="window.appActions.seekBySeconds(-5)"
-                        class="px-2 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-200 font-bold transition cursor-pointer flex items-center gap-1" title="Tua lùi 5 giây (Mũi tên trái ←)">
+                        class="cv-smooth-btn liquid-glass-pill px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer flex items-center gap-1" title="Tua lùi 5 giây (Mũi tên trái ←)">
                         <i class="fa-solid fa-rotate-left text-[11px]"></i><span class="text-[11px]">5s</span>
                       </button>
                       <button type="button" onclick="window.appActions.togglePlayPause()" id="btn-play-pause"
-                        class="w-8 h-8 flex items-center justify-center rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold shadow-md transition cursor-pointer" title="Phát / Tạm dừng (Phím Space)">
+                        class="cv-smooth-btn cta-primary-btn w-8 h-8 flex items-center justify-center rounded-xl font-extrabold shadow-md transition cursor-pointer" title="Phát / Tạm dừng (Phím Space)">
                         <i class="fa-solid fa-pause"></i>
                       </button>
                       <button type="button" onclick="window.appActions.seekBySeconds(5)"
-                        class="px-2 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-200 font-bold transition cursor-pointer flex items-center gap-1" title="Tua tới 5 giây (Mũi tên phải →)">
+                        class="cv-smooth-btn liquid-glass-pill px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer flex items-center gap-1" title="Tua tới 5 giây (Mũi tên phải →)">
                         <span class="text-[11px]">5s</span><i class="fa-solid fa-rotate-right text-[11px]"></i>
                       </button>
 
@@ -2643,29 +2643,29 @@
                     </div>
 
                     <button type="button" onclick="window.appActions.toggleMute()" id="btn-mute"
-                      class="px-2 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-amber-300 font-bold transition cursor-pointer" title="Tắt / Bật âm thanh">
-                      <i class="fa-solid fa-volume-high mr-1"></i><span class="hidden sm:inline">Âm thanh</span>
+                      class="cv-smooth-btn liquid-glass-pill px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer" title="Tắt / Bật âm thanh">
+                      <i class="fa-solid fa-volume-high mr-1 text-slate-300"></i><span class="hidden sm:inline">Âm thanh</span>
                     </button>
                     <input type="range" min="0" max="1" step="0.05" value="0.85"
                       oninput="window.appActions.setVolume(this.value)"
-                      class="w-16 sm:w-20 accent-amber-400 cursor-pointer h-1 rounded-full" title="Âm lượng" />
+                      class="w-16 sm:w-20 accent-rose-500 cursor-pointer h-1 rounded-full" title="Âm lượng" />
                   </div>
 
                   <div class="flex flex-wrap items-center gap-1.5">
                     <button type="button" onclick="window.appActions.cycleSubtitleMode()" id="btn-cc-mode"
-                      class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-amber-500/20 border border-white/10 hover:border-amber-400/40 text-amber-300 font-bold transition cursor-pointer" title="Chuyển ngôn ngữ Phụ đề (Tiếng Việt / Tiếng Anh / Tắt)">
-                      <i class="fa-solid fa-closed-captioning mr-1"></i>Phụ đề: Tiếng Việt
+                      class="cv-smooth-btn liquid-glass-pill px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer" title="Chuyển ngôn ngữ Phụ đề (Tiếng Việt / Tiếng Anh / Tắt)">
+                      <i class="fa-solid fa-closed-captioning mr-1 text-slate-300"></i>Phụ đề: Tiếng Việt
                     </button>
                     <button type="button" onclick="window.appActions.toggleSubtitleSettingsPanel()" id="btn-sub-settings"
-                      class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-slate-200 font-bold transition cursor-pointer" title="Tùy chỉnh vị trí, cỡ chữ & AI Phụ đề">
-                      <i class="fa-solid fa-sliders mr-1 text-amber-300"></i>Phụ đề & AI
+                      class="cv-smooth-btn liquid-glass-pill px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer" title="Tùy chỉnh vị trí, cỡ chữ & AI Phụ đề">
+                      <i class="fa-solid fa-sliders mr-1 text-slate-300"></i>Phụ đề & AI
                     </button>
                     <button type="button" id="btn-sync-live" onclick="window.appActions.syncLiveTime()"
-                      class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-emerald-500/20 border border-white/10 text-emerald-300 font-bold transition cursor-pointer" title="Đồng bộ thời gian chiếu với phòng">
+                      class="cv-smooth-btn liquid-glass-pill px-2.5 py-1.5 rounded-xl text-emerald-300 font-bold transition cursor-pointer" title="Đồng bộ thời gian chiếu với phòng">
                       <i class="fa-solid fa-rotate mr-1"></i>Live
                     </button>
                     <button type="button" id="btn-player-mic" onclick="window.appActions.toggleVoiceMic()"
-                      class="px-2.5 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-500/35 border border-emerald-400/40 text-emerald-300 font-extrabold transition cursor-pointer" title="Bật/Tắt Micro nói chuyện trực tiếp">
+                      class="cv-smooth-btn px-2.5 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-500/35 border border-emerald-400/40 text-emerald-300 font-extrabold transition cursor-pointer" title="Bật/Tắt Micro nói chuyện trực tiếp">
                       <i class="fa-solid fa-microphone-slash mr-1"></i>Bật Mic
                     </button>
                     <button type="button" id="voice-diag-badge" onclick="window.appActions.resumePendingVoiceAudio && window.appActions.resumePendingVoiceAudio()"
@@ -2673,7 +2673,7 @@
                       ICE: --
                     </button>
                     <button type="button" onclick="window.appActions.toggleFullscreen()"
-                      class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-white font-bold transition cursor-pointer" title="Phóng to toàn màn hình">
+                      class="cv-smooth-btn liquid-glass-pill px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer" title="Phóng to toàn màn hình">
                       <i class="fa-solid fa-expand"></i>
                     </button>
                   </div>
@@ -2681,7 +2681,7 @@
               </div>
 
               <!-- Thanh điều khiển Discord Live (Mic, Camera, Share màn hình, Độ phân giải 720p/1080p, Phụ đề giọng nói, Dừng) -->
-              <div id="discord-bottom-dock" class="hidden dimmable-ui flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-2xl bg-stone-950/95 backdrop-blur-md border border-white/10 shadow-2xl text-xs">
+              <div id="discord-bottom-dock" class="hidden dimmable-ui liquid-glass-card flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-2xl shadow-2xl text-xs">
                 <!-- Cụm trái: Mic & Camera (giống Discord) -->
                 <div class="flex items-center gap-1 px-1.5 py-1 rounded-2xl bg-stone-900/95 border border-white/10">
                   <button type="button" id="discord-dock-mic-btn" onclick="window.appActions.toggleVoiceMic()"
@@ -2857,18 +2857,18 @@
         <!-- KHU VỰC SƠ ĐỒ GHẾ NGỒI 48 GHẾ CỐ ĐỊNH (6 HÀNG A->F, MỖI HÀNG 8 GHẾ) -->
         <div class="relative z-10 pt-1 space-y-2.5">
           <!-- Thanh trạng thái ghế của bạn & chú thích các hạng ghế -->
-          <div class="dimmable-ui flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-2xl bg-black/65 border border-white/10 text-xs">
+          <div class="dimmable-ui liquid-glass-card flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 rounded-2xl text-xs">
             <div class="flex flex-wrap items-center gap-2">
               <span class="text-slate-300 font-semibold">
-                <i class="fa-solid fa-couch text-amber-400 mr-1"></i>Ghế của bạn:
-                <strong id="my-seat-badge" class="text-amber-300 font-black">Chưa chọn</strong>
+                <i class="fa-solid fa-couch text-rose-400 mr-1"></i>Ghế của bạn:
+                <strong id="my-seat-badge" class="text-white font-black">Chưa chọn</strong>
               </span>
               <button type="button" onclick="window.appActions.sitRowFCenter()"
-                class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-rose-500 text-slate-950 font-extrabold text-[11px] cursor-pointer">
+                class="cv-smooth-btn cta-primary-btn px-2.5 py-1 rounded-lg font-extrabold text-[11px] cursor-pointer">
                 Ngồi nhanh F4
               </button>
               <button type="button" id="btn-stand-up" onclick="window.appActions.standUpFromSeat()"
-                class="hidden px-2.5 py-1 rounded-lg bg-stone-800 hover:bg-rose-600 text-slate-200 hover:text-white text-[11px] font-bold transition cursor-pointer">
+                class="hidden cv-smooth-btn liquid-glass-pill px-2.5 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer">
                 <i class="fa-solid fa-person-walking-arrow-right mr-1"></i>Đứng dậy
               </button>
             </div>
@@ -2896,8 +2896,8 @@
           <div id="seating-map" class="space-y-2.5 pt-1 pb-1"></div>
 
           <!-- Chỉ dẫn góc nhìn hàng ghế F -->
-          <div class="dimmable-ui text-center text-[11px] text-amber-300/85 font-semibold pt-0.5">
-            <i class="fa-solid fa-sparkles mr-1 text-amber-400"></i>
+          <div class="dimmable-ui text-center text-[11px] text-slate-400 font-semibold pt-0.5">
+            <i class="fa-solid fa-sparkles mr-1 text-rose-400"></i>
             Khán phòng bậc thang Stadium 6 hàng ghế da thật (A–F • 48 chỗ) • Phụ đề chỉ hiện đúng lúc nhân vật cất tiếng nói
           </div>
         </div>
@@ -2907,25 +2907,25 @@
       <div class="lg:col-span-3 order-3">
 
         <!-- HỘP TƯƠNG TÁC ĐỒNG BỘ CHIỀU CAO VỚI KHÁN PHÒNG -->
-        <div class="theater-sidebar-card relative bg-stone-900/95 border border-white/10 rounded-2xl flex flex-col h-[620px] lg:h-[660px] shadow-xl">
+        <div class="theater-sidebar-card liquid-glass-card relative rounded-2xl flex flex-col h-[620px] lg:h-[660px] shadow-xl">
 
           <!-- Thanh trên cùng Sidebar: Đổi tên (Dropdown) | Khán giả (Dropdown) | + 🍿 Bắp nước -->
-          <div class="dimmable-ui relative z-30 flex items-center justify-between gap-1.5 px-2.5 py-2 bg-stone-950/90 border-b border-white/10 rounded-t-2xl text-xs">
+          <div class="dimmable-ui relative z-30 flex items-center justify-between gap-1.5 px-2.5 py-2 bg-white/[0.02] border-b border-white/10 rounded-t-2xl text-xs">
             <div class="flex items-center gap-1.5 min-w-0">
 
               <!-- Dropdown: Đổi tên hiển thị -->
               <div class="relative" data-dropdown-root>
                 <button type="button" onclick="window.appActions.toggleRoomDropdown('profile')"
-                  class="px-2.5 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 border border-amber-500/35 text-amber-300 text-[11px] font-extrabold flex items-center gap-1.5 transition cursor-pointer">
-                  <i class="fa-solid fa-id-badge"></i>
+                  class="cv-smooth-btn liquid-glass-pill px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold flex items-center gap-1.5 transition cursor-pointer">
+                  <i class="fa-solid fa-id-badge text-slate-300"></i>
                   <span>Tên</span>
                   <i class="fa-solid fa-chevron-down text-[9px] opacity-80"></i>
                 </button>
 
                 <div id="dropdown-profile"
-                  class="hidden floating-dropdown-panel absolute left-0 top-full mt-2 w-72 p-3 rounded-2xl bg-stone-950/95 border border-amber-500/35 shadow-2xl z-50 space-y-2 text-xs">
+                  class="hidden floating-dropdown-panel liquid-glass-card absolute left-0 top-full mt-2 w-72 p-3 rounded-2xl shadow-2xl z-50 space-y-2 text-xs">
                   <div class="flex items-center justify-between">
-                    <label class="text-[11px] font-extrabold uppercase tracking-wider text-amber-400">
+                    <label class="text-[11px] font-extrabold uppercase tracking-wider text-slate-300">
                       <i class="fa-solid fa-id-badge mr-1"></i>Đổi tên hiển thị
                     </label>
                     <button type="button" onclick="window.appActions.closeAllDropdowns()"
@@ -2935,9 +2935,9 @@
                   </div>
                   <div class="flex gap-1.5">
                     <input id="inline-name-input" type="text" maxlength="20" placeholder="Nhập tên của bạn..."
-                      class="flex-1 min-w-0 px-3 py-1.5 rounded-xl bg-stone-900 border border-white/15 text-xs text-white font-semibold focus:outline-none focus:border-amber-400" />
+                      class="flex-1 min-w-0 px-3 py-1.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white font-semibold focus:outline-none focus:border-rose-500" />
                     <button type="button" onclick="window.appActions.saveInlineName()"
-                      class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition cursor-pointer shrink-0">
+                      class="cv-smooth-btn cta-primary-btn px-3 py-1.5 rounded-xl font-extrabold text-xs transition cursor-pointer shrink-0">
                       Lưu
                     </button>
                   </div>
@@ -2947,14 +2947,14 @@
               <!-- Dropdown: Danh sách Khán giả đang ngồi -->
               <div class="relative" data-dropdown-root>
                 <button type="button" onclick="window.appActions.toggleRoomDropdown('audience')"
-                  class="px-2.5 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 border border-white/15 text-slate-200 text-[11px] font-extrabold flex items-center gap-1.5 transition cursor-pointer">
+                  class="cv-smooth-btn liquid-glass-pill px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold flex items-center gap-1.5 transition cursor-pointer">
                   <i class="fa-solid fa-users-viewfinder text-rose-500"></i>
-                  <span>Khách (<strong id="audience-count-pill" class="text-amber-300">0/48</strong>)</span>
+                  <span>Khách (<strong id="audience-count-pill" class="text-white">0/48</strong>)</span>
                   <i class="fa-solid fa-chevron-down text-[9px] opacity-80"></i>
                 </button>
 
                 <div id="dropdown-audience"
-                  class="hidden floating-dropdown-panel absolute left-0 top-full mt-2 w-72 sm:w-80 p-3 rounded-2xl bg-stone-950/95 border border-white/15 shadow-2xl z-50 space-y-2 text-xs">
+                  class="hidden floating-dropdown-panel liquid-glass-card absolute left-0 top-full mt-2 w-72 sm:w-80 p-3 rounded-2xl shadow-2xl z-50 space-y-2 text-xs">
                   <div class="flex items-center justify-between border-b border-white/10 pb-1.5">
                     <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-200">
                       <i class="fa-solid fa-users mr-1 text-rose-500"></i>Khán giả đang ngồi
@@ -2969,28 +2969,28 @@
 
             <!-- Nút gọi nhanh Quầy Bắp Nước -->
             <button type="button" onclick="window.appActions.openConcessionModal()"
-              class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/35 text-amber-300 text-[11px] font-extrabold transition cursor-pointer shrink-0">
+              class="cv-smooth-btn liquid-glass-pill px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold transition cursor-pointer shrink-0">
               + 🍿 Bắp nước
             </button>
           </div>
 
           <!-- Thanh chuyển 4 Tab -->
-          <div class="grid grid-cols-4 bg-stone-950 border-b border-white/10 p-1 gap-1 text-[11px] font-extrabold">
+          <div class="grid grid-cols-4 bg-black/40 border-b border-white/10 p-1 gap-1 text-[11px] font-extrabold">
             <button type="button" onclick="window.appActions.switchSidebarTab('chat')" id="tab-btn-chat"
-              class="py-2 rounded-xl bg-rose-600 text-white flex items-center justify-center gap-1 transition cursor-pointer">
+              class="py-2 rounded-xl cta-primary-btn flex items-center justify-center gap-1 transition cursor-pointer">
               <i class="fa-solid fa-comments"></i> <span>Chat</span>
             </button>
             <button type="button" onclick="window.appActions.switchSidebarTab('playlist')" id="tab-btn-playlist"
-              class="py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-slate-300 flex items-center justify-center gap-1 transition cursor-pointer">
-              <i class="fa-solid fa-list-ol text-amber-400"></i> <span>Vote Phim</span>
+              class="py-2 rounded-xl liquid-glass-pill flex items-center justify-center gap-1 transition cursor-pointer">
+              <i class="fa-solid fa-list-ol text-slate-300"></i> <span>Vote Phim</span>
             </button>
             <button type="button" onclick="window.appActions.switchSidebarTab('trivia')" id="tab-btn-trivia"
-              class="py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-slate-300 flex items-center justify-center gap-1 transition cursor-pointer">
-              <i class="fa-solid fa-trophy text-emerald-400"></i> <span>Đố Vui</span>
+              class="py-2 rounded-xl liquid-glass-pill flex items-center justify-center gap-1 transition cursor-pointer">
+              <i class="fa-solid fa-trophy text-slate-300"></i> <span>Đố Vui</span>
             </button>
             <button type="button" onclick="window.appActions.switchSidebarTab('ai')" id="tab-btn-ai"
-              class="py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-slate-300 flex items-center justify-center gap-1 transition cursor-pointer">
-              <i class="fa-solid fa-robot text-sky-400"></i> <span>AI Phim</span>
+              class="py-2 rounded-xl liquid-glass-pill flex items-center justify-center gap-1 transition cursor-pointer">
+              <i class="fa-solid fa-robot text-slate-300"></i> <span>AI Phim</span>
             </button>
           </div>
 
@@ -2999,12 +2999,12 @@
 
             <!-- ==================== TAB 1: KÊNH CHAT RIÊNG ==================== -->
             <div id="sidebar-tab-chat" class="flex-1 flex flex-col overflow-hidden">
-              <div class="px-3.5 py-2 bg-stone-950/60 border-b border-white/5 flex items-center justify-between">
+              <div class="px-3.5 py-2 bg-black/30 border-b border-white/5 flex items-center justify-between">
                 <span class="text-[11px] font-bold text-slate-300">
                   <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block mr-1"></span>
-                  Chat riêng <strong id="chat-room-label" class="text-amber-400">Phòng 01</strong> (Hiện trên ghế)
+                  Chat riêng <strong id="chat-room-label" class="text-white">Phòng 01</strong> (Hiện trên ghế)
                 </span>
-                <button type="button" onclick="window.appActions.copyInviteNextSeatLink()" class="text-[10px] text-indigo-300 hover:text-indigo-200 font-bold cursor-pointer">
+                <button type="button" onclick="window.appActions.copyInviteNextSeatLink()" class="monochrome-pill px-2 py-0.5 rounded-full text-[10px] font-bold cursor-pointer">
                   <i class="fa-solid fa-link mr-0.5"></i>Link ghế cạnh
                 </button>
               </div>
@@ -3012,40 +3012,40 @@
               <div id="chat-messages" class="flex-1 overflow-y-auto p-3 space-y-2.5 text-xs"></div>
 
               <!-- Thả biểu cảm có kèm âm thanh SFX rạp -->
-              <div class="px-3 py-2 bg-stone-950/60 border-t border-white/10 space-y-2">
+              <div class="px-3 py-2 bg-black/35 border-t border-white/10 space-y-2">
                 <div class="flex items-center justify-between gap-1">
-                  <button type="button" onclick="window.appActions.sendReaction('🍿')" class="flex-1 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-sm cursor-pointer" title="Tiếng nhai bắp rang">🍿</button>
-                  <button type="button" onclick="window.appActions.sendReaction('👏')" class="flex-1 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-sm cursor-pointer" title="Tiếng vỗ tay vang rạp">👏</button>
-                  <button type="button" onclick="window.appActions.sendReaction('😂')" class="flex-1 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-sm cursor-pointer" title="Cười lớn">😂</button>
-                  <button type="button" onclick="window.appActions.sendReaction('❤️')" class="flex-1 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-sm cursor-pointer" title="Thả tim">❤️</button>
-                  <button type="button" onclick="window.appActions.sendReaction('🔥')" class="flex-1 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-sm cursor-pointer" title="Cháy quá">🔥</button>
-                  <button type="button" onclick="window.appActions.sendReaction('🌹')" class="flex-1 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-sm cursor-pointer" title="Tặng hoa">🌹</button>
+                  <button type="button" onclick="window.appActions.sendReaction('🍿')" class="flex-1 py-1 rounded-lg liquid-glass-pill text-sm cursor-pointer" title="Tiếng nhai bắp rang">🍿</button>
+                  <button type="button" onclick="window.appActions.sendReaction('👏')" class="flex-1 py-1 rounded-lg liquid-glass-pill text-sm cursor-pointer" title="Tiếng vỗ tay vang rạp">👏</button>
+                  <button type="button" onclick="window.appActions.sendReaction('😂')" class="flex-1 py-1 rounded-lg liquid-glass-pill text-sm cursor-pointer" title="Cười lớn">😂</button>
+                  <button type="button" onclick="window.appActions.sendReaction('❤️')" class="flex-1 py-1 rounded-lg liquid-glass-pill text-sm cursor-pointer" title="Thả tim">❤️</button>
+                  <button type="button" onclick="window.appActions.sendReaction('🔥')" class="flex-1 py-1 rounded-lg liquid-glass-pill text-sm cursor-pointer" title="Cháy quá">🔥</button>
+                  <button type="button" onclick="window.appActions.sendReaction('🌹')" class="flex-1 py-1 rounded-lg liquid-glass-pill text-sm cursor-pointer" title="Tặng hoa">🌹</button>
                 </div>
 
                 <div class="quick-comment-marquee text-[11px]">
                   <div class="quick-comment-track">
-                    <button type="button" onclick="window.appActions.sendQuickChat('Phim hay quá')" class="no-holo shrink-0 px-2.5 py-1 rounded-full bg-gradient-to-r from-purple-600 to-rose-600 text-white font-extrabold cursor-pointer" title="Gửi câu chat và tự động đúc vào Thẻ Ký Ức NFT">🎴 "Phim hay quá"</button>
-                    <button type="button" onclick="window.appActions.sendQuickChat('🔥 Góc nhìn từ hàng F đẹp quá!')" class="no-holo shrink-0 px-2.5 py-1 rounded-full bg-stone-800 hover:bg-stone-700 text-amber-300 font-semibold cursor-pointer">🔥 Góc hàng F đẹp!</button>
-                    <button type="button" onclick="window.appActions.sendQuickChat('🍿 Mời cả phòng ăn bắp rang bơ nhé!')" class="no-holo shrink-0 px-2.5 py-1 rounded-full bg-stone-800 hover:bg-stone-700 text-slate-200 cursor-pointer">🍿 Mời bắp rang!</button>
-                    <button type="button" onclick="window.appActions.sendQuickChat('👏 Cảnh này đỉnh thật sự!')" class="no-holo shrink-0 px-2.5 py-1 rounded-full bg-stone-800 hover:bg-stone-700 text-slate-200 cursor-pointer">👏 Đỉnh thật sự!</button>
-                    <button type="button" onclick="window.appActions.sendQuickChat('Phim hay quá')" class="no-holo shrink-0 px-2.5 py-1 rounded-full bg-gradient-to-r from-purple-600 to-rose-600 text-white font-extrabold cursor-pointer" title="Gửi câu chat và tự động đúc vào Thẻ Ký Ức NFT">🎴 "Phim hay quá"</button>
-                    <button type="button" onclick="window.appActions.sendQuickChat('🔥 Góc nhìn từ hàng F đẹp quá!')" class="no-holo shrink-0 px-2.5 py-1 rounded-full bg-stone-800 hover:bg-stone-700 text-amber-300 font-semibold cursor-pointer">🔥 Góc hàng F đẹp!</button>
-                    <button type="button" onclick="window.appActions.sendQuickChat('🍿 Mời cả phòng ăn bắp rang bơ nhé!')" class="no-holo shrink-0 px-2.5 py-1 rounded-full bg-stone-800 hover:bg-stone-700 text-slate-200 cursor-pointer">🍿 Mời bắp rang!</button>
-                    <button type="button" onclick="window.appActions.sendQuickChat('👏 Cảnh này đỉnh thật sự!')" class="no-holo shrink-0 px-2.5 py-1 rounded-full bg-stone-800 hover:bg-stone-700 text-slate-200 cursor-pointer">👏 Đỉnh thật sự!</button>
+                    <button type="button" onclick="window.appActions.sendQuickChat('Phim hay quá')" class="no-holo shrink-0 px-2.5 py-1 rounded-full cta-primary-btn font-extrabold cursor-pointer" title="Gửi câu chat và tự động đúc vào Thẻ Ký Ức NFT">🎴 "Phim hay quá"</button>
+                    <button type="button" onclick="window.appActions.sendQuickChat('🔥 Góc nhìn từ hàng F đẹp quá!')" class="no-holo shrink-0 px-2.5 py-1 rounded-full liquid-glass-pill font-semibold cursor-pointer">🔥 Góc hàng F đẹp!</button>
+                    <button type="button" onclick="window.appActions.sendQuickChat('🍿 Mời cả phòng ăn bắp rang bơ nhé!')" class="no-holo shrink-0 px-2.5 py-1 rounded-full liquid-glass-pill cursor-pointer">🍿 Mời bắp rang!</button>
+                    <button type="button" onclick="window.appActions.sendQuickChat('👏 Cảnh này đỉnh thật sự!')" class="no-holo shrink-0 px-2.5 py-1 rounded-full liquid-glass-pill cursor-pointer">👏 Đỉnh thật sự!</button>
+                    <button type="button" onclick="window.appActions.sendQuickChat('Phim hay quá')" class="no-holo shrink-0 px-2.5 py-1 rounded-full cta-primary-btn font-extrabold cursor-pointer" title="Gửi câu chat và tự động đúc vào Thẻ Ký Ức NFT">🎴 "Phim hay quá"</button>
+                    <button type="button" onclick="window.appActions.sendQuickChat('🔥 Góc nhìn từ hàng F đẹp quá!')" class="no-holo shrink-0 px-2.5 py-1 rounded-full liquid-glass-pill font-semibold cursor-pointer">🔥 Góc hàng F đẹp!</button>
+                    <button type="button" onclick="window.appActions.sendQuickChat('🍿 Mời cả phòng ăn bắp rang bơ nhé!')" class="no-holo shrink-0 px-2.5 py-1 rounded-full liquid-glass-pill cursor-pointer">🍿 Mời bắp rang!</button>
+                    <button type="button" onclick="window.appActions.sendQuickChat('👏 Cảnh này đỉnh thật sự!')" class="no-holo shrink-0 px-2.5 py-1 rounded-full liquid-glass-pill cursor-pointer">👏 Đỉnh thật sự!</button>
                   </div>
                 </div>
               </div>
 
               <!-- Thanh hiển thị hiệu ứng đang soạn tin nhắn kiểu Messenger (Avatar + 3 chấm nhảy sóng) -->
-              <div id="chat-typing-bar" class="hidden px-3 py-1.5 bg-stone-950/90 border-t border-white/5 flex items-center gap-2 text-[11px] text-slate-300"></div>
+              <div id="chat-typing-bar" class="hidden px-3 py-1.5 bg-black/50 border-t border-white/5 flex items-center gap-2 text-[11px] text-slate-300"></div>
 
-              <form onsubmit="window.appActions.sendChatMessage(event)" class="p-2.5 bg-stone-950 border-t border-white/10 flex gap-2">
+              <form onsubmit="window.appActions.sendChatMessage(event)" class="p-2.5 bg-black/45 border-t border-white/10 flex gap-2">
                 <input id="chat-input" type="text" maxlength="160" placeholder="Nhắn tin (hiện luôn trên ghế của bạn)..."
                   oninput="window.appActions.onChatInputTyping(this.value)"
                   onblur="window.appActions.clearMyChatTyping()"
-                  class="flex-1 px-3 py-2 rounded-xl bg-stone-900 border border-white/15 text-xs text-white focus:outline-none focus:border-amber-400" />
+                  class="flex-1 px-3 py-2 rounded-xl bg-black/60 border border-white/15 text-xs text-white focus:outline-none focus:border-rose-500" />
                 <button type="submit"
-                  class="cv-smooth-btn px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs transition cursor-pointer">
+                  class="cv-smooth-btn cta-primary-btn px-4 py-2 rounded-xl font-extrabold text-xs transition cursor-pointer">
                   Gửi
                 </button>
               </form>
@@ -4026,19 +4026,19 @@
   <!-- MODAL 5: 👑 BẢNG ĐIỀU KHIỂN ADMIN (ĐỒNG BỘ LỊCH CHIẾU)  -->
   <!-- ========================================================= -->
   <div id="admin-panel-modal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-    <div class="bg-stone-950 border border-amber-400/35 rounded-3xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-[0_25px_90px_rgba(0,0,0,0.98)]">
-      <div class="px-5 py-4 bg-gradient-to-r from-amber-950/60 via-stone-900 to-rose-950/60 border-b border-white/10 flex items-center justify-between gap-3">
+    <div class="liquid-glass-card rounded-3xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-[0_25px_90px_rgba(0,0,0,0.98)]">
+      <div class="px-5 py-4 bg-white/[0.03] border-b border-white/10 flex items-center justify-between gap-3">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 to-rose-600 flex items-center justify-center text-slate-950 text-lg shadow-lg">
+          <div class="w-10 h-10 rounded-2xl cta-primary-btn flex items-center justify-center text-white text-lg shadow-lg">
             <i class="fa-solid fa-crown"></i>
           </div>
           <div>
             <h3 class="text-base sm:text-lg font-black text-white">Quản Trị Admin • Setup Phim Các Phòng</h3>
-            <p class="text-xs text-amber-200/80">Chọn phim đang chiếu cho từng phòng và đồng bộ tức thì tới tất cả người tham gia</p>
+            <p class="text-xs text-slate-400">Chọn phim đang chiếu cho từng phòng và đồng bộ tức thì tới tất cả người tham gia</p>
           </div>
         </div>
         <button type="button" onclick="window.appActions.closeAdminPanelModal()"
-          class="w-9 h-9 rounded-full bg-stone-800 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer">
+          class="w-9 h-9 rounded-full liquid-glass-pill text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
@@ -4046,7 +4046,7 @@
       <div class="p-5 overflow-y-auto flex-1 space-y-4">
         <!-- Cổng xác thực Admin -->
         <div id="admin-lock-screen" class="max-w-md mx-auto py-8 text-center space-y-4">
-          <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300 text-2xl">
+          <div class="w-14 h-14 mx-auto rounded-2xl liquid-glass-pill flex items-center justify-center text-rose-400 text-2xl">
             <i class="fa-solid fa-shield-halved"></i>
           </div>
           <div>
@@ -4055,9 +4055,9 @@
           </div>
           <form onsubmit="window.appActions.unlockAdminPanel(event)" class="flex gap-2">
             <input id="admin-pin-input" type="password" placeholder="Nhập mã PIN Admin..."
-              class="flex-1 px-3.5 py-2.5 rounded-xl bg-stone-900 border border-amber-400/40 text-sm text-white font-bold focus:outline-none focus:border-amber-400" />
+              class="flex-1 px-3.5 py-2.5 rounded-xl bg-black/55 border border-white/15 text-sm text-white font-bold focus:outline-none focus:border-rose-500" />
             <button type="submit"
-              class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-rose-500 text-slate-950 font-black text-xs cursor-pointer">
+              class="px-5 py-2.5 rounded-xl cta-primary-btn font-black text-xs cursor-pointer">
               Mở Khóa
             </button>
           </form>
@@ -4066,21 +4066,21 @@
         <!-- Thanh chuyển Tab Admin (Chỉ hiện sau khi mở khóa PIN Admin) -->
         <div id="admin-tabs-bar" class="hidden flex flex-wrap items-center gap-2 border-b border-white/10 pb-3">
           <button type="button" id="admin-tab-rooms" onclick="window.appActions.switchAdminTab('rooms')"
-            class="px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 cursor-pointer transition">
+            class="px-4 py-2 rounded-xl cta-primary-btn font-black text-xs flex items-center gap-1.5 cursor-pointer transition">
             <i class="fa-solid fa-film"></i>
             <span>Setup Phim Các Phòng</span>
           </button>
           <button type="button" id="admin-tab-revenue" onclick="window.appActions.switchAdminTab('revenue')"
-            class="px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs flex items-center gap-1.5 cursor-pointer transition">
+            class="px-4 py-2 rounded-xl liquid-glass-pill font-extrabold text-xs flex items-center gap-1.5 cursor-pointer transition">
             <i class="fa-solid fa-chart-line"></i>
             <span>Thống Kê Doanh Thu Rạp</span>
-            <span id="admin-tab-revenue-badge" class="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-200 text-[10px] font-black">0đ</span>
+            <span id="admin-tab-revenue-badge" class="monochrome-pill px-2 py-0.5 rounded-full text-[10px] font-black">0đ</span>
           </button>
           <button type="button" id="admin-tab-visitors" onclick="window.appActions.switchAdminTab('visitors')"
-            class="px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-sky-500/40 text-sky-300 font-extrabold text-xs flex items-center gap-1.5 cursor-pointer transition">
+            class="px-4 py-2 rounded-xl liquid-glass-pill font-extrabold text-xs flex items-center gap-1.5 cursor-pointer transition">
             <i class="fa-solid fa-users-viewfinder"></i>
-            <span>Khách Truy Cập</span>
-            <span id="admin-tab-visitors-badge" class="px-1.5 py-0.5 rounded-md bg-sky-500/20 text-sky-200 text-[10px] font-black">0</span>
+            <span>Khách Truy Cập & GPS</span>
+            <span id="admin-tab-visitors-badge" class="monochrome-pill px-2 py-0.5 rounded-full text-[10px] font-black">0</span>
           </button>
         </div>
 
@@ -4094,17 +4094,17 @@
         <div id="admin-visitors-panel" class="hidden space-y-4"></div>
       </div>
 
-      <div id="admin-panel-footer" class="hidden px-5 py-3.5 bg-stone-900/95 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
+      <div id="admin-panel-footer" class="hidden px-5 py-3.5 bg-white/[0.02] border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
         <span class="text-[11px] text-slate-400">
           <i class="fa-solid fa-tower-broadcast text-emerald-400 mr-1"></i>Mọi thay đổi được đẩy lên Firebase Realtime và đồng bộ cho toàn bộ người xem.
         </span>
         <div class="flex items-center gap-2">
           <button type="button" onclick="window.appActions.closeAdminPanelModal()"
-            class="px-4 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-slate-200 text-xs font-bold cursor-pointer">
+            class="px-4 py-2 rounded-xl liquid-glass-pill text-xs font-bold cursor-pointer">
             Đóng
           </button>
           <button type="button" onclick="window.appActions.saveAdminLobbyConfig()"
-            class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-rose-500 to-purple-600 text-slate-950 font-black text-xs shadow-lg cursor-pointer flex items-center gap-1.5">
+            class="px-5 py-2 rounded-xl cta-primary-btn font-black text-xs shadow-lg cursor-pointer flex items-center gap-1.5">
             <i class="fa-solid fa-floppy-disk"></i>
             <span>Lưu & Đồng Bộ Tất Cả Người Xem</span>
           </button>
@@ -11067,8 +11067,12 @@
           } else if (info.sessionId && !existing.remoteSessionId) {
             existing.remoteSessionId = info.sessionId;
           }
+          if (existing.pc && (existing.pc.connectionState === "failed" || existing.pc.connectionState === "closed")) {
+            closeVoicePeer(rUid);
+          }
         }
-        if (!voicePeers[rUid] && state.uid < rUid) {
+        // Chủ động tạo kết nối chiều đi nếu mình nhỏ UID hơn HOẶC nếu mình đang bật Mic mà chưa có peer với họ
+        if (!voicePeers[rUid] && (state.uid < rUid || voiceMicActive)) {
           try {
             if (isNativeAndroidVoiceAvailable()) {
               voicePeers[rUid] = { native: true, remoteSessionId: info.sessionId || "", iceDisconnectTimer: null };
@@ -13493,47 +13497,18 @@
     let localMicMonitorNodes = null;
 
     function setLocalMicSelfMonitor(stream, enabled) {
+      // Đã tắt hoàn toàn tính năng tự phát lại mic của chính mình để không bị vọng tiếng
       try {
-        if (!enabled || !stream) {
-          if (localMicMonitorAudioEl) {
-            localMicMonitorAudioEl.pause();
-            localMicMonitorAudioEl.srcObject = null;
-          }
-          if (localMicMonitorNodes) {
-            try { localMicMonitorNodes.source.disconnect(); } catch (_) {}
-            try { localMicMonitorNodes.gain.disconnect(); } catch (_) {}
-            localMicMonitorNodes = null;
-          }
-          return;
+        if (localMicMonitorAudioEl) {
+          localMicMonitorAudioEl.pause();
+          localMicMonitorAudioEl.srcObject = null;
+          localMicMonitorAudioEl.remove();
+          localMicMonitorAudioEl = null;
         }
-        if (!localMicMonitorAudioEl) {
-          localMicMonitorAudioEl = document.createElement("audio");
-          localMicMonitorAudioEl.id = "local-mic-loopback-audio";
-          localMicMonitorAudioEl.autoplay = true;
-          localMicMonitorAudioEl.playsInline = true;
-          localMicMonitorAudioEl.style.display = "none";
-          document.body.appendChild(localMicMonitorAudioEl);
-        }
-        localMicMonitorAudioEl.srcObject = stream;
-        localMicMonitorAudioEl.muted = false;
-        localMicMonitorAudioEl.volume = 1.0;
-        localMicMonitorAudioEl.play().catch(() => {});
-
-        const Ctx = window.AudioContext || window.webkitAudioContext;
-        if (Ctx) {
-          if (!window.__voiceAudioCtx) window.__voiceAudioCtx = new Ctx();
-          const ctx = window.__voiceAudioCtx;
-          if (ctx.state === "suspended") ctx.resume().catch(() => {});
-          if (localMicMonitorNodes) {
-            try { localMicMonitorNodes.source.disconnect(); } catch (_) {}
-            try { localMicMonitorNodes.gain.disconnect(); } catch (_) {}
-          }
-          const source = ctx.createMediaStreamSource(stream);
-          const gain = ctx.createGain();
-          gain.gain.value = 1.15;
-          source.connect(gain);
-          gain.connect(ctx.destination);
-          localMicMonitorNodes = { source, gain };
+        if (localMicMonitorNodes) {
+          try { localMicMonitorNodes.source.disconnect(); } catch (_) {}
+          try { localMicMonitorNodes.gain.disconnect(); } catch (_) {}
+          localMicMonitorNodes = null;
         }
       } catch (_) {}
     }
@@ -13616,7 +13591,7 @@
         if (!hasLiveTrack) {
           try {
             localVoiceStream = await navigator.mediaDevices.getUserMedia({
-              audio: { echoCancellation: false, noiseSuppression: true, autoGainControl: true }
+              audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
             });
           } catch (constraintErr) {
             localVoiceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -13643,7 +13618,6 @@
       voiceMicActive = true;
       updateVoiceMicButtonUI();
       attachVoiceVadMonitor(state.uid, localVoiceStream);
-      setLocalMicSelfMonitor(localVoiceStream, true);
 
       const badge = document.getElementById("voice-diag-badge");
       const dBadge = document.getElementById("discord-voice-diag-badge");
@@ -13654,11 +13628,20 @@
         livekitRoom.localParticipant.setMicrophoneEnabled(true).catch(() => {});
       }
 
-      // Thay thế trực tiếp track micro thật vào luồng WebRTC đã mở sẵn
-      for (const [rUid, entry] of Object.entries(voicePeers)) {
+      // Đảm bảo đồng bộ đầy đủ với tất cả người xem đang ở trong phòng (kể cả khi peer chưa khởi tạo)
+      let allRoomPeers = {};
+      if (rtdb && rtdbMod) {
         try {
-          if (!entry || !entry.pc || entry.pc.connectionState === "closed") continue;
-          if (entry.audioSender) {
+          const pSnap = await rtdbMod.get(rtdbMod.ref(rtdb, `voice/${roomId}/peers`));
+          allRoomPeers = pSnap.val() || {};
+        } catch (_) {}
+      }
+      const targetPeerUids = new Set([...Object.keys(voicePeers), ...Object.keys(allRoomPeers)]);
+      for (const rUid of targetPeerUids) {
+        if (!rUid || rUid === state.uid) continue;
+        try {
+          let entry = voicePeers[rUid];
+          if (entry && entry.pc && entry.pc.connectionState !== "closed" && entry.pc.connectionState !== "failed" && entry.audioSender) {
             await entry.audioSender.replaceTrack(track);
             entry.hadSentTrack = true;
           } else if (rtdb && rtdbMod) {
@@ -13671,6 +13654,7 @@
               fresh: true,
               sdp: offer.sdp,
               from: state.uid,
+              sessionId: currentVoiceSessionId,
               ts: Date.now()
             });
           }
@@ -15656,14 +15640,14 @@
       const footer = document.getElementById("admin-panel-footer");
 
       if (tabRooms) tabRooms.className = state.adminTab === "rooms"
-        ? "px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 cursor-pointer transition"
-        : "px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-white/10 text-slate-300 font-bold text-xs flex items-center gap-1.5 cursor-pointer transition";
+        ? "px-4 py-2 rounded-xl cta-primary-btn font-black text-xs flex items-center gap-1.5 cursor-pointer transition"
+        : "px-4 py-2 rounded-xl liquid-glass-pill font-bold text-xs flex items-center gap-1.5 cursor-pointer transition";
       if (tabRev) tabRev.className = state.adminTab === "revenue"
-        ? "px-4 py-2 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs flex items-center gap-1.5 cursor-pointer transition"
-        : "px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs flex items-center gap-1.5 cursor-pointer transition";
+        ? "px-4 py-2 rounded-xl cta-primary-btn font-black text-xs flex items-center gap-1.5 cursor-pointer transition"
+        : "px-4 py-2 rounded-xl liquid-glass-pill font-extrabold text-xs flex items-center gap-1.5 cursor-pointer transition";
       if (tabVis) tabVis.className = state.adminTab === "visitors"
-        ? "px-4 py-2 rounded-xl bg-sky-500 text-slate-950 font-black text-xs flex items-center gap-1.5 cursor-pointer transition"
-        : "px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-sky-500/40 text-sky-300 font-extrabold text-xs flex items-center gap-1.5 cursor-pointer transition";
+        ? "px-4 py-2 rounded-xl cta-primary-btn font-black text-xs flex items-center gap-1.5 cursor-pointer transition"
+        : "px-4 py-2 rounded-xl liquid-glass-pill font-extrabold text-xs flex items-center gap-1.5 cursor-pointer transition";
 
       editor?.classList.toggle("hidden", state.adminTab !== "rooms");
       revPanel?.classList.toggle("hidden", state.adminTab !== "revenue");
@@ -15821,20 +15805,33 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               ${online.map(v => {
                 const isMe = v.uid === state.uid;
-                const loc = v.currentRoomId && v.currentRoomId !== "lobby"
-                  ? (getEffectiveRoom(v.currentRoomId)?.number || v.currentRoomId)
-                  : "Sảnh chính";
+                const loc = v.currentRoomId === "cinema_finder"
+                  ? "📍 Tìm Rạp Hà Nội"
+                  : (v.currentRoomId && v.currentRoomId !== "lobby"
+                    ? (getEffectiveRoom(v.currentRoomId)?.number || v.currentRoomId)
+                    : "Sảnh chính");
+                const gpsUrl = (v.gpsLat && v.gpsLng)
+                  ? `https://www.google.com/maps?q=${v.gpsLat},${v.gpsLng}`
+                  : "";
                 return `
-                  <div class="px-3 py-2.5 rounded-xl bg-stone-950/90 border border-white/10 flex items-center justify-between gap-2 text-xs">
-                    <div class="min-w-0">
-                      <p class="font-black text-white truncate">
-                        ${escapeHTML(v.userName || "Khách")} ${isMe ? `<span class="text-[10px] text-amber-300">(Bạn)</span>` : ""}
-                      </p>
-                      <p class="text-[10px] text-slate-400">${escapeHTML(v.device || "Web")}</p>
+                  <div class="px-3.5 py-3 rounded-xl liquid-glass-card flex flex-col gap-1.5 text-xs">
+                    <div class="flex items-center justify-between gap-2">
+                      <div class="min-w-0">
+                        <p class="font-black text-white truncate">
+                          ${escapeHTML(v.userName || "Khách")} ${isMe ? `<span class="text-[10px] text-rose-400">(Bạn)</span>` : ""}
+                        </p>
+                        <p class="text-[10px] text-slate-400">${escapeHTML(v.device || "Web")}</p>
+                      </div>
+                      <span class="monochrome-pill px-2.5 py-0.5 rounded-full font-bold text-[10px] shrink-0">
+                        ${escapeHTML(loc)}
+                      </span>
                     </div>
-                    <span class="px-2 py-0.5 rounded-lg bg-sky-500/20 border border-sky-400/30 text-sky-200 font-bold text-[10px] shrink-0">
-                      ${escapeHTML(loc)}
-                    </span>
+                    ${v.gpsLat && v.gpsLng ? `
+                      <div class="pt-1.5 border-t border-white/10 flex flex-wrap items-center justify-between gap-1.5 text-[10px]">
+                        <span class="text-emerald-300 font-semibold truncate"><i class="fa-solid fa-location-crosshairs mr-1"></i>${escapeHTML(v.gpsLabel || `${Number(v.gpsLat).toFixed(4)}, ${Number(v.gpsLng).toFixed(4)}`)}${v.nearestCinema ? ` • Gần: ${escapeHTML(v.nearestCinema)}` : ""}</span>
+                        <a href="${gpsUrl}" target="_blank" rel="noopener noreferrer" class="monochrome-pill px-2 py-0.5 rounded-full font-bold text-[10px] hover:text-white shrink-0">Mở Maps ↗</a>
+                      </div>
+                    ` : ""}
                   </div>
                 `;
               }).join("")}
@@ -16502,6 +16499,38 @@
       }
     }
 
+    function syncUserFinderLocationToAdmin(lat, lng, label, selectedCinemaName = "", isRealGps = false) {
+      if (!rtdb || !rtdbMod || !state.uid) return;
+      const locPayload = {
+        uid: state.uid,
+        userName: state.userName || "Khách",
+        userEmail: state.userEmail || "",
+        gmailVerified: Boolean(state.gmailVerified),
+        device: detectDeviceLabel(),
+        lat: Number(lat || 21.0285),
+        lng: Number(lng || 105.8542),
+        locationLabel: String(label || ""),
+        selectedCinemaName: String(selectedCinemaName || ""),
+        isRealGps: Boolean(isRealGps),
+        updatedAt: Date.now()
+      };
+      rtdbMod.update(rtdbMod.ref(rtdb, `online_visitors/${state.uid}`), {
+        currentRoomId: "cinema_finder",
+        gpsLat: locPayload.lat,
+        gpsLng: locPayload.lng,
+        gpsLabel: locPayload.locationLabel,
+        nearestCinema: locPayload.selectedCinemaName,
+        hasRealGps: locPayload.isRealGps,
+        updatedAt: Date.now()
+      }).catch(() => {});
+      const logId = `LOC_${state.uid}_${Date.now()}`;
+      rtdbMod.set(rtdbMod.ref(rtdb, `cinema_finder_logs/${logId}`), {
+        id: logId,
+        ...locPayload,
+        createdAt: Date.now()
+      }).catch(() => {});
+    }
+
     function openHanoiCinemaFinder() {
       if (state.currentRoomId) {
         leaveRoom();
@@ -16514,6 +16543,14 @@
 
       roomEl?.classList.add("hidden");
       renderHanoiCinemaFinderUI();
+      const nearestInit = getSortedHanoiCinemas()[0];
+      syncUserFinderLocationToAdmin(
+        hanoiFinderState.userLat,
+        hanoiFinderState.userLng,
+        hanoiFinderState.locationLabel,
+        nearestInit ? `${nearestInit.name} (${nearestInit.roadKm} km)` : "",
+        hanoiFinderState.hasRealGps
+      );
       if (!hanoiFinderState.hasRealGps) {
         locateUserInHanoi(true);
       }
@@ -16586,6 +16623,13 @@
           // Tự động chọn rạp gần nhất sau khi định vị
           const nearest = getSortedHanoiCinemas()[0];
           if (nearest) hanoiFinderState.selectedCinemaId = nearest.id;
+          syncUserFinderLocationToAdmin(
+            hanoiFinderState.userLat,
+            hanoiFinderState.userLng,
+            hanoiFinderState.locationLabel,
+            nearest ? `${nearest.name} (${nearest.roadKm} km)` : "",
+            hanoiFinderState.hasRealGps
+          );
           renderHanoiCinemaFinderUI();
         },
         () => {
@@ -16603,6 +16647,13 @@
       hanoiFinderState.locationLabel = `${info.label} (${info.lat.toFixed(4)}, ${info.lng.toFixed(4)})`;
       const nearest = getSortedHanoiCinemas()[0];
       if (nearest) hanoiFinderState.selectedCinemaId = nearest.id;
+      syncUserFinderLocationToAdmin(
+        hanoiFinderState.userLat,
+        hanoiFinderState.userLng,
+        hanoiFinderState.locationLabel,
+        nearest ? `${nearest.name} (${nearest.roadKm} km)` : "",
+        false
+      );
       renderHanoiCinemaFinderUI();
     }
 
