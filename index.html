@@ -13,14 +13,32 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
+    :root {
+      --bg-base: #0A0C10;
+      --bg-surface: rgba(20, 24, 32, 0.65);
+      --accent-primary: #E11D48;
+      --text-primary: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --glass-border: rgba(255, 255, 255, 0.14);
+      --glass-highlight: inset 0 1px 1px rgba(255, 255, 255, 0.25);
+      --status-live: #10B981;
+    }
+
     * {
       box-sizing: border-box;
       font-family: 'Inter', sans-serif;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    *::-webkit-scrollbar {
+      width: 0px !important;
+      height: 0px !important;
+      display: none !important;
     }
 
     html, body {
-      background-color: #090809;
-      color: #f8fafc;
+      background-color: var(--bg-base);
+      color: var(--text-primary);
       width: 100%;
       max-width: 100vw;
       overflow-x: clip;
@@ -30,7 +48,7 @@
       transition: background-color 0.65s cubic-bezier(0.4, 0, 0.2, 1);
     }
     @media (max-width: 768px) {
-      header, main, section, #lobby-view, #room-view {
+      header, main, section, #lobby-view, #hanoi-cinema-finder-view, #room-view {
         max-width: 100vw !important;
         overflow-x: clip !important;
       }
@@ -39,18 +57,23 @@
       }
     }
 
-    /* LỚP NỀN CHUYỂN ĐỘNG MỜ VÔ TẬN KIỂU GEMINI + CÁ NGỪ BƠI */
+    /* LỚP NỀN CHUYỂN ĐỘNG MỜ VÔ TẬN KIỂU GEMINI + CÁ NGỪ BƠI TIẾT CHẾ (0.06 OPACITY) */
     #ambient-tuna-backdrop {
       position: fixed;
       inset: 0;
-      z-index: 0;
-      pointer-events: none;
+      z-index: 0 !important;
+      pointer-events: none !important;
       overflow: hidden;
-      background: radial-gradient(circle at 50% 20%, rgba(24, 20, 24, 0.55), #070608 75%);
+      background: radial-gradient(circle at 50% 20%, rgba(42, 14, 18, 0.24), var(--bg-base) 78%);
     }
-    #lobby-view, #room-view, footer {
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 40 !important;
+    }
+    #lobby-view, #hanoi-cinema-finder-view, #room-view, footer {
       position: relative;
-      z-index: 1;
+      z-index: 10 !important;
     }
     .ambient-mist-layer {
       position: absolute;
@@ -149,8 +172,10 @@
       inset: 0;
       width: 100%;
       height: 100%;
-      opacity: 0.94;
-      pointer-events: none;
+      z-index: 0 !important;
+      opacity: 0.06 !important;
+      filter: saturate(0.55) brightness(0.48);
+      pointer-events: none !important;
       will-change: transform;
       transform: translateZ(0);
     }
@@ -1539,7 +1564,93 @@
         height: 48px;
       }
     }
-    /* Hiệu ứng Zoom 150% - 175% khi trỏ chuột vào các ô ở Sảnh Chính (Desktop Hover) */
+    /* ======================================================= */
+    /* HỆ THỐNG APPLE LIQUID GLASS (60-30-10) & CHUYỂN CẢNH 60FPS */
+    /* ======================================================= */
+    .liquid-glass,
+    .liquid-glass-card,
+    #name-modal > div,
+    #booking-modal > div,
+    #memory-capsule-modal > div,
+    #hero-detail-modal > div,
+    #host-key-modal > div {
+      background: rgba(25, 28, 38, 0.55) !important;
+      backdrop-filter: blur(24px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+      border: 1px solid var(--glass-border) !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), var(--glass-highlight) !important;
+    }
+
+    .liquid-glass-pill {
+      background: rgba(25, 28, 38, 0.55) !important;
+      backdrop-filter: blur(24px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+      border: 1px solid var(--glass-border) !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), var(--glass-highlight) !important;
+      color: var(--text-primary) !important;
+    }
+    .liquid-glass-pill:hover {
+      background: rgba(38, 43, 58, 0.72) !important;
+      border-color: rgba(255, 255, 255, 0.28) !important;
+    }
+
+    .cta-primary-btn {
+      background: var(--accent-primary) !important;
+      color: var(--text-primary) !important;
+      border: 1px solid rgba(255, 255, 255, 0.22) !important;
+      box-shadow: 0 10px 28px rgba(225, 29, 72, 0.42), var(--glass-highlight) !important;
+    }
+    .cta-primary-btn:hover {
+      background: #f43f5e !important;
+      box-shadow: 0 14px 34px rgba(225, 29, 72, 0.58), var(--glass-highlight) !important;
+    }
+
+    .monochrome-pill {
+      background: rgba(20, 24, 32, 0.72) !important;
+      backdrop-filter: blur(16px) saturate(160%);
+      -webkit-backdrop-filter: blur(16px) saturate(160%);
+      border: 1px solid var(--glass-border) !important;
+      box-shadow: var(--glass-highlight);
+      color: var(--text-primary) !important;
+    }
+
+    /* Chuyển trang trượt ngang 2 chiều 60fps GPU-accelerated (Trang chủ <-> Tìm Rạp) */
+    @keyframes pageSlideInFromRight {
+      0% { opacity: 0; transform: translate3d(42px, 0, 0) scale(0.985); }
+      100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+    }
+    @keyframes pageSlideOutToLeft {
+      0% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+      100% { opacity: 0; transform: translate3d(-42px, 0, 0) scale(0.985); }
+    }
+    @keyframes pageSlideInFromLeft {
+      0% { opacity: 0; transform: translate3d(-42px, 0, 0) scale(0.985); }
+      100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+    }
+    @keyframes pageSlideOutToRight {
+      0% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+      100% { opacity: 0; transform: translate3d(42px, 0, 0) scale(0.985); }
+    }
+    .page-anim-in-right {
+      animation: pageSlideInFromRight 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      will-change: transform, opacity;
+    }
+    .page-anim-out-left {
+      animation: pageSlideOutToLeft 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      will-change: transform, opacity;
+      pointer-events: none;
+    }
+    .page-anim-in-left {
+      animation: pageSlideInFromLeft 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      will-change: transform, opacity;
+    }
+    .page-anim-out-right {
+      animation: pageSlideOutToRight 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      will-change: transform, opacity;
+      pointer-events: none;
+    }
+
+    /* Hiệu ứng Hover Zoom cân đối & mượt mà ở Sảnh Chính (Desktop Hover) */
     @media (hover: hover) and (pointer: fine) {
       #hero-thumbs-strip > button.lobby-zoom-tile {
         position: relative;
@@ -1549,9 +1660,9 @@
       }
       #hero-thumbs-strip > button.lobby-zoom-tile:hover {
         z-index: 90 !important;
-        transform: scale(1.65) translateY(-4px) !important;
-        box-shadow: 0 22px 48px rgba(0, 0, 0, 0.96), 0 0 24px rgba(245, 158, 11, 0.55) !important;
-        border-color: rgba(251, 191, 36, 0.95) !important;
+        transform: scale(1.48) translateY(-4px) !important;
+        box-shadow: 0 22px 48px rgba(0, 0, 0, 0.92), var(--glass-highlight) !important;
+        border-color: rgba(255, 255, 255, 0.38) !important;
       }
       #lobby-jjk-episodes > button.lobby-zoom-ep {
         position: relative;
@@ -1561,8 +1672,8 @@
       }
       #lobby-jjk-episodes > button.lobby-zoom-ep:hover {
         z-index: 85 !important;
-        transform: scale(1.68) translateY(-3px) !important;
-        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.92), 0 0 20px rgba(244, 63, 94, 0.55) !important;
+        transform: scale(1.52) translateY(-3px) !important;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.9), var(--glass-highlight) !important;
       }
       #lobby-rooms-grid > .lobby-zoom-card {
         position: relative;
@@ -1576,9 +1687,9 @@
       }
       #lobby-rooms-grid > .lobby-zoom-card:hover {
         z-index: 80 !important;
-        transform: scale(1.5) !important;
-        box-shadow: 0 30px 75px rgba(0, 0, 0, 0.98), 0 0 32px rgba(245, 158, 11, 0.45) !important;
-        border-color: rgba(251, 191, 36, 0.9) !important;
+        transform: scale(1.24) translateY(-6px) !important;
+        box-shadow: 0 28px 64px rgba(0, 0, 0, 0.92), var(--glass-highlight) !important;
+        border-color: rgba(255, 255, 255, 0.32) !important;
       }
     }
 
@@ -1591,21 +1702,20 @@
       width: 6px;
       height: 6px;
       border-radius: 9999px;
-      background: #fbbf24;
+      background: #F8FAFC;
       display: inline-block;
       animation: messengerDotBounce 1.25s infinite ease-in-out;
     }
-    .messenger-typing-dot:nth-child(2) { animation-delay: 0.18s; background: #fb7185; }
-    .messenger-typing-dot:nth-child(3) { animation-delay: 0.36s; background: #38bdf8; }
+    .messenger-typing-dot:nth-child(2) { animation-delay: 0.18s; background: #94A3B8; }
+    .messenger-typing-dot:nth-child(3) { animation-delay: 0.36s; background: #E11D48; }
 
-    /* Hiệu ứng nút bấm mượt mà cho giao diện Tìm Rạp Hà Nội */
+    /* Hiệu ứng nút bấm mượt mà 60fps */
     .cv-smooth-btn {
       transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, filter 0.22s ease, background-color 0.22s ease;
     }
     .cv-smooth-btn:hover {
-      transform: translateY(-2px) scale(1.03);
-      box-shadow: 0 12px 28px rgba(245, 158, 11, 0.28);
-      filter: brightness(1.08);
+      transform: translateY(-2px) scale(1.02);
+      filter: brightness(1.06);
     }
     .cv-smooth-btn:active {
       transform: translateY(0) scale(0.97);
@@ -1614,7 +1724,7 @@
 </head>
 <body class="min-h-screen flex flex-col selection:bg-rose-500 selection:text-white">
 
-  <!-- LỚP NỀN CHUYỂN ĐỘNG MỜ VÔ TẬN + CÁ NGỪ BƠI TƯƠNG TÁC -->
+  <!-- LỚP NỀN CHUYỂN ĐỘNG MỜ VÔ TẬN + CÁ NGỪ BƠI TIẾT CHẾ (Z-INDEX 0, POINTER-EVENTS NONE, OPACITY 0.06) -->
   <div id="ambient-tuna-backdrop" aria-hidden="true">
     <div class="ambient-mist-layer">
       <div class="ambient-mist-blob blob-smoky"></div>
@@ -1625,56 +1735,56 @@
     <canvas id="ambient-tuna-canvas"></canvas>
   </div>
 
-  <!-- HEADER CHUNG -->
-  <header class="sticky top-0 z-40 bg-stone-950/90 backdrop-blur-md border-b border-white/10">
+  <!-- HEADER CHUNG (APPLE LIQUID GLASS NAVBAR) -->
+  <header class="liquid-glass sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3 cursor-pointer" onclick="window.appActions.closeHanoiCinemaFinder(); window.appActions.leaveRoom()">
         <img src="assets/web-logo.png" alt="CineVerse Lotte"
-             class="w-10 h-10 rounded-xl object-cover shadow-lg shadow-rose-600/30 border border-white/10 bg-black" />
+             class="w-10 h-10 rounded-xl object-cover shadow-lg border border-white/15 bg-black" />
         <div>
           <div class="flex items-center gap-2">
-            <span class="font-black text-lg tracking-tight text-white">CINEVERSE <span class="text-amber-400">LOTTE</span></span>
-            <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">Live 3D POV</span>
+            <span class="font-black text-lg tracking-tight text-white">CINEVERSE <span class="text-slate-300 font-extrabold">LOTTE</span></span>
+            <span class="monochrome-pill text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full">Live 3D POV</span>
           </div>
           <p class="text-xs text-slate-400">Không gian Rạp chiếu phim trực tuyến • Góc nhìn chân thực chuẩn rạp</p>
         </div>
       </div>
 
       <div id="header-lobby-actions" class="flex flex-wrap items-center gap-2 sm:gap-2.5">
-        <!-- Nút Đặt Vé Trực Tuyến (Dùng Avatar của Web) -->
+        <!-- Nút CTA chính duy nhất (--accent-primary: #E11D48) -->
         <button type="button" onclick="window.appActions.openBookingModal()"
-          class="cv-smooth-btn flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white text-xs font-black shadow-lg shadow-rose-600/25 transition cursor-pointer">
+          class="cv-smooth-btn cta-primary-btn flex items-center gap-2 px-4 py-2 rounded-xl text-white text-xs font-black transition cursor-pointer">
           <img src="./assets/web-logo.png" alt="CineVerse Avatar" class="w-5 h-5 rounded-full object-cover border border-white/40 bg-black shrink-0" />
           <span>Đặt Vé Rạp</span>
         </button>
 
-        <!-- Nút mở Giao diện Tách Biệt: Tìm Rạp Phim Gần Nhất Hà Nội (Lotte, CGV, Beta) & Dự Trù Ngân Sách -->
+        <!-- Nút phụ Apple Liquid Glass Monochrome: Tìm Rạp Hà Nội -->
         <button type="button" id="btn-open-hanoi-cinemas" onclick="window.appActions.openHanoiCinemaFinder()"
-          class="cv-smooth-btn flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 via-rose-600 to-purple-600 text-white text-xs font-black shadow-lg shadow-amber-500/25 border border-amber-300/40 transition cursor-pointer">
-          <i class="fa-solid fa-map-location-dot text-amber-200 animate-bounce"></i>
-          <span>Tìm Rạp Hà Nội (CGV • Lotte • Beta)</span>
+          class="cv-smooth-btn liquid-glass-pill flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer">
+          <i class="fa-solid fa-location-dot text-rose-500"></i>
+          <span>Tìm Rạp Hà Nội</span>
         </button>
 
-        <!-- Nút mở Tủ Trưng Bày Vé NFT & Hộp Ký Ức (Cinematic Profile) -->
+        <!-- Nút phụ Apple Liquid Glass Monochrome: Tủ Vé NFT & Ký Ức -->
         <button type="button" onclick="window.appActions.openMemoryCapsuleModal()"
-          class="cv-smooth-btn flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-amber-500 hover:from-purple-500 hover:to-amber-400 text-white text-xs font-extrabold shadow-lg shadow-purple-600/25 transition cursor-pointer">
-          <i class="fa-solid fa-id-card-clip"></i>
-          <span>Tủ Vé NFT & Ký Ức</span>
-          <span id="capsule-count-badge" class="px-1.5 py-0.5 rounded-full bg-black/50 text-[10px] font-black text-amber-200">1</span>
+          class="cv-smooth-btn liquid-glass-pill flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer">
+          <i class="fa-solid fa-id-card-clip text-slate-300"></i>
+          <span>Tủ Vé NFT</span>
+          <span id="capsule-count-badge" class="px-1.5 py-0.5 rounded-full bg-white/10 text-[10px] font-black text-slate-200">1</span>
         </button>
 
         <!-- Nút Quản Trị Admin (Ẩn trên bản Member; dùng qua App Admin riêng) -->
         <button type="button" id="btn-admin-panel" onclick="window.appActions.openAdminPanelModal()"
-          class="hidden flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-amber-500/25 to-rose-600/25 hover:from-amber-500/40 hover:to-rose-600/40 border border-amber-400/50 text-amber-300 text-xs font-black shadow-lg transition cursor-pointer"
+          class="hidden liquid-glass-pill flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition cursor-pointer"
           title="Admin: Setup phim cho từng phòng & đồng bộ tất cả người xem">
-          <i class="fa-solid fa-crown text-amber-400"></i>
+          <i class="fa-solid fa-crown text-rose-500"></i>
           <span class="hidden sm:inline">Admin</span>
         </button>
 
-        <!-- Tên khán giả -->
+        <!-- Nút phụ Apple Liquid Glass Monochrome: Tên khán giả -->
         <button type="button" onclick="window.appActions.openNameModal()"
-          class="cv-smooth-btn flex items-center gap-2 px-3 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 border border-amber-500/30 text-xs font-bold text-amber-300 transition cursor-pointer">
-          <i class="fa-solid fa-user-check text-rose-400"></i>
+          class="cv-smooth-btn liquid-glass-pill flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer">
+          <i class="fa-solid fa-circle-user text-slate-300"></i>
           <span><strong id="header-username" class="text-white">Khán giả</strong></span>
           <i class="fa-solid fa-pen text-[10px] text-slate-400"></i>
         </button>
@@ -1894,27 +2004,27 @@
   <!-- VIEW 1B: GIAO DIỆN TÁCH BIỆT - TÌM RẠP PHIM GẦN NHẤT TẠI HÀ NỘI (LOTTE • CGV • BETA) & DỰ TRÙ NGÂN SÁCH -->
   <!-- ========================================================= -->
   <section id="hanoi-cinema-finder-view" class="hidden flex-1 max-w-7xl w-full mx-auto px-4 py-6 space-y-6">
-    <!-- Top Banner & Điều hướng quay về Sảnh Chính -->
-    <div class="rounded-3xl bg-gradient-to-r from-stone-950 via-[#1b0d18] to-stone-950 border border-amber-500/40 p-5 sm:p-6 shadow-[0_25px_70px_rgba(0,0,0,0.92)] flex flex-wrap items-center justify-between gap-4">
+    <!-- Top Banner & Điều hướng quay về Sảnh Chính (Apple Liquid Glass) -->
+    <div class="liquid-glass-card rounded-3xl p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center gap-4">
-        <img src="./assets/web-logo.png" alt="CineVerse Logo" class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border-2 border-amber-400/60 shadow-xl shrink-0" />
+        <img src="./assets/web-logo.png" alt="CineVerse Logo" class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border border-white/20 shadow-xl shrink-0" />
         <div class="space-y-1">
           <div class="flex flex-wrap items-center gap-2">
-            <span class="px-2.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-black uppercase tracking-wider">HÀ NỘI REALTIME GPS</span>
-            <span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[10px] font-black uppercase">CGV • LOTTE CINEMA • BETA CINEMAS</span>
+            <span class="monochrome-pill px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">HÀ NỘI REALTIME GPS</span>
+            <span class="monochrome-pill px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase text-slate-300">CGV • LOTTE CINEMA • BETA CINEMAS</span>
           </div>
           <h1 class="text-lg sm:text-2xl font-black text-white tracking-tight">Bản Đồ Rạp Chiếu Phim Hà Nội &amp; Dự Trù Ngân Sách Thông Minh</h1>
-          <p class="text-xs text-slate-300">Dữ liệu địa chỉ, tọa độ Google Maps và bảng giá niêm yết chính thức được kiểm chứng từ hệ thống rạp tại TP. Hà Nội.</p>
+          <p class="text-xs text-slate-400">Dữ liệu địa chỉ, tọa độ Google Maps và bảng giá niêm yết chính thức được kiểm chứng từ hệ thống rạp tại TP. Hà Nội.</p>
         </div>
       </div>
       <div class="flex flex-wrap items-center gap-2.5">
         <button type="button" onclick="window.appActions.locateUserInHanoi()"
-          class="cv-smooth-btn px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 text-xs font-black flex items-center gap-2 shadow-lg cursor-pointer">
+          class="cv-smooth-btn cta-primary-btn px-4 py-2.5 rounded-xl text-xs font-black flex items-center gap-2 cursor-pointer">
           <i class="fa-solid fa-location-crosshairs"></i>
           <span id="hn-gps-btn-label">Định Vị GPS Hiện Tại</span>
         </button>
         <button type="button" onclick="window.appActions.closeHanoiCinemaFinder()"
-          class="cv-smooth-btn px-4 py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 border border-amber-400/40 text-amber-300 text-xs font-extrabold flex items-center gap-2 cursor-pointer">
+          class="cv-smooth-btn liquid-glass-pill px-4 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2 cursor-pointer">
           <i class="fa-solid fa-arrow-left"></i>
           <span>Quay Về Sảnh Chính</span>
         </button>
@@ -1922,14 +2032,14 @@
     </div>
 
     <!-- Thanh điều khiển: Chọn Quận Hà Nội + Lọc Hãng Rạp + Trạng thái GPS -->
-    <div class="rounded-3xl bg-stone-900/90 border border-white/10 p-4 sm:p-5 space-y-4 shadow-xl">
+    <div class="liquid-glass-card rounded-3xl p-4 sm:p-5 space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
         <div class="md:col-span-4 space-y-1">
-          <label class="text-[11px] font-extrabold uppercase tracking-wider text-amber-400 block">
+          <label class="text-[11px] font-extrabold uppercase tracking-wider text-slate-300 block">
             <i class="fa-solid fa-location-dot mr-1 text-rose-500"></i>Vị Trí Của Bạn Tại Hà Nội
           </label>
           <select id="hn-district-select" onchange="window.appActions.onHanoiDistrictChange(this.value)"
-            class="w-full px-3.5 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-xs text-white font-bold focus:outline-none focus:border-amber-400">
+            class="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white font-bold focus:outline-none focus:border-rose-500">
             <option value="gps">📍 Theo tọa độ GPS hiện tại (hoặc Trung tâm Hà Nội)</option>
             <option value="cau_giay">Quận Cầu Giấy (Xuân Thủy / Trần Duy Hưng)</option>
             <option value="dong_da">Quận Đống Đa (Nguyễn Chí Thanh / Chùa Bộc)</option>
@@ -1949,20 +2059,20 @@
           <label class="text-[11px] font-extrabold uppercase tracking-wider text-slate-300 block">Lọc Hệ Thống Rạp</label>
           <div class="flex flex-wrap items-center gap-1.5" id="hn-brand-filters">
             <button type="button" onclick="window.appActions.setHanoiBrandFilter('all')" data-hnbrand="all"
-              class="cv-smooth-btn px-3.5 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-rose-600 to-amber-500 text-white cursor-pointer">
+              class="cv-smooth-btn cta-primary-btn px-3.5 py-2 rounded-xl text-xs font-black cursor-pointer">
               Tất cả (21 rạp HN)
             </button>
             <button type="button" onclick="window.appActions.setHanoiBrandFilter('Lotte Cinema')" data-hnbrand="Lotte Cinema"
-              class="cv-smooth-btn px-3 py-2 rounded-xl text-xs font-bold bg-stone-950 text-rose-300 border border-rose-500/30 cursor-pointer">
-              🔴 Lotte Cinema (7)
+              class="cv-smooth-btn liquid-glass-pill px-3 py-2 rounded-xl text-xs font-bold cursor-pointer">
+              Lotte Cinema (7)
             </button>
             <button type="button" onclick="window.appActions.setHanoiBrandFilter('CGV Cinemas')" data-hnbrand="CGV Cinemas"
-              class="cv-smooth-btn px-3 py-2 rounded-xl text-xs font-bold bg-stone-950 text-amber-300 border border-amber-500/30 cursor-pointer">
-              🟡 CGV Cinemas (10)
+              class="cv-smooth-btn liquid-glass-pill px-3 py-2 rounded-xl text-xs font-bold cursor-pointer">
+              CGV Cinemas (10)
             </button>
             <button type="button" onclick="window.appActions.setHanoiBrandFilter('Beta Cinemas')" data-hnbrand="Beta Cinemas"
-              class="cv-smooth-btn px-3 py-2 rounded-xl text-xs font-bold bg-stone-950 text-sky-300 border border-sky-500/30 cursor-pointer">
-              🔵 Beta Cinemas (4)
+              class="cv-smooth-btn liquid-glass-pill px-3 py-2 rounded-xl text-xs font-bold cursor-pointer">
+              Beta Cinemas (4)
             </button>
           </div>
         </div>
@@ -1971,13 +2081,13 @@
           <label class="text-[11px] font-extrabold uppercase tracking-wider text-slate-300 block">Tìm Tên Rạp / Đường Phố</label>
           <input id="hn-search-input" type="text" oninput="window.appActions.onHanoiCinemaSearch(this.value)"
             placeholder="VD: Tây Hồ, Bà Triệu, Mỹ Đình..."
-            class="w-full px-3.5 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-xs text-white font-semibold focus:outline-none focus:border-amber-400" />
+            class="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white font-semibold focus:outline-none focus:border-rose-500" />
         </div>
       </div>
 
-      <div id="hn-gps-status-bar" class="px-3.5 py-2 rounded-2xl bg-stone-950/90 border border-emerald-500/30 flex flex-wrap items-center justify-between gap-2 text-xs">
-        <span class="text-slate-300"><i class="fa-solid fa-satellite-dish text-emerald-400 mr-1.5"></i>Trạng thái định vị: <strong id="hn-gps-coord-text" class="text-emerald-300">Khu vực Nội thành Hà Nội (Bấm "Định Vị GPS Hiện Tại" để lấy tọa độ chính xác của bạn)</strong></span>
-        <span class="text-[11px] text-amber-300 font-bold">Giới hạn vùng tìm kiếm: 100% trong địa phận TP. Hà Nội</span>
+      <div id="hn-gps-status-bar" class="px-3.5 py-2 rounded-2xl bg-black/40 border border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <span class="text-slate-300"><i class="fa-solid fa-satellite-dish text-emerald-400 mr-1.5"></i>Trạng thái định vị: <strong id="hn-gps-coord-text" class="text-white">Khu vực Nội thành Hà Nội (Bấm "Định Vị GPS Hiện Tại" để lấy tọa độ chính xác của bạn)</strong></span>
+        <span class="text-[11px] text-slate-400 font-semibold">Giới hạn vùng tìm kiếm: 100% trong địa phận TP. Hà Nội</span>
       </div>
     </div>
 
@@ -1986,35 +2096,35 @@
       <!-- Cột Trái: Danh sách rạp xếp theo khoảng cách gần nhất -->
       <div class="lg:col-span-5 space-y-3">
         <div class="flex items-center justify-between px-1">
-          <h2 class="text-xs sm:text-sm font-black uppercase tracking-wider text-amber-300">
+          <h2 class="text-xs sm:text-sm font-black uppercase tracking-wider text-white">
             <i class="fa-solid fa-ranking-star mr-1.5 text-rose-500"></i>Danh Sách Rạp Gần Bạn Nhất
           </h2>
           <span id="hn-cinema-count-label" class="text-[11px] font-mono text-slate-400">21 cụm rạp</span>
         </div>
-        <div id="hn-cinema-list" class="space-y-3 max-h-[880px] overflow-y-auto pr-1"></div>
+        <div id="hn-cinema-list" class="space-y-3 max-h-[880px] overflow-y-auto"></div>
       </div>
 
       <!-- Cột Phải: Bản đồ Google Maps Trực Tiếp + Dự Trù Ngân Sách + Lịch Chiếu & Bảng Giá -->
       <div class="lg:col-span-7 space-y-5">
         <!-- 1. Khung Google Maps Kết Nối Trực Tiếp & Thông Tin Rạp Đang Chọn -->
-        <div class="rounded-3xl bg-stone-900/95 border border-amber-400/35 overflow-hidden shadow-2xl">
+        <div class="liquid-glass-card rounded-3xl overflow-hidden">
           <div class="p-4 sm:p-5 border-b border-white/10 flex flex-wrap items-start justify-between gap-3">
             <div class="space-y-1 min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-2">
-                <span id="hn-selected-brand-badge" class="px-2.5 py-0.5 rounded-lg bg-rose-600 text-white text-[10px] font-black uppercase">LOTTE CINEMA</span>
-                <span id="hn-selected-distance-badge" class="px-2.5 py-0.5 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[11px] font-black">Cách bạn ~1.2 km</span>
+                <span id="hn-selected-brand-badge" class="monochrome-pill px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase">LOTTE CINEMA</span>
+                <span id="hn-selected-distance-badge" class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/35 text-emerald-300 text-[11px] font-black">Cách bạn ~1.2 km</span>
               </div>
               <h3 id="hn-selected-name" class="text-base sm:text-xl font-black text-white">Lotte Cinema Tây Hồ (Lotte Mall West Lake)</h3>
-              <p id="hn-selected-address" class="text-xs text-slate-300"><i class="fa-solid fa-location-dot text-rose-400 mr-1"></i>Tầng 4, Lotte Mall West Lake Hanoi, 272 Võ Chí Công, Phú Thượng, Tây Hồ, Hà Nội</p>
+              <p id="hn-selected-address" class="text-xs text-slate-300"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>Tầng 4, Lotte Mall West Lake Hanoi, 272 Võ Chí Công, Phú Thượng, Tây Hồ, Hà Nội</p>
             </div>
             <div class="flex flex-wrap items-center gap-2 shrink-0">
               <a id="hn-selected-directions-link" href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer"
-                class="cv-smooth-btn px-3.5 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 text-white text-xs font-black flex items-center gap-1.5 shadow-lg">
+                class="cv-smooth-btn cta-primary-btn px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5">
                 <i class="fa-solid fa-diamond-turn-right"></i>
                 <span>Chỉ Đường Google Maps</span>
               </a>
               <a id="hn-selected-official-link" href="https://www.lottecinemavn.com" target="_blank" rel="noopener noreferrer"
-                class="cv-smooth-btn px-3 py-2 rounded-xl bg-stone-950 hover:bg-stone-800 border border-white/15 text-sky-300 text-xs font-bold flex items-center gap-1.5">
+                class="cv-smooth-btn liquid-glass-pill px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
                 <i class="fa-solid fa-arrow-up-right-from-square"></i>
                 <span>Web Chính Thức</span>
               </a>
@@ -2034,16 +2144,16 @@
         </div>
 
         <!-- 2. Công Cụ Dự Trù Ngân Sách Đi Xem Phim Cho Nhóm / Cá Nhân -->
-        <div class="rounded-3xl bg-stone-900/95 border border-rose-500/35 p-4 sm:p-5 space-y-4 shadow-2xl">
+        <div class="liquid-glass-card rounded-3xl p-4 sm:p-5 space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
             <div>
               <h3 class="text-sm sm:text-base font-black text-white flex items-center gap-2">
-                <i class="fa-solid fa-calculator text-amber-400"></i>
+                <i class="fa-solid fa-calculator text-rose-500"></i>
                 <span>Dự Trù Ngân Sách Đi Xem Phim (Theo Bảng Giá Niêm Yết Chính Thức)</span>
               </h3>
               <p class="text-[11px] text-slate-400">Tự động tính chi phí vé, bắp nước, gửi xe và so sánh giữa 3 hệ thống rạp CGV • Lotte • Beta.</p>
             </div>
-            <span id="hn-budget-per-person-pill" class="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-black">
+            <span id="hn-budget-per-person-pill" class="monochrome-pill px-3 py-1 rounded-full text-xs font-black">
               ~125.000đ / người
             </span>
           </div>
@@ -2111,16 +2221,16 @@
         </div>
 
         <!-- 3. Lịch Chiếu Real-time Hôm Nay & Bảng Giá Chính Thức Tại Rạp Đang Chọn -->
-        <div class="rounded-3xl bg-stone-900/95 border border-white/10 p-4 sm:p-5 space-y-4 shadow-2xl">
+        <div class="liquid-glass-card rounded-3xl p-4 sm:p-5 space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
             <div>
               <h3 class="text-sm sm:text-base font-black text-white flex items-center gap-2">
                 <i class="fa-solid fa-clock text-rose-500"></i>
                 <span>Lịch Chiếu Real-Time Hôm Nay &amp; Bảng Giá Rạp</span>
               </h3>
-              <p id="hn-realtime-clock-label" class="text-[11px] text-emerald-300 font-semibold">Đang đồng bộ theo khung giờ thực tế...</p>
+              <p id="hn-realtime-clock-label" class="text-[11px] text-emerald-400 font-semibold">Đang đồng bộ theo khung giờ thực tế...</p>
             </div>
-            <span id="hn-official-price-source" class="px-2.5 py-1 rounded-lg bg-stone-950 border border-white/10 text-[10px] text-slate-300 font-mono">
+            <span id="hn-official-price-source" class="monochrome-pill px-2.5 py-1 rounded-lg text-[10px] text-slate-300 font-mono">
               Nguồn: lottecinemavn.com
             </span>
           </div>
@@ -5176,29 +5286,36 @@
 
         return `
           <div onclick="window.appActions.enterRoom('${room.id}')"
-               class="lobby-zoom-card group rounded-3xl overflow-hidden bg-stone-900/90 border border-white/10 hover:border-amber-400/60 shadow-xl transition-all duration-300 flex flex-col cursor-pointer">
+               onmouseenter="window.appActions.startCardVideoPreview(this, '${room.id}')"
+               onmouseleave="window.appActions.stopCardVideoPreview(this)"
+               class="lobby-zoom-card liquid-glass-card group rounded-3xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer">
             <div class="relative h-48 overflow-hidden bg-black">
               <img src="${escapeHTML(room.poster)}" alt="${escapeHTML(room.movieTitle)}"
                    onerror="this.src='https://placehold.co/800x450/1c1917/fbbf24?text=CineVerse+Lotte'"
-                   class="w-full h-full object-cover group-hover:scale-105 transition duration-500 opacity-85" />
-              <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/30 to-transparent"></div>
+                   class="w-full h-full object-cover group-hover:scale-105 transition duration-500 opacity-90" />
+              <video class="card-hover-preview-video absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 pointer-events-none" muted playsinline preload="none"></video>
+              <div class="absolute inset-0 bg-gradient-to-t from-[#0A0C10] via-[#0A0C10]/35 to-transparent pointer-events-none"></div>
 
-              <div class="absolute top-3 inset-x-3 flex items-start justify-between gap-2">
+              <span class="card-preview-timer hidden absolute top-3 right-3 z-20 px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md border border-white/20 text-[10px] font-mono font-bold text-emerald-400">
+                ▶ 00:00 / 00:20
+              </span>
+
+              <div class="absolute top-3 inset-x-3 flex items-start justify-between gap-2 pointer-events-none">
                 <div class="flex flex-wrap items-center gap-1.5 min-w-0">
-                  <span class="px-2.5 py-1 rounded-xl bg-rose-600 text-white text-xs font-black shadow">${escapeHTML(room.number)}</span>
-                  <span ${(!isShowing && Number(room.scheduledAt) > Date.now()) ? `data-countdown-room="${room.id}"` : ""} class="px-2.5 py-1 rounded-xl text-xs font-extrabold ${isShowing ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'}">
+                  <span class="monochrome-pill px-2.5 py-1 rounded-full text-xs font-black">${escapeHTML(room.number)}</span>
+                  <span ${(!isShowing && Number(room.scheduledAt) > Date.now()) ? `data-countdown-room="${room.id}"` : ""} class="px-2.5 py-1 rounded-full text-xs font-extrabold ${isShowing ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'monochrome-pill text-slate-300'}">
                     ${isShowing ? '🟢 Đang chiếu' : (Number(room.scheduledAt) > Date.now() ? `⏳ Còn ${formatCountdownRemaining(room.scheduledAt - Date.now())} (${new Date(room.scheduledAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })})` : '⏳ Sắp chiếu')}
                   </span>
-                  ${isLocked ? `<span class="px-2 py-1 rounded-xl bg-black/80 border border-rose-500/50 text-rose-300 text-[10px] font-black"><i class="fa-solid fa-lock mr-1"></i>${(state.isAdminUnlocked && state.adminRoomPins[room.id]) ? `PIN: ${escapeHTML(state.adminRoomPins[room.id])}` : "PIN"}</span>` : ""}
+                  ${isLocked ? `<span class="monochrome-pill px-2 py-1 rounded-full text-[10px] font-black"><i class="fa-solid fa-lock mr-1"></i>${(state.isAdminUnlocked && state.adminRoomPins[room.id]) ? `PIN: ${escapeHTML(state.adminRoomPins[room.id])}` : "PIN"}</span>` : ""}
                 </div>
 
-                <div class="shrink-0 px-2.5 py-1 rounded-xl bg-black/75 border border-white/15 text-xs font-bold text-amber-300">
-                  <i class="fa-solid fa-users mr-1"></i>${count}/${maxCap} ${(room.isCoupleRoom || room.isDiscordRoom) ? "người" : "khán giả"}
+                <div class="card-viewer-pill shrink-0 monochrome-pill px-2.5 py-1 rounded-full text-xs font-bold">
+                  <i class="fa-solid fa-users mr-1 text-slate-300"></i>${count}/${maxCap} ${(room.isCoupleRoom || room.isDiscordRoom) ? "người" : "khán giả"}
                 </div>
               </div>
 
-              <div class="absolute bottom-3 inset-x-3">
-                <p class="text-[11px] text-amber-300 font-semibold">${escapeHTML(room.genre)} • ${escapeHTML(room.duration)}</p>
+              <div class="absolute bottom-3 inset-x-3 pointer-events-none">
+                <p class="text-[11px] text-slate-300 font-semibold">${escapeHTML(room.genre)} • ${escapeHTML(room.duration)}</p>
                 <h3 class="text-base font-black text-white line-clamp-1">${escapeHTML(room.movieTitle)}</h3>
               </div>
             </div>
@@ -5209,8 +5326,8 @@
                   <span>Tỷ lệ lấp đầy ghế</span>
                   <span class="text-white font-bold">${percent}% (${count} ghế có người)</span>
                 </div>
-                <div class="w-full h-1.5 rounded-full bg-stone-800 overflow-hidden">
-                  <div class="h-full bg-gradient-to-r from-amber-400 to-rose-500" style="width:${percent}%"></div>
+                <div class="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                  <div class="h-full bg-rose-600" style="width:${percent}%"></div>
                 </div>
               </div>
 
@@ -5222,8 +5339,8 @@
                       <button type="button"
                         onclick="event.stopPropagation(); window.appActions.enterRoom('${room.id}')"
                         style="touch-action: manipulation;"
-                        class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black text-[11px] shadow-lg transition cursor-pointer flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-ticket"></i>
+                        class="cv-smooth-btn liquid-glass-pill w-full py-2.5 px-3 rounded-xl font-black text-[11px] transition cursor-pointer flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-circle-check text-emerald-400"></i>
                         <span>Đã Có Vé (Ghế ${escapeHTML(ticket.seatId)}) • Vào Phòng</span>
                       </button>
                     `;
@@ -5231,7 +5348,7 @@
                   return `
                     <button type="button"
                       onclick="event.stopPropagation(); window.appActions.openBookingModal('${room.id}')"
-                      class="cv-smooth-btn w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white font-black text-[11px] shadow-lg transition cursor-pointer flex items-center justify-center gap-1.5">
+                      class="cv-smooth-btn cta-primary-btn w-full py-2.5 px-3 rounded-xl font-black text-[11px] transition cursor-pointer flex items-center justify-center gap-1.5">
                       <img src="./assets/web-logo.png" alt="CineVerse" class="w-4 h-4 rounded-full object-cover border border-white/40 bg-black shrink-0" />
                       <span>Đặt Vé & Chọn Ghế</span>
                     </button>
@@ -16331,27 +16448,110 @@
       return row[seatTier] || row.standard;
     }
 
+    // Tự động phát bản xem trước (video preview) 20 giây đầu khi hover vào thẻ phim đang chiếu
+    function startCardVideoPreview(cardEl, roomId) {
+      if (!cardEl || !roomId) return;
+      const vid = cardEl.querySelector(".card-hover-preview-video");
+      const timerBadge = cardEl.querySelector(".card-preview-timer");
+      if (!vid) return;
+
+      const room = getEffectiveRoom(roomId);
+      const srcUrl = (room && room.videoUrl) ? room.videoUrl : "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+      if (!srcUrl || /\.m3u8(\?|$)/i.test(srcUrl)) return;
+
+      if (vid.getAttribute("data-preview-src") !== srcUrl) {
+        vid.setAttribute("data-preview-src", srcUrl);
+        vid.src = srcUrl;
+      }
+
+      vid.muted = true;
+      if (vid.currentTime >= 20) vid.currentTime = 0;
+
+      vid.ontimeupdate = () => {
+        if (vid.currentTime >= 20) {
+          vid.currentTime = 0;
+          vid.play().catch(() => {});
+        }
+        if (timerBadge) {
+          const sec = Math.min(20, Math.floor(vid.currentTime || 0));
+          timerBadge.textContent = `▶ 00:${String(sec).padStart(2, "0")} / 00:20`;
+        }
+      };
+
+      const p = vid.play();
+      if (p && typeof p.then === "function") {
+        p.then(() => {
+          vid.classList.remove("opacity-0");
+          vid.classList.add("opacity-100");
+          if (timerBadge) timerBadge.classList.remove("hidden");
+        }).catch(() => {});
+      }
+    }
+
+    function stopCardVideoPreview(cardEl) {
+      if (!cardEl) return;
+      const vid = cardEl.querySelector(".card-hover-preview-video");
+      const timerBadge = cardEl.querySelector(".card-preview-timer");
+      if (vid) {
+        try { vid.pause(); } catch (_) {}
+        vid.classList.remove("opacity-100");
+        vid.classList.add("opacity-0");
+      }
+      if (timerBadge) {
+        timerBadge.classList.add("hidden");
+      }
+    }
+
     function openHanoiCinemaFinder() {
       if (state.currentRoomId) {
         leaveRoom();
       }
-      document.getElementById("lobby-view")?.classList.add("hidden");
-      document.getElementById("room-view")?.classList.add("hidden");
-      document.getElementById("hanoi-cinema-finder-view")?.classList.remove("hidden");
+      const lobbyEl = document.getElementById("lobby-view");
+      const roomEl = document.getElementById("room-view");
+      const finderEl = document.getElementById("hanoi-cinema-finder-view");
+      if (!finderEl) return;
+      if (!finderEl.classList.contains("hidden")) return;
+
+      roomEl?.classList.add("hidden");
       renderHanoiCinemaFinderUI();
       if (!hanoiFinderState.hasRealGps) {
         locateUserInHanoi(true);
       }
-      try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (_) {}
+
+      if (lobbyEl && !lobbyEl.classList.contains("hidden")) {
+        lobbyEl.classList.remove("page-anim-in-left", "page-anim-in-right");
+        lobbyEl.classList.add("page-anim-out-left");
+        setTimeout(() => {
+          lobbyEl.classList.add("hidden");
+          lobbyEl.classList.remove("page-anim-out-left");
+          finderEl.classList.remove("hidden", "page-anim-out-right");
+          finderEl.classList.add("page-anim-in-right");
+          try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (_) {}
+        }, 220);
+      } else {
+        lobbyEl?.classList.add("hidden");
+        finderEl.classList.remove("hidden", "page-anim-out-right");
+        finderEl.classList.add("page-anim-in-right");
+        try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (_) {}
+      }
     }
 
     function closeHanoiCinemaFinder() {
-      const view = document.getElementById("hanoi-cinema-finder-view");
-      if (!view || view.classList.contains("hidden")) return;
-      view.classList.add("hidden");
-      if (!state.currentRoomId) {
-        document.getElementById("lobby-view")?.classList.remove("hidden");
-      }
+      const finderEl = document.getElementById("hanoi-cinema-finder-view");
+      const lobbyEl = document.getElementById("lobby-view");
+      if (!finderEl || finderEl.classList.contains("hidden")) return;
+
+      finderEl.classList.remove("page-anim-in-right");
+      finderEl.classList.add("page-anim-out-right");
+      setTimeout(() => {
+        finderEl.classList.add("hidden");
+        finderEl.classList.remove("page-anim-out-right");
+        if (!state.currentRoomId && lobbyEl) {
+          lobbyEl.classList.remove("hidden", "page-anim-out-left");
+          lobbyEl.classList.add("page-anim-in-left");
+          try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (_) {}
+        }
+      }, 220);
     }
 
     function locateUserInHanoi(silent = false) {
@@ -16412,8 +16612,8 @@
         const b = btn.getAttribute("data-hnbrand");
         const active = b === hanoiFinderState.brandFilter;
         btn.className = active
-          ? "cv-smooth-btn px-3.5 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-rose-600 to-amber-500 text-white shadow cursor-pointer"
-          : "cv-smooth-btn px-3 py-2 rounded-xl text-xs font-bold bg-stone-950 text-slate-300 border border-white/15 hover:text-white cursor-pointer";
+          ? "cv-smooth-btn cta-primary-btn px-3.5 py-2 rounded-xl text-xs font-black cursor-pointer"
+          : "cv-smooth-btn liquid-glass-pill px-3 py-2 rounded-xl text-xs font-bold cursor-pointer";
       });
       const list = getSortedHanoiCinemas();
       if (list.length > 0 && !list.some(c => c.id === hanoiFinderState.selectedCinemaId)) {
@@ -16469,30 +16669,29 @@
         } else {
           listEl.innerHTML = sorted.map((c, idx) => {
             const isSel = c.id === selected.id;
-            const pCfg = HANOI_CINEMA_PRICING[c.brand] || HANOI_CINEMA_PRICING["Lotte Cinema"];
             const minPrice = getTicketUnitPriceForCinema(c.brand, "auto", "standard", "adult");
             return `
               <div onclick="window.appActions.selectHanoiCinema('${c.id}')"
-                class="cv-smooth-btn p-3.5 rounded-2xl border cursor-pointer transition ${
+                class="cv-smooth-btn liquid-glass-card p-3.5 rounded-2xl cursor-pointer transition ${
                   isSel
-                    ? "bg-gradient-to-r from-stone-900 via-[#24111c] to-stone-900 border-amber-400 ring-2 ring-amber-400/35 shadow-xl"
-                    : "bg-stone-950/90 hover:bg-stone-900 border-white/10"
+                    ? "ring-2 ring-rose-500/80 bg-white/[0.06]"
+                    : "hover:bg-white/[0.03]"
                 }">
                 <div class="flex items-start justify-between gap-2">
                   <div class="flex items-center gap-1.5 flex-wrap">
-                    ${idx === 0 ? `<span class="px-2 py-0.5 rounded bg-emerald-500 text-slate-950 text-[10px] font-black">🏆 GẦN NHẤT</span>` : `<span class="px-2 py-0.5 rounded bg-stone-800 text-slate-300 text-[10px] font-mono font-bold">#${idx + 1}</span>`}
-                    <span class="px-2 py-0.5 rounded text-[10px] font-black ${pCfg.badgeCls}">${escapeHTML(c.brand)}</span>
-                    <span class="px-2 py-0.5 rounded bg-white/5 text-slate-300 text-[10px] font-bold">${escapeHTML(c.district)}</span>
+                    ${idx === 0 ? `<span class="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[10px] font-black">🏆 GẦN NHẤT</span>` : `<span class="monochrome-pill px-2 py-0.5 rounded-full text-[10px] font-mono font-bold">#${idx + 1}</span>`}
+                    <span class="monochrome-pill px-2.5 py-0.5 rounded-full text-[10px] font-extrabold">${escapeHTML(c.brand)}</span>
+                    <span class="monochrome-pill px-2 py-0.5 rounded-full text-slate-300 text-[10px] font-semibold">${escapeHTML(c.district)}</span>
                   </div>
                   <span class="shrink-0 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/35 text-emerald-300 text-[11px] font-black">
                     ${c.roadKm} km • ~${c.driveMins} phút
                   </span>
                 </div>
                 <h4 class="text-xs sm:text-sm font-black text-white mt-2">${escapeHTML(c.name)}</h4>
-                <p class="text-[11px] text-slate-400 mt-0.5 line-clamp-2"><i class="fa-solid fa-location-dot text-rose-400 mr-1"></i>${escapeHTML(c.address)}</p>
+                <p class="text-[11px] text-slate-400 mt-0.5 line-clamp-2"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>${escapeHTML(c.address)}</p>
                 <div class="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
                   <span class="text-slate-400">${escapeHTML(c.screens)}</span>
-                  <span class="text-amber-300 font-black">Giá vé hiện tại từ: ${formatVND(minPrice)}</span>
+                  <span class="text-white font-black">Giá vé từ: ${formatVND(minPrice)}</span>
                 </div>
               </div>
             `;
@@ -16506,7 +16705,7 @@
         const brandBadge = document.getElementById("hn-selected-brand-badge");
         if (brandBadge) {
           brandBadge.textContent = selected.brand;
-          brandBadge.className = `px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase ${pCfg.badgeCls}`;
+          brandBadge.className = "monochrome-pill px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase";
         }
         const distBadge = document.getElementById("hn-selected-distance-badge");
         if (distBadge) {
@@ -16724,6 +16923,8 @@
       requestMovieForCurrentRoom,
       onChatInputTyping,
       clearMyChatTyping,
+      startCardVideoPreview,
+      stopCardVideoPreview,
       openHanoiCinemaFinder,
       closeHanoiCinemaFinder,
       locateUserInHanoi,
@@ -16952,7 +17153,7 @@
           baseSpeed: 42 + Math.random() * 26,
           boostSpeed: 0,
           size: sizeScale,
-          alpha: i < 2 ? 0.94 : 0.72 + Math.random() * 0.18,
+          alpha: 0.65,
           tailPhase: Math.random() * Math.PI * 2,
           seed1: Math.random() * Math.PI * 2,
           seed2: Math.random() * Math.PI * 2,
