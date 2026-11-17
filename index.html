@@ -2741,15 +2741,19 @@
 
       <div id="gmail-auth-status" class="hidden px-3 py-2 rounded-xl bg-emerald-500/15 border border-emerald-400/40 text-xs text-emerald-300 font-semibold flex items-center justify-between gap-2"></div>
 
-      <!-- Chuyển tab Đăng nhập / Tạo tài khoản -->
-      <div id="auth-mode-tabs" class="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-stone-950 border border-white/10">
+      <!-- Chuyển tab Đăng nhập / Tạo tài khoản / Quên mật khẩu -->
+      <div id="auth-mode-tabs" class="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-stone-950 border border-white/10">
         <button id="auth-tab-login" type="button" onclick="window.appActions.switchAuthTab('login')"
           class="py-2 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 cursor-pointer transition">
           Đăng nhập
         </button>
         <button id="auth-tab-register" type="button" onclick="window.appActions.switchAuthTab('register')"
           class="py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white cursor-pointer transition">
-          Tạo tài khoản mới
+          Tạo tài khoản
+        </button>
+        <button id="auth-tab-forgot" type="button" onclick="window.appActions.switchAuthTab('forgot')"
+          class="py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white cursor-pointer transition">
+          Quên mật khẩu
         </button>
       </div>
 
@@ -2763,6 +2767,35 @@
         <div class="space-y-1">
           <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Mật khẩu</label>
           <input id="login-password-input" type="password" placeholder="Nhập mật khẩu của bạn..."
+            onkeydown="if(event.key==='Enter'){event.preventDefault();window.appActions.confirmNameModal();}"
+            class="w-full px-4 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-sm text-white font-semibold focus:outline-none focus:border-amber-400" />
+        </div>
+        <div class="flex justify-end">
+          <button type="button" onclick="window.appActions.switchAuthTab('forgot')"
+            class="text-[11px] font-bold text-amber-400 hover:text-amber-300 underline cursor-pointer">
+            Quên mật khẩu? Lấy lại ngay (không cần mã OTP)
+          </button>
+        </div>
+      </div>
+
+      <!-- PANEL QUÊN MẬT KHẨU (KHÔNG CẦN MÃ OTP - CHỈ CẦN ĐÚNG GMAIL) -->
+      <div id="auth-panel-forgot" class="hidden space-y-3">
+        <p class="text-[11px] text-emerald-300 bg-emerald-500/10 border border-emerald-400/30 rounded-xl px-3 py-2">
+          Chỉ cần nhập đúng địa chỉ Gmail bạn đã đăng ký trước đó để đặt lại mật khẩu mới ngay lập tức (không cần mã OTP).
+        </p>
+        <div class="space-y-1">
+          <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Gmail đã đăng ký tài khoản</label>
+          <input id="forgot-gmail-input" type="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="tenban@gmail.com"
+            class="w-full px-4 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-sm text-white font-semibold focus:outline-none focus:border-amber-400" />
+        </div>
+        <div class="space-y-1">
+          <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Mật khẩu mới (tối thiểu 6 ký tự)</label>
+          <input id="forgot-new-password-input" type="password" minlength="6" placeholder="Nhập mật khẩu mới..."
+            class="w-full px-4 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-sm text-white font-semibold focus:outline-none focus:border-amber-400" />
+        </div>
+        <div class="space-y-1">
+          <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Nhập lại mật khẩu mới</label>
+          <input id="forgot-confirm-password-input" type="password" minlength="6" placeholder="Xác nhận lại mật khẩu mới..."
             onkeydown="if(event.key==='Enter'){event.preventDefault();window.appActions.confirmNameModal();}"
             class="w-full px-4 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-sm text-white font-semibold focus:outline-none focus:border-amber-400" />
         </div>
@@ -8764,27 +8797,37 @@
 
     function switchAuthTab(tab = "login") {
       setAuthModalError("");
-      state.authTab = tab === "register" ? "register" : "login";
+      state.authTab = (tab === "register" || tab === "forgot") ? tab : "login";
       const tabLogin = document.getElementById("auth-tab-login");
       const tabReg = document.getElementById("auth-tab-register");
+      const tabForgot = document.getElementById("auth-tab-forgot");
       const panelLogin = document.getElementById("auth-panel-login");
       const panelReg = document.getElementById("auth-panel-register");
+      const panelForgot = document.getElementById("auth-panel-forgot");
       const btn = document.getElementById("name-modal-confirm-btn");
 
       const activeCls = "py-2 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 cursor-pointer transition";
       const idleCls = "py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white cursor-pointer transition";
 
+      if (tabLogin) tabLogin.className = state.authTab === "login" ? activeCls : idleCls;
+      if (tabReg) tabReg.className = state.authTab === "register" ? activeCls : idleCls;
+      if (tabForgot) tabForgot.className = state.authTab === "forgot" ? activeCls : idleCls;
+
+      panelLogin?.classList.toggle("hidden", state.authTab !== "login");
+      panelReg?.classList.toggle("hidden", state.authTab !== "register");
+      panelForgot?.classList.toggle("hidden", state.authTab !== "forgot");
+
       if (state.authTab === "register") {
-        if (tabReg) tabReg.className = activeCls;
-        if (tabLogin) tabLogin.className = idleCls;
-        panelLogin?.classList.add("hidden");
-        panelReg?.classList.remove("hidden");
         if (btn) btn.textContent = pendingBookingArgs ? "Tạo tài khoản & Đặt vé" : (pendingEnterRoomId ? "Tạo tài khoản & Vào Phòng" : "Tạo tài khoản & Xác thực");
+      } else if (state.authTab === "forgot") {
+        const loginEmailVal = (document.getElementById("login-gmail-input")?.value || "").trim().toLowerCase();
+        const forgotEmailEl = document.getElementById("forgot-gmail-input");
+        if (forgotEmailEl && !forgotEmailEl.value && loginEmailVal) {
+          forgotEmailEl.value = loginEmailVal;
+        }
+        if (btn) btn.textContent = "Đặt lại mật khẩu & Đăng nhập";
+        setTimeout(() => (forgotEmailEl?.value ? document.getElementById("forgot-new-password-input") : forgotEmailEl)?.focus(), 40);
       } else {
-        if (tabLogin) tabLogin.className = activeCls;
-        if (tabReg) tabReg.className = idleCls;
-        panelReg?.classList.add("hidden");
-        panelLogin?.classList.remove("hidden");
         if (btn) btn.textContent = pendingBookingArgs ? "Đăng nhập & Đặt vé" : (pendingEnterRoomId ? "Đăng nhập & Vào Phòng" : "Đăng nhập");
       }
     }
@@ -8795,11 +8838,13 @@
       const modeTabs = document.getElementById("auth-mode-tabs");
       const panelLogin = document.getElementById("auth-panel-login");
       const panelReg = document.getElementById("auth-panel-register");
+      const panelForgot = document.getElementById("auth-panel-forgot");
       const btn = document.getElementById("name-modal-confirm-btn");
 
       if (state.accountLoggedIn && state.gmailVerified && state.userEmail) {
         modeTabs?.classList.add("hidden");
         panelLogin?.classList.add("hidden");
+        panelForgot?.classList.add("hidden");
         panelReg?.classList.remove("hidden");
         document.getElementById("modal-otp-wrap")?.classList.add("hidden");
         document.getElementById("send-otp-btn")?.classList.add("hidden");
@@ -9004,8 +9049,82 @@
         return;
       }
 
+      // Trường hợp 2b: Tab QUÊN MẬT KHẨU (chỉ cần nhập đúng Gmail đã đăng ký, không cần OTP)
+      if (state.authTab === "forgot") {
+        const forgotGmailEl = document.getElementById("forgot-gmail-input");
+        const forgotNewPassEl = document.getElementById("forgot-new-password-input");
+        const forgotConfirmPassEl = document.getElementById("forgot-confirm-password-input");
+        const email = (forgotGmailEl?.value || "").trim().toLowerCase();
+        const newPass = forgotNewPassEl?.value || "";
+        const confirmPass = forgotConfirmPassEl?.value || "";
+
+        if (!/^[a-z0-9._%+-]+@gmail\.com$/i.test(email)) {
+          setAuthModalError("Vui lòng nhập đúng địa chỉ @gmail.com đã đăng ký!");
+          showToast("Vui lòng nhập đúng địa chỉ @gmail.com đã đăng ký!", "error");
+          forgotGmailEl?.focus();
+          return;
+        }
+        if (newPass.length < 6) {
+          setAuthModalError("Mật khẩu mới phải có ít nhất 6 ký tự!");
+          showToast("Mật khẩu mới phải có ít nhất 6 ký tự!", "error");
+          forgotNewPassEl?.focus();
+          return;
+        }
+        if (newPass !== confirmPass) {
+          setAuthModalError("Mật khẩu nhập lại không khớp!");
+          showToast("Mật khẩu nhập lại không khớp!", "error");
+          forgotConfirmPassEl?.focus();
+          return;
+        }
+
+        if (btn) { btn.disabled = true; btn.textContent = "Đang khôi phục mật khẩu..."; }
+        try {
+          const accKey = await sha256HexClient(email);
+          const acc = await rtdbGetAccountSafe(accKey);
+          if (!acc) {
+            throw new Error("Gmail này chưa được đăng ký trên hệ thống! Vui lòng kiểm tra lại hoặc chuyển sang tab 'Tạo tài khoản'.");
+          }
+          const passHash = await sha256HexClient(`${email}:${newPass}`);
+          await rtdbSetAccountSafe(accKey, {
+            ...acc,
+            email,
+            passwordHash: passHash,
+            updatedAt: Date.now()
+          });
+
+          state.userEmail = email;
+          state.gmailVerified = true;
+          state.accountLoggedIn = true;
+          saveVerifiedEmail(email, acc.verifiedUid || accKey, acc.displayName || "Thành viên");
+          await applyNewUserName(acc.displayName || "Thành viên");
+          syncMyOnlinePresence();
+          if (forgotNewPassEl) forgotNewPassEl.value = "";
+          if (forgotConfirmPassEl) forgotConfirmPassEl.value = "";
+          showToast(`✅ Đã đặt lại mật khẩu mới thành công! Chào mừng ${acc.displayName || "Thành viên"}`, "success");
+
+          const targetRoom = pendingEnterRoomId;
+          pendingEnterRoomId = null;
+          const bookArgs = pendingBookingArgs;
+          pendingBookingArgs = null;
+          document.getElementById("name-modal")?.classList.add("hidden");
+          if (bookArgs) {
+            if (bookArgs.quickBar) await quickBookFromLobbyBar();
+            else openBookingModal(bookArgs.roomId, bookArgs.showtime, bookArgs.seat);
+          } else if (targetRoom) {
+            enterRoom(targetRoom);
+          }
+        } catch (err) {
+          const msg = `❌ ${err.message || "Không thể đặt lại mật khẩu"}`;
+          setAuthModalError(msg);
+          showToast(msg, "error");
+        } finally {
+          if (btn) { btn.disabled = false; btn.textContent = prevText; }
+        }
+        return;
+      }
+
       // Trường hợp 2: Tab ĐĂNG NHẬP bằng Gmail + Mật khẩu đã tạo trước đó
-      if (state.authTab !== "register") {
+      if (state.authTab === "login") {
         const loginGmail = document.getElementById("login-gmail-input");
         const loginPass = document.getElementById("login-password-input");
         const email = (loginGmail?.value || "").trim().toLowerCase();
