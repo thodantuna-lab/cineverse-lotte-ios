@@ -1,7 +1,9 @@
 node_modules/
 www/
 ios/
+android/
 .venv/
+archive/
 *.zip
 Chú thuật hồi chiến/
 .DS_Store
