@@ -2104,7 +2104,7 @@
                 </button>
 
                 <!-- 1. Trình phát Video HTML5 (.mp4 / file từ máy) -->
-                <video id="html5-video-player" class="w-full h-full object-contain bg-black hidden" playsinline></video>
+                <video id="html5-video-player" class="w-full h-full object-contain bg-black hidden" autoplay playsinline></video>
 
                 <!-- 2. Trình phát YouTube IFrame -->
                 <div id="youtube-wrapper" class="w-full h-full hidden"></div>
@@ -6299,6 +6299,30 @@
         tryAutoLoadMatchingR2Subtitle(room);
         videoEl.classList.remove("hidden");
         seekContainer.classList.remove("hidden");
+        setScreenCurtainClosed(false);
+        videoEl.muted = false;
+        videoEl.loop = true;
+        videoEl.volume = 0.85;
+
+        const tryAutoPlayRoomVideo = () => {
+          if (!videoEl || videoEl.classList.contains("hidden")) return;
+          const playBtn = document.getElementById("btn-play-pause");
+          videoEl.play().then(() => {
+            if (playBtn) playBtn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
+            setScreenCurtainClosed(false);
+          }).catch(() => {
+            videoEl.muted = true;
+            const muteBtn = document.getElementById("btn-mute");
+            if (muteBtn) muteBtn.innerHTML = `<i class="fa-solid fa-volume-xmark mr-1 text-rose-400"></i>Đã tắt tiếng`;
+            videoEl.play().then(() => {
+              if (playBtn) playBtn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
+              setScreenCurtainClosed(false);
+            }).catch(() => {
+              if (playBtn) playBtn.innerHTML = `<i class="fa-solid fa-play"></i>`;
+            });
+          });
+        };
+
         const isHlsUrl = /\.m3u8(\?|$)/i.test(room.videoUrl);
         if (isHlsUrl && window.Hls && window.Hls.isSupported()) {
           window.__activeHlsInstance = new window.Hls({
@@ -6309,25 +6333,27 @@
           });
           window.__activeHlsInstance.loadSource(room.videoUrl);
           window.__activeHlsInstance.attachMedia(videoEl);
+          window.__activeHlsInstance.on(window.Hls.Events.MANIFEST_PARSED, () => {
+            tryAutoPlayRoomVideo();
+          });
         } else {
           videoEl.src = room.videoUrl;
         }
-        videoEl.loop = true;
-        videoEl.volume = 0.85;
 
+        let didInitialSeek = false;
         videoEl.onloadedmetadata = () => {
           document.getElementById("video-time-total").textContent = formatTime(videoEl.duration || room.durationSec || 370);
-          if (!room.isLocalBlob && !room.isCustomStartZero && videoEl.duration > 10) {
+          if (!didInitialSeek && !room.isLocalBlob && !room.isCustomStartZero && videoEl.duration > 10) {
+            didInitialSeek = true;
             videoEl.currentTime = Math.floor((Date.now() / 1000) % videoEl.duration);
           }
           renderSubtitleAtTime(room, videoEl.currentTime || 0);
-          videoEl.play().catch(() => {
-            videoEl.muted = true;
-            const muteBtn = document.getElementById("btn-mute");
-            if (muteBtn) muteBtn.innerHTML = `<i class="fa-solid fa-volume-xmark mr-1 text-rose-400"></i>Đã tắt tiếng`;
-            videoEl.play().catch(() => {});
-          });
+          tryAutoPlayRoomVideo();
         };
+        videoEl.oncanplay = () => {
+          if (videoEl.paused) tryAutoPlayRoomVideo();
+        };
+        tryAutoPlayRoomVideo();
 
         videoEl.ontimeupdate = () => {
           const cur = videoEl.currentTime || 0;
@@ -6374,12 +6400,11 @@
 
     function requireHostPlaybackControl() {
       if (isIAmHost()) return true;
-      showToast("🔒 Chỉ Chủ Trì (có Key Chủ Trì) mới có quyền phát/dừng/tua video đồng bộ!", "warning");
+      showToast("🔒 Chỉ Chủ Trì (có Key Chủ Trì) mới có quyền tua phim!", "warning");
       return false;
     }
 
     function togglePlayPause() {
-      if (!requireHostPlaybackControl()) return;
       const videoEl = document.getElementById("html5-video-player");
       const ytWrapper = document.getElementById("youtube-wrapper");
       const btn = document.getElementById("btn-play-pause");
@@ -6393,21 +6418,26 @@
             : `<i class="fa-solid fa-pause"></i>`;
         }
         setScreenCurtainClosed(state.ytPaused);
-        broadcastRoomVideoSync(state.ytPaused ? "pause" : "play");
+        if (isIAmHost()) broadcastRoomVideoSync(state.ytPaused ? "pause" : "play");
         return;
       }
 
       if (!videoEl || videoEl.classList.contains("hidden")) return;
       if (videoEl.paused) {
-        videoEl.play().catch(() => {});
+        videoEl.play().catch(() => {
+          videoEl.muted = true;
+          const muteBtn = document.getElementById("btn-mute");
+          if (muteBtn) muteBtn.innerHTML = `<i class="fa-solid fa-volume-xmark mr-1 text-rose-400"></i>Đã tắt tiếng`;
+          videoEl.play().catch(() => {});
+        });
         if (btn) btn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
         setScreenCurtainClosed(false);
-        broadcastRoomVideoSync("play");
+        if (isIAmHost()) broadcastRoomVideoSync("play");
       } else {
         videoEl.pause();
         if (btn) btn.innerHTML = `<i class="fa-solid fa-play"></i>`;
         setScreenCurtainClosed(true);
-        broadcastRoomVideoSync("pause");
+        if (isIAmHost()) broadcastRoomVideoSync("pause");
       }
     }
 
@@ -9394,8 +9424,7 @@
         seekSlider.classList.toggle("cursor-not-allowed", !canControl);
       }
       if (playBtn) {
-        playBtn.classList.toggle("opacity-50", !canControl);
-        playBtn.classList.toggle("cursor-not-allowed", !canControl);
+        playBtn.classList.remove("opacity-50", "cursor-not-allowed");
       }
     }
 
@@ -9764,6 +9793,7 @@
         const data = snap.val();
         if (!data) return;
         latestRoomSyncState = data;
+        if (!currentRoomHost || !currentRoomHost.uid) return;
         applyRemoteVideoSync(roomId, data, false);
       }, () => {});
       const unsubEffects = rtdbMod.onValue(rtdbMod.ref(rtdb, `effects/${roomId}`), (snap) => {
