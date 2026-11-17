@@ -3255,10 +3255,10 @@
           <img src="./assets/web-logo.png" alt="CineVerse Logo" class="w-10 h-10 rounded-2xl object-cover border border-amber-400/40 shadow-lg shrink-0" />
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-base sm:text-lg font-black text-white">Đặt Vé Rạp Chiếu Phim Trực Tuyến (Box Office)</h3>
-              <span class="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[10px] font-black uppercase">IMAX Laser 70mm</span>
+              <h3 id="booking-modal-title" class="text-base sm:text-lg font-black text-white">Đặt Vé Rạp Chiếu Phim Trực Tuyến (Box Office)</h3>
+              <span id="booking-modal-mode-badge" class="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[10px] font-black uppercase">IMAX Laser 70mm</span>
             </div>
-            <p class="text-xs text-slate-400">Chọn suất chiếu, bấm chọn ghế trên sơ đồ 6 hàng (A–F) và nhận Vé Điện Tử kèm Thẻ Ký Ức NFT độc bản</p>
+            <p id="booking-modal-subtitle" class="text-xs text-slate-400">Chọn suất chiếu, bấm chọn ghế trên sơ đồ 6 hàng (A–F) và nhận Vé Điện Tử kèm Thẻ Ký Ức NFT độc bản</p>
           </div>
         </div>
         <button type="button" onclick="window.appActions.closeBookingModal()"
@@ -3289,17 +3289,17 @@
               <label class="text-[11px] font-extrabold uppercase tracking-wider text-amber-400 block">Chọn Combo Bắp Nước Đi Kèm</label>
               <select id="booking-combo-select" onchange="window.appActions.onBookingComboChange(this.value)"
                 class="w-full px-3 py-2 rounded-xl bg-stone-900 border border-white/15 text-white font-bold text-xs focus:outline-none focus:border-amber-400">
-                <option value="🍿🥤|45000">🍿🥤 Combo Solo Bắp + Pepsi (+45.000đ)</option>
-                <option value="🍿🍿🥤🥤|79000">🍿🍿🥤🥤 Combo Couple Sweetbox (+79.000đ)</option>
-                <option value="🧀🍿🧋|65000">🧀🍿🧋 Combo Phô Mai Trà Sữa (+65.000đ)</option>
-                <option value="🥂🍾🍓|120000">🥂🍾🍓 Combo VIP Hoàng Gia (+120.000đ)</option>
-                <option value="|0">Không kèm bắp nước (+0đ)</option>
+                <option value="🍿🥤|45000|Combo Solo Bắp + Pepsi">🍿🥤 Combo Solo Bắp + Pepsi</option>
+                <option value="🍿🍿🥤🥤|79000|Combo Couple Sweetbox">🍿🍿🥤🥤 Combo Couple Sweetbox</option>
+                <option value="🧀🍿🧋|65000|Combo Phô Mai Trà Sữa">🧀🍿🧋 Combo Phô Mai Trà Sữa</option>
+                <option value="🥂🍾🍓|120000|Combo VIP Hoàng Gia">🥂🍾🍓 Combo VIP Hoàng Gia</option>
+                <option value="|0|Không kèm bắp nước">Không kèm bắp nước</option>
               </select>
             </div>
           </div>
 
           <!-- Chọn Giờ Suất Chiếu -->
-          <div class="space-y-1.5">
+          <div id="booking-showtime-wrap" class="space-y-1.5">
             <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-300 block">Chọn Khung Giờ Suất Chiếu Hôm Nay:</span>
             <div id="booking-showtime-pills" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
           </div>
@@ -3314,11 +3314,11 @@
             <!-- Lưới 6 hàng x 8 ghế -->
             <div id="booking-seat-grid" class="space-y-1.5"></div>
 
-            <!-- Chú thích giá vé theo hạng ghế -->
-            <div class="flex flex-wrap items-center justify-center gap-3 pt-2 border-t border-white/10 text-[10px] text-slate-300">
-              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-rose-950 border border-rose-600 inline-block"></span>Standard A–C (95k)</span>
-              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-amber-900 border border-amber-500 inline-block"></span>VIP D–E (125k)</span>
-              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-rose-700 border border-rose-300 inline-block"></span>Sweetbox F (160k)</span>
+            <!-- Chú thích hạng ghế -->
+            <div id="booking-seat-legend" class="flex flex-wrap items-center justify-center gap-3 pt-2 border-t border-white/10 text-[10px] text-slate-300">
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-rose-950 border border-rose-600 inline-block"></span><span data-legend-tier="standard">Standard A–C</span></span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-amber-900 border border-amber-500 inline-block"></span><span data-legend-tier="vip">VIP D–E</span></span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-rose-700 border border-rose-300 inline-block"></span><span data-legend-tier="sweetbox">Sweetbox F</span></span>
               <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-amber-400 border border-white inline-block"></span>Đang chọn</span>
               <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-slate-700 border border-slate-500 inline-block"></span>Đã có người</span>
             </div>
@@ -3350,29 +3350,49 @@
                   <span class="text-slate-400">Ghế đã chọn:</span>
                   <strong id="booking-preview-seat" class="text-amber-400 text-sm font-black">F4 (Sweetbox Đôi)</strong>
                 </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-slate-400">Giá vé ghế:</span>
-                  <strong id="booking-seat-price" class="text-white font-bold">160.000đ</strong>
+
+                <!-- Hiển thị ở Chế độ Free (Không hiện báo giá) -->
+                <div id="booking-free-mode-rows" class="space-y-2 pt-2 border-t border-white/10">
+                  <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Combo đi kèm:</span>
+                    <strong id="booking-free-combo-label" class="text-rose-300 font-bold">🍿🥤 Combo Solo Bắp + Pepsi</strong>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Chế độ phòng rạp:</span>
+                    <strong class="text-emerald-400 font-black">🆓 Đặt ghế Free • Vào thẳng ghế</strong>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Quy định đổi ghế:</span>
+                    <strong id="booking-free-cooldown-badge" class="text-sky-300 font-bold text-[11px]">⏳ 10 phút / 1 lần đổi ghế</strong>
+                  </div>
                 </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-slate-400">Combo Bắp Nước:</span>
-                  <strong id="booking-combo-price" class="text-rose-300 font-bold">🍿🥤 +45.000đ</strong>
-                </div>
-                <div id="booking-instant-fee-row" class="hidden flex justify-between items-center">
-                  <span class="text-amber-300 font-semibold">⚡ Phụ thu Vào Rạp Ngay:</span>
-                  <strong class="text-amber-300 font-bold">+50.000đ</strong>
-                </div>
-                <div id="booking-buyout-fee-row" class="hidden flex justify-between items-center">
-                  <span class="text-purple-300 font-semibold">👑 Bao Nguyên Rạp (Tặng Key Chủ Trì):</span>
-                  <strong class="text-purple-300 font-bold">+500.000đ</strong>
-                </div>
-                <div class="border-t border-dashed border-white/15 pt-2 flex justify-between items-center text-sm">
-                  <span class="font-black text-white">TỔNG CỘNG:</span>
-                  <strong id="booking-total-price" class="text-amber-400 font-black text-base">205.000đ</strong>
+
+                <!-- Hiển thị ở Chế độ Trả Phí -->
+                <div id="booking-paid-price-rows" class="hidden space-y-2 pt-2 border-t border-white/10">
+                  <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Giá vé ghế:</span>
+                    <strong id="booking-seat-price" class="text-white font-bold">160.000đ</strong>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-slate-400">Combo Bắp Nước:</span>
+                    <strong id="booking-combo-price" class="text-rose-300 font-bold">🍿🥤 +45.000đ</strong>
+                  </div>
+                  <div id="booking-instant-fee-row" class="hidden flex justify-between items-center">
+                    <span class="text-amber-300 font-semibold">⚡ Phụ thu Vào Rạp Ngay:</span>
+                    <strong class="text-amber-300 font-bold">+50.000đ</strong>
+                  </div>
+                  <div id="booking-buyout-fee-row" class="hidden flex justify-between items-center">
+                    <span class="text-purple-300 font-semibold">👑 Bao Nguyên Rạp (Tặng Key Chủ Trì):</span>
+                    <strong class="text-purple-300 font-bold">+500.000đ</strong>
+                  </div>
+                  <div class="border-t border-dashed border-white/15 pt-2 flex justify-between items-center text-sm">
+                    <span class="font-black text-white">TỔNG CỘNG:</span>
+                    <strong id="booking-total-price" class="text-amber-400 font-black text-base">205.000đ</strong>
+                  </div>
                 </div>
               </div>
 
-              <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-amber-500/10 border border-amber-400/35 cursor-pointer hover:bg-amber-500/15 transition">
+              <label id="booking-buyout-label-wrap" class="hidden flex items-start gap-2.5 p-2.5 rounded-xl bg-amber-500/10 border border-amber-400/35 cursor-pointer hover:bg-amber-500/15 transition">
                 <input id="booking-private-buyout-chk" type="checkbox" onchange="window.appActions.toggleBookingBuyout(this.checked)"
                   class="mt-0.5 accent-amber-500 w-4 h-4 shrink-0 cursor-pointer" />
                 <div class="text-[11px] leading-relaxed">
@@ -4874,7 +4894,7 @@
         return;
       }
       const myTicket = state.bookedTicketsByRoom?.[roomId];
-      if (!options?.fromBooking && myTicket?.showtimeUnlockAt && Date.now() < myTicket.showtimeUnlockAt) {
+      if (state.paymentMode === "paid" && !options?.fromBooking && myTicket?.showtimeUnlockAt && Date.now() < myTicket.showtimeUnlockAt) {
         const remainSec = Math.max(1, Math.ceil((myTicket.showtimeUnlockAt - Date.now()) / 1000));
         const hrs = Math.floor(remainSec / 3600);
         const mins = Math.floor((remainSec % 3600) / 60);
@@ -5080,16 +5100,26 @@
         return;
       }
 
-      // Khóa cố định ghế theo vé đã đặt — muốn chuyển sang ghế khác phải mua vé mới cho ghế đó
+      // Khóa cố định ghế theo vé đã đặt — muốn chuyển sang ghế khác phải xác nhận đổi ghế / đặt vé mới
       const bookedTicket = state.bookedTicketsByRoom?.[roomId];
       const roomObjForSeat = getEffectiveRoom(roomId);
       const validSeatsForRoom = getValidSeatsForRoom(roomObjForSeat);
+      const currentLockedSeat = (bookedTicket && bookedTicket.seatId) ? bookedTicket.seatId : getMySeatInRoom(roomId);
       if (bookedTicket && bookedTicket.seatId && !validSeatsForRoom.includes(bookedTicket.seatId) && validSeatsForRoom.includes(seatId)) {
         bookedTicket.seatId = seatId;
         saveAppStateToStorage();
-      } else if (bookedTicket && bookedTicket.seatId && bookedTicket.seatId !== seatId) {
+      } else if (currentLockedSeat && currentLockedSeat !== seatId) {
         if (notify) {
-          showToast(`🎫 Để chuyển từ ghế ${bookedTicket.seatId} sang ghế ${seatId}, vui lòng đặt mua vé mới cho ghế ${seatId}!`, "info");
+          if (state.paymentMode !== "paid") {
+            const remainMs = getFreeSeatChangeRemainingMs();
+            if (remainMs > 0) {
+              showToast(`⏳ Chế độ Free giới hạn đổi ghế 10 phút/lần để tránh spam! Vui lòng đợi ${formatCooldownRemaining(remainMs)} nữa.`, "warning");
+              return;
+            }
+            showToast(`🪑 Chọn xác nhận để đổi từ ghế ${currentLockedSeat} sang ghế ${seatId} (Chế độ Free)!`, "info");
+          } else {
+            showToast(`🎫 Để chuyển từ ghế ${currentLockedSeat} sang ghế ${seatId}, vui lòng đặt mua vé mới cho ghế ${seatId}!`, "info");
+          }
           openBookingModal(roomId, null, seatId);
         }
         return;
@@ -12995,7 +13025,7 @@
             hasInitRevenueOrders = true;
           } else {
             const sorted = Object.values(val)
-              .filter(o => o && o.id && typeof o.totalAmount === "number")
+              .filter(o => o && o.id && !o.isFreeMode && Number(o.totalAmount || 0) > 0)
               .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
             state.revenueOrders = sorted;
 
@@ -13125,6 +13155,37 @@
     // =========================================================
     // 14. QUẦY ĐẶT VÉ RẠP TRỰC TUYẾN (BOX OFFICE) Ở GIAO DIỆN CHÍNH
     // =========================================================
+    const FREE_SEAT_CHANGE_COOLDOWN_MS = 10 * 60 * 1000; // 10 phút chống spam đổi ghế ở Chế độ Free
+
+    function getFreeSeatChangeRemainingMs() {
+      if (state.paymentMode === "paid") return 0;
+      let lastTs = Number(state.lastFreeSeatChangeAt || 0);
+      if (!lastTs) {
+        try { lastTs = Number(localStorage.getItem("cineverse_last_free_seat_change_at") || 0); } catch (_) {}
+      }
+      if (!lastTs) return 0;
+      const elapsed = Date.now() - lastTs;
+      return elapsed < FREE_SEAT_CHANGE_COOLDOWN_MS ? (FREE_SEAT_CHANGE_COOLDOWN_MS - elapsed) : 0;
+    }
+
+    function formatCooldownRemaining(ms = 0) {
+      const totalSec = Math.max(1, Math.ceil(Number(ms || 0) / 1000));
+      const mins = Math.floor(totalSec / 60);
+      const secs = totalSec % 60;
+      return mins > 0 ? `${mins} phút ${secs} giây` : `${secs} giây`;
+    }
+
+    function recordFreeSeatChangeTimestamp() {
+      const now = Date.now();
+      state.lastFreeSeatChangeAt = now;
+      try { localStorage.setItem("cineverse_last_free_seat_change_at", String(now)); } catch (_) {}
+    }
+
+    function formatShowtimeForCurrentMode(st = "") {
+      const raw = String(st || "");
+      return state.paymentMode === "paid" ? raw : raw.replace(/\s*\(\+50\.000đ\)/g, "");
+    }
+
     function getSeatPriceAndTier(seatId = "F4") {
       const row = (seatId || "F4").charAt(0).toUpperCase();
       if (row === "F") {
@@ -13157,7 +13218,11 @@
         return;
       }
       state.bookingDraft.roomId = targetRoomId;
-      if (preselectShowtime) state.bookingDraft.showtime = preselectShowtime;
+      if (preselectShowtime) {
+        state.bookingDraft.showtime = preselectShowtime;
+      } else if (state.paymentMode !== "paid") {
+        state.bookingDraft.showtime = BOOKING_SHOWTIMES[0];
+      }
 
       const room = getEffectiveRoom(targetRoomId);
       const validSeats = getValidSeatsForRoom(room);
@@ -13225,10 +13290,10 @@
     }
 
     function onBookingComboChange(val) {
-      const parts = String(val || "🍿🥤|45000|Combo Bắp Rang Bơ & Pepsi Lớn").split("|");
-      state.bookingDraft.comboIcon = parts[0] || "🍿🥤";
+      const parts = String(val || "🍿🥤|45000|Combo Solo Bắp + Pepsi").split("|");
+      state.bookingDraft.comboIcon = parts[0] || "";
       state.bookingDraft.comboPrice = parseInt(parts[1] || "0", 10) || 0;
-      state.bookingDraft.comboName = parts[2] || "Combo VIP";
+      state.bookingDraft.comboName = parts[2] || (state.bookingDraft.comboIcon ? "Combo Bắp Nước" : "Không kèm bắp nước");
       renderBookingModalUI();
     }
 
@@ -13252,6 +13317,7 @@
     }
 
     function renderBookingModalUI() {
+      const isPaidMode = state.paymentMode === "paid";
       const roomId = state.bookingDraft.roomId || "room-1";
       const room = getEffectiveRoom(roomId);
       const roomSeats = state.seatsByRoom[roomId] || {};
@@ -13263,7 +13329,35 @@
         state.bookingDraft.seatId = selectedSeat;
       }
 
-      // 1. Render dropdown chọn phòng phim
+      const currentSeatInTargetRoom = getMySeatInRoom(roomId) || state.bookedTicketsByRoom?.[roomId]?.seatId || "";
+      const isInRoomSeatChange = Boolean(state.currentRoomId === roomId && currentSeatInTargetRoom);
+
+      // Cập nhật tiêu đề & nhãn chế độ Modal Đặt Vé / Đổi Ghế
+      const modalTitleEl = document.getElementById("booking-modal-title");
+      const modalSubEl = document.getElementById("booking-modal-subtitle");
+      const modeBadgeEl = document.getElementById("booking-modal-mode-badge");
+      if (modalTitleEl) {
+        if (!isPaidMode) {
+          modalTitleEl.textContent = isInRoomSeatChange
+            ? `Đổi Ghế Ngồi Trong ${room.number} (Chế Độ Free)`
+            : "Đặt Vé & Chọn Ghế Vào Phòng Ngay (Chế Độ Free)";
+        } else {
+          modalTitleEl.textContent = "Đặt Vé Rạp Chiếu Phim Trực Tuyến (Box Office)";
+        }
+      }
+      if (modalSubEl) {
+        modalSubEl.textContent = !isPaidMode
+          ? "Chế độ Free: Không thu phí & không tính doanh thu • Bấm xác nhận là vào thẳng phòng hoặc đổi ghế ngay (giới hạn đổi ghế 10 phút/lần)"
+          : "Chọn suất chiếu, bấm chọn ghế trên sơ đồ và nhận Vé Điện Tử kèm Thẻ Ký Ức NFT độc bản";
+      }
+      if (modeBadgeEl) {
+        modeBadgeEl.textContent = !isPaidMode ? "🆓 CHẾ ĐỘ FREE" : "IMAX Laser 70mm";
+        modeBadgeEl.className = !isPaidMode
+          ? "px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10px] font-black uppercase"
+          : "px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[10px] font-black uppercase";
+      }
+
+      // 1. Render dropdown chọn phòng phim & cập nhật nhãn Combo Bắp Nước (ẩn giá khi ở Chế độ Free)
       const roomSelect = document.getElementById("booking-room-select");
       if (roomSelect) {
         roomSelect.innerHTML = DEFAULT_ROOMS.map(r => {
@@ -13272,11 +13366,28 @@
         }).join("");
       }
 
-      // 2. Render các khung giờ suất chiếu
+      const comboSelect = document.getElementById("booking-combo-select");
+      if (comboSelect) {
+        const comboOpts = [
+          { val: "🍿🥤|45000|Combo Solo Bắp + Pepsi", freeText: "🍿🥤 Combo Solo Bắp + Pepsi", paidText: "🍿🥤 Combo Solo Bắp + Pepsi (+45.000đ)" },
+          { val: "🍿🍿🥤🥤|79000|Combo Couple Sweetbox", freeText: "🍿🍿🥤🥤 Combo Couple Sweetbox", paidText: "🍿🍿🥤🥤 Combo Couple Sweetbox (+79.000đ)" },
+          { val: "🧀🍿🧋|65000|Combo Phô Mai Trà Sữa", freeText: "🧀🍿🧋 Combo Phô Mai Trà Sữa", paidText: "🧀🍿🧋 Combo Phô Mai Trà Sữa (+65.000đ)" },
+          { val: "🥂🍾🍓|120000|Combo VIP Hoàng Gia", freeText: "🥂🍾🍓 Combo VIP Hoàng Gia", paidText: "🥂🍾🍓 Combo VIP Hoàng Gia (+120.000đ)" },
+          { val: "|0|Không kèm bắp nước", freeText: "Không kèm bắp nước", paidText: "Không kèm bắp nước (+0đ)" }
+        ];
+        const currentIcon = state.bookingDraft.comboIcon ?? "🍿🥤";
+        comboSelect.innerHTML = comboOpts.map(c => {
+          const iconPart = c.val.split("|")[0];
+          return `<option value="${escapeHTML(c.val)}" ${iconPart === currentIcon ? "selected" : ""}>${escapeHTML(isPaidMode ? c.paidText : c.freeText)}</option>`;
+        }).join("");
+      }
+
+      // 2. Render các khung giờ suất chiếu (ẩn phụ thu +50.000đ khi ở Chế độ Free)
       const pillsEl = document.getElementById("booking-showtime-pills");
       if (pillsEl) {
         pillsEl.innerHTML = BOOKING_SHOWTIMES.map(st => {
           const active = st === state.bookingDraft.showtime;
+          const displayLabel = formatShowtimeForCurrentMode(st);
           return `
             <button type="button"
               onclick="window.appActions.selectBookingShowtime('${escapeHTML(st)}')"
@@ -13285,10 +13396,21 @@
                   ? "bg-amber-500 text-slate-950 border-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.45)]"
                   : "bg-stone-950 hover:bg-stone-800 text-slate-300 border-white/10"
               }">
-              <i class="fa-regular fa-clock mr-1"></i>${escapeHTML(st)}
+              <i class="fa-regular fa-clock mr-1"></i>${escapeHTML(displayLabel)}
             </button>
           `;
         }).join("");
+      }
+
+      // Cập nhật chú thích hạng ghế (ẩn 95k/125k/160k khi ở Chế độ Free)
+      const legendEl = document.getElementById("booking-seat-legend");
+      if (legendEl) {
+        const stdSpan = legendEl.querySelector('[data-legend-tier="standard"]');
+        const vipSpan = legendEl.querySelector('[data-legend-tier="vip"]');
+        const swtSpan = legendEl.querySelector('[data-legend-tier="sweetbox"]');
+        if (stdSpan) stdSpan.textContent = isPaidMode ? "Standard A–C (95k)" : "Standard A–C";
+        if (vipSpan) vipSpan.textContent = isPaidMode ? "VIP D–E (125k)" : "VIP D–E";
+        if (swtSpan) swtSpan.textContent = isPaidMode ? "Sweetbox F (160k)" : "Sweetbox F";
       }
 
       // 3. Render sơ đồ đúng số ghế thực tế của từng phòng (2 ghế Đôi / 10 ghế Stream / 48 ghế Tiêu chuẩn)
@@ -13367,35 +13489,72 @@
       const titleEl = document.getElementById("booking-preview-title");
       if (titleEl) titleEl.textContent = room.movieTitle;
       const timeEl = document.getElementById("booking-preview-time");
-      if (timeEl) timeEl.textContent = state.bookingDraft.showtime;
+      if (timeEl) {
+        timeEl.textContent = formatShowtimeForCurrentMode(state.bookingDraft.showtime);
+      }
 
       const { price: seatPrice, tier } = getSeatPriceAndTier(selectedSeat);
       const comboPrice = state.bookingDraft.comboPrice || 0;
       const showtimeInfo = getShowtimeSurchargeAndUnlock(state.bookingDraft.showtime);
       const surcharge = showtimeInfo.surcharge || 0;
-      const buyoutFee = state.bookingDraft.privateBuyout ? 500000 : 0;
+      const buyoutFee = (isPaidMode && state.bookingDraft.privateBuyout) ? 500000 : 0;
       const total = seatPrice + comboPrice + surcharge + buyoutFee;
 
       const seatPreviewEl = document.getElementById("booking-preview-seat");
       if (seatPreviewEl) seatPreviewEl.textContent = `${selectedSeat} (${tier.split("•")[0].trim()})`;
-      const seatPriceEl = document.getElementById("booking-seat-price");
-      if (seatPriceEl) seatPriceEl.textContent = formatVND(seatPrice);
-      const comboPriceEl = document.getElementById("booking-combo-price");
-      if (comboPriceEl) comboPriceEl.textContent = formatVND(comboPrice);
-      const instantRow = document.getElementById("booking-instant-fee-row");
-      if (instantRow) instantRow.classList.toggle("hidden", surcharge <= 0);
-      const buyoutRow = document.getElementById("booking-buyout-fee-row");
-      if (buyoutRow) buyoutRow.classList.toggle("hidden", buyoutFee <= 0);
-      const buyoutChk = document.getElementById("booking-private-buyout-chk");
-      if (buyoutChk) buyoutChk.checked = Boolean(state.bookingDraft.privateBuyout);
-      const totalPriceEl = document.getElementById("booking-total-price");
-      if (totalPriceEl) totalPriceEl.textContent = formatVND(total);
+
+      const freeModeRows = document.getElementById("booking-free-mode-rows");
+      const paidPriceRows = document.getElementById("booking-paid-price-rows");
+      const buyoutLabelWrap = document.getElementById("booking-buyout-label-wrap");
+      if (freeModeRows) freeModeRows.classList.toggle("hidden", isPaidMode);
+      if (paidPriceRows) paidPriceRows.classList.toggle("hidden", !isPaidMode);
+      if (buyoutLabelWrap) buyoutLabelWrap.classList.toggle("hidden", !isPaidMode);
+
+      if (!isPaidMode) {
+        backToBookingSummary();
+        const freeComboEl = document.getElementById("booking-free-combo-label");
+        if (freeComboEl) {
+          freeComboEl.textContent = state.bookingDraft.comboIcon
+            ? `${state.bookingDraft.comboIcon} ${state.bookingDraft.comboName || "Combo Bắp Nước"}`
+            : "Không kèm bắp nước";
+        }
+        const cooldownBadgeEl = document.getElementById("booking-free-cooldown-badge");
+        if (cooldownBadgeEl) {
+          const remainMs = getFreeSeatChangeRemainingMs();
+          if (remainMs > 0 && currentSeatInTargetRoom && currentSeatInTargetRoom !== selectedSeat) {
+            cooldownBadgeEl.textContent = `⏳ Chờ ${formatCooldownRemaining(remainMs)} để đổi ghế`;
+            cooldownBadgeEl.className = "text-amber-300 font-bold text-[11px]";
+          } else {
+            cooldownBadgeEl.textContent = "⏳ 10 phút / 1 lần đổi ghế (chống spam)";
+            cooldownBadgeEl.className = "text-sky-300 font-bold text-[11px]";
+          }
+        }
+      } else {
+        const seatPriceEl = document.getElementById("booking-seat-price");
+        if (seatPriceEl) seatPriceEl.textContent = formatVND(seatPrice);
+        const comboPriceEl = document.getElementById("booking-combo-price");
+        if (comboPriceEl) comboPriceEl.textContent = formatVND(comboPrice);
+        const instantRow = document.getElementById("booking-instant-fee-row");
+        if (instantRow) instantRow.classList.toggle("hidden", surcharge <= 0);
+        const buyoutRow = document.getElementById("booking-buyout-fee-row");
+        if (buyoutRow) buyoutRow.classList.toggle("hidden", buyoutFee <= 0);
+        const buyoutChk = document.getElementById("booking-private-buyout-chk");
+        if (buyoutChk) buyoutChk.checked = Boolean(state.bookingDraft.privateBuyout);
+        const totalPriceEl = document.getElementById("booking-total-price");
+        if (totalPriceEl) totalPriceEl.textContent = formatVND(total);
+      }
 
       const btnTextEl = document.getElementById("booking-confirm-btn-text");
       if (btnTextEl) {
-        btnTextEl.textContent = state.paymentMode === "paid"
-          ? `Thanh Toán (${formatVND(total)})`
-          : "Xác Nhận Đặt Vé & Vào Ghế Ngồi Ngay";
+        if (isPaidMode) {
+          btnTextEl.textContent = `Thanh Toán (${formatVND(total)})`;
+        } else if (isInRoomSeatChange && currentSeatInTargetRoom !== selectedSeat) {
+          btnTextEl.textContent = `Xác Nhận Đổi Sang Ghế ${selectedSeat} Ngay`;
+        } else if (state.currentRoomId === roomId) {
+          btnTextEl.textContent = `Ngồi Vào Ghế ${selectedSeat} Ngay`;
+        } else {
+          btnTextEl.textContent = `Đặt Ghế ${selectedSeat} & Vào Phòng Ngay`;
+        }
       }
       updateInlinePaymentQrView(total);
     }
@@ -13473,38 +13632,43 @@
     }
 
     async function applyUpgradedTicketAndEnter(roomId) {
+      const isPaidMode = state.paymentMode === "paid";
       const ticket = state.bookedTicketsByRoom?.[roomId];
       if (ticket) {
         ticket.showtimeUnlockAt = 0;
         ticket.showtime = "⚡ Vào Rạp Ngay • Suất VIP (+50.000đ)";
-        ticket.surcharge = (Number(ticket.surcharge) || 0) + INSTANT_ENTRY_SURCHARGE;
-        ticket.totalAmount = (Number(ticket.totalAmount) || 0) + INSTANT_ENTRY_SURCHARGE;
+        if (isPaidMode) {
+          ticket.surcharge = (Number(ticket.surcharge) || 0) + INSTANT_ENTRY_SURCHARGE;
+          ticket.totalAmount = (Number(ticket.totalAmount) || 0) + INSTANT_ENTRY_SURCHARGE;
+        }
       }
-      const room = getEffectiveRoom(roomId);
-      const revOrder = {
-        id: "UPG_" + Date.now() + "_" + Math.random().toString(36).slice(2, 5),
-        roomId,
-        roomNumber: room.number,
-        movieTitle: room.movieTitle,
-        seatId: ticket?.seatId || "F4",
-        tier: "Đổi vé Vào Ngay",
-        ticketPrice: INSTANT_ENTRY_SURCHARGE,
-        comboName: "Phụ thu đổi suất",
-        comboPrice: 0,
-        totalAmount: INSTANT_ENTRY_SURCHARGE,
-        uid: state.uid,
-        userName: state.userName,
-        userEmail: state.userEmail || "",
-        gmailVerified: Boolean(state.gmailVerified),
-        createdAt: Date.now()
-      };
-      state.revenueOrders = [revOrder, ...(state.revenueOrders || [])];
-      if (rtdb && rtdbMod) {
-        rtdbMod.set(rtdbMod.ref(rtdb, `revenue_orders/${revOrder.id}`), revOrder).catch(() => {});
+      if (isPaidMode) {
+        const room = getEffectiveRoom(roomId);
+        const revOrder = {
+          id: "UPG_" + Date.now() + "_" + Math.random().toString(36).slice(2, 5),
+          roomId,
+          roomNumber: room.number,
+          movieTitle: room.movieTitle,
+          seatId: ticket?.seatId || "F4",
+          tier: "Đổi vé Vào Ngay",
+          ticketPrice: INSTANT_ENTRY_SURCHARGE,
+          comboName: "Phụ thu đổi suất",
+          comboPrice: 0,
+          totalAmount: INSTANT_ENTRY_SURCHARGE,
+          uid: state.uid,
+          userName: state.userName,
+          userEmail: state.userEmail || "",
+          gmailVerified: Boolean(state.gmailVerified),
+          createdAt: Date.now()
+        };
+        state.revenueOrders = [revOrder, ...(state.revenueOrders || [])];
+        if (rtdb && rtdbMod) {
+          rtdbMod.set(rtdbMod.ref(rtdb, `revenue_orders/${revOrder.id}`), revOrder).catch(() => {});
+        }
       }
       saveAppStateToStorage();
       closeTicketUpgradeModal();
-      showToast("⚡ Đổi vé Vào Rạp Ngay thành công! Đang mở cửa phòng chiếu...", "success");
+      showToast("⚡ Mở cửa vào rạp ngay thành công!", "success");
       await enterRoom(roomId, { fromBooking: true });
       if (ticket?.seatId) await assignSeat(roomId, ticket.seatId, false);
     }
@@ -13739,6 +13903,7 @@
         return;
       }
 
+      const isPaidMode = state.paymentMode === "paid";
       const targetRoomId = state.bookingDraft.roomId || "room-1";
       const targetSeatId = state.bookingDraft.seatId || "F4";
       const showtime = state.bookingDraft.showtime || "19:30 • IMAX Laser 70mm";
@@ -13746,10 +13911,22 @@
       const { price: seatPrice, tier } = getSeatPriceAndTier(targetSeatId);
       const comboPrice = state.bookingDraft.comboPrice || 0;
       const showtimeInfo = getShowtimeSurchargeAndUnlock(showtime);
-      const buyoutFee = state.bookingDraft.privateBuyout ? 500000 : 0;
-      const totalAmount = seatPrice + comboPrice + (showtimeInfo.surcharge || 0) + buyoutFee;
+      const buyoutFee = (isPaidMode && state.bookingDraft.privateBuyout) ? 500000 : 0;
+      const totalAmount = isPaidMode ? (seatPrice + comboPrice + (showtimeInfo.surcharge || 0) + buyoutFee) : 0;
 
-      if (state.paymentMode === "paid" && !options?.paymentVerified) {
+      const prevBookedSeat = state.bookedTicketsByRoom?.[targetRoomId]?.seatId || getMySeatInRoom(targetRoomId);
+      const isChangingExistingSeat = Boolean(prevBookedSeat && prevBookedSeat !== targetSeatId);
+
+      // Chế độ Free: Giới hạn đổi ghế 10 phút / 1 lần để chống spam
+      if (!isPaidMode && isChangingExistingSeat) {
+        const remainMs = getFreeSeatChangeRemainingMs();
+        if (remainMs > 0) {
+          showToast(`⏳ Chế độ Free giới hạn đổi ghế 10 phút/lần để tránh spam! Vui lòng đợi ${formatCooldownRemaining(remainMs)} nữa.`, "warning");
+          return;
+        }
+      }
+
+      if (isPaidMode && !options?.paymentVerified) {
         await startPaidTicketFlow({
           fromQuickBar,
           targetRoomId,
@@ -13766,7 +13943,6 @@
         state.mySnack = state.bookingDraft.comboIcon;
       }
 
-      const prevBookedSeat = state.bookedTicketsByRoom?.[targetRoomId]?.seatId || getMySeatInRoom(targetRoomId);
       if (prevBookedSeat && prevBookedSeat !== targetSeatId) {
         if (state.seatsByRoom[targetRoomId]?.[prevBookedSeat]?.uid === state.uid) {
           delete state.seatsByRoom[targetRoomId][prevBookedSeat];
@@ -13777,7 +13953,7 @@
       }
 
       let grantedHostKey = "";
-      if (state.bookingDraft.privateBuyout) {
+      if (isPaidMode && state.bookingDraft.privateBuyout) {
         const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
         const arr = new Uint8Array(6);
         crypto.getRandomValues(arr);
@@ -13806,64 +13982,72 @@
           }).catch(() => {});
         }
         state.bookingDraft.privateBuyout = false;
+      } else {
+        state.bookingDraft.privateBuyout = false;
       }
 
       state.bookedTicketsByRoom[targetRoomId] = {
         seatId: targetSeatId,
         showtime,
-        showtimeUnlockAt: showtimeInfo.unlockAt || 0,
+        showtimeUnlockAt: isPaidMode ? (showtimeInfo.unlockAt || 0) : 0,
         movieVersion: String(roomObj.movieVersion || ""),
         movieTitle: roomObj.movieTitle || "",
-        ticketPrice: seatPrice,
-        comboPrice,
-        surcharge: showtimeInfo.surcharge || 0,
-        buyoutFee,
+        ticketPrice: isPaidMode ? seatPrice : 0,
+        comboPrice: isPaidMode ? comboPrice : 0,
+        surcharge: isPaidMode ? (showtimeInfo.surcharge || 0) : 0,
+        buyoutFee: isPaidMode ? buyoutFee : 0,
         hostKey: grantedHostKey,
-        totalAmount,
+        totalAmount: isPaidMode ? totalAmount : 0,
+        isFreeMode: !isPaidMode,
         bookedAt: Date.now()
       };
 
-      const orderRecord = {
-        id: "ORD_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
-        roomId: targetRoomId,
-        roomNumber: roomObj.number,
-        movieTitle: roomObj.movieTitle,
-        seatId: targetSeatId,
-        tier: tier.split("•")[0].trim(),
-        ticketPrice: seatPrice,
-        comboName: state.bookingDraft.comboName || "Không combo",
-        comboPrice,
-        totalAmount,
-        uid: state.uid,
-        userName: state.userName,
-        userEmail: state.userEmail || "",
-        gmailVerified: Boolean(state.gmailVerified),
-        createdAt: Date.now()
-      };
-      state.revenueOrders = [orderRecord, ...(state.revenueOrders || [])];
-      if (rtdb && rtdbMod) {
-        rtdbMod.set(rtdbMod.ref(rtdb, `revenue_orders/${orderRecord.id}`), orderRecord).catch(() => {});
-      }
-      const workerNotifyBase = (state.r2WorkerUrl || "").replace(/\/+$/, "");
-      if (workerNotifyBase) {
-        fetch(`${workerNotifyBase}/notify-admin-booking`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(orderRecord)
-        }).catch(() => {});
-      }
-      if (state.isAdminUnlocked) {
-        renderAdminRevenueDashboard();
+      // Chỉ ghi nhận vào bảng doanh thu hệ thống khi ở Chế độ Trả Phí (Paid)
+      if (isPaidMode) {
+        const orderRecord = {
+          id: "ORD_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+          roomId: targetRoomId,
+          roomNumber: roomObj.number,
+          movieTitle: roomObj.movieTitle,
+          seatId: targetSeatId,
+          tier: tier.split("•")[0].trim(),
+          ticketPrice: seatPrice,
+          comboName: state.bookingDraft.comboName || "Không combo",
+          comboPrice,
+          totalAmount,
+          uid: state.uid,
+          userName: state.userName,
+          userEmail: state.userEmail || "",
+          gmailVerified: Boolean(state.gmailVerified),
+          createdAt: Date.now()
+        };
+        state.revenueOrders = [orderRecord, ...(state.revenueOrders || [])];
+        if (rtdb && rtdbMod) {
+          rtdbMod.set(rtdbMod.ref(rtdb, `revenue_orders/${orderRecord.id}`), orderRecord).catch(() => {});
+        }
+        const workerNotifyBase = (state.r2WorkerUrl || "").replace(/\/+$/, "");
+        if (workerNotifyBase) {
+          fetch(`${workerNotifyBase}/notify-admin-booking`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(orderRecord)
+          }).catch(() => {});
+        }
+        if (state.isAdminUnlocked) {
+          renderAdminRevenueDashboard();
+        }
+      } else if (isChangingExistingSeat) {
+        recordFreeSeatChangeTimestamp();
       }
 
       closeBookingModal();
       const waitMsgAfterBook = getRoomWaitMessage(roomObj);
       if (waitMsgAfterBook) {
         renderLobby();
-        showToast(`🎟️ Đã giữ vé ghế ${targetSeatId}! ${waitMsgAfterBook}`, "info");
+        showToast(`🎟️ Đã giữ ghế ${targetSeatId}! ${waitMsgAfterBook}`, "info");
         return;
       }
-      if (showtimeInfo.unlockAt && Date.now() < showtimeInfo.unlockAt) {
+      if (isPaidMode && showtimeInfo.unlockAt && Date.now() < showtimeInfo.unlockAt) {
         const remainSec = Math.max(1, Math.ceil((showtimeInfo.unlockAt - Date.now()) / 1000));
         const hrs = Math.floor(remainSec / 3600);
         const mins = Math.floor((remainSec % 3600) / 60);
@@ -13882,10 +14066,16 @@
       renderLobby();
 
       // Tự động đúc Thẻ Ký Ức Điện Ảnh NFT cho vé vừa đặt
-      const capsule = autoSyncMemoryCapsule(targetRoomId, targetSeatId, "Phim hay quá", showtime, true);
+      const capsule = autoSyncMemoryCapsule(targetRoomId, targetSeatId, "Phim hay quá", formatShowtimeForCurrentMode(showtime), true);
       playCinemaBellSFX();
       if (grantedHostKey) {
         showToast(`👑 Bao Nguyên Rạp thành công! Key Chủ Trì ${grantedHostKey} đã được gửi về Gmail ${state.userEmail || ""}!`, "success");
+      } else if (!isPaidMode) {
+        if (isChangingExistingSeat) {
+          showToast(`🪑 Đã đổi sang ghế ${targetSeatId} thành công! (Giới hạn đổi ghế tiếp theo sau 10 phút)`, "success");
+        } else {
+          showToast(`🎟️ Đã đặt ghế ${targetSeatId} & vào thẳng ghế ngồi! Đồng bộ Thẻ Ký Ức NFT #${capsule.securityCode}.`, "success");
+        }
       } else {
         showToast(`🎟️ Đặt vé thành công (${formatVND(totalAmount)})! Ghế ${targetSeatId} & Đã đúc Thẻ Ký Ức NFT #${capsule.securityCode}!`, "success");
       }
@@ -15156,26 +15346,43 @@
 
     async function pollSiteLockRealtimeFallback() {
       try {
-        const res = await fetch(`${RTDB_URL}/lobby_config/site_lock.json?t=${Date.now()}`, {
-          cache: "no-store",
-          signal: AbortSignal.timeout(4000)
-        });
-        if (!res.ok) return;
-        const val = await res.json();
-        const nextEnabled = Boolean(val?.enabled);
-        const nextHash = String(val?.keyHash || "");
-        const nextUpdated = Number(val?.updatedAt || 0);
-        if (
-          state.siteLock?.enabled !== nextEnabled ||
-          state.siteLock?.keyHash !== nextHash ||
-          state.siteLock?.updatedAt !== nextUpdated
-        ) {
-          state.siteLock = {
-            enabled: nextEnabled,
-            keyHash: nextHash,
-            updatedAt: nextUpdated
-          };
-          applySiteLockState();
+        const [lockRes, payRes] = await Promise.all([
+          fetch(`${RTDB_URL}/lobby_config/site_lock.json?t=${Date.now()}`, {
+            cache: "no-store",
+            signal: AbortSignal.timeout(4000)
+          }).catch(() => null),
+          fetch(`${RTDB_URL}/lobby_config/payment_mode.json?t=${Date.now()}`, {
+            cache: "no-store",
+            signal: AbortSignal.timeout(4000)
+          }).catch(() => null)
+        ]);
+        if (lockRes && lockRes.ok) {
+          const val = await lockRes.json();
+          const nextEnabled = Boolean(val?.enabled);
+          const nextHash = String(val?.keyHash || "");
+          const nextUpdated = Number(val?.updatedAt || 0);
+          if (
+            state.siteLock?.enabled !== nextEnabled ||
+            state.siteLock?.keyHash !== nextHash ||
+            state.siteLock?.updatedAt !== nextUpdated
+          ) {
+            state.siteLock = {
+              enabled: nextEnabled,
+              keyHash: nextHash,
+              updatedAt: nextUpdated
+            };
+            applySiteLockState();
+          }
+        }
+        if (payRes && payRes.ok) {
+          const payVal = await payRes.json();
+          const nextMode = payVal?.mode === "paid" ? "paid" : "free";
+          if (state.paymentMode !== nextMode) {
+            state.paymentMode = nextMode;
+            if (!document.getElementById("booking-modal")?.classList.contains("hidden")) {
+              renderBookingModalUI();
+            }
+          }
         }
       } catch (_) {}
     }
