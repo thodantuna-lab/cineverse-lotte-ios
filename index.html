@@ -5081,7 +5081,12 @@
 
       // Khóa cố định ghế theo vé đã đặt — muốn chuyển sang ghế khác phải mua vé mới cho ghế đó
       const bookedTicket = state.bookedTicketsByRoom?.[roomId];
-      if (bookedTicket && bookedTicket.seatId && bookedTicket.seatId !== seatId) {
+      const roomObjForSeat = getEffectiveRoom(roomId);
+      const validSeatsForRoom = getValidSeatsForRoom(roomObjForSeat);
+      if (bookedTicket && bookedTicket.seatId && !validSeatsForRoom.includes(bookedTicket.seatId) && validSeatsForRoom.includes(seatId)) {
+        bookedTicket.seatId = seatId;
+        saveAppStateToStorage();
+      } else if (bookedTicket && bookedTicket.seatId && bookedTicket.seatId !== seatId) {
         if (notify) {
           showToast(`🎫 Để chuyển từ ghế ${bookedTicket.seatId} sang ghế ${seatId}, vui lòng đặt mua vé mới cho ghế ${seatId}!`, "info");
           openBookingModal(roomId, null, seatId);
