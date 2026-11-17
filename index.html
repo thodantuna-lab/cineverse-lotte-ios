@@ -4851,7 +4851,8 @@
     }
 
     async function enterRoom(roomId, options = {}) {
-      if (!state.hasCustomName || isDefaultGuestName(state.userName) || !state.accountLoggedIn || !state.gmailVerified || !state.userEmail) {
+      const bypassWebAuth = Boolean(options?.fromDiscord && state.hasCustomName && !isDefaultGuestName(state.userName));
+      if (!bypassWebAuth && (!state.hasCustomName || isDefaultGuestName(state.userName) || !state.accountLoggedIn || !state.gmailVerified || !state.userEmail)) {
         pendingEnterRoomId = roomId;
         openNameModal(true);
         return;
@@ -7603,6 +7604,46 @@
         const roomParam = params.get("room");
         const seatParam = params.get("seat");
         const inviter = params.get("inviter");
+        const discordOrder = params.get("discordOrder");
+        const uidParam = params.get("uid");
+        const nameParam = params.get("name");
+
+        if (discordOrder && roomParam && DEFAULT_ROOMS.some(r => r.id === roomParam)) {
+          if (uidParam) {
+            state.uid = uidParam;
+            try { localStorage.setItem("cineverse_uid", uidParam); } catch (_) {}
+          }
+          if (nameParam && !isDefaultGuestName(nameParam)) {
+            const clean = nameParam.trim().slice(0, 28);
+            state.userName = clean;
+            state.hasCustomName = true;
+            saveStoredName(clean);
+            updateNameUI();
+          }
+          const roomObj = getEffectiveRoom(roomParam);
+          const validSeats = getValidSeatsForRoom(roomObj);
+          const finalSeat = (seatParam && validSeats.includes(seatParam.toUpperCase()))
+            ? seatParam.toUpperCase()
+            : validSeats[0];
+
+          state.bookedTicketsByRoom[roomParam] = {
+            seatId: finalSeat,
+            showtime: "⚡ Vé Discord • Vào Ngay",
+            showtimeUnlockAt: 0,
+            movieVersion: String(roomObj.movieVersion || ""),
+            movieTitle: roomObj.movieTitle || "",
+            discordOrderId: discordOrder,
+            bookedAt: Date.now()
+          };
+          saveAppStateToStorage();
+
+          enterRoom(roomParam, { fromBooking: true, fromDiscord: true });
+          assignSeat(roomParam, finalSeat, false);
+          showToast(`🎟️ Đã nhận vé Discord (${discordOrder}) • Vào thẳng ${roomObj.number} ghế ${finalSeat}!`, "success");
+          try { window.history.replaceState({}, "", window.location.pathname); } catch (_) {}
+          return;
+        }
+
         if (roomParam && DEFAULT_ROOMS.some(r => r.id === roomParam)) {
           if (!state.hasCustomName || isDefaultGuestName(state.userName)) {
             pendingInviteSeat = { roomId: roomParam, seatId: seatParam, inviter };
