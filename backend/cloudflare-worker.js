@@ -236,7 +236,7 @@ function logGeminiTelemetry(entry, ctx) {
 /**
  * Shared Gemini generateContent caller with non-blocking RTDB telemetry.
  */
-async function callGeminiWithTelemetry(modelName, payload, timeoutMs, featureTag, env, ctx) {
+async function callGeminiWithTelemetry(modelName, payload, timeoutMs, featureTag, env, ctx, colo = "EDGE") {
   const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`;
   const startedAt = Date.now();
   const logId = `g_${startedAt}_${Math.random().toString(36).slice(2, 7)}`;
@@ -262,7 +262,12 @@ async function callGeminiWithTelemetry(modelName, payload, timeoutMs, featureTag
     outputTokens = Number(usage.candidatesTokenCount || 0);
     totalTokens = Number(usage.totalTokenCount || (inputTokens + outputTokens));
     if (!text) {
-      errorMsg = String(gemData?.error?.message || `HTTP_${status || "EMPTY"}`).slice(0, 140);
+      const raw = String(gemData?.error?.message || `HTTP_${status || "EMPTY"}`);
+      if (raw.includes("User location is not supported")) {
+        errorMsg = `User location is not supported [Edge: ${colo}]`;
+      } else {
+        errorMsg = raw.slice(0, 140);
+      }
     }
   } catch (e) {
     status = e?.name === "TimeoutError" ? 408 : 0;
@@ -280,6 +285,7 @@ async function callGeminiWithTelemetry(modelName, payload, timeoutMs, featureTag
     inputTokens,
     outputTokens,
     totalTokens,
+    colo,
     error: errorMsg
   }, ctx);
 
@@ -318,6 +324,7 @@ ${numberedLines}`;
     let rawText = "";
     let lastError = "EMPTY_RESPONSE";
 
+    const colo = request?.cf?.colo || "EDGE";
     for (let idx = 0; idx < modelsToTry.length; idx++) {
       const modelName = modelsToTry[idx];
       if (idx > 0) await new Promise(r => setTimeout(r, 900));
@@ -331,12 +338,15 @@ ${numberedLines}`;
       const res = await callGeminiWithTelemetry(modelName, {
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: genCfg
-      }, 30000, "translate-srt", env, ctx);
+      }, 30000, "translate-srt", env, ctx, colo);
       if (res.text) {
         rawText = res.text;
         break;
       }
       if (res.errorMsg) lastError = res.errorMsg;
+      if (res.errorMsg && res.errorMsg.includes("User location is not supported")) {
+        break;
+      }
     }
 
     if (!rawText) {
@@ -430,16 +440,20 @@ Câu hỏi của khán giả: ${question}`;
     let rawText = "";
     let lastError = "EMPTY_RESPONSE";
 
+    const colo = request?.cf?.colo || "EDGE";
     for (const modelName of modelsToTry) {
       const res = await callGeminiWithTelemetry(modelName, {
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: baseGenConfig
-      }, 15000, `ai-${mode}`, env, ctx);
+      }, 15000, `ai-${mode}`, env, ctx, colo);
       if (res.text) {
         rawText = res.text;
         break;
       }
       if (res.errorMsg) lastError = res.errorMsg;
+      if (res.errorMsg && res.errorMsg.includes("User location is not supported")) {
+        break;
+      }
     }
     if (!rawText) {
       return jsonResponse({ ok: false, error: lastError }, 200);
@@ -503,6 +517,9 @@ async function extractCleanMovieMetaWithAI(rawTitle, env, ctx) {
             year: String(parsed.year || fallback.year || "")
           };
         }
+      }
+      if (res.errorMsg && res.errorMsg.includes("User location is not supported")) {
+        break;
       }
     } catch (e) {}
   }
