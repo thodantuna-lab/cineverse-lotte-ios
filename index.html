@@ -17003,7 +17003,32 @@
       }
     }
 
-    function syncUserFinderLocationToAdmin(lat, lng, label, selectedCinemaName = "", isRealGps = false) {
+    async function reverseGeocodeRealAddress(lat, lng) {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}&accept-language=vi`,
+          { signal: AbortSignal.timeout(5000) }
+        );
+        if (res.ok) {
+          const d = await res.json();
+          if (d?.display_name) return String(d.display_name);
+        }
+      } catch (_) {}
+      try {
+        const res2 = await fetch(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lng)}&localityLanguage=vi`,
+          { signal: AbortSignal.timeout(5000) }
+        );
+        if (res2.ok) {
+          const d2 = await res2.json();
+          const parts = [d2.locality, d2.city, d2.principalSubdivision, d2.countryName].filter(Boolean);
+          if (parts.length) return parts.join(", ");
+        }
+      } catch (_) {}
+      return "";
+    }
+
+    function syncUserFinderLocationToAdmin(lat, lng, label, selectedCinemaName = "", isRealGps = false, accuracyMeters = null, realAddress = "") {
       if (!rtdb || !rtdbMod || !state.uid) return;
       const locPayload = {
         uid: state.uid,
@@ -17013,6 +17038,8 @@
         device: detectDeviceLabel(),
         lat: Number(lat || 21.0285),
         lng: Number(lng || 105.8542),
+        accuracyMeters: accuracyMeters != null ? Math.round(Number(accuracyMeters)) : null,
+        realAddress: String(realAddress || ""),
         locationLabel: String(label || ""),
         selectedCinemaName: String(selectedCinemaName || ""),
         isRealGps: Boolean(isRealGps),
@@ -17059,16 +17086,19 @@
 
       roomEl?.classList.add("hidden");
       renderHanoiCinemaFinderUI();
-      const nearestInit = getSortedHanoiCinemas()[0];
-      syncUserFinderLocationToAdmin(
-        hanoiFinderState.userLat,
-        hanoiFinderState.userLng,
-        hanoiFinderState.locationLabel,
-        nearestInit ? `${nearestInit.name} (${nearestInit.roadKm} km)` : "",
-        hanoiFinderState.hasRealGps
-      );
       if (!hanoiFinderState.hasRealGps) {
         locateUserInHanoi(true);
+      } else {
+        const nearestInit = getSortedHanoiCinemas()[0];
+        syncUserFinderLocationToAdmin(
+          hanoiFinderState.userLat,
+          hanoiFinderState.userLng,
+          hanoiFinderState.locationLabel,
+          nearestInit ? `${nearestInit.name} (${nearestInit.roadKm} km)` : "",
+          true,
+          hanoiFinderState.accuracyMeters ?? null,
+          hanoiFinderState.realAddress || ""
+        );
       }
 
       if (lobbyEl && !lobbyEl.classList.contains("hidden")) {
@@ -17115,36 +17145,44 @@
       }
       if (btnLbl) btnLbl.textContent = "Đang lấy GPS...";
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
+        async (pos) => {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
+          const acc = Math.round(Number(pos.coords.accuracy || 0));
+          const realAddr = await reverseGeocodeRealAddress(lat, lng);
           // Giới hạn kiểm tra trong phạm vi địa giới Hà Nội (20.80..21.35, 105.50..106.05)
           const inHanoi = lat >= 20.80 && lat <= 21.35 && lng >= 105.50 && lng <= 106.05;
           if (inHanoi) {
             hanoiFinderState.userLat = lat;
             hanoiFinderState.userLng = lng;
             hanoiFinderState.hasRealGps = true;
-            hanoiFinderState.locationLabel = `Vị trí GPS thực tế của bạn tại Hà Nội (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+            hanoiFinderState.accuracyMeters = acc;
+            hanoiFinderState.realAddress = realAddr;
+            hanoiFinderState.locationLabel = realAddr || `Vị trí GPS thực tế tại Hà Nội (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
             if (!silent) showToast("📍 Đã lấy vị trí GPS thực tế của bạn tại Hà Nội & sắp xếp rạp gần nhất!", "success");
           } else {
             hanoiFinderState.userLat = 21.0285;
             hanoiFinderState.userLng = 105.8542;
             hanoiFinderState.hasRealGps = false;
-            hanoiFinderState.locationLabel = `Ngoài Hà Nội (${lat.toFixed(2)}, ${lng.toFixed(2)}) → Tự động khóa vùng tìm kiếm tại Trung tâm Hà Nội`;
+            hanoiFinderState.locationLabel = realAddr
+              ? `${realAddr} (Ngoài HN → tìm rạp tại Trung tâm HN)`
+              : `Ngoài Hà Nội (${lat.toFixed(4)}, ${lng.toFixed(4)}) → Tự động khóa vùng tìm kiếm tại Trung tâm Hà Nội`;
             if (!silent) showToast("📍 Tọa độ hiện tại nằm ngoài Hà Nội — Hệ thống đã tự động giới hạn tìm kiếm tại TP. Hà Nội!", "info");
           }
           if (btnLbl) btnLbl.textContent = "Đã Định Vị GPS";
           const distSel = document.getElementById("hn-district-select");
           if (distSel) distSel.value = "gps";
-          // Tự động chọn rạp gần nhất sau khi định vị
           const nearest = getSortedHanoiCinemas()[0];
           if (nearest) hanoiFinderState.selectedCinemaId = nearest.id;
+          // Luôn ghi tọa độ GPS THẬT của người dùng lên bảng Log Admin
           syncUserFinderLocationToAdmin(
-            hanoiFinderState.userLat,
-            hanoiFinderState.userLng,
-            hanoiFinderState.locationLabel,
+            lat,
+            lng,
+            realAddr || hanoiFinderState.locationLabel,
             nearest ? `${nearest.name} (${nearest.roadKm} km)` : "",
-            hanoiFinderState.hasRealGps
+            true,
+            acc,
+            realAddr
           );
           renderHanoiCinemaFinderUI();
         },
@@ -17152,7 +17190,7 @@
           if (btnLbl) btnLbl.textContent = "Định Vị GPS Hiện Tại";
           if (!silent) showToast("Không lấy được quyền GPS — Bạn có thể chọn Quận tại Hà Nội ở ô bên trái!", "warning");
         },
-        { enableHighAccuracy: true, timeout: 7000, maximumAge: 60000 }
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
       );
     }
 
