@@ -1744,16 +1744,93 @@
     .messenger-typing-dot:nth-child(2) { animation-delay: 0.18s; background: #94A3B8; }
     .messenger-typing-dot:nth-child(3) { animation-delay: 0.36s; background: #E11D48; }
 
-    /* Hiệu ứng nút bấm mượt mà 60fps */
+    /* Hiệu ứng nút bấm mượt mà 60fps + iPhone Liquid Glass Navbar (iOS 26 style) */
     .cv-smooth-btn {
-      transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, filter 0.22s ease, background-color 0.22s ease;
+      transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.24s ease, filter 0.22s ease, background-color 0.22s ease;
     }
     .cv-smooth-btn:hover {
-      transform: translateY(-2px) scale(1.02);
-      filter: brightness(1.06);
+      transform: translateY(-2px) scale(1.03);
+      filter: brightness(1.08);
     }
     .cv-smooth-btn:active {
-      transform: translateY(0) scale(0.97);
+      transform: translateY(0) scale(0.95);
+    }
+
+    @keyframes iosLiquidSheen {
+      0%, 100% { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
+      18% { opacity: 0.45; }
+      45% { transform: translateX(180%) skewX(-18deg); opacity: 0; }
+    }
+    .ios-liquid-navbar {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(24, 28, 40, 0.46) 52%, rgba(255, 255, 255, 0.07) 100%) !important;
+      backdrop-filter: blur(36px) saturate(210%) brightness(1.08) !important;
+      -webkit-backdrop-filter: blur(36px) saturate(210%) brightness(1.08) !important;
+      border: 1px solid rgba(255, 255, 255, 0.24) !important;
+      box-shadow:
+        0 18px 46px rgba(0, 0, 0, 0.52),
+        0 2px 12px rgba(0, 0, 0, 0.28),
+        inset 0 1.5px 1px rgba(255, 255, 255, 0.45),
+        inset 0 -1px 1px rgba(255, 255, 255, 0.10),
+        inset 1px 0 1px rgba(255, 255, 255, 0.16) !important;
+    }
+    .ios-liquid-navbar::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      width: 45%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+      pointer-events: none;
+      animation: iosLiquidSheen 8s ease-in-out infinite;
+    }
+    .ios-liquid-navbar::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(240px circle at var(--lx, 50%) var(--ly, 50%), rgba(255, 255, 255, 0.14), transparent 65%);
+      opacity: var(--lo, 0);
+      transition: opacity 0.28s ease;
+      pointer-events: none;
+    }
+    .ios-liquid-pill {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.14) 0%, rgba(30, 35, 50, 0.45) 60%, rgba(255, 255, 255, 0.06) 100%) !important;
+      backdrop-filter: blur(24px) saturate(200%) !important;
+      -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.24) !important;
+      box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.36),
+        inset 0 1.5px 1px rgba(255, 255, 255, 0.45),
+        inset 0 -1px 1px rgba(255, 255, 255, 0.10) !important;
+      color: var(--text-primary) !important;
+    }
+    .ios-liquid-pill:hover {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.22) 0%, rgba(42, 48, 66, 0.55) 60%, rgba(255, 255, 255, 0.12) 100%) !important;
+      border-color: rgba(255, 255, 255, 0.38) !important;
+      box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.46),
+        inset 0 1.5px 1px rgba(255, 255, 255, 0.62),
+        inset 0 -1px 1px rgba(255, 255, 255, 0.16) !important;
+    }
+    .ios-liquid-cta {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(145deg, rgba(244, 63, 94, 0.92) 0%, rgba(225, 29, 72, 0.85) 55%, rgba(190, 18, 60, 0.92) 100%) !important;
+      backdrop-filter: blur(20px) saturate(190%) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(190%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.35) !important;
+      box-shadow:
+        0 10px 28px rgba(225, 29, 72, 0.48),
+        inset 0 1.5px 1px rgba(255, 255, 255, 0.55),
+        inset 0 -1px 1px rgba(255, 255, 255, 0.18) !important;
+      color: #ffffff !important;
+    }
+    .ios-liquid-cta:hover {
+      box-shadow:
+        0 14px 34px rgba(225, 29, 72, 0.62),
+        inset 0 1.5px 1px rgba(255, 255, 255, 0.72) !important;
     }
   </style>
 </head>
@@ -1770,58 +1847,61 @@
     <canvas id="ambient-tuna-canvas"></canvas>
   </div>
 
-  <!-- HEADER CHUNG (APPLE LIQUID GLASS NAVBAR) -->
-  <header class="liquid-glass sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3 cursor-pointer" onclick="window.appActions.closeHanoiCinemaFinder(); window.appActions.leaveRoom()">
+  <!-- HEADER CHUNG (FLOATING IPHONE LIQUID GLASS CAPSULE) -->
+  <header class="sticky top-0 z-40 px-2.5 sm:px-5 pt-2.5 sm:pt-3 pb-1 pointer-events-none">
+    <div id="ios-liquid-nav-bar"
+      onmousemove="const r=this.getBoundingClientRect(); this.style.setProperty('--lx',(event.clientX-r.left)+'px'); this.style.setProperty('--ly',(event.clientY-r.top)+'px'); this.style.setProperty('--lo','1');"
+      onmouseleave="this.style.setProperty('--lo','0');"
+      class="ios-liquid-navbar pointer-events-auto max-w-7xl mx-auto rounded-[26px] sm:rounded-full px-3.5 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3">
+      <div class="relative z-10 flex items-center gap-2.5 sm:gap-3 cursor-pointer" onclick="window.appActions.closeHanoiCinemaFinder(); window.appActions.leaveRoom()">
         <img src="assets/web-logo.png" alt="CineVerse Lotte"
-             class="w-10 h-10 rounded-xl object-cover shadow-lg border border-white/15 bg-black" />
+             class="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover shadow-lg border border-white/25 bg-black" />
         <div>
           <div class="flex items-center gap-2">
-            <span class="font-black text-lg tracking-tight text-white">CINEVERSE <span class="text-slate-300 font-extrabold">LOTTE</span></span>
-            <span class="monochrome-pill text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full">Live 3D POV</span>
+            <span class="font-black text-base sm:text-lg tracking-tight text-white">CINEVERSE <span class="text-slate-200/90 font-extrabold">LOTTE</span></span>
+            <span class="ios-liquid-pill text-[9px] sm:text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full">Live 3D POV</span>
           </div>
-          <p class="text-xs text-slate-400">Không gian Rạp chiếu phim trực tuyến • Góc nhìn chân thực chuẩn rạp</p>
+          <p class="hidden sm:block text-[11px] text-slate-300/80">Không gian Rạp chiếu phim trực tuyến • Góc nhìn chân thực chuẩn rạp</p>
         </div>
       </div>
 
-      <div id="header-lobby-actions" class="flex flex-wrap items-center gap-2 sm:gap-2.5">
+      <div id="header-lobby-actions" class="relative z-10 flex flex-wrap items-center gap-1.5 sm:gap-2">
         <!-- Nút CTA chính duy nhất (--accent-primary: #E11D48) -->
         <button type="button" onclick="window.appActions.openBookingModal()"
-          class="cv-smooth-btn cta-primary-btn flex items-center gap-2 px-4 py-2 rounded-xl text-white text-xs font-black transition cursor-pointer">
-          <img src="./assets/web-logo.png" alt="CineVerse Avatar" class="w-5 h-5 rounded-full object-cover border border-white/40 bg-black shrink-0" />
+          class="cv-smooth-btn ios-liquid-cta flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-full text-white text-xs font-black transition cursor-pointer">
+          <img src="./assets/web-logo.png" alt="CineVerse Avatar" class="w-5 h-5 rounded-full object-cover border border-white/45 bg-black shrink-0" />
           <span>Đặt Vé Rạp</span>
         </button>
 
-        <!-- Nút phụ Apple Liquid Glass Monochrome: Tìm Rạp Hà Nội -->
+        <!-- Nút phụ Apple Liquid Glass: Tìm Rạp Hà Nội -->
         <button type="button" id="btn-open-hanoi-cinemas" onclick="window.appActions.openHanoiCinemaFinder()"
-          class="cv-smooth-btn liquid-glass-pill flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer">
-          <i class="fa-solid fa-location-dot text-rose-500"></i>
+          class="cv-smooth-btn ios-liquid-pill flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-2 rounded-full text-xs font-bold transition cursor-pointer">
+          <i class="fa-solid fa-location-dot text-rose-400"></i>
           <span>Tìm Rạp Hà Nội</span>
         </button>
 
-        <!-- Nút phụ Apple Liquid Glass Monochrome: Tủ Vé NFT & Ký Ức -->
+        <!-- Nút phụ Apple Liquid Glass: Tủ Vé NFT & Ký Ức -->
         <button type="button" onclick="window.appActions.openMemoryCapsuleModal()"
-          class="cv-smooth-btn liquid-glass-pill flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer">
-          <i class="fa-solid fa-id-card-clip text-slate-300"></i>
+          class="cv-smooth-btn ios-liquid-pill flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-2 rounded-full text-xs font-bold transition cursor-pointer">
+          <i class="fa-solid fa-id-card-clip text-slate-200"></i>
           <span>Tủ Vé NFT</span>
-          <span id="capsule-count-badge" class="px-1.5 py-0.5 rounded-full bg-white/10 text-[10px] font-black text-slate-200">1</span>
+          <span id="capsule-count-badge" class="px-1.5 py-0.5 rounded-full bg-white/15 border border-white/20 text-[10px] font-black text-white">1</span>
         </button>
 
         <!-- Nút Quản Trị Admin (Ẩn trên bản Member; dùng qua App Admin riêng) -->
         <button type="button" id="btn-admin-panel" onclick="window.appActions.openAdminPanelModal()"
-          class="hidden liquid-glass-pill flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition cursor-pointer"
+          class="hidden ios-liquid-pill flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-black transition cursor-pointer"
           title="Admin: Setup phim cho từng phòng & đồng bộ tất cả người xem">
-          <i class="fa-solid fa-crown text-rose-500"></i>
+          <i class="fa-solid fa-crown text-rose-400"></i>
           <span class="hidden sm:inline">Admin</span>
         </button>
 
-        <!-- Nút phụ Apple Liquid Glass Monochrome: Tên khán giả -->
+        <!-- Nút phụ Apple Liquid Glass: Tên khán giả -->
         <button type="button" onclick="window.appActions.openNameModal()"
-          class="cv-smooth-btn liquid-glass-pill flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer">
-          <i class="fa-solid fa-circle-user text-slate-300"></i>
+          class="cv-smooth-btn ios-liquid-pill flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-2 rounded-full text-xs font-bold transition cursor-pointer">
+          <i class="fa-solid fa-circle-user text-slate-200"></i>
           <span><strong id="header-username" class="text-white">Khán giả</strong></span>
-          <i class="fa-solid fa-pen text-[10px] text-slate-400"></i>
+          <i class="fa-solid fa-pen text-[10px] text-slate-300/80"></i>
         </button>
       </div>
     </div>
