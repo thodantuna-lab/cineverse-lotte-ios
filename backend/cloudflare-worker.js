@@ -1002,6 +1002,38 @@ async function handleWorkerFetch(request, env, corsHdrs) {
       );
     }
 
+    if (url.pathname === "/hanoi-showtimes" && request.method === "GET") {
+      try {
+        const res = await fetch("https://moveek.com/dang-chieu/", {
+          headers: { "User-Agent": "Mozilla/5.0 (compatible; CineVerseBot/1.0)" }
+        });
+        if (res.ok) {
+          const html = await res.text();
+          const titleMatches = [...html.matchAll(/<a[^>]+href="\/phim\/[^"]+"[^>]*title="([^"]{2,80})"/gi)];
+          const seen = new Set();
+          const movies = [];
+          const defaultSlots = ["10:00", "12:20", "14:40", "17:05", "19:25", "21:40", "23:10"];
+          for (const m of titleMatches) {
+            const t = (m[1] || "").replace(/\s+/g, " ").trim();
+            if (!t || seen.has(t.toLowerCase())) continue;
+            seen.add(t.toLowerCase());
+            movies.push({ title: t, format: "2D Phụ đề • Rạp Hà Nội", slots: defaultSlots });
+            if (movies.length >= 6) break;
+          }
+          if (movies.length > 0) {
+            return new Response(
+              JSON.stringify({ ok: true, source: "Moveek Hà Nội (Live)", movies }),
+              { status: 200, headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=900" } }
+            );
+          }
+        }
+      } catch (_) {}
+      return new Response(
+        JSON.stringify({ ok: false, movies: [] }),
+        { status: 200, headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8" } }
+      );
+    }
+
     const forceRefresh = url.searchParams.get("refresh") === "1";
     const nowTs = Date.now();
     if (!forceRefresh && R2_CATALOG_CACHE.data && nowTs - R2_CATALOG_CACHE.ts < 30000) {

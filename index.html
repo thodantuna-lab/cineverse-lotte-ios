@@ -1568,25 +1568,60 @@
     /* HỆ THỐNG APPLE LIQUID GLASS (60-30-10) & CHUYỂN CẢNH 60FPS */
     /* ======================================================= */
     .liquid-glass,
-    .liquid-glass-card,
     #name-modal > div,
     #booking-modal > div,
     #memory-capsule-modal > div,
     #hero-detail-modal > div,
     #host-key-modal > div {
-      background: rgba(25, 28, 38, 0.55) !important;
-      backdrop-filter: blur(24px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+      background: rgba(25, 28, 38, 0.62) !important;
+      backdrop-filter: blur(22px) saturate(170%) !important;
+      -webkit-backdrop-filter: blur(22px) saturate(170%) !important;
       border: 1px solid var(--glass-border) !important;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), var(--glass-highlight) !important;
     }
 
-    .liquid-glass-pill {
-      background: rgba(25, 28, 38, 0.55) !important;
-      backdrop-filter: blur(24px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    .liquid-glass-card {
+      background: rgba(25, 28, 38, 0.56) !important;
+      backdrop-filter: blur(14px) saturate(150%) !important;
+      -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
       border: 1px solid var(--glass-border) !important;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), var(--glass-highlight) !important;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.38), var(--glass-highlight) !important;
+      contain: layout style;
+    }
+
+    #lobby-rooms-grid > *,
+    #hn-cinema-list > * {
+      content-visibility: auto;
+      contain-intrinsic-size: 260px;
+    }
+
+    @media (max-width: 640px) {
+      #hanoi-cinema-finder-view {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        padding-top: 12px !important;
+        padding-bottom: 20px !important;
+      }
+      #hanoi-cinema-finder-view .liquid-glass-card {
+        border-radius: 20px !important;
+      }
+    }
+
+    @media (max-height: 520px) and (orientation: landscape) {
+      #hn-google-map-wrap {
+        height: 190px !important;
+      }
+      #hn-cinema-list {
+        max-height: 260px !important;
+      }
+    }
+
+    .liquid-glass-pill {
+      background: rgba(25, 28, 38, 0.58) !important;
+      backdrop-filter: blur(14px) saturate(150%) !important;
+      -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
+      border: 1px solid var(--glass-border) !important;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), var(--glass-highlight) !important;
       color: var(--text-primary) !important;
     }
     .liquid-glass-pill:hover {
@@ -2003,43 +2038,43 @@
   <!-- ========================================================= -->
   <!-- VIEW 1B: GIAO DIỆN TÁCH BIỆT - TÌM RẠP PHIM GẦN NHẤT TẠI HÀ NỘI (LOTTE • CGV • BETA) & DỰ TRÙ NGÂN SÁCH -->
   <!-- ========================================================= -->
-  <section id="hanoi-cinema-finder-view" class="hidden flex-1 max-w-7xl w-full mx-auto px-4 py-6 space-y-6">
-    <!-- Top Banner & Điều hướng quay về Sảnh Chính (Apple Liquid Glass) -->
-    <div class="liquid-glass-card rounded-3xl p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4">
-      <div class="flex items-center gap-4">
-        <img src="./assets/web-logo.png" alt="CineVerse Logo" class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border border-white/20 shadow-xl shrink-0" />
-        <div class="space-y-1">
-          <div class="flex flex-wrap items-center gap-2">
+  <section id="hanoi-cinema-finder-view" class="hidden flex-1 max-w-7xl w-full mx-auto px-2.5 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6 overflow-x-clip">
+    <!-- Top Banner & Điều hướng quay về Sảnh Chính (Responsive Portrait + Landscape) -->
+    <div class="liquid-glass-card rounded-3xl p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
+      <div class="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+        <img src="./assets/web-logo.png" alt="CineVerse Logo" class="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl object-cover border border-white/20 shadow-xl shrink-0" />
+        <div class="space-y-1 min-w-0">
+          <div class="flex flex-wrap items-center gap-1.5">
             <span class="monochrome-pill px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">HÀ NỘI REALTIME GPS</span>
-            <span class="monochrome-pill px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase text-slate-300">CGV • LOTTE CINEMA • BETA CINEMAS</span>
+            <span class="monochrome-pill px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase text-slate-300">CGV • LOTTE • BETA</span>
           </div>
-          <h1 class="text-lg sm:text-2xl font-black text-white tracking-tight">Bản Đồ Rạp Chiếu Phim Hà Nội &amp; Dự Trù Ngân Sách Thông Minh</h1>
-          <p class="text-xs text-slate-400">Dữ liệu địa chỉ, tọa độ Google Maps và bảng giá niêm yết chính thức được kiểm chứng từ hệ thống rạp tại TP. Hà Nội.</p>
+          <h1 class="text-base sm:text-2xl font-black text-white tracking-tight leading-snug">Bản Đồ Rạp Chiếu Phim Hà Nội &amp; Dự Trù Ngân Sách Thông Minh</h1>
+          <p class="text-[11px] sm:text-xs text-slate-400">Dữ liệu địa chỉ Google Maps, bảng giá niêm yết theo từng chi nhánh rạp &amp; lịch chiếu rạp thực tế tại TP. Hà Nội.</p>
         </div>
       </div>
-      <div class="flex flex-wrap items-center gap-2.5">
+      <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto shrink-0">
         <button type="button" onclick="window.appActions.locateUserInHanoi()"
-          class="cv-smooth-btn cta-primary-btn px-4 py-2.5 rounded-xl text-xs font-black flex items-center gap-2 cursor-pointer">
+          class="cv-smooth-btn cta-primary-btn px-3 sm:px-4 py-2.5 rounded-xl text-[11px] sm:text-xs font-black flex items-center justify-center gap-1.5 cursor-pointer">
           <i class="fa-solid fa-location-crosshairs"></i>
-          <span id="hn-gps-btn-label">Định Vị GPS Hiện Tại</span>
+          <span id="hn-gps-btn-label" class="truncate">Định Vị GPS</span>
         </button>
         <button type="button" onclick="window.appActions.closeHanoiCinemaFinder()"
-          class="cv-smooth-btn liquid-glass-pill px-4 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2 cursor-pointer">
+          class="cv-smooth-btn liquid-glass-pill px-3 sm:px-4 py-2.5 rounded-xl text-[11px] sm:text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer">
           <i class="fa-solid fa-arrow-left"></i>
-          <span>Quay Về Sảnh Chính</span>
+          <span class="truncate">Về Sảnh Chính</span>
         </button>
       </div>
     </div>
 
     <!-- Thanh điều khiển: Chọn Quận Hà Nội + Lọc Hãng Rạp + Trạng thái GPS -->
-    <div class="liquid-glass-card rounded-3xl p-4 sm:p-5 space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-        <div class="md:col-span-4 space-y-1">
+    <div class="liquid-glass-card rounded-3xl p-3.5 sm:p-5 space-y-3.5 sm:space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start md:items-center">
+        <div class="md:col-span-4 space-y-1 min-w-0">
           <label class="text-[11px] font-extrabold uppercase tracking-wider text-slate-300 block">
             <i class="fa-solid fa-location-dot mr-1 text-rose-500"></i>Vị Trí Của Bạn Tại Hà Nội
           </label>
           <select id="hn-district-select" onchange="window.appActions.onHanoiDistrictChange(this.value)"
-            class="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white font-bold focus:outline-none focus:border-rose-500">
+            class="w-full px-3 py-2.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white font-bold focus:outline-none focus:border-rose-500">
             <option value="gps">📍 Theo tọa độ GPS hiện tại (hoặc Trung tâm Hà Nội)</option>
             <option value="cau_giay">Quận Cầu Giấy (Xuân Thủy / Trần Duy Hưng)</option>
             <option value="dong_da">Quận Đống Đa (Nguyễn Chí Thanh / Chùa Bộc)</option>
@@ -2055,29 +2090,29 @@
           </select>
         </div>
 
-        <div class="md:col-span-5 space-y-1">
+        <div class="md:col-span-5 space-y-1 min-w-0">
           <label class="text-[11px] font-extrabold uppercase tracking-wider text-slate-300 block">Lọc Hệ Thống Rạp</label>
-          <div class="flex flex-wrap items-center gap-1.5" id="hn-brand-filters">
+          <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1.5" id="hn-brand-filters">
             <button type="button" onclick="window.appActions.setHanoiBrandFilter('all')" data-hnbrand="all"
-              class="cv-smooth-btn cta-primary-btn px-3.5 py-2 rounded-xl text-xs font-black cursor-pointer">
-              Tất cả (21 rạp HN)
+              class="cv-smooth-btn cta-primary-btn px-3 py-2 rounded-xl text-[11px] sm:text-xs font-black cursor-pointer text-center">
+              Tất cả (21 rạp)
             </button>
             <button type="button" onclick="window.appActions.setHanoiBrandFilter('Lotte Cinema')" data-hnbrand="Lotte Cinema"
-              class="cv-smooth-btn liquid-glass-pill px-3 py-2 rounded-xl text-xs font-bold cursor-pointer">
+              class="cv-smooth-btn liquid-glass-pill px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold cursor-pointer text-center">
               Lotte Cinema (7)
             </button>
             <button type="button" onclick="window.appActions.setHanoiBrandFilter('CGV Cinemas')" data-hnbrand="CGV Cinemas"
-              class="cv-smooth-btn liquid-glass-pill px-3 py-2 rounded-xl text-xs font-bold cursor-pointer">
+              class="cv-smooth-btn liquid-glass-pill px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold cursor-pointer text-center">
               CGV Cinemas (10)
             </button>
             <button type="button" onclick="window.appActions.setHanoiBrandFilter('Beta Cinemas')" data-hnbrand="Beta Cinemas"
-              class="cv-smooth-btn liquid-glass-pill px-3 py-2 rounded-xl text-xs font-bold cursor-pointer">
+              class="cv-smooth-btn liquid-glass-pill px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold cursor-pointer text-center">
               Beta Cinemas (4)
             </button>
           </div>
         </div>
 
-        <div class="md:col-span-3 space-y-1">
+        <div class="md:col-span-3 space-y-1 min-w-0">
           <label class="text-[11px] font-extrabold uppercase tracking-wider text-slate-300 block">Tìm Tên Rạp / Đường Phố</label>
           <input id="hn-search-input" type="text" oninput="window.appActions.onHanoiCinemaSearch(this.value)"
             placeholder="VD: Tây Hồ, Bà Triệu, Mỹ Đình..."
@@ -2085,54 +2120,54 @@
         </div>
       </div>
 
-      <div id="hn-gps-status-bar" class="px-3.5 py-2 rounded-2xl bg-black/40 border border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
-        <span class="text-slate-300"><i class="fa-solid fa-satellite-dish text-emerald-400 mr-1.5"></i>Trạng thái định vị: <strong id="hn-gps-coord-text" class="text-white">Khu vực Nội thành Hà Nội (Bấm "Định Vị GPS Hiện Tại" để lấy tọa độ chính xác của bạn)</strong></span>
-        <span class="text-[11px] text-slate-400 font-semibold">Giới hạn vùng tìm kiếm: 100% trong địa phận TP. Hà Nội</span>
+      <div id="hn-gps-status-bar" class="px-3 py-2 rounded-2xl bg-black/40 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-[11px] sm:text-xs">
+        <span class="text-slate-300 break-words"><i class="fa-solid fa-satellite-dish text-emerald-400 mr-1.5"></i>Trạng thái: <strong id="hn-gps-coord-text" class="text-white">Khu vực Nội thành Hà Nội (Bấm "Định Vị GPS" để lấy tọa độ chính xác)</strong></span>
+        <span class="text-[10px] sm:text-[11px] text-slate-400 font-semibold shrink-0">Giới hạn vùng: 100% TP. Hà Nội</span>
       </div>
     </div>
 
-    <!-- Lưới chính: Cột Trái Danh Sách Rạp Gần Nhất (5/12) | Cột Phải Google Maps + Lịch Chiếu Realtime + Dự Trù Ngân Sách (7/12) -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <!-- Lưới chính: Cột Trái Danh Sách Rạp Gần Nhất (5/12) | Cột Phải Google Maps + Dự Trù Ngân Sách + Lịch Chiếu Realtime (7/12) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
       <!-- Cột Trái: Danh sách rạp xếp theo khoảng cách gần nhất -->
-      <div class="lg:col-span-5 space-y-3">
+      <div class="lg:col-span-5 space-y-2.5 sm:space-y-3 min-w-0">
         <div class="flex items-center justify-between px-1">
           <h2 class="text-xs sm:text-sm font-black uppercase tracking-wider text-white">
             <i class="fa-solid fa-ranking-star mr-1.5 text-rose-500"></i>Danh Sách Rạp Gần Bạn Nhất
           </h2>
           <span id="hn-cinema-count-label" class="text-[11px] font-mono text-slate-400">21 cụm rạp</span>
         </div>
-        <div id="hn-cinema-list" class="space-y-3 max-h-[880px] overflow-y-auto"></div>
+        <div id="hn-cinema-list" class="space-y-2.5 sm:space-y-3 max-h-[340px] sm:max-h-[420px] lg:max-h-[880px] overflow-y-auto pr-0.5"></div>
       </div>
 
       <!-- Cột Phải: Bản đồ Google Maps Trực Tiếp + Dự Trù Ngân Sách + Lịch Chiếu & Bảng Giá -->
-      <div class="lg:col-span-7 space-y-5">
+      <div class="lg:col-span-7 space-y-4 sm:space-y-5 min-w-0">
         <!-- 1. Khung Google Maps Kết Nối Trực Tiếp & Thông Tin Rạp Đang Chọn -->
         <div class="liquid-glass-card rounded-3xl overflow-hidden">
-          <div class="p-4 sm:p-5 border-b border-white/10 flex flex-wrap items-start justify-between gap-3">
+          <div class="p-3.5 sm:p-5 border-b border-white/10 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
             <div class="space-y-1 min-w-0 flex-1">
-              <div class="flex flex-wrap items-center gap-2">
+              <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 <span id="hn-selected-brand-badge" class="monochrome-pill px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase">LOTTE CINEMA</span>
                 <span id="hn-selected-distance-badge" class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/35 text-emerald-300 text-[11px] font-black">Cách bạn ~1.2 km</span>
               </div>
-              <h3 id="hn-selected-name" class="text-base sm:text-xl font-black text-white">Lotte Cinema Tây Hồ (Lotte Mall West Lake)</h3>
-              <p id="hn-selected-address" class="text-xs text-slate-300"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>Tầng 4, Lotte Mall West Lake Hanoi, 272 Võ Chí Công, Phú Thượng, Tây Hồ, Hà Nội</p>
+              <h3 id="hn-selected-name" class="text-base sm:text-xl font-black text-white leading-snug">Lotte Cinema Tây Hồ (Lotte Mall West Lake)</h3>
+              <p id="hn-selected-address" class="text-[11px] sm:text-xs text-slate-300 break-words"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>Tầng 4, Lotte Mall West Lake Hanoi, 272 Võ Chí Công, Phú Thượng, Tây Hồ, Hà Nội</p>
             </div>
-            <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto shrink-0">
               <a id="hn-selected-directions-link" href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer"
-                class="cv-smooth-btn cta-primary-btn px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5">
+                class="cv-smooth-btn cta-primary-btn px-3 py-2 rounded-xl text-[11px] sm:text-xs font-black flex items-center justify-center gap-1.5">
                 <i class="fa-solid fa-diamond-turn-right"></i>
-                <span>Chỉ Đường Google Maps</span>
+                <span class="truncate">Chỉ Đường Maps</span>
               </a>
               <a id="hn-selected-official-link" href="https://www.lottecinemavn.com" target="_blank" rel="noopener noreferrer"
-                class="cv-smooth-btn liquid-glass-pill px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                class="cv-smooth-btn liquid-glass-pill px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold flex items-center justify-center gap-1.5">
                 <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                <span>Web Chính Thức</span>
+                <span class="truncate">Web Đặt Vé</span>
               </a>
             </div>
           </div>
 
           <!-- Bản đồ Google Maps Embed thực tế -->
-          <div class="relative w-full h-64 sm:h-72 bg-black">
+          <div id="hn-google-map-wrap" class="relative w-full h-52 sm:h-64 lg:h-72 bg-black">
             <iframe id="hn-google-map-iframe"
               title="Bản đồ Google Maps Rạp Phim Hà Nội"
               class="w-full h-full border-0"
@@ -2143,35 +2178,41 @@
           </div>
         </div>
 
-        <!-- 2. Công Cụ Dự Trù Ngân Sách Đi Xem Phim Cho Nhóm / Cá Nhân -->
-        <div class="liquid-glass-card rounded-3xl p-4 sm:p-5 space-y-4">
-          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
-            <div>
+        <!-- 2. Công Cụ Dự Trù Ngân Sách Đi Xem Phim Cho Nhóm / Cá Nhân (Tùy chọn đầy đủ & giá theo từng chi nhánh) -->
+        <div class="liquid-glass-card rounded-3xl p-3.5 sm:p-5 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+            <div class="min-w-0">
               <h3 class="text-sm sm:text-base font-black text-white flex items-center gap-2">
-                <i class="fa-solid fa-calculator text-rose-500"></i>
-                <span>Dự Trù Ngân Sách Đi Xem Phim (Theo Bảng Giá Niêm Yết Chính Thức)</span>
+                <i class="fa-solid fa-calculator text-rose-500 shrink-0"></i>
+                <span>Dự Trù Ngân Sách Đi Xem Phim (Theo Giá Từng Chi Nhánh)</span>
               </h3>
-              <p class="text-[11px] text-slate-400">Tự động tính chi phí vé, bắp nước, gửi xe và so sánh giữa 3 hệ thống rạp CGV • Lotte • Beta.</p>
+              <p id="hn-branch-pricing-note" class="text-[11px] text-slate-400 mt-0.5">Tự động tính chi phí vé đúng theo chi nhánh rạp đang chọn, định dạng phòng chiếu, bắp nước &amp; gửi xe.</p>
             </div>
-            <span id="hn-budget-per-person-pill" class="monochrome-pill px-3 py-1 rounded-full text-xs font-black">
+            <span id="hn-budget-per-person-pill" class="self-start sm:self-auto monochrome-pill px-3 py-1 rounded-full text-xs font-black shrink-0">
               ~125.000đ / người
             </span>
           </div>
 
-          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs">
             <div class="space-y-1">
               <label class="text-[10px] font-extrabold uppercase text-slate-400 block">Số người đi xem</label>
-              <select id="hn-budget-people" onchange="window.appActions.updateHanoiCinemaBudget()"
-                class="w-full px-2.5 py-2 rounded-xl bg-stone-950 border border-white/15 text-white font-bold">
-                <option value="1">1 người (Đi lẻ)</option>
-                <option value="2" selected>2 người (Cặp đôi / Bạn bè)</option>
-                <option value="3">3 người</option>
-                <option value="4">4 người (Nhóm bạn)</option>
-                <option value="5">5 người</option>
-                <option value="6">6 người</option>
-                <option value="8">8 người</option>
-                <option value="10">10 người (Hội nhóm)</option>
-              </select>
+              <div class="flex items-center gap-1.5">
+                <select id="hn-budget-people" onchange="window.appActions.onBudgetPeoplePresetChange(this.value)"
+                  class="flex-1 min-w-0 px-2.5 py-2 rounded-xl bg-stone-950 border border-white/15 text-white font-bold">
+                  <option value="1">1 người (Đi lẻ)</option>
+                  <option value="2" selected>2 người (Cặp đôi)</option>
+                  <option value="3">3 người</option>
+                  <option value="4">4 người (Nhóm bạn)</option>
+                  <option value="5">5 người</option>
+                  <option value="6">6 người</option>
+                  <option value="8">8 người</option>
+                  <option value="10">10 người</option>
+                  <option value="custom">Tự nhập số người...</option>
+                </select>
+                <input id="hn-budget-people-custom" type="number" min="1" max="100" value="2"
+                  oninput="window.appActions.updateHanoiCinemaBudget()"
+                  class="hidden w-16 px-2 py-2 rounded-xl bg-stone-950 border border-rose-500/60 text-white font-black text-center" />
+              </div>
             </div>
 
             <div class="space-y-1">
@@ -2180,6 +2221,19 @@
                 class="w-full px-2.5 py-2 rounded-xl bg-stone-950 border border-white/15 text-white font-bold">
                 <option value="adult" selected>Người lớn tiêu chuẩn</option>
                 <option value="u22">U22 / Học sinh - Sinh viên</option>
+                <option value="child">Trẻ em / Người cao tuổi</option>
+              </select>
+            </div>
+
+            <div class="space-y-1">
+              <label class="text-[10px] font-extrabold uppercase text-slate-400 block">Định dạng phòng chiếu</label>
+              <select id="hn-budget-format" onchange="window.appActions.updateHanoiCinemaBudget()"
+                class="w-full px-2.5 py-2 rounded-xl bg-stone-950 border border-white/15 text-white font-bold">
+                <option value="2d" selected>2D Tiêu chuẩn</option>
+                <option value="3d">3D (Kèm kính)</option>
+                <option value="imax">IMAX / Super Plex</option>
+                <option value="4dx">4DX / ScreenX</option>
+                <option value="luxury">VIP Thương gia (Gold Class / Charlotte)</option>
               </select>
             </div>
 
@@ -2187,8 +2241,8 @@
               <label class="text-[10px] font-extrabold uppercase text-slate-400 block">Hạng ghế ngồi</label>
               <select id="hn-budget-seat-tier" onchange="window.appActions.updateHanoiCinemaBudget()"
                 class="w-full px-2.5 py-2 rounded-xl bg-stone-950 border border-white/15 text-white font-bold">
-                <option value="standard">2D Standard</option>
-                <option value="vip" selected>2D VIP (Trung tâm)</option>
+                <option value="standard">Ghế Thường (Standard)</option>
+                <option value="vip" selected>Ghế VIP (Trung tâm)</option>
                 <option value="sweetbox">Ghế đôi Sweetbox</option>
               </select>
             </div>
@@ -2197,40 +2251,42 @@
               <label class="text-[10px] font-extrabold uppercase text-slate-400 block">Thời điểm xem</label>
               <select id="hn-budget-daytype" onchange="window.appActions.updateHanoiCinemaBudget()"
                 class="w-full px-2.5 py-2 rounded-xl bg-stone-950 border border-white/15 text-white font-bold">
-                <option value="auto" selected>🕒 Theo khung giờ thực tế hôm nay</option>
+                <option value="auto" selected>🕒 Theo giờ thực tế hôm nay</option>
                 <option value="weekday_day">T2, T4, T5 (Trước 17:00)</option>
                 <option value="weekday_night">T2, T4, T5 (Sau 17:00)</option>
-                <option value="happy_tue">Thứ 3 (Happy Day / Culture Day)</option>
-                <option value="weekend">T6, T7, CN &amp; Ngày Lễ</option>
+                <option value="happy_tue">Ngày Thành Viên (T3 / T4 Beta)</option>
+                <option value="weekend">Cuối tuần (T6, T7, CN &amp; Lễ)</option>
               </select>
             </div>
 
-            <div class="space-y-1 col-span-2 sm:col-span-1">
+            <div class="space-y-1">
               <label class="text-[10px] font-extrabold uppercase text-slate-400 block">Bắp nước &amp; Gửi xe</label>
               <select id="hn-budget-combo" onchange="window.appActions.updateHanoiCinemaBudget()"
                 class="w-full px-2.5 py-2 rounded-xl bg-stone-950 border border-white/15 text-white font-bold">
-                <option value="shared" selected>🍿 Combo chia chung tiết kiệm</option>
-                <option value="individual">🥤 Mỗi người 1 Combo riêng</option>
-                <option value="none">Không mua bắp nước</option>
+                <option value="shared" selected>🍿 Combo chia chung + Xe máy</option>
+                <option value="individual">🥤 Mỗi người 1 Combo + Xe máy</option>
+                <option value="popcorn_only">🌽 Chỉ mua bắp (không nước)</option>
+                <option value="car_shared">🚗 Combo chung + Gửi Ô tô</option>
+                <option value="none">Không mua bắp nước &amp; không gửi xe</option>
               </select>
             </div>
           </div>
 
           <!-- Bảng kết quả dự trù chi tiết -->
-          <div id="hn-budget-breakdown-box" class="bg-stone-950 rounded-2xl p-4 border border-white/10 space-y-3"></div>
+          <div id="hn-budget-breakdown-box" class="bg-stone-950 rounded-2xl p-3.5 sm:p-4 border border-white/10 space-y-3"></div>
         </div>
 
         <!-- 3. Lịch Chiếu Real-time Hôm Nay & Bảng Giá Chính Thức Tại Rạp Đang Chọn -->
-        <div class="liquid-glass-card rounded-3xl p-4 sm:p-5 space-y-4">
-          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
-            <div>
+        <div class="liquid-glass-card rounded-3xl p-3.5 sm:p-5 space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+            <div class="min-w-0">
               <h3 class="text-sm sm:text-base font-black text-white flex items-center gap-2">
-                <i class="fa-solid fa-clock text-rose-500"></i>
-                <span>Lịch Chiếu Real-Time Hôm Nay &amp; Bảng Giá Rạp</span>
+                <i class="fa-solid fa-clock text-rose-500 shrink-0"></i>
+                <span>Lịch Chiếu Thực Tế Tại Rạp Hôm Nay &amp; Bảng Giá</span>
               </h3>
-              <p id="hn-realtime-clock-label" class="text-[11px] text-emerald-400 font-semibold">Đang đồng bộ theo khung giờ thực tế...</p>
+              <p id="hn-realtime-clock-label" class="text-[11px] text-emerald-400 font-semibold mt-0.5">Đang đồng bộ lịch chiếu thực tế tại Hà Nội...</p>
             </div>
-            <span id="hn-official-price-source" class="monochrome-pill px-2.5 py-1 rounded-lg text-[10px] text-slate-300 font-mono">
+            <span id="hn-official-price-source" class="self-start sm:self-auto monochrome-pill px-2.5 py-1 rounded-lg text-[10px] text-slate-300 font-mono shrink-0">
               Nguồn: lottecinemavn.com
             </span>
           </div>
@@ -9086,7 +9142,7 @@
       let frameEl = null;
       let canopyEl = null;
       ambilightInterval = setInterval(() => {
-        if (!state.currentRoomId) return;
+        if (document.hidden || !state.currentRoomId) return;
         if (!frameEl || !frameEl.isConnected) frameEl = document.querySelector(".lotte-screen-frame");
         if (!canopyEl || !canopyEl.isConnected) canopyEl = document.querySelector(".ceiling-canopy");
         if (!frameEl || !canopyEl) return;
@@ -13886,72 +13942,32 @@
           if (seatsRenderTimer) clearTimeout(seatsRenderTimer);
           seatsRenderTimer = setTimeout(() => {
             seatsRenderTimer = null;
-            if (state.currentRoomId) {
-              const curSeats = state.seatsByRoom[state.currentRoomId] || {};
-              const sig = state.currentRoomId + "|" + Object.entries(curSeats)
-                .sort((a, b) => a[0].localeCompare(b[0]))
-                .map(([sid, s]) => `${sid}:${s?.uid || ""}:${s?.userName || ""}:${s?.snack || ""}`)
-                .join(",");
-              if (sig !== lastRoomSeatsSig) {
-                lastRoomSeatsSig = sig;
-                renderSeatingMap();
-                renderAudienceList();
-                updateRoomHeaderUI();
-              }
-            } else {
-              const lobbySig = DEFAULT_ROOMS.map(r => `${r.id}:${Object.keys(state.seatsByRoom[r.id] || {}).length}`).join("|");
-              if (lobbySig !== lastLobbySeatsSig) {
-                lastLobbySeatsSig = lobbySig;
-                renderHeroBillboard();
-                renderLobby();
-              }
-            }
-          }, 180);
-        }, () => {});
-
-        // Đồng bộ danh sách đặt vé & doanh thu rạp theo thời gian thực + cảnh báo tức thì cho Admin (App iOS & Web)
-        const seenRevenueOrderIds = new Set();
-        let hasInitRevenueOrders = false;
-        rtdbMod.onValue(rtdbMod.ref(rtdb, "revenue_orders"), (snap) => {
-          const val = snap.val();
-          if (!val || typeof val !== "object") {
-            state.revenueOrders = [];
-            hasInitRevenueOrders = true;
-          } else {
-            const sorted = Object.values(val)
-              .filter(o => o && o.id && !o.isFreeMode && Number(o.totalAmount || 0) > 0)
-              .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-            state.revenueOrders = sorted;
-
-            if (!hasInitRevenueOrders) {
-              sorted.forEach(o => seenRevenueOrderIds.add(o.id));
-              hasInitRevenueOrders = true;
-            } else {
-              const newOrders = sorted.filter(o => !seenRevenueOrderIds.has(o.id));
-              newOrders.forEach(o => {
-                seenRevenueOrderIds.add(o.id);
-                if (state.isAdminUnlocked && o.uid !== state.uid && Date.now() - (o.createdAt || 0) < 60000) {
-                  playCinemaBellSFX();
-                  const msg = `🔔 ${o.userName || "Khách"} vừa đặt vé ${o.roomNumber || o.roomId} • Ghế ${o.seatId} (${formatVND(o.totalAmount)})`;
-                  showToast(msg, "success");
-                  try {
-                    if (typeof Notification !== "undefined" && Notification.permission === "granted") {
-                      new Notification("CineVerse Admin • Có khách đặt vé mới!", {
-                        body: `${o.userName || "Khách"} đặt ${o.roomNumber || o.roomId} • Ghế ${o.seatId} (${formatVND(o.totalAmount)})`,
-                        icon: "assets/web-logo.png"
-                      });
-                    }
-                  } catch (_) {}
+            requestAnimationFrame(() => {
+              if (state.currentRoomId) {
+                const curSeats = state.seatsByRoom[state.currentRoomId] || {};
+                const sig = state.currentRoomId + "|" + Object.entries(curSeats)
+                  .sort((a, b) => a[0].localeCompare(b[0]))
+                  .map(([sid, s]) => `${sid}:${s?.uid || ""}:${s?.userName || ""}:${s?.snack || ""}`)
+                  .join(",");
+                if (sig !== lastRoomSeatsSig) {
+                  lastRoomSeatsSig = sig;
+                  renderSeatingMap();
+                  renderAudienceList();
+                  updateRoomHeaderUI();
                 }
-              });
-            }
-          }
-          if (state.isAdminUnlocked) {
-            renderAdminRevenueDashboard();
-          }
+              } else {
+                const lobbySig = DEFAULT_ROOMS.map(r => `${r.id}:${Object.keys(state.seatsByRoom[r.id] || {}).length}`).join("|");
+                if (lobbySig !== lastLobbySeatsSig) {
+                  lastLobbySeatsSig = lobbySig;
+                  renderHeroBillboard();
+                  renderLobby();
+                }
+              }
+            });
+          }, 280);
         }, () => {});
 
-        // Theo dõi khách đang mở web & lịch sử truy cập (chỉ Admin mới xem được)
+        // Theo dõi khách đang mở web & lịch sử truy cập (chỉ Admin mới tải danh sách đầy đủ để tối ưu 100+ người dùng)
         const myOnlineRef = rtdbMod.ref(rtdb, `online_visitors/${state.uid}`);
         try { rtdbMod.onDisconnect(myOnlineRef).remove().catch(() => {}); } catch (_) {}
         syncMyOnlinePresence();
@@ -13972,17 +13988,6 @@
           }
         } catch (_) {}
 
-        rtdbMod.onValue(rtdbMod.ref(rtdb, "online_visitors"), (snap) => {
-          const val = snap.val() || {};
-          const nowTs = Date.now();
-          state.onlineVisitors = Object.values(val)
-            .filter(v => v && v.uid && (!v.updatedAt || nowTs - v.updatedAt < 1800000))
-            .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-          if (state.isAdminUnlocked) {
-            renderAdminVisitorsPanel();
-          }
-        }, () => {});
-
         rtdbMod.onValue(rtdbMod.ref(rtdb, "lobby_config/payment_mode"), (snap) => {
           const val = snap.val() || {};
           state.paymentMode = val.mode === "paid" ? "paid" : "free";
@@ -14001,32 +14006,9 @@
           applySiteLockState();
         }, () => {});
 
-        const seenVisitIds = new Set();
-        let hasInitVisits = false;
-        const visitQuery = rtdbMod.query(rtdbMod.ref(rtdb, "visit_logs"), rtdbMod.limitToLast(40));
-        rtdbMod.onValue(visitQuery, (snap) => {
-          const val = snap.val() || {};
-          const list = Object.values(val)
-            .filter(v => v && v.id)
-            .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-          state.visitLogs = list;
-          if (!hasInitVisits) {
-            list.forEach(v => seenVisitIds.add(v.id));
-            hasInitVisits = true;
-          } else {
-            list.forEach(v => {
-              if (!seenVisitIds.has(v.id)) {
-                seenVisitIds.add(v.id);
-                if (state.isAdminUnlocked && v.uid !== state.uid && Date.now() - (v.createdAt || 0) < 60000) {
-                  showToast(`👀 ${v.userName || "Khách"} (${v.device || "Web"}) vừa truy cập vào web!`, "info");
-                }
-              }
-            });
-          }
-          if (state.isAdminUnlocked) {
-            renderAdminVisitorsPanel();
-          }
-        }, () => {});
+        if (state.isAdminUnlocked) {
+          ensureAdminRTDBListeners();
+        }
 
         // Nếu người dùng đã vào phòng trước khi Firebase SDK tải xong thì đồng bộ ngay
         if (state.currentRoomId) {
@@ -14044,6 +14026,85 @@
       } catch (e) {
         // Hoạt động mượt mà ở chế độ Local Realtime nếu mất mạng
       }
+    }
+
+    let adminRtdbListenersBound = false;
+    function ensureAdminRTDBListeners() {
+      if (adminRtdbListenersBound || !rtdb || !rtdbMod || !state.isAdminUnlocked) return;
+      adminRtdbListenersBound = true;
+
+      const seenRevenueOrderIds = new Set();
+      let hasInitRevenueOrders = false;
+      rtdbMod.onValue(rtdbMod.ref(rtdb, "revenue_orders"), (snap) => {
+        const val = snap.val();
+        if (!val || typeof val !== "object") {
+          state.revenueOrders = [];
+          hasInitRevenueOrders = true;
+        } else {
+          const sorted = Object.values(val)
+            .filter(o => o && o.id && !o.isFreeMode && Number(o.totalAmount || 0) > 0)
+            .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          state.revenueOrders = sorted;
+
+          if (!hasInitRevenueOrders) {
+            sorted.forEach(o => seenRevenueOrderIds.add(o.id));
+            hasInitRevenueOrders = true;
+          } else {
+            const newOrders = sorted.filter(o => !seenRevenueOrderIds.has(o.id));
+            newOrders.forEach(o => {
+              seenRevenueOrderIds.add(o.id);
+              if (state.isAdminUnlocked && o.uid !== state.uid && Date.now() - (o.createdAt || 0) < 60000) {
+                playCinemaBellSFX();
+                const msg = `🔔 ${o.userName || "Khách"} vừa đặt vé ${o.roomNumber || o.roomId} • Ghế ${o.seatId} (${formatVND(o.totalAmount)})`;
+                showToast(msg, "success");
+                try {
+                  if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+                    new Notification("CineVerse Admin • Có khách đặt vé mới!", {
+                      body: `${o.userName || "Khách"} đặt ${o.roomNumber || o.roomId} • Ghế ${o.seatId} (${formatVND(o.totalAmount)})`,
+                      icon: "assets/web-logo.png"
+                    });
+                  }
+                } catch (_) {}
+              }
+            });
+          }
+        }
+        if (state.isAdminUnlocked) renderAdminRevenueDashboard();
+      }, () => {});
+
+      rtdbMod.onValue(rtdbMod.ref(rtdb, "online_visitors"), (snap) => {
+        const val = snap.val() || {};
+        const nowTs = Date.now();
+        state.onlineVisitors = Object.values(val)
+          .filter(v => v && v.uid && (!v.updatedAt || nowTs - v.updatedAt < 1800000))
+          .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+        if (state.isAdminUnlocked) renderAdminVisitorsPanel();
+      }, () => {});
+
+      const seenVisitIds = new Set();
+      let hasInitVisits = false;
+      const visitQuery = rtdbMod.query(rtdbMod.ref(rtdb, "visit_logs"), rtdbMod.limitToLast(40));
+      rtdbMod.onValue(visitQuery, (snap) => {
+        const val = snap.val() || {};
+        const list = Object.values(val)
+          .filter(v => v && v.id)
+          .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        state.visitLogs = list;
+        if (!hasInitVisits) {
+          list.forEach(v => seenVisitIds.add(v.id));
+          hasInitVisits = true;
+        } else {
+          list.forEach(v => {
+            if (!seenVisitIds.has(v.id)) {
+              seenVisitIds.add(v.id);
+              if (state.isAdminUnlocked && v.uid !== state.uid && Date.now() - (v.createdAt || 0) < 60000) {
+                showToast(`👀 ${v.userName || "Khách"} (${v.device || "Web"}) vừa truy cập vào web!`, "info");
+              }
+            }
+          });
+        }
+        if (state.isAdminUnlocked) renderAdminVisitorsPanel();
+      }, () => {});
     }
 
     // =========================================================
@@ -15956,6 +16017,9 @@
       }
       state.isAdminUnlocked = true;
       state.adminSessionPin = pin;
+      if (typeof ensureAdminRTDBListeners === "function") {
+        ensureAdminRTDBListeners();
+      }
       try {
         if (typeof Notification !== "undefined" && Notification.permission === "default") {
           Notification.requestPermission().catch(() => {});
@@ -16295,7 +16359,9 @@
     }
 
     pollSiteLockRealtimeFallback();
-    setInterval(pollSiteLockRealtimeFallback, 1500);
+    setInterval(() => {
+      if (!document.hidden) pollSiteLockRealtimeFallback();
+    }, 30000);
 
     // Chống chuột phải & phím tắt F12 / DevTools / View-Source trên Web & App Member
     document.addEventListener("contextmenu", (e) => {
@@ -16334,47 +16400,73 @@
       long_bien: { label: "Quận Long Biên", lat: 21.0410, lng: 105.8890 }
     };
 
-    // Bảng giá chính thức đã kiểm chứng trên website của 3 hệ thống rạp tại Hà Nội (2025/2026)
+    // Bảng giá chính thức đã kiểm chứng trên website của 3 hệ thống rạp tại Hà Nội theo từng phân khúc chi nhánh (2026)
     const HANOI_CINEMA_PRICING = {
       "Lotte Cinema": {
         officialUrl: "https://www.lottecinemavn.com",
         badgeCls: "bg-rose-600 text-white",
         borderCls: "border-rose-500/40",
         tickets: {
-          weekday_day: { standard: 75000, vip: 85000, sweetbox: 95000, u22: 65000 },
-          weekday_night: { standard: 85000, vip: 95000, sweetbox: 105000, u22: 65000 },
-          happy_tue: { standard: 65000, vip: 65000, sweetbox: 85000, u22: 60000 },
-          weekend: { standard: 100000, vip: 110000, sweetbox: 120000, u22: 75000 }
+          weekday_day: { standard: 75000, vip: 85000, sweetbox: 95000, u22: 65000, child: 60000 },
+          weekday_night: { standard: 85000, vip: 95000, sweetbox: 105000, u22: 65000, child: 65000 },
+          happy_tue: { standard: 65000, vip: 65000, sweetbox: 85000, u22: 60000, child: 55000 },
+          weekend: { standard: 100000, vip: 110000, sweetbox: 120000, u22: 75000, child: 70000 }
         },
-        combos: { solo: 85000, couple: 115000, soloLabel: "Harmony Solo (1 Bắp + 1 Nước)", coupleLabel: "Harmony Couple (1 Bắp lớn + 2 Nước)" },
-        parkingBike: 5000
+        combos: { solo: 85000, couple: 115000, popcornOnly: 55000, soloLabel: "Harmony Solo (1 Bắp + 1 Nước)", coupleLabel: "Harmony Couple (1 Bắp lớn + 2 Nước)" },
+        parkingBike: 5000,
+        parkingCar: 30000
       },
       "CGV Cinemas": {
         officialUrl: "https://www.cgv.vn",
         badgeCls: "bg-amber-500 text-slate-950",
         borderCls: "border-amber-500/40",
         tickets: {
-          weekday_day: { standard: 85000, vip: 90000, sweetbox: 110000, u22: 70000 },
-          weekday_night: { standard: 90000, vip: 95000, sweetbox: 115000, u22: 70000 },
-          happy_tue: { standard: 75000, vip: 75000, sweetbox: 95000, u22: 65000 },
-          weekend: { standard: 110000, vip: 120000, sweetbox: 135000, u22: 80000 }
+          weekday_day: { standard: 85000, vip: 90000, sweetbox: 110000, u22: 70000, child: 65000 },
+          weekday_night: { standard: 95000, vip: 105000, sweetbox: 125000, u22: 70000, child: 70000 },
+          happy_tue: { standard: 75000, vip: 75000, sweetbox: 95000, u22: 65000, child: 60000 },
+          weekend: { standard: 115000, vip: 120000, sweetbox: 140000, u22: 80000, child: 75000 }
         },
-        combos: { solo: 89000, couple: 119000, soloLabel: "My Combo (1 Bắp + 1 Nước lớn)", coupleLabel: "CGV Combo (1 Bắp lớn + 2 Nước lớn)" },
-        parkingBike: 5000
+        combos: { solo: 89000, couple: 119000, popcornOnly: 59000, soloLabel: "My Combo (1 Bắp + 1 Nước lớn)", coupleLabel: "CGV Combo (1 Bắp lớn + 2 Nước lớn)" },
+        parkingBike: 5000,
+        parkingCar: 35000
       },
       "Beta Cinemas": {
         officialUrl: "https://www.betacinemas.vn",
         badgeCls: "bg-sky-500 text-slate-950",
         borderCls: "border-sky-500/40",
         tickets: {
-          weekday_day: { standard: 50000, vip: 55000, sweetbox: 65000, u22: 45000 },
-          weekday_night: { standard: 55000, vip: 60000, sweetbox: 70000, u22: 45000 },
-          happy_tue: { standard: 45000, vip: 45000, sweetbox: 55000, u22: 45000 },
-          weekend: { standard: 65000, vip: 70000, sweetbox: 80000, u22: 50000 }
+          weekday_day: { standard: 50000, vip: 55000, sweetbox: 65000, u22: 45000, child: 45000 },
+          weekday_night: { standard: 55000, vip: 60000, sweetbox: 70000, u22: 45000, child: 45000 },
+          happy_tue: { standard: 45000, vip: 45000, sweetbox: 55000, u22: 45000, child: 45000 },
+          weekend: { standard: 65000, vip: 70000, sweetbox: 80000, u22: 50000, child: 50000 }
         },
-        combos: { solo: 58000, couple: 88000, soloLabel: "Combo Beta 1 (1 Bắp + 1 Nước)", coupleLabel: "Combo Sweetheart (1 Bắp lớn + 2 Nước)" },
-        parkingBike: 5000
+        combos: { solo: 58000, couple: 88000, popcornOnly: 38000, soloLabel: "Combo Beta 1 (1 Bắp + 1 Nước)", coupleLabel: "Combo Sweetheart (1 Bắp lớn + 2 Nước)" },
+        parkingBike: 5000,
+        parkingCar: 25000
       }
+    };
+
+    // Chênh lệch giá thực tế theo từng chi nhánh cụ thể tại Hà Nội
+    const HANOI_BRANCH_PRICE_OVERRIDES = {
+      lotte_tay_ho: { delta: 10000, note: "Chi nhánh Flagship Lotte Mall West Lake (+10.000đ, hỗ trợ Cine Comfort & Charlotte VIP)", luxuryPrice: 300000 },
+      lotte_keangnam: { delta: 5000, note: "Chi nhánh Landmark 72 Keangnam (+5.000đ, hỗ trợ Super Plex)" },
+      lotte_ha_dong: { delta: -5000, note: "Chi nhánh Hà Đông áp dụng giá ưu đãi ngoại khu (-5.000đ/vé)" },
+      lotte_minh_khai: { delta: -5000, note: "Chi nhánh Minh Khai áp dụng giá ưu đãi nội khu (-5.000đ/vé)" },
+      lotte_thang_long: { delta: -5000, note: "Chi nhánh Thăng Long Big C áp dụng giá tiêu chuẩn (-5.000đ/vé)" },
+      cgv_metropolis: { delta: 10000, note: "Chi nhánh cao cấp Metropolis Liễu Giai (+10.000đ, có IMAX Laser & L'Amour)", luxuryPrice: 300000 },
+      cgv_ba_trieu: { delta: 5000, note: "Chi nhánh trung tâm Vincom Bà Triệu (+5.000đ, có 4DX, Starium & Gold Class)", luxuryPrice: 280000 },
+      cgv_trang_tien: { delta: 10000, note: "Chi nhánh Boutique Tràng Tiền Plaza (+10.000đ)" },
+      cgv_iph: { delta: -10000, note: "Chi nhánh CGV Indochina Plaza IPH Cầu Giấy có mức giá mềm hơn (-10.000đ/vé)" },
+      cgv_aeon_ha_dong: { delta: -5000, note: "Chi nhánh AEON Mall Hà Đông (-5.000đ vé 2D, có IMAX & Starium)" },
+      beta_dan_phuong: { delta: -5000, note: "Chi nhánh Beta Đan Phượng áp dụng giá ưu đãi ngoại thành (-5.000đ/vé, từ 40.000đ)" }
+    };
+
+    const HANOI_FORMAT_SURCHARGE = {
+      "2d": { add: 0, label: "2D Tiêu chuẩn" },
+      "3d": { add: 40000, label: "3D (+40.000đ)" },
+      "imax": { add: 60000, label: "IMAX / Super Plex (+60.000đ)" },
+      "4dx": { add: 55000, label: "4DX / ScreenX (+55.000đ)" },
+      "luxury": { fixed: 280000, label: "VIP Thương gia (Gold Class / Charlotte)" }
     };
 
     // Danh sách 21 cụm rạp thực tế tại TP. Hà Nội (Địa chỉ & Tọa độ WGS84 chính xác ngoài đời thực)
@@ -16435,14 +16527,29 @@
       return hour < 17 ? "weekday_day" : "weekday_night";
     }
 
-    function getTicketUnitPriceForCinema(brand, dayType, seatTier, audience) {
+    function getTicketUnitPriceForCinema(cinemaOrBrand, dayType, seatTier, audience, format = "2d") {
+      const brand = typeof cinemaOrBrand === "object" ? cinemaOrBrand.brand : cinemaOrBrand;
+      const cinemaId = typeof cinemaOrBrand === "object" ? cinemaOrBrand.id : "";
       const cfg = HANOI_CINEMA_PRICING[brand] || HANOI_CINEMA_PRICING["Lotte Cinema"];
+      const branchOvr = cinemaId ? (HANOI_BRANCH_PRICE_OVERRIDES[cinemaId] || null) : null;
+      const fmtInfo = HANOI_FORMAT_SURCHARGE[format] || HANOI_FORMAT_SURCHARGE["2d"];
+
+      if (format === "luxury") {
+        if (branchOvr?.luxuryPrice) return branchOvr.luxuryPrice;
+        return brand === "Beta Cinemas" ? 120000 : 280000;
+      }
+
       const dt = dayType === "auto" ? resolveAutoDayType() : dayType;
       const row = cfg.tickets[dt] || cfg.tickets.weekday_night;
+      let base = row[seatTier] || row.standard;
       if (audience === "u22" && seatTier !== "sweetbox") {
-        return row.u22;
+        base = row.u22;
+      } else if (audience === "child" && seatTier !== "sweetbox") {
+        base = row.child || row.u22;
       }
-      return row[seatTier] || row.standard;
+      const delta = branchOvr?.delta || 0;
+      const fmtAdd = fmtInfo.add || 0;
+      return Math.max(40000, base + delta + fmtAdd);
     }
 
     // Tự động phát bản xem trước (video preview) 20 giây đầu khi hover vào thẻ phim đang chiếu
@@ -16720,7 +16827,7 @@
         } else {
           listEl.innerHTML = sorted.map((c, idx) => {
             const isSel = c.id === selected.id;
-            const minPrice = getTicketUnitPriceForCinema(c.brand, "auto", "standard", "adult");
+            const minPrice = getTicketUnitPriceForCinema(c, "auto", "standard", "adult", "2d");
             return `
               <div onclick="window.appActions.selectHanoiCinema('${c.id}')"
                 class="cv-smooth-btn liquid-glass-card p-3.5 rounded-2xl cursor-pointer transition ${
@@ -16790,46 +16897,87 @@
       renderHanoiRealtimeShowtimes(selected);
     }
 
+    function onBudgetPeoplePresetChange(val) {
+      const customInp = document.getElementById("hn-budget-people-custom");
+      if (customInp) {
+        if (val === "custom") {
+          customInp.classList.remove("hidden");
+          customInp.focus();
+        } else {
+          customInp.classList.add("hidden");
+          customInp.value = val;
+        }
+      }
+      updateHanoiCinemaBudget();
+    }
+
     function updateHanoiCinemaBudget() {
       const sorted = getSortedHanoiCinemas();
       const selected = sorted.find(c => c.id === hanoiFinderState.selectedCinemaId) || HANOI_REAL_CINEMAS[0];
       if (!selected) return;
 
-      const people = Math.max(1, parseInt(document.getElementById("hn-budget-people")?.value || "2", 10));
+      const peopleSel = document.getElementById("hn-budget-people")?.value || "2";
+      const peopleCustom = document.getElementById("hn-budget-people-custom")?.value || "2";
+      const people = Math.max(1, Math.min(100, parseInt(peopleSel === "custom" ? peopleCustom : peopleSel, 10) || 2));
       const audience = document.getElementById("hn-budget-audience")?.value || "adult";
+      const format = document.getElementById("hn-budget-format")?.value || "2d";
       const seatTier = document.getElementById("hn-budget-seat-tier")?.value || "vip";
       const dayType = document.getElementById("hn-budget-daytype")?.value || "auto";
       const comboMode = document.getElementById("hn-budget-combo")?.value || "shared";
 
-      const calcForBrand = (brandName) => {
+      const branchNoteEl = document.getElementById("hn-branch-pricing-note");
+      const branchOvr = HANOI_BRANCH_PRICE_OVERRIDES[selected.id];
+      if (branchNoteEl) {
+        branchNoteEl.textContent = branchOvr?.note
+          ? `📌 ${selected.name}: ${branchOvr.note}`
+          : `📌 ${selected.name}: Áp dụng bảng giá niêm yết tiêu chuẩn hệ thống ${selected.brand} tại Hà Nội.`;
+      }
+
+      const calcForTarget = (cinemaOrBrand) => {
+        const brandName = typeof cinemaOrBrand === "object" ? cinemaOrBrand.brand : cinemaOrBrand;
         const cfg = HANOI_CINEMA_PRICING[brandName];
-        const unitTicket = getTicketUnitPriceForCinema(brandName, dayType, seatTier, audience);
+        const unitTicket = getTicketUnitPriceForCinema(cinemaOrBrand, dayType, seatTier, audience, format);
         const ticketTotal = unitTicket * people;
         let comboTotal = 0;
         let comboDesc = "Không mua bắp nước";
         if (comboMode === "individual") {
           comboTotal = cfg.combos.solo * people;
           comboDesc = `${people} x ${cfg.combos.soloLabel}`;
-        } else if (comboMode === "shared") {
+        } else if (comboMode === "shared" || comboMode === "car_shared") {
           const couples = Math.floor(people / 2);
           const rem = people % 2;
           comboTotal = couples * cfg.combos.couple + rem * cfg.combos.solo;
           comboDesc = couples > 0
             ? `${couples} Combo Đôi${rem > 0 ? " + 1 Combo Đơn" : ""}`
             : `1 ${cfg.combos.soloLabel}`;
+        } else if (comboMode === "popcorn_only") {
+          const packs = Math.ceil(people / 2);
+          comboTotal = packs * (cfg.combos.popcornOnly || 45000);
+          comboDesc = `${packs} Bắp rang bơ lớn`;
         }
-        const parkingCount = Math.ceil(people / 2);
-        const parkingTotal = parkingCount * cfg.parkingBike;
+        let parkingTotal = 0;
+        let parkingDesc = "Không gửi xe";
+        if (comboMode === "car_shared") {
+          const cars = Math.ceil(people / 4);
+          parkingTotal = cars * (cfg.parkingCar || 30000);
+          parkingDesc = `${cars} Ô tô`;
+        } else if (comboMode !== "none") {
+          const bikes = Math.ceil(people / 2);
+          parkingTotal = bikes * cfg.parkingBike;
+          parkingDesc = `${bikes} Xe máy`;
+        }
         const grandTotal = ticketTotal + comboTotal + parkingTotal;
         const perPerson = Math.round(grandTotal / people);
-        return { brandName, unitTicket, ticketTotal, comboTotal, comboDesc, parkingTotal, grandTotal, perPerson };
+        return { brandName, unitTicket, ticketTotal, comboTotal, comboDesc, parkingTotal, parkingDesc, grandTotal, perPerson };
       };
 
-      const cur = calcForBrand(selected.brand);
+      const cur = calcForTarget(selected);
       const pill = document.getElementById("hn-budget-per-person-pill");
       if (pill) pill.textContent = `${formatVND(cur.perPerson)} / người`;
 
-      const compareBrands = ["Beta Cinemas", "Lotte Cinema", "CGV Cinemas"].map(calcForBrand);
+      const compareBrands = ["Beta Cinemas", "Lotte Cinema", "CGV Cinemas"].map(b =>
+        b === selected.brand ? calcForTarget(selected) : calcForTarget(b)
+      );
       const box = document.getElementById("hn-budget-breakdown-box");
       if (box) {
         box.innerHTML = `
@@ -16837,17 +16985,17 @@
             <div class="p-3 rounded-xl bg-stone-900 border border-white/10">
               <span class="text-[10px] text-slate-400 block">Tiền vé (${people} người)</span>
               <strong class="text-sm font-black text-white">${formatVND(cur.ticketTotal)}</strong>
-              <span class="text-[10px] text-amber-300 block">${formatVND(cur.unitTicket)} / vé</span>
+              <span class="text-[10px] text-amber-300 block">${formatVND(cur.unitTicket)} / vé (${HANOI_FORMAT_SURCHARGE[format]?.label || "2D"})</span>
             </div>
             <div class="p-3 rounded-xl bg-stone-900 border border-white/10">
               <span class="text-[10px] text-slate-400 block">Bắp nước (${escapeHTML(cur.comboDesc)})</span>
               <strong class="text-sm font-black text-rose-300">${formatVND(cur.comboTotal)}</strong>
-              <span class="text-[10px] text-slate-400 block">+ Gửi xe: ${formatVND(cur.parkingTotal)}</span>
+              <span class="text-[10px] text-slate-400 block">+ Gửi xe (${cur.parkingDesc}): ${formatVND(cur.parkingTotal)}</span>
             </div>
             <div class="p-3 rounded-xl bg-amber-500/15 border border-amber-400/40">
               <span class="text-[10px] text-amber-200 font-bold block">TỔNG NGÂN SÁCH CẢ NHÓM</span>
               <strong class="text-base font-black text-amber-300">${formatVND(cur.grandTotal)}</strong>
-              <span class="text-[10px] text-emerald-300 block">Tại ${escapeHTML(selected.brand)}</span>
+              <span class="text-[10px] text-emerald-300 block truncate">${escapeHTML(selected.name)}</span>
             </div>
             <div class="p-3 rounded-xl bg-emerald-500/15 border border-emerald-400/40">
               <span class="text-[10px] text-emerald-200 font-bold block">CHIA ĐỀU MỖI NGƯỜI</span>
@@ -16873,6 +17021,40 @@
       }
     }
 
+    // Dữ liệu phim thực tế đang chiếu tại các rạp Hà Nội (CGV • Lotte • Beta - Tháng 11/2026) + đồng bộ live từ Worker
+    const HANOI_VERIFIED_NOW_SHOWING = [
+      { title: "Godzilla Trừ Không (Godzilla Minus Zero)", format: "2D Phụ đề • IMAX • 4DX", rating: "T13+", slots: ["09:45", "11:50", "14:10", "16:30", "18:45", "20:50", "22:45"] },
+      { title: "Ngày Con Còn Mẹ (Phim Việt Nam)", format: "2D Việt Nam • Gia đình", rating: "K", slots: ["10:15", "12:30", "14:45", "17:00", "19:15", "21:30", "23:15"] },
+      { title: "Kẻ Hồi Sinh (The Resurrected)", format: "2D Phụ đề • Hành động", rating: "T16+", slots: ["10:30", "13:15", "15:40", "18:05", "20:20", "22:35"] },
+      { title: "Bí Kíp Luyện Cướp", format: "2D Phụ đề • Hành động Hài", rating: "T16+", slots: ["09:30", "12:05", "14:35", "17:15", "19:45", "22:10"] },
+      { title: "Chàng Mèo Mang Mũ (The Cat in the Hat)", format: "2D Lồng tiếng / Phụ đề", rating: "P", slots: ["09:15", "11:10", "13:30", "15:50", "18:00"] },
+      { title: "Thòng Lọng Ma: Quỷ Cái Đòi Mạng", format: "2D Phụ đề • Kinh dị", rating: "T18+", slots: ["16:20", "18:55", "21:05", "22:55", "23:45"] }
+    ];
+    let hanoiLiveShowtimesCache = { ts: 0, movies: null, sourceLabel: "" };
+
+    async function fetchHanoiRealtimeShowtimesFromWorker(selected) {
+      const workerBase = (state.r2WorkerUrl || "").trim().replace(/\/+$/, "");
+      if (!workerBase) return null;
+      if (hanoiLiveShowtimesCache.movies && Date.now() - hanoiLiveShowtimesCache.ts < 900000) {
+        return hanoiLiveShowtimesCache;
+      }
+      try {
+        const res = await fetch(`${workerBase}/hanoi-showtimes?brand=${encodeURIComponent(selected.brand)}&cinema=${encodeURIComponent(selected.id)}`, {
+          signal: AbortSignal.timeout(4500)
+        });
+        const data = await res.json();
+        if (data?.ok && Array.isArray(data.movies) && data.movies.length > 0) {
+          hanoiLiveShowtimesCache = {
+            ts: Date.now(),
+            movies: data.movies,
+            sourceLabel: data.source || "Moveek / Cụm rạp Hà Nội"
+          };
+          return hanoiLiveShowtimesCache;
+        }
+      } catch (_) {}
+      return null;
+    }
+
     function renderHanoiRealtimeShowtimes(selected) {
       if (!selected) return;
       const pCfg = HANOI_CINEMA_PRICING[selected.brand] || HANOI_CINEMA_PRICING["Lotte Cinema"];
@@ -16883,7 +17065,7 @@
 
       const clockLbl = document.getElementById("hn-realtime-clock-label");
       if (clockLbl) {
-        clockLbl.textContent = `🕒 Giờ thực tế Hà Nội: ${timeStr} • ${dateStr} (tự động khóa các suất đã qua giờ chiếu)`;
+        clockLbl.textContent = `🕒 Giờ thực tế Hà Nội: ${timeStr} • ${dateStr} • Rạp: ${selected.name}`;
       }
       const srcLbl = document.getElementById("hn-official-price-source");
       if (srcLbl) {
@@ -16892,49 +17074,49 @@
 
       const priceTableEl = document.getElementById("hn-official-price-table");
       if (priceTableEl) {
-        const t = pCfg.tickets;
+        const pTueStd = getTicketUnitPriceForCinema(selected, "happy_tue", "standard", "adult", "2d");
+        const pTueU22 = getTicketUnitPriceForCinema(selected, "weekday_day", "standard", "u22", "2d");
+        const pWkDay = getTicketUnitPriceForCinema(selected, "weekday_day", "standard", "adult", "2d");
+        const pWkNightVip = getTicketUnitPriceForCinema(selected, "weekday_night", "vip", "adult", "2d");
+        const pWeekendStd = getTicketUnitPriceForCinema(selected, "weekend", "standard", "adult", "2d");
+        const pWeekendSwb = getTicketUnitPriceForCinema(selected, "weekend", "sweetbox", "adult", "2d");
         priceTableEl.innerHTML = `
           <div class="p-3 rounded-2xl bg-stone-950 border border-white/10 space-y-1">
             <span class="text-[10px] font-black uppercase text-emerald-300">Thứ 3 Happy Day / U22</span>
-            <p class="text-sm font-black text-white">${formatVND(t.happy_tue.standard)} – ${formatVND(t.weekday_day.u22)}</p>
-            <p class="text-[10px] text-slate-400">Áp dụng Thứ 3 hàng tuần &amp; thẻ U22/HSSV</p>
+            <p class="text-sm font-black text-white">${formatVND(Math.min(pTueStd, pTueU22))} – ${formatVND(Math.max(pTueStd, pTueU22))}</p>
+            <p class="text-[10px] text-slate-400">Áp dụng tại ${escapeHTML(selected.brand)} (${escapeHTML(selected.district)})</p>
           </div>
           <div class="p-3 rounded-2xl bg-stone-950 border border-white/10 space-y-1">
             <span class="text-[10px] font-black uppercase text-amber-300">Ngày thường (T2, T4, T5)</span>
-            <p class="text-sm font-black text-white">${formatVND(t.weekday_day.standard)} – ${formatVND(t.weekday_night.vip)}</p>
+            <p class="text-sm font-black text-white">${formatVND(pWkDay)} – ${formatVND(pWkNightVip)}</p>
             <p class="text-[10px] text-slate-400">Standard trước 17h → VIP sau 17h</p>
           </div>
           <div class="p-3 rounded-2xl bg-stone-950 border border-white/10 space-y-1">
             <span class="text-[10px] font-black uppercase text-rose-300">Cuối tuần (T6, T7, CN &amp; Lễ)</span>
-            <p class="text-sm font-black text-white">${formatVND(t.weekend.standard)} – ${formatVND(t.weekend.sweetbox)}</p>
+            <p class="text-sm font-black text-white">${formatVND(pWeekendStd)} – ${formatVND(pWeekendSwb)}</p>
             <p class="text-[10px] text-slate-400">Standard 2D → Ghế đôi Sweetbox</p>
           </div>
         `;
       }
 
-      const movies = [
-        { title: "Chú Thuật Hồi Chiến: Tử Diệt Hồi Du (IMAX Laser Vietsub)", format: "2D Phụ đề • IMAX", slots: ["09:45", "11:30", "13:45", "15:50", "17:45", "19:30", "21:15", "22:50"] },
-        { title: "Captain America: Thế Giới Mới (2025 - Dolby Atmos)", format: "2D Phụ đề • Atmos", slots: ["10:15", "12:30", "14:40", "16:55", "18:45", "20:30", "22:15", "23:30"] },
-        { title: "Avatar: Lửa Và Tro Tàn (3D / 2D IMAX)", format: "2D/3D Phụ đề", slots: ["09:15", "12:00", "15:15", "18:10", "20:00", "21:45", "23:15"] }
-      ];
-
-      const stContainer = document.getElementById("hn-realtime-showtimes-list");
-      if (stContainer) {
+      const drawShowtimesList = (moviesList) => {
+        const stContainer = document.getElementById("hn-realtime-showtimes-list");
+        if (!stContainer) return;
         const day = now.getDay();
         const isWeekend = day === 0 || day === 5 || day === 6;
         const isTue = day === 2;
 
-        stContainer.innerHTML = movies.map(mv => {
-          const pills = mv.slots.map(hhmm => {
+        stContainer.innerHTML = moviesList.map(mv => {
+          const pills = (mv.slots || []).map(hhmm => {
             const [hh, mm] = hhmm.split(":").map(Number);
             const slotMins = hh * 60 + mm;
             const diff = slotMins - curMins;
             const slotDayType = isWeekend ? "weekend" : (isTue ? "happy_tue" : (hh < 17 ? "weekday_day" : "weekday_night"));
-            const slotPrice = getTicketUnitPriceForCinema(selected.brand, slotDayType, "vip", "adult");
+            const slotPrice = getTicketUnitPriceForCinema(selected, slotDayType, "vip", "adult", "2d");
 
             if (diff < -15) {
               return `
-                <div class="px-2.5 py-1.5 rounded-xl bg-stone-950/50 border border-white/5 text-slate-600 text-center opacity-55 select-none">
+                <div class="px-2 py-1.5 rounded-xl bg-stone-950/50 border border-white/5 text-slate-600 text-center opacity-55 select-none">
                   <span class="font-mono font-bold text-xs line-through block">${hhmm}</span>
                   <span class="text-[9px] block">Đã qua</span>
                 </div>
@@ -16943,7 +17125,7 @@
             const isSoon = diff >= -15 && diff <= 90;
             return `
               <a href="${pCfg.officialUrl}" target="_blank" rel="noopener noreferrer"
-                class="cv-smooth-btn px-2.5 py-1.5 rounded-xl border text-center block ${
+                class="cv-smooth-btn px-2 py-1.5 rounded-xl border text-center block ${
                   isSoon
                     ? "bg-amber-500/20 border-amber-400 text-amber-200 shadow-[0_0_15px_rgba(245,158,11,0.3)]"
                     : "bg-stone-950 hover:bg-stone-800 border-white/15 text-white"
@@ -16955,16 +17137,33 @@
           }).join("");
 
           return `
-            <div class="p-3.5 rounded-2xl bg-stone-950/90 border border-white/10 space-y-2.5">
+            <div class="p-3 sm:p-3.5 rounded-2xl bg-stone-950/90 border border-white/10 space-y-2.5">
               <div class="flex flex-wrap items-center justify-between gap-2">
-                <h4 class="text-xs sm:text-sm font-black text-white">${escapeHTML(mv.title)}</h4>
-                <span class="px-2 py-0.5 rounded bg-rose-500/20 border border-rose-400/30 text-rose-300 text-[10px] font-bold">${escapeHTML(mv.format)}</span>
+                <div class="flex items-center gap-2 min-w-0">
+                  <h4 class="text-xs sm:text-sm font-black text-white">${escapeHTML(mv.title)}</h4>
+                  ${mv.rating ? `<span class="px-1.5 py-0.5 rounded bg-white/10 text-slate-300 text-[9px] font-black shrink-0">${escapeHTML(mv.rating)}</span>` : ""}
+                </div>
+                <span class="px-2 py-0.5 rounded bg-rose-500/20 border border-rose-400/30 text-rose-300 text-[10px] font-bold shrink-0">${escapeHTML(mv.format || "2D Phụ đề")}</span>
               </div>
-              <div class="grid grid-cols-4 sm:grid-cols-8 gap-1.5">${pills}</div>
+              <div class="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-8 gap-1.5">${pills}</div>
             </div>
           `;
         }).join("");
-      }
+      };
+
+      const initialList = (hanoiLiveShowtimesCache.movies && hanoiLiveShowtimesCache.movies.length > 0)
+        ? hanoiLiveShowtimesCache.movies
+        : HANOI_VERIFIED_NOW_SHOWING;
+      drawShowtimesList(initialList);
+
+      fetchHanoiRealtimeShowtimesFromWorker(selected).then(live => {
+        if (live && live.movies && live.movies.length > 0) {
+          drawShowtimesList(live.movies);
+          if (clockLbl && live.sourceLabel) {
+            clockLbl.textContent = `🕒 Giờ thực tế Hà Nội: ${timeStr} • ${dateStr} • Nguồn: ${live.sourceLabel}`;
+          }
+        }
+      });
     }
 
     window.appActions = {
@@ -16983,6 +17182,7 @@
       setHanoiBrandFilter,
       onHanoiCinemaSearch,
       selectHanoiCinema,
+      onBudgetPeoplePresetChange,
       updateHanoiCinemaBudget,
       selectHeroSlide,
       nextHeroSlide,
@@ -17143,8 +17343,8 @@
     if (state.r2WorkerUrl) {
       syncFromR2Worker(true);
       setInterval(() => {
-        if (state.r2WorkerUrl) syncFromR2Worker(true);
-      }, 45000);
+        if (!document.hidden && state.r2WorkerUrl) syncFromR2Worker(true);
+      }, 180000);
     }
     initSeatingMapDelegation();
     renderSeatingMap();
@@ -17170,12 +17370,12 @@
 
       let width = window.innerWidth;
       let height = window.innerHeight;
-      let dpr = Math.min(window.devicePixelRatio || 1, 2);
+      let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
 
       function resizeCanvas() {
         width = window.innerWidth;
         height = window.innerHeight;
-        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        dpr = Math.min(window.devicePixelRatio || 1, 1.5);
         canvas.width = Math.max(1, Math.floor(width * dpr));
         canvas.height = Math.max(1, Math.floor(height * dpr));
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -17190,8 +17390,9 @@
         return Math.random() * width;
       }
 
-      // Đàn Cá Ngừ Đại Dương (Bluefin Tuna) góc nhìn ngang 3D đồng bộ màu Đỏ Crimson Logo CineVerse-Lotte
-      const tunaFlock = Array.from({ length: 8 }, (_, i) => {
+      // Đàn Cá Ngừ Đại Dương (Bluefin Tuna) góc nhìn ngang 3D tối ưu số lượng theo thiết bị để đạt 60fps
+      const fishCount = width < 640 ? 4 : 6;
+      const tunaFlock = Array.from({ length: fishCount }, (_, i) => {
         const dir = i % 2 === 0 ? 1 : -1;
         const sizeScale = i === 0 || i === 3 ? 108 + Math.random() * 18 : 74 + Math.random() * 24;
         return {
@@ -17250,8 +17451,8 @@
         // Vẽ lại quầng sáng cache bằng 1 lệnh drawImage siêu nhẹ
         ctx.drawImage(haloCanvas, -L * 0.68, -L * 0.68, L * 1.36, L * 1.36);
 
-        // Uốn sóng mềm mại theo 16 lát cắt dọc từ mũi (u=1) về đuôi (u=0)
-        const slices = 16;
+        // Uốn sóng mềm mại theo 8 lát cắt dọc tối ưu hiệu năng GPU
+        const slices = 8;
         const sw = tunaImg.naturalWidth;
         const sh = tunaImg.naturalHeight;
         const srcSliceW = sw / slices;
