@@ -108,6 +108,30 @@
       ".read": true,
       ".write": true
     },
+    "room_subtitles": {
+      ".read": true,
+      ".write": true
+    },
+    "subtitle_offsets": {
+      ".read": true,
+      ".write": true
+    },
+    "typing": {
+      ".read": true,
+      ".write": true
+    },
+    "voice": {
+      ".read": true,
+      ".write": true
+    },
+    "room_movie_requests": {
+      ".read": true,
+      ".write": true
+    },
+    "cinema_finder_logs": {
+      ".read": true,
+      ".write": true
+    },
     "webrtc_voice": {
       ".read": true,
       ".write": true

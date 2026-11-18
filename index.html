@@ -11965,7 +11965,10 @@
         rebuildDiscordCamConnections(roomId);
         updateDiscordLiveUI();
       }, (err) => {
-        showToast("⚠️ Lỗi đọc trạng thái Live từ Firebase: " + (err?.message || "Permission denied"), "error");
+        if (!window.__liveScreenPermWarned) {
+          window.__liveScreenPermWarned = true;
+          console.warn("[RTDB] screen_broadcaster read warning:", err?.message || err);
+        }
       });
       liveCamUnsubs.push(unsubPeers);
 
@@ -12946,7 +12949,10 @@
         }
         updateDiscordLiveUI();
       }, (err) => {
-        showToast("⚠️ Lỗi đọc trạng thái Live từ Firebase: " + (err?.message || "Permission denied"), "error");
+        if (!window.__liveScreenPermWarned) {
+          window.__liveScreenPermWarned = true;
+          console.warn("[RTDB] screen_broadcaster read warning:", err?.message || err);
+        }
       });
       liveScreenUnsubs.push(unsubBc);
 
@@ -16480,19 +16486,19 @@
       long_bien: { label: "Quận Long Biên", lat: 21.0410, lng: 105.8890 }
     };
 
-    // Bảng giá chính thức đã kiểm chứng trên website của 3 hệ thống rạp tại Hà Nội theo từng phân khúc chi nhánh (2026)
+    // Bảng giá chính thức đã kiểm chứng trên website của 3 hệ thống rạp tại Hà Nội (Người lớn vs HSSV/U22 & Combo từng hãng)
     const HANOI_CINEMA_PRICING = {
       "Lotte Cinema": {
         officialUrl: "https://www.lottecinemavn.com",
         badgeCls: "bg-rose-600 text-white",
         borderCls: "border-rose-500/40",
         tickets: {
-          weekday_day: { standard: 75000, vip: 85000, sweetbox: 95000, u22: 65000, child: 60000 },
-          weekday_night: { standard: 85000, vip: 95000, sweetbox: 105000, u22: 65000, child: 65000 },
-          happy_tue: { standard: 65000, vip: 65000, sweetbox: 85000, u22: 60000, child: 55000 },
-          weekend: { standard: 100000, vip: 110000, sweetbox: 120000, u22: 75000, child: 70000 }
+          weekday_day: { standard: 75000, vip: 80000, sweetbox: 95000, u22: 55000, child: 55000 },
+          weekday_night: { standard: 85000, vip: 90000, sweetbox: 105000, u22: 65000, child: 60000 },
+          happy_tue: { standard: 65000, vip: 70000, sweetbox: 85000, u22: 55000, child: 55000 },
+          weekend: { standard: 100000, vip: 105000, sweetbox: 120000, u22: 70000, child: 65000 }
         },
-        combos: { solo: 85000, couple: 115000, popcornOnly: 55000, soloLabel: "Harmony Solo (1 Bắp + 1 Nước)", coupleLabel: "Harmony Couple (1 Bắp lớn + 2 Nước)" },
+        combos: { solo: 79000, couple: 105000, popcornOnly: 55000, soloLabel: "Solo Combo (1 Bắp lớn + 1 Nước)", coupleLabel: "Harmony Couple (1 Bắp lớn + 2 Nước)" },
         parkingBike: 5000,
         parkingCar: 30000
       },
@@ -16501,12 +16507,12 @@
         badgeCls: "bg-amber-500 text-slate-950",
         borderCls: "border-amber-500/40",
         tickets: {
-          weekday_day: { standard: 85000, vip: 90000, sweetbox: 110000, u22: 70000, child: 65000 },
-          weekday_night: { standard: 95000, vip: 105000, sweetbox: 125000, u22: 70000, child: 70000 },
-          happy_tue: { standard: 75000, vip: 75000, sweetbox: 95000, u22: 65000, child: 60000 },
+          weekday_day: { standard: 95000, vip: 100000, sweetbox: 120000, u22: 68000, child: 65000 },
+          weekday_night: { standard: 105000, vip: 110000, sweetbox: 130000, u22: 70000, child: 70000 },
+          happy_tue: { standard: 75000, vip: 80000, sweetbox: 95000, u22: 65000, child: 60000 },
           weekend: { standard: 115000, vip: 120000, sweetbox: 140000, u22: 80000, child: 75000 }
         },
-        combos: { solo: 89000, couple: 119000, popcornOnly: 59000, soloLabel: "My Combo (1 Bắp + 1 Nước lớn)", coupleLabel: "CGV Combo (1 Bắp lớn + 2 Nước lớn)" },
+        combos: { solo: 95000, couple: 125000, popcornOnly: 65000, soloLabel: "My Combo (1 Bắp lớn + 1 Nước lớn)", coupleLabel: "CGV Combo (1 Bắp lớn + 2 Nước lớn)" },
         parkingBike: 5000,
         parkingCar: 35000
       },
@@ -16515,30 +16521,106 @@
         badgeCls: "bg-sky-500 text-slate-950",
         borderCls: "border-sky-500/40",
         tickets: {
-          weekday_day: { standard: 50000, vip: 55000, sweetbox: 65000, u22: 45000, child: 45000 },
-          weekday_night: { standard: 55000, vip: 60000, sweetbox: 70000, u22: 45000, child: 45000 },
-          happy_tue: { standard: 45000, vip: 45000, sweetbox: 55000, u22: 45000, child: 45000 },
-          weekend: { standard: 65000, vip: 70000, sweetbox: 80000, u22: 50000, child: 50000 }
+          weekday_day: { standard: 55000, vip: 60000, sweetbox: 70000, u22: 45000, child: 45000 },
+          weekday_night: { standard: 65000, vip: 70000, sweetbox: 80000, u22: 50000, child: 45000 },
+          happy_tue: { standard: 45000, vip: 50000, sweetbox: 60000, u22: 45000, child: 45000 },
+          weekend: { standard: 80000, vip: 85000, sweetbox: 95000, u22: 55000, child: 50000 }
         },
-        combos: { solo: 58000, couple: 88000, popcornOnly: 38000, soloLabel: "Combo Beta 1 (1 Bắp + 1 Nước)", coupleLabel: "Combo Sweetheart (1 Bắp lớn + 2 Nước)" },
+        combos: { solo: 68000, couple: 88000, popcornOnly: 55000, soloLabel: "Combo Beta 1 (1 Bắp lớn + 1 Nước)", coupleLabel: "Combo Cặp Đôi (1 Bắp lớn + 2 Nước)" },
         parkingBike: 5000,
         parkingCar: 25000
       }
     };
 
-    // Chênh lệch giá thực tế theo từng chi nhánh cụ thể tại Hà Nội
+    // Bảng giá chính xác riêng cho từng chi nhánh có chính sách giá khác (Lotte Hà Đông, Lotte Tây Hồ, CGV Flagship/IPH, Beta Giải Phóng/Đan Phượng...)
     const HANOI_BRANCH_PRICE_OVERRIDES = {
-      lotte_tay_ho: { delta: 10000, note: "Chi nhánh Flagship Lotte Mall West Lake (+10.000đ, hỗ trợ Cine Comfort & Charlotte VIP)", luxuryPrice: 300000 },
-      lotte_keangnam: { delta: 5000, note: "Chi nhánh Landmark 72 Keangnam (+5.000đ, hỗ trợ Super Plex)" },
-      lotte_ha_dong: { delta: -5000, note: "Chi nhánh Hà Đông áp dụng giá ưu đãi ngoại khu (-5.000đ/vé)" },
-      lotte_minh_khai: { delta: -5000, note: "Chi nhánh Minh Khai áp dụng giá ưu đãi nội khu (-5.000đ/vé)" },
-      lotte_thang_long: { delta: -5000, note: "Chi nhánh Thăng Long Big C áp dụng giá tiêu chuẩn (-5.000đ/vé)" },
-      cgv_metropolis: { delta: 10000, note: "Chi nhánh cao cấp Metropolis Liễu Giai (+10.000đ, có IMAX Laser & L'Amour)", luxuryPrice: 300000 },
-      cgv_ba_trieu: { delta: 5000, note: "Chi nhánh trung tâm Vincom Bà Triệu (+5.000đ, có 4DX, Starium & Gold Class)", luxuryPrice: 280000 },
-      cgv_trang_tien: { delta: 10000, note: "Chi nhánh Boutique Tràng Tiền Plaza (+10.000đ)" },
-      cgv_iph: { delta: -10000, note: "Chi nhánh CGV Indochina Plaza IPH Cầu Giấy có mức giá mềm hơn (-10.000đ/vé)" },
-      cgv_aeon_ha_dong: { delta: -5000, note: "Chi nhánh AEON Mall Hà Đông (-5.000đ vé 2D, có IMAX & Starium)" },
-      beta_dan_phuong: { delta: -5000, note: "Chi nhánh Beta Đan Phượng áp dụng giá ưu đãi ngoại thành (-5.000đ/vé, từ 40.000đ)" }
+      lotte_ha_dong: {
+        note: "Ngoại lệ giá ưu đãi Lotte Hà Đông: Người lớn 55k–85k; HSSV/U22/Trẻ em đồng giá 45.000đ (T2–CN)!",
+        tickets: {
+          weekday_day: { standard: 55000, vip: 60000, sweetbox: 75000, u22: 45000, child: 45000 },
+          weekday_night: { standard: 70000, vip: 75000, sweetbox: 90000, u22: 45000, child: 45000 },
+          happy_tue: { standard: 55000, vip: 60000, sweetbox: 75000, u22: 45000, child: 45000 },
+          weekend: { standard: 80000, vip: 85000, sweetbox: 100000, u22: 45000, child: 45000 }
+        }
+      },
+      lotte_tay_ho: {
+        note: "Chi nhánh Flagship Lotte Mall West Lake: Người lớn 95k–125k; U22 65k (T2–T5) / 85k (Cuối tuần); Charlotte VIP 300k",
+        luxuryPrice: 300000,
+        tickets: {
+          weekday_day: { standard: 95000, vip: 100000, sweetbox: 115000, u22: 65000, child: 65000 },
+          weekday_night: { standard: 105000, vip: 110000, sweetbox: 125000, u22: 65000, child: 65000 },
+          happy_tue: { standard: 75000, vip: 80000, sweetbox: 95000, u22: 65000, child: 60000 },
+          weekend: { standard: 120000, vip: 125000, sweetbox: 145000, u22: 85000, child: 75000 }
+        }
+      },
+      lotte_keangnam: {
+        note: "Chi nhánh Landmark 72 Keangnam: Người lớn 75k–110k; HSSV/U22 55k–70k (hỗ trợ Super Plex)"
+      },
+      cgv_metropolis: {
+        note: "Chi nhánh cao cấp Metropolis Liễu Giai: Người lớn 100k–130k; HSSV/U22 tại quầy 70k–85k (có IMAX Laser & L'Amour)",
+        luxuryPrice: 300000,
+        tickets: {
+          weekday_day: { standard: 100000, vip: 105000, sweetbox: 125000, u22: 70000, child: 65000 },
+          weekday_night: { standard: 110000, vip: 115000, sweetbox: 135000, u22: 75000, child: 70000 },
+          happy_tue: { standard: 80000, vip: 85000, sweetbox: 100000, u22: 68000, child: 65000 },
+          weekend: { standard: 125000, vip: 130000, sweetbox: 150000, u22: 85000, child: 80000 }
+        }
+      },
+      cgv_ba_trieu: {
+        note: "Chi nhánh trung tâm Vincom Bà Triệu: Người lớn 95k–125k; HSSV/U22 tại quầy 70k–85k (có 4DX & Gold Class)",
+        luxuryPrice: 280000,
+        tickets: {
+          weekday_day: { standard: 95000, vip: 100000, sweetbox: 120000, u22: 70000, child: 65000 },
+          weekday_night: { standard: 105000, vip: 110000, sweetbox: 130000, u22: 75000, child: 70000 },
+          happy_tue: { standard: 75000, vip: 80000, sweetbox: 95000, u22: 65000, child: 60000 },
+          weekend: { standard: 120000, vip: 125000, sweetbox: 145000, u22: 85000, child: 75000 }
+        }
+      },
+      cgv_trang_tien: {
+        note: "Chi nhánh Boutique Tràng Tiền Plaza: Người lớn 100k–130k; HSSV/U22 70k–85k",
+        tickets: {
+          weekday_day: { standard: 100000, vip: 105000, sweetbox: 125000, u22: 70000, child: 65000 },
+          weekday_night: { standard: 110000, vip: 115000, sweetbox: 135000, u22: 75000, child: 70000 },
+          happy_tue: { standard: 80000, vip: 85000, sweetbox: 100000, u22: 68000, child: 65000 },
+          weekend: { standard: 125000, vip: 130000, sweetbox: 150000, u22: 85000, child: 80000 }
+        }
+      },
+      cgv_iph: {
+        note: "Chi nhánh CGV Indochina Plaza IPH Cầu Giấy giá mềm hơn: Người lớn 85k–110k; HSSV/U22 65k–75k",
+        tickets: {
+          weekday_day: { standard: 85000, vip: 90000, sweetbox: 105000, u22: 65000, child: 60000 },
+          weekday_night: { standard: 95000, vip: 100000, sweetbox: 115000, u22: 68000, child: 65000 },
+          happy_tue: { standard: 70000, vip: 75000, sweetbox: 90000, u22: 60000, child: 60000 },
+          weekend: { standard: 105000, vip: 110000, sweetbox: 125000, u22: 75000, child: 70000 }
+        }
+      },
+      cgv_aeon_ha_dong: {
+        note: "Chi nhánh AEON Mall Hà Đông: Người lớn 85k–110k; HSSV/U22 65k–75k (có IMAX & Starium)",
+        tickets: {
+          weekday_day: { standard: 85000, vip: 90000, sweetbox: 110000, u22: 65000, child: 60000 },
+          weekday_night: { standard: 95000, vip: 100000, sweetbox: 120000, u22: 68000, child: 65000 },
+          happy_tue: { standard: 70000, vip: 75000, sweetbox: 90000, u22: 60000, child: 60000 },
+          weekend: { standard: 105000, vip: 110000, sweetbox: 130000, u22: 75000, child: 70000 }
+        }
+      },
+      beta_giai_phong: {
+        note: "Beta Giải Phóng: Người lớn 60k–90k; HSSV/U22 50.000đ–55.000đ",
+        tickets: {
+          weekday_day: { standard: 60000, vip: 65000, sweetbox: 75000, u22: 50000, child: 45000 },
+          weekday_night: { standard: 70000, vip: 75000, sweetbox: 85000, u22: 55000, child: 50000 },
+          happy_tue: { standard: 50000, vip: 55000, sweetbox: 65000, u22: 45000, child: 45000 },
+          weekend: { standard: 85000, vip: 90000, sweetbox: 100000, u22: 55000, child: 50000 }
+        }
+      },
+      beta_dan_phuong: {
+        note: "Beta Đan Phượng (ngoại thành giá rẻ): Người lớn 45k–75k; HSSV/U22 đồng giá 45.000đ",
+        tickets: {
+          weekday_day: { standard: 45000, vip: 50000, sweetbox: 60000, u22: 45000, child: 40000 },
+          weekday_night: { standard: 55000, vip: 60000, sweetbox: 70000, u22: 45000, child: 45000 },
+          happy_tue: { standard: 45000, vip: 45000, sweetbox: 55000, u22: 45000, child: 40000 },
+          weekend: { standard: 70000, vip: 75000, sweetbox: 85000, u22: 45000, child: 45000 }
+        }
+      }
     };
 
     const HANOI_FORMAT_SURCHARGE = {
@@ -16620,14 +16702,15 @@
       }
 
       const dt = dayType === "auto" ? resolveAutoDayType() : dayType;
-      const row = cfg.tickets[dt] || cfg.tickets.weekday_night;
+      const ticketTable = branchOvr?.tickets || cfg.tickets;
+      const row = ticketTable[dt] || ticketTable.weekday_night;
       let base = row[seatTier] || row.standard;
       if (audience === "u22" && seatTier !== "sweetbox") {
         base = row.u22;
       } else if (audience === "child" && seatTier !== "sweetbox") {
         base = row.child || row.u22;
       }
-      const delta = branchOvr?.delta || 0;
+      const delta = (!branchOvr?.tickets && branchOvr?.delta) ? branchOvr.delta : 0;
       const fmtAdd = fmtInfo.add || 0;
       return Math.max(40000, base + delta + fmtAdd);
     }
