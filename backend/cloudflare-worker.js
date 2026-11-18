@@ -320,7 +320,7 @@ async function handleAIRequest(request, env) {
       ? { responseMimeType: "application/json", temperature: 0.8 }
       : { temperature: 0.7 };
 
-    const modelsToTry = ["gemini-flash-lite-latest", "gemini-2.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.8-flash"];
+    const modelsToTry = ["gemini-flash-lite-latest", "gemini-2.5-flash-lite", "gemini-2.5-flash"];
     let rawText = "";
     let lastError = "EMPTY_RESPONSE";
 
@@ -358,8 +358,8 @@ async function handleAIRequest(request, env) {
   }
 }
 
-async function extractCleanMovieMetaWithAI(rawTitle, env) {
-  const fallback = {
+function buildRegexMovieMeta(rawTitle) {
+  return {
     query: String(rawTitle || "")
       .replace(/\[[^\]]*\]|\([^)]*\)/g, " ")
       .replace(/(vietsub|thuyết minh|lồng tiếng|full hd|1080p|720p|4k|webrip|bluray|motchill|motphim|8phimx|ani-one|tập\s*\d+)/gi, " ")
@@ -369,6 +369,10 @@ async function extractCleanMovieMetaWithAI(rawTitle, env) {
     type: /tập\s*\d+|season|s\d+|anime|phần\s*\d+/i.test(rawTitle || "") ? "tv" : "movie",
     year: ""
   };
+}
+
+async function extractCleanMovieMetaWithAI(rawTitle, env) {
+  const fallback = buildRegexMovieMeta(rawTitle);
   if (!env.GEMINI_API_KEY || !rawTitle) return fallback;
   try {
     const prompt = `Từ tên file phim sau: "${rawTitle}". Hãy trích xuất tên phim/anime gốc chuẩn quốc tế (tiếng Anh hoặc tên chính thức để tìm poster), loại ("movie" hoặc "tv" hoặc "anime"), và năm phát hành nếu có. Trả về đúng JSON: {"query":"...","type":"movie","year":""}`;
@@ -398,18 +402,7 @@ async function extractCleanMovieMetaWithAI(rawTitle, env) {
   return fallback;
 }
 
-async function handlePosterLookup(request, env) {
-  const url = new URL(request.url);
-  const rawTitle = (url.searchParams.get("title") || "").trim();
-  if (!rawTitle) return jsonResponse({ ok: false, error: "MISSING_TITLE" }, 400);
-
-  const cache = caches.default;
-  const cacheKey = new Request(url.toString(), { method: "GET" });
-  const cached = await cache.match(cacheKey);
-  if (cached) return cached;
-
-  const meta = await extractCleanMovieMetaWithAI(rawTitle, env);
-  const q = meta.query || rawTitle;
+async function lookupPosterByMeta(q, type, rawTitle, env) {
   let posterUrl = "";
   let source = "";
 
@@ -451,7 +444,7 @@ async function handlePosterLookup(request, env) {
   }
 
   // 3. Jikan (MyAnimeList) cho Anime
-  if (!posterUrl && (meta.type === "anime" || /chú thuật|jujutsu|anime|tập/i.test(rawTitle))) {
+  if (!posterUrl && (type === "anime" || /chú thuật|jujutsu|anime|tập/i.test(rawTitle))) {
     try {
       const jikanRes = await fetch(
         `https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=1`,
@@ -482,7 +475,7 @@ async function handlePosterLookup(request, env) {
     } catch (e) {}
   }
 
-  // 4. TVMaze API (Miễn phí, không cần API key, cho phim bộ/series)
+  // 5. TVMaze API (Miễn phí, không cần API key, cho phim bộ/series)
   if (!posterUrl) {
     try {
       const tvRes = await fetch(
@@ -496,6 +489,33 @@ async function handlePosterLookup(request, env) {
         source = "tvmaze";
       }
     } catch (e) {}
+  }
+
+  return { posterUrl, source };
+}
+
+async function handlePosterLookup(request, env) {
+  const url = new URL(request.url);
+  const rawTitle = (url.searchParams.get("title") || "").trim();
+  if (!rawTitle) return jsonResponse({ ok: false, error: "MISSING_TITLE" }, 400);
+
+  const cache = caches.default;
+  const cacheKey = new Request(url.toString(), { method: "GET" });
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
+
+  // Ưu tiên làm sạch tên bằng regex trước để tiết kiệm Gemini RPM (tránh chạm 15 RPM Free Tier)
+  const regexMeta = buildRegexMovieMeta(rawTitle);
+  let q = regexMeta.query || rawTitle;
+  let { posterUrl, source } = await lookupPosterByMeta(q, regexMeta.type, rawTitle, env);
+
+  // Chỉ gọi Gemini AI trích xuất tên quốc tế khi fast-path regex không tìm được poster
+  if (!posterUrl) {
+    const aiMeta = await extractCleanMovieMetaWithAI(rawTitle, env);
+    if (aiMeta.query && aiMeta.query.toLowerCase() !== q.toLowerCase()) {
+      q = aiMeta.query;
+      ({ posterUrl, source } = await lookupPosterByMeta(q, aiMeta.type, rawTitle, env));
+    }
   }
 
   const response = new Response(
