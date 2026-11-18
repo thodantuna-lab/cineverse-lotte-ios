@@ -1,0 +1,8 @@
+name = "cineverse-r2"
+main = "cloudflare-worker.js"
+compatibility_date = "2025-01-01"
+account_id = "988ac48a415b3b62191a7c80089215f9"
+
+[[r2_buckets]]
+binding = "MY_BUCKET"
+bucket_name = "chuthuathoichien"
