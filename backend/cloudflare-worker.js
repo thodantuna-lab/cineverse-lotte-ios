@@ -314,18 +314,24 @@ Quy tắc bắt buộc:
 Danh sách ${lines.length} câu cần dịch:
 ${numberedLines}`;
 
-    const modelsToTry = ["gemini-flash-lite-latest", "gemini-flash-latest", "gemini-3.5-flash"];
+    const modelsToTry = ["gemini-flash-lite-latest", "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-flash-latest"];
     let rawText = "";
     let lastError = "EMPTY_RESPONSE";
 
-    for (const modelName of modelsToTry) {
+    for (let idx = 0; idx < modelsToTry.length; idx++) {
+      const modelName = modelsToTry[idx];
+      if (idx > 0) await new Promise(r => setTimeout(r, 900));
+      const genCfg = {
+        responseMimeType: "application/json",
+        temperature: 0.3
+      };
+      if (modelName === "gemini-flash-latest" || modelName === "gemini-3.5-flash-lite") {
+        genCfg.thinkingConfig = { thinkingBudget: 0 };
+      }
       const res = await callGeminiWithTelemetry(modelName, {
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.4
-        }
-      }, 25000, "translate-srt", env, ctx);
+        generationConfig: genCfg
+      }, 30000, "translate-srt", env, ctx);
       if (res.text) {
         rawText = res.text;
         break;
@@ -394,7 +400,7 @@ Câu hỏi của khán giả: ${question}`;
       ? { responseMimeType: "application/json", temperature: 0.3 }
       : { temperature: 0.3 };
 
-    const modelsToTry = ["gemini-flash-lite-latest", "gemini-flash-latest", "gemini-3.5-flash"];
+    const modelsToTry = ["gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-flash-latest"];
     let rawText = "";
     let lastError = "EMPTY_RESPONSE";
 
