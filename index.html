@@ -10250,12 +10250,15 @@
           }
         }
         const myMod = (mod.users || {})[state.uid] || {};
-        state.roomMutedUntil = Number(myMod.mutedUntil || 0);
+        const normMyName = String(state.userName || "").trim().toLowerCase().replace(/[.#$/\[\]]/g, "_");
+        const myNameMod = normMyName ? ((mod.byName || {})[normMyName] || {}) : {};
+        state.roomMutedUntil = Math.max(Number(myMod.mutedUntil || 0), Number(myNameMod.mutedUntil || 0));
         if (state.roomMutedUntil > Date.now() && voiceMicActive) {
           toggleVoiceMic().catch(() => {});
           showToast("🔇 Admin đã tắt mic của bạn từ xa.", "error");
         }
-        if (myMod.kickedAt && myMod.kickedAt > roomJoinedTs && modInitialized) {
+        const kickedAt = Math.max(Number(myMod.kickedAt || 0), Number(myNameMod.kickedAt || 0));
+        if (kickedAt && kickedAt > roomJoinedTs && modInitialized) {
           showToast("🚫 Bạn đã được Admin mời ra khỏi phòng chiếu.", "error");
           leaveRoom();
         }
