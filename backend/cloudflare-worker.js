@@ -314,7 +314,7 @@ Quy tắc bắt buộc:
 Danh sách ${lines.length} câu cần dịch:
 ${numberedLines}`;
 
-    const modelsToTry = ["gemini-flash-lite-latest", "gemini-2.5-flash-lite", "gemini-2.5-flash"];
+    const modelsToTry = ["gemini-flash-lite-latest", "gemini-flash-latest", "gemini-3.5-flash"];
     let rawText = "";
     let lastError = "EMPTY_RESPONSE";
 
@@ -377,7 +377,7 @@ async function handleAIRequest(request, env, ctx) {
       ? { responseMimeType: "application/json", temperature: 0.8 }
       : { temperature: 0.7 };
 
-    const modelsToTry = ["gemini-flash-lite-latest", "gemini-2.5-flash-lite", "gemini-2.5-flash"];
+    const modelsToTry = ["gemini-flash-lite-latest", "gemini-flash-latest", "gemini-3.5-flash"];
     let rawText = "";
     let lastError = "EMPTY_RESPONSE";
 

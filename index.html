@@ -10252,7 +10252,11 @@
         const myMod = (mod.users || {})[state.uid] || {};
         const normMyName = String(state.userName || "").trim().toLowerCase().replace(/[.#$/\[\]]/g, "_");
         const myNameMod = normMyName ? ((mod.byName || {})[normMyName] || {}) : {};
+        const prevMuted = state.roomMutedUntil && state.roomMutedUntil > Date.now();
         state.roomMutedUntil = Math.max(Number(myMod.mutedUntil || 0), Number(myNameMod.mutedUntil || 0));
+        if (prevMuted && state.roomMutedUntil <= Date.now()) {
+          showToast("🔊 Admin đã mở lại mic cho bạn!", "success");
+        }
         if (state.roomMutedUntil > Date.now() && voiceMicActive) {
           toggleVoiceMic().catch(() => {});
           showToast("🔇 Admin đã tắt mic của bạn từ xa.", "error");
