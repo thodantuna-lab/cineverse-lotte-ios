@@ -7125,7 +7125,6 @@
       if (curEl) curEl.textContent = formatTime(nextTime);
       if (sliderEl) sliderEl.value = Math.min(100, (nextTime / videoEl.duration) * 100);
       broadcastRoomVideoSync("seek");
-      showToast(delta < 0 ? `⏪ Tua lùi ${Math.abs(delta)}s (${formatTime(nextTime)})` : `⏩ Tua tới ${delta}s (${formatTime(nextTime)})`, "info");
     }
 
     document.addEventListener("keydown", (e) => {
@@ -10585,7 +10584,6 @@
         if (!forceResync && data.uid !== state.uid && Date.now() - (data.updatedAt || 0) < 8000) {
           if (data.action === "pause") showToast(`⏸️ ${data.userName} đã tạm dừng phim`, "info");
           else if (data.action === "play") showToast(`▶️ ${data.userName} đã tiếp tục phát phim`, "info");
-          else if (data.action === "seek") showToast(`⏩ ${data.userName} vừa tua tới ${formatTime(data.currentTime || 0)}`, "info");
           else if (data.action === "effects") showToast(`👑 Chủ Trì ${data.userName} vừa đồng bộ hiệu ứng phòng!`, "info");
         }
       } finally {
