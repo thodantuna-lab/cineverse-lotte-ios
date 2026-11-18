@@ -10236,9 +10236,36 @@
           renderChatTypingIndicator();
         }
       }, () => {});
+      let modInitialized = false;
+      const roomJoinedTs = Date.now();
+      state.roomMutedUntil = 0;
+      const unsubMod = rtdbMod.onValue(rtdbMod.ref(rtdb, `lobby_config/room_moderation/${roomId}`), (snap) => {
+        const mod = snap.val() || {};
+        if (mod.clearChatAt && mod.clearChatAt > roomJoinedTs && mod.clearChatAt !== state._lastClearChatAt) {
+          state._lastClearChatAt = mod.clearChatAt;
+          state.chatByRoom[roomId] = [];
+          if (state.currentRoomId === roomId) {
+            renderChatMessages();
+            showToast("🧹 Admin đã dọn sạch khung chat phòng này.", "info");
+          }
+        }
+        const myMod = (mod.users || {})[state.uid] || {};
+        state.roomMutedUntil = Number(myMod.mutedUntil || 0);
+        if (state.roomMutedUntil > Date.now() && voiceMicActive) {
+          toggleVoiceMic().catch(() => {});
+          showToast("🔇 Admin đã tắt mic của bạn từ xa.", "error");
+        }
+        if (myMod.kickedAt && myMod.kickedAt > roomJoinedTs && modInitialized) {
+          showToast("🚫 Bạn đã được Admin mời ra khỏi phòng chiếu.", "error");
+          leaveRoom();
+        }
+        modInitialized = true;
+      }, () => {});
       roomChatUnsub = () => {
         try { unsubMsg(); } catch (_) {}
         try { unsubTyping(); } catch (_) {}
+        try { unsubMod(); } catch (_) {}
+        state.roomMutedUntil = 0;
       };
     }
 
@@ -13722,6 +13749,11 @@
           rtdbMod.update(rtdbMod.ref(rtdb, `voice/${roomId}/peers/${state.uid}`), { micOn: false, updatedAt: Date.now() }).catch(() => {});
         }
         showToast("🔇 Đã tắt micro của bạn.", "info");
+        return;
+      }
+
+      if (state.roomMutedUntil && state.roomMutedUntil > Date.now()) {
+        showToast("🔇 Mic của bạn đang bị Admin tạm khóa.", "error");
         return;
       }
 
