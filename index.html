@@ -6454,15 +6454,27 @@
     }
 
     function updateAiSubButtonState(roomId) {
-      const btn = document.getElementById("btn-ai-sub");
-      if (!btn) return;
       const hasSrt = Boolean(state.hasR2SrtByRoom?.[roomId] || state.customSubtitlesByRoom?.[roomId]?.length > 0);
-      btn.disabled = !hasSrt;
-      btn.classList.toggle("opacity-45", !hasSrt);
-      btn.classList.toggle("cursor-not-allowed", !hasSrt);
-      btn.title = hasSrt
-        ? "Dịch / chỉnh phụ đề AI từ file .srt"
-        : "Phim này chưa có file .srt trên R2 — tắt Phụ đề AI để tránh quá tải";
+      const btn = document.getElementById("btn-ai-sub");
+      if (btn) {
+        btn.disabled = !hasSrt;
+        btn.classList.toggle("opacity-45", !hasSrt);
+        btn.classList.toggle("cursor-not-allowed", !hasSrt);
+        btn.title = hasSrt
+          ? "Dịch / chỉnh phụ đề AI từ file .srt"
+          : "Phim này chưa có file .srt trên R2 — tắt Phụ đề AI để tránh quá tải";
+      }
+      const ccBtn = document.getElementById("btn-cc-mode");
+      if (ccBtn) {
+        ccBtn.disabled = !hasSrt;
+        ccBtn.classList.toggle("opacity-45", !hasSrt);
+        ccBtn.classList.toggle("cursor-not-allowed", !hasSrt);
+        if (!hasSrt) {
+          ccBtn.innerHTML = `<i class="fa-solid fa-closed-captioning mr-1 text-slate-500"></i>Phụ đề: Không có .srt`;
+          const lyricsOverlay = document.getElementById("lyrics-overlay");
+          if (lyricsOverlay) lyricsOverlay.classList.add("hidden");
+        }
+      }
     }
 
     async function generateAISubtitlesNow() {
