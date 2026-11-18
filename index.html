@@ -8613,6 +8613,24 @@
 
     const aiPlaylistFetching = {};
 
+    function buildCleanAiMovieContext(room) {
+      const def = (typeof DEFAULT_ROOMS !== "undefined" ? DEFAULT_ROOMS : []).find(d => d.id === room?.id);
+      const isSameDefault = def && String(def.movieTitle || "").trim() === String(room?.movieTitle || "").trim();
+      const allRooms = (typeof getAllRooms === "function" ? getAllRooms() : (typeof DEFAULT_ROOMS !== "undefined" ? DEFAULT_ROOMS : [])).map(r => {
+        const eff = typeof getEffectiveRoom === "function" ? getEffectiveRoom(r.id) : r;
+        return { room: eff.number || r.id, title: eff.movieTitle || "", status: eff.status || "showing" };
+      });
+      const vault = (typeof getAllCatalogVideos === "function" ? getAllCatalogVideos() : []).slice(0, 60).map(v => v.title);
+      return {
+        movieTitle: room?.movieTitle || "Phim đang chiếu",
+        genre: isSameDefault ? (room?.genre || "") : "",
+        cast: isSameDefault ? (room?.cast || "") : "",
+        synopsis: isSameDefault ? (room?.synopsis || "") : "",
+        availableRooms: allRooms,
+        availableTitles: vault
+      };
+    }
+
     async function callWorkerAI(payload) {
       try {
         const base = (typeof getR2WorkerUrl === "function" ? getR2WorkerUrl() : DEFAULT_R2_WORKER_URL).replace(/\/+$/, "");
@@ -8790,12 +8808,13 @@
         btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i>Đang tạo...`;
       }
       try {
+        const ctx = buildCleanAiMovieContext(room);
         const aiRes = await callWorkerAI({
           mode: "trivia",
-          movieTitle: room.movieTitle,
-          genre: room.genre,
-          cast: room.cast || "",
-          synopsis: room.synopsis || ""
+          movieTitle: ctx.movieTitle,
+          genre: ctx.genre,
+          cast: ctx.cast,
+          synopsis: ctx.synopsis
         });
         if (aiRes && Array.isArray(aiRes.items) && aiRes.items.length) {
           const valid = aiRes.items.filter(it => it && it.q && Array.isArray(it.options) && it.options.length >= 2 && typeof it.answer === "number");
@@ -9049,12 +9068,15 @@
     }
 
     async function generateSmartMovieAIReply(q, room) {
+      const ctx = buildCleanAiMovieContext(room);
       const workerRes = await callWorkerAI({
         mode: "chat",
-        movieTitle: room.movieTitle,
-        genre: room.genre,
-        cast: room.cast || "",
-        synopsis: room.synopsis || "",
+        movieTitle: ctx.movieTitle,
+        genre: ctx.genre,
+        cast: ctx.cast,
+        synopsis: ctx.synopsis,
+        availableRooms: ctx.availableRooms,
+        availableTitles: ctx.availableTitles,
         question: q
       });
       if (workerRes && workerRes.reply) {

@@ -360,22 +360,39 @@ async function handleAIRequest(request, env, ctx) {
     const cast = body.cast || "";
     const question = body.question || "";
     const availableTitles = Array.isArray(body.availableTitles) ? body.availableTitles : [];
+    const availableRooms = Array.isArray(body.availableRooms) ? body.availableRooms : [];
 
     let prompt = "";
     let wantJson = false;
     if (mode === "trivia") {
       wantJson = true;
-      prompt = `Hãy tạo 4 câu hỏi trắc nghiệm đố vui thú vị bằng tiếng Việt về bộ phim "${movieTitle}" (Thể loại: ${genre}, Diễn viên: ${cast}, Tóm tắt: ${synopsis}). Trả về đúng JSON mảng gồm 4 phần tử theo mẫu: [{"q":"câu hỏi","options":["A","B","C","D"],"answer":0}] với answer là chỉ số 0..3 của đáp án đúng.`;
+      prompt = `Bạn là chuyên gia điện ảnh. Hãy tạo 4 câu hỏi trắc nghiệm đố vui CHÍNH XÁC 100% về bộ phim thực tế "${movieTitle}"${genre ? ` (Thể loại: ${genre})` : ""}${cast ? ` (Diễn viên: ${cast})` : ""}${synopsis ? ` (Tóm tắt: ${synopsis})` : ""}.
+Quy tắc bắt buộc:
+- Chỉ hỏi sự thật chính xác về đúng bộ phim "${movieTitle}" (diễn viên, đạo diễn, nhân vật, cốt truyện thật). TUYỆT ĐỐI KHÔNG bịa đặt hoặc trộn nội dung phim khác.
+- Đáp án đúng phải khớp chính xác với chỉ số answer (0..3).
+Trả về đúng JSON mảng 4 phần tử: [{"q":"câu hỏi","options":["A","B","C","D"],"answer":0}]`;
     } else if (mode === "recommend") {
       wantJson = true;
       prompt = `Khán giả vừa xem "${movieTitle}" (${genre}). Trong danh sách video sẵn có sau: ${JSON.stringify(availableTitles.slice(0, 30))}, hãy chọn ra 3-4 video phù hợp nhất để đề xuất xem tiếp (nếu là phim bộ hãy ưu tiên tập tiếp theo). Trả về đúng JSON mảng gồm các object: [{"title":"tên chính xác trong danh sách","reason":"lý do ngắn gọn bằng tiếng Việt"}].`;
     } else {
-      prompt = `Bạn là Trợ lý Điện ảnh thông minh trong rạp CineVerse Lotte. Phim đang chiếu là "${movieTitle}" (Thể loại: ${genre}, Diễn viên: ${cast}, Tóm tắt: ${synopsis}). Hãy trả lời câu hỏi sau của khán giả bằng tiếng Việt ngắn gọn, tự nhiên và chính xác (2-5 câu): ${question}`;
+      const roomsContext = availableRooms.length
+        ? `\nDanh sách các phòng đang chiếu thực tế tại rạp CineVerse Lotte:\n${availableRooms.map(r => `- ${r.room}: ${r.title} (${r.status === "upcoming" ? "Sắp chiếu" : "Đang chiếu"})`).join("\n")}`
+        : "";
+      const catalogContext = availableTitles.length
+        ? `\nMột số phim sẵn có trong kho rạp (${availableTitles.length} phim): ${availableTitles.slice(0, 40).join(", ")}.`
+        : "";
+      prompt = `Bạn là Trợ lý Điện ảnh thông minh của rạp trực tuyến CineVerse Lotte.
+Phim đang chiếu tại phòng hiện tại: "${movieTitle}"${genre ? ` (Thể loại: ${genre})` : ""}${cast ? ` (Diễn viên: ${cast})` : ""}${synopsis ? ` (Tóm tắt: ${synopsis})` : ""}.${roomsContext}${catalogContext}
+Quy tắc bắt buộc:
+1. Trả lời đúng sự thật bằng tiếng Việt ngắn gọn (2-6 câu). Tuyệt đối KHÔNG bịa nội dung hay nhầm sang phim khác.
+2. Nếu người dùng hỏi danh sách phim đang chiếu hoặc phim có ở rạp, hãy liệt kê đúng từ danh sách phòng & kho phim ở trên.
+3. Nếu không chắc chắn chi tiết nào của "${movieTitle}", hãy nói rõ là chưa có thông tin thay vì đoán bừa.
+Câu hỏi của khán giả: ${question}`;
     }
 
     const baseGenConfig = wantJson
-      ? { responseMimeType: "application/json", temperature: 0.8 }
-      : { temperature: 0.7 };
+      ? { responseMimeType: "application/json", temperature: 0.3 }
+      : { temperature: 0.3 };
 
     const modelsToTry = ["gemini-flash-lite-latest", "gemini-flash-latest", "gemini-3.5-flash"];
     let rawText = "";
