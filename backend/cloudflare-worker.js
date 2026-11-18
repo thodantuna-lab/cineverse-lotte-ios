@@ -220,7 +220,73 @@ function jsonResponse(payload, status = 200) {
   });
 }
 
-async function handleTranslateSrtRequest(request, env) {
+const RTDB_GEMINI_TELEMETRY_BASE = "https://cineverse-ea320-default-rtdb.asia-southeast1.firebasedatabase.app/lobby_config/gemini_usage_logs";
+
+function logGeminiTelemetry(entry, ctx) {
+  const promise = fetch(`${RTDB_GEMINI_TELEMETRY_BASE}/${entry.id}.json`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(entry)
+  }).catch(() => {});
+  if (ctx && typeof ctx.waitUntil === "function") {
+    ctx.waitUntil(promise);
+  }
+}
+
+/**
+ * Shared Gemini generateContent caller with non-blocking RTDB telemetry.
+ */
+async function callGeminiWithTelemetry(modelName, payload, timeoutMs, featureTag, env, ctx) {
+  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`;
+  const startedAt = Date.now();
+  const logId = `g_${startedAt}_${Math.random().toString(36).slice(2, 7)}`;
+  let status = 0;
+  let text = "";
+  let errorMsg = "";
+  let inputTokens = 0;
+  let outputTokens = 0;
+  let totalTokens = 0;
+
+  try {
+    const gemRes = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: AbortSignal.timeout(timeoutMs),
+      body: JSON.stringify(payload)
+    });
+    status = gemRes.status || 0;
+    const gemData = await gemRes.json().catch(() => ({}));
+    text = gemData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const usage = gemData?.usageMetadata || {};
+    inputTokens = Number(usage.promptTokenCount || 0);
+    outputTokens = Number(usage.candidatesTokenCount || 0);
+    totalTokens = Number(usage.totalTokenCount || (inputTokens + outputTokens));
+    if (!text) {
+      errorMsg = String(gemData?.error?.message || `HTTP_${status || "EMPTY"}`).slice(0, 140);
+    }
+  } catch (e) {
+    status = e?.name === "TimeoutError" ? 408 : 0;
+    errorMsg = String(e?.message || "FETCH_ERROR").slice(0, 140);
+  }
+
+  logGeminiTelemetry({
+    id: logId,
+    ts: startedAt,
+    model: modelName,
+    feature: featureTag,
+    status,
+    ok: Boolean(text),
+    latencyMs: Date.now() - startedAt,
+    inputTokens,
+    outputTokens,
+    totalTokens,
+    error: errorMsg
+  }, ctx);
+
+  return { text, errorMsg, status };
+}
+
+async function handleTranslateSrtRequest(request, env, ctx) {
   if (!env.GEMINI_API_KEY) {
     return jsonResponse({ ok: false, error: "MISSING_GEMINI_KEY" }, 200);
   }
@@ -253,27 +319,18 @@ ${numberedLines}`;
     let lastError = "EMPTY_RESPONSE";
 
     for (const modelName of modelsToTry) {
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`;
-      try {
-        const gemRes = await fetch(apiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          signal: AbortSignal.timeout(25000),
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              responseMimeType: "application/json",
-              temperature: 0.4
-            }
-          })
-        });
-        const gemData = await gemRes.json();
-        rawText = gemData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-        if (rawText) break;
-        lastError = gemData?.error?.message || lastError;
-      } catch (e) {
-        lastError = e?.message || lastError;
+      const res = await callGeminiWithTelemetry(modelName, {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: 0.4
+        }
+      }, 25000, "translate-srt", env, ctx);
+      if (res.text) {
+        rawText = res.text;
+        break;
       }
+      if (res.errorMsg) lastError = res.errorMsg;
     }
 
     if (!rawText) {
@@ -290,7 +347,7 @@ ${numberedLines}`;
   }
 }
 
-async function handleAIRequest(request, env) {
+async function handleAIRequest(request, env, ctx) {
   if (!env.GEMINI_API_KEY) {
     return jsonResponse({ ok: false, error: "MISSING_GEMINI_KEY" }, 200);
   }
@@ -325,24 +382,15 @@ async function handleAIRequest(request, env) {
     let lastError = "EMPTY_RESPONSE";
 
     for (const modelName of modelsToTry) {
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`;
-      try {
-        const gemRes = await fetch(apiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          signal: AbortSignal.timeout(15000),
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: baseGenConfig
-          })
-        });
-        const gemData = await gemRes.json();
-        rawText = gemData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-        if (rawText) break;
-        lastError = gemData?.error?.message || lastError;
-      } catch (e) {
-        lastError = e?.message || lastError;
+      const res = await callGeminiWithTelemetry(modelName, {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: baseGenConfig
+      }, 15000, `ai-${mode}`, env, ctx);
+      if (res.text) {
+        rawText = res.text;
+        break;
       }
+      if (res.errorMsg) lastError = res.errorMsg;
     }
     if (!rawText) {
       return jsonResponse({ ok: false, error: lastError }, 200);
@@ -371,25 +419,17 @@ function buildRegexMovieMeta(rawTitle) {
   };
 }
 
-async function extractCleanMovieMetaWithAI(rawTitle, env) {
+async function extractCleanMovieMetaWithAI(rawTitle, env, ctx) {
   const fallback = buildRegexMovieMeta(rawTitle);
   if (!env.GEMINI_API_KEY || !rawTitle) return fallback;
   try {
     const prompt = `Từ tên file phim sau: "${rawTitle}". Hãy trích xuất tên phim/anime gốc chuẩn quốc tế (tiếng Anh hoặc tên chính thức để tìm poster), loại ("movie" hoặc "tv" hoặc "anime"), và năm phát hành nếu có. Trả về đúng JSON: {"query":"...","type":"movie","year":""}`;
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`;
-    const res = await fetch(apiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      signal: AbortSignal.timeout(8000),
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json", temperature: 0.1 }
-      })
-    });
-    const data = await res.json();
-    const txt = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    if (txt) {
-      const parsed = JSON.parse(txt);
+    const res = await callGeminiWithTelemetry("gemini-flash-lite-latest", {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: "application/json", temperature: 0.1 }
+    }, 8000, "poster-meta", env, ctx);
+    if (res.text) {
+      const parsed = JSON.parse(res.text);
       if (parsed && parsed.query) {
         return {
           query: String(parsed.query).trim(),
@@ -494,7 +534,7 @@ async function lookupPosterByMeta(q, type, rawTitle, env) {
   return { posterUrl, source };
 }
 
-async function handlePosterLookup(request, env) {
+async function handlePosterLookup(request, env, ctx) {
   const url = new URL(request.url);
   const rawTitle = (url.searchParams.get("title") || "").trim();
   if (!rawTitle) return jsonResponse({ ok: false, error: "MISSING_TITLE" }, 400);
@@ -511,7 +551,7 @@ async function handlePosterLookup(request, env) {
 
   // Chỉ gọi Gemini AI trích xuất tên quốc tế khi fast-path regex không tìm được poster
   if (!posterUrl) {
-    const aiMeta = await extractCleanMovieMetaWithAI(rawTitle, env);
+    const aiMeta = await extractCleanMovieMetaWithAI(rawTitle, env, ctx);
     if (aiMeta.query && aiMeta.query.toLowerCase() !== q.toLowerCase()) {
       q = aiMeta.query;
       ({ posterUrl, source } = await lookupPosterByMeta(q, aiMeta.type, rawTitle, env));
@@ -535,7 +575,7 @@ async function handlePosterLookup(request, env) {
   return response;
 }
 
-async function handleWorkerFetch(request, env, corsHdrs) {
+async function handleWorkerFetch(request, env, corsHdrs, ctx) {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHdrs });
     }
@@ -621,7 +661,7 @@ async function handleWorkerFetch(request, env, corsHdrs) {
       return new Response("Subtitle not found", { status: 404, headers: CORS_HEADERS });
     }
     if (request.method === "GET" && url.pathname.endsWith("/poster")) {
-      return handlePosterLookup(request, env);
+      return handlePosterLookup(request, env, ctx);
     }
     if (request.method === "GET" && url.pathname.endsWith("/turn")) {
       // 1. Cloudflare Realtime TURN (Miễn phí 1.000 GB/tháng trong Cloudflare Dashboard -> Calls / Realtime -> TURN)
@@ -680,10 +720,10 @@ async function handleWorkerFetch(request, env, corsHdrs) {
       }
     }
     if (request.method === "POST" && url.pathname.endsWith("/ai")) {
-      return handleAIRequest(request, env);
+      return handleAIRequest(request, env, ctx);
     }
     if (request.method === "POST" && url.pathname.endsWith("/translate-srt")) {
-      return handleTranslateSrtRequest(request, env);
+      return handleTranslateSrtRequest(request, env, ctx);
     }
     if ((request.method === "POST" || request.method === "GET") && url.pathname.endsWith("/livekit-token")) {
       return handleLiveKitTokenRequest(request, env);
@@ -1109,9 +1149,9 @@ async function handleWorkerFetch(request, env, corsHdrs) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const corsHdrs = getCorsHeaders(request, env);
-    const raw = await handleWorkerFetch(request, env, corsHdrs);
+    const raw = await handleWorkerFetch(request, env, corsHdrs, ctx);
     const res = new Response(raw.body, raw);
     for (const [k, v] of Object.entries(corsHdrs)) {
       res.headers.set(k, v);
