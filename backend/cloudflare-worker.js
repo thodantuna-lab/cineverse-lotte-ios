@@ -320,19 +320,25 @@ Quy tắc bắt buộc:
 Danh sách ${lines.length} câu cần dịch:
 ${numberedLines}`;
 
-    const modelsToTry = ["gemini-flash-lite-latest", "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-flash-latest"];
+    const modelsToTry = [
+      "gemini-2.5-flash-lite",
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+      "gemini-flash-latest",
+      "gemini-1.5-flash"
+    ];
     let rawText = "";
     let lastError = "EMPTY_RESPONSE";
 
     const colo = request?.cf?.colo || "EDGE";
     for (let idx = 0; idx < modelsToTry.length; idx++) {
       const modelName = modelsToTry[idx];
-      if (idx > 0) await new Promise(r => setTimeout(r, 900));
+      if (idx > 0) await new Promise(r => setTimeout(r, 1200));
       const genCfg = {
         responseMimeType: "application/json",
         temperature: 0.3
       };
-      if (modelName === "gemini-flash-latest" || modelName === "gemini-3.5-flash-lite") {
+      if (modelName.includes("2.5") || modelName.includes("flash") || modelName.includes("thinking")) {
         genCfg.thinkingConfig = { thinkingBudget: 0 };
       }
       const res = await callGeminiWithTelemetry(modelName, {
@@ -436,15 +442,27 @@ Câu hỏi của khán giả: ${question}`;
       ? { responseMimeType: "application/json", temperature: 0.3 }
       : { temperature: 0.3 };
 
-    const modelsToTry = ["gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-flash-latest"];
+    const modelsToTry = [
+      "gemini-2.5-flash-lite",
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+      "gemini-flash-latest",
+      "gemini-1.5-flash"
+    ];
     let rawText = "";
     let lastError = "EMPTY_RESPONSE";
 
     const colo = request?.cf?.colo || "EDGE";
-    for (const modelName of modelsToTry) {
+    for (let idx = 0; idx < modelsToTry.length; idx++) {
+      const modelName = modelsToTry[idx];
+      if (idx > 0) await new Promise(r => setTimeout(r, 1200));
+      const genCfg = { ...baseGenConfig };
+      if (modelName.includes("2.5") || modelName.includes("flash") || modelName.includes("thinking")) {
+        genCfg.thinkingConfig = { thinkingBudget: 0 };
+      }
       const res = await callGeminiWithTelemetry(modelName, {
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: baseGenConfig
+        generationConfig: genCfg
       }, 15000, `ai-${mode}`, env, ctx, colo);
       if (res.text) {
         rawText = res.text;
