@@ -4254,6 +4254,46 @@
     </div>
   </div>
 
+  <!-- HỘP NHẮN TIN TRỰC TIẾP VỚI CHỦ RẠP (Góc dưới bên phải) -->
+  <div id="owner-chat-widget" class="fixed bottom-4 right-4 z-[75] flex flex-col items-end gap-2.5">
+    <div id="owner-chat-drawer" class="hidden w-[330px] sm:w-[360px] max-w-[92vw] h-[430px] max-h-[70vh] rounded-3xl overflow-hidden flex flex-col border border-white/15 bg-[#11151E]/92 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.7)]">
+      <div class="px-4 py-3 border-b border-white/10 bg-white/[0.03] flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-rose-500 to-rose-700 flex items-center justify-center text-white text-xs shadow">
+            <i class="fa-solid fa-headset"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-extrabold text-white truncate">Nhắn Cho Chủ Rạp</span>
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+            </div>
+            <p class="text-[10px] text-slate-400 truncate">Hỗ trợ trực tiếp &amp; phản hồi thời gian thực</p>
+          </div>
+        </div>
+        <button type="button" onclick="window.appActions.toggleOwnerChatWidget(false)"
+          class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 text-xs flex items-center justify-center cursor-pointer">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div id="owner-chat-messages" class="flex-1 overflow-y-auto p-3.5 space-y-2.5 text-xs">
+        <div class="text-center text-[11px] text-slate-400 py-8">Hãy nhắn tin nếu bạn cần hỗ trợ đặt vé, lỗi phòng chiếu hoặc yêu cầu phim nhé!</div>
+      </div>
+      <form onsubmit="event.preventDefault(); window.appActions.sendOwnerSupportMessage();" class="p-2.5 border-t border-white/10 bg-black/30 flex items-center gap-2">
+        <input id="owner-chat-input" type="text" maxlength="400" placeholder="Nhập tin nhắn gửi Chủ Rạp..."
+          class="flex-1 min-w-0 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-rose-500" />
+        <button type="submit" class="cta-primary-btn px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer shrink-0">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </form>
+    </div>
+    <button type="button" id="owner-chat-fab" onclick="window.appActions.toggleOwnerChatWidget()"
+      class="relative cta-primary-btn h-12 px-4 rounded-full flex items-center gap-2 text-xs font-extrabold shadow-[0_10px_30px_rgba(225,29,72,0.45)] cursor-pointer hover:scale-105 active:scale-95 transition">
+      <i class="fa-solid fa-comment-dots text-base"></i>
+      <span class="hidden sm:inline">Nhắn Chủ Rạp</span>
+      <span id="owner-chat-unread" class="hidden absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black flex items-center justify-center shadow">0</span>
+    </button>
+  </div>
+
   <!-- TOAST THÔNG BÁO -->
   <div id="toast-container" class="fixed bottom-4 right-4 z-[9999] space-y-2 pointer-events-none"></div>
 
@@ -14234,6 +14274,55 @@
           }
         }, () => {});
 
+        // Hỗ trợ nhắn tin trực tiếp với Chủ Rạp (Support Chat Realtime)
+        const supportThreadId = String(state.uid || "guest").replace(/[.#$/\[\]]/g, "_");
+        let lastSupportAdminMsgId = "";
+        let supportUnread = 0;
+        let supportInitialized = false;
+        rtdbMod.onValue(rtdbMod.ref(rtdb, `lobby_config/support_chats/${supportThreadId}/messages`), (snap) => {
+          const raw = snap.val() || {};
+          const msgs = Object.values(raw).filter(m => m && m.text).sort((a, b) => (a.ts || 0) - (b.ts || 0));
+          state.ownerSupportMessages = msgs;
+          const listEl = document.getElementById("owner-chat-messages");
+          if (listEl) {
+            if (msgs.length === 0) {
+              listEl.innerHTML = `<div class="text-center text-[11px] text-slate-400 py-8">Hãy nhắn tin nếu bạn cần hỗ trợ đặt vé, lỗi phòng chiếu hoặc yêu cầu phim nhé!</div>`;
+            } else {
+              listEl.innerHTML = msgs.map(m => {
+                const isMe = m.sender === "user";
+                return `
+                  <div class="flex flex-col ${isMe ? "items-end" : "items-start"} gap-0.5">
+                    <span class="text-[9px] text-slate-400 px-1">${isMe ? escapeHTML(m.userName || state.userName || "Bạn") : "👑 Chủ Rạp CineVerse"} • ${new Date(m.ts || Date.now()).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}</span>
+                    <div class="max-w-[85%] px-3 py-2 rounded-2xl text-xs leading-relaxed ${isMe ? "bg-rose-600 text-white rounded-br-sm" : "bg-white/10 border border-white/10 text-slate-100 rounded-bl-sm"}">${escapeHTML(m.text)}</div>
+                  </div>
+                `;
+              }).join("");
+              listEl.scrollTop = listEl.scrollHeight;
+            }
+          }
+          const latest = msgs[msgs.length - 1];
+          const drawerOpen = !document.getElementById("owner-chat-drawer")?.classList.contains("hidden");
+          if (supportInitialized && latest && latest.sender === "admin" && latest.id !== lastSupportAdminMsgId) {
+            lastSupportAdminMsgId = latest.id;
+            if (!drawerOpen) {
+              supportUnread += 1;
+              const badge = document.getElementById("owner-chat-unread");
+              if (badge) {
+                badge.textContent = String(supportUnread);
+                badge.classList.remove("hidden");
+              }
+              showToast(`👑 Chủ Rạp vừa nhắn tin: ${latest.text}`, "info");
+            }
+          } else if (latest && latest.sender === "admin") {
+            lastSupportAdminMsgId = latest.id;
+          }
+          if (drawerOpen) {
+            supportUnread = 0;
+            document.getElementById("owner-chat-unread")?.classList.add("hidden");
+          }
+          supportInitialized = true;
+        }, () => {});
+
         if (state.isAdminUnlocked) {
           ensureAdminRTDBListeners();
         }
@@ -17547,6 +17636,43 @@
       adjustSubtitleFontSize,
       setManualSubAlign,
       generateAISubtitlesNow,
+      toggleOwnerChatWidget(forceState) {
+        const drawer = document.getElementById("owner-chat-drawer");
+        if (!drawer) return;
+        const nextOpen = typeof forceState === "boolean" ? forceState : drawer.classList.contains("hidden");
+        drawer.classList.toggle("hidden", !nextOpen);
+        if (nextOpen) {
+          document.getElementById("owner-chat-unread")?.classList.add("hidden");
+          const listEl = document.getElementById("owner-chat-messages");
+          if (listEl) listEl.scrollTop = listEl.scrollHeight;
+          document.getElementById("owner-chat-input")?.focus();
+        }
+      },
+      async sendOwnerSupportMessage() {
+        const inp = document.getElementById("owner-chat-input");
+        const text = (inp?.value || "").trim();
+        if (!text) return;
+        if (!rtdb || !rtdbMod) {
+          showToast("Đang kết nối máy chủ chat, thử lại sau 1 giây!", "info");
+          return;
+        }
+        inp.value = "";
+        const threadId = String(state.uid || "guest").replace(/[.#$/\[\]]/g, "_");
+        const msgId = `m_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+        const ts = Date.now();
+        const msgObj = { id: msgId, sender: "user", userName: state.userName || "Khách", text, ts };
+        await rtdbMod.set(rtdbMod.ref(rtdb, `lobby_config/support_chats/${threadId}/messages/${msgId}`), msgObj).catch(() => {});
+        await rtdbMod.update(rtdbMod.ref(rtdb, `lobby_config/support_chats/${threadId}/meta`), {
+          uid: threadId,
+          userName: state.userName || "Khách",
+          userEmail: state.verifiedGmail || "",
+          roomId: state.currentRoomId || "lobby",
+          lastMessage: text,
+          lastSender: "user",
+          updatedAt: ts,
+          unreadByAdmin: 1
+        }).catch(() => {});
+      },
       triggerSubtitleFileInput,
       handleSubtitleFileSelect,
       toggleFullscreen,
