@@ -407,12 +407,16 @@
     }
     @media (min-width: 768px) {
       body.theater-dimmed #cinema-screen {
-        aspect-ratio: 21 / 9 !important;
-        max-height: 74vh;
+        aspect-ratio: 16 / 9 !important;
+        max-height: 78vh;
         box-shadow: 0 0 90px rgba(56, 189, 248, 0.28), 0 0 150px rgba(244, 63, 94, 0.14) !important;
       }
       body.theater-dimmed #html5-video-player {
-        object-fit: cover !important;
+        object-fit: contain !important;
+      }
+      body.theater-dimmed .imax-curve-arch-bottom {
+        height: 6px !important;
+        opacity: 0.35;
       }
     }
     body.theater-dimmed .theater-sidebar-card {
