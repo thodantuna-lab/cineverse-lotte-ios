@@ -7620,8 +7620,14 @@
         createdAt: Date.now()
       };
       if (rtdb && rtdbMod) {
+        rtdbMod.set(rtdbMod.ref(rtdb, `lobby_config/movie_requests/${reqId}`), payload).catch(() => {});
         rtdbMod.set(rtdbMod.ref(rtdb, `room_movie_requests/${reqId}`), payload).catch(() => {});
       }
+      fetch(`${RTDB_URL}/lobby_config/movie_requests/${encodeURIComponent(reqId)}.json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).catch(() => {});
       fetch(`${RTDB_URL}/room_movie_requests/${encodeURIComponent(reqId)}.json`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
