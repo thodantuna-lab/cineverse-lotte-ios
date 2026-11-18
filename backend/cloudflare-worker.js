@@ -1145,12 +1145,12 @@ async function handleWorkerFetch(request, env, corsHdrs, ctx) {
 
     const forceRefresh = url.searchParams.get("refresh") === "1";
     const nowTs = Date.now();
-    if (!forceRefresh && R2_CATALOG_CACHE.data && nowTs - R2_CATALOG_CACHE.ts < 30000) {
+    if (!forceRefresh && R2_CATALOG_CACHE.data && nowTs - R2_CATALOG_CACHE.ts < 60000) {
       return new Response(
         JSON.stringify({ ok: true, cached: true, count: R2_CATALOG_CACHE.data.length, videos: R2_CATALOG_CACHE.data }),
         {
           status: 200,
-          headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8" }
+          headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=60, s-maxage=60" }
         }
       );
     }
@@ -1192,7 +1192,7 @@ async function handleWorkerFetch(request, env, corsHdrs, ctx) {
       JSON.stringify({ ok: true, count: videos.length, videos }),
       {
         status: 200,
-        headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8" }
+        headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=60, s-maxage=60" }
       }
     );
 }

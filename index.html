@@ -17981,7 +17981,7 @@
       const backdropEl = document.getElementById("ambient-tuna-backdrop");
 
       window.__setAmbientTunaPaused = (paused) => {
-        ambientTunaPaused = Boolean(paused);
+        ambientTunaPaused = Boolean(paused) || Boolean(document.hidden);
         if (backdropEl) {
           backdropEl.style.display = ambientTunaPaused ? "none" : "";
         }
@@ -17995,6 +17995,14 @@
           ambientTunaRafId = requestAnimationFrame(tick);
         }
       };
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          window.__setAmbientTunaPaused(true);
+        } else if (!state.currentRoomId) {
+          window.__setAmbientTunaPaused(false);
+        }
+      });
 
       function tick(now) {
         if (ambientTunaPaused) {
