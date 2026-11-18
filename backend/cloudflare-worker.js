@@ -456,38 +456,56 @@ Câu hỏi của khán giả: ${question}`;
 }
 
 function buildRegexMovieMeta(rawTitle) {
+  const s = String(rawTitle || "");
+  const yearMatch = s.match(/\b(19\d{2}|20\d{2})\b/);
+  const year = yearMatch ? yearMatch[1] : "";
+  // Ưu tiên tên tiếng Anh nằm trong ngoặc đơn (vd: "(The Nun 2)", "(Clown in a Cornfield)", "(Resident Evil 2026)")
+  const parenMatches = [...s.matchAll(/\(([^)]+)\)/g)].map(m => m[1].trim());
+  const parenTitle = parenMatches.find(p =>
+    !/^\d{4}$/.test(p) &&
+    !/^(vietsub|thuyết minh|lồng tiếng|full|1080p|720p|4k|bluray|webrip|x264|x265|hevc)/i.test(p) &&
+    /[a-zA-Z]{2,}/.test(p)
+  );
+  const baseStr = parenTitle || s.replace(/\[[^\]]*\]|\([^)]*\)/g, " ");
+  const query = baseStr
+    .replace(/^xem\s+/i, " ")
+    .replace(/\b(phimmoi(?:\.fun|z)?|tập\s*full|tập\s*\d+|vietsub|thuyết\s*minh|lồng\s*tiếng|miễn\s*phí|full\s*hd|fhd|1080p|720p|4k|webrip|bluray|x264|x265|hevc|aac5?\.1|hindi|ozlem|rarbg|upco\s*cinema|mọt\s*chill|motchill|motphim|8phimx|ani-one(?:\s*vietnam)?|yts\.(?:mx|gg|bz))\b/gi, " ")
+    .replace(/\b(19\d{2}|20\d{2})\b/g, " ")
+    .replace(/[._-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
   return {
-    query: String(rawTitle || "")
-      .replace(/\[[^\]]*\]|\([^)]*\)/g, " ")
-      .replace(/(vietsub|thuyết minh|lồng tiếng|full hd|1080p|720p|4k|webrip|bluray|motchill|motphim|8phimx|ani-one|tập\s*\d+)/gi, " ")
-      .replace(/[._-]+/g, " ")
-      .replace(/\s+/g, " ")
-      .trim(),
-    type: /tập\s*\d+|season|s\d+|anime|phần\s*\d+/i.test(rawTitle || "") ? "tv" : "movie",
-    year: ""
+    query,
+    type: /tập\s*\d+|season|s\d+|anime|phần\s*\d+/i.test(s) ? "tv" : "movie",
+    year
   };
 }
 
 async function extractCleanMovieMetaWithAI(rawTitle, env, ctx) {
   const fallback = buildRegexMovieMeta(rawTitle);
   if (!env.GEMINI_API_KEY || !rawTitle) return fallback;
-  try {
-    const prompt = `Từ tên file phim sau: "${rawTitle}". Hãy trích xuất tên phim/anime gốc chuẩn quốc tế (tiếng Anh hoặc tên chính thức để tìm poster), loại ("movie" hoặc "tv" hoặc "anime"), và năm phát hành nếu có. Trả về đúng JSON: {"query":"...","type":"movie","year":""}`;
-    const res = await callGeminiWithTelemetry("gemini-flash-lite-latest", {
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { responseMimeType: "application/json", temperature: 0.1 }
-    }, 8000, "poster-meta", env, ctx);
-    if (res.text) {
-      const parsed = JSON.parse(res.text);
-      if (parsed && parsed.query) {
-        return {
-          query: String(parsed.query).trim(),
-          type: String(parsed.type || fallback.type),
-          year: String(parsed.year || "")
-        };
+  const prompt = `Từ tên file phim sau: "${rawTitle}". Hãy trích xuất tên phim/anime gốc chuẩn quốc tế (tiếng Anh hoặc tên chính thức để tìm poster), loại ("movie" hoặc "tv" hoặc "anime"), và năm phát hành nếu có. Trả về đúng JSON: {"query":"...","type":"movie","year":""}`;
+  const models = ["gemini-flash-lite-latest", "gemini-3.5-flash-lite"];
+  for (const modelName of models) {
+    try {
+      const genCfg = { responseMimeType: "application/json", temperature: 0.1 };
+      if (modelName === "gemini-3.5-flash-lite") genCfg.thinkingConfig = { thinkingBudget: 0 };
+      const res = await callGeminiWithTelemetry(modelName, {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: genCfg
+      }, 18000, "poster-meta", env, ctx);
+      if (res.text) {
+        const parsed = JSON.parse(res.text);
+        if (parsed && parsed.query) {
+          return {
+            query: String(parsed.query).trim(),
+            type: String(parsed.type || fallback.type),
+            year: String(parsed.year || fallback.year || "")
+          };
+        }
       }
-    }
-  } catch (e) {}
+    } catch (e) {}
+  }
   return fallback;
 }
 
