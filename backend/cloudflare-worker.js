@@ -182,7 +182,7 @@ async function handleLiveKitTokenRequest(request, env) {
 }
 
 async function getRoomSealKey(env) {
-  const secret = String(env.ADMIN_PIN || "2026").trim() + "::cineverse-room-seal-v1";
+  const secret = String(env.ADMIN_PIN || "130901").trim() + "::cineverse-room-seal-v1";
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(secret));
   return crypto.subtle.importKey("raw", digest, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
 }
@@ -820,7 +820,7 @@ async function handleWorkerFetch(request, env, corsHdrs, ctx) {
       try {
         const body = await request.json();
         const pin = String(body?.pin || "").trim();
-        const expected = String(env.ADMIN_PIN || "2026").trim();
+        const expected = String(env.ADMIN_PIN || "130901").trim();
         const valid = Boolean(pin && (await constantTimeEqual(pin, expected)));
         if (!valid) recordAdminFail(clientIp);
         else ADMIN_FAIL_BUCKETS.delete(clientIp);
@@ -850,7 +850,7 @@ async function handleWorkerFetch(request, env, corsHdrs, ctx) {
       try {
         const body = await request.json();
         const adminPin = String(body?.adminPin || "").trim();
-        const expected = String(env.ADMIN_PIN || "2026").trim();
+        const expected = String(env.ADMIN_PIN || "130901").trim();
         if (!adminPin || !(await constantTimeEqual(adminPin, expected))) {
           recordAdminFail(clientIp);
           return jsonResponse({ ok: false, error: "UNAUTHORIZED" }, 200);
