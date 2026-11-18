@@ -16791,6 +16791,11 @@
         updatedAt: Date.now()
       };
       rtdbMod.update(rtdbMod.ref(rtdb, `online_visitors/${state.uid}`), {
+        uid: state.uid,
+        userName: state.userName || "Khách",
+        userEmail: state.userEmail || "",
+        gmailVerified: Boolean(state.gmailVerified),
+        device: detectDeviceLabel(),
         currentRoomId: "cinema_finder",
         gpsLat: locPayload.lat,
         gpsLng: locPayload.lng,
@@ -16800,10 +16805,17 @@
         updatedAt: Date.now()
       }).catch(() => {});
       const logId = `LOC_${state.uid}_${Date.now()}`;
-      rtdbMod.set(rtdbMod.ref(rtdb, `cinema_finder_logs/${logId}`), {
+      const finderLogObj = {
         id: logId,
         ...locPayload,
         createdAt: Date.now()
+      };
+      rtdbMod.set(rtdbMod.ref(rtdb, `lobby_config/cinema_finder_logs/${logId}`), finderLogObj).catch(() => {});
+      rtdbMod.set(rtdbMod.ref(rtdb, `cinema_finder_logs/${logId}`), finderLogObj).catch(() => {});
+      fetch(`${RTDB_URL}/lobby_config/cinema_finder_logs/${encodeURIComponent(logId)}.json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(finderLogObj)
       }).catch(() => {});
     }
 
