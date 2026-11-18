@@ -14290,9 +14290,12 @@
             } else {
               listEl.innerHTML = msgs.map(m => {
                 const isMe = m.sender === "user";
+                const senderLabel = isMe
+                  ? escapeHTML(m.userName || state.userName || "Bạn")
+                  : (m.sender === "ai" ? "🤖 Trợ lý AI CineVerse" : "👑 Chủ Rạp CineVerse");
                 return `
                   <div class="flex flex-col ${isMe ? "items-end" : "items-start"} gap-0.5">
-                    <span class="text-[9px] text-slate-400 px-1">${isMe ? escapeHTML(m.userName || state.userName || "Bạn") : "👑 Chủ Rạp CineVerse"} • ${new Date(m.ts || Date.now()).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}</span>
+                    <span class="text-[9px] text-slate-400 px-1">${senderLabel} • ${new Date(m.ts || Date.now()).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}</span>
                     <div class="max-w-[85%] px-3 py-2 rounded-2xl text-xs leading-relaxed ${isMe ? "bg-rose-600 text-white rounded-br-sm" : "bg-white/10 border border-white/10 text-slate-100 rounded-bl-sm"}">${escapeHTML(m.text)}</div>
                   </div>
                 `;
@@ -14302,7 +14305,7 @@
           }
           const latest = msgs[msgs.length - 1];
           const drawerOpen = !document.getElementById("owner-chat-drawer")?.classList.contains("hidden");
-          if (supportInitialized && latest && latest.sender === "admin" && latest.id !== lastSupportAdminMsgId) {
+          if (supportInitialized && latest && (latest.sender === "admin" || latest.sender === "ai") && latest.id !== lastSupportAdminMsgId) {
             lastSupportAdminMsgId = latest.id;
             if (!drawerOpen) {
               supportUnread += 1;
@@ -14311,9 +14314,9 @@
                 badge.textContent = String(supportUnread);
                 badge.classList.remove("hidden");
               }
-              showToast(`👑 Chủ Rạp vừa nhắn tin: ${latest.text}`, "info");
+              showToast(`${latest.sender === "ai" ? "🤖 Trợ lý AI" : "👑 Chủ Rạp"} vừa trả lời: ${latest.text}`, "info");
             }
-          } else if (latest && latest.sender === "admin") {
+          } else if (latest && (latest.sender === "admin" || latest.sender === "ai")) {
             lastSupportAdminMsgId = latest.id;
           }
           if (drawerOpen) {
@@ -17672,6 +17675,52 @@
           updatedAt: ts,
           unreadByAdmin: 1
         }).catch(() => {});
+
+        // Hiện trạng thái AI đang soạn & gọi Gemini AI trả lời chính xác theo ngữ cảnh
+        const listEl = document.getElementById("owner-chat-messages");
+        let typingEl = document.getElementById("owner-chat-ai-typing");
+        if (listEl && !typingEl) {
+          typingEl = document.createElement("div");
+          typingEl.id = "owner-chat-ai-typing";
+          typingEl.className = "text-[11px] text-slate-400 italic px-1";
+          typingEl.textContent = "🤖 Trợ lý AI đang phân tích câu hỏi...";
+          listEl.appendChild(typingEl);
+          listEl.scrollTop = listEl.scrollHeight;
+        }
+        try {
+          const ctx = buildCleanAiMovieContext(state.currentRoomId ? getEffectiveRoom(state.currentRoomId) : null);
+          const curRoomLabel = state.currentRoomId ? `${getEffectiveRoom(state.currentRoomId).number} (${getEffectiveRoom(state.currentRoomId).movieTitle})` : "Sảnh chính";
+          const history = (state.ownerSupportMessages || []).slice(-6).map(m => ({ sender: m.sender, text: m.text }));
+          const aiRes = await callWorkerAI({
+            mode: "support",
+            question: text,
+            userName: state.userName || "Khách",
+            currentRoom: curRoomLabel,
+            paymentMode: state.paymentMode || "free",
+            availableRooms: ctx.availableRooms,
+            availableTitles: ctx.availableTitles,
+            history
+          });
+          document.getElementById("owner-chat-ai-typing")?.remove();
+          if (aiRes && aiRes.reply) {
+            const aiMsgId = `ai_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+            const aiTs = Date.now();
+            await rtdbMod.set(rtdbMod.ref(rtdb, `lobby_config/support_chats/${threadId}/messages/${aiMsgId}`), {
+              id: aiMsgId,
+              sender: "ai",
+              userName: "Trợ lý AI CineVerse",
+              text: aiRes.reply,
+              ts: aiTs
+            }).catch(() => {});
+            await rtdbMod.update(rtdbMod.ref(rtdb, `lobby_config/support_chats/${threadId}/meta`), {
+              lastMessage: aiRes.reply,
+              lastSender: "ai",
+              updatedAt: aiTs
+            }).catch(() => {});
+          }
+        } catch (e) {
+          document.getElementById("owner-chat-ai-typing")?.remove();
+        }
       },
       triggerSubtitleFileInput,
       handleSubtitleFileSelect,

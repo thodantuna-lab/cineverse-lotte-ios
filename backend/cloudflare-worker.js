@@ -367,6 +367,7 @@ async function handleAIRequest(request, env, ctx) {
     const question = body.question || "";
     const availableTitles = Array.isArray(body.availableTitles) ? body.availableTitles : [];
     const availableRooms = Array.isArray(body.availableRooms) ? body.availableRooms : [];
+    const history = Array.isArray(body.history) ? body.history.slice(-6) : [];
 
     let prompt = "";
     let wantJson = false;
@@ -380,6 +381,31 @@ Trả về đúng JSON mảng 4 phần tử: [{"q":"câu hỏi","options":["A","
     } else if (mode === "recommend") {
       wantJson = true;
       prompt = `Khán giả vừa xem "${movieTitle}" (${genre}). Trong danh sách video sẵn có sau: ${JSON.stringify(availableTitles.slice(0, 30))}, hãy chọn ra 3-4 video phù hợp nhất để đề xuất xem tiếp (nếu là phim bộ hãy ưu tiên tập tiếp theo). Trả về đúng JSON mảng gồm các object: [{"title":"tên chính xác trong danh sách","reason":"lý do ngắn gọn bằng tiếng Việt"}].`;
+    } else if (mode === "support") {
+      const roomsContext = availableRooms.length
+        ? availableRooms.map(r => `- ${r.room}: ${r.title} (${r.status === "upcoming" ? "Sắp chiếu" : "Đang chiếu"})`).join("\n")
+        : "Đang cập nhật";
+      const histText = history.length
+        ? `\nLịch sử hội thoại gần nhất:\n${history.map(h => `${h.sender === "user" ? "Khách" : "CSKH"}: ${h.text}`).join("\n")}\n`
+        : "";
+      const payModeLabel = body.paymentMode === "paid" ? "Đang bật Thu Phí VietQR (cần quét QR và chờ Admin duyệt)" : "Đang bật chế độ Miễn Phí (đặt vé & chọn ghế vào rạp ngay không mất phí)";
+      prompt = `Bạn là Nhân viên CSKH & Hỗ trợ kỹ thuật chính thức của rạp chiếu phim trực tuyến CineVerse Lotte.
+Thông tin hệ thống thực tế hiện tại:
+- Chế độ vé: ${payModeLabel}.
+- Vị trí khách hiện tại: ${body.currentRoom || "Sảnh chính"}.
+- Danh sách phòng chiếu thực tế:\n${roomsContext}
+- Kho phim sẵn có (${availableTitles.length} phim mẫu): ${availableTitles.slice(0, 35).join(", ")}.
+- Quy trình & tính năng thật trên web:
+  1. Đặt vé/chọn ghế: Chọn phòng ở Sảnh chính -> chọn ghế (tối đa 48 ghế/phòng, Phòng Stream có 10 ghế VIP) -> vào rạp xem đồng bộ.
+  2. Yêu cầu chiếu phim khác: Trong phòng chiếu, bấm vào phim ở cột "Phim Đang Có" bên trái để gửi yêu cầu về Chủ Rạp duyệt, khi Admin duyệt phim sẽ phát ngay.
+  3. Phụ đề: Chỉ các phim có sẵn file .srt trên máy chủ R2 mới bật được Phụ đề & Phụ đề AI; các phim đã có Vietsub cứng hoặc không có .srt sẽ tự ẩn nút phụ đề để tránh che chữ/quá tải.
+  4. Tìm Rạp Hà Nội: Bấm nút "Tìm Rạp Hà Nội" trên thanh menu để định vị GPS các cụm rạp CGV, Lotte, Beta tại Hà Nội, xem lịch chiếu và dự trù ngân sách.
+  5. Mic / Âm thanh trong phòng: Bấm "Bật Mic" ở thanh điều khiển dưới màn hình và cấp quyền micro cho trình duyệt.${histText}
+Quy tắc trả lời:
+- Đọc kỹ câu hỏi của khách để hiểu đúng ý định và trả lời TRỰC DIỆN, CHÍNH XÁC, lịch sự bằng tiếng Việt (2-5 câu, rõ ràng, dễ làm theo).
+- TUYỆT ĐỐI KHÔNG bịa đặt phim, giá vé, hoặc tính năng không có thật ở trên.
+- Nếu khách yêu cầu thao tác thủ công từ Chủ Rạp (duyệt đơn QR gấp, mở khóa phòng, khiếu nại riêng), hãy trả lời ngắn gọn và báo Chủ Rạp đã nhận được tin nhắn để xử lý trực tiếp.
+Tin nhắn mới của khách (${body.userName || "Khách"}): ${question}`;
     } else {
       const roomsContext = availableRooms.length
         ? `\nDanh sách các phòng đang chiếu thực tế tại rạp CineVerse Lotte:\n${availableRooms.map(r => `- ${r.room}: ${r.title} (${r.status === "upcoming" ? "Sắp chiếu" : "Đang chiếu"})`).join("\n")}`
