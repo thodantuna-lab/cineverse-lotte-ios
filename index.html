@@ -4267,7 +4267,7 @@
               <span class="text-xs font-extrabold text-white truncate">Nhắn Cho Chủ Rạp</span>
               <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
             </div>
-            <p class="text-[10px] text-slate-400 truncate">Hỗ trợ trực tiếp &amp; phản hồi thời gian thực</p>
+            <p id="owner-chat-subtext" class="text-[10px] text-slate-400 truncate">Hỗ trợ trực tiếp &amp; phản hồi thời gian thực</p>
           </div>
         </div>
         <button type="button" onclick="window.appActions.toggleOwnerChatWidget(false)"
@@ -14279,24 +14279,55 @@
         let lastSupportAdminMsgId = "";
         let supportUnread = 0;
         let supportInitialized = false;
+        // Lắng nghe metadata của hội thoại để biết khi nào Chủ Rạp tiếp quản (tắt AI)
+        rtdbMod.onValue(rtdbMod.ref(rtdb, `lobby_config/support_chats/${supportThreadId}/meta`), (snap) => {
+          state.ownerSupportMeta = snap.val() || {};
+          const isHuman = state.ownerSupportMeta?.aiDisabled === false ? false : Boolean(state.ownerSupportMeta.aiDisabled === true || state.ownerSupportMeta.humanHandled === true || (state.ownerSupportMessages || []).some(m => m && m.sender === "admin"));
+          const subTextEl = document.getElementById("owner-chat-subtext");
+          if (subTextEl) {
+            subTextEl.innerHTML = isHuman
+              ? `<span class="text-amber-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-user-tie"></i> Chủ Rạp đang trực tiếp phản hồi</span>`
+              : `Hỗ trợ trực tiếp &amp; phản hồi thời gian thực`;
+          }
+        }, () => {});
+
         rtdbMod.onValue(rtdbMod.ref(rtdb, `lobby_config/support_chats/${supportThreadId}/messages`), (snap) => {
           const raw = snap.val() || {};
           const msgs = Object.values(raw).filter(m => m && m.text).sort((a, b) => (a.ts || 0) - (b.ts || 0));
           state.ownerSupportMessages = msgs;
+          const isHuman = state.ownerSupportMeta?.aiDisabled === false ? false : Boolean(state.ownerSupportMeta?.aiDisabled === true || state.ownerSupportMeta?.humanHandled === true || msgs.some(m => m && m.sender === "admin"));
+          const subTextEl = document.getElementById("owner-chat-subtext");
+          if (subTextEl) {
+            subTextEl.innerHTML = isHuman
+              ? `<span class="text-amber-400 font-semibold flex items-center gap-1"><i class="fa-solid fa-user-tie"></i> Chủ Rạp đang trực tiếp phản hồi</span>`
+              : `Hỗ trợ trực tiếp &amp; phản hồi thời gian thực`;
+          }
+
           const listEl = document.getElementById("owner-chat-messages");
           if (listEl) {
             if (msgs.length === 0) {
               listEl.innerHTML = `<div class="text-center text-[11px] text-slate-400 py-8">Hãy nhắn tin nếu bạn cần hỗ trợ đặt vé, lỗi phòng chiếu hoặc yêu cầu phim nhé!</div>`;
             } else {
-              listEl.innerHTML = msgs.map(m => {
+              listEl.innerHTML = msgs.map((m, idx) => {
                 const isMe = m.sender === "user";
+                const isAdmin = m.sender === "admin";
+                const isAi = m.sender === "ai";
                 const senderLabel = isMe
                   ? escapeHTML(m.userName || state.userName || "Bạn")
-                  : (m.sender === "ai" ? "🤖 Trợ lý AI CineVerse" : "👑 Chủ Rạp CineVerse");
+                  : (isAi ? "🤖 Trợ lý AI CineVerse" : "👑 Chủ Rạp CineVerse");
+                const isFirstAdminMsg = isAdmin && !msgs.slice(0, idx).some(prev => prev.sender === "admin");
+                const divider = isFirstAdminMsg ? `
+                  <div class="w-full flex items-center justify-center my-2">
+                    <span class="px-2.5 py-0.5 rounded-full text-[9px] bg-amber-500/15 border border-amber-500/30 text-amber-300 font-semibold flex items-center gap-1 shadow-sm">
+                      <i class="fa-solid fa-shield-halved"></i> Chủ Rạp đã tiếp quản (AI đã tắt)
+                    </span>
+                  </div>
+                ` : "";
                 return `
+                  ${divider}
                   <div class="flex flex-col ${isMe ? "items-end" : "items-start"} gap-0.5">
                     <span class="text-[9px] text-slate-400 px-1">${senderLabel} • ${new Date(m.ts || Date.now()).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}</span>
-                    <div class="max-w-[85%] px-3 py-2 rounded-2xl text-xs leading-relaxed ${isMe ? "bg-rose-600 text-white rounded-br-sm" : "bg-white/10 border border-white/10 text-slate-100 rounded-bl-sm"}">${escapeHTML(m.text)}</div>
+                    <div class="max-w-[85%] px-3 py-2 rounded-2xl text-xs leading-relaxed ${isMe ? "bg-rose-600 text-white rounded-br-sm" : (isAdmin ? "bg-amber-500/15 border border-amber-500/35 text-amber-100 rounded-bl-sm font-medium" : "bg-white/10 border border-white/10 text-slate-100 rounded-bl-sm")}">${escapeHTML(m.text)}</div>
                   </div>
                 `;
               }).join("");
@@ -17743,7 +17774,32 @@
           unreadByAdmin: 1
         }).catch(() => {});
 
-        // Hiện trạng thái AI đang soạn & gọi Gemini AI trả lời chính xác theo ngữ cảnh
+        // KIỂM TRA: Nếu Chủ Rạp đã từng trả lời hoặc đã tắt AI -> KHÔNG cho AI trả lời tiếp!
+        const hasAdminReply = (state.ownerSupportMessages || []).some(m => m && m.sender === "admin");
+        let metaVal = state.ownerSupportMeta || {};
+        try {
+          const metaSnap = await rtdbMod.get(rtdbMod.ref(rtdb, `lobby_config/support_chats/${threadId}/meta`));
+          if (metaSnap && typeof metaSnap.val === "function" && metaSnap.exists()) {
+            metaVal = metaSnap.val() || metaVal;
+          }
+        } catch (e) {}
+
+        let isAiDisabled = false;
+        if (metaVal.aiDisabled === false) {
+          isAiDisabled = false;
+        } else if (metaVal.aiDisabled === true || metaVal.humanHandled === true) {
+          isAiDisabled = true;
+        } else {
+          isAiDisabled = hasAdminReply;
+        }
+
+        if (isAiDisabled) {
+          // Chủ Rạp đã vào phản hồi cuộc hội thoại này -> Tuyệt đối không cho AI xen vào trả lời nữa!
+          document.getElementById("owner-chat-ai-typing")?.remove();
+          return;
+        }
+
+        // Hiện trạng thái AI đang soạn & gọi Gemini AI trả lời chính xác theo ngữ cảnh (chỉ khi Chủ Rạp chưa can thiệp)
         const listEl = document.getElementById("owner-chat-messages");
         let typingEl = document.getElementById("owner-chat-ai-typing");
         if (listEl && !typingEl) {
@@ -17769,6 +17825,13 @@
             history
           });
           document.getElementById("owner-chat-ai-typing")?.remove();
+
+          // Kiểm tra lại lần nữa trước khi ghi tin nhắn AI lên DB, đề phòng Chủ Rạp gửi tin nhắn trong lúc AI đang sinh câu trả lời
+          const latestHasAdmin = (state.ownerSupportMessages || []).some(m => m && m.sender === "admin");
+          if (state.ownerSupportMeta?.aiDisabled === true || state.ownerSupportMeta?.humanHandled === true || (state.ownerSupportMeta?.aiDisabled !== false && latestHasAdmin)) {
+            return;
+          }
+
           if (aiRes && aiRes.reply) {
             const aiMsgId = `ai_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
             const aiTs = Date.now();
