@@ -5651,6 +5651,7 @@
       state.currentRoomId = roomId;
       try { window.__setAmbientTunaPaused?.(true); } catch (_) {}
       try { syncMyOnlinePresence?.(); } catch (_) {}
+      try { logMemberActivity?.("join_room", `Khán giả vào ${room.number || roomId} (${room.movieTitle || "Phim"})`, { roomId, roomNumber: room.number }); } catch (_) {}
 
       document.getElementById("lobby-view").classList.add("hidden");
       document.getElementById("hanoi-cinema-finder-view")?.classList.add("hidden");
@@ -5742,6 +5743,7 @@
       state.currentRoomId = null;
       try { window.__setAmbientTunaPaused?.(false); } catch (_) {}
       try { syncMyOnlinePresence?.(); } catch (_) {}
+      try { logMemberActivity?.("leave_room", "Khán giả rời phòng chiếu về Sảnh chính"); } catch (_) {}
       document.getElementById("room-view").classList.add("hidden");
       document.getElementById("hanoi-cinema-finder-view")?.classList.add("hidden");
       document.getElementById("lobby-view").classList.remove("hidden");
@@ -5841,6 +5843,7 @@
         updateRoomHeaderUI();
         applySubtitlePositionAndSize();
         showToast(`Bạn đã đứng dậy khỏi ghế ${seatId}.`, "info");
+        try { logMemberActivity?.("seat_release", `Đứng dậy khỏi ghế ${seatId} (${getEffectiveRoom(roomId)?.number || roomId})`, { seatId, roomId }); } catch (_) {}
         clearMySeatFromRTDB();
         if (db && fb && currentUser) {
           try {
@@ -5878,6 +5881,7 @@
         playSeatClickSFX();
         autoSyncMemoryCapsule(roomId, seatId, null);
         showToast(`🪑 Bạn (${state.userName}) đã ngồi vào ghế ${seatId}! Đã đồng bộ vào Thẻ Ký Ức Điện Ảnh NFT.`, "success");
+        try { logMemberActivity?.("seat_book", `Ngồi vào ghế ${seatId} (${getEffectiveRoom(roomId)?.number || roomId})`, { seatId, roomId }); } catch (_) {}
       }
 
       syncMySeatToRTDB(roomId, seatId);
@@ -7718,6 +7722,7 @@
         body: JSON.stringify(payload)
       }).catch(() => {});
       playSeatClickSFX();
+      try { logMemberActivity?.("movie_request", `Yêu cầu chiếu phim: "${item.title}" tại ${roomObj?.number || roomId}`, { movieTitle: item.title, roomId }); } catch (_) {}
       showToast(`📨 Đã gửi yêu cầu chiếu "${item.title}" tại ${roomObj?.number || roomId} về Admin! Khi Admin phê duyệt, phim sẽ tự động phát ngay tại phòng.`, "success");
     }
 
@@ -8230,6 +8235,7 @@
       if (rtdb && rtdbMod) {
         try {
           await rtdbMod.push(rtdbMod.ref(rtdb, `chat/${roomId}`), msg);
+          logMemberActivity?.("chat_message", `Chat tại ${getEffectiveRoom(roomId)?.number || roomId}: "${msg.text.slice(0, 60)}"`, { roomId, text: msg.text.slice(0, 80) });
         } catch (e) {}
       }
 
@@ -13858,6 +13864,7 @@
           rtdbMod.update(rtdbMod.ref(rtdb, `voice/${roomId}/peers/${state.uid}`), { micOn: false, updatedAt: Date.now() }).catch(() => {});
         }
         showToast("🔇 Đã tắt micro của bạn.", "info");
+        try { logMemberActivity?.("mic_toggle", `Tắt Microphone tại ${getEffectiveRoom(roomId)?.number || roomId}`, { micState: "off", roomId }); } catch (_) {}
         return;
       }
 
@@ -13910,6 +13917,7 @@
       voiceMicActive = true;
       updateVoiceMicButtonUI();
       attachVoiceVadMonitor(state.uid, localVoiceStream);
+      try { logMemberActivity?.("mic_toggle", `Bật Microphone đàm thoại tại ${getEffectiveRoom(roomId)?.number || roomId}`, { micState: "on", roomId }); } catch (_) {}
 
       const badge = document.getElementById("voice-diag-badge");
       const dBadge = document.getElementById("discord-voice-diag-badge");
@@ -15337,6 +15345,14 @@
         bookedAt: Date.now()
       };
 
+      try {
+        logMemberActivity?.("payment_ticket", `Đặt vé thành công: Ghế ${targetSeatId} (${roomObj.number || targetRoomId}) ${isPaidMode ? formatVND(totalAmount) : "[Miễn Phí]"}`, {
+          seatId: targetSeatId,
+          roomId: targetRoomId,
+          totalAmount: isPaidMode ? totalAmount : 0
+        });
+      } catch (_) {}
+
       // Chỉ ghi nhận vào bảng doanh thu hệ thống khi ở Chế độ Trả Phí (Paid)
       if (isPaidMode) {
         const orderRecord = {
@@ -16067,6 +16083,35 @@
         currentRoomId: state.currentRoomId || "lobby",
         updatedAt: Date.now()
       }).catch(() => {});
+    }
+
+    function logMemberActivity(type, detail, extra = {}) {
+      try {
+        const actId = `act_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+        const curRoom = state.currentRoomId ? getEffectiveRoom(state.currentRoomId) : null;
+        const actObj = {
+          id: actId,
+          ts: Date.now(),
+          type,
+          uid: String(state.uid || "guest").slice(0, 40),
+          userName: state.userName || "Khách",
+          userEmail: state.userEmail || state.verifiedGmail || "",
+          device: typeof detectDeviceLabel === "function" ? detectDeviceLabel() : "Trình duyệt Web",
+          roomId: state.currentRoomId || "lobby",
+          roomTitle: curRoom ? curRoom.movieTitle : "Sảnh chính",
+          detail: String(detail || "").slice(0, 160),
+          ...extra
+        };
+        if (rtdb && rtdbMod) {
+          rtdbMod.set(rtdbMod.ref(rtdb, `lobby_config/member_activity_logs/${actId}`), actObj).catch(() => {});
+        } else {
+          fetch(`${RTDB_URL}/lobby_config/member_activity_logs/${encodeURIComponent(actId)}.json`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(actObj)
+          }).catch(() => {});
+        }
+      } catch (_) {}
     }
 
     function switchAdminTab(tab = "rooms") {
@@ -17127,6 +17172,10 @@
       };
       rtdbMod.set(rtdbMod.ref(rtdb, `lobby_config/cinema_finder_logs/${logId}`), finderLogObj).catch(() => {});
       rtdbMod.set(rtdbMod.ref(rtdb, `cinema_finder_logs/${logId}`), finderLogObj).catch(() => {});
+      try {
+        const addrShort = realAddress || label || "Việt Nam";
+        logMemberActivity?.("gps_located", `Định vị GPS: ${addrShort}`, { lat: locPayload.lat, lng: locPayload.lng, address: addrShort });
+      } catch (_) {}
       fetch(`${RTDB_URL}/lobby_config/cinema_finder_logs/${encodeURIComponent(logId)}.json`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -17763,6 +17812,7 @@
         const ts = Date.now();
         const msgObj = { id: msgId, sender: "user", userName: state.userName || "Khách", text, ts };
         await rtdbMod.set(rtdbMod.ref(rtdb, `lobby_config/support_chats/${threadId}/messages/${msgId}`), msgObj).catch(() => {});
+        try { logMemberActivity?.("support_message", `Nhắn tin cho Chủ Rạp: "${text.slice(0, 60)}"`, { text: text.slice(0, 80) }); } catch (_) {}
         await rtdbMod.update(rtdbMod.ref(rtdb, `lobby_config/support_chats/${threadId}/meta`), {
           uid: threadId,
           userName: state.userName || "Khách",
