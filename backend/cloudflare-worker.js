@@ -321,11 +321,9 @@ Danh sách ${lines.length} câu cần dịch:
 ${numberedLines}`;
 
     const modelsToTry = [
-      "gemini-2.5-flash-lite",
-      "gemini-2.5-flash",
-      "gemini-2.0-flash",
+      "gemini-flash-lite-latest",
       "gemini-flash-latest",
-      "gemini-1.5-flash"
+      "gemini-3.5-flash-lite"
     ];
     let rawText = "";
     let lastError = "EMPTY_RESPONSE";
@@ -338,7 +336,7 @@ ${numberedLines}`;
         responseMimeType: "application/json",
         temperature: 0.3
       };
-      if (modelName.includes("2.5") || modelName.includes("flash") || modelName.includes("thinking")) {
+      if (modelName === "gemini-flash-latest" || modelName === "gemini-3.5-flash-lite") {
         genCfg.thinkingConfig = { thinkingBudget: 0 };
       }
       const res = await callGeminiWithTelemetry(modelName, {
@@ -443,11 +441,9 @@ Câu hỏi của khán giả: ${question}`;
       : { temperature: 0.3 };
 
     const modelsToTry = [
-      "gemini-2.5-flash-lite",
-      "gemini-2.5-flash",
-      "gemini-2.0-flash",
+      "gemini-flash-lite-latest",
       "gemini-flash-latest",
-      "gemini-1.5-flash"
+      "gemini-3.5-flash-lite"
     ];
     let rawText = "";
     let lastError = "EMPTY_RESPONSE";
@@ -457,7 +453,7 @@ Câu hỏi của khán giả: ${question}`;
       const modelName = modelsToTry[idx];
       if (idx > 0) await new Promise(r => setTimeout(r, 1200));
       const genCfg = { ...baseGenConfig };
-      if (modelName.includes("2.5") || modelName.includes("flash") || modelName.includes("thinking")) {
+      if (modelName === "gemini-flash-latest" || modelName === "gemini-3.5-flash-lite") {
         genCfg.thinkingConfig = { thinkingBudget: 0 };
       }
       const res = await callGeminiWithTelemetry(modelName, {

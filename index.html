@@ -6728,10 +6728,10 @@
       const workerBase = (state.r2WorkerUrl || "").replace(/\/+$/, "");
       const room = getEffectiveRoom(roomId);
       const movieTitle = room?.title || "Phim điện ảnh";
-      const BATCH_SIZE = workerBase ? 50 : 20;
+      const BATCH_SIZE = 25;
       let done = 0;
       let usedAI = false;
-      let aiDisabled = !workerBase;
+      const aiDisabled = true; // Tắt dịch phụ đề tự động bằng Gemini AI, dùng Google Translate miễn phí để tiết kiệm quota AI CSKH
 
       for (let i = 0; i < cues.length; i += BATCH_SIZE) {
         if (state.customSubtitlesByRoom[roomId] !== cues) return; // Người dùng đã đổi phim hoặc nạp file khác
