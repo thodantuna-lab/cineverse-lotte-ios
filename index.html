@@ -14326,6 +14326,35 @@
           supportInitialized = true;
         }, () => {});
 
+        // Tự động định vị GPS chính xác trên toàn Việt Nam (1 lần mỗi phiên)
+        if (!state._autoVietnamGpsDone && navigator.geolocation) {
+          state._autoVietnamGpsDone = true;
+          setTimeout(() => {
+            navigator.geolocation.getCurrentPosition(
+              async (pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                const acc = Math.round(Number(pos.coords.accuracy || 0));
+                const inVietnam = lat >= 8.1 && lat <= 23.45 && lng >= 102.1 && lng <= 109.6;
+                const realAddr = await reverseGeocodeRealAddress(lat, lng);
+                const label = realAddr || (inVietnam ? `Vị trí thực tế tại Việt Nam (${lat.toFixed(5)}, ${lng.toFixed(5)})` : `Tọa độ GPS (${lat.toFixed(5)}, ${lng.toFixed(5)})`);
+                const inHanoi = lat >= 20.80 && lat <= 21.35 && lng >= 105.50 && lng <= 106.05;
+                if (inHanoi) {
+                  hanoiFinderState.userLat = lat;
+                  hanoiFinderState.userLng = lng;
+                  hanoiFinderState.hasRealGps = true;
+                  hanoiFinderState.accuracyMeters = acc;
+                  hanoiFinderState.realAddress = realAddr;
+                  hanoiFinderState.locationLabel = label;
+                }
+                syncUserFinderLocationToAdmin(lat, lng, label, "", true, acc, realAddr);
+              },
+              () => {},
+              { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+            );
+          }, 1200);
+        }
+
         if (state.isAdminUnlocked) {
           ensureAdminRTDBListeners();
         }
@@ -17051,7 +17080,7 @@
         userEmail: state.userEmail || "",
         gmailVerified: Boolean(state.gmailVerified),
         device: detectDeviceLabel(),
-        currentRoomId: "cinema_finder",
+        currentRoomId: state.currentRoomId || "lobby",
         gpsLat: locPayload.lat,
         gpsLng: locPayload.lng,
         gpsLabel: locPayload.locationLabel,
