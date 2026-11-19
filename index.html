@@ -3328,15 +3328,15 @@
                     <span class="text-[11px]">Share Màn Hình</span>
                   </button>
                   <select id="discord-quality-select" onchange="window.appActions.setDiscordStreamQuality(this.value)"
-                    class="px-2 py-1.5 rounded-xl bg-stone-950 border border-white/15 text-emerald-300 text-[11px] font-extrabold cursor-pointer outline-none" title="Chọn độ phân giải & FPS thực tế (4K / 2K / 1080p / 720p)">
+                    class="px-2 py-1.5 rounded-xl bg-stone-950 border border-white/15 text-emerald-300 text-[11px] font-extrabold cursor-pointer outline-none" title="Chọn độ phân giải & FPS thực tế (Khóa tối thiểu ≥ 45fps)">
                     <option value="uhd4k_60">4K • 60fps</option>
-                    <option value="uhd4k_30">4K • 30fps</option>
+                    <option value="uhd4k_45">4K • 45fps</option>
                     <option value="qhd1440_60">2K • 60fps</option>
-                    <option value="qhd1440_30">2K • 30fps</option>
+                    <option value="qhd1440_45">2K • 45fps</option>
                     <option value="fhd1080_60" selected>1080p • 60fps</option>
-                    <option value="fhd1080_30">1080p • 30fps</option>
+                    <option value="fhd1080_45">1080p • 45fps</option>
                     <option value="hd720_60">720p • 60fps</option>
-                    <option value="hd720_30">720p • 30fps</option>
+                    <option value="hd720_45">720p • 45fps</option>
                   </select>
                 </div>
 
@@ -12088,12 +12088,26 @@
 
         await disconnectLiveKitRoom();
         const room = new LK.Room({
-          adaptiveStream: true,
+          adaptiveStream: false,
           dynacast: true,
+          publishDefaults: {
+            videoCodec: "h264",
+            simulcast: false,
+            screenShareEncoding: {
+              maxBitrate: 8_000_000,
+              maxFramerate: 60,
+              priority: "high"
+            },
+            degradationPreference: "maintain-framerate",
+            dtx: true,
+            red: true
+          },
           audioCaptureDefaults: {
             echoCancellation: true,
             noiseSuppression: true,
-            autoGainControl: true
+            autoGainControl: true,
+            channelCount: 1,
+            sampleRate: 48000
           }
         });
 
@@ -12115,6 +12129,8 @@
               playRes.catch(() => { pendingVoiceAudios.add(el); });
             }
           } else if (track.kind === "video" && pub?.source === LK.Track.Source.ScreenShare) {
+            if (track.receiver) applyDiscordZeroJitter(track.receiver);
+            window.__livekitRemoteScreenTrack = track;
             const videoEl = document.getElementById("discord-live-video");
             if (videoEl) {
               remoteScreenStream = new MediaStream([track.mediaStreamTrack]);
@@ -12122,6 +12138,7 @@
               videoEl.muted = !!isDiscordViewerMuted;
               videoEl.play().catch(() => {});
               updateDiscordLiveUI();
+              startDiscordStatsMonitor();
             }
           }
         });
@@ -12814,30 +12831,49 @@
     let liveScreenStatsTimer = null;
     let isDiscordViewerMuted = false;
 
+    const MIN_SCREEN_SHARE_FPS = 45;
+    let screenFpsGuardScale = 1.0;
+
     const DISCORD_QUALITY_PRESETS = {
-      hd720_30: {
-        label: "720p 30fps",
+      hd720_45: {
+        label: "720p 45fps",
         width: 1280,
         height: 720,
-        frameRate: 30,
-        maxBitrate: 2_000_000,
-        contentHint: "detail"
+        frameRate: 45,
+        maxBitrate: 3_000_000,
+        contentHint: "motion"
+      },
+      hd720_30: {
+        label: "720p 45fps",
+        width: 1280,
+        height: 720,
+        frameRate: 45,
+        maxBitrate: 3_000_000,
+        contentHint: "motion"
       },
       hd720_60: {
         label: "720p 60fps",
         width: 1280,
         height: 720,
         frameRate: 60,
-        maxBitrate: 3_500_000,
+        maxBitrate: 4_000_000,
+        contentHint: "motion"
+      },
+      fhd1080_45: {
+        label: "1080p 45fps",
+        width: 1920,
+        height: 1080,
+        frameRate: 45,
+        maxBitrate: 6_000_000,
         contentHint: "motion"
       },
       fhd1080_30: {
-        label: "1080p 30fps",
+        label: "1080p 45fps",
         width: 1920,
         height: 1080,
-        frameRate: 30,
-        maxBitrate: 5_000_000,
-        contentHint: "detail"
+        frameRate: 45,
+        maxBitrate: 6_000_000,
+        contentHint: "motion"
       },
       fhd1080_60: {
         label: "1080p 60fps",
@@ -12847,13 +12883,21 @@
         maxBitrate: 8_000_000,
         contentHint: "motion"
       },
-      qhd1440_30: {
-        label: "2K 30fps",
+      qhd1440_45: {
+        label: "2K 45fps",
         width: 2560,
         height: 1440,
-        frameRate: 30,
-        maxBitrate: 8_500_000,
-        contentHint: "detail"
+        frameRate: 45,
+        maxBitrate: 9_500_000,
+        contentHint: "motion"
+      },
+      qhd1440_30: {
+        label: "2K 45fps",
+        width: 2560,
+        height: 1440,
+        frameRate: 45,
+        maxBitrate: 9_500_000,
+        contentHint: "motion"
       },
       qhd1440_60: {
         label: "2K 60fps",
@@ -12863,13 +12907,21 @@
         maxBitrate: 12_000_000,
         contentHint: "motion"
       },
-      uhd4k_30: {
-        label: "4K 30fps",
+      uhd4k_45: {
+        label: "4K 45fps",
         width: 3840,
         height: 2160,
-        frameRate: 30,
-        maxBitrate: 14_000_000,
-        contentHint: "detail"
+        frameRate: 45,
+        maxBitrate: 15_000_000,
+        contentHint: "motion"
+      },
+      uhd4k_30: {
+        label: "4K 45fps",
+        width: 3840,
+        height: 2160,
+        frameRate: 45,
+        maxBitrate: 15_000_000,
+        contentHint: "motion"
       },
       uhd4k_60: {
         label: "4K 60fps",
@@ -12881,32 +12933,70 @@
       }
     };
 
-    // Chọn độ phân giải & FPS thực tế (1080p/720p • 60fps/30fps) từ thanh điều khiển dưới màn hình
+    // Ưu tiên codec phần cứng H.264 (NVENC / QuickSync / VideoToolbox) để giữ ≥ 45-60fps ngay cả khi phòng full 10 ghế
+    function preferHardwareH264Codec(pc) {
+      try {
+        if (!pc || typeof RTCRtpSender === "undefined" || typeof RTCRtpSender.getCapabilities !== "function") return;
+        const caps = RTCRtpSender.getCapabilities("video");
+        if (!caps || !Array.isArray(caps.codecs)) return;
+        const h264 = caps.codecs.filter((c) => c.mimeType && c.mimeType.toLowerCase() === "video/h264");
+        const rest = caps.codecs.filter((c) => !c.mimeType || c.mimeType.toLowerCase() !== "video/h264");
+        if (h264.length === 0) return;
+        const ordered = [...h264, ...rest];
+        pc.getTransceivers().forEach((tr) => {
+          if (tr?.sender?.track?.kind === "video" && typeof tr.setCodecPreferences === "function") {
+            try { tr.setCodecPreferences(ordered); } catch (_) {}
+          }
+        });
+      } catch (_) {}
+    }
+
+    function getLiveKitScreenShareSender() {
+      try {
+        if (!livekitVoiceActive || !livekitRoom?.localParticipant) return null;
+        const pubs = livekitRoom.localParticipant.videoTrackPublications || livekitRoom.localParticipant.trackPublications;
+        if (!pubs) return null;
+        for (const pub of pubs.values()) {
+          if (pub?.source === "screen_share" || pub?.trackName === "screen_share" || pub?.track?.source === "screen_share") {
+            if (pub?.track?.sender) return pub.track.sender;
+          }
+        }
+      } catch (_) {}
+      return null;
+    }
+
+    // Chọn độ phân giải & FPS thực tế (tối thiểu ≥ 45fps) từ thanh điều khiển dưới màn hình
     async function setDiscordStreamQuality(preset) {
       if (!DISCORD_QUALITY_PRESETS[preset]) return;
       liveScreenQuality = preset;
+      screenFpsGuardScale = 1.0;
       const qSel = document.getElementById("discord-quality-select");
       if (qSel && qSel.value !== preset) qSel.value = preset;
 
       const cfg = DISCORD_QUALITY_PRESETS[preset];
-      // Nếu đang share màn hình -> áp dụng ngay độ phân giải, FPS & bitrate mới lên track + encoder WebRTC
+      const targetFps = Math.max(MIN_SCREEN_SHARE_FPS, cfg.frameRate);
+      // Nếu đang share màn hình -> áp dụng ngay độ phân giải, FPS ≥ 45 & bitrate mới lên track + cả SFU lẫn P2P encoder
       if (liveScreenStream) {
         const vTrack = liveScreenStream.getVideoTracks()[0];
         if (vTrack) {
-          try { vTrack.contentHint = cfg.contentHint; } catch (_) {}
+          try { vTrack.contentHint = "motion"; } catch (_) {}
           try {
             await vTrack.applyConstraints({
-              width: cfg.width,
-              height: cfg.height,
-              frameRate: cfg.frameRate
+              width: { ideal: cfg.width },
+              height: { ideal: cfg.height },
+              frameRate: { ideal: targetFps, min: MIN_SCREEN_SHARE_FPS }
             });
           } catch (_) {
-            try { await vTrack.applyConstraints({ frameRate: cfg.frameRate }); } catch (__) {}
+            try { await vTrack.applyConstraints({ frameRate: { ideal: targetFps } }); } catch (__) {}
           }
+        }
+        const sfuSender = getLiveKitScreenShareSender();
+        if (sfuSender) {
+          await applyDiscordSenderParams(sfuSender, cfg, false, true);
         }
         for (const { pc } of liveScreenPeers.values()) {
           const sender = pc.getSenders().find((s) => s.track && s.track.kind === "video");
-          if (sender) await applyDiscordSenderParams(sender, cfg);
+          if (sender) await applyDiscordSenderParams(sender, cfg, false, false);
         }
         if (liveScreenBroadcaster && liveScreenBroadcaster.uid === state.uid) {
           liveScreenBroadcaster.quality = preset;
@@ -12920,29 +13010,30 @@
         startDiscordStatsMonitor();
       }
 
-      // Nếu đang bật Camera -> áp dụng độ phân giải & FPS mới cho Camera
+      // Nếu đang bật Camera -> áp dụng preset nhẹ để nhường băng thông cho màn hình Share giữ ≥ 45fps
       if (localCameraStream) {
+        const camCfg = getEffectiveCamPreset();
         const camTrack = localCameraStream.getVideoTracks()[0];
         if (camTrack) {
           try {
             await camTrack.applyConstraints({
-              width: { ideal: cfg.width },
-              height: { ideal: cfg.height },
-              frameRate: { ideal: cfg.frameRate, max: cfg.frameRate }
+              width: { ideal: camCfg.width },
+              height: { ideal: camCfg.height },
+              frameRate: { ideal: camCfg.frameRate, max: camCfg.frameRate }
             });
           } catch (_) {}
         }
         for (const { pc } of liveCamPeers.values()) {
           const sender = pc.getSenders().find((s) => s.track && s.track.kind === "video");
-          if (sender) await applyDiscordSenderParams(sender, cfg);
+          if (sender) await applyDiscordSenderParams(sender, camCfg, true, false);
         }
       }
 
       const activeH = liveScreenStream?.getVideoTracks?.()[0]?.getSettings?.().height;
       if (liveScreenStream && activeH && activeH < cfg.height) {
-        showToast(`🎬 Đã áp dụng ${cfg.label} (Màn hình gốc tối đa ${activeH}p, đã mở khóa bitrate ${(cfg.maxBitrate / 1_000_000).toFixed(0)} Mbps)`, "info");
+        showToast(`🎬 Đã áp dụng ${cfg.label} (Màn hình gốc tối đa ${activeH}p, ưu tiên giữ ≥ 45fps)`, "info");
       } else {
-        showToast(`🎬 Đã áp dụng chất lượng Live: ${cfg.label}`, "info");
+        showToast(`🎬 Đã áp dụng chất lượng Live: ${cfg.label} (Khóa ≥ 45fps)`, "info");
       }
     }
 
@@ -12951,29 +13042,57 @@
       width: 1280,
       height: 720,
       frameRate: 30,
-      maxBitrate: 1_200_000,
+      maxBitrate: 1_100_000,
       contentHint: "motion"
     };
 
-    // Áp dụng cấu hình tối ưu cho Video Sender (tự cân bằng bitrate khi nhiều người xem P2P & ưu tiên giữ 60fps cho preset 60fps)
-    async function applyDiscordSenderParams(sender, cfg, isCamera = false) {
+    const DISCORD_CAM_FULLROOM_PRESET = {
+      label: "480p 24fps",
+      width: 854,
+      height: 480,
+      frameRate: 24,
+      maxBitrate: 480_000,
+      contentHint: "motion"
+    };
+
+    // Khi đang Share màn hình hoặc phòng đông (>=5 ghế) -> tự hạ Cam tile xuống 480p 24fps để dồn 100% GPU/băng thông giữ Share ≥ 45fps
+    function getEffectiveCamPreset() {
+      const seatCount = state.currentRoomId ? Object.keys(state.seatsByRoom?.[state.currentRoomId] || {}).length : 0;
+      if (liveScreenStream || seatCount >= 5) return DISCORD_CAM_FULLROOM_PRESET;
+      return DISCORD_CAM_PRESET;
+    }
+
+    // Áp dụng cấu hình tối ưu cho Video Sender:
+    // - SFU (LiveKit): 1 luồng upload duy nhất O(1) cho cả phòng full 10 ghế, khóa maintain-framerate ≥ 45–60fps
+    // - P2P fallback full ghế (4-9 người xem): tự chia bitrate + hạ nhẹ scale phân giải để encoder LUÔN giữ ≥ 45fps
+    async function applyDiscordSenderParams(sender, cfg, isCamera = false, isSfu = false) {
       try {
         const params = sender.getParameters();
         if (!params.encodings || params.encodings.length === 0) {
           params.encodings = [{}];
         }
         const trackH = sender?.track?.getSettings?.().height || cfg.height;
-        const downBy = trackH > cfg.height ? Math.max(1.0, Number((trackH / cfg.height).toFixed(3))) : 1.0;
-        const peerCount = !isCamera ? Math.max(1, liveScreenPeers.size) : 1;
-        const effectiveBitrate = (!isCamera && peerCount >= 3)
-          ? Math.max(1_800_000, Math.round(cfg.maxBitrate / Math.sqrt(peerCount - 0.5)))
+        const baseDownBy = trackH > cfg.height ? Math.max(1.0, Number((trackH / cfg.height).toFixed(3))) : 1.0;
+        const peerCount = (!isCamera && !isSfu) ? Math.max(1, liveScreenPeers.size) : 1;
+
+        let fullRoomScale = 1.0;
+        if (!isCamera && !isSfu) {
+          if (peerCount >= 7) fullRoomScale = 1.5;      // 7–9 viewer P2P: ~720p để khóa cứng ≥ 45-60fps
+          else if (peerCount >= 4) fullRoomScale = 1.33; // 4–6 viewer P2P: ~810p để giữ ≥ 45-60fps
+        }
+        const finalScale = !isCamera
+          ? Number(Math.max(baseDownBy, fullRoomScale, screenFpsGuardScale).toFixed(2))
+          : baseDownBy;
+
+        const effectiveBitrate = (!isCamera && !isSfu && peerCount >= 3)
+          ? Math.max(1_600_000, Math.round(cfg.maxBitrate / Math.sqrt(peerCount - 0.3)))
           : cfg.maxBitrate;
+
+        const targetFps = isCamera ? cfg.frameRate : Math.max(MIN_SCREEN_SHARE_FPS, cfg.frameRate);
         params.encodings[0].maxBitrate = effectiveBitrate;
-        params.encodings[0].maxFramerate = cfg.frameRate;
-        params.encodings[0].scaleResolutionDownBy = downBy;
-        params.degradationPreference = isCamera
-          ? "balanced"
-          : (cfg.frameRate >= 60 ? "maintain-framerate" : "maintain-resolution");
+        params.encodings[0].maxFramerate = targetFps;
+        params.encodings[0].scaleResolutionDownBy = finalScale;
+        params.degradationPreference = isCamera ? "balanced" : "maintain-framerate";
         await sender.setParameters(params);
         try {
           const p2 = sender.getParameters();
@@ -13138,7 +13257,7 @@
         return;
       }
 
-      const cfg = DISCORD_CAM_PRESET;
+      const cfg = getEffectiveCamPreset();
       let camStream = null;
       try {
         camStream = await navigator.mediaDevices.getUserMedia({
@@ -13647,18 +13766,50 @@
 
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent || "") || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
       const cfg = DISCORD_QUALITY_PRESETS[liveScreenQuality] || DISCORD_QUALITY_PRESETS.fhd1080_60;
+      const targetFps = Math.max(MIN_SCREEN_SHARE_FPS, cfg.frameRate);
+      screenFpsGuardScale = 1.0;
       let stream = null;
 
       if (livekitVoiceActive && livekitRoom && !window.Capacitor?.Plugins?.ReplayKitBridge && navigator.mediaDevices?.getDisplayMedia) {
         try {
-          const pub = await livekitRoom.localParticipant.setScreenShareEnabled(true, {
-            audio: true,
-            resolution: { width: cfg.width, height: cfg.height, frameRate: cfg.frameRate }
-          });
+          const pub = await livekitRoom.localParticipant.setScreenShareEnabled(
+            true,
+            {
+              audio: true,
+              contentHint: "motion",
+              resolution: { width: cfg.width, height: cfg.height, frameRate: targetFps },
+              surfaceSwitching: "include",
+              selfBrowserSurface: "exclude",
+              systemAudio: "include"
+            },
+            {
+              videoCodec: "h264",
+              simulcast: false,
+              degradationPreference: "maintain-framerate",
+              screenShareEncoding: {
+                maxBitrate: cfg.maxBitrate,
+                maxFramerate: targetFps,
+                priority: "high"
+              }
+            }
+          );
           const track = pub?.track?.mediaStreamTrack;
           if (!track) {
             showToast("Không thể bật Chia sẻ màn hình SFU.", "error");
             return;
+          }
+          try { track.contentHint = "motion"; } catch (_) {}
+          try {
+            await track.applyConstraints({
+              width: { ideal: cfg.width },
+              height: { ideal: cfg.height },
+              frameRate: { ideal: targetFps, min: MIN_SCREEN_SHARE_FPS }
+            });
+          } catch (_) {
+            try { await track.applyConstraints({ frameRate: { ideal: targetFps } }); } catch (__) {}
+          }
+          if (pub?.track?.sender) {
+            await applyDiscordSenderParams(pub.track.sender, cfg, false, true);
           }
           liveScreenStream = new MediaStream([track]);
           liveScreenRoomId = room.id;
@@ -13671,8 +13822,9 @@
           }
           updateDiscordLiveUI();
           renderSeatingMap();
-          pushMessageToRoom(`🖥️ ${state.userName} đã bật Chia sẻ màn hình SFU (${cfg.label})!`);
-          showToast(`Đã bật Chia sẻ màn hình SFU (${cfg.label})!`, "success");
+          startDiscordStatsMonitor();
+          pushMessageToRoom(`🖥️ ${state.userName} đã bật Chia sẻ màn hình SFU (${cfg.label} • H.264 khóa ≥ 45fps)!`);
+          showToast(`Đã bật Share màn hình SFU (${cfg.label} • khóa ≥ 45fps kể cả full phòng)!`, "success");
         } catch (err) {
           showToast("Đã hủy hoặc không thể chia sẻ màn hình.", "info");
         }
@@ -13706,7 +13858,7 @@
             video: {
               width: { ideal: cfg.width },
               height: { ideal: cfg.height },
-              frameRate: { ideal: cfg.frameRate, max: cfg.frameRate },
+              frameRate: { ideal: targetFps, min: MIN_SCREEN_SHARE_FPS },
               cursor: "always"
             },
             audio: {
@@ -13724,12 +13876,19 @@
             showToast("Bạn đã hủy chọn màn hình phát Live.", "info");
             return;
           }
-          // Fallback nếu trình duyệt/mobile không hỗ trợ constraints audio kèm theo
+          // Fallback nếu trình duyệt/mobile không hỗ trợ ràng buộc min FPS hoặc audio kèm theo
           try {
-            stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+            stream = await navigator.mediaDevices.getDisplayMedia({
+              video: { width: { ideal: cfg.width }, height: { ideal: cfg.height }, frameRate: { ideal: targetFps } },
+              audio: true
+            });
           } catch (err2) {
-            showToast("Không thể mở chia sẻ màn hình: " + (err2?.message || "Lỗi thiết bị"), "error");
-            return;
+            try {
+              stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+            } catch (err3) {
+              showToast("Không thể mở chia sẻ màn hình: " + (err3?.message || "Lỗi thiết bị"), "error");
+              return;
+            }
           }
         }
       }
@@ -13796,23 +13955,47 @@
       if (!liveScreenStream) return startDiscordScreenShare();
       const cfg = DISCORD_QUALITY_PRESETS[liveScreenQuality] || DISCORD_QUALITY_PRESETS.fhd1080_60;
 
-      // Nếu đang phát qua LiveKit SFU -> re-publish track mới mượt mà
+      // Nếu đang phát qua LiveKit SFU -> re-publish track mới mượt mà với khóa ≥ 45fps H.264
+      const targetFps = Math.max(MIN_SCREEN_SHARE_FPS, cfg.frameRate);
+      screenFpsGuardScale = 1.0;
       if (livekitVoiceActive && livekitRoom?.localParticipant && !window.Capacitor?.Plugins?.ReplayKitBridge) {
         try {
           await livekitRoom.localParticipant.setScreenShareEnabled(false);
-          const pub = await livekitRoom.localParticipant.setScreenShareEnabled(true, {
-            audio: true,
-            resolution: { width: cfg.width, height: cfg.height, frameRate: cfg.frameRate }
-          });
+          const pub = await livekitRoom.localParticipant.setScreenShareEnabled(
+            true,
+            {
+              audio: true,
+              contentHint: "motion",
+              resolution: { width: cfg.width, height: cfg.height, frameRate: targetFps },
+              surfaceSwitching: "include",
+              selfBrowserSurface: "exclude",
+              systemAudio: "include"
+            },
+            {
+              videoCodec: "h264",
+              simulcast: false,
+              degradationPreference: "maintain-framerate",
+              screenShareEncoding: {
+                maxBitrate: cfg.maxBitrate,
+                maxFramerate: targetFps,
+                priority: "high"
+              }
+            }
+          );
           const track = pub?.track?.mediaStreamTrack;
           if (!track) {
             await stopDiscordScreenShare();
             return;
           }
+          try { track.contentHint = "motion"; } catch (_) {}
+          if (pub?.track?.sender) {
+            await applyDiscordSenderParams(pub.track.sender, cfg, false, true);
+          }
           liveScreenStream = new MediaStream([track]);
           track.onended = () => { stopDiscordScreenShare(); };
           updateDiscordLiveUI();
-          showToast("Đã chuyển cửa sổ chia sẻ màn hình SFU!", "success");
+          startDiscordStatsMonitor();
+          showToast("Đã chuyển cửa sổ chia sẻ màn hình SFU (≥ 45fps)!", "success");
         } catch (_) {
           await stopDiscordScreenShare();
         }
@@ -13877,6 +14060,7 @@
     // Dừng phát màn hình và dọn dẹp kết nối P2P
     async function stopDiscordScreenShare() {
       const wasStreaming = Boolean(liveScreenStream);
+      screenFpsGuardScale = 1.0;
       if (livekitVoiceActive && livekitRoom) {
         try { await livekitRoom.localParticipant.setScreenShareEnabled(false); } catch (e) {}
       }
@@ -14087,7 +14271,17 @@
       for (const track of liveScreenStream.getTracks()) {
         const sender = entry.pc.addTrack(track, liveScreenStream);
         if (track.kind === "video") {
-          await applyDiscordSenderParams(sender, cfg);
+          await applyDiscordSenderParams(sender, cfg, false, false);
+        }
+      }
+      preferHardwareH264Codec(entry.pc);
+
+      // Khi số người xem P2P tăng (4–9 ghế), tự cân bằng lại bitrate & scale các peer đang phát để giữ ≥ 45fps toàn phòng
+      if (liveScreenPeers.size >= 4) {
+        for (const [u, peerObj] of liveScreenPeers.entries()) {
+          if (u === viewerUid || peerObj.isNativeWebRTC || !peerObj.pc) continue;
+          const vSender = peerObj.pc.getSenders().find((s) => s.track && s.track.kind === "video");
+          if (vSender) applyDiscordSenderParams(vSender, cfg, false, false);
         }
       }
 
@@ -14248,7 +14442,7 @@
       }).catch(() => {});
     }
 
-    // Theo dõi trạng thái RTT (ms) & độ phân giải / FPS / Bitrate thực tế + tự khôi phục nếu luồng bị đứng đen
+    // Theo dõi trạng thái RTT (ms), FPS, Bitrate thực tế cho CẢ LiveKit SFU & P2P + Tự động bảo vệ sàn ≥ 45fps
     function startDiscordStatsMonitor() {
       stopDiscordStatsMonitor();
       const statsEl = document.getElementById("discord-stream-stats");
@@ -14256,33 +14450,71 @@
       let prevTs = 0;
       let prevFramesDecoded = 0;
       let stalledTicks = 0;
+      let lowFpsTicks = 0;
+
+      const enforce45FpsFloor = async () => {
+        if (!liveScreenStream || screenFpsGuardScale >= 1.75) return;
+        const cfg = DISCORD_QUALITY_PRESETS[liveScreenQuality] || DISCORD_QUALITY_PRESETS.fhd1080_60;
+        screenFpsGuardScale = Number(Math.min(1.75, screenFpsGuardScale + 0.25).toFixed(2));
+        const sfuSender = getLiveKitScreenShareSender();
+        if (sfuSender) {
+          await applyDiscordSenderParams(sfuSender, cfg, false, true);
+        }
+        for (const { pc, isNativeWebRTC } of liveScreenPeers.values()) {
+          if (isNativeWebRTC || !pc) continue;
+          const sender = pc.getSenders().find((s) => s.track && s.track.kind === "video");
+          if (sender) await applyDiscordSenderParams(sender, cfg, false, false);
+        }
+      };
+
       const pollStats = async () => {
         if (!statsEl || document.hidden) return;
+        const sfuSender = liveScreenStream ? getLiveKitScreenShareSender() : null;
+        const sfuReceiver = (!liveScreenStream && livekitVoiceActive) ? window.__livekitRemoteScreenTrack?.receiver : null;
         const firstEntry = liveScreenPeers.values().next().value;
-        if (!firstEntry) {
+
+        let statsPromise = null;
+        let modeTag = "";
+        if (sfuSender && typeof sfuSender.getStats === "function") {
+          statsPromise = sfuSender.getStats();
+          modeTag = " • SFU";
+        } else if (sfuReceiver && typeof sfuReceiver.getStats === "function") {
+          statsPromise = sfuReceiver.getStats();
+          modeTag = " • SFU";
+        } else if (firstEntry && firstEntry.pc && typeof firstEntry.pc.getStats === "function") {
+          statsPromise = firstEntry.pc.getStats();
+        }
+
+        if (!statsPromise) {
           const vTrack = liveScreenStream?.getVideoTracks?.()[0];
           const s = vTrack?.getSettings?.();
           if (s && s.height) {
-            statsEl.textContent = `⚡ Chờ người xem • ${s.height}p${s.frameRate ? Math.round(s.frameRate) : ""}`;
+            statsEl.textContent = `⚡ Chờ người xem • ${s.height}p${s.frameRate ? Math.round(s.frameRate) : ""}${livekitVoiceActive ? " • SFU" : ""}`;
           } else {
-            statsEl.textContent = "⚡ Chờ người xem...";
+            statsEl.textContent = livekitVoiceActive ? "⚡ Sẵn sàng • SFU" : "⚡ Chờ người xem...";
           }
           return;
         }
         try {
-          const stats = await firstEntry.pc.getStats();
+          const stats = await statsPromise;
           let rttMs = null;
           let height = 0;
           let fps = 0;
           let mbpsText = "";
           let curFramesDecoded = null;
+          let activeFramesEncoded = 0;
           stats.forEach((report) => {
             if (report.type === "candidate-pair" && report.state === "succeeded" && typeof report.currentRoundTripTime === "number") {
               rttMs = Math.round(report.currentRoundTripTime * 1000);
+            } else if (report.type === "remote-inbound-rtp" && report.kind === "video" && typeof report.roundTripTime === "number") {
+              rttMs = Math.round(report.roundTripTime * 1000);
             }
             if ((report.type === "inbound-rtp" || report.type === "outbound-rtp") && report.kind === "video") {
               if (report.frameHeight) height = report.frameHeight;
               if (report.framesPerSecond) fps = Math.round(report.framesPerSecond);
+              if (report.type === "outbound-rtp" && typeof report.framesEncoded === "number") {
+                activeFramesEncoded = report.framesEncoded;
+              }
               if (report.type === "inbound-rtp" && typeof report.framesDecoded === "number") {
                 curFramesDecoded = report.framesDecoded;
               }
@@ -14297,8 +14529,20 @@
               }
             }
           });
+
+          // Auto 45 FPS Floor Guard: nếu đang phát mà FPS thực tế tụt < 45 liên tiếp 4 giây -> tự giảm nhẹ độ phân giải để đẩy FPS về 50–60fps
+          if (liveScreenStream && activeFramesEncoded > 60 && fps > 5 && fps < MIN_SCREEN_SHARE_FPS) {
+            lowFpsTicks += 1;
+            if (lowFpsTicks >= 2) {
+              lowFpsTicks = 0;
+              enforce45FpsFloor();
+            }
+          } else if (fps >= MIN_SCREEN_SHARE_FPS) {
+            lowFpsTicks = 0;
+          }
+
           // Nếu phía người xem bị đứng khung hình > 8 giây dù người phát vẫn đang Live -> tự đồng bộ lại
-          if (curFramesDecoded !== null && !liveScreenStream && liveScreenBroadcaster) {
+          if (curFramesDecoded !== null && !liveScreenStream && liveScreenBroadcaster && !livekitVoiceActive) {
             if (curFramesDecoded === prevFramesDecoded) {
               stalledTicks += 1;
               if (stalledTicks >= 4) {
@@ -14311,12 +14555,12 @@
             }
           }
           const rttText = rttMs !== null ? `${rttMs}ms` : "~0ms";
-          const resText = height ? `${height}p${fps || ""}` : "";
+          const resText = height ? `${height}p${fps || ""}` : (fps ? `${fps}fps` : "");
           const dcState = window.__screenAudioDcState;
           const audioDiag = (!liveScreenStream && dcState)
             ? ` • 🔊${window.__screenAudioRxCount || 0}(${dcState}/${window.__screenAudioCtxState || "noctx"}${window.__screenAudioFormat ? "/" + window.__screenAudioFormat : ""})`
             : "";
-          statsEl.textContent = (resText ? `⚡ ${rttText} • ${resText}${mbpsText}` : `⚡ ${rttText}`) + audioDiag;
+          statsEl.textContent = (resText ? `⚡ ${rttText} • ${resText}${mbpsText}${modeTag}` : `⚡ ${rttText}${modeTag}`) + audioDiag;
         } catch (_) {}
       };
       pollStats();
