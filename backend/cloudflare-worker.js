@@ -28,7 +28,7 @@ const SECURITY_HEADERS = {
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, HEAD, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
   "Cache-Control": "no-store",
   ...SECURITY_HEADERS
 };
@@ -97,7 +97,7 @@ function checkAdminBan(ip) {
 
 function recordAdminFail(ip) {
   const now = Date.now();
-  const windowMs = 10 * 60 * 1000;
+  const windowMs = 15 * 60 * 1000;
   const rec = ADMIN_FAIL_BUCKETS.get(ip);
   if (!rec || now >= rec.until) {
     ADMIN_FAIL_BUCKETS.set(ip, { count: 1, until: now + windowMs });
@@ -105,6 +105,68 @@ function recordAdminFail(ip) {
     rec.count += 1;
     if (rec.count >= 5) rec.until = now + windowMs;
   }
+}
+
+function getExpectedAdminPin(env) {
+  return String(env?.ADMIN_PIN || "").trim();
+}
+
+async function getAdminSessionKey(env) {
+  const secretBase = String(env?.ADMIN_SESSION_SECRET || env?.ADMIN_PIN || "").trim();
+  if (!secretBase) throw new Error("ADMIN_PIN_NOT_CONFIGURED");
+  const enc = new TextEncoder();
+  return crypto.subtle.importKey(
+    "raw",
+    enc.encode(`${secretBase}::cineverse-admin-session-v1`),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+}
+
+async function signAdminSessionToken(env, ttlMs = 8 * 60 * 60 * 1000) {
+  const key = await getAdminSessionKey(env);
+  const now = Date.now();
+  const expiresAt = now + ttlMs;
+  const rand = new Uint8Array(12);
+  crypto.getRandomValues(rand);
+  const nonce = Array.from(rand).map((b) => b.toString(16).padStart(2, "0")).join("");
+  const payload = { role: "admin", iat: now, exp: expiresAt, nonce };
+  const payloadB64 = base64UrlEncode(new TextEncoder().encode(JSON.stringify(payload)));
+  const sigBuf = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(payloadB64));
+  const sigB64 = base64UrlEncode(new Uint8Array(sigBuf));
+  return { token: `${payloadB64}.${sigB64}`, expiresAt };
+}
+
+async function verifyAdminSessionToken(env, token) {
+  const raw = String(token || "").trim();
+  if (!raw || !raw.includes(".")) return { ok: false };
+  const parts = raw.split(".");
+  if (parts.length !== 2) return { ok: false };
+  const [payloadB64, sigB64] = parts;
+  if (!payloadB64 || !sigB64) return { ok: false };
+  try {
+    const key = await getAdminSessionKey(env);
+    const expectedSigBuf = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(payloadB64));
+    const expectedSigB64 = base64UrlEncode(new Uint8Array(expectedSigBuf));
+    const sigOk = await constantTimeEqual(sigB64, expectedSigB64);
+    if (!sigOk) return { ok: false };
+    const b64 = payloadB64.replace(/-/g, "+").replace(/_/g, "/");
+    const pad = "=".repeat((4 - (b64.length % 4)) % 4);
+    const payload = JSON.parse(atob(b64 + pad));
+    if (payload?.role !== "admin" || typeof payload.exp !== "number" || Date.now() >= payload.exp) {
+      return { ok: false };
+    }
+    return { ok: true, expiresAt: payload.exp };
+  } catch (_) {
+    return { ok: false };
+  }
+}
+
+function extractAdminToken(request, body) {
+  const auth = String(request?.headers?.get("Authorization") || "").trim();
+  if (/^Bearer\s+/i.test(auth)) return auth.replace(/^Bearer\s+/i, "").trim();
+  return String(body?.token || "").trim();
 }
 
 async function constantTimeEqual(a, b) {
@@ -182,7 +244,9 @@ async function handleLiveKitTokenRequest(request, env) {
 }
 
 async function getRoomSealKey(env) {
-  const secret = String(env.ADMIN_PIN || "130901").trim() + "::cineverse-room-seal-v1";
+  const adminPin = getExpectedAdminPin(env);
+  if (!adminPin) throw new Error("ADMIN_PIN_NOT_CONFIGURED");
+  const secret = adminPin + "::cineverse-room-seal-v1";
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(secret));
   return crypto.subtle.importKey("raw", digest, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
 }
@@ -831,14 +895,35 @@ async function handleWorkerFetch(request, env, corsHdrs, ctx) {
       if (ban.banned) {
         return jsonResponse({ ok: false, error: "TOO_MANY_FAILED_ATTEMPTS", retryAfterSec: ban.retryAfterSec }, 429);
       }
+      const expected = getExpectedAdminPin(env);
+      if (!expected) {
+        return jsonResponse({ ok: false, error: "ADMIN_PIN_NOT_CONFIGURED" }, 503);
+      }
       try {
-        const body = await request.json();
+        const body = await request.json().catch(() => ({}));
+        const token = extractAdminToken(request, body);
+        if (token && !body?.pin) {
+          const tv = await verifyAdminSessionToken(env, token);
+          if (tv.ok) {
+            return jsonResponse({ ok: true, validToken: true, expiresAt: tv.expiresAt, usingSecret: true }, 200);
+          }
+          return jsonResponse({ ok: false, error: "INVALID_OR_EXPIRED_TOKEN" }, 401);
+        }
         const pin = String(body?.pin || "").trim();
-        const expected = String(env.ADMIN_PIN || "130901").trim();
         const valid = Boolean(pin && (await constantTimeEqual(pin, expected)));
-        if (!valid) recordAdminFail(clientIp);
-        else ADMIN_FAIL_BUCKETS.delete(clientIp);
-        return jsonResponse({ ok: valid, usingSecret: Boolean(env.ADMIN_PIN) }, 200);
+        if (!valid) {
+          recordAdminFail(clientIp);
+          await new Promise((r) => setTimeout(r, 300));
+          return jsonResponse({ ok: false, usingSecret: true }, 200);
+        }
+        ADMIN_FAIL_BUCKETS.delete(clientIp);
+        const session = await signAdminSessionToken(env, 8 * 60 * 60 * 1000);
+        return jsonResponse({
+          ok: true,
+          token: session.token,
+          expiresAt: session.expiresAt,
+          usingSecret: true
+        }, 200);
       } catch (e) {
         recordAdminFail(clientIp);
         return jsonResponse({ ok: false }, 200);
@@ -853,7 +938,7 @@ async function handleWorkerFetch(request, env, corsHdrs, ctx) {
         const sealed = await sealRoomPin(env, roomId, pin);
         return jsonResponse({ ok: true, sealed }, 200);
       } catch (e) {
-        return jsonResponse({ ok: false }, 200);
+        return jsonResponse({ ok: false, error: e?.message || "SEAL_ERROR" }, 200);
       }
     }
     if (request.method === "POST" && url.pathname.endsWith("/room-locks-unseal")) {
@@ -861,13 +946,25 @@ async function handleWorkerFetch(request, env, corsHdrs, ctx) {
       if (ban.banned) {
         return jsonResponse({ ok: false, error: "TOO_MANY_FAILED_ATTEMPTS", retryAfterSec: ban.retryAfterSec }, 429);
       }
+      const expected = getExpectedAdminPin(env);
+      if (!expected) {
+        return jsonResponse({ ok: false, error: "ADMIN_PIN_NOT_CONFIGURED" }, 503);
+      }
       try {
         const body = await request.json();
-        const adminPin = String(body?.adminPin || "").trim();
-        const expected = String(env.ADMIN_PIN || "130901").trim();
-        if (!adminPin || !(await constantTimeEqual(adminPin, expected))) {
+        const token = extractAdminToken(request, body);
+        let authorized = false;
+        if (token) {
+          const tv = await verifyAdminSessionToken(env, token);
+          authorized = tv.ok;
+        }
+        if (!authorized) {
+          const adminPin = String(body?.adminPin || "").trim();
+          authorized = Boolean(adminPin && (await constantTimeEqual(adminPin, expected)));
+        }
+        if (!authorized) {
           recordAdminFail(clientIp);
-          return jsonResponse({ ok: false, error: "UNAUTHORIZED" }, 200);
+          return jsonResponse({ ok: false, error: "UNAUTHORIZED" }, 401);
         }
         ADMIN_FAIL_BUCKETS.delete(clientIp);
         const locks = body?.locks && typeof body.locks === "object" ? body.locks : {};
