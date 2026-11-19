@@ -1871,13 +1871,6 @@
       </div>
 
       <div id="header-lobby-actions" class="relative z-10 flex flex-wrap items-center gap-1.5 sm:gap-2">
-        <!-- Nút CTA chính duy nhất (--accent-primary: #E11D48) -->
-        <button type="button" onclick="window.appActions.openBookingModal()"
-          class="cv-smooth-btn ios-liquid-cta flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-full text-white text-xs font-black transition cursor-pointer">
-          <img src="./assets/web-logo.png" alt="CineVerse Avatar" class="w-5 h-5 rounded-full object-cover border border-white/45 bg-black shrink-0" />
-          <span>Đặt Vé Rạp</span>
-        </button>
-
         <!-- Nút phụ Apple Liquid Glass: Tìm Rạp Hà Nội -->
         <button type="button" id="btn-open-hanoi-cinemas" onclick="window.appActions.openHanoiCinemaFinder()"
           class="cv-smooth-btn ios-liquid-pill flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-2 rounded-full text-xs font-bold transition cursor-pointer">
@@ -2001,7 +1994,7 @@
               TOP 1 THỊNH HÀNH
             </span>
             <span id="hero-match-score" class="text-emerald-400 font-extrabold">99% Phù hợp</span>
-            <span class="text-slate-300">2026</span>
+            <span id="hero-year" class="text-slate-300">2026</span>
             <span id="hero-quality-badge" class="px-1.5 py-0.5 rounded border border-white/30 text-[10px] text-slate-200 font-black">
               4K IMAX
             </span>
@@ -5147,6 +5140,557 @@
       return "";
     }
 
+    const DYNAMIC_MOVIE_META_CACHE = {};
+    const DYNAMIC_MOVIE_META_PENDING = new Set();
+
+    function resolveMovieMetadata(title = "", baseRoom = {}) {
+      const raw = String(title || "").trim();
+      const t = raw
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/Đ/g, "d")
+        .toLowerCase();
+      const yearMatch = raw.match(/\b(19\d{2}|20\d{2})\b/);
+      const parsedYear = yearMatch ? yearMatch[1] : "";
+
+      const CATALOG_META = [
+        {
+          test: () => t.includes("shang-chi") || t.includes("thap luan"),
+          year: "2021",
+          duration: "2h 12m",
+          ageRating: "T13+",
+          genre: "Hành động • Võ thuật • Kỳ ảo Marvel",
+          cast: "Simu Liu, Lương Triều Vỹ, Awkwafina, Dương Tử Quỳnh",
+          synopsis: "Shang-Chi buộc phải đối mặt với quá khứ và tổ chức Thập Luân bí ẩn do chính cha mình là Văn Vũ (Lương Triều Vỹ) thống lĩnh, mở ra cuộc chiến võ thuật và thần thoại phương Đông mãn nhãn."
+        },
+        {
+          test: () => t.includes("meg 2") || t.includes("vuc sau") || t.includes("the trench"),
+          year: "2023",
+          duration: "1h 56m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Quái vật biển sâu",
+          cast: "Jason Statham, Ngô Kinh (Wu Jing), Sophia Cai, Page Kennedy",
+          synopsis: "Jonas Taylor cùng đoàn thám hiểm lặn xuống rãnh đại dương sâu nhất hành tinh và phải chiến đấu sinh tồn trước đàn siêu cá mập cổ đại Megalodon cùng những sinh vật khổng lồ thời tiền sử."
+        },
+        {
+          test: () => t.includes("ca map sieu bao chua") || t.includes("the meg"),
+          year: "2018",
+          duration: "1h 53m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Sinh tồn đại dương",
+          cast: "Jason Statham, Lý Băng Băng, Rainn Wilson, Ruby Rose",
+          synopsis: "Một trạm nghiên cứu dưới đáy biển Thái Bình Dương bị tấn công bởi siêu cá mập Megalodon dài hơn 23 mét tưởng đã tuyệt chủng, buộc chuyên gia lặn cứu hộ Jonas Taylor phải lao vào cuộc giải cứu sinh tử."
+        },
+        {
+          test: () => t.includes("3 idiots") || t.includes("3_idiots"),
+          year: "2009",
+          duration: "2h 50m",
+          ageRating: "T13+",
+          genre: "Hài hước • Tâm lý • Học đường Kinh điển",
+          cast: "Aamir Khan, R. Madhavan, Sharman Joshi, Kareena Kapoor",
+          synopsis: "Hành trình tìm kiếm người bạn thân mất tích Rancho đưa Farhan và Raju sống lại những năm tháng đại học đầy tiếng cười, nước mắt và bài học truyền cảm hứng về việc theo đuổi đam mê đích thực."
+        },
+        {
+          test: () => t.includes("ac quy ma so 2") || t.includes("the nun 2"),
+          year: "2023",
+          duration: "1h 50m",
+          ageRating: "T18+",
+          genre: "Kinh dị • Tâm linh • Vũ trụ The Conjuring",
+          cast: "Taissa Farmiga, Jonas Bloquet, Storm Reid, Bonnie Aarons",
+          synopsis: "Năm 1956 tại Pháp, một linh mục bị sát hại dã man khiến bóng tối lan rộng. Sơ Irene một lần nữa phải đối đầu trực diện với ác quỷ Valak dưới hình hài Ma Sơ kinh hoàng."
+        },
+        {
+          test: () => t.includes("ac quy ma so") || t.includes("the nun"),
+          year: "2018",
+          duration: "1h 36m",
+          ageRating: "T18+",
+          genre: "Kinh dị • Bí ẩn • Tâm linh",
+          cast: "Taissa Farmiga, Demián Bichir, Jonas Bloquet, Bonnie Aarons",
+          synopsis: "Một linh mục thuộc Tòa thánh Vatican và một nữ tu tập sự được cử đến tu viện cổ tại Romania để điều tra cái chết bí ẩn, nơi họ chạm trán thế lực tà ác cổ xưa mang hình hài Ma Sơ Valak."
+        },
+        {
+          test: () => t.includes("annabelle") && t.includes("tao vat"),
+          year: "2017",
+          duration: "1h 49m",
+          ageRating: "T18+",
+          genre: "Kinh dị • Tâm linh • Giật gân",
+          cast: "Stephanie Sigman, Talitha Bateman, Anthony LaPaglia, Miranda Otto",
+          synopsis: "Nhiều năm sau cái chết bi thảm của con gái nhỏ, người thợ làm búp bê và vợ đón một nữ tu cùng các bé gái mồ côi vào ở, vô tình đánh thức thực thể tà ác trú ngụ trong con búp bê Annabelle."
+        },
+        {
+          test: () => t.includes("annabelle") && t.includes("tro ve"),
+          year: "2019",
+          duration: "1h 46m",
+          ageRating: "T18+",
+          genre: "Kinh dị • Siêu nhiên • Vũ trụ The Conjuring",
+          cast: "Mckenna Grace, Madison Iseman, Patrick Wilson, Vera Farmiga",
+          synopsis: "Dù đã bị vợ chồng ngoại cảm Ed và Lorraine Warren nhốt trong tủ kính phép thuật, búp bê Annabelle vẫn đánh thức các linh hồn ác độc trong căn phòng, nhắm vào cô con gái nhỏ Judy trong một đêm kinh hoàng."
+        },
+        {
+          test: () => t.includes("annabelle"),
+          year: "2014",
+          duration: "1h 39m",
+          ageRating: "T18+",
+          genre: "Kinh dị • Tâm linh • Bí ẩn",
+          cast: "Annabelle Wallis, Ward Horton, Alfre Woodard, Tony Amendola",
+          synopsis: "Món quà là con búp bê cổ điển hiếm có mà John tặng người vợ sắp sinh Mia nhanh chóng trở thành cơn ác mộng đẫm máu khi một giáo phái tà giáo triệu hồi ác linh nhập vào nó."
+        },
+        {
+          test: () => t.includes("avatar") && (t.includes("lua") || t.includes("tro tan") || t.includes("2025")),
+          year: "2025",
+          duration: "3h 10m",
+          ageRating: "T13+",
+          genre: "Khoa học viễn tưởng • Phiêu lưu • Sử thi 3D",
+          cast: "Sam Worthington, Zoe Saldaña, Sigourney Weaver, Oona Chaplin",
+          synopsis: "Gia đình Jake Sully và Neytiri bước vào vùng đất mới trên hành tinh Pandora, nơi họ chạm trán bộ tộc Tro Tàn (Ash People) hung dữ gắn liền với nguyên tố lửa và những xung đột chưa từng có."
+        },
+        {
+          test: () => t.includes("avatar"),
+          year: "2022",
+          duration: "3h 12m",
+          ageRating: "T13+",
+          genre: "Khoa học viễn tưởng • Phiêu lưu • Hành động",
+          cast: "Sam Worthington, Zoe Saldaña, Sigourney Weaver, Kate Winslet",
+          synopsis: "Khi mối đe dọa cũ quay trở lại Pandora, Jake Sully và Neytiri phải đưa gia đình rời khu rừng quen thuộc để tìm nơi ẩn náu tại bộ tộc biển Metkayina và chiến đấu bảo vệ những người thân yêu."
+        },
+        {
+          test: () => t.includes("endgame") || t.includes("hoi ket"),
+          year: "2019",
+          duration: "3h 01m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Siêu anh hùng Marvel",
+          cast: "Robert Downey Jr., Chris Evans, Scarlett Johansson, Chris Hemsworth",
+          synopsis: "Sau cú búng tay hủy diệt một nửa vũ trụ của Thanos, những siêu anh hùng Avengers còn sống sót thực hiện phi vụ du hành lượng tử xuyên thời gian để đảo ngược định mệnh trong trận chiến vĩ đại nhất lịch sử."
+        },
+        {
+          test: () => t.includes("biet doi sieu anh hung 3") || t.includes("cuoc chien vo cuc") || t.includes("infinity war"),
+          year: "2018",
+          duration: "2h 29m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Siêu anh hùng Marvel",
+          cast: "Robert Downey Jr., Chris Hemsworth, Mark Ruffalo, Josh Brolin",
+          synopsis: "Biệt đội Avengers cùng các Vệ Binh Dải Ngân Hà phải hợp lực đánh cược tất cả để ngăn chặn bạo chúa Thanos thu thập đủ 6 Viên Đá Vô Cực nhằm xóa sổ một nửa sự sống trong vũ trụ."
+        },
+        {
+          test: () => t.includes("biet doi sieu anh hung 2") || t.includes("ultron"),
+          year: "2015",
+          duration: "2h 21m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Siêu anh hùng Marvel",
+          cast: "Robert Downey Jr., Chris Evans, Chris Hemsworth, Scarlett Johansson",
+          synopsis: "Khi chương trình gìn giữ hòa bình do Tony Stark và Bruce Banner khởi tạo sinh ra trí tuệ nhân tạo Ultron với tham vọng diệt chủng nhân loại, biệt đội Avengers phải tái hợp để cứu lấy Trái Đất."
+        },
+        {
+          test: () => t.includes("biet doi sieu anh hung") || t.includes("the avengers"),
+          year: "2012",
+          duration: "2h 23m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Siêu anh hùng Marvel",
+          cast: "Robert Downey Jr., Chris Evans, Scarlett Johansson, Tom Hiddleston",
+          synopsis: "Giám đốc Nick Fury của tổ chức S.H.I.E.L.D. tập hợp các siêu anh hùng Iron Man, Captain America, Thor, Hulk, Black Widow và Hawkeye để ngăn chặn Loki cùng đạo quân ngoài hành tinh xâm lược Trái Đất."
+        },
+        {
+          test: () => t.includes("black widow") || t.includes("goa phu den"),
+          year: "2021",
+          duration: "2h 14m",
+          ageRating: "T13+",
+          genre: "Hành động • Điệp viên • Siêu anh hùng Marvel",
+          cast: "Scarlett Johansson, Florence Pugh, David Harbour, Rachel Weisz",
+          synopsis: "Natasha Romanoff phải đối diện với những góc khuất trong quá khứ điệp viên của mình và tái hợp cùng gia đình cũ để triệt phá tổ chức Red Room đứng sau âm mưu thao túng các đặc vụ Black Widow."
+        },
+        {
+          test: () => t.includes("captain america") && t.includes("mua dong"),
+          year: "2014",
+          duration: "2h 16m",
+          ageRating: "T13+",
+          genre: "Hành động • Điệp viên • Siêu anh hùng Marvel",
+          cast: "Chris Evans, Scarlett Johansson, Sebastian Stan, Anthony Mackie",
+          synopsis: "Steve Rogers hợp tác cùng Black Widow và Falcon để phơi bày âm mưu thâm độc ngay trong lòng tổ chức S.H.I.E.L.D., đồng thời đối mặt sát thủ bí ẩn mang biệt danh Chiến Binh Mùa Đông."
+        },
+        {
+          test: () => t.includes("captain america") && t.includes("noi chien"),
+          year: "2016",
+          duration: "2h 27m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Siêu anh hùng Marvel",
+          cast: "Chris Evans, Robert Downey Jr., Scarlett Johansson, Sebastian Stan",
+          synopsis: "Bất đồng sâu sắc về Hiệp định Sokovia chia rẽ biệt đội Avengers thành hai phe đối đầu do Captain America và Iron Man dẫn dắt, đẩy các siêu anh hùng vào cuộc nội chiến khốc liệt."
+        },
+        {
+          test: () => t.includes("captain america") && t.includes("the gioi moi"),
+          year: "2025",
+          duration: "1h 58m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Siêu anh hùng Marvel",
+          cast: "Anthony Mackie, Harrison Ford, Danny Ramirez, Giancarlo Esposito",
+          synopsis: "Sau cuộc gặp với tân Tổng thống Hoa Kỳ Thaddeus Ross, Sam Wilson với chiếc khiên Captain America bị cuốn vào một sự cố quốc tế nghiêm trọng và phải vạch trần kẻ chủ mưu trước khi thế giới rơi vào hỗn loạn."
+        },
+        {
+          test: () => t.includes("wakanda"),
+          year: "2022",
+          duration: "2h 41m",
+          ageRating: "T13+",
+          genre: "Hành động • Phiêu lưu • Siêu anh hùng Marvel",
+          cast: "Letitia Wright, Lupita Nyong'o, Danai Gurira, Tenoch Huerta",
+          synopsis: "Sau sự ra đi của Vua T'Challa, Hoàng hậu Ramonda, Shuri và các chiến binh Wakanda phải chiến đấu bảo vệ vương quốc trước sự trỗi dậy của đế chế dưới đáy biển Talokan do Namor thống lĩnh."
+        },
+        {
+          test: () => t.includes("black panther") || t.includes("chien binh bao den"),
+          year: "2018",
+          duration: "2h 14m",
+          ageRating: "T13+",
+          genre: "Hành động • Phiêu lưu • Siêu anh hùng Marvel",
+          cast: "Chadwick Boseman, Michael B. Jordan, Lupita Nyong'o, Danai Gurira",
+          synopsis: "Trở về vương quốc công nghệ cao Wakanda để kế vị ngai vàng, T'Challa phải đối mặt với kẻ thách thức Erik Killmonger trong cuộc chiến quyết định vận mệnh của Wakanda và cả thế giới."
+        },
+        {
+          test: () => t.includes("chu he trong canh dong ngo") || t.includes("clown in a cornfield"),
+          year: "2025",
+          duration: "1h 36m",
+          ageRating: "T18+",
+          genre: "Kinh dị • Giật gân • Sát nhân",
+          cast: "Katie Douglas, Carson MacCormac, Aaron Abrams, Kevin Durand",
+          synopsis: "Chuyển đến thị trấn nhỏ vùng Trung Tây để bắt đầu cuộc sống mới, Quinn và nhóm bạn trẻ bất ngờ trở thành con mồi trong cuộc săn lùng đẫm máu của kẻ sát nhân mang mặt nạ chú hề Frendo giữa cánh đồng ngô."
+        },
+        {
+          test: () => t.includes("chu he ma quai") || /\bit\s*\(2017\)/i.test(raw),
+          year: "2017",
+          duration: "2h 15m",
+          ageRating: "T18+",
+          genre: "Kinh dị • Bí ẩn • Siêu nhiên",
+          cast: "Bill Skarsgård, Jaeden Martell, Finn Wolfhard, Sophia Lillis",
+          synopsis: "Tại thị trấn Derry, bảy đứa trẻ thuộc Hội Kẻ Thua Cuộc phải hợp sức vượt qua nỗi sợ hãi sâu thẳm nhất để đối đầu thực thể tà ác cổ xưa đội lốt chú hề nhảy múa Pennywise."
+        },
+        {
+          test: () => t.includes("con thinh no") || t.includes("wrath of man"),
+          year: "2021",
+          duration: "1h 59m",
+          ageRating: "T18+",
+          genre: "Hành động • Tội phạm • Giật gân",
+          cast: "Jason Statham, Holt McCallany, Scott Eastwood, Josh Hartnett",
+          synopsis: "Một nhân viên bảo vệ bí ẩn có kỹ năng thiện xạ lạnh lùng gia nhập công ty vận chuyển tiền mặt tại Los Angeles với mục đích thực sự là truy lùng những kẻ đã cướp đi mạng sống con trai anh."
+        },
+        {
+          test: () => t.includes("cu roi tu than") || t.includes("diem chet"),
+          year: "2024",
+          duration: "1h 47m",
+          ageRating: "T16+",
+          genre: "Giật gân • Sinh tồn • Kịch tính",
+          cast: "Grace Caroline Currey, Virginia Gardner, Jeffrey Dean Morgan",
+          synopsis: "Mắc kẹt ở độ cao hàng trăm mét trên đỉnh tháp truyền hình hoang phế giữa sa mạc không sóng điện thoại, hai cô gái ưa mạo hiểm phải tận dụng từng chút sức lực để giành giật sự sống."
+        },
+        {
+          test: () => t.includes("eternals") || t.includes("chung toc bat tu"),
+          year: "2021",
+          duration: "2h 36m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Sử thi Marvel",
+          cast: "Gemma Chan, Richard Madden, Angelina Jolie, Don Lee (Ma Dong-seok)",
+          synopsis: "Những chiến binh bất tử Eternals sống ẩn mình trên Trái Đất suốt hàng ngàn năm buộc phải tái hợp để bảo vệ nhân loại khỏi chủng tộc quái vật cổ đại Deviants và hiểm họa thức tỉnh Celestial."
+        },
+        {
+          test: () => t.includes("godzilla"),
+          year: "2021",
+          duration: "1h 53m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Quái vật Khổng lồ",
+          cast: "Alexander Skarsgård, Millie Bobby Brown, Rebecca Hall, Shun Oguri",
+          synopsis: "Hai siêu quái vật huyền thoại Godzilla và Kong bước vào trận đại chiến chấn động thế giới, trong khi nhân loại tiến sâu vào Trái Đất Rỗng để khám phá nguồn gốc thật sự của các Titan và âm mưu Mechagodzilla."
+        },
+        {
+          test: () => t.includes("nguoi khong lo xanh") || t.includes("hulk"),
+          year: "2008",
+          duration: "1h 52m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Siêu anh hùng Marvel",
+          cast: "Edward Norton, Liv Tyler, Tim Roth, William Hurt",
+          synopsis: "Nhà khoa học Bruce Banner vừa tìm kiếm phương thuốc hóa giải bức xạ gamma biến anh thành Người Khổng Lồ Xanh Hulk, vừa phải trốn chạy sự truy đuổi của quân đội và đối đầu quái vật Abomination."
+        },
+        {
+          test: () => t.includes("dao dau lau") || t.includes("skull island"),
+          year: "2017",
+          duration: "1h 58m",
+          ageRating: "T13+",
+          genre: "Hành động • Phiêu lưu • Quái vật Khổng lồ",
+          cast: "Tom Hiddleston, Samuel L. Jackson, Brie Larson, John Goodman",
+          synopsis: "Đoàn thám hiểm khoa học và quân sự đặt chân lên hòn đảo Đầu Lâu bí ẩn ở Thái Bình Dương, nơi họ chạm trán vị thần hộ mệnh khổng lồ Kong cùng đàn quái vật săn mồi dưới lòng đất Skullcrawlers."
+        },
+        {
+          test: () => t.includes("nguoi kien") || t.includes("ant-man"),
+          year: "2018",
+          duration: "1h 58m",
+          ageRating: "T13+",
+          genre: "Hành động • Hài hước • Khoa học viễn tưởng Marvel",
+          cast: "Paul Rudd, Evangeline Lilly, Michael Douglas, Michelle Pfeiffer",
+          synopsis: "Scott Lang khoác lại bộ giáp Người Kiến và sát cánh cùng Chiến Binh Ong Hope van Dyne trong nhiệm vụ đột nhập Lượng Tử Giới để giải cứu Janet van Dyne khỏi kẻ thù xuyên không gian Ghost."
+        },
+        {
+          test: () => t.includes("nguoi nhen") && t.includes("khong con nha"),
+          year: "2021",
+          duration: "2h 28m",
+          ageRating: "T13+",
+          genre: "Hành động • Đa vũ trụ • Siêu anh hùng Marvel",
+          cast: "Tom Holland, Zendaya, Benedict Cumberbatch, Tobey Maguire, Andrew Garfield",
+          synopsis: "Khi danh tính Spider-Man bị phơi bày, Peter Parker nhờ Doctor Strange thực hiện phép thuật xóa ký ức nhưng vô tình xé toạc Đa Vũ Trụ, kéo theo những ác nhân nguy hiểm nhất từ các thực tại khác."
+        },
+        {
+          test: () => t.includes("nguoi nhen") && t.includes("tro ve nha"),
+          year: "2017",
+          duration: "2h 13m",
+          ageRating: "T13+",
+          genre: "Hành động • Phiêu lưu • Siêu anh hùng Marvel",
+          cast: "Tom Holland, Michael Keaton, Robert Downey Jr., Zendaya",
+          synopsis: "Sau trận chiến cùng biệt đội Avengers, cậu học sinh trung học Peter Parker dưới sự dẫn dắt của Tony Stark nỗ lực chứng tỏ bản thân là một siêu anh hùng thực thụ khi đối đầu trùm vũ khí Vulture."
+        },
+        {
+          test: () => t.includes("nguoi nhen") && t.includes("xa nha"),
+          year: "2019",
+          duration: "2h 09m",
+          ageRating: "T13+",
+          genre: "Hành động • Phiêu lưu • Siêu anh hùng Marvel",
+          cast: "Tom Holland, Jake Gyllenhaal, Zendaya, Samuel L. Jackson",
+          synopsis: "Chuyến du lịch châu Âu cùng bạn bè của Peter Parker bị gián đoạn khi Nick Fury chiêu mộ cậu hợp tác cùng nhân vật bí ẩn Mysterio để chống lại các thực thể nguyên tố tàn phá lục địa."
+        },
+        {
+          test: () => t.includes("nguoi sat 3") || t.includes("iron man 3"),
+          year: "2013",
+          duration: "2h 10m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Siêu anh hùng Marvel",
+          cast: "Robert Downey Jr., Gwyneth Paltrow, Don Cheadle, Guy Pearce",
+          synopsis: "Khi thế giới riêng bị kẻ khủng bố bí ẩn Mandarin phá hủy hoàn toàn, Tony Stark phải dựa vào trí tuệ thiên tài và bản lĩnh chế tạo của mình để bảo vệ người thương và lật mặt kẻ đứng sau dự án Extremis."
+        },
+        {
+          test: () => t.includes("nguoi sat 2") || t.includes("iron man 2"),
+          year: "2010",
+          duration: "2h 04m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Siêu anh hùng Marvel",
+          cast: "Robert Downey Jr., Gwyneth Paltrow, Don Cheadle, Scarlett Johansson",
+          synopsis: "Sau khi công khai danh tính Iron Man với cả thế giới, Tony Stark vừa đối mặt áp lực bàn giao công nghệ cho chính phủ, vừa phải chống lại cuộc trả thù của nhà vật lý Ivan Vanko (Whiplash)."
+        },
+        {
+          test: () => t.includes("nguoi sat") || t.includes("iron man"),
+          year: "2008",
+          duration: "2h 06m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Siêu anh hùng Marvel",
+          cast: "Robert Downey Jr., Gwyneth Paltrow, Terrence Howard, Jeff Bridges",
+          synopsis: "Tỷ phú thiên tài công nghệ Tony Stark bị bắt cóc tại Afghanistan và tự chế tạo bộ giáp sắt tối tân để thoát thân, mở đầu kỷ nguyên siêu anh hùng Iron Man bảo vệ thế giới."
+        },
+        {
+          test: () => t.includes("shawshank"),
+          year: "1994",
+          duration: "2h 22m",
+          ageRating: "T16+",
+          genre: "Tâm lý • Chính kịch • Tuyệt tác IMDb #1",
+          cast: "Tim Robbins, Morgan Freeman, Bob Gunton, William Sadler",
+          synopsis: "Bị kết án tù chung thân oan ức tại nhà tù khắc nghiệt Shawshank, cựu phó chủ tịch ngân hàng Andy Dufresne kết bạn với tù nhân kỳ cựu Red và âm thầm chuẩn bị kế hoạch tìm lại tự do suốt gần hai thập kỷ."
+        },
+        {
+          test: () => t.includes("other mommy") || t.includes("other.mommy"),
+          year: "2026",
+          duration: "1h 42m",
+          ageRating: "T18+",
+          genre: "Kinh dị • Tâm lý • Siêu nhiên",
+          cast: "Jessica Chastain, Jay Duplass, Dichen Lachman",
+          synopsis: "Một gia đình rơi vào vòng xoáy kinh hoàng khi cô con gái nhỏ bắt đầu trò chuyện với thực thể vô hình trong tủ quần áo tự xưng là 'Người Mẹ Khác' đang âm mưu chiếm đoạt ngôi nhà."
+        },
+        {
+          test: () => t.includes("phu thuy toi thuong") || t.includes("doctor strange"),
+          year: "2022",
+          duration: "2h 06m",
+          ageRating: "T13+",
+          genre: "Hành động • Kỳ ảo • Đa vũ trụ Marvel",
+          cast: "Benedict Cumberbatch, Elizabeth Olsen, Xochitl Gomez, Benedict Wong",
+          synopsis: "Doctor Strange phải du hành xuyên qua những thực tại nguy hiểm của Đa Vũ Trụ để bảo vệ cô bé America Chavez khỏi cơn cuồng nộ của Phù Thủy Đỏ Scarlet Witch (Wanda Maximoff)."
+        },
+        {
+          test: () => t.includes("resident evil") || t.includes("vung dat quy du"),
+          year: "2026",
+          duration: "1h 47m",
+          ageRating: "T18+",
+          genre: "Kinh dị • Hành động • Sinh tồn Zombie",
+          cast: "Kaya Scodelario, Robbie Amell, Hannah John-Kamen, Tom Hopper",
+          synopsis: "Thành phố Raccoon từng là đại bản doanh của tập đoàn dược phẩm Umbrella giờ trở thành vùng đất chết khi T-Virus bùng phát dưới lòng đất, buộc nhóm sống sót phải chiến đấu xuyên đêm để thoát thân."
+        },
+        {
+          test: () => t.includes("than sam iv") || t.includes("tinh yeu va sam set"),
+          year: "2022",
+          duration: "1h 59m",
+          ageRating: "T13+",
+          genre: "Hành động • Phiêu lưu • Kỳ ảo Marvel",
+          cast: "Chris Hemsworth, Natalie Portman, Christian Bale, Tessa Thompson",
+          synopsis: "Hành trình tìm kiếm sự bình yên của Thần Sấm Thor bị gián đoạn bởi Gorr — Kẻ Sát Thần. Thor phải hợp lực cùng Vua Valkyrie, Korg và bạn gái cũ Jane Foster nay mang sức mạnh Mighty Thor."
+        },
+        {
+          test: () => t.includes("than sam ii") || t.includes("the gioi bong toi"),
+          year: "2013",
+          duration: "1h 52m",
+          ageRating: "T13+",
+          genre: "Hành động • Kỳ ảo • Khoa học viễn tưởng Marvel",
+          cast: "Chris Hemsworth, Natalie Portman, Tom Hiddleston, Anthony Hopkins",
+          synopsis: "Khi chủng tộc Hắc Tinh cổ đại do Malekith cầm đầu trỗi dậy cùng vũ khí hủy diệt Aether nhằm nhấn chìm Cửu Giới vào bóng tối, Thor buộc phải bắt tay với người em trai đầy mưu mô Loki."
+        },
+        {
+          test: () => t.includes("than sam") || t.includes("thor"),
+          year: "2011",
+          duration: "1h 55m",
+          ageRating: "T13+",
+          genre: "Hành động • Kỳ ảo • Siêu anh hùng Marvel",
+          cast: "Chris Hemsworth, Natalie Portman, Tom Hiddleston, Anthony Hopkins",
+          synopsis: "Bị Vua Odin tước bỏ thần lực và trục xuất xuống Trái Đất vì sự kiêu ngạo, Thần Sấm Thor phải học cách khiêm nhường để xứng đáng nâng lại búa thần Mjolnir và ngăn chặn âm mưu của Loki."
+        },
+        {
+          test: () => t.includes("venom") || t.includes("carnage"),
+          year: "2021",
+          duration: "1h 37m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Phản anh hùng",
+          cast: "Tom Hardy, Woody Harrelson, Michelle Williams, Naomie Harris",
+          synopsis: "Nhà báo Eddie Brock và vật ký sinh ngoài hành tinh Venom phải đối đầu kẻ sát nhân hàng loạt Cletus Kasady sau khi hắn hợp nhất với symbiote khát máu Carnage và trốn thoát khỏi ngục tử hình."
+        },
+        {
+          test: () => t.includes("ve binh dai ngan ha 3"),
+          year: "2023",
+          duration: "2h 30m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Phiêu lưu Marvel",
+          cast: "Chris Pratt, Zoe Saldaña, Dave Bautista, Bradley Cooper, Chukwudi Iwuji",
+          synopsis: "Peter Quill tập hợp đội Vệ Binh Dải Ngân Hà trong nhiệm vụ sinh tử để cứu mạng người đồng đội Rocket và đối mặt với kẻ sáng tạo tàn nhẫn High Evolutionary."
+        },
+        {
+          test: () => t.includes("ve binh dai ngan ha 2"),
+          year: "2017",
+          duration: "2h 16m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Hài hước Marvel",
+          cast: "Chris Pratt, Zoe Saldaña, Dave Bautista, Kurt Russell",
+          synopsis: "Đội Vệ Binh Dải Ngân Hà phiêu lưu đến rìa vũ trụ và khám phá bí mật về thân thế thật sự của Star-Lord Peter Quill khi anh gặp lại người cha quyền năng mang bản thể hành tinh sống Ego."
+        },
+        {
+          test: () => t.includes("ve binh dai ngan ha"),
+          year: "2014",
+          duration: "2h 01m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Phiêu lưu Marvel",
+          cast: "Chris Pratt, Zoe Saldaña, Dave Bautista, Vin Diesel, Bradley Cooper",
+          synopsis: "Kẻ đạo chích không gian Peter Quill bất đắc dĩ lập nhóm cùng bốn kẻ lập dị ngoài hành tinh gồm Gamora, Drax, Rocket và Groot để bảo vệ viên Ngọc Vũ Trụ khỏi tay Ronan Kẻ Buộc Tội."
+        },
+        {
+          test: () => t.includes("chu thuat") || t.includes("jujutsu") || t.includes("tu diet"),
+          year: "2026",
+          duration: "24:00",
+          ageRating: "T16+",
+          genre: "Anime • Hành động • Siêu nhiên • Ani-One Vietnam",
+          cast: "Itadori Yuji, Fushiguro Megumi, Okkotsu Yuta, Higuruma Hiromi",
+          synopsis: (() => {
+            const epM = raw.match(/tập\s*(\d+)/i);
+            const ep = epM ? Number(epM[1]) : 0;
+            const epSynopses = {
+              48: "Mở màn Tử Diệt Hồi Du Phần 1: Sau biến cố Shibuya, các chú thuật sư bước vào trò chơi sinh tử khốc liệt do Kenjaku giăng ra.",
+              49: "Tiếp nối hành trình tập hợp đồng minh và chuẩn bị tiến vào kết giới Tử Diệt Hồi Du để giải cứu Gojo Satoru.",
+              50: "Yuji và Megumi tìm kiếm Hakari Kinji tại sàn đấu ngầm nhằm thuyết phục anh tham gia chiến dịch phá giải kết giới.",
+              51: "Bí mật về trò chơi Tử Diệt Hồi Du cùng các quy tắc sinh tử tại những kết giới khắp Nhật Bản dần được hé lộ.",
+              52: "Yuji và Megumi chính thức bước vào kết giới Tokyo Số 1, lập tức bị tách rời và phải chạm trán những người chơi nguy hiểm.",
+              53: "Trận đối đầu căng thẳng tại kết giới Tokyo khi Itadori Yuji tìm kiếm luật sư thiên tài sở hữu 100 điểm — Higuruma Hiromi.",
+              54: "Higuruma Hiromi triển khai Lãnh Địa Tru Tử Thuật, buộc Yuji phải đối diện phiên tòa phán xét tội lỗi tại Shibuya.",
+              55: "Fushiguro Megumi rơi vào bẫy của nhóm Reggie Star và buộc phải bung toàn bộ Thập Chủng Ảnh Pháp Thuật để sinh tồn.",
+              56: "Lãnh Địa Triển Khai Khảm Hợp Ámế Đình của Megumi va chạm trực diện với chiến thuật phiếu mua hàng hiểm hóc của Reggie.",
+              57: "Đặc cấp chú thuật sư Okkotsu Yuta đơn độc càn quét kết giới Sendai, đối đầu bốn thế lực mạnh nhất vùng.",
+              58: "Đại chiến tam phương tại Sendai bùng nổ khi Yuta triệu hồi toàn bộ sức mạnh của Rika và sao chép chú thuật đỉnh cao.",
+              59: "Hakari Kinji chạm trán chú thuật sư cổ đại Kashimo Hajime trong trận chiến sấm sét điên cuồng với Lãnh Địa Tọa Sát Bác Đồ."
+            };
+            return epSynopses[ep] || "Sau biến cố Shibuya, Itadori Yuji, Fushiguro Megumi và Okkotsu Yuta bước vào trò chơi sinh tử Tử Diệt Hồi Du do Kenjaku kích hoạt nhằm giải phong ấn cho Gojo Satoru.";
+          })()
+        },
+        {
+          test: () => t.includes("thang tu") || t.includes("ha anh tuan"),
+          year: "2016",
+          duration: "05:52",
+          ageRating: "P",
+          genre: "Âm nhạc • Ballad • Lãng mạn",
+          cast: "Hà Anh Tuấn, Thanh Hằng, Phạm Toàn Thắng",
+          synopsis: "Bản ballad lãng mạn về những ký ức tình yêu trong trẻo và hoài niệm thanh xuân giữa khung cảnh Đà Lạt mộng mơ dành riêng cho Phòng Đôi."
+        }
+      ];
+
+      for (const entry of CATALOG_META) {
+        if (entry.test()) {
+          return {
+            year: entry.year || parsedYear || "2025",
+            duration: entry.duration || "2h 00m",
+            ageRating: entry.ageRating || "T13+",
+            genre: entry.genre,
+            cast: entry.cast,
+            synopsis: entry.synopsis
+          };
+        }
+      }
+
+      if (DYNAMIC_MOVIE_META_CACHE[t]) {
+        return DYNAMIC_MOVIE_META_CACHE[t];
+      }
+
+      const isSameAsBase = baseRoom && String(baseRoom.movieTitle || "").trim() === raw;
+      if (isSameAsBase && baseRoom.synopsis) {
+        return {
+          year: parsedYear || "2026",
+          duration: baseRoom.duration || "2h 00m",
+          ageRating: baseRoom.ageRating || "T13+",
+          genre: baseRoom.genre || "Điện ảnh • Chiếu rạp",
+          cast: baseRoom.cast || "CineVerse Lotte",
+          synopsis: baseRoom.synopsis
+        };
+      }
+
+      // Clean title & infer accurate fallback metadata for any new movie without leaking old room's JJK text
+      const cleanName = raw
+        .replace(/\b(phimmoi(?:\.fun|z)?|tập\s*full|vietsub|thuyết\s*minh|lồng\s*tiếng|full\s*hd|fhd|1080p|720p|4k|webrip|bluray|x264|x265|hevc|aac5?\.1|rarbg|yts\.[a-z]+|motchill|motphim|8phimx|upco\s*cinema)\b/gi, " ")
+        .replace(/[-_.\[\]]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim() || raw;
+
+      // Trigger non-blocking background Wikipedia lookup to enrich unknown future titles
+      if (raw && !DYNAMIC_MOVIE_META_PENDING.has(t)) {
+        DYNAMIC_MOVIE_META_PENDING.add(t);
+        const searchQ = cleanName.replace(/\(\d{4}\)/g, "").trim();
+        fetch(`https://vi.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchQ + " phim")}&utf8=&format=json&origin=*`)
+          .then(r => r.json())
+          .then(d => d?.query?.search?.[0]?.title)
+          .then(wTitle => wTitle ? fetch(`https://vi.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wTitle)}`).then(r => r.json()) : null)
+          .then(sum => {
+            if (sum && sum.extract && sum.extract.length > 40) {
+              DYNAMIC_MOVIE_META_CACHE[t] = {
+                year: parsedYear || "2025",
+                duration: "2h 00m",
+                ageRating: "T13+",
+                genre: "Điện ảnh • Chiếu rạp HD",
+                cast: cleanName,
+                synopsis: sum.extract.slice(0, 260) + (sum.extract.length > 260 ? "..." : "")
+              };
+              try {
+                if (!state.currentRoomId) {
+                  renderHeroBillboard();
+                  renderLobby();
+                }
+              } catch (_) {}
+            }
+          })
+          .catch(() => {});
+      }
+
+      return {
+        year: parsedYear || "2025",
+        duration: "2h 00m",
+        ageRating: "T13+",
+        genre: "Điện ảnh • Chiếu rạp HD",
+        cast: cleanName,
+        synopsis: `Thưởng thức bộ phim "${cleanName}" với chất lượng hình ảnh và âm thanh vòm sống động trên màn hình cong IMAX tại CineVerse Lotte.`
+      };
+    }
+
     function getEffectiveRoom(roomId) {
       const base = DEFAULT_ROOMS.find(r => r.id === roomId) || DEFAULT_ROOMS[0];
       const adminCfg = (state.lobbyConfigRooms && state.lobbyConfigRooms[roomId]) || {};
@@ -5156,6 +5700,13 @@
         merged.status = "showing";
       }
       merged.poster = resolveMoviePoster(merged.movieTitle, merged.poster, merged.youtubeId);
+      const meta = resolveMovieMetadata(merged.movieTitle, base);
+      merged.synopsis = meta.synopsis;
+      merged.cast = meta.cast;
+      merged.genre = meta.genre;
+      merged.duration = meta.duration;
+      merged.ageRating = meta.ageRating;
+      merged.year = meta.year;
       return merged;
     }
 
@@ -5278,6 +5829,7 @@
       setTxt("hero-age-rating", room.ageRating || "T13+");
       setTxt("hero-rank-badge", room.rankBadge || "TOP PHIM HÔM NAY");
       setTxt("hero-match-score", room.matchScore || "98% Phù hợp");
+      setTxt("hero-year", room.year || "2025");
       setTxt("hero-quality-badge", room.quality || "4K IMAX");
       setTxt("hero-duration", room.duration || "15:00");
       setTxt("hero-movie-title", room.movieTitle);
@@ -7673,6 +8225,8 @@
       enterRoom(targetRoomId);
       renderJJKEpisodeLists(vaultId);
       renderTheaterLeftMovieList();
+      renderHeroBillboard();
+      renderLobby();
       const roomObj = getEffectiveRoom(targetRoomId);
       showToast(`🎬 Đang phát "${item.title}" tại ${roomObj.number}!`, "success");
     }
@@ -8680,9 +9234,9 @@
       const vault = (typeof getAllCatalogVideos === "function" ? getAllCatalogVideos() : []).slice(0, 60).map(v => v.title);
       return {
         movieTitle: room?.movieTitle || "Phim đang chiếu",
-        genre: isSameDefault ? (room?.genre || "") : "",
-        cast: isSameDefault ? (room?.cast || "") : "",
-        synopsis: isSameDefault ? (room?.synopsis || "") : "",
+        genre: room?.genre || "",
+        cast: room?.cast || "",
+        synopsis: room?.synopsis || "",
         availableRooms: allRooms,
         availableTitles: vault
       };
@@ -10648,6 +11202,13 @@
             hasLyrics: (data.movieTitle || "").toLowerCase().includes("tháng tư")
           };
           updateRoomHeaderUI();
+          renderHeroBillboard();
+          renderLobby();
+          if (state.currentRoomId === roomId) {
+            state.triviaData = null;
+            renderTriviaWidget();
+            renderTheaterLeftMovieList();
+          }
           setupRoomVideoPlayer(getEffectiveRoom(roomId));
           if (!data.youtubeId) {
             const videoEl = document.getElementById("html5-video-player");
@@ -14026,6 +14587,9 @@
 
           renderHeroBillboard();
           renderLobby();
+          if (!document.getElementById("hero-detail-modal")?.classList.contains("hidden")) {
+            openHeroDetailModal();
+          }
           if (state.currentRoomId) {
             const room = getEffectiveRoom(state.currentRoomId);
             const newTitle = room?.movieTitle || "";
@@ -14033,9 +14597,13 @@
             if (activeRoomMovieSwitched || (prevActiveTitle && newTitle !== prevActiveTitle) || (prevActiveUrl && newUrl !== prevActiveUrl)) {
               delete state.roomsCustom[state.currentRoomId];
               const freshRoom = getEffectiveRoom(state.currentRoomId);
+              state.triviaIndex = 0;
+              state.triviaAnsweredCurrent = false;
               updateRoomHeaderUI();
               setupRoomVideoPlayer(freshRoom);
               renderTheaterLeftMovieList();
+              if (state.sidebarTab === "trivia") renderTriviaPanel();
+              if (state.sidebarTab === "playlist") renderPlaylistQueue();
               showToast(`🎬 Admin đã phê duyệt & phát ngay bộ phim: "${freshRoom.movieTitle}"!`, "success");
             } else {
               const titleEl = document.getElementById("room-header-title");
