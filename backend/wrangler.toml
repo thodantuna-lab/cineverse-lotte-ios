@@ -4,7 +4,7 @@ compatibility_date = "2025-01-01"
 account_id = "988ac48a415b3b62191a7c80089215f9"
 
 [placement]
-mode = "smart"
+region = "gcp:asia-southeast1"
 
 [[r2_buckets]]
 binding = "MY_BUCKET"

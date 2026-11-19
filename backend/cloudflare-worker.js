@@ -442,6 +442,63 @@ function cleanPlainReply(text) {
     .trim();
 }
 
+function buildConciseSupportFallback(qTrim, body) {
+  const q = String(qTrim || "");
+  const isPaid = body?.paymentMode === "paid";
+  const rooms = Array.isArray(body?.availableRooms) ? body.availableRooms : [];
+
+  const numM = q.match(/phòng(?:\s*chiếu)?\s*0?([1-8])\b/i) || q.match(/\b(?:p|rm)[-\s]?0?([1-8])\b/i);
+  const wantCouple = /phòng\s*đôi/i.test(q);
+  const wantStream = /phòng\s*stream/i.test(q);
+  const targetNum = numM ? numM[1] : (wantCouple ? "7" : (wantStream ? "8" : ""));
+
+  if (targetNum) {
+    const matched = rooms.find(r => {
+      const lbl = String(r?.room || "");
+      const m = lbl.match(/0?([1-8])/);
+      if (m && m[1] === targetNum) return true;
+      if (targetNum === "7" && /đôi/i.test(lbl)) return true;
+      if (targetNum === "8" && /stream/i.test(lbl)) return true;
+      return false;
+    });
+    if (matched) {
+      const st = matched.status === "upcoming" ? "sắp chiếu" : "đang chiếu";
+      return `${matched.room} hiện ${st}: ${matched.title || "đang cập nhật"}. Vé đang ${isPaid ? "thu phí VietQR" : "Miễn Phí"}, bạn bấm vào ${matched.room} ở Sảnh chính để chọn ghế nhé.`;
+    }
+    return `Bạn chọn Phòng 0${targetNum} ở Sảnh chính để xem lịch chiếu và đặt ghế nhé.`;
+  }
+
+  if (/doanh\s*thu|thống\s*kê|lợi\s*nhuận/i.test(q)) {
+    return isPaid
+      ? "Số liệu doanh thu là thông tin nội bộ nên không công khai ạ."
+      : "Rạp hiện đang mở Miễn Phí toàn bộ nên không phát sinh doanh thu vé ạ.";
+  }
+  if (/giá\s*vé|mua\s*vé|đặt\s*vé|thanh\s*toán|vietqr|mất\s*phí|bao\s*nhiêu\s*tiền/i.test(q)) {
+    return isPaid
+      ? "Rạp đang áp dụng thu phí VietQR, bạn chọn ghế rồi quét mã QR để Admin duyệt nhé."
+      : "Hiện rạp đang mở Miễn Phí, bạn chỉ cần chọn phòng và ghế để vào xem ngay nhé.";
+  }
+  if (/đổi\s*phim|yêu\s*cầu\s*phim|chiếu\s*phim\s*khác/i.test(q)) {
+    return "Trong phòng chiếu, bạn bấm vào phim ở cột Phim Đang Có bên trái để gửi yêu cầu Chủ Rạp duyệt đổi phim nhé.";
+  }
+  if (/\bmic\b|micro|âm\s*thanh|nói\s*chuyện/i.test(q)) {
+    return "Bạn bấm nút Bật Mic ở thanh điều khiển dưới màn hình và cấp quyền micro cho trình duyệt nhé.";
+  }
+  if (/phụ\s*đề|vietsub|\bsub\b|\bsrt\b/i.test(q)) {
+    return "Phụ đề chỉ hiển thị với phim có file .srt trên máy chủ; phim đã có Vietsub cứng sẽ tự ẩn nút phụ đề ạ.";
+  }
+  if (/tìm\s*rạp|hà\s*nội|\bcgv\b|\bbeta\b|\blotte\b/i.test(q)) {
+    return "Bạn bấm nút Tìm Rạp Hà Nội trên thanh menu để xem các cụm rạp gần nhất và lịch chiếu nhé.";
+  }
+  if (/(chủ\s*rạp|\badmin\b|khiếu\s*nại|tài\s*khoản|mở\s*khóa)/iu.test(q)) {
+    return "Chủ Rạp đã nhận được tin nhắn của bạn và sẽ phản hồi sớm nhất nhé.";
+  }
+  if (/(phòng\s*(?:nào|gì|mấy|chiếu)|đang\s*chiếu|sắp\s*chiếu|xem\s*gì|gợi\s*ý|(?<![\p{L}\p{N}])(?:kho|list)(?![\p{L}\p{N}])|danh\s*sách|có\s*phim|phim\s*gì|phim\s*nào)/iu.test(q) && rooms.length > 0) {
+    return `Rạp đang có: ${rooms.slice(0, 4).map(r => `${r.room} (${r.title})`).join(", ")}. Bạn xem đủ các phòng ở Sảnh chính nhé.`;
+  }
+  return "Chủ Rạp đã nhận được tin nhắn của bạn và sẽ phản hồi sớm nhất nhé.";
+}
+
 async function handleAIRequest(request, env, ctx) {
   if (!env.GEMINI_API_KEY) {
     return jsonResponse({ ok: false, error: "MISSING_GEMINI_API_KEY" }, 200);
@@ -476,7 +533,7 @@ async function handleAIRequest(request, env, ctx) {
       }
     }
 
-    const asksCatalog = /(xem gì|gợi ý|kho|list|danh sách|có phim|phim gì|phim nào|các phim|những phim|mấy phim|đổi phim|tìm phim|thể loại|anime|hành động|kinh dị)/i.test(qTrim);
+    const asksCatalog = /(xem gì|gợi ý|(?<![\p{L}\p{N}])(?:kho|list)(?![\p{L}\p{N}])|danh sách|có phim|phim gì|phim nào|các phim|những phim|mấy phim|đổi phim|tìm phim|thể loại|anime|hành động|kinh dị)/iu.test(qTrim);
     const asksRooms = /(phòng|room|đang chiếu|sắp chiếu|lịch|xem gì|chỗ nào|vào đâu)/i.test(qTrim);
     const asksGuide = /(cách|làm sao|hướng dẫn|đặt vé|chọn ghế|đổi phim|phụ đề|sub|srt|tìm rạp|hà nội|mic|âm thanh|tiếng|lỗi|không xem|lag|giật|vé|tiền|qr)/i.test(qTrim);
 
@@ -571,6 +628,15 @@ Khán giả: ${qTrim}`;
       }
     }
     if (!rawText) {
+      if (mode === "support") {
+        return jsonResponse({
+          ok: true,
+          mode,
+          reply: buildConciseSupportFallback(qTrim, body),
+          fallback: true,
+          upstreamError: lastError
+        }, 200);
+      }
       return jsonResponse({ ok: false, error: lastError }, 200);
     }
 
