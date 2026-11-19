@@ -1108,7 +1108,7 @@
       border-top: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    /* Hạng ghế VIP Gold Class (Hàng D, E) - Da bò Cognac viền vàng kim */
+    /* Hạng ghế VIP (Hàng D, E) - Viền vàng kim */
     .cinema-chair.chair-vip {
       background: linear-gradient(180deg, #5c3415 0%, #361d0a 55%, #1a0d04 100%);
       border-color: rgba(245, 158, 11, 0.65);
@@ -3516,7 +3516,7 @@
                 <span class="w-3 h-3 rounded bg-rose-950 border border-rose-700 inline-block"></span>Standard (A–C)
               </span>
               <span class="flex items-center gap-1.5">
-                <span class="w-3 h-3 rounded bg-amber-900/80 border border-amber-500 inline-block"></span>VIP Da Bò (D, E)
+                <span class="w-3 h-3 rounded bg-amber-900/80 border border-amber-500 inline-block"></span>Hàng ghế VIP (D, E)
               </span>
               <span class="flex items-center gap-1.5">
                 <span class="w-3 h-3 rounded bg-rose-800 border border-rose-400 inline-block"></span>Sweetbox Đôi (F)
@@ -5605,6 +5605,7 @@
     let myActiveSeatPath = null;
     let myActiveSeatDisconnect = null;
     let hasSyncedInitialSeats = false;
+    const rtdbConfirmedMySeatByRoom = {};
 
     function escapeHTML(str = "") {
       return String(str)
@@ -6966,6 +6967,9 @@
         } else if (!roomSeats["F5"]) {
           assignSeat(roomId, "F5", false);
         }
+      } else {
+        const existingMySeat = getMySeatInRoom(roomId);
+        if (existingMySeat) syncMySeatToRTDB(roomId, existingMySeat);
       }
 
       try { updateRoomHeaderUI(); } catch (_) {}
@@ -7014,6 +7018,7 @@
         }
         clearMyChatTyping();
         clearMySeatFromRTDB();
+        rtdbConfirmedMySeatByRoom[oldRoomId] = false;
         releaseMyHostStatus();
         cleanupRoomVoice(oldRoomId);
         cleanupRoomLiveScreen(oldRoomId);
@@ -7334,7 +7339,7 @@
           const bubble = state.seatBubbles[bubbleKey];
           const hasValidBubble = bubble && bubble.expiresAt > now;
 
-          const tierLabel = isCouple ? "Sweetbox" : isVIP ? "VIP Da Bò" : "Trống";
+          const tierLabel = isCouple ? "Sweetbox" : isVIP ? "VIP" : "Trống";
 
           return `
             <button type="button"
@@ -11921,6 +11926,42 @@
       };
     }
 
+    const HOST_SESSION_STORAGE_KEY = "cineverse_host_session_v1";
+
+    function savePersistedHostSession(roomId, claimedAt = null) {
+      if (!roomId || !state.uid) return;
+      try {
+        const prev = loadPersistedHostSession();
+        localStorage.setItem(HOST_SESSION_STORAGE_KEY, JSON.stringify({
+          roomId,
+          uid: state.uid,
+          userName: state.userName || "Host",
+          claimedAt: claimedAt || (prev && prev.roomId === roomId ? prev.claimedAt : Date.now()) || Date.now(),
+          updatedAt: Date.now()
+        }));
+      } catch (_) {}
+    }
+
+    function loadPersistedHostSession() {
+      try {
+        const raw = localStorage.getItem(HOST_SESSION_STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.roomId || !parsed.uid) return null;
+        if (parsed.updatedAt && (Date.now() - parsed.updatedAt > 43200000)) {
+          localStorage.removeItem(HOST_SESSION_STORAGE_KEY);
+          return null;
+        }
+        return parsed;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function clearPersistedHostSession() {
+      try { localStorage.removeItem(HOST_SESSION_STORAGE_KEY); } catch (_) {}
+    }
+
     function isIAmHost() {
       return Boolean(currentRoomHost && currentRoomHost.uid === state.uid);
     }
@@ -11961,24 +12002,38 @@
       }
     }
 
+    let hostHeartbeatTickCount = 0;
     function startHostHeartbeat() {
       stopHostHeartbeat();
+      hostHeartbeatTickCount = 0;
       hostHeartbeatTimer = setInterval(() => {
         if (isIAmHost() && state.currentRoomId) {
           broadcastRoomVideoSync("heartbeat");
+          hostHeartbeatTickCount += 1;
+          if (hostHeartbeatTickCount % 8 === 0) {
+            const roomId = state.currentRoomId;
+            savePersistedHostSession(roomId);
+            if (rtdb && rtdbMod) {
+              rtdbMod.update(rtdbMod.ref(rtdb, `host/${roomId}`), {
+                updatedAt: Date.now()
+              }).catch(() => {});
+            }
+          }
         }
       }, 3000);
     }
 
     function releaseMyHostStatus() {
       stopHostHeartbeat();
+      clearPersistedHostSession();
       if (myHostDisconnect) {
         try { myHostDisconnect.cancel(); } catch (e) {}
         myHostDisconnect = null;
       }
-      if (myHostRoomId && rtdb && rtdbMod) {
-        try { rtdbMod.remove(rtdbMod.ref(rtdb, `host/${myHostRoomId}`)); } catch (e) {}
-        try { rtdbMod.remove(rtdbMod.ref(rtdb, `effects/${myHostRoomId}`)); } catch (e) {}
+      const targetHostRoom = myHostRoomId || (isIAmHost() ? state.currentRoomId : null);
+      if (targetHostRoom && rtdb && rtdbMod) {
+        try { rtdbMod.remove(rtdbMod.ref(rtdb, `host/${targetHostRoom}`)); } catch (e) {}
+        try { rtdbMod.remove(rtdbMod.ref(rtdb, `effects/${targetHostRoom}`)); } catch (e) {}
       }
       myHostRoomId = null;
       currentRoomHost = null;
@@ -12064,16 +12119,20 @@
       try {
         const hostRef = rtdbMod.ref(rtdb, `host/${roomId}`);
         myHostRoomId = roomId;
-        myHostDisconnect = rtdbMod.onDisconnect(hostRef);
-        await myHostDisconnect.remove();
+        if (myHostDisconnect) {
+          try { await myHostDisconnect.cancel(); } catch (_) {}
+          myHostDisconnect = null;
+        }
+        const now = Date.now();
         const hostObj = {
           uid: state.uid,
           userName: state.userName,
           userEmail: state.userEmail || "",
-          claimedAt: Date.now(),
-          updatedAt: Date.now()
+          claimedAt: now,
+          updatedAt: now
         };
         await rtdbMod.set(hostRef, hostObj);
+        savePersistedHostSession(roomId, now);
         currentRoomHost = hostObj;
         renderRoomHostBadge();
         startHostHeartbeat();
@@ -12338,12 +12397,55 @@
         }
       };
 
+      let hostRestoreChecked = false;
       const unsubHost = rtdbMod.onValue(rtdbMod.ref(rtdb, `host/${roomId}`), (snap) => {
         const hostVal = snap.val();
-        currentRoomHost = (hostVal && hostVal.uid) ? hostVal : null;
-        if (!isIAmHost()) {
+        const savedHost = loadPersistedHostSession();
+
+        if (hostVal && hostVal.uid === state.uid) {
+          hostRestoreChecked = true;
+          myHostRoomId = roomId;
+          currentRoomHost = hostVal;
+          savePersistedHostSession(roomId, hostVal.claimedAt || Date.now());
+          renderRoomHostBadge();
+          startHostHeartbeat();
+          return;
+        }
+
+        if ((!hostVal || !hostVal.uid) && !hostRestoreChecked && savedHost && savedHost.roomId === roomId && savedHost.uid === state.uid) {
+          hostRestoreChecked = true;
+          myHostRoomId = roomId;
+          const restoredHost = {
+            uid: state.uid,
+            userName: state.userName || savedHost.userName || "Host",
+            userEmail: state.userEmail || "",
+            claimedAt: savedHost.claimedAt || Date.now(),
+            updatedAt: Date.now()
+          };
+          currentRoomHost = restoredHost;
+          savePersistedHostSession(roomId, restoredHost.claimedAt);
+          rtdbMod.set(rtdbMod.ref(rtdb, `host/${roomId}`), restoredHost).catch(() => {});
+          renderRoomHostBadge();
+          startHostHeartbeat();
+          broadcastRoomVideoSync("host");
+          broadcastRoomEffectsSync();
+          return;
+        }
+
+        if (hostVal && hostVal.uid && hostVal.uid !== state.uid) {
+          hostRestoreChecked = true;
+          if (savedHost?.roomId === roomId) clearPersistedHostSession();
+          myHostRoomId = null;
+          currentRoomHost = hostVal;
+          stopHostHeartbeat();
+        } else {
+          hostRestoreChecked = true;
+          if (savedHost?.roomId === roomId) clearPersistedHostSession();
+          myHostRoomId = null;
+          currentRoomHost = null;
           stopHostHeartbeat();
         }
+
         renderRoomHostBadge();
         if (currentRoomHost && currentRoomHost.uid && currentRoomHost.uid !== state.uid) {
           if (latestRoomEffectsState) applyRemoteRoomEffects(latestRoomEffectsState, roomId, false);
@@ -15920,7 +16022,6 @@
         const cleanupOnLeave = () => {
           saveWatchProgressForCurrentVideo(true);
           clearMySeatFromRTDB();
-          releaseMyHostStatus();
           cleanupRoomVoice(state.currentRoomId);
           cleanupRoomLiveScreen(state.currentRoomId);
           cleanupRoomLiveCam(state.currentRoomId);
@@ -16064,16 +16165,64 @@
           renderLobby();
         }, () => {});
 
-        // Lắng nghe ghế ngồi của các phòng theo thời gian thực + debounce + dirty-check tránh vẽ lại thừa khi đông người
+        // Đồng bộ ngay ghế đang ngồi trước khi mở listener seats/$roomId để tránh snapshot rỗng lúc vừa F5 xóa mất ghế
+        if (state.currentRoomId) {
+          const bootSeat = getMySeatInRoom(state.currentRoomId) || state.bookedTicketsByRoom?.[state.currentRoomId]?.seatId;
+          if (bootSeat) {
+            if (!state.seatsByRoom[state.currentRoomId]) state.seatsByRoom[state.currentRoomId] = {};
+            if (!state.seatsByRoom[state.currentRoomId][bootSeat] || state.seatsByRoom[state.currentRoomId][bootSeat].uid === state.uid) {
+              state.seatsByRoom[state.currentRoomId][bootSeat] = {
+                uid: state.uid,
+                userName: state.userName,
+                snack: state.mySnack || "🍿🥤",
+                isReal: true,
+                updatedAt: Date.now()
+              };
+              syncMySeatToRTDB(state.currentRoomId, bootSeat);
+            }
+          }
+        }
+
+        // Lắng nghe ghế ngồi theo từng phòng (seats/$roomId — khớp đúng Firebase Security Rules) + debounce + dirty-check
         let seatsRenderTimer = null;
         let lastRoomSeatsSig = "";
         let lastLobbySeatsSig = "";
-        rtdbMod.onValue(rtdbMod.ref(rtdb, "seats"), (snap) => {
-          const allRemote = snap.val() || {};
-          const nowTs = Date.now();
-          DEFAULT_ROOMS.forEach(r => {
+        const hasSyncedInitialRoomSeats = {};
+
+        const scheduleSeatsUIRender = () => {
+          if (seatsRenderTimer) clearTimeout(seatsRenderTimer);
+          seatsRenderTimer = setTimeout(() => {
+            seatsRenderTimer = null;
+            requestAnimationFrame(() => {
+              if (state.currentRoomId) {
+                const curSeats = state.seatsByRoom[state.currentRoomId] || {};
+                const sig = state.currentRoomId + "|" + Object.entries(curSeats)
+                  .sort((a, b) => a[0].localeCompare(b[0]))
+                  .map(([sid, s]) => `${sid}:${s?.uid || ""}:${s?.userName || ""}:${s?.snack || ""}`)
+                  .join(",");
+                if (sig !== lastRoomSeatsSig) {
+                  lastRoomSeatsSig = sig;
+                  renderSeatingMap();
+                  renderAudienceList();
+                  updateRoomHeaderUI();
+                }
+              } else {
+                const lobbySig = DEFAULT_ROOMS.map(rm => `${rm.id}:${Object.keys(state.seatsByRoom[rm.id] || {}).length}`).join("|");
+                if (lobbySig !== lastLobbySeatsSig) {
+                  lastLobbySeatsSig = lobbySig;
+                  renderHeroBillboard();
+                  renderLobby();
+                }
+              }
+            });
+          }, 180);
+        };
+
+        DEFAULT_ROOMS.forEach(r => {
+          rtdbMod.onValue(rtdbMod.ref(rtdb, `seats/${r.id}`), (snap) => {
+            const nowTs = Date.now();
             const prevRoom = state.seatsByRoom[r.id] || {};
-            const rawRemote = allRemote[r.id] || {};
+            const rawRemote = snap.val() || {};
             const remoteRoom = {};
             Object.entries(rawRemote).forEach(([seatId, info]) => {
               if (!info || !info.uid) return;
@@ -16085,7 +16234,8 @@
               remoteRoom[seatId] = info;
             });
 
-            if (hasSyncedInitialSeats && state.currentRoomId === r.id) {
+            const roomSyncedBefore = Boolean(hasSyncedInitialRoomSeats[r.id]);
+            if (roomSyncedBefore && state.currentRoomId === r.id) {
               Object.entries(remoteRoom).forEach(([seatId, info]) => {
                 if (info && info.isReal && info.uid !== state.uid) {
                   const prevInfo = prevRoom[seatId];
@@ -16115,67 +16265,60 @@
                 merged[seatId] = info;
               }
             });
+
+            const isMeSeatedNow = Object.values(remoteRoom).some(s => s && s.uid === state.uid);
+            const justEntered = Boolean(state.currentRoomId === r.id && state.roomEnteredAt && (nowTs - state.roomEnteredAt < 4000));
+
+            if (isMeSeatedNow) {
+              rtdbConfirmedMySeatByRoom[r.id] = true;
+            } else if (state.currentRoomId === r.id && justEntered) {
+              // Giữ lại ghế cục bộ trong lúc syncMySeatToRTDB hoàn tất ghi ngay sau khi vào phòng / F5
+              const localMySeatEntry = Object.entries(prevRoom).find(([, s]) => s && s.uid === state.uid);
+              const fallbackSeatId = localMySeatEntry?.[0] || state.bookedTicketsByRoom?.[r.id]?.seatId;
+              if (fallbackSeatId && !merged[fallbackSeatId]) {
+                merged[fallbackSeatId] = localMySeatEntry?.[1] || {
+                  uid: state.uid,
+                  userName: state.userName,
+                  snack: state.mySnack || "🍿🥤",
+                  isReal: true,
+                  updatedAt: nowTs
+                };
+                syncMySeatToRTDB(r.id, fallbackSeatId);
+              }
+            }
+
             const prevRealCount = Object.values(prevRoom).filter(s => s && s.isReal).length;
             const remoteRealCount = Object.values(remoteRoom).filter(s => s && s.isReal).length;
-            if (hasSyncedInitialSeats && prevRealCount > 0 && remoteRealCount === 0) {
+            if (roomSyncedBefore && prevRealCount > 0 && remoteRealCount === 0 && !justEntered) {
               state.chatByRoom[r.id] = [];
               delete state.roomsCustom[r.id];
               rtdbMod.remove(rtdbMod.ref(rtdb, `chat/${r.id}`)).catch(() => {});
               rtdbMod.remove(rtdbMod.ref(rtdb, `sync/${r.id}`)).catch(() => {});
             }
 
-            const wasMeSeated = Object.values(prevRoom).some(s => s && s.uid === state.uid);
-            const isMeSeatedNow = Object.values(remoteRoom).some(s => s && s.uid === state.uid);
             state.seatsByRoom[r.id] = merged;
 
-            // Bắt buộc có ghế ngồi mới được xem trong phòng: nếu ghế của người dùng bị Admin dọn trên RTDB -> tự động đưa ra Sảnh chính ngay lập tức
-            if (state.currentRoomId === r.id && !isMeSeatedNow) {
-              const justEntered = state.roomEnteredAt && (Date.now() - state.roomEnteredAt < 2500);
-              if (wasMeSeated || (hasSyncedInitialSeats && !justEntered)) {
-                if (state.bookedTicketsByRoom?.[r.id]) {
-                  delete state.bookedTicketsByRoom[r.id];
-                  saveAppStateToStorage();
-                }
-                clearMySeatFromRTDB();
-                showToast("🪑 Ghế của bạn đã được Admin dọn — mời bạn ra Sảnh chính đặt lại ghế!", "info");
-                setTimeout(() => {
-                  if (state.currentRoomId === r.id && !getMySeatInRoom(r.id)) {
-                    leaveRoom();
-                  }
-                }, 40);
+            // Chỉ đưa ra Sảnh chính nếu ghế đã từng được RTDB xác nhận và sau đó bị xóa (Admin dọn ghế)
+            if (state.currentRoomId === r.id && !isMeSeatedNow && rtdbConfirmedMySeatByRoom[r.id] && !justEntered) {
+              rtdbConfirmedMySeatByRoom[r.id] = false;
+              if (state.bookedTicketsByRoom?.[r.id]) {
+                delete state.bookedTicketsByRoom[r.id];
+                saveAppStateToStorage();
               }
+              clearMySeatFromRTDB();
+              showToast("🪑 Ghế của bạn đã được Admin dọn — mời bạn ra Sảnh chính đặt lại ghế!", "info");
+              setTimeout(() => {
+                if (state.currentRoomId === r.id && !getMySeatInRoom(r.id)) {
+                  leaveRoom();
+                }
+              }, 40);
             }
-          });
 
-          hasSyncedInitialSeats = true;
-
-          if (seatsRenderTimer) clearTimeout(seatsRenderTimer);
-          seatsRenderTimer = setTimeout(() => {
-            seatsRenderTimer = null;
-            requestAnimationFrame(() => {
-              if (state.currentRoomId) {
-                const curSeats = state.seatsByRoom[state.currentRoomId] || {};
-                const sig = state.currentRoomId + "|" + Object.entries(curSeats)
-                  .sort((a, b) => a[0].localeCompare(b[0]))
-                  .map(([sid, s]) => `${sid}:${s?.uid || ""}:${s?.userName || ""}:${s?.snack || ""}`)
-                  .join(",");
-                if (sig !== lastRoomSeatsSig) {
-                  lastRoomSeatsSig = sig;
-                  renderSeatingMap();
-                  renderAudienceList();
-                  updateRoomHeaderUI();
-                }
-              } else {
-                const lobbySig = DEFAULT_ROOMS.map(r => `${r.id}:${Object.keys(state.seatsByRoom[r.id] || {}).length}`).join("|");
-                if (lobbySig !== lastLobbySeatsSig) {
-                  lastLobbySeatsSig = lobbySig;
-                  renderHeroBillboard();
-                  renderLobby();
-                }
-              }
-            });
-          }, 280);
-        }, () => {});
+            hasSyncedInitialRoomSeats[r.id] = true;
+            hasSyncedInitialSeats = true;
+            scheduleSeatsUIRender();
+          }, () => {});
+        });
 
         // Theo dõi khách đang mở web & lịch sử truy cập (chỉ Admin mới tải danh sách đầy đủ để tối ưu 100+ người dùng)
         const myOnlineRef = rtdbMod.ref(rtdb, `online_visitors/${state.uid}`);
@@ -16501,7 +16644,7 @@
         return { price: 150000, tier: "Sweetbox Đôi • Hàng F" };
       }
       if (row === "D" || row === "E") {
-        return { price: 120000, tier: `VIP Da Bò • Hàng ${row}` };
+        return { price: 120000, tier: `Hàng ghế VIP • Hàng ${row}` };
       }
       return { price: 90000, tier: `Standard • Hàng ${row}` };
     }
