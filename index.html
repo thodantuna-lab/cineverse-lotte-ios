@@ -3941,6 +3941,33 @@
     </div>
   </div>
 
+  <!-- MODAL NHƯỜNG QUYỀN CHỦ TRÌ PHÒNG CHIẾU -->
+  <div id="host-transfer-modal" onclick="if(event.target===this)window.appActions.closeHostTransferModal()" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-stone-900 border border-amber-400/30 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-black text-white"><i class="fa-solid fa-crown text-amber-400 mr-2"></i>Nhường Quyền Chủ Trì</h3>
+        <button type="button" onclick="window.appActions.closeHostTransferModal()" class="text-slate-400 hover:text-white cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-300 leading-relaxed">Chọn khán giả đang ngồi trong rạp để trao toàn quyền <strong class="text-amber-300">Chủ Trì</strong> (phát/dừng/tua phim, đổi phim từ danh sách và đồng bộ rạp).</p>
+      <input id="host-transfer-search" type="text" maxlength="40" placeholder="Tìm theo tên hoặc số ghế (VD: B6)..."
+        oninput="window.appActions.filterHostTransferList(this.value)"
+        class="w-full px-3 py-2 rounded-xl bg-stone-950 border border-white/15 text-xs text-white focus:outline-none focus:border-amber-400" />
+      <div id="host-transfer-list" class="max-h-64 overflow-y-auto space-y-2 pr-1"></div>
+      <div class="flex items-center justify-between gap-2 pt-3 border-t border-white/10">
+        <button type="button" onclick="window.appActions.releaseRoomHostFree()"
+          class="px-3 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 text-xs font-bold transition cursor-pointer">
+          <i class="fa-solid fa-door-open mr-1.5"></i>Trả quyền tự do
+        </button>
+        <button type="button" onclick="window.appActions.closeHostTransferModal()"
+          class="px-4 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-slate-300 text-xs font-bold transition cursor-pointer">
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL THANH TOÁN VIETQR (CHẾ ĐỘ TRẢ PHÍ) -->
   <div id="payment-qr-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-stone-900 border border-amber-400/35 rounded-3xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-2xl">
@@ -7031,6 +7058,7 @@
         toggleDimLights();
       }
       closeAllDropdowns();
+      closeHostTransferModal();
       if (roomChatUnsub) {
         roomChatUnsub();
         roomChatUnsub = null;
@@ -7420,17 +7448,29 @@
         return;
       }
 
+      const iAmHostNow = isIAmHost();
+      const activeHostUid = currentRoomHost?.uid || "";
+
       listEl.innerHTML = entries.map(([seatId, info]) => {
         const isMe = info.uid === state.uid;
+        const isHostUser = Boolean(activeHostUid && info.uid === activeHostUid);
         const isSpeakingNow = typeof speakingUids !== "undefined" && speakingUids.has(info.uid);
         return `
           <div data-audience-uid="${escapeHTML(info.uid)}" class="flex items-center justify-between px-2.5 py-1.5 rounded-xl transition-all duration-150 ${isMe ? 'bg-amber-500/20 border border-amber-400/40' : 'bg-stone-950 border border-white/5'} ${isSpeakingNow ? 'audience-row-speaking' : ''}">
             <div class="flex items-center gap-2 min-w-0">
               <span class="px-2 py-0.5 rounded bg-rose-600 text-white font-black text-[10px] shrink-0">${seatId}</span>
               <span class="font-bold truncate ${isMe ? 'text-amber-300' : 'text-slate-200'}">${escapeHTML(info.userName)} ${isMe ? '(Bạn)' : ''}</span>
+              ${isHostUser ? '<span class="px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[10px] font-black shrink-0">👑 Chủ Trì</span>' : ''}
               ${info.snack ? `<span class="text-xs">${escapeHTML(info.snack)}</span>` : ''}
             </div>
             <div class="flex items-center gap-1.5 shrink-0">
+              ${iAmHostNow && !isMe && info.isReal ? `
+                <button type="button" data-focus-uid="${escapeHTML(info.uid)}" onclick="window.appActions.openHostTransferModal(this.dataset.focusUid)"
+                  class="px-2 py-0.5 rounded bg-purple-600/25 hover:bg-amber-500 border border-amber-400/40 text-amber-200 hover:text-slate-950 text-[10px] font-bold transition cursor-pointer"
+                  title="Nhường quyền Chủ Trì cho ${escapeHTML(info.userName)}">
+                  👑 Nhường
+                </button>
+              ` : ''}
               <button type="button" onclick="window.appActions.openConcessionModal('${seatId}')"
                 class="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-slate-950 text-[10px] font-bold transition cursor-pointer" title="Tặng bắp nước cho ghế ${seatId}">
                 🎁 Tặng
@@ -8567,7 +8607,7 @@
     let lastSpaceHandledAt = 0;
     function isAnyBlockingModalOpen() {
       if (document.getElementById("cv-intro-splash")) return true;
-      const modalIds = ["name-modal", "host-key-modal", "admin-panel-modal", "memory-capsule-modal", "payment-modal", "request-movie-modal", "seat-booking-modal", "maintenance-gate-overlay"];
+      const modalIds = ["name-modal", "host-key-modal", "host-transfer-modal", "admin-panel-modal", "memory-capsule-modal", "payment-modal", "request-movie-modal", "seat-booking-modal", "maintenance-gate-overlay"];
       return modalIds.some((id) => {
         const el = document.getElementById(id);
         return el && !el.classList.contains("hidden");
@@ -11972,12 +12012,15 @@
       if (!currentRoomHost || !currentRoomHost.uid) {
         btn.innerHTML = `<i class="fa-solid fa-crown mr-1"></i>Nhận Chủ Trì`;
         btn.className = "px-2 py-0.5 rounded-lg bg-stone-800 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-[11px] transition cursor-pointer";
+        btn.title = "Bấm để nhập Key và nhận quyền Chủ Trì phòng";
       } else if (currentRoomHost.uid === state.uid) {
-        btn.innerHTML = `<i class="fa-solid fa-crown mr-1"></i>Bạn là Chủ Trì (Đang đồng bộ)`;
+        btn.innerHTML = `<i class="fa-solid fa-crown mr-1"></i>Bạn là Chủ Trì • Nhường quyền`;
         btn.className = "px-2 py-0.5 rounded-lg bg-amber-500 text-slate-950 font-black text-[11px] shadow cursor-pointer";
+        btn.title = "Bấm để nhường quyền Chủ Trì cho người khác trong rạp hoặc trả phòng tự do";
       } else {
         btn.innerHTML = `<i class="fa-solid fa-crown mr-1 text-amber-400"></i>Chủ Trì: ${escapeHTML(currentRoomHost.userName || "Host")}`;
         btn.className = "px-2 py-0.5 rounded-lg bg-purple-600/25 text-purple-200 border border-purple-400/40 font-bold text-[11px] cursor-pointer";
+        btn.title = "Chủ Trì hiện tại của phòng";
       }
       const canControl = isIAmHost();
       const seekSlider = document.getElementById("video-seek-slider");
@@ -11992,6 +12035,17 @@
       }
       if (state.currentRoomId && typeof renderTheaterLeftMovieList === "function") {
         renderTheaterLeftMovieList();
+      }
+      if (state.currentRoomId && typeof renderAudienceList === "function") {
+        renderAudienceList();
+      }
+      const transferModal = document.getElementById("host-transfer-modal");
+      if (transferModal && !transferModal.classList.contains("hidden")) {
+        if (!canControl) {
+          closeHostTransferModal();
+        } else {
+          renderHostTransferModalList();
+        }
       }
     }
 
@@ -12147,15 +12201,181 @@
       }
     }
 
+    let hostTransferFocusUid = "";
+    let hostTransferQuery = "";
+    let hostTransferInFlight = false;
+
+    function getTransferableRoomViewers(roomId) {
+      if (!roomId) return [];
+      const roomSeats = state.seatsByRoom[roomId] || {};
+      const byUid = new Map();
+      Object.entries(roomSeats)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .forEach(([seatId, info]) => {
+          if (!info || !info.isReal || !info.uid || info.uid === state.uid) return;
+          if (!byUid.has(info.uid)) {
+            byUid.set(info.uid, {
+              seatId,
+              uid: info.uid,
+              userName: String(info.userName || "Khán giả").trim() || "Khán giả",
+              snack: info.snack || ""
+            });
+          }
+        });
+      return Array.from(byUid.values()).sort((a, b) => {
+        if (hostTransferFocusUid) {
+          if (a.uid === hostTransferFocusUid && b.uid !== hostTransferFocusUid) return -1;
+          if (b.uid === hostTransferFocusUid && a.uid !== hostTransferFocusUid) return 1;
+        }
+        return a.seatId.localeCompare(b.seatId);
+      });
+    }
+
+    function renderHostTransferModalList() {
+      const listEl = document.getElementById("host-transfer-list");
+      if (!listEl || !state.currentRoomId) return;
+      const viewers = getTransferableRoomViewers(state.currentRoomId);
+      if (viewers.length === 0) {
+        listEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-6 italic">Hiện chưa có khán giả nào khác đang ngồi ghế trong phòng này. Hãy đợi bạn bè vào phòng và chọn ghế để có thể nhường quyền!</p>`;
+        return;
+      }
+      const filtered = hostTransferQuery
+        ? viewers.filter(v => v.userName.toLowerCase().includes(hostTransferQuery) || v.seatId.toLowerCase().includes(hostTransferQuery))
+        : viewers;
+      if (filtered.length === 0) {
+        listEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-6 italic">Không tìm thấy khán giả phù hợp với từ khóa.</p>`;
+        return;
+      }
+      listEl.innerHTML = filtered.map(v => {
+        const isFocused = Boolean(hostTransferFocusUid && v.uid === hostTransferFocusUid);
+        return `
+          <div class="flex items-center justify-between gap-2 p-2.5 rounded-2xl transition ${isFocused ? 'bg-amber-500/15 border border-amber-400/70' : 'bg-stone-950 border border-white/10'}">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="px-2 py-0.5 rounded bg-rose-600 text-white font-black text-[10px] shrink-0">${escapeHTML(v.seatId)}</span>
+              <div class="min-w-0">
+                <p class="text-xs font-bold text-white truncate">${escapeHTML(v.userName)} ${v.snack ? escapeHTML(v.snack) : ''}</p>
+                ${isFocused ? '<p class="text-[10px] text-amber-300 font-bold">Đang chọn</p>' : ''}
+              </div>
+            </div>
+            <button type="button" data-transfer-uid="${escapeHTML(v.uid)}"
+              onclick="window.appActions.transferRoomHostTo(this.dataset.transferUid)"
+              class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] font-extrabold transition cursor-pointer shrink-0">
+              <i class="fa-solid fa-crown mr-1"></i>Nhường quyền
+            </button>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function openHostTransferModal(focusUid = "") {
+      if (!state.currentRoomId) return;
+      if (!isIAmHost()) {
+        showToast("Chỉ Chủ Trì phòng mới có thể nhường quyền!", "warning");
+        return;
+      }
+      hostTransferFocusUid = String(focusUid || "");
+      hostTransferQuery = "";
+      const searchEl = document.getElementById("host-transfer-search");
+      if (searchEl) searchEl.value = "";
+      renderHostTransferModalList();
+      document.getElementById("host-transfer-modal")?.classList.remove("hidden");
+    }
+
+    function closeHostTransferModal() {
+      document.getElementById("host-transfer-modal")?.classList.add("hidden");
+      hostTransferFocusUid = "";
+      hostTransferQuery = "";
+    }
+
+    function filterHostTransferList(val = "") {
+      hostTransferQuery = String(val || "").trim().toLowerCase();
+      renderHostTransferModalList();
+    }
+
+    function releaseRoomHostFree() {
+      closeHostTransferModal();
+      releaseMyHostStatus();
+      showToast("Bạn đã trả quyền Chủ Trì phòng về trạng thái tự do.", "info");
+    }
+
+    async function transferRoomHostTo(targetUid) {
+      if (hostTransferInFlight) return;
+      if (!state.currentRoomId || !rtdb || !rtdbMod) {
+        showToast("Đang kết nối máy chủ, vui lòng thử lại sau 1 giây!", "info");
+        return;
+      }
+      if (!isIAmHost()) {
+        closeHostTransferModal();
+        showToast("Chỉ Chủ Trì phòng mới có thể nhường quyền!", "warning");
+        return;
+      }
+      const roomId = state.currentRoomId;
+      if (!targetUid || targetUid === state.uid) return;
+      const target = getTransferableRoomViewers(roomId).find(v => v.uid === targetUid);
+      if (!target) {
+        renderHostTransferModalList();
+        showToast("Khán giả này vừa rời phòng hoặc chưa ngồi ghế!", "warning");
+        return;
+      }
+      hostTransferInFlight = true;
+      try {
+        stopHostHeartbeat();
+        if (myHostDisconnect) {
+          try { await myHostDisconnect.cancel(); } catch (_) {}
+          myHostDisconnect = null;
+        }
+        const now = Date.now();
+        const targetName = String(target.userName || "Khán giả").trim().slice(0, 40) || "Khán giả";
+        const fromName = String(state.userName || "Chủ Trì").trim().slice(0, 40) || "Chủ Trì";
+        const newHostObj = {
+          uid: target.uid,
+          userName: targetName,
+          claimedAt: now,
+          updatedAt: now,
+          transferredFromUid: state.uid,
+          transferredFromName: fromName
+        };
+        await rtdbMod.set(rtdbMod.ref(rtdb, `host/${roomId}`), newHostObj);
+        clearPersistedHostSession();
+        myHostRoomId = null;
+        currentRoomHost = newHostObj;
+        closeHostTransferModal();
+        renderRoomHostBadge();
+        if (state.sfxEnabled && typeof playSeatClickSFX === "function") playSeatClickSFX();
+
+        const sysMsg = {
+          id: "host_" + now + "_" + Math.random().toString(36).slice(2, 6),
+          uid: "system_host",
+          userName: "👑 Chủ Trì",
+          seatId: target.seatId || "VIP",
+          text: `${fromName} đã nhường quyền Chủ Trì phòng cho ${targetName} (ghế ${target.seatId})!`.slice(0, 240),
+          createdAt: now
+        };
+        rtdbMod.push(rtdbMod.ref(rtdb, `chat/${roomId}`), sysMsg).catch(() => {});
+        try {
+          logMemberActivity?.("host_transfer", `Nhường quyền Chủ Trì phòng ${getEffectiveRoom(roomId)?.number || roomId} cho ${targetName}`, {
+            roomId,
+            targetUid: target.uid,
+            targetName,
+            targetSeatId: target.seatId
+          });
+        } catch (_) {}
+        showToast(`👑 Đã nhường quyền Chủ Trì cho ${targetName} (ghế ${target.seatId})!`, "success");
+      } catch (e) {
+        if (isIAmHost()) startHostHeartbeat();
+        showToast("Không thể nhường quyền Chủ Trì lúc này, vui lòng thử lại.", "error");
+      } finally {
+        hostTransferInFlight = false;
+      }
+    }
+
     async function toggleRoomHost() {
       if (!state.currentRoomId || !rtdb || !rtdbMod) {
         showToast("Đang kết nối máy chủ, vui lòng thử lại sau 1 giây!", "info");
         return;
       }
-      const roomId = state.currentRoomId;
       if (isIAmHost()) {
-        releaseMyHostStatus();
-        showToast("Bạn đã nhường quyền Chủ Trì phòng.", "info");
+        openHostTransferModal();
         return;
       }
       if (currentRoomHost && currentRoomHost.uid && currentRoomHost.uid !== state.uid) {
@@ -12401,14 +12621,29 @@
       const unsubHost = rtdbMod.onValue(rtdbMod.ref(rtdb, `host/${roomId}`), (snap) => {
         const hostVal = snap.val();
         const savedHost = loadPersistedHostSession();
+        const wasMeHost = Boolean(currentRoomHost && currentRoomHost.uid === state.uid);
 
         if (hostVal && hostVal.uid === state.uid) {
+          const alreadyPersistedMe = Boolean(savedHost && savedHost.roomId === roomId && savedHost.uid === state.uid);
+          const isFreshTransferToMe = Boolean(
+            !wasMeHost &&
+            !alreadyPersistedMe &&
+            hostVal.transferredFromUid &&
+            hostVal.transferredFromUid !== state.uid &&
+            (Date.now() - (hostVal.claimedAt || 0) < 20000)
+          );
           hostRestoreChecked = true;
           myHostRoomId = roomId;
           currentRoomHost = hostVal;
           savePersistedHostSession(roomId, hostVal.claimedAt || Date.now());
           renderRoomHostBadge();
           startHostHeartbeat();
+          if (isFreshTransferToMe) {
+            if (state.sfxEnabled && typeof playCinemaBellSFX === "function") playCinemaBellSFX();
+            showToast(`👑 ${hostVal.transferredFromName || "Chủ Trì"} đã nhường quyền Chủ Trì phòng cho bạn!`, "success");
+            broadcastRoomVideoSync("host");
+            broadcastRoomEffectsSync();
+          }
           return;
         }
 
@@ -16205,6 +16440,10 @@
                   renderSeatingMap();
                   renderAudienceList();
                   updateRoomHeaderUI();
+                  const transferModal = document.getElementById("host-transfer-modal");
+                  if (transferModal && !transferModal.classList.contains("hidden")) {
+                    renderHostTransferModalList();
+                  }
                 }
               } else {
                 const lobbySig = DEFAULT_ROOMS.map(rm => `${rm.id}:${Object.keys(state.seatsByRoom[rm.id] || {}).length}`).join("|");
@@ -19879,6 +20118,11 @@
       seekBySeconds,
       syncLiveTime,
       toggleRoomHost,
+      openHostTransferModal,
+      closeHostTransferModal,
+      filterHostTransferList,
+      transferRoomHostTo,
+      releaseRoomHostFree,
       closeHostKeyModal,
       confirmHostKeyModal,
       pasteHostKeyFromClipboard,
