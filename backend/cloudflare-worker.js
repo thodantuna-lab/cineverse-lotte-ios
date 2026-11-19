@@ -431,9 +431,20 @@ ${numberedLines}`;
   }
 }
 
+function cleanPlainReply(text) {
+  return String(text || "")
+    .replace(/\*\*([^*\n]+)\*\*/g, "$1")
+    .replace(/__([^_\n]+)__/g, "$1")
+    .replace(/\*([^*\n]+)\*/g, "$1")
+    .replace(/`([^`\n]+)`/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 async function handleAIRequest(request, env, ctx) {
   if (!env.GEMINI_API_KEY) {
-    return jsonResponse({ ok: false, error: "MISSING_GEMINI_KEY" }, 200);
+    return jsonResponse({ ok: false, error: "MISSING_GEMINI_API_KEY" }, 200);
   }
   try {
     const body = await request.json();
@@ -442,10 +453,32 @@ async function handleAIRequest(request, env, ctx) {
     const genre = body.genre || "";
     const synopsis = body.synopsis || "";
     const cast = body.cast || "";
-    const question = body.question || "";
+    const qTrim = String(body.question || "").trim().slice(0, 350);
     const availableTitles = Array.isArray(body.availableTitles) ? body.availableTitles : [];
     const availableRooms = Array.isArray(body.availableRooms) ? body.availableRooms : [];
-    const history = Array.isArray(body.history) ? body.history.slice(-6) : [];
+    const history = Array.isArray(body.history)
+      ? body.history.slice(-4).map(h => ({ sender: h?.sender, text: String(h?.text || "").slice(0, 140) }))
+      : [];
+
+    if (mode === "support") {
+      const qNorm = qTrim.toLowerCase().replace(/[!.,?~…]+$/g, "").replace(/\s+/g, " ");
+      if (!qNorm) {
+        return jsonResponse({ ok: true, mode, reply: "Bạn cần hỗ trợ gì ạ?", zeroToken: true }, 200);
+      }
+      if (/^(ok|oke|okie|oki|okela|uk|uh|ừ|ừm|uhm|vâng|dạ|da|rồi|roi|được|duoc|đã hiểu|hieu roi|hiểu rồi|biết rồi|biet roi|👍|👌)$/.test(qNorm)) {
+        return jsonResponse({ ok: true, mode, reply: "Dạ vâng ạ, cần hỗ trợ gì cứ nhắn nhé.", zeroToken: true }, 200);
+      }
+      if (/^(cảm ơn|cam on|cảm ơn nhé|cam on nhe|cảm ơn bạn|cảm ơn shop|cảm ơn ad|thanks|thank you|tks|tk|ty|❤️|🙏)$/.test(qNorm)) {
+        return jsonResponse({ ok: true, mode, reply: "Không có gì ạ, chúc bạn xem phim vui vẻ.", zeroToken: true }, 200);
+      }
+      if (/^(hi|hello|alo|chào|chao|xin chào|xin chao|ad ơi|admin ơi|shop ơi|hey)$/.test(qNorm)) {
+        return jsonResponse({ ok: true, mode, reply: "Chào bạn! Bạn cần hỗ trợ về phim, phòng chiếu hay vé ạ?", zeroToken: true }, 200);
+      }
+    }
+
+    const asksCatalog = /(xem gì|gợi ý|kho|list|danh sách|có phim|phim gì|phim nào|các phim|những phim|mấy phim|đổi phim|tìm phim|thể loại|anime|hành động|kinh dị)/i.test(qTrim);
+    const asksRooms = /(phòng|room|đang chiếu|sắp chiếu|lịch|xem gì|chỗ nào|vào đâu)/i.test(qTrim);
+    const asksGuide = /(cách|làm sao|hướng dẫn|đặt vé|chọn ghế|đổi phim|phụ đề|sub|srt|tìm rạp|hà nội|mic|âm thanh|tiếng|lỗi|không xem|lag|giật|vé|tiền|qr)/i.test(qTrim);
 
     let prompt = "";
     let wantJson = false;
@@ -458,51 +491,55 @@ Quy tắc bắt buộc:
 Trả về đúng JSON mảng 4 phần tử: [{"q":"câu hỏi","options":["A","B","C","D"],"answer":0}]`;
     } else if (mode === "recommend") {
       wantJson = true;
-      prompt = `Khán giả vừa xem "${movieTitle}" (${genre}). Trong danh sách video sẵn có sau: ${JSON.stringify(availableTitles.slice(0, 30))}, hãy chọn ra 3-4 video phù hợp nhất để đề xuất xem tiếp (nếu là phim bộ hãy ưu tiên tập tiếp theo). Trả về đúng JSON mảng gồm các object: [{"title":"tên chính xác trong danh sách","reason":"lý do ngắn gọn bằng tiếng Việt"}].`;
+      prompt = `Khán giả vừa xem "${movieTitle}" (${genre}). Trong danh sách video sẵn có sau: ${JSON.stringify(availableTitles.slice(0, 25))}, chọn 3-4 video phù hợp nhất để đề xuất xem tiếp (ưu tiên tập tiếp theo nếu là phim bộ). Trả về đúng JSON mảng: [{"title":"tên chính xác trong danh sách","reason":"lý do cực ngắn <= 10 từ"}]`;
     } else if (mode === "support") {
-      const roomsContext = availableRooms.length
-        ? availableRooms.map(r => `- ${r.room}: ${r.title} (${r.status === "upcoming" ? "Sắp chiếu" : "Đang chiếu"})`).join("\n")
-        : "Đang cập nhật";
+      const roomsLine = (asksRooms || asksCatalog) && availableRooms.length
+        ? `\nPhòng: ${availableRooms.map(r => `${r.room}: ${r.title} (${r.status === "upcoming" ? "Sắp chiếu" : "Đang chiếu"})`).join(" | ")}`
+        : "";
+      const titlesLine = asksCatalog && availableTitles.length
+        ? `\nKho (${availableTitles.length}): ${availableTitles.slice(0, 20).join(", ")}`
+        : "";
+      const guideLine = asksGuide
+        ? `\nTính năng: Chọn phòng -> chọn ghế (48 ghế/phòng, Stream 10 ghế). Bấm phim ở "Phim Đang Có" gửi Admin duyệt đổi phim. Phụ đề chỉ hiện với phim có file .srt. "Tìm Rạp Hà Nội" để xem cụm rạp. Bấm "Bật Mic" dưới màn hình để nói chuyện.`
+        : "";
       const histText = history.length
-        ? `\nLịch sử hội thoại gần nhất:\n${history.map(h => `${h.sender === "user" ? "Khách" : "CSKH"}: ${h.text}`).join("\n")}\n`
+        ? `\nHội thoại gần nhất:\n${history.map(h => `${h.sender === "user" ? "Khách" : "CSKH"}: ${h.text}`).join("\n")}`
         : "";
-      const payModeLabel = body.paymentMode === "paid" ? "Đang bật Thu Phí VietQR (cần quét QR và chờ Admin duyệt)" : "Đang bật chế độ Miễn Phí (đặt vé & chọn ghế vào rạp ngay không mất phí)";
-      prompt = `Bạn là Nhân viên CSKH & Hỗ trợ kỹ thuật chính thức của rạp chiếu phim trực tuyến CineVerse Lotte.
-Thông tin hệ thống thực tế hiện tại:
-- Chế độ vé: ${payModeLabel}.
-- Vị trí khách hiện tại: ${body.currentRoom || "Sảnh chính"}.
-- Danh sách phòng chiếu thực tế:\n${roomsContext}
-- Kho phim sẵn có (${availableTitles.length} phim mẫu): ${availableTitles.slice(0, 35).join(", ")}.
-- Quy trình & tính năng thật trên web:
-  1. Đặt vé/chọn ghế: Chọn phòng ở Sảnh chính -> chọn ghế (tối đa 48 ghế/phòng, Phòng Stream có 10 ghế VIP) -> vào rạp xem đồng bộ.
-  2. Yêu cầu chiếu phim khác: Trong phòng chiếu, bấm vào phim ở cột "Phim Đang Có" bên trái để gửi yêu cầu về Chủ Rạp duyệt, khi Admin duyệt phim sẽ phát ngay.
-  3. Phụ đề: Chỉ các phim có sẵn file .srt trên máy chủ R2 mới bật được Phụ đề & Phụ đề AI; các phim đã có Vietsub cứng hoặc không có .srt sẽ tự ẩn nút phụ đề để tránh che chữ/quá tải.
-  4. Tìm Rạp Hà Nội: Bấm nút "Tìm Rạp Hà Nội" trên thanh menu để định vị GPS các cụm rạp CGV, Lotte, Beta tại Hà Nội, xem lịch chiếu và dự trù ngân sách.
-  5. Mic / Âm thanh trong phòng: Bấm "Bật Mic" ở thanh điều khiển dưới màn hình và cấp quyền micro cho trình duyệt.${histText}
-Quy tắc trả lời:
-- Đọc kỹ câu hỏi của khách để hiểu đúng ý định và trả lời TRỰC DIỆN, CHÍNH XÁC, lịch sự bằng tiếng Việt (2-5 câu, rõ ràng, dễ làm theo).
-- TUYỆT ĐỐI KHÔNG bịa đặt phim, giá vé, hoặc tính năng không có thật ở trên.
-- Nếu khách yêu cầu thao tác thủ công từ Chủ Rạp (duyệt đơn QR gấp, mở khóa phòng, khiếu nại riêng), hãy trả lời ngắn gọn và báo Chủ Rạp đã nhận được tin nhắn để xử lý trực tiếp.
-Tin nhắn mới của khách (${body.userName || "Khách"}): ${question}`;
+      const payModeLabel = body.paymentMode === "paid" ? "Trả phí VietQR (cần Admin duyệt)" : "Miễn phí";
+      prompt = `Bạn là CSKH của rạp trực tuyến CineVerse Lotte.
+Ngữ cảnh hiện tại: Vé=${payModeLabel} | Vị trí=${body.currentRoom || "Sảnh chính"}${roomsLine}${titlesLine}${guideLine}${histText}
+Quy tắc BẮT BUỘC:
+- Trả lời thẳng vào câu hỏi, đủ ý, NGẮN GỌN NHẤT (1–2 câu, tối đa ~40 từ; chỉ liệt kê gọn nếu khách hỏi danh sách).
+- KHÔNG lòng vòng, KHÔNG nhắc lại phim/phòng khi không cần, KHÔNG thêm câu mời chào/chúc xem phim cuối câu.
+- KHÔNG dùng Markdown (*, **, #, \`).
+- KHÔNG bịa đặt. Hỏi dữ liệu nội bộ (doanh thu, thống kê quản trị) -> trả lời 1 câu rõ thông tin nội bộ không công khai (hoặc rạp đang miễn phí nếu hỏi về vé). Cần Chủ Rạp xử lý thủ công -> 1 câu ngắn báo Chủ Rạp đã nhận tin.
+Khách (${body.userName || "Khách"}): ${qTrim}`;
     } else {
-      const roomsContext = availableRooms.length
-        ? `\nDanh sách các phòng đang chiếu thực tế tại rạp CineVerse Lotte:\n${availableRooms.map(r => `- ${r.room}: ${r.title} (${r.status === "upcoming" ? "Sắp chiếu" : "Đang chiếu"})`).join("\n")}`
+      const roomsLine = (asksRooms || asksCatalog) && availableRooms.length
+        ? `\nPhòng: ${availableRooms.map(r => `${r.room}: ${r.title} (${r.status === "upcoming" ? "Sắp chiếu" : "Đang chiếu"})`).join(" | ")}`
         : "";
-      const catalogContext = availableTitles.length
-        ? `\nMột số phim sẵn có trong kho rạp (${availableTitles.length} phim): ${availableTitles.slice(0, 40).join(", ")}.`
+      const catalogLine = asksCatalog && availableTitles.length
+        ? `\nKho (${availableTitles.length}): ${availableTitles.slice(0, 20).join(", ")}`
         : "";
-      prompt = `Bạn là Trợ lý Điện ảnh thông minh của rạp trực tuyến CineVerse Lotte.
-Phim đang chiếu tại phòng hiện tại: "${movieTitle}"${genre ? ` (Thể loại: ${genre})` : ""}${cast ? ` (Diễn viên: ${cast})` : ""}${synopsis ? ` (Tóm tắt: ${synopsis})` : ""}.${roomsContext}${catalogContext}
-Quy tắc bắt buộc:
-1. Trả lời đúng sự thật bằng tiếng Việt ngắn gọn (2-6 câu). Tuyệt đối KHÔNG bịa nội dung hay nhầm sang phim khác.
-2. Nếu người dùng hỏi danh sách phim đang chiếu hoặc phim có ở rạp, hãy liệt kê đúng từ danh sách phòng & kho phim ở trên.
-3. Nếu không chắc chắn chi tiết nào của "${movieTitle}", hãy nói rõ là chưa có thông tin thay vì đoán bừa.
-Câu hỏi của khán giả: ${question}`;
+      prompt = `Bạn là Trợ lý Điện ảnh rạp CineVerse Lotte.
+Phim hiện tại: "${movieTitle}"${genre ? ` (${genre})` : ""}${cast ? ` | Cast: ${cast}` : ""}${synopsis ? ` | ${synopsis}` : ""}.${roomsLine}${catalogLine}
+Quy tắc BẮT BUỘC:
+1. Trả lời đúng sự thật, thẳng vào trọng tâm bằng tiếng Việt ngắn gọn (1–3 câu), KHÔNG lòng vòng, KHÔNG thêm câu chào/chúc cuối câu.
+2. KHÔNG dùng Markdown (*, **, #, \`). KHÔNG bịa chi tiết; nếu chưa có thông tin thì nói ngắn gọn là chưa có.
+3. Hỏi lịch/kho phim thì liệt kê gọn từ dữ liệu trên.
+Khán giả: ${qTrim}`;
     }
 
     const baseGenConfig = wantJson
-      ? { responseMimeType: "application/json", temperature: 0.3 }
-      : { temperature: 0.3 };
+      ? {
+          responseMimeType: "application/json",
+          temperature: mode === "trivia" ? 0.25 : 0.2,
+          maxOutputTokens: mode === "trivia" ? 520 : 260
+        }
+      : {
+          temperature: mode === "support" ? 0.2 : 0.25,
+          maxOutputTokens: mode === "support" ? 120 : 180
+        };
 
     const modelsToTry = [
       "gemini-flash-lite-latest",
@@ -541,7 +578,7 @@ Câu hỏi của khán giả: ${question}`;
       const parsed = JSON.parse(rawText);
       return jsonResponse({ ok: true, mode, items: parsed }, 200);
     }
-    return jsonResponse({ ok: true, mode, reply: rawText.trim() }, 200);
+    return jsonResponse({ ok: true, mode, reply: cleanPlainReply(rawText) }, 200);
   } catch (err) {
     return jsonResponse({ ok: false, error: err?.message || "AI_ERROR" }, 200);
   }
