@@ -6206,6 +6206,7 @@
       if (heroVid) heroVid.pause();
 
       state.currentRoomId = roomId;
+      state.roomEnteredAt = Date.now();
       try { window.__setAmbientTunaPaused?.(true); } catch (_) {}
       try { syncMyOnlinePresence?.(); } catch (_) {}
       try { logMemberActivity?.("join_room", `Khán giả vào ${room.number || roomId} (${room.movieTitle || "Phim"})`, { roomId, roomNumber: room.number }); } catch (_) {}
@@ -6388,25 +6389,9 @@
 
       const prevSeat = getMySeatInRoom(roomId);
 
-      // Nếu bấm lại vào chính ghế đang ngồi -> không cho đứng dậy nếu đã cố định theo vé
+      // Nếu bấm lại vào chính ghế đang ngồi -> không được phép xem không ghế, phải có ghế mới được ở trong phòng
       if (prevSeat === seatId && notify) {
-        if (bookedTicket && bookedTicket.seatId === seatId) {
-          showToast(`🔒 Bạn đang ngồi cố định tại ghế ${seatId} theo vé đã đặt!`, "info");
-          return;
-        }
-        delete roomSeats[seatId];
-        renderSeatingMap();
-        renderAudienceList();
-        updateRoomHeaderUI();
-        applySubtitlePositionAndSize();
-        showToast(`Bạn đã đứng dậy khỏi ghế ${seatId}.`, "info");
-        try { logMemberActivity?.("seat_release", `Đứng dậy khỏi ghế ${seatId} (${getEffectiveRoom(roomId)?.number || roomId})`, { seatId, roomId }); } catch (_) {}
-        clearMySeatFromRTDB();
-        if (db && fb && currentUser) {
-          try {
-            await fb.deleteDoc(fb.doc(db, "artifacts", appId, "public", "data", `seats_${roomId}`, seatId));
-          } catch (e) {}
-        }
+        showToast(`🔒 Bạn đang ngồi tại ghế ${seatId}. Không thể bỏ trống ghế khi đang xem trong phòng!`, "info");
         return;
       }
 
@@ -6500,8 +6485,7 @@
       const badge = document.getElementById("my-seat-badge");
       const standBtn = document.getElementById("btn-stand-up");
       if (badge) badge.textContent = mySeat ? `${mySeat} (${state.userName})` : "Chưa chọn";
-      const isSeatLockedByTicket = Boolean(state.bookedTicketsByRoom?.[roomId]?.seatId);
-      if (standBtn) standBtn.classList.toggle("hidden", !mySeat || isSeatLockedByTicket);
+      if (standBtn) standBtn.classList.add("hidden");
 
       const now = Date.now();
       const effectiveRoom = getEffectiveRoom(roomId);
@@ -10903,21 +10887,49 @@
           renderChatTypingIndicator();
         }
       }, () => {});
-      let modInitialized = false;
-      const roomJoinedTs = Date.now();
+      // Seed mốc thời gian moderation hiện tại ngay lúc vào phòng để không bị dính lệnh dọn ghế cũ, nhưng cũng không bị lệch đồng hồ giữa máy Admin và máy Khách
+      let seenClearChatAt = Number(state._lastClearChatAt || 0);
+      let seenClearSeatsAt = Number(state._lastClearSeatsAt || 0);
+      let seenVacatedAt = Number(state._lastVacatedAt || 0);
+      let seenKickedAt = Number(state._lastKickedAt || 0);
+      let modSeeded = false;
       state.roomMutedUntil = 0;
       const unsubMod = rtdbMod.onValue(rtdbMod.ref(rtdb, `lobby_config/room_moderation/${roomId}`), (snap) => {
         const mod = snap.val() || {};
-        if (mod.clearChatAt && mod.clearChatAt > roomJoinedTs && mod.clearChatAt !== state._lastClearChatAt) {
-          state._lastClearChatAt = mod.clearChatAt;
+        const myMod = (mod.users || {})[state.uid] || {};
+        const normMyName = String(state.userName || "").trim().toLowerCase().replace(/[.#$/\[\]]/g, "_");
+        const myNameMod = normMyName ? ((mod.byName || {})[normMyName] || {}) : {};
+        const curClearChatAt = Number(mod.clearChatAt || 0);
+        const curClearSeatsAt = Number(mod.clearSeatsAt || 0);
+        const curVacatedAt = Math.max(Number(myMod.vacatedAt || 0), Number(myNameMod.vacatedAt || 0));
+        const curKickedAt = Math.max(Number(myMod.kickedAt || 0), Number(myNameMod.kickedAt || 0));
+
+        if (!modSeeded) {
+          modSeeded = true;
+          seenClearChatAt = Math.max(seenClearChatAt, curClearChatAt);
+          seenClearSeatsAt = Math.max(seenClearSeatsAt, curClearSeatsAt);
+          seenVacatedAt = Math.max(seenVacatedAt, curVacatedAt);
+          seenKickedAt = Math.max(seenKickedAt, curKickedAt);
+          state._lastClearChatAt = seenClearChatAt;
+          state._lastClearSeatsAt = seenClearSeatsAt;
+          state._lastVacatedAt = seenVacatedAt;
+          state._lastKickedAt = seenKickedAt;
+          state.roomMutedUntil = Math.max(Number(myMod.mutedUntil || 0), Number(myNameMod.mutedUntil || 0));
+          return;
+        }
+
+        if (curClearChatAt > seenClearChatAt) {
+          seenClearChatAt = curClearChatAt;
+          state._lastClearChatAt = curClearChatAt;
           state.chatByRoom[roomId] = [];
           if (state.currentRoomId === roomId) {
             renderChatMessages();
             showToast("🧹 Admin đã dọn sạch khung chat phòng này.", "info");
           }
         }
-        if (mod.clearSeatsAt && mod.clearSeatsAt > roomJoinedTs && mod.clearSeatsAt !== state._lastClearSeatsAt) {
-          state._lastClearSeatsAt = mod.clearSeatsAt;
+        if (curClearSeatsAt > seenClearSeatsAt) {
+          seenClearSeatsAt = curClearSeatsAt;
+          state._lastClearSeatsAt = curClearSeatsAt;
           if (state.seatsByRoom[roomId]) {
             state.seatsByRoom[roomId] = {};
           }
@@ -10932,12 +10944,9 @@
             return;
           }
         }
-        const myMod = (mod.users || {})[state.uid] || {};
-        const normMyName = String(state.userName || "").trim().toLowerCase().replace(/[.#$/\[\]]/g, "_");
-        const myNameMod = normMyName ? ((mod.byName || {})[normMyName] || {}) : {};
-        const vacatedAt = Math.max(Number(myMod.vacatedAt || 0), Number(myNameMod.vacatedAt || 0));
-        if (vacatedAt && vacatedAt > roomJoinedTs && vacatedAt !== state._lastVacatedAt) {
-          state._lastVacatedAt = vacatedAt;
+        if (curVacatedAt > seenVacatedAt) {
+          seenVacatedAt = curVacatedAt;
+          state._lastVacatedAt = curVacatedAt;
           const mySeatNow = getMySeatInRoom(roomId);
           if (mySeatNow && state.seatsByRoom[roomId]) {
             delete state.seatsByRoom[roomId][mySeatNow];
@@ -10962,9 +10971,9 @@
           toggleVoiceMic().catch(() => {});
           showToast("🔇 Admin đã tắt mic của bạn từ xa.", "error");
         }
-        const kickedAt = Math.max(Number(myMod.kickedAt || 0), Number(myNameMod.kickedAt || 0));
-        if (kickedAt && kickedAt > roomJoinedTs && kickedAt !== state._lastKickedAt) {
-          state._lastKickedAt = kickedAt;
+        if (curKickedAt > seenKickedAt) {
+          seenKickedAt = curKickedAt;
+          state._lastKickedAt = curKickedAt;
           if (state.bookedTicketsByRoom?.[roomId]) {
             delete state.bookedTicketsByRoom[roomId];
             saveAppStateToStorage();
@@ -10973,7 +10982,6 @@
           leaveRoom();
           return;
         }
-        modInitialized = true;
       }, () => {});
       roomChatUnsub = () => {
         try { unsubMsg(); } catch (_) {}
@@ -14823,7 +14831,27 @@
               rtdbMod.remove(rtdbMod.ref(rtdb, `sync/${r.id}`)).catch(() => {});
             }
 
+            const wasMeSeated = Object.values(prevRoom).some(s => s && s.uid === state.uid);
+            const isMeSeatedNow = Object.values(remoteRoom).some(s => s && s.uid === state.uid);
             state.seatsByRoom[r.id] = merged;
+
+            // Bắt buộc có ghế ngồi mới được xem trong phòng: nếu ghế của người dùng bị Admin dọn trên RTDB -> tự động đưa ra Sảnh chính ngay lập tức
+            if (state.currentRoomId === r.id && !isMeSeatedNow) {
+              const justEntered = state.roomEnteredAt && (Date.now() - state.roomEnteredAt < 2500);
+              if (wasMeSeated || (hasSyncedInitialSeats && !justEntered)) {
+                if (state.bookedTicketsByRoom?.[r.id]) {
+                  delete state.bookedTicketsByRoom[r.id];
+                  saveAppStateToStorage();
+                }
+                clearMySeatFromRTDB();
+                showToast("🪑 Ghế của bạn đã được Admin dọn — mời bạn ra Sảnh chính đặt lại ghế!", "info");
+                setTimeout(() => {
+                  if (state.currentRoomId === r.id && !getMySeatInRoom(r.id)) {
+                    leaveRoom();
+                  }
+                }, 40);
+              }
+            }
           });
 
           hasSyncedInitialSeats = true;
