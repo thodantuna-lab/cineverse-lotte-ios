@@ -3422,9 +3422,15 @@
         </button>
       </div>
       <p class="text-xs text-slate-300 leading-relaxed">Để nhận quyền <strong class="text-amber-300">Chủ Trì (điều khiển phát/tua phim)</strong> cho phòng này, vui lòng nhập mã Key do Admin cung cấp.</p>
-      <input id="host-key-input" type="text" maxlength="24" placeholder="Ví dụ: CV-8A4K9P"
-        onkeydown="if(event.key==='Enter'){event.preventDefault();window.appActions.confirmHostKeyModal();}"
-        class="w-full px-4 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-sm text-amber-300 font-mono uppercase tracking-widest text-center font-black focus:outline-none focus:border-amber-400" />
+      <div class="relative">
+        <input id="host-key-input" type="text" maxlength="24" placeholder="Ví dụ: CV-8A4K9P"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();window.appActions.confirmHostKeyModal();}"
+          class="w-full pl-4 pr-16 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-sm text-amber-300 font-mono uppercase tracking-widest text-center font-black focus:outline-none focus:border-amber-400" />
+        <button type="button" onclick="window.appActions.pasteHostKeyFromClipboard()"
+          class="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/40 text-amber-300 text-[11px] font-bold cursor-pointer">
+          Dán
+        </button>
+      </div>
       <div class="flex justify-end gap-2 pt-1">
         <button type="button" onclick="window.appActions.closeHostKeyModal()" class="px-4 py-2 rounded-xl bg-stone-800 text-slate-300 text-xs font-bold cursor-pointer">Hủy</button>
         <button id="host-key-confirm-btn" type="button" onclick="window.appActions.confirmHostKeyModal()" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold cursor-pointer">Xác nhận làm Chủ Trì</button>
@@ -10910,9 +10916,36 @@
             showToast("🧹 Admin đã dọn sạch khung chat phòng này.", "info");
           }
         }
+        if (mod.clearSeatsAt && mod.clearSeatsAt > roomJoinedTs && mod.clearSeatsAt !== state._lastClearSeatsAt) {
+          state._lastClearSeatsAt = mod.clearSeatsAt;
+          if (state.seatsByRoom[roomId]) {
+            state.seatsByRoom[roomId] = {};
+          }
+          clearMySeatFromRTDB();
+          if (state.currentRoomId === roomId) {
+            renderSeatingMap();
+            renderAudienceList();
+            updateRoomHeaderUI();
+            showToast("🪑 Admin đã dọn ghế phòng chiếu này.", "info");
+          }
+        }
         const myMod = (mod.users || {})[state.uid] || {};
         const normMyName = String(state.userName || "").trim().toLowerCase().replace(/[.#$/\[\]]/g, "_");
         const myNameMod = normMyName ? ((mod.byName || {})[normMyName] || {}) : {};
+        const vacatedAt = Math.max(Number(myMod.vacatedAt || 0), Number(myNameMod.vacatedAt || 0));
+        if (vacatedAt && vacatedAt > roomJoinedTs && vacatedAt !== state._lastVacatedAt) {
+          state._lastVacatedAt = vacatedAt;
+          const mySeatNow = getMySeatInRoom(roomId);
+          if (mySeatNow && state.seatsByRoom[roomId]) {
+            delete state.seatsByRoom[roomId][mySeatNow];
+          }
+          clearMySeatFromRTDB();
+          if (state.currentRoomId === roomId) {
+            renderSeatingMap();
+            renderAudienceList();
+            updateRoomHeaderUI();
+          }
+        }
         const prevMuted = state.roomMutedUntil && state.roomMutedUntil > Date.now();
         state.roomMutedUntil = Math.max(Number(myMod.mutedUntil || 0), Number(myNameMod.mutedUntil || 0));
         if (prevMuted && state.roomMutedUntil <= Date.now()) {
@@ -11005,12 +11038,30 @@
       setTimeout(() => inp?.focus(), 60);
     }
 
+    async function pasteHostKeyFromClipboard() {
+      const inp = document.getElementById("host-key-input");
+      if (!inp) return;
+      try {
+        if (navigator.clipboard && typeof navigator.clipboard.readText === "function") {
+          const text = (await navigator.clipboard.readText() || "").trim().toUpperCase();
+          if (text) {
+            inp.value = text.slice(0, 24);
+            inp.focus();
+            showToast("📋 Đã dán Key từ Clipboard!", "info");
+            return;
+          }
+        }
+      } catch (_) {}
+      inp.focus();
+      showToast("Nhấn Ctrl+V (hoặc giữ lì chọn Dán) vào ô nhập Key!", "info");
+    }
+
     function closeHostKeyModal() {
       document.getElementById("host-key-modal")?.classList.add("hidden");
     }
 
     async function confirmHostKeyModal() {
-      if (!state.currentRoomId || !rtdb || !rtdbMod) return;
+      if (!state.currentRoomId) return;
       const roomId = state.currentRoomId;
       const inp = document.getElementById("host-key-input");
       const btn = document.getElementById("host-key-confirm-btn");
@@ -11022,8 +11073,20 @@
       }
       if (btn) { btn.disabled = true; btn.textContent = "Đang kiểm tra..."; }
       try {
-        const snap = await rtdbMod.get(rtdbMod.ref(rtdb, `host_keys/${roomId}`));
-        const keyData = snap?.val();
+        let keyData = null;
+        if (rtdb && rtdbMod) {
+          try {
+            const snap = await Promise.race([
+              rtdbMod.get(rtdbMod.ref(rtdb, `host_keys/${roomId}`)),
+              new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 3500))
+            ]);
+            keyData = snap?.val() || null;
+          } catch (_) {}
+        }
+        if (!keyData || !keyData.key) {
+          const res = await fetch(`${RTDB_URL}/host_keys/${encodeURIComponent(roomId)}.json?t=${Date.now()}`, { cache: "no-store" });
+          if (res.ok) keyData = await res.json();
+        }
         const expectedKey = String(keyData?.key || "").trim().toUpperCase();
         if (!expectedKey) {
           showToast("⚠️ Admin chưa tạo Key Chủ Trì cho phòng này!", "warning");
@@ -14628,11 +14691,13 @@
           syncCurrentRoomSubtitleOffset();
         }, () => {});
 
-        // Duy trì heartbeat ghế đang ngồi mỗi 60s để tránh bị dọn nhầm
+        // Duy trì heartbeat ghế đang ngồi mỗi 60s để tránh bị dọn nhầm (chỉ gia hạn nếu ghế vẫn còn trên RTDB)
         setInterval(() => {
           if (state.currentRoomId) {
             const mySeat = getMySeatInRoom(state.currentRoomId);
-            if (mySeat) syncMySeatToRTDB(state.currentRoomId, mySeat);
+            if (mySeat && state.seatsByRoom[state.currentRoomId]?.[mySeat]?.uid === state.uid) {
+              syncMySeatToRTDB(state.currentRoomId, mySeat);
+            }
           }
         }, 60000);
 
@@ -18334,6 +18399,7 @@
       toggleRoomHost,
       closeHostKeyModal,
       confirmHostKeyModal,
+      pasteHostKeyFromClipboard,
       closePaymentQrModal,
       backToBookingSummary,
       closeTicketUpgradeModal,
