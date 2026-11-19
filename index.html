@@ -9098,6 +9098,9 @@
 
       closeVideoVaultModal();
       enterRoom(targetRoomId);
+      if (isIAmHost() && state.currentRoomId === targetRoomId) {
+        broadcastRoomVideoSync("switch_movie");
+      }
       renderJJKEpisodeLists(vaultId);
       renderTheaterLeftMovieList();
       renderHeroBillboard();
@@ -18945,17 +18948,26 @@
     async function saveAdminLobbyConfig() {
       const payload = {};
       DEFAULT_ROOMS.forEach(baseRoom => {
+        const prev = state.lobbyConfigRooms?.[baseRoom.id] || {};
         const title = (document.getElementById(`admin-title-${baseRoom.id}`)?.value || baseRoom.movieTitle).trim();
         const rawUrl = (document.getElementById(`admin-url-${baseRoom.id}`)?.value || "").trim();
         const rawPoster = (document.getElementById(`admin-poster-${baseRoom.id}`)?.value || "").trim();
         const status = document.getElementById(`admin-status-${baseRoom.id}`)?.value || "showing";
         const ytId = extractYouTubeId(rawUrl);
+        const nextUrl = ytId ? "" : rawUrl;
+        const nextYt = ytId || "";
+        const movieChanged =
+          title !== (prev.movieTitle || baseRoom.movieTitle) ||
+          nextUrl !== (prev.videoUrl || "") ||
+          nextYt !== (prev.youtubeId || "");
         payload[baseRoom.id] = {
           movieTitle: title,
           status,
-          youtubeId: ytId || "",
-          videoUrl: ytId ? "" : rawUrl,
+          youtubeId: nextYt,
+          videoUrl: nextUrl,
           poster: resolveMoviePoster(title, rawPoster, ytId),
+          movieVersion: movieChanged ? String(Date.now()) : String(prev.movieVersion || ""),
+          updatedBy: "Admin Web",
           isCustomStartZero: true,
           updatedAt: Date.now()
         };
