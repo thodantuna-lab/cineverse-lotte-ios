@@ -1872,7 +1872,7 @@
       transform: scale(1);
     }
 
-    /* ===== CINEMATIC SPLASH SCREEN: CÁ NGỪ BƠI VÀO Ô AVATAR + TÊN WEB & SLOGAN ===== */
+    /* ===== CINEMATIC SPLASH SCREEN (100% GPU COMPOSITOR ZERO-LAG) ===== */
     #cv-intro-splash {
       position: fixed;
       inset: 0;
@@ -1886,39 +1886,33 @@
       cursor: pointer;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
+      contain: layout style paint;
+      will-change: opacity, transform;
       opacity: 1;
-      transform: scale(1);
-      transition: opacity 0.52s cubic-bezier(0.22, 1, 0.36, 1), transform 0.58s cubic-bezier(0.22, 1, 0.36, 1);
+      transform: translate3d(0, 0, 0) scale(1);
+      transition: opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1), transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     }
     #cv-intro-splash.is-exiting {
       opacity: 0;
-      transform: scale(1.035);
+      transform: translate3d(0, 0, 0) scale(1.03);
       pointer-events: none;
     }
     .cv-intro-ambient {
       position: absolute;
       inset: 0;
       pointer-events: none;
-      background: radial-gradient(circle at 50% 44%, rgba(229, 9, 20, 0.22) 0%, rgba(140, 8, 22, 0.08) 32%, rgba(2, 3, 6, 0) 66%);
+      background: radial-gradient(circle at 50% 44%, rgba(229, 9, 20, 0.22) 0%, rgba(140, 8, 22, 0.07) 34%, rgba(2, 3, 6, 0) 64%);
       opacity: 0;
-      transform: scale(0.86);
-      transition: opacity 0.75s ease-out, transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+      animation: cvAmbientBloom 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.84s forwards;
     }
-    #cv-intro-splash.is-locked .cv-intro-ambient {
-      opacity: 1;
-      transform: scale(1);
-    }
-    #cv-intro-canvas {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 2;
+    @keyframes cvAmbientBloom {
+      from { opacity: 0; transform: scale(0.88); }
+      to { opacity: 1; transform: scale(1); }
     }
     .cv-intro-stage {
       position: relative;
-      z-index: 3;
+      z-index: 2;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -1943,84 +1937,176 @@
         margin-bottom: 28px;
       }
     }
+    .cv-swim-glow {
+      position: absolute;
+      inset: -28px -36px -28px -52px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at 55% 50%, rgba(244, 63, 94, 0.42) 0%, rgba(229, 9, 20, 0.16) 45%, rgba(0, 0, 0, 0) 74%);
+      pointer-events: none;
+    }
+    /* Con cá ngừ bơi theo cung chữ C vào đúng tâm (0,0) ô Avatar — 100% GPU compositor */
+    .cv-swim-track {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 132px;
+      height: 58px;
+      margin-left: -66px;
+      margin-top: -29px;
+      z-index: 4;
+      pointer-events: none;
+      will-change: transform, opacity;
+      animation: cvFishSwimIn 0.96s cubic-bezier(0.28, 0.04, 0.24, 1) 0.02s both;
+    }
+    @media (min-width: 640px) {
+      .cv-swim-track {
+        width: 152px;
+        height: 67px;
+        margin-left: -76px;
+        margin-top: -33.5px;
+      }
+    }
+    @keyframes cvFishSwimIn {
+      0% {
+        transform: translate3d(-215px, 128px, 0) rotate(-42deg) scale(1.02);
+        opacity: 0;
+      }
+      14% {
+        transform: translate3d(-176px, 52px, 0) rotate(-52deg) scale(1.06);
+        opacity: 1;
+      }
+      38% {
+        transform: translate3d(-138px, -36px, 0) rotate(-32deg) scale(1.04);
+        opacity: 1;
+      }
+      64% {
+        transform: translate3d(-74px, -68px, 0) rotate(12deg) scale(0.95);
+        opacity: 1;
+      }
+      84% {
+        transform: translate3d(-14px, -18px, 0) rotate(32deg) scale(0.76);
+        opacity: 0.92;
+      }
+      100% {
+        transform: translate3d(0px, 0px, 0) rotate(22deg) scale(0.5);
+        opacity: 0;
+      }
+    }
+    .cv-swim-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      will-change: transform;
+      animation: cvFishWag 0.16s ease-in-out infinite alternate;
+    }
+    @keyframes cvFishWag {
+      from { transform: scaleY(0.94) skewY(4deg) rotate(-3.5deg); }
+      to { transform: scaleY(1.05) skewY(-4deg) rotate(3.5deg); }
+    }
+    .cv-intro-ripple {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid rgba(244, 63, 94, 0.72);
+      opacity: 0;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+    .cv-intro-ripple-1 {
+      animation: cvRippleOut 0.72s cubic-bezier(0.16, 1, 0.3, 1) 0.84s forwards;
+    }
+    .cv-intro-ripple-2 {
+      border-width: 1.5px;
+      border-color: rgba(255, 228, 230, 0.55);
+      animation: cvRippleOut 0.68s cubic-bezier(0.16, 1, 0.3, 1) 0.93s forwards;
+    }
+    @keyframes cvRippleOut {
+      0% { transform: scale(0.84); opacity: 0.8; }
+      100% { transform: scale(1.92); opacity: 0; }
+    }
     .cv-intro-avatar-ring {
       position: absolute;
-      inset: -7px;
+      inset: -8px;
       border-radius: 50%;
-      border: 1px dashed rgba(255, 255, 255, 0.16);
-      opacity: 0.75;
-      animation: cvIntroOrbit 9s linear infinite;
-      transition: inset 0.6s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.45s ease, opacity 0.45s ease;
+      border: 1px solid rgba(244, 63, 94, 0.38);
+      opacity: 0;
+      will-change: transform, opacity;
+      animation: cvRingLock 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.84s forwards;
     }
-    #cv-intro-splash.is-locked .cv-intro-avatar-ring {
-      inset: -11px;
-      border-style: solid;
-      border-color: rgba(244, 63, 94, 0.48);
-      opacity: 0.92;
+    @keyframes cvRingLock {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1.04); opacity: 0.9; }
     }
-    @keyframes cvIntroOrbit {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+    .cv-intro-avatar-glow {
+      position: absolute;
+      inset: -14px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(229, 9, 20, 0.48) 0%, rgba(229, 9, 20, 0.16) 46%, rgba(229, 9, 20, 0) 72%);
+      opacity: 0;
+      pointer-events: none;
+      will-change: opacity, transform;
+      animation: cvGlowLock 0.55s ease-out 0.84s forwards;
+    }
+    @keyframes cvGlowLock {
+      from { opacity: 0; transform: scale(0.82); }
+      to { opacity: 1; transform: scale(1.06); }
     }
     #cv-intro-avatar-box {
       position: relative;
+      z-index: 2;
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, rgba(28, 12, 18, 0.92), #040508 74%);
+      background: radial-gradient(circle at 35% 30%, rgba(28, 12, 18, 0.94), #040508 74%);
       border: 1.5px solid rgba(255, 255, 255, 0.16);
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), inset 0 0 22px rgba(0, 0, 0, 0.85);
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      will-change: transform, opacity;
+      animation: cvPortalAppear 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.04s both;
+    }
+    @keyframes cvPortalAppear {
+      from { opacity: 0; transform: scale(0.86); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .cv-intro-avatar-border-lit {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 1.5px solid rgba(244, 63, 94, 0.85);
       opacity: 0;
-      transform: scale(0.86);
-      animation: cvIntroPortalAppear 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards;
-      transition: border-color 0.45s ease, box-shadow 0.55s ease;
+      pointer-events: none;
+      will-change: opacity;
+      animation: cvFadeOn 0.38s ease-out 0.84s forwards;
     }
-    @keyframes cvIntroPortalAppear {
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-    #cv-intro-splash.is-locked #cv-intro-avatar-box {
-      border-color: rgba(244, 63, 94, 0.82);
-      box-shadow:
-        0 0 44px rgba(229, 9, 20, 0.48),
-        0 0 16px rgba(244, 63, 94, 0.3),
-        inset 0 0 20px rgba(229, 9, 20, 0.24);
+    @keyframes cvFadeOn {
+      to { opacity: 1; }
     }
     .cv-intro-avt-fish {
       width: 78%;
       height: 78%;
       object-fit: contain;
       opacity: 0;
-      transform: scale(0.58) rotate(-38deg);
-      filter: drop-shadow(0 0 16px rgba(229, 9, 20, 0.55));
-      transition:
-        opacity 0.36s cubic-bezier(0.22, 1, 0.36, 1),
-        transform 0.62s cubic-bezier(0.16, 1, 0.3, 1);
       will-change: transform, opacity;
+      animation: cvLogoCurlIn 0.56s cubic-bezier(0.16, 1, 0.3, 1) 0.82s forwards;
     }
-    #cv-intro-splash.is-locked .cv-intro-avt-fish {
-      opacity: 1;
-      transform: scale(1) rotate(0deg);
+    @keyframes cvLogoCurlIn {
+      0% { opacity: 0; transform: scale(0.56) rotate(-36deg); }
+      100% { opacity: 1; transform: scale(1) rotate(0deg); }
     }
     .cv-intro-glint {
       position: absolute;
       inset: -40%;
       background: linear-gradient(120deg, transparent 36%, rgba(255, 255, 255, 0.42) 50%, transparent 64%);
-      transform: translateX(-140%) rotate(12deg);
+      transform: translate3d(-140%, 0, 0) rotate(12deg);
       pointer-events: none;
+      will-change: transform;
+      animation: cvGlintSweep 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0.9s forwards;
     }
-    #cv-intro-splash.is-locked .cv-intro-glint {
-      animation: cvIntroGlintSweep 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.08s forwards;
-    }
-    @keyframes cvIntroGlintSweep {
-      0% { transform: translateX(-140%) rotate(12deg); }
-      100% { transform: translateX(140%) rotate(12deg); }
+    @keyframes cvGlintSweep {
+      from { transform: translate3d(-140%, 0, 0) rotate(12deg); }
+      to { transform: translate3d(140%, 0, 0) rotate(12deg); }
     }
     .cv-intro-brand {
       display: flex;
@@ -2031,38 +2117,21 @@
       font-weight: 900;
       font-size: clamp(1.65rem, 6.2vw, 2.75rem);
       line-height: 1.08;
-      letter-spacing: 0.34em;
-      opacity: 0;
-      transform: translateY(14px);
-      transition:
-        opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.14s,
-        transform 0.68s cubic-bezier(0.16, 1, 0.3, 1) 0.14s,
-        letter-spacing 0.78s cubic-bezier(0.16, 1, 0.3, 1) 0.14s;
-    }
-    #cv-intro-splash.is-locked .cv-intro-brand {
-      opacity: 1;
-      transform: translateY(0);
       letter-spacing: 0.14em;
+      opacity: 0;
+      will-change: transform, opacity;
+      animation: cvBrandReveal 0.58s cubic-bezier(0.16, 1, 0.3, 1) 0.98s forwards;
+    }
+    @keyframes cvBrandReveal {
+      from { opacity: 0; transform: translate3d(0, 14px, 0) scale(0.95); }
+      to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
     }
     .cv-intro-brand-main {
-      background: linear-gradient(105deg, #ffffff 15%, #ffe4e6 42%, #ffffff 55%, #fda4af 78%, #ffffff 100%);
-      background-size: 220% 100%;
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      text-shadow: 0 0 28px rgba(229, 9, 20, 0.22);
-    }
-    #cv-intro-splash.is-locked .cv-intro-brand-main {
-      animation: cvIntroShimmer 1.35s ease-out 0.2s forwards;
-    }
-    @keyframes cvIntroShimmer {
-      0% { background-position: 120% 0; }
-      100% { background-position: -30% 0; }
+      color: #ffffff;
     }
     .cv-intro-brand-sub {
-      color: rgba(244, 63, 94, 0.96);
+      color: #f43f5e;
       font-weight: 800;
-      text-shadow: 0 0 22px rgba(229, 9, 20, 0.45);
     }
     .cv-intro-beam {
       width: min(210px, 54vw);
@@ -2070,32 +2139,30 @@
       margin: 14px auto 13px;
       border-radius: 999px;
       background: linear-gradient(90deg, transparent 0%, rgba(229, 9, 20, 0.85) 28%, rgba(255, 255, 255, 0.92) 50%, rgba(229, 9, 20, 0.85) 72%, transparent 100%);
-      transform: scaleX(0);
       opacity: 0;
-      transition:
-        transform 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.28s,
-        opacity 0.45s ease 0.28s;
+      transform: scaleX(0);
+      will-change: transform, opacity;
+      animation: cvBeamDraw 0.52s cubic-bezier(0.16, 1, 0.3, 1) 1.1s forwards;
     }
-    #cv-intro-splash.is-locked .cv-intro-beam {
-      transform: scaleX(1);
-      opacity: 1;
+    @keyframes cvBeamDraw {
+      from { opacity: 0; transform: scaleX(0); }
+      to { opacity: 1; transform: scaleX(1); }
     }
     .cv-intro-slogan {
       max-width: 90vw;
-      font-size: clamp(0.66rem, 2.3vw, 0.82rem);
+      
+      font-size: clamp(0.64rem, 2.25vw, 0.8rem);
       font-weight: 600;
-      letter-spacing: 0.22em;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: rgba(226, 232, 240, 0.82);
+      color: rgba(226, 232, 240, 0.84);
       opacity: 0;
-      transform: translateY(10px);
-      transition:
-        opacity 0.62s cubic-bezier(0.16, 1, 0.3, 1) 0.38s,
-        transform 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.38s;
+      will-change: transform, opacity;
+      animation: cvSloganReveal 0.54s cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards;
     }
-    #cv-intro-splash.is-locked .cv-intro-slogan {
-      opacity: 1;
-      transform: translateY(0);
+    @keyframes cvSloganReveal {
+      from { opacity: 0; transform: translate3d(0, 10px, 0); }
+      to { opacity: 1; transform: translate3d(0, 0, 0); }
     }
     .cv-intro-skip {
       position: absolute;
@@ -2110,28 +2177,35 @@
       color: rgba(255, 255, 255, 0.24);
       pointer-events: none;
     }
-    @keyframes cvAvtWelcomePulse {
-      0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.72); }
-      70% { box-shadow: 0 0 0 12px rgba(244, 63, 94, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
-    }
-    .cv-avt-welcome-pulse {
-      animation: cvAvtWelcomePulse 0.95s cubic-bezier(0.22, 1, 0.36, 1) 1;
+    @media (prefers-reduced-motion: reduce) {
+      .cv-swim-track, .cv-swim-wake { display: none !important; }
+      .cv-intro-avt-fish, .cv-intro-brand, .cv-intro-beam, .cv-intro-slogan, .cv-intro-ambient {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-rose-500 selection:text-white">
 
-  <!-- CINEMATIC SPLASH SCREEN: CÁ NGỪ BƠI VÀO Ô AVATAR + TÊN WEB & SLOGAN -->
+  <!-- CINEMATIC SPLASH SCREEN: CÁ NGỪ BƠI VÀO Ô AVATAR + TÊN WEB & SLOGAN (100% GPU ZERO-LAG) -->
   <div id="cv-intro-splash" role="presentation" aria-label="CineVerse Lotte Intro">
     <div class="cv-intro-ambient" aria-hidden="true"></div>
-    <canvas id="cv-intro-canvas" aria-hidden="true"></canvas>
     <div class="cv-intro-stage">
       <div class="cv-intro-avatar-wrap">
-        <div class="cv-intro-avatar-ring"></div>
+        <div class="cv-swim-track" aria-hidden="true">
+          <div class="cv-swim-glow"></div>
+          <img class="cv-swim-img" src="assets/tuna-swim-sprite.png" alt="" decoding="async" />
+        </div>
+        <div class="cv-intro-avatar-glow" aria-hidden="true"></div>
+        <div class="cv-intro-ripple cv-intro-ripple-1" aria-hidden="true"></div>
+        <div class="cv-intro-ripple cv-intro-ripple-2" aria-hidden="true"></div>
+        <div class="cv-intro-avatar-ring" aria-hidden="true"></div>
         <div id="cv-intro-avatar-box">
-          <img class="cv-intro-avt-fish" src="assets/tuna-avt-sprite.png" alt="CineVerse Logo" />
-          <div class="cv-intro-glint"></div>
+          <img class="cv-intro-avt-fish" src="assets/tuna-avt-sprite.png" alt="CineVerse Logo" decoding="async" />
+          <div class="cv-intro-glint" aria-hidden="true"></div>
+          <div class="cv-intro-avatar-border-lit" aria-hidden="true"></div>
         </div>
       </div>
       <div class="cv-intro-brand">
@@ -2144,361 +2218,38 @@
     <span class="cv-intro-skip">Nhấn bất kỳ để vào rạp</span>
   </div>
   <script>
-    (function initCineverseSplash() {
+    (function () {
       const splash = document.getElementById("cv-intro-splash");
-      const canvas = document.getElementById("cv-intro-canvas");
-      const avatarBox = document.getElementById("cv-intro-avatar-box");
-      if (!splash || !canvas || !avatarBox) return;
-
-      const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      let rafId = null;
-      let finished = false;
-      let locked = false;
-
-      function dismissSplash() {
-        if (finished) return;
-        finished = true;
+      const doneQueue = [];
+      window.__cineverseSplashDone = false;
+      window.__onCineverseSplashDone = function (cb) {
+        if (typeof cb !== "function") return;
+        if (window.__cineverseSplashDone) { cb(); return; }
+        doneQueue.push(cb);
+      };
+      if (!splash) { window.__cineverseSplashDone = true; return; }
+      let exiting = false;
+      function dismiss() {
+        if (exiting) return;
+        exiting = true;
+        clearTimeout(autoTimer);
         splash.classList.add("is-exiting");
-        const headerAvt = document.getElementById("header-web-avatar");
-        if (headerAvt) {
-          headerAvt.classList.add("cv-avt-welcome-pulse");
-          setTimeout(() => headerAvt.classList.remove("cv-avt-welcome-pulse"), 1000);
-        }
+        window.removeEventListener("keydown", onKey);
         setTimeout(() => {
-          if (rafId) {
-            cancelAnimationFrame(rafId);
-            rafId = null;
-          }
-          window.removeEventListener("resize", resize);
-          window.removeEventListener("keydown", onKeySkip);
           if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
-        }, 560);
-      }
-
-      function onKeySkip(e) {
-        if (e.key === "Escape" || e.key === "Enter" || e.key === " ") dismissSplash();
-      }
-      splash.addEventListener("click", dismissSplash, { passive: true });
-      window.addEventListener("keydown", onKeySkip, { passive: true });
-
-      const safetyTimer = setTimeout(dismissSplash, 4400);
-
-      if (reducedMotion) {
-        splash.classList.add("is-locked");
-        setTimeout(() => {
-          clearTimeout(safetyTimer);
-          dismissSplash();
-        }, 1200);
-        return;
-      }
-
-      const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        splash.classList.add("is-locked");
-        setTimeout(() => {
-          clearTimeout(safetyTimer);
-          dismissSplash();
-        }, 1600);
-        return;
-      }
-
-      let W = window.innerWidth;
-      let H = window.innerHeight;
-      let dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-      function resize() {
-        W = window.innerWidth;
-        H = window.innerHeight;
-        dpr = Math.min(window.devicePixelRatio || 1, 2);
-        canvas.width = Math.max(1, Math.floor(W * dpr));
-        canvas.height = Math.max(1, Math.floor(H * dpr));
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      }
-      resize();
-      window.addEventListener("resize", resize);
-
-      // Offscreen cached crimson halo (zero GC per frame)
-      const halo = document.createElement("canvas");
-      halo.width = 256;
-      halo.height = 256;
-      const hctx = halo.getContext("2d");
-      if (hctx) {
-        const g = hctx.createRadialGradient(128, 128, 10, 128, 128, 124);
-        g.addColorStop(0, "rgba(244, 63, 94, 0.42)");
-        g.addColorStop(0.45, "rgba(229, 9, 20, 0.16)");
-        g.addColorStop(1, "rgba(0, 0, 0, 0)");
-        hctx.fillStyle = g;
-        hctx.fillRect(0, 0, 256, 256);
-      }
-
-      const swimImg = new Image();
-      swimImg.src = "assets/tuna-swim-sprite.png";
-
-      const trail = [];
-      const particles = [];
-      const ripples = [];
-      let startTime = 0;
-      const SWIM_DURATION = 1080;
-      const EXIT_AT = 2780;
-
-      function cubicBezier(p0, p1, p2, p3, t) {
-        const u = 1 - t;
-        const tt = t * t;
-        const uu = u * u;
-        return {
-          x: uu * u * p0.x + 3 * uu * t * p1.x + 3 * u * tt * p2.x + tt * t * p3.x,
-          y: uu * u * p0.y + 3 * uu * t * p1.y + 3 * u * tt * p2.y + tt * t * p3.y
-        };
-      }
-
-      function cubicTangent(p0, p1, p2, p3, t) {
-        const u = 1 - t;
-        return {
-          x: 3 * u * u * (p1.x - p0.x) + 6 * u * t * (p2.x - p1.x) + 3 * t * t * (p3.x - p2.x),
-          y: 3 * u * u * (p1.y - p0.y) + 6 * u * t * (p2.y - p1.y) + 3 * t * t * (p3.y - p2.y)
-        };
-      }
-
-      function drawHeroTuna(x, y, angle, size, tailPhase, alpha) {
-        if (alpha <= 0.01) return;
-        const hasImg = swimImg.complete && swimImg.naturalWidth > 0;
-        const L = size;
-        const aspect = hasImg ? swimImg.naturalHeight / swimImg.naturalWidth : 0.44;
-        const fh = L * aspect;
-
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(angle);
-        ctx.globalAlpha = alpha;
-
-        // Luminous crimson water glow behind fish
-        ctx.drawImage(halo, -L * 0.72, -L * 0.72, L * 1.44, L * 1.44);
-
-        if (hasImg) {
-          const slices = 10;
-          const sw = swimImg.naturalWidth;
-          const sh = swimImg.naturalHeight;
-          const srcW = sw / slices;
-          const dstW = L / slices;
-          const waveAmp = fh * 0.14;
-          for (let i = 0; i < slices; i++) {
-            const u0 = i / slices;
-            const uMid = (i + 0.5) / slices;
-            const tailFactor = Math.pow(1 - uMid, 1.75);
-            const waveY = Math.sin(tailPhase - (1 - uMid) * 3.8) * waveAmp * tailFactor;
-            ctx.drawImage(
-              swimImg,
-              u0 * sw,
-              0,
-              srcW + 0.7,
-              sh,
-              -L * 0.5 + i * dstW,
-              -fh * 0.5 + waveY,
-              dstW + 1.0,
-              fh
-            );
+          window.__cineverseSplashDone = true;
+          while (doneQueue.length) {
+            try { doneQueue.shift()(); } catch (_) {}
           }
-        } else {
-          // Instant crisp fallback crimson silhouette if image still decoding
-          ctx.fillStyle = "#e11d48";
-          ctx.beginPath();
-          ctx.ellipse(0, 0, L * 0.44, fh * 0.4, 0, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        ctx.restore();
+        }, 440);
       }
-
-      function triggerLock(tx, ty) {
-        if (locked) return;
-        locked = true;
-        splash.classList.add("is-locked");
-        ripples.push(
-          { x: tx, y: ty, r: 46, maxR: 155, alpha: 0.78, width: 2.4, color: "244, 63, 94" },
-          { x: tx, y: ty, r: 38, maxR: 118, alpha: 0.52, width: 1.4, color: "255, 228, 230" }
-        );
-        for (let i = 0; i < 14; i++) {
-          const a = (Math.PI * 2 * i) / 14 + (Math.random() - 0.5) * 0.3;
-          const spd = 48 + Math.random() * 88;
-          particles.push({
-            x: tx + Math.cos(a) * 28,
-            y: ty + Math.sin(a) * 28,
-            vx: Math.cos(a) * spd,
-            vy: Math.sin(a) * spd,
-            r: 1.4 + Math.random() * 2.2,
-            life: 1,
-            decay: 1.25 + Math.random() * 0.6,
-            warm: i % 3 === 0
-          });
-        }
+      function onKey(e) {
+        if (e.key === "Escape" || e.key === "Enter" || e.key === " ") dismiss();
       }
-
-      let lastTs = 0;
-      function tick(now) {
-        if (finished) return;
-        if (!startTime) {
-          startTime = now;
-          lastTs = now;
-        }
-        const dt = Math.min(0.05, Math.max(0.001, (now - lastTs) / 1000));
-        lastTs = now;
-        const elapsed = now - startTime;
-
-        ctx.clearRect(0, 0, W, H);
-
-        const rect = avatarBox.getBoundingClientRect();
-        const tx = rect.left + rect.width * 0.5;
-        const ty = rect.top + rect.height * 0.5;
-
-        const spanX = Math.min(W * 0.56, 430);
-        const spanY = Math.min(H * 0.24, 185);
-        const p0 = { x: tx - spanX * 1.15 - 60, y: ty + spanY * 0.92 };
-        const p1 = { x: tx - spanX * 0.72, y: ty + spanY * 0.22 };
-        const p2 = { x: tx - spanX * 0.42, y: ty - spanY * 0.68 };
-        const p3 = { x: tx, y: ty };
-
-        const rawT = Math.min(1, elapsed / SWIM_DURATION);
-        // Smooth energetic swim easing: brisk glide curving silkily into avatar center
-        const easedT = rawT < 0.5
-          ? 2 * rawT * rawT
-          : 1 - Math.pow(-2 * rawT + 2, 2.2) / 2;
-
-        if (rawT < 1) {
-          const pos = cubicBezier(p0, p1, p2, p3, easedT);
-          const tan = cubicTangent(p0, p1, p2, p3, easedT);
-          const angle = Math.atan2(tan.y, tan.x);
-
-          // Record luminous wake ribbon points
-          const tailOffset = Math.min(W < 640 ? 64 : 84, 92) * 0.46;
-          const tailX = pos.x - Math.cos(angle) * tailOffset;
-          const tailY = pos.y - Math.sin(angle) * tailOffset;
-          trail.push({ x: tailX, y: tailY, life: 1 });
-          if (trail.length > 34) trail.shift();
-
-          if (Math.random() < 0.72 && rawT < 0.92) {
-            particles.push({
-              x: tailX + (Math.random() - 0.5) * 10,
-              y: tailY + (Math.random() - 0.5) * 10,
-              vx: -Math.cos(angle) * (20 + Math.random() * 35) + (Math.random() - 0.5) * 16,
-              vy: -Math.sin(angle) * (20 + Math.random() * 35) + (Math.random() - 0.5) * 16,
-              r: 1.1 + Math.random() * 1.9,
-              life: 0.9,
-              decay: 1.5 + Math.random() * 0.8,
-              warm: Math.random() < 0.45
-            });
-          }
-
-          // Morph shrink & crossfade seamlessly right as fish dives into the avatar box
-          const baseSize = W < 640 ? 132 : 162;
-          const diveBlend = rawT > 0.76 ? (rawT - 0.76) / 0.24 : 0;
-          const curSize = baseSize * (1 - diveBlend * 0.42);
-          const fishAlpha = Math.min(1, rawT * 5) * (1 - Math.pow(diveBlend, 1.5));
-
-          // Draw glowing water wake ribbon
-          if (trail.length > 2) {
-            for (let i = 1; i < trail.length; i++) {
-              const a = trail[i - 1];
-              const b = trail[i];
-              const frac = i / trail.length;
-              const alpha = frac * b.life * 0.36;
-              if (alpha <= 0.01) continue;
-              ctx.beginPath();
-              ctx.moveTo(a.x, a.y);
-              ctx.lineTo(b.x, b.y);
-              ctx.strokeStyle = `rgba(244, 63, 94, ${alpha.toFixed(3)})`;
-              ctx.lineWidth = Math.max(1, frac * 5.2);
-              ctx.lineCap = "round";
-              ctx.stroke();
-            }
-          }
-
-          drawHeroTuna(pos.x, pos.y, angle, curSize, elapsed * 0.0175, fishAlpha);
-
-          if (rawT >= 0.86 && !locked) {
-            triggerLock(tx, ty);
-          }
-        } else {
-          if (!locked) triggerLock(tx, ty);
-          // Fade remaining wake trail gracefully
-          for (let i = 1; i < trail.length; i++) {
-            const a = trail[i - 1];
-            const b = trail[i];
-            const frac = i / trail.length;
-            const alpha = frac * b.life * 0.32;
-            if (alpha <= 0.01) continue;
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(244, 63, 94, ${alpha.toFixed(3)})`;
-            ctx.lineWidth = Math.max(0.8, frac * 4.5);
-            ctx.lineCap = "round";
-            ctx.stroke();
-          }
-        }
-
-        for (let i = trail.length - 1; i >= 0; i--) {
-          trail[i].life -= dt * 2.1;
-          if (trail[i].life <= 0) trail.splice(i, 1);
-        }
-
-        // Render bioluminescent droplets
-        for (let i = particles.length - 1; i >= 0; i--) {
-          const p = particles[i];
-          p.x += p.vx * dt;
-          p.y += p.vy * dt;
-          p.vx *= 0.96;
-          p.vy *= 0.96;
-          p.life -= p.decay * dt;
-          if (p.life <= 0) {
-            particles.splice(i, 1);
-            continue;
-          }
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fillStyle = p.warm
-            ? `rgba(255, 228, 230, ${(p.life * 0.72).toFixed(3)})`
-            : `rgba(244, 63, 94, ${(p.life * 0.75).toFixed(3)})`;
-          ctx.fill();
-        }
-
-        // Render impact water shockwave ripples
-        for (let i = ripples.length - 1; i >= 0; i--) {
-          const rp = ripples[i];
-          rp.r += (rp.maxR - rp.r) * Math.min(1, dt * 4.8) + dt * 36;
-          rp.alpha -= dt * 0.95;
-          if (rp.alpha <= 0.01 || rp.r >= rp.maxR) {
-            ripples.splice(i, 1);
-            continue;
-          }
-          ctx.beginPath();
-          ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(${rp.color}, ${rp.alpha.toFixed(3)})`;
-          ctx.lineWidth = rp.width;
-          ctx.stroke();
-        }
-
-        if (elapsed >= EXIT_AT) {
-          clearTimeout(safetyTimer);
-          dismissSplash();
-          return;
-        }
-
-        rafId = requestAnimationFrame(tick);
-      }
-
-      // Kick off immediately as soon as sprite is ready (or max 280ms fallback)
-      let started = false;
-      function launch() {
-        if (started || finished) return;
-        started = true;
-        rafId = requestAnimationFrame(tick);
-      }
-      if (swimImg.complete && swimImg.naturalWidth > 0) {
-        launch();
-      } else {
-        swimImg.onload = launch;
-        swimImg.onerror = launch;
-        setTimeout(launch, 280);
-      }
+      splash.addEventListener("click", dismiss, { passive: true });
+      window.addEventListener("keydown", onKey, { passive: true });
+      const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const autoTimer = setTimeout(dismiss, reduced ? 1050 : 2350);
     })();
   </script>
 
@@ -19816,7 +19567,7 @@
     }
 
     initCustomSelectMenus();
-    initAmbientTunaBackground();
+    if (window.__onCineverseSplashDone) { window.__onCineverseSplashDone(initAmbientTunaBackground); } else { initAmbientTunaBackground(); }
     initFirebase();
   </script>
 </body>
