@@ -1869,6 +1869,33 @@
       opacity: 1;
       transform: scale(1);
     }
+    /* Spacebar Play/Pause Center OSD Feedback (100% GPU Compositor) */
+    #cinema-playpause-osd {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: 45;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 20px;
+      border-radius: 999px;
+      background: rgba(7, 8, 12, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      opacity: 0;
+      transform: translate3d(-50%, -50%, 0) scale(0.84);
+      will-change: transform, opacity;
+      transition: opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1), transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #cinema-playpause-osd.is-visible {
+      opacity: 1;
+      transform: translate3d(-50%, -50%, 0) scale(1);
+    }
 
     /* ===== CINEMATIC SPLASH SCREEN (TRUE 120FPS GPU COMPOSITOR + TEXTURE PRE-DECODE) ===== */
     #cv-intro-splash {
@@ -3197,6 +3224,8 @@
 
                 <!-- 5. Khu vực hiệu ứng cảm xúc bay lên màn hình -->
                 <div id="floating-reactions-layer" class="absolute inset-0 pointer-events-none overflow-hidden z-30"></div>
+                <!-- 6. OSD phản hồi phím Space (Tạm dừng / Tiếp tục) -->
+                <div id="cinema-playpause-osd" aria-hidden="true"></div>
               </div>
             </div>
 
@@ -8117,11 +8146,27 @@
       return false;
     }
 
-    function togglePlayPause() {
+    let playPauseOsdTimer = null;
+    function showPlayPauseOSD(isPaused, customLabel = "") {
+      const osd = document.getElementById("cinema-playpause-osd");
+      if (!osd) return;
+      osd.innerHTML = isPaused
+        ? `<i class="fa-solid fa-pause text-rose-400 text-base"></i><span>${customLabel || "Đã tạm dừng"}</span>`
+        : `<i class="fa-solid fa-play text-emerald-400 text-base"></i><span>${customLabel || "Tiếp tục phát"}</span>`;
+      osd.classList.add("is-visible");
+      clearTimeout(playPauseOsdTimer);
+      playPauseOsdTimer = setTimeout(() => {
+        osd.classList.remove("is-visible");
+      }, 650);
+    }
+
+    function togglePlayPause(showOsd = false) {
       const videoEl = document.getElementById("html5-video-player");
       const ytWrapper = document.getElementById("youtube-wrapper");
+      const liveVid = document.getElementById("discord-live-video");
       const btn = document.getElementById("btn-play-pause");
 
+      // 1. YouTube player
       if (ytWrapper && !ytWrapper.classList.contains("hidden")) {
         state.ytPaused = !state.ytPaused;
         sendYouTubeCommand(state.ytPaused ? "pauseVideo" : "playVideo");
@@ -8131,26 +8176,43 @@
             : `<i class="fa-solid fa-pause"></i>`;
         }
         setScreenCurtainClosed(state.ytPaused);
+        if (showOsd) showPlayPauseOSD(state.ytPaused);
         if (isIAmHost()) broadcastRoomVideoSync(state.ytPaused ? "pause" : "play");
         return;
       }
 
-      if (!videoEl || videoEl.classList.contains("hidden")) return;
-      if (videoEl.paused) {
-        videoEl.play().catch(() => {
-          videoEl.muted = true;
-          const muteBtn = document.getElementById("btn-mute");
-          if (muteBtn) muteBtn.innerHTML = `<i class="fa-solid fa-volume-xmark mr-1 text-rose-400"></i>Đã tắt tiếng`;
-          videoEl.play().catch(() => {});
-        });
-        if (btn) btn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
-        setScreenCurtainClosed(false);
-        if (isIAmHost()) broadcastRoomVideoSync("play");
-      } else {
-        videoEl.pause();
-        if (btn) btn.innerHTML = `<i class="fa-solid fa-play"></i>`;
-        setScreenCurtainClosed(true);
-        if (isIAmHost()) broadcastRoomVideoSync("pause");
+      // 2. HTML5 MP4 / R2 Movie player
+      if (videoEl && !videoEl.classList.contains("hidden")) {
+        if (videoEl.paused) {
+          videoEl.play().catch(() => {
+            videoEl.muted = true;
+            const muteBtn = document.getElementById("btn-mute");
+            if (muteBtn) muteBtn.innerHTML = `<i class="fa-solid fa-volume-xmark mr-1 text-rose-400"></i>Đã tắt tiếng`;
+            videoEl.play().catch(() => {});
+          });
+          if (btn) btn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
+          setScreenCurtainClosed(false);
+          if (showOsd) showPlayPauseOSD(false);
+          if (isIAmHost()) broadcastRoomVideoSync("play");
+        } else {
+          videoEl.pause();
+          if (btn) btn.innerHTML = `<i class="fa-solid fa-play"></i>`;
+          setScreenCurtainClosed(true);
+          if (showOsd) showPlayPauseOSD(true);
+          if (isIAmHost()) broadcastRoomVideoSync("pause");
+        }
+        return;
+      }
+
+      // 3. Phòng Stream (người xem tạm dừng / tiếp tục màn hình Live cục bộ)
+      if (liveVid && !liveVid.classList.contains("hidden") && liveVid.srcObject) {
+        if (liveVid.paused) {
+          liveVid.play().catch(() => {});
+          if (showOsd) showPlayPauseOSD(false, "Tiếp tục xem Live");
+        } else {
+          liveVid.pause();
+          if (showOsd) showPlayPauseOSD(true, "Tạm dừng màn hình Live");
+        }
       }
     }
 
@@ -8229,15 +8291,41 @@
       broadcastRoomVideoSync("seek");
     }
 
-    document.addEventListener("keydown", (e) => {
+    let lastSpaceHandledAt = 0;
+    function isAnyBlockingModalOpen() {
+      if (document.getElementById("cv-intro-splash")) return true;
+      const modalIds = ["name-modal", "host-key-modal", "admin-panel-modal", "memory-capsule-modal", "payment-modal", "request-movie-modal", "seat-booking-modal", "maintenance-gate-overlay"];
+      return modalIds.some((id) => {
+        const el = document.getElementById(id);
+        return el && !el.classList.contains("hidden");
+      });
+    }
+
+    // Bắt phím Space ở capture phase: dừng/tiếp tục phim mượt, không bị trôi trang và không kích hoạt đúp nút đang focus
+    window.addEventListener("keydown", (e) => {
       if (!state.currentRoomId) return;
-      const tag = (document.activeElement?.tagName || "").toUpperCase();
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || document.activeElement?.isContentEditable) {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const activeEl = document.activeElement;
+      const tag = (activeEl?.tagName || "").toUpperCase();
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || activeEl?.isContentEditable) {
         return;
       }
-      if (e.code === "Space") {
+      if (isAnyBlockingModalOpen()) return;
+
+      if (e.code === "Space" || e.key === " ") {
         e.preventDefault();
-        togglePlayPause();
+        e.stopPropagation();
+        if (e.repeat) return;
+        // Bỏ focus khỏi button/video đang chọn trước đó để keyup Space không kích hoạt click lặp
+        if (activeEl && (tag === "BUTTON" || tag === "A" || tag === "VIDEO")) {
+          try { activeEl.blur(); } catch (_) {}
+        }
+        lastSpaceHandledAt = Date.now();
+        togglePlayPause(true);
+      } else if (e.key === "k" || e.key === "K") {
+        if (e.repeat) return;
+        e.preventDefault();
+        togglePlayPause(true);
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();
         seekBySeconds(-5);
@@ -8245,7 +8333,14 @@
         e.preventDefault();
         seekBySeconds(5);
       }
-    });
+    }, true);
+
+    window.addEventListener("keyup", (e) => {
+      if ((e.code === "Space" || e.key === " ") && Date.now() - lastSpaceHandledAt < 450) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
 
     function syncLiveTime() {
       if (!state.currentRoomId) return;
@@ -10365,6 +10460,11 @@
       let canopyEl = null;
       ambilightInterval = setInterval(() => {
         if (document.hidden || !state.currentRoomId) return;
+        // Bỏ repaint box-shadow 75px khi đang ở Phòng Stream hoặc phát Share màn hình để giữ 60fps tuyệt đối
+        const activeRoom = getEffectiveRoom(state.currentRoomId);
+        if (activeRoom?.isDiscordRoom || liveScreenStream || remoteScreenStream) return;
+        const vidEl = document.getElementById("html5-video-player");
+        if (vidEl && !vidEl.classList.contains("hidden") && vidEl.paused) return;
         if (!frameEl || !frameEl.isConnected) frameEl = document.querySelector(".lotte-screen-frame");
         if (!canopyEl || !canopyEl.isConnected) canopyEl = document.querySelector(".ceiling-canopy");
         if (!frameEl || !canopyEl) return;
@@ -12179,6 +12279,7 @@
     function startVoiceStatsMonitor() {
       stopVoiceStatsMonitor();
       voiceStatsTimer = setInterval(async () => {
+        if (document.hidden) return;
         const badge = document.getElementById("voice-diag-badge");
         const dBadge = document.getElementById("discord-voice-diag-badge");
         if (livekitVoiceActive && livekitRoom && state.currentRoomId) {
@@ -12744,7 +12845,7 @@
         height: 1080,
         frameRate: 60,
         maxBitrate: 8_000_000,
-        contentHint: "detail"
+        contentHint: "motion"
       },
       qhd1440_30: {
         label: "2K 30fps",
@@ -12760,7 +12861,7 @@
         height: 1440,
         frameRate: 60,
         maxBitrate: 12_000_000,
-        contentHint: "detail"
+        contentHint: "motion"
       },
       uhd4k_30: {
         label: "4K 30fps",
@@ -12776,7 +12877,7 @@
         height: 2160,
         frameRate: 60,
         maxBitrate: 20_000_000,
-        contentHint: "detail"
+        contentHint: "motion"
       }
     };
 
@@ -12854,7 +12955,7 @@
       contentHint: "motion"
     };
 
-    // Áp dụng cấu hình tối ưu cho Video Sender (Screen Share ưu tiên nét, Camera tối ưu nhẹ tránh nghẽn băng thông)
+    // Áp dụng cấu hình tối ưu cho Video Sender (tự cân bằng bitrate khi nhiều người xem P2P & ưu tiên giữ 60fps cho preset 60fps)
     async function applyDiscordSenderParams(sender, cfg, isCamera = false) {
       try {
         const params = sender.getParameters();
@@ -12863,10 +12964,16 @@
         }
         const trackH = sender?.track?.getSettings?.().height || cfg.height;
         const downBy = trackH > cfg.height ? Math.max(1.0, Number((trackH / cfg.height).toFixed(3))) : 1.0;
-        params.encodings[0].maxBitrate = cfg.maxBitrate;
+        const peerCount = !isCamera ? Math.max(1, liveScreenPeers.size) : 1;
+        const effectiveBitrate = (!isCamera && peerCount >= 3)
+          ? Math.max(1_800_000, Math.round(cfg.maxBitrate / Math.sqrt(peerCount - 0.5)))
+          : cfg.maxBitrate;
+        params.encodings[0].maxBitrate = effectiveBitrate;
         params.encodings[0].maxFramerate = cfg.frameRate;
         params.encodings[0].scaleResolutionDownBy = downBy;
-        params.degradationPreference = isCamera ? "balanced" : "maintain-resolution";
+        params.degradationPreference = isCamera
+          ? "balanced"
+          : (cfg.frameRate >= 60 ? "maintain-framerate" : "maintain-resolution");
         await sender.setParameters(params);
         try {
           const p2 = sender.getParameters();
@@ -12879,12 +12986,12 @@
       } catch (_) {}
     }
 
-    // Áp dụng độ trễ buffer mượt 50-60ms cho Receiver (tránh nghẽn & đứng hình khi jitter mạng/TURN)
+    // Áp dụng độ trễ buffer mượt 60-80ms cho Receiver (tránh nghẽn & đứng hình khi jitter mạng Wi-Fi/4G)
     function applyDiscordZeroJitter(receiver) {
       if (!receiver) return;
       try {
-        if ("playoutDelayHint" in receiver) receiver.playoutDelayHint = 0.06;
-        if ("jitterBufferTarget" in receiver) receiver.jitterBufferTarget = 50;
+        if ("playoutDelayHint" in receiver) receiver.playoutDelayHint = 0.08;
+        if ("jitterBufferTarget" in receiver) receiver.jitterBufferTarget = 60;
       } catch (_) {}
     }
 
@@ -13684,24 +13791,52 @@
       showToast("Đã bật Live màn hình! Bạn bè trong phòng sẽ thấy ngay lập tức.", "success");
     }
 
-    // Đổi cửa sổ / tab đang chia sẻ mà không làm rớt kết nối với người xem
+    // Đổi cửa sổ / tab đang chia sẻ mà không làm rớt kết nối với người xem (hỗ trợ cả SFU LiveKit & P2P)
     async function switchDiscordScreenSource() {
       if (!liveScreenStream) return startDiscordScreenShare();
-      const cfg = DISCORD_QUALITY_PRESETS[liveScreenQuality] || DISCORD_QUALITY_PRESETS.hd720_60;
+      const cfg = DISCORD_QUALITY_PRESETS[liveScreenQuality] || DISCORD_QUALITY_PRESETS.fhd1080_60;
+
+      // Nếu đang phát qua LiveKit SFU -> re-publish track mới mượt mà
+      if (livekitVoiceActive && livekitRoom?.localParticipant && !window.Capacitor?.Plugins?.ReplayKitBridge) {
+        try {
+          await livekitRoom.localParticipant.setScreenShareEnabled(false);
+          const pub = await livekitRoom.localParticipant.setScreenShareEnabled(true, {
+            audio: true,
+            resolution: { width: cfg.width, height: cfg.height, frameRate: cfg.frameRate }
+          });
+          const track = pub?.track?.mediaStreamTrack;
+          if (!track) {
+            await stopDiscordScreenShare();
+            return;
+          }
+          liveScreenStream = new MediaStream([track]);
+          track.onended = () => { stopDiscordScreenShare(); };
+          updateDiscordLiveUI();
+          showToast("Đã chuyển cửa sổ chia sẻ màn hình SFU!", "success");
+        } catch (_) {
+          await stopDiscordScreenShare();
+        }
+        return;
+      }
+
       let newStream = null;
       try {
         newStream = await navigator.mediaDevices.getDisplayMedia({
           video: {
             width: { ideal: cfg.width },
             height: { ideal: cfg.height },
-            frameRate: { ideal: cfg.frameRate, max: cfg.frameRate }
+            frameRate: { ideal: cfg.frameRate, max: cfg.frameRate },
+            cursor: "always"
           },
           audio: {
             echoCancellation: false,
             noiseSuppression: false,
             autoGainControl: false,
             suppressLocalAudioPlayback: false
-          }
+          },
+          surfaceSwitching: "include",
+          selfBrowserSurface: "exclude",
+          systemAudio: "include"
         });
       } catch (_) {
         return;
@@ -13716,15 +13851,21 @@
         newVideoTrack.onended = () => stopDiscordScreenShare();
       }
 
-      for (const { pc } of liveScreenPeers.values()) {
+      const roomId = liveScreenRoomId || state.currentRoomId;
+      for (const [viewerUid, entry] of liveScreenPeers.entries()) {
+        const pc = entry?.pc;
+        if (!pc || entry.isNativeWebRTC) continue;
         const vSender = pc.getSenders().find((s) => s.track && s.track.kind === "video");
         if (vSender && newVideoTrack) {
           await vSender.replaceTrack(newVideoTrack).catch(() => {});
           await applyDiscordSenderParams(vSender, cfg);
         }
         const aSender = pc.getSenders().find((s) => s.track && s.track.kind === "audio");
-        if (aSender && newAudioTrack) {
+        if (aSender) {
           await aSender.replaceTrack(newAudioTrack).catch(() => {});
+        } else if (newAudioTrack && roomId) {
+          // Cửa sổ trước không có tiếng nhưng cửa sổ mới có tiếng -> gửi Offer mới để viewer nhận cả tiếng
+          initiateOfferToDiscordViewer(roomId, viewerUid, entry.viewerJoinedAt || Date.now());
         }
       }
 
@@ -13829,6 +13970,10 @@
     function closeDiscordPeer(uid) {
       const entry = liveScreenPeers.get(uid);
       if (!entry) return;
+      if (entry.disconnectTimer) {
+        clearTimeout(entry.disconnectTimer);
+        entry.disconnectTimer = null;
+      }
       try { entry.pc.close(); } catch (_) {}
       try { entry.audioPc?.close?.(); } catch (_) {}
       if (entry.isNativeWebRTC) {
@@ -14112,7 +14257,7 @@
       let prevFramesDecoded = 0;
       let stalledTicks = 0;
       const pollStats = async () => {
-        if (!statsEl) return;
+        if (!statsEl || document.hidden) return;
         const firstEntry = liveScreenPeers.values().next().value;
         if (!firstEntry) {
           const vTrack = liveScreenStream?.getVideoTracks?.()[0];
@@ -14365,6 +14510,7 @@
       liveScreenUnsubs.forEach((u) => { try { u(); } catch (_) {} });
       liveScreenUnsubs = [];
       stopDiscordStatsMonitor();
+      cleanupIOSFallbackStream();
 
       if (liveScreenStream) {
         liveScreenStream.getTracks().forEach((t) => { try { t.stop(); } catch (_) {} });
@@ -14380,6 +14526,8 @@
           rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${targetId}/screen_broadcaster`)).catch(() => {});
           rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${targetId}/screen_signals`)).catch(() => {});
           rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${targetId}/screen_ice`)).catch(() => {});
+          rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${targetId}/screen_audio_signals`)).catch(() => {});
+          rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${targetId}/screen_audio_ice`)).catch(() => {});
         }
       }
       liveScreenBroadcaster = null;
@@ -14873,7 +15021,7 @@
       speakingUids.clear();
     }
 
-    // Vòng lặp kiểm tra mức âm thanh thực tế (~80ms/lần): chỉ khi nói ra tiếng mới bật ánh xanh
+    // Vòng lặp kiểm tra mức âm thanh thực tế (~100ms/lần, tạm nghỉ khi ẩn tab): chỉ khi nói ra tiếng mới bật ánh xanh
     function startVoiceVadLoop() {
       if (voiceVadTimer) return;
       voiceVadTimer = setInterval(() => {
@@ -14882,6 +15030,7 @@
           voiceVadTimer = null;
           return;
         }
+        if (document.hidden) return;
         if (voiceVadAudioCtx && voiceVadAudioCtx.state === "suspended") {
           voiceVadAudioCtx.resume().catch(() => {});
         }
@@ -14905,7 +15054,7 @@
             setSpeakingState(uid, false);
           }
         }
-      }, 80);
+      }, 100);
     }
 
     let localMicMonitorAudioEl = null;
@@ -14929,6 +15078,8 @@
     }
 
     function cleanupRoomVoice(roomId) {
+      stopVoiceSpeechRecognition();
+      cleanupRoomLiveCaptions(roomId);
       clearAllVoiceVadMonitors();
       setLocalMicSelfMonitor(null, false);
       if (roomVoiceUnsub) {
@@ -14966,6 +15117,7 @@
       // Nếu Mic đang bật -> tắt Mic ngay lập tức
       if (voiceMicActive) {
         voiceMicActive = false;
+        stopVoiceSpeechRecognition();
         setSpeakingState(state.uid, false);
         setLocalMicSelfMonitor(null, false);
         if (localVoiceStream) {
@@ -15007,12 +15159,52 @@
         return;
       }
 
+      // Chế độ LiveKit SFU đang hoạt động: dùng thẳng pipeline SFU (KHÔNG tạo thêm mesh P2P trùng gây vọng & tốn băng thông!)
+      if (livekitVoiceActive && livekitRoom?.state === "connected" && livekitRoom?.localParticipant) {
+        try {
+          await livekitRoom.localParticipant.setMicrophoneEnabled(true);
+          voiceMicActive = true;
+          updateVoiceMicButtonUI();
+          if (voiceSubtitlesEnabled) startVoiceSpeechRecognition();
+          try { logMemberActivity?.("mic_toggle", `Bật Microphone SFU tại ${getEffectiveRoom(roomId)?.number || roomId}`, { micState: "on", roomId }); } catch (_) {}
+          const badge = document.getElementById("voice-diag-badge");
+          const dBadge = document.getElementById("discord-voice-diag-badge");
+          if (badge) { badge.textContent = "🎙️ Mic:SFU-OK"; badge.classList.remove("hidden"); }
+          if (dBadge) { dBadge.textContent = "🎙️ Mic:SFU-OK"; dBadge.classList.remove("hidden"); }
+          if (rtdb && rtdbMod) {
+            rtdbMod.update(rtdbMod.ref(rtdb, `voice/${roomId}/peers/${state.uid}`), {
+              uid: state.uid,
+              userName: state.userName,
+              micOn: true,
+              sfu: true,
+              sessionId: currentVoiceSessionId,
+              updatedAt: Date.now()
+            }).catch(() => {});
+          }
+          showToast("🎙️ Micro đã bật (SFU tốc độ cao)! Đã kích hoạt phát tiếng trực tiếp trong phòng.", "success");
+          return;
+        } catch (sfuMicErr) {
+          const errName = sfuMicErr?.name || "";
+          if (errName === "NotAllowedError" || errName === "PermissionDeniedError") {
+            showToast("Bạn chưa cấp quyền sử dụng Micro cho trình duyệt!", "error");
+            return;
+          }
+          // Fallback mượt sang luồng getUserMedia chuẩn nếu SFU bật mic lỗi
+        }
+      }
+
       try {
         const hasLiveTrack = localVoiceStream && localVoiceStream.getAudioTracks().some(t => t.readyState === "live");
         if (!hasLiveTrack) {
           try {
             localVoiceStream = await navigator.mediaDevices.getUserMedia({
-              audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+              audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true,
+                channelCount: 1,
+                sampleRate: 48000
+              }
             });
           } catch (constraintErr) {
             localVoiceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -15036,9 +15228,22 @@
         return;
       }
       track.enabled = true;
+      track.onended = () => {
+        if (voiceMicActive) {
+          voiceMicActive = false;
+          stopVoiceSpeechRecognition();
+          setSpeakingState(state.uid, false);
+          updateVoiceMicButtonUI();
+          if (rtdb && rtdbMod && state.currentRoomId) {
+            rtdbMod.update(rtdbMod.ref(rtdb, `voice/${state.currentRoomId}/peers/${state.uid}`), { micOn: false, updatedAt: Date.now() }).catch(() => {});
+          }
+          showToast("⚠️ Thiết bị Micro vừa ngắt kết nối.", "warning");
+        }
+      };
       voiceMicActive = true;
       updateVoiceMicButtonUI();
       attachVoiceVadMonitor(state.uid, localVoiceStream);
+      if (voiceSubtitlesEnabled) startVoiceSpeechRecognition();
       try { logMemberActivity?.("mic_toggle", `Bật Microphone đàm thoại tại ${getEffectiveRoom(roomId)?.number || roomId}`, { micState: "on", roomId }); } catch (_) {}
 
       const badge = document.getElementById("voice-diag-badge");
@@ -15046,41 +15251,40 @@
       if (badge) { badge.textContent = "🎙️ Mic: ĐANG PHÁT"; badge.classList.remove("hidden"); }
       if (dBadge) { dBadge.textContent = "🎙️ Mic: ĐANG PHÁT"; dBadge.classList.remove("hidden"); }
 
-      if (livekitVoiceActive && livekitRoom?.state === "connected" && livekitRoom?.localParticipant) {
-        livekitRoom.localParticipant.setMicrophoneEnabled(true).catch(() => {});
-      }
-
-      // Đảm bảo đồng bộ đầy đủ với tất cả người xem đang ở trong phòng (kể cả khi peer chưa khởi tạo)
-      let allRoomPeers = {};
-      if (rtdb && rtdbMod) {
-        try {
-          const pSnap = await rtdbMod.get(rtdbMod.ref(rtdb, `voice/${roomId}/peers`));
-          allRoomPeers = pSnap.val() || {};
-        } catch (_) {}
-      }
-      const targetPeerUids = new Set([...Object.keys(voicePeers), ...Object.keys(allRoomPeers)]);
-      for (const rUid of targetPeerUids) {
-        if (!rUid || rUid === state.uid) continue;
-        try {
-          let entry = voicePeers[rUid];
-          if (entry && entry.pc && entry.pc.connectionState !== "closed" && entry.pc.connectionState !== "failed" && entry.audioSender) {
-            await entry.audioSender.replaceTrack(track);
-            entry.hadSentTrack = true;
-          } else if (rtdb && rtdbMod) {
-            closeVoicePeer(rUid);
-            const freshEntry = getOrCreateVoicePeer(roomId, rUid);
-            const offer = await freshEntry.pc.createOffer();
-            await freshEntry.pc.setLocalDescription(offer);
-            await rtdbMod.set(rtdbMod.ref(rtdb, `voice/${roomId}/signals/${rUid}/${state.uid}`), {
-              type: "offer",
-              fresh: true,
-              sdp: offer.sdp,
-              from: state.uid,
-              sessionId: currentVoiceSessionId,
-              ts: Date.now()
-            });
-          }
-        } catch (e) {}
+      // Đồng bộ P2P cho tất cả người xem đang ở trong phòng (chỉ khi không dùng LiveKit SFU & không tạo trùng Native Android peer)
+      if (!isNativeAndroidVoiceAvailable()) {
+        let allRoomPeers = {};
+        if (rtdb && rtdbMod) {
+          try {
+            const pSnap = await rtdbMod.get(rtdbMod.ref(rtdb, `voice/${roomId}/peers`));
+            allRoomPeers = pSnap.val() || {};
+          } catch (_) {}
+        }
+        const targetPeerUids = new Set([...Object.keys(voicePeers), ...Object.keys(allRoomPeers)]);
+        for (const rUid of targetPeerUids) {
+          if (!rUid || rUid === state.uid) continue;
+          try {
+            let entry = voicePeers[rUid];
+            if (entry && entry.native) continue;
+            if (entry && entry.pc && entry.pc.connectionState !== "closed" && entry.pc.connectionState !== "failed" && entry.audioSender) {
+              await entry.audioSender.replaceTrack(track);
+              entry.hadSentTrack = true;
+            } else if (rtdb && rtdbMod) {
+              closeVoicePeer(rUid);
+              const freshEntry = getOrCreateVoicePeer(roomId, rUid);
+              const offer = await freshEntry.pc.createOffer();
+              await freshEntry.pc.setLocalDescription(offer);
+              await rtdbMod.set(rtdbMod.ref(rtdb, `voice/${roomId}/signals/${rUid}/${state.uid}`), {
+                type: "offer",
+                fresh: true,
+                sdp: offer.sdp,
+                from: state.uid,
+                sessionId: currentVoiceSessionId,
+                ts: Date.now()
+              });
+            }
+          } catch (e) {}
+        }
       }
 
       if (rtdb && rtdbMod) {
@@ -15105,16 +15309,15 @@
         rtdb = databaseMod.getDatabase(app);
         rtdbMod = databaseMod;
 
-        window.addEventListener("pagehide", () => {
+        const cleanupOnLeave = () => {
           clearMySeatFromRTDB();
           releaseMyHostStatus();
           cleanupRoomVoice(state.currentRoomId);
-        });
-        window.addEventListener("beforeunload", () => {
-          clearMySeatFromRTDB();
-          releaseMyHostStatus();
-          cleanupRoomVoice(state.currentRoomId);
-        });
+          cleanupRoomLiveScreen(state.currentRoomId);
+          cleanupRoomLiveCam(state.currentRoomId);
+        };
+        window.addEventListener("pagehide", cleanupOnLeave);
+        window.addEventListener("beforeunload", cleanupOnLeave);
 
         // Lắng nghe cấu hình lịch chiếu từ Admin (đồng bộ tất cả người tham gia)
         rtdbMod.onValue(rtdbMod.ref(rtdb, "lobby_config/rooms"), (snap) => {
