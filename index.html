@@ -10921,12 +10921,15 @@
           if (state.seatsByRoom[roomId]) {
             state.seatsByRoom[roomId] = {};
           }
+          if (state.bookedTicketsByRoom?.[roomId]) {
+            delete state.bookedTicketsByRoom[roomId];
+            saveAppStateToStorage();
+          }
           clearMySeatFromRTDB();
           if (state.currentRoomId === roomId) {
-            renderSeatingMap();
-            renderAudienceList();
-            updateRoomHeaderUI();
-            showToast("🪑 Admin đã dọn ghế phòng chiếu này.", "info");
+            showToast("🪑 Admin đã dọn ghế phòng chiếu — mời bạn ra Sảnh chính!", "info");
+            leaveRoom();
+            return;
           }
         }
         const myMod = (mod.users || {})[state.uid] || {};
@@ -10939,11 +10942,15 @@
           if (mySeatNow && state.seatsByRoom[roomId]) {
             delete state.seatsByRoom[roomId][mySeatNow];
           }
+          if (state.bookedTicketsByRoom?.[roomId]) {
+            delete state.bookedTicketsByRoom[roomId];
+            saveAppStateToStorage();
+          }
           clearMySeatFromRTDB();
           if (state.currentRoomId === roomId) {
-            renderSeatingMap();
-            renderAudienceList();
-            updateRoomHeaderUI();
+            showToast("🪑 Admin đã dọn ghế của bạn — mời bạn ra Sảnh chính!", "info");
+            leaveRoom();
+            return;
           }
         }
         const prevMuted = state.roomMutedUntil && state.roomMutedUntil > Date.now();
@@ -10956,9 +10963,15 @@
           showToast("🔇 Admin đã tắt mic của bạn từ xa.", "error");
         }
         const kickedAt = Math.max(Number(myMod.kickedAt || 0), Number(myNameMod.kickedAt || 0));
-        if (kickedAt && kickedAt > roomJoinedTs && modInitialized) {
-          showToast("🚫 Bạn đã được Admin mời ra khỏi phòng chiếu.", "error");
+        if (kickedAt && kickedAt > roomJoinedTs && kickedAt !== state._lastKickedAt) {
+          state._lastKickedAt = kickedAt;
+          if (state.bookedTicketsByRoom?.[roomId]) {
+            delete state.bookedTicketsByRoom[roomId];
+            saveAppStateToStorage();
+          }
+          showToast("🚫 Bạn đã được Admin mời ra khỏi phòng chiếu về Sảnh chính.", "error");
           leaveRoom();
+          return;
         }
         modInitialized = true;
       }, () => {});
