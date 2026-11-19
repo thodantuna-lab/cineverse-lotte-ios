@@ -201,63 +201,14 @@
       position: relative;
       overflow: hidden;
       transition:
-        transform 0.26s cubic-bezier(0.22, 1, 0.36, 1),
-        box-shadow 0.26s cubic-bezier(0.22, 1, 0.36, 1),
-        border-color 0.26s ease,
-        background-color 0.26s ease,
-        filter 0.26s ease;
-      will-change: transform;
-    }
-    /* Tối ưu GPU Compositor: chạy hoàn toàn bằng transform3d để không gây giật lag video */
-    @keyframes btnHologramFlow {
-      0% {
-        transform: translate3d(0%, 0, 0);
-      }
-      100% {
-        transform: translate3d(-50%, 0, 0);
-      }
-    }
-    button:not(.cinema-chair):not(.absolute):not(.fixed):not(.no-holo):not(:disabled) {
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.14), 0 0 16px rgba(232, 121, 249, 0.10);
-    }
-    button:not(.cinema-chair):not(.absolute):not(.fixed):not(.no-holo)::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      width: 200%;
-      background-image: linear-gradient(
-        110deg,
-        rgba(56, 189, 248, 0.04) 0%,
-        rgba(56, 189, 248, 0.18) 12%,
-        rgba(192, 132, 252, 0.20) 25%,
-        rgba(251, 191, 36, 0.16) 37%,
-        rgba(56, 189, 248, 0.04) 50%,
-        rgba(56, 189, 248, 0.18) 62%,
-        rgba(192, 132, 252, 0.20) 75%,
-        rgba(251, 191, 36, 0.16) 87%,
-        rgba(56, 189, 248, 0.04) 100%
-      );
-      animation: btnHologramFlow 4.2s linear infinite;
-      will-change: transform;
-      pointer-events: none;
-      z-index: 1;
-    }
-    button:not(.cinema-chair):not(.absolute):not(.fixed):disabled::after {
-      animation: none;
-      opacity: 0;
+        transform 0.14s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.14s ease,
+        border-color 0.14s ease,
+        background-color 0.14s ease;
     }
     button:not(.cinema-chair):not(.absolute):not(.fixed):not(.no-holo):hover:not(:disabled) {
-      transform: translateY(-2px) scale(1.025);
-      box-shadow:
-        0 6px 20px rgba(56, 189, 248, 0.28),
-        0 0 16px rgba(232, 121, 249, 0.24),
-        inset 0 0 10px rgba(255, 255, 255, 0.14);
-      filter: brightness(1.08);
-    }
-    button:not(.cinema-chair):not(.absolute):not(.fixed):not(.no-holo):hover:not(:disabled)::after {
-      animation-duration: 2.2s;
+      transform: translateY(-1px);
+      filter: brightness(1.06);
     }
 
     /* Tách tầng GPU riêng cho màn hình video 1080p để phát mượt tối đa */
@@ -1586,11 +1537,11 @@
     }
 
     .liquid-glass-card {
-      background: rgba(25, 28, 38, 0.56) !important;
-      backdrop-filter: blur(14px) saturate(150%) !important;
-      -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
+      background: rgba(25, 28, 38, 0.68) !important;
+      backdrop-filter: blur(10px) saturate(140%) !important;
+      -webkit-backdrop-filter: blur(10px) saturate(140%) !important;
       border: 1px solid var(--glass-border) !important;
-      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.38), var(--glass-highlight) !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.36), var(--glass-highlight) !important;
       contain: layout style;
     }
 
@@ -1622,15 +1573,15 @@
     }
 
     .liquid-glass-pill {
-      background: rgba(25, 28, 38, 0.58) !important;
-      backdrop-filter: blur(14px) saturate(150%) !important;
-      -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
+      background: rgba(25, 28, 38, 0.68) !important;
+      backdrop-filter: blur(10px) saturate(140%) !important;
+      -webkit-backdrop-filter: blur(10px) saturate(140%) !important;
       border: 1px solid var(--glass-border) !important;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), var(--glass-highlight) !important;
       color: var(--text-primary) !important;
     }
     .liquid-glass-pill:hover {
-      background: rgba(38, 43, 58, 0.72) !important;
+      background: rgba(38, 43, 58, 0.78) !important;
       border-color: rgba(255, 255, 255, 0.28) !important;
     }
 
@@ -1646,9 +1597,7 @@
     }
 
     .monochrome-pill {
-      background: rgba(20, 24, 32, 0.72) !important;
-      backdrop-filter: blur(16px) saturate(160%);
-      -webkit-backdrop-filter: blur(16px) saturate(160%);
+      background: rgba(20, 24, 32, 0.88) !important;
       border: 1px solid var(--glass-border) !important;
       box-shadow: var(--glass-highlight);
       color: var(--text-primary) !important;
@@ -2101,6 +2050,7 @@
                muted
                loop
                playsinline
+               preload="none"
                class="hidden absolute inset-0 w-full h-full object-cover opacity-75 transition-opacity duration-700"></video>
 
         <!-- Lớp phủ Gradient đa hướng chuẩn giao diện Netflix -->
@@ -2397,14 +2347,15 @@
             </div>
           </div>
 
-          <!-- Bản đồ Google Maps Embed thực tế -->
+          <!-- Bản đồ Google Maps Embed thực tế (Lazy-load khi mở tab Tìm Rạp để không làm chậm trang chủ) -->
           <div id="hn-google-map-wrap" class="relative w-full h-52 sm:h-64 lg:h-72 bg-black">
             <iframe id="hn-google-map-iframe"
               title="Bản đồ Google Maps Rạp Phim Hà Nội"
               class="w-full h-full border-0"
               loading="lazy"
               referrerpolicy="no-referrer-when-downgrade"
-              src="https://maps.google.com/maps?q=Lotte+Mall+West+Lake+Hanoi+272+Vo+Chi+Cong+Ha+Noi&t=&z=15&ie=UTF8&iwloc=&output=embed">
+              src="about:blank"
+              data-src="https://maps.google.com/maps?q=Lotte+Mall+West+Lake+Hanoi+272+Vo+Chi+Cong+Ha+Noi&t=&z=15&ie=UTF8&iwloc=&output=embed">
             </iframe>
           </div>
         </div>
@@ -5300,9 +5251,20 @@
 
     const DYNAMIC_MOVIE_META_CACHE = {};
     const DYNAMIC_MOVIE_META_PENDING = new Set();
+    const RESOLVED_CATALOG_META_CACHE = {};
 
     function resolveMovieMetadata(title = "", baseRoom = {}) {
       const raw = String(title || "").trim();
+      const cacheKey = raw + "||" + String(baseRoom?.genre || "") + "||" + String(baseRoom?.duration || "");
+      if (RESOLVED_CATALOG_META_CACHE[cacheKey] && !DYNAMIC_MOVIE_META_CACHE[raw]) {
+        return RESOLVED_CATALOG_META_CACHE[cacheKey];
+      }
+      const res = _resolveMovieMetadataCore(raw, baseRoom);
+      RESOLVED_CATALOG_META_CACHE[cacheKey] = res;
+      return res;
+    }
+
+    function _resolveMovieMetadataCore(raw = "", baseRoom = {}) {
       const t = raw
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
@@ -5942,28 +5904,35 @@
       const posterEl = document.getElementById("hero-bg-poster");
       const videoEl = document.getElementById("hero-bg-video");
       if (posterEl) {
-        posterEl.src = room.poster;
-        posterEl.classList.remove("netflix-hero-bg");
-        void posterEl.offsetWidth;
-        posterEl.classList.add("netflix-hero-bg");
+        if (posterEl.getAttribute("src") !== room.poster) {
+          posterEl.src = room.poster;
+          posterEl.classList.remove("netflix-hero-bg");
+          void posterEl.offsetWidth;
+          posterEl.classList.add("netflix-hero-bg");
+        }
       }
 
-      // Phát video preview nền như Netflix nếu có
+      // Giữ Poster sắc nét làm nền Billboard để không tự động stream file phim 1.5GB–3GB ở sảnh (chỉ bật trailer nếu người dùng chủ động bấm nút loa)
       if (videoEl) {
         const previewSrc = room.videoUrl || room.previewVideoUrl;
-        if (previewSrc && !state.currentRoomId) {
+        if (previewSrc && !state.currentRoomId && !state.heroMuted) {
           if (videoEl.getAttribute("data-src") !== previewSrc) {
             videoEl.setAttribute("data-src", previewSrc);
             videoEl.src = previewSrc;
           }
-          videoEl.muted = state.heroMuted;
+          videoEl.muted = false;
           videoEl.classList.remove("hidden");
           videoEl.play().catch(() => {
             videoEl.muted = true;
             videoEl.play().catch(() => {});
           });
         } else {
-          videoEl.pause();
+          if (!videoEl.paused) videoEl.pause();
+          if (videoEl.getAttribute("src")) {
+            videoEl.removeAttribute("src");
+            videoEl.removeAttribute("data-src");
+            try { videoEl.load(); } catch (_) {}
+          }
           videoEl.classList.add("hidden");
         }
       }
@@ -6077,17 +6046,13 @@
 
     function toggleHeroVideoMute() {
       state.heroMuted = !state.heroMuted;
-      const videoEl = document.getElementById("hero-bg-video");
       const btn = document.getElementById("btn-hero-mute");
-      if (videoEl) {
-        videoEl.muted = state.heroMuted;
-        if (!state.heroMuted) videoEl.play().catch(() => {});
-      }
       if (btn) {
         btn.innerHTML = state.heroMuted
           ? `<i class="fa-solid fa-volume-xmark text-xs"></i>`
           : `<i class="fa-solid fa-volume-high text-xs text-amber-400"></i>`;
       }
+      renderHeroBillboard();
     }
 
     function enterHeroRoom() {
@@ -18949,8 +18914,8 @@
         // Vẽ lại quầng sáng cache bằng 1 lệnh drawImage siêu nhẹ
         ctx.drawImage(haloCanvas, -L * 0.68, -L * 0.68, L * 1.36, L * 1.36);
 
-        // Uốn sóng mềm mại theo 8 lát cắt dọc tối ưu hiệu năng GPU
-        const slices = 8;
+        // Uốn sóng mềm mại theo 5 lát cắt dọc tối ưu hiệu năng GPU
+        const slices = 5;
         const sw = tunaImg.naturalWidth;
         const sh = tunaImg.naturalHeight;
         const srcSliceW = sw / slices;
@@ -19015,7 +18980,11 @@
           ambientTunaRafId = null;
           return;
         }
-        const rawDt = Math.min(0.035, Math.max(0.001, (now - lastTime) / 1000));
+        if (now - lastTime < 32) {
+          ambientTunaRafId = requestAnimationFrame(tick);
+          return;
+        }
+        const rawDt = Math.min(0.05, Math.max(0.001, (now - lastTime) / 1000));
         lastTime = now;
         smoothDt += (rawDt - smoothDt) * 0.25;
         const dt = smoothDt;
@@ -19131,17 +19100,6 @@
           }
           if (closest) fleeFish(closest);
         }
-      }, { passive: true });
-
-      window.addEventListener("mousemove", (e) => {
-        if (ambientTunaPaused) return;
-        const interactiveTarget = e.target && e.target.closest ? e.target.closest("button, a, input, select, textarea, [onclick], [data-seat-id]") : null;
-        if (interactiveTarget) {
-          if (document.body.style.cursor === "pointer") document.body.style.cursor = "";
-          return;
-        }
-        const nearFish = tunaFlock.some(f => Math.hypot(f.x - e.clientX, f.y - e.clientY) <= 95);
-        document.body.style.cursor = nearFish ? "pointer" : "";
       }, { passive: true });
 
       if (!ambientTunaPaused) {
@@ -19279,10 +19237,17 @@
         sel.addEventListener("change", () => syncTriggerLabel(sel, trigger));
 
         // Theo dõi khi code JS thay đổi danh sách <option> hoặc .value của <select>
-        const optObserver = new MutationObserver(() => {
-          syncTriggerLabel(sel, trigger);
-        });
-        optObserver.observe(sel, { childList: true, subtree: true, attributes: true });
+        let syncQueued = false;
+        const queueSyncLabel = () => {
+          if (syncQueued) return;
+          syncQueued = true;
+          queueMicrotask(() => {
+            syncQueued = false;
+            syncTriggerLabel(sel, trigger);
+          });
+        };
+        const optObserver = new MutationObserver(queueSyncLabel);
+        optObserver.observe(sel, { childList: true });
 
         const desc = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value");
         if (desc && desc.set && desc.get) {
@@ -19290,7 +19255,7 @@
             get() { return desc.get.call(this); },
             set(v) {
               desc.set.call(this, v);
-              syncTriggerLabel(sel, trigger);
+              queueSyncLabel();
             }
           });
         }
@@ -19300,11 +19265,14 @@
 
       const bodyObserver = new MutationObserver((mutations) => {
         for (const m of mutations) {
-          m.addedNodes.forEach((node) => {
-            if (node.nodeType !== 1) return;
+          for (let i = 0; i < m.addedNodes.length; i++) {
+            const node = m.addedNodes[i];
+            if (node.nodeType !== 1) continue;
             if (node.tagName === "SELECT") upgradeSelect(node);
-            else if (node.querySelectorAll) node.querySelectorAll("select").forEach(upgradeSelect);
-          });
+            else if (node.firstElementChild && node.querySelectorAll) {
+              node.querySelectorAll("select").forEach(upgradeSelect);
+            }
+          }
         }
       });
       bodyObserver.observe(document.body, { childList: true, subtree: true });
