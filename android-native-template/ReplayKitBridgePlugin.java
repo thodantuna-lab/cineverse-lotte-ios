@@ -562,11 +562,11 @@ public class ReplayKitBridgePlugin extends Plugin {
                 RtpParameters params = sender.getParameters();
                 if (!params.encodings.isEmpty()) {
                     RtpParameters.Encoding enc = params.encodings.get(0);
-                    enc.minBitrateBps = Math.max(1_500_000, maxBitrate / 3);
+                    enc.minBitrateBps = Math.min(maxBitrate / 2, Math.max(800_000, maxBitrate / 3));
                     enc.maxBitrateBps = maxBitrate;
-                    enc.maxFramerate = maxFramerate;
+                    enc.maxFramerate = Math.max(45, maxFramerate);
                 }
-                params.degradationPreference = RtpParameters.DegradationPreference.BALANCED;
+                params.degradationPreference = RtpParameters.DegradationPreference.MAINTAIN_FRAMERATE;
                 sender.setParameters(params);
             }
 

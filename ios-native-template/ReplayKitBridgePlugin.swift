@@ -696,11 +696,11 @@ public class ReplayKitBridgePlugin: CAPPlugin, CAPBridgedPlugin {
             if let sender = pc.add(videoTrack, streamIds: ["cineverse_screen"]) {
                 let params = sender.parameters
                 if let enc = params.encodings.first {
-                    enc.minBitrateBps = NSNumber(value: max(2_000_000, maxBitrate / 3))
+                    enc.minBitrateBps = NSNumber(value: min(maxBitrate / 2, max(800_000, maxBitrate / 3)))
                     enc.maxBitrateBps = NSNumber(value: maxBitrate)
-                    enc.maxFramerate = NSNumber(value: maxFramerate)
+                    enc.maxFramerate = NSNumber(value: max(45, maxFramerate))
                 }
-                params.degradationPreference = NSNumber(value: RTCDegradationPreference.balanced.rawValue)
+                params.degradationPreference = NSNumber(value: RTCDegradationPreference.maintainFramerate.rawValue)
                 sender.parameters = params
             }
 

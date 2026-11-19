@@ -12647,9 +12647,7 @@
       currentVoiceSessionId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       const voiceJoinedAt = Date.now();
       await ensureVoiceTurnLoaded();
-      if (isNativeAndroidVoiceAvailable()) {
-        await window.Capacitor.Plugins.ReplayKitBridge.voiceStartService().catch(() => {});
-      }
+      // Thử kết nối LiveKit SFU trước — trên Android APK tránh mở trùng dịch vụ Mic native nếu SFU đã hoạt động
       const sfuConnected = await connectLiveKitRoom(roomId);
       if (sfuConnected) {
         const myPeerRef = rtdbMod.ref(rtdb, `voice/${roomId}/peers/${state.uid}`);
@@ -12669,6 +12667,9 @@
         };
         startVoiceStatsMonitor();
         return;
+      }
+      if (isNativeAndroidVoiceAvailable()) {
+        await window.Capacitor.Plugins.ReplayKitBridge.voiceStartService().catch(() => {});
       }
       await Promise.all([
         rtdbMod.remove(rtdbMod.ref(rtdb, `voice/${roomId}/signals/${state.uid}`)).catch(() => {}),
@@ -14246,11 +14247,16 @@
         liveScreenPeers.set(viewerUid, entry);
 
         try {
+          // Tự điều tiết bitrate trên App iOS/Android khi nhiều người xem (full 10 ghế = 9 viewer) để không nghẽn Wi-Fi/5G & giữ ≥ 45fps
+          const nativePeerCount = Math.max(1, liveScreenPeers.size);
+          let nativeBitrate = Math.min(cfg.maxBitrate || 5_000_000, 5_000_000);
+          if (nativePeerCount >= 6) nativeBitrate = 1_600_000;
+          else if (nativePeerCount >= 3) nativeBitrate = 2_500_000;
           const res = await rkPlugin.createPeerOffer({
             viewerUid,
             iceServers: VOICE_ICE_CONFIG.iceServers || [],
-            maxBitrate: cfg.maxBitrate || 8000000,
-            maxFramerate: 60
+            maxBitrate: nativeBitrate,
+            maxFramerate: Math.max(MIN_SCREEN_SHARE_FPS, cfg.frameRate || 60)
           });
           if (res?.sdp) {
             await rtdbMod.set(rtdbMod.ref(rtdb, `voice/${roomId}/screen_signals/${viewerUid}/offer`), {
@@ -14599,15 +14605,21 @@
           updateDiscordLiveUI();
           return;
         }
-        // Nếu người khác đang phát -> đăng ký mình làm viewer để nhận Offer tức thì
+        // Nếu người khác đang phát:
+        // - Nếu người phát dùng SFU VÀ mình (Web hoặc App) đã nối LiveKit SFU -> nhận thẳng luồng từ LiveKit Cloud (O(1), không tạo P2P thừa!)
+        // - Nếu người phát dùng P2P/Native App ReplayKit HOẶC máy mình chưa nối được SFU -> đăng ký screen_viewers để nhận luồng P2P
         if (val.uid !== state.uid) {
-          const viewerRef = rtdbMod.ref(rtdb, `voice/${roomId}/screen_viewers/${state.uid}`);
-          rtdbMod.set(viewerRef, {
-            uid: state.uid,
-            name: state.userName || "Khách",
-            joinedAt: Date.now()
-          }).catch(() => {});
-          try { rtdbMod.onDisconnect(viewerRef).remove(); } catch (_) {}
+          const viewerHasSfu = Boolean(livekitVoiceActive && livekitRoom?.state === "connected");
+          if (!val.sfu || !viewerHasSfu) {
+            const viewerRef = rtdbMod.ref(rtdb, `voice/${roomId}/screen_viewers/${state.uid}`);
+            rtdbMod.set(viewerRef, {
+              uid: state.uid,
+              name: state.userName || "Khách",
+              needP2p: !viewerHasSfu,
+              joinedAt: Date.now()
+            }).catch(() => {});
+            try { rtdbMod.onDisconnect(viewerRef).remove(); } catch (_) {}
+          }
         }
         updateDiscordLiveUI();
       }, (err) => {
@@ -14618,13 +14630,15 @@
       });
       liveScreenUnsubs.push(unsubBc);
 
-      // Broadcaster lắng nghe toàn bộ danh sách viewer theo thời gian thực (onValue đảm bảo không sót người vào trước hoặc F5 lại)
+      // Broadcaster lắng nghe danh sách viewer cần P2P (khi đang phát SFU thì CHỈ gửi P2P cho máy nào báo needP2p, tránh nén trùng 9 luồng!)
       const viewersRef = rtdbMod.ref(rtdb, `voice/${roomId}/screen_viewers`);
       const unsubViewers = rtdbMod.onValue(viewersRef, (snap) => {
         const viewersMap = snap.val() || {};
         if (liveScreenStream) {
+          const isSfuBroadcast = Boolean(liveScreenBroadcaster?.sfu);
           for (const [viewerUid, vData] of Object.entries(viewersMap)) {
             if (!viewerUid || viewerUid === state.uid) continue;
+            if (isSfuBroadcast && !vData?.needP2p) continue;
             const joinedAt = vData?.joinedAt || 0;
             const existing = liveScreenPeers.get(viewerUid);
             if (!existing || existing.pc.connectionState === "closed" || existing.pc.connectionState === "failed" || (joinedAt && existing.viewerJoinedAt !== joinedAt)) {
@@ -15391,19 +15405,7 @@
         return;
       }
 
-      if (isNativeAndroidVoiceAvailable()) {
-        try {
-          await window.Capacitor.Plugins.ReplayKitBridge.voiceStartService();
-          await window.Capacitor.Plugins.ReplayKitBridge.voiceSetMicEnabled({ enabled: true });
-        } catch (err) {}
-      }
-
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showToast("Trình duyệt này không hỗ trợ micro trực tuyến (cần HTTPS hoặc localhost).", "error");
-        return;
-      }
-
-      // Chế độ LiveKit SFU đang hoạt động: dùng thẳng pipeline SFU (KHÔNG tạo thêm mesh P2P trùng gây vọng & tốn băng thông!)
+      // Chế độ LiveKit SFU đang hoạt động: dùng thẳng pipeline SFU (trên cả Web & App iOS/Android, KHÔNG mở trùng AudioRecord native!)
       if (livekitVoiceActive && livekitRoom?.state === "connected" && livekitRoom?.localParticipant) {
         try {
           await livekitRoom.localParticipant.setMicrophoneEnabled(true);
@@ -15433,8 +15435,20 @@
             showToast("Bạn chưa cấp quyền sử dụng Micro cho trình duyệt!", "error");
             return;
           }
-          // Fallback mượt sang luồng getUserMedia chuẩn nếu SFU bật mic lỗi
+          // Fallback mượt sang luồng P2P / Native nếu SFU bật mic lỗi
         }
+      }
+
+      if (isNativeAndroidVoiceAvailable()) {
+        try {
+          await window.Capacitor.Plugins.ReplayKitBridge.voiceStartService();
+          await window.Capacitor.Plugins.ReplayKitBridge.voiceSetMicEnabled({ enabled: true });
+        } catch (err) {}
+      }
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast("Trình duyệt này không hỗ trợ micro trực tuyến (cần HTTPS hoặc localhost).", "error");
+        return;
       }
 
       try {
