@@ -2162,16 +2162,35 @@
       to { opacity: 1; transform: translate3d(0, 0, 0) scaleX(1); }
     }
     .cv-intro-slogan {
-      max-width: 90vw;
+      max-width: 92vw;
       
-      font-size: clamp(0.64rem, 2.25vw, 0.8rem);
-      font-weight: 600;
+      font-size: clamp(0.68rem, 2.3vw, 0.86rem);
+      font-weight: 700;
       letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: rgba(226, 232, 240, 0.84);
+      color: rgba(248, 250, 252, 0.92);
       opacity: 0;
       will-change: transform, opacity;
-      animation: cvSloganReveal 0.54s cubic-bezier(0.16, 1, 0.3, 1) 1.16s both;
+      animation: cvSloganReveal 0.54s cubic-bezier(0.16, 1, 0.3, 1) 1.14s both;
+    }
+    .cv-intro-features {
+      max-width: 92vw;
+      margin-top: 9px;
+      
+      font-size: clamp(0.56rem, 1.85vw, 0.69rem);
+      font-weight: 600;
+      line-height: 1.65;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(203, 213, 225, 0.72);
+      opacity: 0;
+      will-change: transform, opacity;
+      animation: cvSloganReveal 0.54s cubic-bezier(0.16, 1, 0.3, 1) 1.26s both;
+    }
+    .cv-feat-dot {
+      color: #f43f5e;
+      margin: 0 5px;
+      font-weight: 800;
     }
     @keyframes cvSloganReveal {
       from { opacity: 0; transform: translate3d(0, 10px, 0); }
@@ -2226,7 +2245,8 @@
         <span class="cv-intro-brand-sub">LOTTE</span>
       </div>
       <div class="cv-intro-beam cv-anim"></div>
-      <p class="cv-intro-slogan cv-anim">Không Gian Rạp Chiếu Phim Trực Tuyến • Góc Nhìn Hàng F</p>
+      <p class="cv-intro-slogan cv-anim">Nền Tảng Rạp Chiếu Phim 3D Trực Tuyến Đa Trải Nghiệm</p>
+      <p class="cv-intro-features cv-anim">Xem Chung Đồng Bộ <span class="cv-feat-dot">•</span> Chọn Ghế &amp; Vé NFT <span class="cv-feat-dot">•</span> Live Chat <span class="cv-feat-dot">•</span> Tìm Rạp Hà Nội</p>
     </div>
     <span class="cv-intro-skip">Nhấn bất kỳ để vào rạp</span>
   </div>
@@ -2279,7 +2299,7 @@
           requestAnimationFrame(() => {
             if (exiting) return;
             splash.classList.add("is-running");
-            autoTimer = setTimeout(dismiss, reduced ? 1000 : 2280);
+            autoTimer = setTimeout(dismiss, reduced ? 1100 : 2550);
           });
         });
       }
@@ -2323,7 +2343,7 @@
             <span class="font-black text-base sm:text-lg tracking-tight text-white">CINEVERSE <span class="text-slate-200/90 font-extrabold">LOTTE</span></span>
             <span class="ios-liquid-pill text-[9px] sm:text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full">Live 3D POV</span>
           </div>
-          <p class="hidden sm:block text-[11px] text-slate-300/80">Không gian Rạp chiếu phim trực tuyến • Góc nhìn chân thực chuẩn rạp</p>
+          <p class="hidden sm:block text-[11px] text-slate-300/80">Rạp phim 3D trực tuyến • Xem chung đồng bộ • Chọn ghế & Vé NFT • Tìm rạp Hà Nội</p>
         </div>
       </div>
 
@@ -13450,7 +13470,7 @@
             const canvas = document.createElement("canvas");
             canvas.width = vid.videoWidth || 1280;
             canvas.height = vid.videoHeight || 720;
-            const ctx = canvas.getContext("2d");
+            const ctx = canvas.getContext("2d", { alpha: true, desynchronized: true }) || canvas.getContext("2d");
             let rafId = 0;
             const draw = () => {
               if (!vid.paused && !vid.ended && ctx) {
