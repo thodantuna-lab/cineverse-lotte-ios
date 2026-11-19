@@ -1609,17 +1609,6 @@
         box-shadow: 0 22px 48px rgba(0, 0, 0, 0.92), var(--glass-highlight) !important;
         border-color: rgba(255, 255, 255, 0.38) !important;
       }
-      #lobby-jjk-episodes > button.lobby-zoom-ep {
-        position: relative;
-        z-index: 10;
-        transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease !important;
-        transform-origin: center center;
-      }
-      #lobby-jjk-episodes > button.lobby-zoom-ep:hover {
-        z-index: 85 !important;
-        transform: scale(1.52) translateY(-3px) !important;
-        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.9), var(--glass-highlight) !important;
-      }
       #lobby-rooms-grid > .lobby-zoom-card {
         position: relative;
         z-index: 10;
@@ -2539,28 +2528,6 @@
       <div class="relative z-10 w-full h-1 bg-white/10 overflow-hidden">
         <div id="hero-progress-bar" class="h-full bg-gradient-to-r from-rose-600 via-amber-400 to-rose-500 netflix-progress-fill"></div>
       </div>
-    </div>
-
-    <!-- Bộ phim độc quyền 12 tập (Cloudflare R2 HD) -->
-    <div class="rounded-3xl bg-gradient-to-r from-[#1a0b1e] via-stone-950 to-[#1c1008] border border-amber-500/35 p-4 sm:p-5 shadow-2xl space-y-3">
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <div class="flex items-center gap-3.5">
-          <div class="relative w-11 h-14 sm:w-12 sm:h-16 rounded-2xl overflow-hidden border border-amber-400/50 shadow-[0_6px_20px_rgba(245,158,11,0.3)] bg-black shrink-0">
-            <img src="./assets/jjk-culling-game.jpg" alt="Chú Thuật Hồi Chiến: Tử Diệt Hồi Du" class="w-full h-full object-cover object-top" />
-            <span class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/55 to-transparent text-[8px] font-black uppercase tracking-wider text-amber-300 text-center py-0.5">HOT</span>
-          </div>
-          <div>
-            <div class="flex flex-wrap items-center gap-2">
-              <h2 class="text-sm sm:text-base font-black text-white">Chú Thuật Hồi Chiến: Tử Diệt Hồi Du Phần 1 (Vietsub)</h2>
-              <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10px] font-black">
-                Cloudflare R2 HD • 12 Tập
-              </span>
-            </div>
-            <p class="text-[11px] text-slate-300">Bấm vào bất kỳ tập nào dưới đây để đặt vé & chọn ghế vào phòng chiếu IMAX màn hình cong.</p>
-          </div>
-        </div>
-      </div>
-      <div id="lobby-jjk-episodes" class="grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-12 gap-2"></div>
     </div>
 
     <!-- Bộ lọc phòng chiếu -->
