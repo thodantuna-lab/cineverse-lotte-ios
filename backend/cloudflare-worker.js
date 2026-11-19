@@ -22,7 +22,7 @@ const SECURITY_HEADERS = {
   "X-Content-Type-Options": "nosniff",
   "X-Frame-Options": "DENY",
   "Referrer-Policy": "strict-origin-when-cross-origin",
-  "Permissions-Policy": "geolocation=(), payment=()"
+  "Permissions-Policy": "geolocation=(self), payment=()"
 };
 
 const CORS_HEADERS = {
@@ -893,6 +893,31 @@ async function handleWorkerFetch(request, env, corsHdrs, ctx) {
         );
       }
     }
+    if (request.method === "GET" && (path === "/geo" || path.endsWith("/geo"))) {
+      const cf = request.cf || {};
+      const lat = Number(cf.latitude);
+      const lng = Number(cf.longitude);
+      const city = String(cf.city || "").trim();
+      const region = String(cf.region || "").trim();
+      const country = String(cf.country || "").trim();
+      const parts = [city, region && region !== city ? region : "", country === "VN" ? "Việt Nam" : country].filter(Boolean);
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          source: "cloudflare_ip",
+          city,
+          region,
+          country,
+          label: parts.join(", ") || "Việt Nam",
+          lat: Number.isFinite(lat) ? lat : null,
+          lng: Number.isFinite(lng) ? lng : null,
+          timezone: String(cf.timezone || ""),
+          colo: String(cf.colo || "")
+        }),
+        { status: 200, headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } }
+      );
+    }
+
     if (request.method === "GET" && url.pathname.endsWith("/sub")) {
       const srtUrl = (url.searchParams.get("url") || "").trim();
       let objectKey = (url.searchParams.get("key") || "").trim();

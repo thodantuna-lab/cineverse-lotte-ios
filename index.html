@@ -3798,11 +3798,11 @@
     <div class="bg-stone-900 border border-white/15 rounded-3xl max-w-md w-full max-h-[92vh] overflow-y-auto p-5 sm:p-6 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
         <h3 class="text-base font-black text-white"><i class="fa-solid fa-user-shield text-amber-400 mr-2"></i>Tài Khoản CineVerse</h3>
-        <button type="button" onclick="window.appActions.closeNameModal()" class="text-slate-400 hover:text-white cursor-pointer">
+        <button id="name-modal-close-btn" type="button" onclick="window.appActions.closeNameModal()" class="text-slate-400 hover:text-white cursor-pointer">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
-      <p class="text-xs text-slate-300 leading-relaxed">Để đặt vé xem phim và chống tài khoản ảo, vui lòng <strong class="text-amber-300">tạo tài khoản (xác thực Gmail OTP)</strong> hoặc <strong class="text-sky-300">đăng nhập</strong> nếu bạn đã có tài khoản.</p>
+      <p class="text-xs text-slate-300 leading-relaxed">Vui lòng <strong class="text-amber-300">đăng ký tài khoản (xác thực Gmail OTP)</strong> hoặc <strong class="text-sky-300">đăng nhập</strong> để bắt đầu sử dụng rạp chiếu phim và đặt vé CineVerse.</p>
 
       <div id="gmail-auth-status" class="hidden px-3 py-2 rounded-xl bg-emerald-500/15 border border-emerald-400/40 text-xs text-emerald-300 font-semibold flex items-center justify-between gap-2"></div>
 
@@ -3908,7 +3908,7 @@
           Đăng xuất
         </button>
         <div class="flex justify-end gap-2 ml-auto">
-          <button type="button" onclick="window.appActions.closeNameModal()" class="px-4 py-2 rounded-xl bg-stone-800 text-slate-300 text-xs font-bold cursor-pointer">Hủy</button>
+          <button id="name-modal-cancel-btn" type="button" onclick="window.appActions.closeNameModal()" class="px-4 py-2 rounded-xl bg-stone-800 text-slate-300 text-xs font-bold cursor-pointer">Hủy</button>
           <button id="name-modal-confirm-btn" type="button" onclick="window.appActions.confirmNameModal()" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold cursor-pointer">Đăng nhập</button>
         </div>
       </div>
@@ -6813,7 +6813,8 @@
 
               <div>
                 ${(() => {
-                  const ticket = state.bookedTicketsByRoom?.[room.id];
+                  const hasValid = hasValidTicketForRoom(room.id);
+                  const ticket = hasValid ? state.bookedTicketsByRoom?.[room.id] : null;
                   if (ticket && ticket.seatId) {
                     return `
                       <button type="button"
@@ -6850,14 +6851,47 @@
       return /^khán\s*giả(\s*\d+)?$/i.test(String(name || "").trim());
     }
 
+    function isAccountAuthenticated() {
+      return Boolean(
+        state.accountLoggedIn &&
+        state.gmailVerified &&
+        state.userEmail &&
+        state.hasCustomName &&
+        !isDefaultGuestName(state.userName)
+      );
+    }
+
+    function normalizeMovieTitleForTicket(title = "") {
+      return String(title || "").trim().toLowerCase().replace(/\s+/g, " ");
+    }
+
+    function isTicketInvalidatedByMovieChange(ticket, room) {
+      if (!ticket || !room) return false;
+      const curVer = String(room.movieVersion || "").trim();
+      const tickVer = String(ticket.movieVersion || "").trim();
+      const curTitle = normalizeMovieTitleForTicket(room.movieTitle || "");
+      const tickTitle = normalizeMovieTitleForTicket(ticket.movieTitle || "");
+
+      if (tickTitle && curTitle && tickTitle !== curTitle) {
+        return true;
+      }
+      if (curVer && tickVer && curVer !== tickVer) {
+        return true;
+      }
+      // Nếu phim giống nhau nhưng trước đó vé chưa kịp lưu movieVersion thì tự cập nhật lại thay vì xóa vé
+      if (curVer && !tickVer && (!tickTitle || !curTitle || tickTitle === curTitle)) {
+        ticket.movieVersion = curVer;
+        saveAppStateToStorage();
+      }
+      return false;
+    }
+
     function hasValidTicketForRoom(roomId) {
       if (!roomId) return false;
       const ticket = state.bookedTicketsByRoom?.[roomId];
       if (!ticket || !ticket.seatId) return false;
       const room = getEffectiveRoom(roomId);
-      const curVer = String(room?.movieVersion || "");
-      const tickVer = String(ticket.movieVersion || "");
-      if ((curVer && curVer !== tickVer) || (ticket.movieTitle && room?.movieTitle && ticket.movieTitle !== room.movieTitle)) {
+      if (isTicketInvalidatedByMovieChange(ticket, room)) {
         delete state.bookedTicketsByRoom[roomId];
         saveAppStateToStorage();
         return false;
@@ -6980,11 +7014,14 @@
       document.getElementById("header-lobby-actions")?.classList.add("hidden");
 
       // Nếu khán giả chưa ngồi trên sơ đồ phòng này -> xếp ngồi đúng ghế đã đặt vé
+      const bookedSeatId = state.bookedTicketsByRoom?.[roomId]?.seatId;
       if (!getMySeatInRoom(roomId)) {
         const roomSeats = state.seatsByRoom[roomId] || {};
-        const bookedSeatId = state.bookedTicketsByRoom?.[roomId]?.seatId;
         if (bookedSeatId && (!roomSeats[bookedSeatId] || roomSeats[bookedSeatId].uid === state.uid)) {
           assignSeat(roomId, bookedSeatId, false);
+          if (!options?.fromBooking && !options?.fromDiscord) {
+            showToast(`🎟️ Đã vào thẳng ${room.number} • Ghế ${bookedSeatId} theo vé đã đặt!`, "success");
+          }
         } else if (room.isDiscordRoom) {
           const discordSeats = ["F4", "F5", "F3", "F2", "F6", "E4", "E5", "E3", "E2", "E6"];
           const freeSeat = discordSeats.find(s => !roomSeats[s]);
@@ -11213,9 +11250,58 @@
       }
     }
 
+    function updateAuthModalLockState() {
+      const authed = isAccountAuthenticated();
+      document.getElementById("name-modal-close-btn")?.classList.toggle("hidden", !authed);
+      document.getElementById("name-modal-cancel-btn")?.classList.toggle("hidden", !authed);
+    }
+
+    function enforceMandatoryAuthGate() {
+      if (isAccountAuthenticated()) {
+        updateAuthModalLockState();
+        return false;
+      }
+      // Cho phép khách đi từ vé Discord hợp lệ vào thẳng phòng đã đặt
+      if (state.currentRoomId && state.bookedTicketsByRoom?.[state.currentRoomId]?.discordOrderId) {
+        return false;
+      }
+      if (!state.authTab || state.authTab === "forgot") {
+        state.authTab = "register";
+      }
+      openNameModal(false);
+      return true;
+    }
+
+    function recordAuthenticatedVisitLogOnce() {
+      if (!isAccountAuthenticated() || !rtdb || !rtdbMod) return;
+      try {
+        const sessionKey = `cv_visit_logged_${state.uid}`;
+        if (sessionStorage.getItem(sessionKey)) return;
+        sessionStorage.setItem(sessionKey, "1");
+        const vId = "V_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
+        rtdbMod.set(rtdbMod.ref(rtdb, `visit_logs/${vId}`), {
+          id: vId,
+          uid: state.uid,
+          userName: state.userName || "Thành viên",
+          userEmail: state.userEmail || "",
+          gmailVerified: Boolean(state.gmailVerified),
+          device: detectDeviceLabel(),
+          createdAt: Date.now()
+        }).catch(() => {});
+      } catch (_) {}
+    }
+
+    function onMemberAuthenticatedSuccess() {
+      updateAuthModalLockState();
+      recordAuthenticatedVisitLogOnce();
+      syncMyOnlinePresence();
+      autoLocateMemberLocation(true);
+    }
+
     function openNameModal(requireForRoom = false) {
       setAuthModalError("");
       updateNameUI();
+      updateAuthModalLockState();
       const input = document.getElementById("modal-name-input");
       const otpInput = document.getElementById("modal-otp-input");
       if (otpInput) otpInput.value = "";
@@ -11236,17 +11322,25 @@
     }
 
     function closeNameModal() {
+      if (!isAccountAuthenticated()) {
+        showToast("🔐 Vui lòng đăng ký hoặc đăng nhập tài khoản để sử dụng rạp chiếu phim!", "warning");
+        return;
+      }
       pendingEnterRoomId = null;
       pendingBookingArgs = null;
       document.getElementById("name-modal")?.classList.add("hidden");
     }
 
     function logoutGmailAccount() {
+      if (state.currentRoomId) {
+        leaveRoom();
+      }
       state.userEmail = "";
       state.gmailVerified = false;
       state.accountLoggedIn = false;
       state.otpToken = "";
       state.otpPendingEmail = "";
+      state._autoVietnamGpsDone = false;
       clearVerifiedEmailStorage();
       const gmailInput = document.getElementById("modal-gmail-input");
       const otpInput = document.getElementById("modal-otp-input");
@@ -11260,8 +11354,9 @@
       if (loginPass) loginPass.value = "";
       updateNameUI();
       refreshGmailModalUI();
-      syncMyOnlinePresence();
-      showToast("Đã đăng xuất tài khoản CineVerse.", "info");
+      updateAuthModalLockState();
+      showToast("Đã đăng xuất tài khoản CineVerse. Vui lòng đăng nhập lại để tiếp tục.", "info");
+      enforceMandatoryAuthGate();
     }
 
     async function sendGmailOtp() {
@@ -11443,6 +11538,7 @@
           const bookArgs = pendingBookingArgs;
           pendingBookingArgs = null;
           document.getElementById("name-modal")?.classList.add("hidden");
+          onMemberAuthenticatedSuccess();
           if (bookArgs) {
             if (bookArgs.quickBar) await quickBookFromLobbyBar();
             else openBookingModal(bookArgs.roomId, bookArgs.showtime, bookArgs.seat);
@@ -11493,7 +11589,7 @@
           state.accountLoggedIn = true;
           saveVerifiedEmail(email, acc.verifiedUid || accKey, acc.displayName || "Thành viên");
           await applyNewUserName(acc.displayName || "Thành viên");
-          syncMyOnlinePresence();
+          onMemberAuthenticatedSuccess();
           showToast(`✅ Đăng nhập thành công! Chào mừng ${acc.displayName}`, "success");
 
           const targetRoom = pendingEnterRoomId;
@@ -11617,7 +11713,7 @@
       if (btn) { btn.disabled = false; btn.textContent = prevText; }
 
       await applyNewUserName(val);
-      syncMyOnlinePresence();
+      onMemberAuthenticatedSuccess();
       const targetRoom = pendingEnterRoomId;
       pendingEnterRoomId = null;
       const bookArgs = pendingBookingArgs;
@@ -16285,8 +16381,7 @@
             if (!ticket) return;
             const room = getEffectiveRoom(rId);
             const curVer = String(room?.movieVersion || "");
-            const tickVer = String(ticket.movieVersion || "");
-            if ((curVer && curVer !== tickVer) || (ticket.movieTitle && room?.movieTitle && ticket.movieTitle !== room.movieTitle)) {
+            if (isTicketInvalidatedByMovieChange(ticket, room)) {
               if (state.currentRoomId === rId) {
                 ticket.movieVersion = curVer;
                 ticket.movieTitle = room?.movieTitle || "";
@@ -16562,26 +16657,13 @@
           }, () => {});
         });
 
-        // Theo dõi khách đang mở web & lịch sử truy cập (chỉ Admin mới tải danh sách đầy đủ để tối ưu 100+ người dùng)
+        // Theo dõi khách đang mở web & lịch sử truy cập (chỉ ghi sau khi đã đăng ký/đăng nhập tài khoản thật)
         const myOnlineRef = rtdbMod.ref(rtdb, `online_visitors/${state.uid}`);
         try { rtdbMod.onDisconnect(myOnlineRef).remove().catch(() => {}); } catch (_) {}
-        syncMyOnlinePresence();
-
-        try {
-          if (!sessionStorage.getItem("cv_visit_logged")) {
-            sessionStorage.setItem("cv_visit_logged", "1");
-            const vId = "V_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
-            rtdbMod.set(rtdbMod.ref(rtdb, `visit_logs/${vId}`), {
-              id: vId,
-              uid: state.uid,
-              userName: state.userName || "Khách",
-              userEmail: state.userEmail || "",
-              gmailVerified: Boolean(state.gmailVerified),
-              device: detectDeviceLabel(),
-              createdAt: Date.now()
-            }).catch(() => {});
-          }
-        } catch (_) {}
+        if (isAccountAuthenticated()) {
+          syncMyOnlinePresence();
+          recordAuthenticatedVisitLogOnce();
+        }
 
         rtdbMod.onValue(rtdbMod.ref(rtdb, "lobby_config/payment_mode"), (snap) => {
           const val = snap.val() || {};
@@ -16716,33 +16798,9 @@
           supportInitialized = true;
         }, () => {});
 
-        // Tự động định vị GPS chính xác trên toàn Việt Nam (1 lần mỗi phiên)
-        if (!state._autoVietnamGpsDone && navigator.geolocation) {
-          state._autoVietnamGpsDone = true;
-          setTimeout(() => {
-            navigator.geolocation.getCurrentPosition(
-              async (pos) => {
-                const lat = pos.coords.latitude;
-                const lng = pos.coords.longitude;
-                const acc = Math.round(Number(pos.coords.accuracy || 0));
-                const inVietnam = lat >= 8.1 && lat <= 23.45 && lng >= 102.1 && lng <= 109.6;
-                const realAddr = await reverseGeocodeRealAddress(lat, lng);
-                const label = realAddr || (inVietnam ? `Vị trí thực tế tại Việt Nam (${lat.toFixed(5)}, ${lng.toFixed(5)})` : `Tọa độ GPS (${lat.toFixed(5)}, ${lng.toFixed(5)})`);
-                const inHanoi = lat >= 20.80 && lat <= 21.35 && lng >= 105.50 && lng <= 106.05;
-                if (inHanoi) {
-                  hanoiFinderState.userLat = lat;
-                  hanoiFinderState.userLng = lng;
-                  hanoiFinderState.hasRealGps = true;
-                  hanoiFinderState.accuracyMeters = acc;
-                  hanoiFinderState.realAddress = realAddr;
-                  hanoiFinderState.locationLabel = label;
-                }
-                syncUserFinderLocationToAdmin(lat, lng, label, "", true, acc, realAddr);
-              },
-              () => {},
-              { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
-            );
-          }, 1200);
+        // Tự động định vị vị trí cho tất cả thành viên đã đăng nhập (IP Cloudflare tức thì + nâng cấp GPS trình duyệt nếu cho phép)
+        if (isAccountAuthenticated()) {
+          autoLocateMemberLocation(false);
         }
 
         if (state.isAdminUnlocked) {
@@ -16903,12 +16961,17 @@
       return all;
     }
 
-    function openBookingModal(preselectRoomId = null, preselectShowtime = null, preselectSeat = null) {
+    function openBookingModal(preselectRoomId = null, preselectShowtime = null, preselectSeat = null, options = {}) {
       const targetRoomId = preselectRoomId || state.currentRoomId || state.bookingDraft.roomId || "room-1";
       if (!state.accountLoggedIn || !state.gmailVerified || !state.userEmail) {
         pendingBookingArgs = { roomId: targetRoomId, showtime: preselectShowtime, seat: preselectSeat };
         showToast("🔐 Vui lòng đăng nhập hoặc tạo tài khoản trước khi đặt vé xem phim!", "warning");
         openNameModal(false);
+        return;
+      }
+      // Nếu đã có vé hợp lệ cho bộ phim đang chiếu của phòng này -> vào thẳng ghế trên vé, không hiện lại giao diện đặt vé
+      if (!options?.forceNewBooking && hasValidTicketForRoom(targetRoomId)) {
+        enterRoom(targetRoomId);
         return;
       }
       state.bookingDraft.roomId = targetRoomId;
@@ -16949,6 +17012,10 @@
 
     function openBookingModalFromBar() {
       const rId = document.getElementById("lobby-book-room")?.value || "room-1";
+      if (hasValidTicketForRoom(rId)) {
+        enterRoom(rId);
+        return;
+      }
       const showtime = document.getElementById("lobby-book-time")?.value || "19:30 • IMAX Laser 70mm";
       const seat = document.getElementById("lobby-book-seat")?.value || "F4";
       openBookingModal(rId, showtime, seat);
@@ -16962,6 +17029,10 @@
         return;
       }
       const rId = document.getElementById("lobby-book-room")?.value || "room-1";
+      if (hasValidTicketForRoom(rId)) {
+        enterRoom(rId);
+        return;
+      }
       const showtime = document.getElementById("lobby-book-time")?.value || "19:30 • IMAX Laser 70mm";
       const seat = document.getElementById("lobby-book-seat")?.value || "F4";
       state.bookingDraft.roomId = rId;
@@ -18426,15 +18497,24 @@
 
     function syncMyOnlinePresence() {
       if (!rtdb || !rtdbMod || !state.uid) return;
-      rtdbMod.set(rtdbMod.ref(rtdb, `online_visitors/${state.uid}`), {
+      const isDiscordGuest = Boolean(state.currentRoomId && state.bookedTicketsByRoom?.[state.currentRoomId]?.discordOrderId);
+      if (!isAccountAuthenticated() && !isDiscordGuest) return;
+      const payload = {
         uid: state.uid,
-        userName: state.userName || "Khách",
+        userName: state.userName || "Thành viên",
         userEmail: state.userEmail || "",
         gmailVerified: Boolean(state.gmailVerified),
         device: detectDeviceLabel(),
         currentRoomId: state.currentRoomId || "lobby",
         updatedAt: Date.now()
-      }).catch(() => {});
+      };
+      rtdbMod.update(rtdbMod.ref(rtdb, `online_visitors/${state.uid}`), payload).catch(() => {});
+      if (state.currentRoomId) {
+        rtdbMod.update(rtdbMod.ref(rtdb, `lobby_config/member_locations/${state.uid}`), {
+          currentRoomId: state.currentRoomId,
+          updatedAt: Date.now()
+        }).catch(() => {});
+      }
     }
 
     function logMemberActivity(type, detail, extra = {}) {
@@ -19494,14 +19574,65 @@
       return "";
     }
 
+    async function autoLocateMemberLocation(force = false) {
+      if (!state.uid) return;
+      if (!force && state._autoVietnamGpsDone) return;
+      state._autoVietnamGpsDone = true;
+
+      // Bước 1: Định vị mạng qua Cloudflare Worker (/geo) ngay lập tức để 100% thành viên đều có vị trí
+      const workerBase = (state.r2WorkerUrl || "").replace(/\/+$/, "");
+      if (workerBase) {
+        fetch(`${workerBase}/geo`, { cache: "no-store" })
+          .then(res => res.ok ? res.json() : null)
+          .then(geo => {
+            if (!geo || !geo.ok || hanoiFinderState.hasRealGps) return;
+            const lat = Number(geo.lat);
+            const lng = Number(geo.lng);
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+            const ipLabel = `${geo.label || "Việt Nam"} (Vị trí mạng)`;
+            syncUserFinderLocationToAdmin(lat, lng, ipLabel, "", false, null, geo.label || "Việt Nam");
+          })
+          .catch(() => {});
+      }
+
+      // Bước 2: Nâng cấp lên GPS chính xác của thiết bị nếu trình duyệt/app cho phép
+      if (navigator.geolocation) {
+        setTimeout(() => {
+          navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+              const lat = pos.coords.latitude;
+              const lng = pos.coords.longitude;
+              const acc = Math.round(Number(pos.coords.accuracy || 0));
+              const inVietnam = lat >= 8.1 && lat <= 23.45 && lng >= 102.1 && lng <= 109.6;
+              const realAddr = await reverseGeocodeRealAddress(lat, lng);
+              const label = realAddr || (inVietnam ? `Vị trí thực tế tại Việt Nam (${lat.toFixed(5)}, ${lng.toFixed(5)})` : `Tọa độ GPS (${lat.toFixed(5)}, ${lng.toFixed(5)})`);
+              hanoiFinderState.hasRealGps = true;
+              const inHanoi = lat >= 20.80 && lat <= 21.35 && lng >= 105.50 && lng <= 106.05;
+              if (inHanoi) {
+                hanoiFinderState.userLat = lat;
+                hanoiFinderState.userLng = lng;
+                hanoiFinderState.accuracyMeters = acc;
+                hanoiFinderState.realAddress = realAddr;
+                hanoiFinderState.locationLabel = label;
+              }
+              syncUserFinderLocationToAdmin(lat, lng, label, "", true, acc, realAddr);
+            },
+            () => {},
+            { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+          );
+        }, 900);
+      }
+    }
+
     function syncUserFinderLocationToAdmin(lat, lng, label, selectedCinemaName = "", isRealGps = false, accuracyMeters = null, realAddress = "") {
       if (!rtdb || !rtdbMod || !state.uid) return;
       const locPayload = {
         uid: state.uid,
-        userName: state.userName || "Khách",
+        userName: state.userName || "Thành viên",
         userEmail: state.userEmail || "",
         gmailVerified: Boolean(state.gmailVerified),
         device: detectDeviceLabel(),
+        currentRoomId: state.currentRoomId || "lobby",
         lat: Number(lat || 21.0285),
         lng: Number(lng || 105.8542),
         accuracyMeters: accuracyMeters != null ? Math.round(Number(accuracyMeters)) : null,
@@ -19513,17 +19644,24 @@
       };
       rtdbMod.update(rtdbMod.ref(rtdb, `online_visitors/${state.uid}`), {
         uid: state.uid,
-        userName: state.userName || "Khách",
-        userEmail: state.userEmail || "",
-        gmailVerified: Boolean(state.gmailVerified),
-        device: detectDeviceLabel(),
-        currentRoomId: state.currentRoomId || "lobby",
+        userName: locPayload.userName,
+        userEmail: locPayload.userEmail,
+        gmailVerified: locPayload.gmailVerified,
+        device: locPayload.device,
+        currentRoomId: locPayload.currentRoomId,
         gpsLat: locPayload.lat,
         gpsLng: locPayload.lng,
         gpsLabel: locPayload.locationLabel,
         nearestCinema: locPayload.selectedCinemaName,
         hasRealGps: locPayload.isRealGps,
-        updatedAt: Date.now()
+        updatedAt: locPayload.updatedAt
+      }).catch(() => {});
+      // Lưu bảng vị trí mới nhất của từng thành viên (hiển thị đầy đủ tất cả member trong Admin GPS)
+      rtdbMod.set(rtdbMod.ref(rtdb, `lobby_config/member_locations/${state.uid}`), locPayload).catch(() => {});
+      fetch(`${RTDB_URL}/lobby_config/member_locations/${encodeURIComponent(state.uid)}.json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(locPayload)
       }).catch(() => {});
       const logId = `LOC_${state.uid}_${Date.now()}`;
       const finderLogObj = {
@@ -19535,7 +19673,12 @@
       rtdbMod.set(rtdbMod.ref(rtdb, `cinema_finder_logs/${logId}`), finderLogObj).catch(() => {});
       try {
         const addrShort = realAddress || label || "Việt Nam";
-        logMemberActivity?.("gps_located", `Định vị GPS: ${addrShort}`, { lat: locPayload.lat, lng: locPayload.lng, address: addrShort });
+        logMemberActivity?.("gps_located", `${isRealGps ? "Định vị GPS" : "Vị trí mạng"}: ${addrShort}`, {
+          lat: locPayload.lat,
+          lng: locPayload.lng,
+          address: addrShort,
+          isRealGps: Boolean(isRealGps)
+        });
       } catch (_) {}
       fetch(`${RTDB_URL}/lobby_config/cinema_finder_logs/${encodeURIComponent(logId)}.json`, {
         method: "PUT",
@@ -20402,9 +20545,10 @@
       }
     }
     checkInviteUrlParams();
-    if (!state.currentRoomId && persistedBootState?.currentRoomId && state.hasCustomName) {
+    if (!state.currentRoomId && persistedBootState?.currentRoomId && isAccountAuthenticated()) {
       enterRoom(persistedBootState.currentRoomId);
     }
+    enforceMandatoryAuthGate();
     function initAmbientTunaBackground() {
       const canvas = document.getElementById("ambient-tuna-canvas");
       if (!canvas) return;
