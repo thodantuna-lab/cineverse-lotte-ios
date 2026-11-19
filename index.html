@@ -6267,7 +6267,7 @@
       const base = DEFAULT_ROOMS.find(r => r.id === roomId) || DEFAULT_ROOMS[0];
       const adminCfg = (state.lobbyConfigRooms && state.lobbyConfigRooms[roomId]) || {};
       const custom = state.roomsCustom[roomId] || {};
-      const merged = { ...base, ...custom, ...adminCfg };
+      const merged = { ...base, ...adminCfg, ...custom };
       if (merged.status === "upcoming" && Number(merged.scheduledAt) > 0 && Date.now() >= Number(merged.scheduledAt)) {
         merged.status = "showing";
       }
