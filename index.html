@@ -3838,20 +3838,32 @@
         <div class="flex justify-end">
           <button type="button" onclick="window.appActions.switchAuthTab('forgot')"
             class="text-[11px] font-bold text-amber-400 hover:text-amber-300 underline cursor-pointer">
-            Quên mật khẩu? Lấy lại ngay (không cần mã OTP)
+            Quên mật khẩu? Xác thực Gmail OTP để đặt lại
           </button>
         </div>
       </div>
 
-      <!-- PANEL QUÊN MẬT KHẨU (KHÔNG CẦN MÃ OTP - CHỈ CẦN ĐÚNG GMAIL) -->
+      <!-- PANEL QUÊN MẬT KHẨU (BẮT BUỘC XÁC THỰC MÃ OTP GMAIL) -->
       <div id="auth-panel-forgot" class="hidden space-y-3">
-        <p class="text-[11px] text-emerald-300 bg-emerald-500/10 border border-emerald-400/30 rounded-xl px-3 py-2">
-          Chỉ cần nhập đúng địa chỉ Gmail bạn đã đăng ký trước đó để đặt lại mật khẩu mới ngay lập tức (không cần mã OTP).
+        <p class="text-[11px] text-amber-200 bg-amber-500/15 border border-amber-400/40 rounded-xl px-3 py-2">
+          Để bảo vệ tài khoản khỏi bị chiếm đoạt, vui lòng nhập Gmail đã đăng ký và xác thực <strong>mã OTP 6 số</strong> gửi về hộp thư trước khi đặt lại mật khẩu.
         </p>
         <div class="space-y-1">
           <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Gmail đã đăng ký tài khoản</label>
-          <input id="forgot-gmail-input" type="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="tenban@gmail.com"
-            class="w-full px-4 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-sm text-white font-semibold focus:outline-none focus:border-amber-400" />
+          <div class="flex gap-2">
+            <input id="forgot-gmail-input" type="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="tenban@gmail.com"
+              class="flex-1 min-w-0 px-4 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-sm text-white font-semibold focus:outline-none focus:border-amber-400" />
+            <button id="send-forgot-otp-btn" type="button" onclick="window.appActions.sendForgotOtp()"
+              class="shrink-0 px-3.5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 disabled:opacity-50 text-slate-950 text-xs font-extrabold cursor-pointer transition">
+              Gửi mã OTP
+            </button>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Mã xác thực OTP (6 số trong Gmail)</label>
+          <input id="forgot-otp-input" type="text" inputmode="numeric" maxlength="6" placeholder="Nhập 6 chữ số OTP..."
+            class="w-full px-4 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-sm text-amber-300 tracking-[0.35em] font-black text-center focus:outline-none focus:border-amber-400" />
+          <p id="forgot-otp-hint" class="text-[11px] text-slate-400">Kiểm tra cả mục Thư rác (Spam) nếu chưa thấy email.</p>
         </div>
         <div class="space-y-1">
           <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Mật khẩu mới (tối thiểu 6 ký tự)</label>
@@ -3902,6 +3914,7 @@
       </div>
 
       <p id="auth-modal-error" class="hidden px-3 py-2 rounded-xl bg-rose-500/15 border border-rose-500/40 text-xs text-rose-300 font-semibold"></p>
+      <p class="text-[10px] text-slate-500 leading-relaxed">Bằng việc đăng ký hoặc đăng nhập, bạn đồng ý để CineVerse lưu tên hiển thị, Gmail và vị trí khu vực phục vụ bảo mật phòng chiếu &amp; tìm rạp gần bạn.</p>
 
       <div class="flex items-center justify-between gap-2 pt-2">
         <button id="gmail-logout-btn" type="button" onclick="window.appActions.logoutGmailAccount()" class="hidden px-3 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/40 text-rose-300 text-xs font-bold cursor-pointer">
@@ -10086,7 +10099,7 @@
 
     let pendingInviteSeat = null;
 
-    function checkInviteUrlParams() {
+    async function checkInviteUrlParams() {
       try {
         const params = new URLSearchParams(window.location.search);
         const roomParam = params.get("room");
@@ -10097,21 +10110,40 @@
         const nameParam = params.get("name");
 
         if (discordOrder && roomParam && DEFAULT_ROOMS.some(r => r.id === roomParam)) {
-          if (uidParam) {
-            state.uid = uidParam;
-            try { localStorage.setItem("cineverse_uid", uidParam); } catch (_) {}
+          const workerBase = (state.r2WorkerUrl || "").replace(/\/+$/, "");
+          let verifiedTicket = null;
+          if (workerBase && uidParam) {
+            try {
+              const vRes = await fetch(`${workerBase}/discord-ticket/verify`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderId: discordOrder, roomId: roomParam, seatId: seatParam || "", uid: uidParam })
+              });
+              const vData = await vRes.json().catch(() => ({}));
+              if (vRes.ok && vData?.ok) {
+                verifiedTicket = vData;
+              }
+            } catch (_) {}
           }
-          if (nameParam && !isDefaultGuestName(nameParam)) {
-            const clean = nameParam.trim().slice(0, 28);
-            state.userName = clean;
+          if (!verifiedTicket) {
+            showToast("❌ Vé Discord không hợp lệ hoặc đã hết hạn! Vui lòng đăng nhập tài khoản để đặt vé.", "error");
+            try { window.history.replaceState({}, "", window.location.pathname); } catch (_) {}
+            enforceMandatoryAuthGate();
+            return;
+          }
+          state.uid = verifiedTicket.uid;
+          try { localStorage.setItem("cineverse_uid", verifiedTicket.uid); } catch (_) {}
+          const safeDiscordName = String(verifiedTicket.userName || nameParam || "").trim().slice(0, 28);
+          if (safeDiscordName && !isDefaultGuestName(safeDiscordName)) {
+            state.userName = safeDiscordName;
             state.hasCustomName = true;
-            saveStoredName(clean);
+            saveStoredName(safeDiscordName);
             updateNameUI();
           }
           const roomObj = getEffectiveRoom(roomParam);
           const validSeats = getValidSeatsForRoom(roomObj);
-          const finalSeat = (seatParam && validSeats.includes(seatParam.toUpperCase()))
-            ? seatParam.toUpperCase()
+          const finalSeat = (verifiedTicket.seatId && validSeats.includes(String(verifiedTicket.seatId).toUpperCase()))
+            ? String(verifiedTicket.seatId).toUpperCase()
             : validSeats[0];
 
           state.bookedTicketsByRoom[roomParam] = {
@@ -10127,7 +10159,7 @@
 
           enterRoom(roomParam, { fromBooking: true, fromDiscord: true });
           assignSeat(roomParam, finalSeat, false);
-          showToast(`🎟️ Đã nhận vé Discord (${discordOrder}) • Vào thẳng ${roomObj.number} ghế ${finalSeat}!`, "success");
+          showToast(`🎟️ Đã xác thực vé Discord (${discordOrder}) • Vào thẳng ${roomObj.number} ghế ${finalSeat}!`, "success");
           try { window.history.replaceState({}, "", window.location.pathname); } catch (_) {}
           return;
         }
@@ -11448,6 +11480,69 @@
       }
     }
 
+    let forgotOtpCooldownTimer = null;
+    async function sendForgotOtp() {
+      const gmailEl = document.getElementById("forgot-gmail-input");
+      const sendBtn = document.getElementById("send-forgot-otp-btn");
+      const hintEl = document.getElementById("forgot-otp-hint");
+      const email = (gmailEl?.value || "").trim().toLowerCase();
+      if (!/^[a-z0-9._%+-]+@gmail\.com$/i.test(email)) {
+        setAuthModalError("Vui lòng nhập đúng địa chỉ @gmail.com đã đăng ký!");
+        showToast("Vui lòng nhập đúng địa chỉ @gmail.com đã đăng ký!", "error");
+        gmailEl?.focus();
+        return;
+      }
+      if (state.forgotOtpCooldownSec > 0) return;
+      const workerBase = (state.r2WorkerUrl || "").replace(/\/+$/, "");
+      if (!workerBase) {
+        showToast("Chưa cấu hình URL Cloudflare Worker để gửi OTP!", "error");
+        return;
+      }
+      setAuthModalError("");
+      if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = "Đang gửi..."; }
+      try {
+        const res = await fetch(`${workerBase}/auth/send-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, displayName: "Khôi phục mật khẩu" })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok || !data.otpToken) {
+          throw new Error(data.error || `Không thể gửi mã OTP (${res.status})`);
+        }
+        state.forgotOtpToken = data.otpToken;
+        state.forgotOtpEmail = email;
+        if (hintEl) {
+          hintEl.innerHTML = `<span class="text-emerald-300 font-semibold">📧 Đã gửi mã 6 số tới <b>${escapeHTML(email)}</b> (hết hạn sau 5 phút).</span>`;
+        }
+        showToast(`📧 Đã gửi mã OTP khôi phục tới ${email}!`, "success");
+        document.getElementById("forgot-otp-input")?.focus();
+
+        state.forgotOtpCooldownSec = 45;
+        if (forgotOtpCooldownTimer) clearInterval(forgotOtpCooldownTimer);
+        forgotOtpCooldownTimer = setInterval(() => {
+          state.forgotOtpCooldownSec = Math.max(0, (state.forgotOtpCooldownSec || 0) - 1);
+          const btnNow = document.getElementById("send-forgot-otp-btn");
+          if (btnNow) {
+            if (state.forgotOtpCooldownSec > 0) {
+              btnNow.disabled = true;
+              btnNow.textContent = `Gửi lại (${state.forgotOtpCooldownSec}s)`;
+            } else {
+              btnNow.disabled = false;
+              btnNow.textContent = "Gửi lại mã";
+              clearInterval(forgotOtpCooldownTimer);
+              forgotOtpCooldownTimer = null;
+            }
+          }
+        }, 1000);
+      } catch (err) {
+        const msg = `❌ ${err.message || "Không thể gửi mã OTP"}`;
+        setAuthModalError(msg);
+        showToast(msg, "error");
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = "Gửi mã OTP"; }
+      }
+    }
+
     async function confirmNameModal() {
       setAuthModalError("");
       const btn = document.getElementById("name-modal-confirm-btn");
@@ -11480,12 +11575,14 @@
         return;
       }
 
-      // Trường hợp 2b: Tab QUÊN MẬT KHẨU (chỉ cần nhập đúng Gmail đã đăng ký, không cần OTP)
+      // Trường hợp 2b: Tab QUÊN MẬT KHẨU (BẮT BUỘC XÁC THỰC GMAIL OTP CHỐNG CHIẾM TÀI KHOẢN)
       if (state.authTab === "forgot") {
         const forgotGmailEl = document.getElementById("forgot-gmail-input");
+        const forgotOtpEl = document.getElementById("forgot-otp-input");
         const forgotNewPassEl = document.getElementById("forgot-new-password-input");
         const forgotConfirmPassEl = document.getElementById("forgot-confirm-password-input");
         const email = (forgotGmailEl?.value || "").trim().toLowerCase();
+        const otpCode = (forgotOtpEl?.value || "").trim();
         const newPass = forgotNewPassEl?.value || "";
         const confirmPass = forgotConfirmPassEl?.value || "";
 
@@ -11493,6 +11590,17 @@
           setAuthModalError("Vui lòng nhập đúng địa chỉ @gmail.com đã đăng ký!");
           showToast("Vui lòng nhập đúng địa chỉ @gmail.com đã đăng ký!", "error");
           forgotGmailEl?.focus();
+          return;
+        }
+        if (!state.forgotOtpToken || state.forgotOtpEmail !== email) {
+          setAuthModalError("Vui lòng bấm 'Gửi mã OTP' để xác thực quyền sở hữu Gmail trước!");
+          showToast("Vui lòng bấm 'Gửi mã OTP' trước khi đặt lại mật khẩu!", "warning");
+          return;
+        }
+        if (!/^\d{6}$/.test(otpCode)) {
+          setAuthModalError("Vui lòng nhập đúng mã OTP 6 chữ số đã gửi về Gmail!");
+          showToast("Vui lòng nhập đủ mã OTP 6 chữ số!", "error");
+          forgotOtpEl?.focus();
           return;
         }
         if (newPass.length < 6) {
@@ -11508,8 +11616,22 @@
           return;
         }
 
-        if (btn) { btn.disabled = true; btn.textContent = "Đang khôi phục mật khẩu..."; }
+        if (btn) { btn.disabled = true; btn.textContent = "Đang xác thực OTP..."; }
         try {
+          const workerBase = (state.r2WorkerUrl || "").replace(/\/+$/, "");
+          const vRes = await fetch(`${workerBase}/auth/verify-otp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, otp: otpCode, otpToken: state.forgotOtpToken })
+          });
+          const vData = await vRes.json().catch(() => ({}));
+          if (!vRes.ok || !vData.ok) {
+            throw new Error(vData.error || "Mã OTP không đúng hoặc đã hết hạn!");
+          }
+          state.forgotOtpToken = "";
+          state.forgotOtpEmail = "";
+          if (forgotOtpEl) forgotOtpEl.value = "";
+
           const accKey = await sha256HexClient(email);
           const acc = await rtdbGetAccountSafe(accKey);
           if (!acc) {
@@ -12173,7 +12295,7 @@
             }
           }
         }
-      }, 3000);
+      }, 6000);
     }
 
     function releaseMyHostStatus() {
@@ -12235,29 +12357,50 @@
       }
       if (btn) { btn.disabled = true; btn.textContent = "Đang kiểm tra..."; }
       try {
-        let keyData = null;
-        if (rtdb && rtdbMod) {
+        const workerBase = (state.r2WorkerUrl || "").replace(/\/+$/, "");
+        let verifiedByServer = false;
+        if (workerBase) {
           try {
-            const snap = await Promise.race([
-              rtdbMod.get(rtdbMod.ref(rtdb, `host_keys/${roomId}`)),
-              new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 3500))
-            ]);
-            keyData = snap?.val() || null;
+            const res = await fetch(`${workerBase}/host-claim`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ roomId, key: enteredKey })
+            });
+            const data = await res.json().catch(() => ({}));
+            if (res.ok && data.ok) {
+              verifiedByServer = true;
+            } else if (res.status === 403 || res.status === 404 || res.status === 429 || res.status === 400) {
+              showToast(`❌ ${data.error || "Key Chủ Trì không đúng!"}`, res.status === 404 ? "warning" : "error");
+              inp?.focus();
+              return;
+            }
           } catch (_) {}
         }
-        if (!keyData || !keyData.key) {
-          const res = await fetch(`${RTDB_URL}/host_keys/${encodeURIComponent(roomId)}.json?t=${Date.now()}`, { cache: "no-store" });
-          if (res.ok) keyData = await res.json();
-        }
-        const expectedKey = String(keyData?.key || "").trim().toUpperCase();
-        if (!expectedKey) {
-          showToast("⚠️ Admin chưa tạo Key Chủ Trì cho phòng này!", "warning");
-          return;
-        }
-        if (enteredKey !== expectedKey) {
-          showToast("❌ Key Chủ Trì không đúng! Vui lòng liên hệ Admin.", "error");
-          inp?.focus();
-          return;
+        if (!verifiedByServer) {
+          let keyData = null;
+          if (rtdb && rtdbMod) {
+            try {
+              const snap = await Promise.race([
+                rtdbMod.get(rtdbMod.ref(rtdb, `host_keys/${roomId}`)),
+                new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 3500))
+              ]);
+              keyData = snap?.val() || null;
+            } catch (_) {}
+          }
+          if (!keyData || !keyData.key) {
+            const res = await fetch(`${RTDB_URL}/host_keys/${encodeURIComponent(roomId)}.json?t=${Date.now()}`, { cache: "no-store" });
+            if (res.ok) keyData = await res.json();
+          }
+          const expectedKey = String(keyData?.key || "").trim().toUpperCase();
+          if (!expectedKey) {
+            showToast("⚠️ Admin chưa tạo Key Chủ Trì cho phòng này!", "warning");
+            return;
+          }
+          if (enteredKey !== expectedKey) {
+            showToast("❌ Key Chủ Trì không đúng! Vui lòng liên hệ Admin.", "error");
+            inp?.focus();
+            return;
+          }
         }
         closeHostKeyModal();
         await claimRoomHostNow(roomId);
@@ -20432,6 +20575,7 @@
       confirmNameModal,
       switchAuthTab,
       sendGmailOtp,
+      sendForgotOtp,
       logoutGmailAccount,
       saveInlineName,
       openCustomVideoModal,
@@ -20544,11 +20688,12 @@
         sfxBtn.innerHTML = `<i class="fa-solid ${state.sfxEnabled ? 'fa-volume-high' : 'fa-volume-xmark'}"></i> <span>SFX Rạp: ${state.sfxEnabled ? 'BẬT' : 'TẮT'}</span>`;
       }
     }
-    checkInviteUrlParams();
-    if (!state.currentRoomId && persistedBootState?.currentRoomId && isAccountAuthenticated()) {
-      enterRoom(persistedBootState.currentRoomId);
-    }
-    enforceMandatoryAuthGate();
+    Promise.resolve(checkInviteUrlParams()).finally(() => {
+      if (!state.currentRoomId && persistedBootState?.currentRoomId && isAccountAuthenticated()) {
+        enterRoom(persistedBootState.currentRoomId);
+      }
+      enforceMandatoryAuthGate();
+    });
     function initAmbientTunaBackground() {
       const canvas = document.getElementById("ambient-tuna-canvas");
       if (!canvas) return;

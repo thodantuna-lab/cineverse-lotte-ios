@@ -29,6 +29,7 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, HEAD, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Vary": "Origin",
   "Cache-Control": "no-store",
   ...SECURITY_HEADERS
 };
@@ -49,7 +50,41 @@ function getCorsHeaders(request, env) {
 // Edge in-memory rate limiters & caches (per isolate)
 const RATE_BUCKETS = new Map();
 const ADMIN_FAIL_BUCKETS = new Map();
+const USED_OTP_TOKENS = new Map();
+const AI_RESPONSE_CACHE = new Map();
 let R2_CATALOG_CACHE = { ts: 0, data: null };
+
+function timingSafeEqualStr(a, b) {
+  const sa = String(a || "");
+  const sb = String(b || "");
+  if (sa.length !== sb.length) return false;
+  let diff = 0;
+  for (let i = 0; i < sa.length; i++) {
+    diff |= sa.charCodeAt(i) ^ sb.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+function getOtpSecret(env) {
+  const secret = String(env?.OTP_SECRET || env?.ADMIN_PIN || env?.RESEND_API_KEY || "").trim();
+  if (!secret) throw new Error("OTP_SECRET_NOT_CONFIGURED");
+  return secret;
+}
+
+function isOtpTokenUsed(token) {
+  const now = Date.now();
+  if (USED_OTP_TOKENS.size > 400) {
+    for (const [k, exp] of USED_OTP_TOKENS.entries()) {
+      if (exp <= now) USED_OTP_TOKENS.delete(k);
+    }
+  }
+  const exp = USED_OTP_TOKENS.get(token);
+  return Boolean(exp && exp > now);
+}
+
+function markOtpTokenUsed(token, ttlMs = 600000) {
+  USED_OTP_TOKENS.set(token, Date.now() + ttlMs);
+}
 
 function getClientIp(request) {
   return (
@@ -231,12 +266,15 @@ async function handleLiveKitTokenRequest(request, env) {
     const body = request.method === "POST" ? await request.json() : {};
     const url = new URL(request.url);
     const room = String(body?.roomId || url.searchParams.get("roomId") || "").trim();
-    const identity = String(body?.uid || url.searchParams.get("uid") || "").trim();
-    const name = String(body?.name || url.searchParams.get("name") || identity).trim();
+    const identity = String(body?.uid || url.searchParams.get("uid") || "").trim().slice(0, 64);
+    const name = String(body?.name || url.searchParams.get("name") || identity).trim().slice(0, 40);
     if (!room || !identity) {
       return jsonResponse({ ok: false, error: "MISSING_ROOM_OR_UID" }, 200);
     }
-    const token = await signLiveKitJwt(apiKey, apiSecret, { room, identity, name });
+    if (!/^(cineverse_)?(room-[1-8]|stream-[1-8])$/i.test(room)) {
+      return jsonResponse({ ok: false, error: "INVALID_ROOM_ID" }, 400);
+    }
+    const token = await signLiveKitJwt(apiKey, apiSecret, { room, identity, name, ttlSeconds: 14400 });
     return jsonResponse({ ok: true, url: livekitUrl, token }, 200);
   } catch (e) {
     return jsonResponse({ ok: false, error: e?.message || "LIVEKIT_TOKEN_ERROR" }, 200);
@@ -517,6 +555,16 @@ async function handleAIRequest(request, env, ctx) {
       ? body.history.slice(-4).map(h => ({ sender: h?.sender, text: String(h?.text || "").slice(0, 140) }))
       : [];
 
+    // Cache AI kết quả cho các chế độ lặp lại (trivia / recommend) trong 30 phút để tiết kiệm quota Gemini
+    const cacheableAiMode = mode === "trivia" || mode === "recommend";
+    const aiCacheKey = cacheableAiMode ? `${mode}:${String(movieTitle || "").trim().toLowerCase()}` : "";
+    if (cacheableAiMode && aiCacheKey) {
+      const cached = AI_RESPONSE_CACHE.get(aiCacheKey);
+      if (cached && Date.now() - cached.ts < 1800000) {
+        return jsonResponse({ ok: true, mode, items: cached.items, cached: true }, 200);
+      }
+    }
+
     if (mode === "support") {
       const qNorm = qTrim.toLowerCase().replace(/[!.,?~…]+$/g, "").replace(/\s+/g, " ");
       if (!qNorm) {
@@ -642,6 +690,13 @@ Khán giả: ${qTrim}`;
 
     if (wantJson) {
       const parsed = JSON.parse(rawText);
+      if (cacheableAiMode && aiCacheKey && Array.isArray(parsed) && parsed.length > 0) {
+        if (AI_RESPONSE_CACHE.size > 200) {
+          const firstKey = AI_RESPONSE_CACHE.keys().next().value;
+          if (firstKey) AI_RESPONSE_CACHE.delete(firstKey);
+        }
+        AI_RESPONSE_CACHE.set(aiCacheKey, { ts: Date.now(), items: parsed });
+      }
       return jsonResponse({ ok: true, mode, items: parsed }, 200);
     }
     return jsonResponse({ ok: true, mode, reply: cleanPlainReply(rawText) }, 200);
@@ -1172,7 +1227,7 @@ async function handleWorkerFetch(request, env, corsHdrs, ctx) {
       }
     }
 
-    // Gmail OTP Auth (stateless HMAC-SHA256 signed token + Resend)
+    // Gmail OTP Auth (stateless HMAC-SHA256 signed token + Resend + per-email anti-bomb)
     if (request.method === "POST" && url.pathname === "/auth/send-otp") {
       try {
         const body = await request.json().catch(() => ({}));
@@ -1181,14 +1236,26 @@ async function handleWorkerFetch(request, env, corsHdrs, ctx) {
         if (!/^[a-z0-9._%+-]+@gmail\.com$/i.test(email)) {
           return jsonResponse({ ok: false, error: "Vui lòng nhập địa chỉ Gmail hợp lệ (@gmail.com)." }, 400);
         }
+        const emailRl = checkRateLimit(email, "otp_email", 3, 600000);
+        if (!emailRl.allowed) {
+          return jsonResponse({
+            ok: false,
+            error: `Gmail này đã yêu cầu quá nhiều mã OTP. Vui lòng thử lại sau ${emailRl.retryAfterSec} giây.`
+          }, 429);
+        }
         if (!env.RESEND_API_KEY) {
           return jsonResponse({ ok: false, error: "Worker chưa cấu hình RESEND_API_KEY." }, 500);
+        }
+        let secret;
+        try {
+          secret = getOtpSecret(env);
+        } catch (_) {
+          return jsonResponse({ ok: false, error: "OTP_SECRET_NOT_CONFIGURED" }, 503);
         }
         const arr = new Uint32Array(1);
         crypto.getRandomValues(arr);
         const otp = String(100000 + (arr[0] % 900000));
         const exp = Date.now() + 5 * 60 * 1000;
-        const secret = env.OTP_SECRET || env.ADMIN_PIN || env.RESEND_API_KEY || "cineverse-otp-fallback";
         const enc = new TextEncoder();
 
         const hashBuf = await crypto.subtle.digest("SHA-256", enc.encode(`${email}:${otp}:${secret}`));
@@ -1250,8 +1317,20 @@ async function handleWorkerFetch(request, env, corsHdrs, ctx) {
         if (!/^[a-z0-9._%+-]+@gmail\.com$/i.test(email) || !/^\d{6}$/.test(otp) || !otpToken.includes(".")) {
           return jsonResponse({ ok: false, error: "Thông tin xác thực không hợp lệ (cần Gmail & mã 6 số)." }, 400);
         }
+        const verifyRl = checkRateLimit(`${clientIp}:${email}`, "otp_verify", 8, 600000);
+        if (!verifyRl.allowed) {
+          return jsonResponse({ ok: false, error: `Bạn thử sai quá nhiều lần. Thử lại sau ${verifyRl.retryAfterSec} giây.` }, 429);
+        }
+        if (isOtpTokenUsed(otpToken)) {
+          return jsonResponse({ ok: false, error: "Mã OTP này đã được sử dụng. Vui lòng gửi mã mới." }, 400);
+        }
+        let secret;
+        try {
+          secret = getOtpSecret(env);
+        } catch (_) {
+          return jsonResponse({ ok: false, error: "OTP_SECRET_NOT_CONFIGURED" }, 503);
+        }
         const [payloadB64, sigB64] = otpToken.split(".");
-        const secret = env.OTP_SECRET || env.ADMIN_PIN || env.RESEND_API_KEY || "cineverse-otp-fallback";
         const enc = new TextEncoder();
         const key = await crypto.subtle.importKey(
           "raw",
@@ -1263,7 +1342,7 @@ async function handleWorkerFetch(request, env, corsHdrs, ctx) {
         const expectedSigBuf = await crypto.subtle.sign("HMAC", key, enc.encode(payloadB64));
         const expectedSigB64 = btoa(String.fromCharCode(...new Uint8Array(expectedSigBuf)))
           .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-        if (sigB64 !== expectedSigB64) {
+        if (!timingSafeEqualStr(sigB64, expectedSigB64)) {
           return jsonResponse({ ok: false, error: "Phiên OTP không hợp lệ hoặc đã bị chỉnh sửa." }, 400);
         }
         const b64Norm = payloadB64.replace(/-/g, "+").replace(/_/g, "/");
@@ -1276,12 +1355,78 @@ async function handleWorkerFetch(request, env, corsHdrs, ctx) {
         }
         const hashBuf = await crypto.subtle.digest("SHA-256", enc.encode(`${email}:${otp}:${secret}`));
         const otpHash = Array.from(new Uint8Array(hashBuf)).map((b) => b.toString(16).padStart(2, "0")).join("");
-        if (otpHash !== payload.otpHash) {
+        if (!timingSafeEqualStr(otpHash, payload.otpHash)) {
           return jsonResponse({ ok: false, error: "Mã OTP không đúng. Vui lòng kiểm tra lại Gmail." }, 400);
         }
+        markOtpTokenUsed(otpToken, 600000);
         const uidBuf = await crypto.subtle.digest("SHA-256", enc.encode(`uid:${email}:${secret}`));
         const verifiedUid = "gm_" + Array.from(new Uint8Array(uidBuf)).slice(0, 8).map((b) => b.toString(16).padStart(2, "0")).join("");
         return jsonResponse({ ok: true, email, verifiedUid, verifiedAt: Date.now() }, 200);
+      } catch (e) {
+        return jsonResponse({ ok: false, error: String(e?.message || e) }, 500);
+      }
+    }
+
+    // Xác thực Key Chủ Trì phía server (chống dò key & không cần client đọc trực tiếp host_keys)
+    if (request.method === "POST" && url.pathname === "/host-claim") {
+      try {
+        const claimRl = checkRateLimit(clientIp, "host_claim", 8, 600000);
+        if (!claimRl.allowed) {
+          return jsonResponse({ ok: false, error: `Thử sai Key quá nhiều lần. Vui lòng đợi ${claimRl.retryAfterSec} giây.` }, 429);
+        }
+        const body = await request.json().catch(() => ({}));
+        const roomId = String(body.roomId || "").trim();
+        const enteredKey = String(body.key || "").trim().toUpperCase();
+        if (!/^room-[1-8]$/.test(roomId) || !enteredKey) {
+          return jsonResponse({ ok: false, error: "Thông tin phòng hoặc Key không hợp lệ." }, 400);
+        }
+        const rtdbBase = String(env.FIREBASE_RTDB_URL || "https://cineverse-ea320-default-rtdb.asia-southeast1.firebasedatabase.app").replace(/\/+$/, "");
+        const keyRes = await fetch(`${rtdbBase}/host_keys/${encodeURIComponent(roomId)}.json`, { cache: "no-store" });
+        const keyData = keyRes.ok ? await keyRes.json().catch(() => null) : null;
+        const expectedKey = String(keyData?.key || "").trim().toUpperCase();
+        if (!expectedKey) {
+          return jsonResponse({ ok: false, error: "Admin chưa tạo Key Chủ Trì cho phòng này." }, 404);
+        }
+        if (!timingSafeEqualStr(enteredKey, expectedKey)) {
+          return jsonResponse({ ok: false, error: "Key Chủ Trì không đúng." }, 403);
+        }
+        return jsonResponse({ ok: true, roomId }, 200);
+      } catch (e) {
+        return jsonResponse({ ok: false, error: String(e?.message || e) }, 500);
+      }
+    }
+
+    // Xác thực vé Discord từ URL (chống giả mạo ?discordOrder=...&uid=... để vượt cổng đăng nhập)
+    if (request.method === "POST" && url.pathname === "/discord-ticket/verify") {
+      try {
+        const body = await request.json().catch(() => ({}));
+        const orderId = String(body.orderId || "").trim();
+        const roomId = String(body.roomId || "").trim();
+        const seatId = String(body.seatId || "").trim().toUpperCase();
+        const uid = String(body.uid || "").trim();
+        if (!orderId || !/^room-[1-8]$/.test(roomId) || !uid.startsWith("discord_")) {
+          return jsonResponse({ ok: false, error: "Vé Discord không hợp lệ." }, 400);
+        }
+        const rtdbBase = String(env.FIREBASE_RTDB_URL || "https://cineverse-ea320-default-rtdb.asia-southeast1.firebasedatabase.app").replace(/\/+$/, "");
+        const ordRes = await fetch(`${rtdbBase}/revenue_orders/${encodeURIComponent(orderId)}.json`, { cache: "no-store" });
+        const order = ordRes.ok ? await ordRes.json().catch(() => null) : null;
+        if (!order || order.source !== "discord" || order.roomId !== roomId || order.uid !== uid) {
+          return jsonResponse({ ok: false, error: "Không tìm thấy vé Discord hợp lệ trên hệ thống." }, 403);
+        }
+        if (seatId && String(order.seatId || "").toUpperCase() !== seatId) {
+          return jsonResponse({ ok: false, error: "Số ghế không khớp với vé Discord." }, 403);
+        }
+        if (order.createdAt && Date.now() - Number(order.createdAt) > 24 * 60 * 60 * 1000) {
+          return jsonResponse({ ok: false, error: "Vé Discord đã hết hạn (quá 24 giờ)." }, 403);
+        }
+        return jsonResponse({
+          ok: true,
+          orderId,
+          roomId: order.roomId,
+          seatId: order.seatId,
+          uid: order.uid,
+          userName: String(order.userName || "Thành viên Discord").slice(0, 28)
+        }, 200);
       } catch (e) {
         return jsonResponse({ ok: false, error: String(e?.message || e) }, 500);
       }
