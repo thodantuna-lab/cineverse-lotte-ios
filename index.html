@@ -9280,6 +9280,11 @@
         if (rtdb && rtdbMod) {
           rtdbMod.update(rtdbMod.ref(rtdb, `lobby_config/rooms/${roomId}`), roomLobbyPayload).catch(() => {});
         }
+        fetch(`${RTDB_URL}/lobby_config/rooms/${encodeURIComponent(roomId)}.json`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(roomLobbyPayload)
+        }).catch(() => {});
 
         saveAppStateToStorage();
         renderTheaterLeftMovieList();
@@ -12848,6 +12853,11 @@
         if (!state.lobbyConfigRooms) state.lobbyConfigRooms = {};
         state.lobbyConfigRooms[roomId] = { ...(lobbyRoom || {}), ...lobbySyncPayload };
         rtdbMod.update(rtdbMod.ref(rtdb, `lobby_config/rooms/${roomId}`), lobbySyncPayload).catch(() => {});
+        fetch(`${RTDB_URL}/lobby_config/rooms/${encodeURIComponent(roomId)}.json`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(lobbySyncPayload)
+        }).catch(() => {});
         renderHeroBillboard();
         renderLobby();
       }
