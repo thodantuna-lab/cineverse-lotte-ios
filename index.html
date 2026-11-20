@@ -9249,10 +9249,42 @@
       const commitSwitchSuccess = () => {
         if (didCommit) return;
         didCommit = true;
+        const switchTs = Date.now();
+        const newVer = String(switchTs);
         if (!state.lastHostSwitchByRoom) state.lastHostSwitchByRoom = {};
-        state.lastHostSwitchByRoom[roomId] = Date.now();
+        state.lastHostSwitchByRoom[roomId] = switchTs;
+        if (state.bookedTicketsByRoom?.[roomId]) {
+          state.bookedTicketsByRoom[roomId].movieTitle = item.title;
+          state.bookedTicketsByRoom[roomId].movieVersion = newVer;
+        }
+
+        // Tự động cập nhật ngay lên Sảnh chính (lobby_config/rooms/$roomId) cho tất cả người dùng
+        const roomLobbyPayload = {
+          movieTitle: item.title,
+          status: "showing",
+          scheduledAt: 0,
+          youtubeId: item.youtubeId || "",
+          videoUrl: item.youtubeId ? "" : (item.videoUrl || ""),
+          poster: posterUrl || curRoom?.poster || "",
+          movieVersion: newVer,
+          updatedBy: `Chủ Trì ${state.userName || "Host"}`,
+          updatedByUid: state.uid,
+          isCustomStartZero: true,
+          updatedAt: switchTs
+        };
+        if (!state.lobbyConfigRooms) state.lobbyConfigRooms = {};
+        state.lobbyConfigRooms[roomId] = {
+          ...(state.lobbyConfigRooms[roomId] || {}),
+          ...roomLobbyPayload
+        };
+        if (rtdb && rtdbMod) {
+          rtdbMod.update(rtdbMod.ref(rtdb, `lobby_config/rooms/${roomId}`), roomLobbyPayload).catch(() => {});
+        }
+
         saveAppStateToStorage();
         renderTheaterLeftMovieList();
+        renderHeroBillboard();
+        renderLobby();
 
         // Đồng bộ tức thì phim mới tới toàn bộ khán giả trong phòng
         broadcastRoomVideoSync("switch_movie");
@@ -9264,7 +9296,7 @@
 
         pushMessageToRoom(`👑 Chủ Trì ${state.userName || "Host"} đã đổi phim sang: "${item.title}"`);
         try { logMemberActivity?.("host_switch_movie", `Chủ Trì đổi phim sang "${item.title}" tại ${curRoom?.number || roomId}`, { movieTitle: item.title, roomId }); } catch (_) {}
-        showToast(`👑 Đã đổi phim sang "${item.title}"! (Lần đổi tiếp theo sau 30 phút)`, "success");
+        showToast(`👑 Đã đổi phim sang "${item.title}" & cập nhật ra Sảnh! (Lần đổi tiếp theo sau 30 phút)`, "success");
       };
 
       if (item.youtubeId) {
@@ -16611,14 +16643,25 @@
         window.addEventListener("pagehide", cleanupOnLeave);
         window.addEventListener("beforeunload", cleanupOnLeave);
 
-        // Lắng nghe cấu hình lịch chiếu từ Admin (đồng bộ tất cả người tham gia)
+        // Lắng nghe cấu hình lịch chiếu từ Admin & Chủ Trì phòng (đồng bộ Sảnh & người tham gia)
         rtdbMod.onValue(rtdbMod.ref(rtdb, "lobby_config/rooms"), (snap) => {
           const val = snap.val() || {};
-          const prevActiveTitle = state.currentRoomId ? (getEffectiveRoom(state.currentRoomId)?.movieTitle || "") : "";
-          const prevActiveUrl = state.currentRoomId ? (getEffectiveRoom(state.currentRoomId)?.videoUrl || "") : "";
+          const prevActiveRoom = state.currentRoomId ? getEffectiveRoom(state.currentRoomId) : null;
+          const prevActiveTitle = prevActiveRoom?.movieTitle || "";
+          const prevActiveUrl = prevActiveRoom?.videoUrl || "";
+          const prevActiveYt = prevActiveRoom?.youtubeId || "";
+          const activeCfg = state.currentRoomId ? val[state.currentRoomId] : null;
+          const activeRoomAlreadyMatched = Boolean(
+            state.currentRoomId &&
+            prevActiveTitle &&
+            activeCfg &&
+            prevActiveTitle === (activeCfg.movieTitle || "") &&
+            prevActiveUrl === (activeCfg.videoUrl || "") &&
+            prevActiveYt === (activeCfg.youtubeId || "")
+          );
           state.lobbyConfigRooms = val;
 
-          // Kiểm tra nếu Admin đổi phim: nếu người xem đang ở trong phòng đó thì chiếu luôn phim mới tại phòng, chỉ reset vé các phòng khác
+          // Kiểm tra nếu Admin hoặc Chủ Trì đổi phim: nếu người xem đang ở trong phòng đó thì chiếu luôn phim mới tại phòng, chỉ reset vé các phòng khác
           let ticketsReset = false;
           let activeRoomMovieSwitched = false;
           Object.keys(state.bookedTicketsByRoom || {}).forEach(rId => {
@@ -16630,8 +16673,10 @@
               if (state.currentRoomId === rId) {
                 ticket.movieVersion = curVer;
                 ticket.movieTitle = room?.movieTitle || "";
-                delete state.roomsCustom[rId];
-                activeRoomMovieSwitched = true;
+                if (!activeRoomAlreadyMatched) {
+                  delete state.roomsCustom[rId];
+                  activeRoomMovieSwitched = true;
+                }
                 ticketsReset = true;
               } else {
                 delete state.bookedTicketsByRoom[rId];
@@ -16650,7 +16695,7 @@
             const room = getEffectiveRoom(state.currentRoomId);
             const newTitle = room?.movieTitle || "";
             const newUrl = room?.videoUrl || "";
-            if (activeRoomMovieSwitched || (prevActiveTitle && newTitle !== prevActiveTitle) || (prevActiveUrl && newUrl !== prevActiveUrl)) {
+            if (!activeRoomAlreadyMatched && (activeRoomMovieSwitched || (prevActiveTitle && newTitle !== prevActiveTitle) || (prevActiveUrl && newUrl !== prevActiveUrl))) {
               delete state.roomsCustom[state.currentRoomId];
               const freshRoom = getEffectiveRoom(state.currentRoomId);
               state.triviaIndex = 0;
@@ -16660,7 +16705,8 @@
               renderTheaterLeftMovieList();
               if (state.sidebarTab === "trivia") renderTriviaPanel();
               if (state.sidebarTab === "playlist") renderPlaylistQueue();
-              showToast(`🎬 Admin đã phê duyệt & phát ngay bộ phim: "${freshRoom.movieTitle}"!`, "success");
+              const actorLabel = activeCfg?.updatedBy || "Admin";
+              showToast(`🎬 ${actorLabel} đã cập nhật & phát bộ phim: "${freshRoom.movieTitle}"!`, "success");
             } else {
               const titleEl = document.getElementById("room-header-title");
               if (titleEl) titleEl.textContent = room.movieTitle;
