@@ -537,18 +537,110 @@ function buildConciseSupportFallback(qTrim, body) {
   return "Chủ Rạp đã nhận được tin nhắn của bạn và sẽ phản hồi sớm nhất nhé.";
 }
 
-async function handleAIRequest(request, env, ctx) {
-  if (!env.GEMINI_API_KEY) {
-    return jsonResponse({ ok: false, error: "MISSING_GEMINI_API_KEY" }, 200);
+const HOST_KEY_ROOMS = [
+  { id: "room-1", name: "Phòng 01" },
+  { id: "room-2", name: "Phòng 02" },
+  { id: "room-3", name: "Phòng 03" },
+  { id: "room-4", name: "Phòng 04" },
+  { id: "room-5", name: "Phòng 05" },
+  { id: "room-6", name: "Phòng 06" },
+  { id: "room-7", name: "Phòng Đôi" },
+  { id: "room-8", name: "Phòng Stream" }
+];
+
+function extractTargetRoomIdForHostKey(qTrim, body) {
+  const q = String(qTrim || "").toLowerCase();
+  if (/ph[oò]ng\s*[đd][oô]i/i.test(q) || /\broom[-_\s]?7\b/i.test(q)) return "room-7";
+  if (/ph[oò]ng\s*stream/i.test(q) || /\broom[-_\s]?8\b/i.test(q)) return "room-8";
+  const m = q.match(/(?:ph[oò]ng|room|\bp)\s*[-_#]?\s*0?([1-8])\b/i);
+  if (m) return `room-${m[1]}`;
+
+  const curId = String(body?.currentRoomId || "").trim();
+  if (/^room-[1-8]$/i.test(curId)) return curId.toLowerCase();
+
+  const curLabel = String(body?.currentRoom || "").toLowerCase();
+  if (/ph[oò]ng\s*[đd][oô]i/i.test(curLabel)) return "room-7";
+  if (/ph[oò]ng\s*stream/i.test(curLabel)) return "room-8";
+  const mCur = curLabel.match(/ph[oò]ng\s*0?([1-8])\b/i);
+  if (mCur) return `room-${mCur[1]}`;
+
+  return "";
+}
+
+async function handleHostKeyChatRequest(qTrim, body, env) {
+  const wantsHostKey =
+    /(xin|l[aấ]y|c[aấ]p|cho|g[uử]i|mu[oố]n|h[oỏ]i|nh[aậ]n).*(key|ch[uủ]\s*tr[iì]|host)/i.test(qTrim) ||
+    /(key\s*(ph[oò]ng|ch[uủ]\s*tr[iì]|host|stream|[đd][oô]i)|m[aã]\s*ch[uủ]\s*tr[iì])/i.test(qTrim);
+  if (!wantsHostKey) return null;
+
+  const rtdbBase = String(env?.FIREBASE_RTDB_URL || "https://cineverse-ea320-default-rtdb.asia-southeast1.firebasedatabase.app").replace(/\/+$/, "");
+  const targetRoomId = extractTargetRoomIdForHostKey(qTrim, body);
+
+  const hostPairs = await Promise.all(
+    HOST_KEY_ROOMS.map(async (r) => {
+      try {
+        const res = await fetch(`${rtdbBase}/host/${encodeURIComponent(r.id)}.json`, { cache: "no-store" });
+        const val = res.ok ? await res.json().catch(() => null) : null;
+        return [r.id, val && val.uid ? val : null];
+      } catch (_) {
+        return [r.id, null];
+      }
+    })
+  );
+  const hostMap = Object.fromEntries(hostPairs);
+  const freeRooms = HOST_KEY_ROOMS.filter((r) => !hostMap[r.id]);
+  const freeText = freeRooms.length > 0 ? freeRooms.map((r) => r.name).join(", ") : "";
+
+  if (!targetRoomId) {
+    if (freeRooms.length === 0) {
+      return "Hiện tất cả các phòng đều đang có người chủ trì nên bạn chưa thể xin key lúc này. Vui lòng đợi người chủ trì nhường quyền nhé!";
+    }
+    return `Bạn muốn xin key phòng nào? Hiện các phòng đang trống Chủ Trì gồm: ${freeText}. Hãy nhắn cụ thể ví dụ: "xin key phòng 1" nhé!`;
   }
+
+  const targetMeta = HOST_KEY_ROOMS.find((r) => r.id === targetRoomId) || { id: targetRoomId, name: targetRoomId };
+  const currentHost = hostMap[targetRoomId];
+  if (currentHost && currentHost.uid) {
+    const hostName = String(currentHost.userName || "Chủ Trì").trim();
+    if (freeText) {
+      return `${targetMeta.name} đang có người chủ trì (${hostName}) nên bạn không thể xin key. Vui lòng qua phòng trống (${freeText}) hoặc đợi người chủ trì nhường quyền!`;
+    }
+    return `${targetMeta.name} đang có người chủ trì (${hostName}) nên bạn không thể xin key. Hiện tất cả các phòng khác cũng đã có chủ trì, vui lòng đợi người chủ trì nhường quyền!`;
+  }
+
+  try {
+    const keyRes = await fetch(`${rtdbBase}/host_keys/${encodeURIComponent(targetRoomId)}.json`, { cache: "no-store" });
+    const keyData = keyRes.ok ? await keyRes.json().catch(() => null) : null;
+    const keyVal = String(keyData?.key || "").trim().toUpperCase();
+    if (!keyVal) {
+      return `Admin chưa tạo Key Chủ Trì cho ${targetMeta.name}. Vui lòng chọn phòng trống khác${freeText ? ` (${freeText})` : ""} hoặc đợi Chủ Rạp cấp nhé!`;
+    }
+    return `Key Chủ Trì ${targetMeta.name} (đang trống): ${keyVal}. Bạn vào ${targetMeta.name}, bấm nút "Nhận Chủ Trì" và nhập mã này để làm Chủ Trì nhé!`;
+  } catch (_) {
+    return "Không thể kiểm tra Key Chủ Trì lúc này, vui lòng thử lại sau giây lát.";
+  }
+}
+
+async function handleAIRequest(request, env, ctx) {
   try {
     const body = await request.json();
     const mode = body.mode || "chat";
+    const qTrim = String(body.question || "").trim().slice(0, 350);
+
+    if ((mode === "support" || mode === "chat") && qTrim) {
+      const hostKeyReply = await handleHostKeyChatRequest(qTrim, body, env);
+      if (hostKeyReply) {
+        return jsonResponse({ ok: true, mode, reply: hostKeyReply, zeroToken: true }, 200);
+      }
+    }
+
+    if (!env.GEMINI_API_KEY) {
+      return jsonResponse({ ok: false, error: "MISSING_GEMINI_API_KEY" }, 200);
+    }
     const movieTitle = body.movieTitle || "Phim đang chiếu";
     const genre = body.genre || "";
     const synopsis = body.synopsis || "";
     const cast = body.cast || "";
-    const qTrim = String(body.question || "").trim().slice(0, 350);
     const availableTitles = Array.isArray(body.availableTitles) ? body.availableTitles : [];
     const availableRooms = Array.isArray(body.availableRooms) ? body.availableRooms : [];
     const history = Array.isArray(body.history)

@@ -10712,6 +10712,8 @@
       const ctx = buildCleanAiMovieContext(room);
       const workerRes = await callWorkerAI({
         mode: "chat",
+        currentRoomId: state.currentRoomId || "",
+        currentRoom: room?.number || "",
         movieTitle: ctx.movieTitle,
         genre: ctx.genre,
         cast: ctx.cast,
@@ -20525,6 +20527,7 @@
             mode: "support",
             question: text,
             userName: state.userName || "Khách",
+            currentRoomId: state.currentRoomId || "",
             currentRoom: curRoomLabel,
             paymentMode: state.paymentMode || "free",
             availableRooms: ctx.availableRooms,
