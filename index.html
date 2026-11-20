@@ -8417,6 +8417,7 @@
           });
         } else {
           videoEl.src = room.videoUrl;
+          try { videoEl.load(); } catch (_) {}
         }
 
         let didInitialSeek = false;
@@ -8491,7 +8492,11 @@
       }
       if (videoEl) {
         videoEl.pause();
+        videoEl.onloadedmetadata = null;
+        videoEl.oncanplay = null;
+        videoEl.ontimeupdate = null;
         videoEl.removeAttribute("src");
+        try { videoEl.load(); } catch (_) {}
         videoEl.classList.add("hidden");
       }
       if (ytWrapper) {
@@ -12715,7 +12720,17 @@
 
     function applyRemoteVideoSync(roomId, data, forceResync = false) {
       if (!data || state.currentRoomId !== roomId) return;
-      if (!forceResync && data.uid === state.uid) return;
+      const isMyOwnSync = data.uid === state.uid;
+      if (!forceResync && isMyOwnSync) {
+        // Nếu chính Chủ Trì F5 lại trang khi đang chiếu phim tự đổi -> vẫn khôi phục đúng phim từ sync RTDB
+        const curRoom = getEffectiveRoom(roomId);
+        const hasRemoteSrc = Boolean(data.youtubeId || data.videoUrl);
+        const needRestore = hasRemoteSrc && !state.roomsCustom[roomId] && (
+          (data.youtubeId || "") !== (curRoom.youtubeId || "") ||
+          (data.videoUrl || "") !== (curRoom.videoUrl || "")
+        ) && (Date.now() - (data.updatedAt || 0) < 10800000);
+        if (!needRestore) return;
+      }
       if (!forceResync && currentRoomHost && currentRoomHost.uid && data.uid !== currentRoomHost.uid) return;
 
       isApplyingRemoteSync = true;
