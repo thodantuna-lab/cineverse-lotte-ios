@@ -9244,7 +9244,7 @@
       updateRoomHeaderUI();
       renderJJKEpisodeLists(vaultId);
       renderTheaterLeftMovieList();
-      renderTriviaWidget();
+      if (state.sidebarTab === "trivia" && typeof renderTriviaPanel === "function") renderTriviaPanel();
       renderHeroBillboard();
       renderLobby();
       setupRoomVideoPlayer(getEffectiveRoom(roomId));
@@ -12817,7 +12817,7 @@
           renderLobby();
           if (state.currentRoomId === roomId) {
             state.triviaData = null;
-            renderTriviaWidget();
+            if (state.sidebarTab === "trivia" && typeof renderTriviaPanel === "function") renderTriviaPanel();
             renderTheaterLeftMovieList();
           }
           setupRoomVideoPlayer(getEffectiveRoom(roomId));
