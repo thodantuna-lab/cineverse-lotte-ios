@@ -9219,11 +9219,7 @@
       // Lưu lịch sử phim cũ trước khi chuyển sang phim mới
       saveWatchProgressForCurrentVideo(true);
 
-      const switchedAt = Date.now();
-      if (!state.lastHostSwitchByRoom) state.lastHostSwitchByRoom = {};
-      state.lastHostSwitchByRoom[roomId] = switchedAt;
-      saveAppStateToStorage();
-
+      const prevCustom = state.roomsCustom[roomId] ? { ...state.roomsCustom[roomId] } : null;
       const posterUrl = resolveMoviePoster(item.title, item.poster, item.youtubeId);
       delete state.customSubtitlesByRoom[roomId];
       state.triviaData = null;
@@ -9249,17 +9245,50 @@
       renderLobby();
       setupRoomVideoPlayer(getEffectiveRoom(roomId));
 
-      // Đồng bộ tức thì phim mới tới toàn bộ khán giả trong phòng
-      broadcastRoomVideoSync("switch_movie");
-      setTimeout(() => {
-        if (isIAmHost() && state.currentRoomId === roomId) {
-          broadcastRoomVideoSync("play");
-        }
-      }, 650);
+      let didCommit = false;
+      const commitSwitchSuccess = () => {
+        if (didCommit) return;
+        didCommit = true;
+        if (!state.lastHostSwitchByRoom) state.lastHostSwitchByRoom = {};
+        state.lastHostSwitchByRoom[roomId] = Date.now();
+        saveAppStateToStorage();
+        renderTheaterLeftMovieList();
 
-      pushMessageToRoom(`👑 Chủ Trì ${state.userName || "Host"} đã đổi phim sang: "${item.title}"`);
-      try { logMemberActivity?.("host_switch_movie", `Chủ Trì đổi phim sang "${item.title}" tại ${curRoom?.number || roomId}`, { movieTitle: item.title, roomId }); } catch (_) {}
-      showToast(`👑 Đã đổi phim sang "${item.title}"! (Lần đổi tiếp theo sau 30 phút)`, "success");
+        // Đồng bộ tức thì phim mới tới toàn bộ khán giả trong phòng
+        broadcastRoomVideoSync("switch_movie");
+        setTimeout(() => {
+          if (isIAmHost() && state.currentRoomId === roomId) {
+            broadcastRoomVideoSync("play");
+          }
+        }, 650);
+
+        pushMessageToRoom(`👑 Chủ Trì ${state.userName || "Host"} đã đổi phim sang: "${item.title}"`);
+        try { logMemberActivity?.("host_switch_movie", `Chủ Trì đổi phim sang "${item.title}" tại ${curRoom?.number || roomId}`, { movieTitle: item.title, roomId }); } catch (_) {}
+        showToast(`👑 Đã đổi phim sang "${item.title}"! (Lần đổi tiếp theo sau 30 phút)`, "success");
+      };
+
+      if (item.youtubeId) {
+        commitSwitchSuccess();
+      } else {
+        const activeVideoEl = document.getElementById("html5-video-player");
+        if (!activeVideoEl || activeVideoEl.readyState >= 1) {
+          commitSwitchSuccess();
+        } else {
+          activeVideoEl.addEventListener("loadedmetadata", commitSwitchSuccess, { once: true });
+          activeVideoEl.addEventListener("canplay", commitSwitchSuccess, { once: true });
+          activeVideoEl.addEventListener("error", () => {
+            if (didCommit) return;
+            if (prevCustom) state.roomsCustom[roomId] = prevCustom;
+            else delete state.roomsCustom[roomId];
+            updateRoomHeaderUI();
+            renderTheaterLeftMovieList();
+            renderHeroBillboard();
+            renderLobby();
+            setupRoomVideoPlayer(getEffectiveRoom(roomId));
+            showToast(`❌ Không thể tải phim "${item.title}", chưa tính thời gian chờ 30 phút. Bạn có thể chọn phim khác!`, "error");
+          }, { once: true });
+        }
+      }
     }
 
     async function requestMovieForCurrentRoom(vaultId) {
