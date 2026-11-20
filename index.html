@@ -5241,7 +5241,8 @@
           unlockedRooms: state.unlockedRooms,
           playlistByRoom: state.playlistByRoom,
           bookingDraft: state.bookingDraft,
-          bookedTicketsByRoom: state.bookedTicketsByRoom
+          bookedTicketsByRoom: state.bookedTicketsByRoom,
+          lastHostSwitchByRoom: state.lastHostSwitchByRoom || {}
         };
         localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(payload));
       } catch (e) {}
@@ -5301,6 +5302,9 @@
         }
         if (parsed.bookedTicketsByRoom && typeof parsed.bookedTicketsByRoom === "object") {
           state.bookedTicketsByRoom = parsed.bookedTicketsByRoom;
+        }
+        if (parsed.lastHostSwitchByRoom && typeof parsed.lastHostSwitchByRoom === "object") {
+          state.lastHostSwitchByRoom = parsed.lastHostSwitchByRoom;
         }
         if (parsed.bookingDraft && typeof parsed.bookingDraft === "object") {
           state.bookingDraft = { ...state.bookingDraft, ...parsed.bookingDraft };
@@ -9164,7 +9168,18 @@
       showToast(`🎬 Đang phát "${item.title}" tại ${roomObj.number}!`, "success");
     }
 
-    // Người Chủ Trì (isIAmHost) được quyền đổi phim trực tiếp từ Danh Sách Phim và đồng bộ tức thì cho cả phòng;
+    const HOST_MOVIE_SWITCH_COOLDOWN_MS = 30 * 60 * 1000;
+
+    function getHostMovieSwitchCooldownRemainingMs(roomId) {
+      if (!roomId) return 0;
+      const localTs = Number(state.lastHostSwitchByRoom?.[roomId] || 0);
+      const remoteTs = Number(latestRoomSyncState?.lastMovieSwitchedAt || 0);
+      const lastTs = Math.max(localTs, remoteTs);
+      if (!lastTs) return 0;
+      return Math.max(0, HOST_MOVIE_SWITCH_COOLDOWN_MS - (Date.now() - lastTs));
+    }
+
+    // Người Chủ Trì (isIAmHost) được quyền đổi phim trực tiếp từ Danh Sách Phim (giới hạn 30 phút/lần chống spam) và đồng bộ tức thì cho cả phòng;
     // Khán giả thường sẽ gửi yêu cầu chiếu về Admin như cũ.
     async function selectMovieFromTheaterList(vaultId) {
       if (!isIAmHost()) {
@@ -9180,8 +9195,23 @@
         return;
       }
 
+      const remainMs = getHostMovieSwitchCooldownRemainingMs(roomId);
+      if (remainMs > 0) {
+        const totalSec = Math.ceil(remainMs / 1000);
+        const mins = Math.floor(totalSec / 60);
+        const secs = totalSec % 60;
+        showToast(`⏳ Chống spam: Mỗi phòng chỉ được đổi phim 30 phút/lần. Vui lòng đợi thêm ${mins} phút ${secs} giây!`, "warning");
+        renderTheaterLeftMovieList();
+        return;
+      }
+
       // Lưu lịch sử phim cũ trước khi chuyển sang phim mới
       saveWatchProgressForCurrentVideo(true);
+
+      const switchedAt = Date.now();
+      if (!state.lastHostSwitchByRoom) state.lastHostSwitchByRoom = {};
+      state.lastHostSwitchByRoom[roomId] = switchedAt;
+      saveAppStateToStorage();
 
       const posterUrl = resolveMoviePoster(item.title, item.poster, item.youtubeId);
       delete state.customSubtitlesByRoom[roomId];
@@ -9218,7 +9248,7 @@
 
       pushMessageToRoom(`👑 Chủ Trì ${state.userName || "Host"} đã đổi phim sang: "${item.title}"`);
       try { logMemberActivity?.("host_switch_movie", `Chủ Trì đổi phim sang "${item.title}" tại ${curRoom?.number || roomId}`, { movieTitle: item.title, roomId }); } catch (_) {}
-      showToast(`👑 Đã đổi phim sang "${item.title}" và đồng bộ tới cả phòng!`, "success");
+      showToast(`👑 Đã đổi phim sang "${item.title}"! (Lần đổi tiếp theo sau 30 phút)`, "success");
     }
 
     async function requestMovieForCurrentRoom(vaultId) {
@@ -9549,8 +9579,17 @@
       const hostHintEl = document.getElementById("theater-left-host-hint");
       if (hostHintEl) {
         if (amHost) {
-          hostHintEl.className = "mt-1.5 px-2 py-1 rounded-lg bg-amber-500/15 border border-amber-400/35 text-[10px] font-extrabold text-amber-300 leading-snug";
-          hostHintEl.innerHTML = `<i class="fa-solid fa-crown mr-1"></i>Chủ Trì: Bấm phim để đổi chiếu ngay cho cả phòng`;
+          const remainMs = getHostMovieSwitchCooldownRemainingMs(state.currentRoomId);
+          if (remainMs > 0) {
+            const totalSec = Math.ceil(remainMs / 1000);
+            const mins = Math.floor(totalSec / 60);
+            const secs = totalSec % 60;
+            hostHintEl.className = "mt-1.5 px-2 py-1 rounded-lg bg-amber-500/15 border border-amber-400/35 text-[10px] font-extrabold text-amber-300 leading-snug";
+            hostHintEl.innerHTML = `<i class="fa-solid fa-hourglass-half mr-1"></i>Chủ Trì • Đổi phim tiếp sau ${mins}p ${secs}s`;
+          } else {
+            hostHintEl.className = "mt-1.5 px-2 py-1 rounded-lg bg-amber-500/15 border border-amber-400/35 text-[10px] font-extrabold text-amber-300 leading-snug";
+            hostHintEl.innerHTML = `<i class="fa-solid fa-crown mr-1"></i>Chủ Trì: Bấm phim để đổi ngay (30p/lần)`;
+          }
         } else {
           hostHintEl.className = "mt-1.5 text-[10px] font-bold text-slate-400 leading-snug";
           hostHintEl.textContent = "Bấm phim để gửi yêu cầu chiếu về Admin";
@@ -12711,6 +12750,7 @@
         subtitleOffsetSec: Number(state.subtitleOffsetSec) || 0,
         subtitleMode: state.subtitleMode || "vi",
         action,
+        lastMovieSwitchedAt: Number(state.lastHostSwitchByRoom?.[roomId] || latestRoomSyncState?.lastMovieSwitchedAt || 0),
         uid: state.uid,
         userName: state.userName,
         updatedAt: Date.now()
@@ -12720,6 +12760,11 @@
 
     function applyRemoteVideoSync(roomId, data, forceResync = false) {
       if (!data || state.currentRoomId !== roomId) return;
+      if (Number(data.lastMovieSwitchedAt || 0) > Number(state.lastHostSwitchByRoom?.[roomId] || 0)) {
+        if (!state.lastHostSwitchByRoom) state.lastHostSwitchByRoom = {};
+        state.lastHostSwitchByRoom[roomId] = Number(data.lastMovieSwitchedAt);
+        saveAppStateToStorage();
+      }
       const isMyOwnSync = data.uid === state.uid;
       if (!forceResync && isMyOwnSync) {
         // Nếu chính Chủ Trì F5 lại trang khi đang chiếu phim tự đổi -> vẫn khôi phục đúng phim từ sync RTDB
