@@ -12828,6 +12828,29 @@
         updatedAt: Date.now()
       };
       rtdbMod.set(rtdbMod.ref(rtdb, `sync/${roomId}`), payload).catch(() => {});
+
+      // Đảm bảo Sảnh chính (lobby_config/rooms/$roomId) luôn khớp với phim Chủ Trì đang phát
+      const lobbyRoom = state.lobbyConfigRooms?.[roomId];
+      if (room.movieTitle && (!lobbyRoom || lobbyRoom.movieTitle !== room.movieTitle || (room.videoUrl && lobbyRoom.videoUrl !== room.videoUrl))) {
+        const lobbySyncPayload = {
+          movieTitle: room.movieTitle,
+          status: "showing",
+          scheduledAt: 0,
+          youtubeId: room.youtubeId || "",
+          videoUrl: room.youtubeId ? "" : (room.videoUrl || ""),
+          poster: room.poster || lobbyRoom?.poster || "",
+          movieVersion: String(state.lastHostSwitchByRoom?.[roomId] || Date.now()),
+          updatedBy: `Chủ Trì ${state.userName || "Host"}`,
+          updatedByUid: state.uid,
+          isCustomStartZero: true,
+          updatedAt: Date.now()
+        };
+        if (!state.lobbyConfigRooms) state.lobbyConfigRooms = {};
+        state.lobbyConfigRooms[roomId] = { ...(lobbyRoom || {}), ...lobbySyncPayload };
+        rtdbMod.update(rtdbMod.ref(rtdb, `lobby_config/rooms/${roomId}`), lobbySyncPayload).catch(() => {});
+        renderHeroBillboard();
+        renderLobby();
+      }
     }
 
     function applyRemoteVideoSync(roomId, data, forceResync = false) {
