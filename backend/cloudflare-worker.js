@@ -574,6 +574,20 @@ async function handleHostKeyChatRequest(qTrim, body, env) {
   if (!wantsHostKey) return null;
 
   const rtdbBase = String(env?.FIREBASE_RTDB_URL || "https://cineverse-ea320-default-rtdb.asia-southeast1.firebasedatabase.app").replace(/\/+$/, "");
+
+  // Tự động tắt tính năng xin Key khi rạp đang bật chế độ Trả phí
+  try {
+    const payRes = await fetch(`${rtdbBase}/lobby_config/payment_mode.json`, { cache: "no-store" });
+    const payData = payRes.ok ? await payRes.json().catch(() => null) : null;
+    if (payData?.mode === "paid" || body?.paymentMode === "paid") {
+      return "Rạp hiện đang bật chế độ Trả phí nên tính năng xin Key Chủ Trì tự động tạm tắt. Vui lòng đặt vé/bao rạp qua VietQR hoặc liên hệ Chủ Rạp!";
+    }
+  } catch (_) {
+    if (body?.paymentMode === "paid") {
+      return "Rạp hiện đang bật chế độ Trả phí nên tính năng xin Key Chủ Trì tự động tạm tắt. Vui lòng đặt vé/bao rạp qua VietQR hoặc liên hệ Chủ Rạp!";
+    }
+  }
+
   const targetRoomId = extractTargetRoomIdForHostKey(qTrim, body);
 
   const hostPairs = await Promise.all(
