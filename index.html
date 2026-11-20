@@ -5242,7 +5242,8 @@
           playlistByRoom: state.playlistByRoom,
           bookingDraft: state.bookingDraft,
           bookedTicketsByRoom: state.bookedTicketsByRoom,
-          lastHostSwitchByRoom: state.lastHostSwitchByRoom || {}
+          lastHostSwitchByRoom: state.lastHostSwitchByRoom || {},
+          lobbyConfigRooms: state.lobbyConfigRooms || {}
         };
         localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(payload));
       } catch (e) {}
@@ -5305,6 +5306,9 @@
         }
         if (parsed.lastHostSwitchByRoom && typeof parsed.lastHostSwitchByRoom === "object") {
           state.lastHostSwitchByRoom = parsed.lastHostSwitchByRoom;
+        }
+        if (parsed.lobbyConfigRooms && typeof parsed.lobbyConfigRooms === "object") {
+          state.lobbyConfigRooms = parsed.lobbyConfigRooms;
         }
         if (parsed.bookingDraft && typeof parsed.bookingDraft === "object") {
           state.bookingDraft = { ...state.bookingDraft, ...parsed.bookingDraft };
@@ -9141,6 +9145,68 @@
       showToast(`Đã lưu "${finalTitle}" vào Kho Phim!`, "success");
     }
 
+    function syncHostMovieToLobbyAndSchedule(roomId, {
+      movieTitle = "",
+      youtubeId = "",
+      videoUrl = "",
+      poster = "",
+      movieVersion = "",
+      updatedAt = Date.now()
+    } = {}) {
+      if (!roomId || !movieTitle) return;
+      const curRoom = getEffectiveRoom(roomId);
+      const newVer = String(movieVersion || updatedAt || Date.now());
+      const roomLobbyPayload = {
+        movieTitle,
+        status: "showing",
+        scheduledAt: 0,
+        youtubeId: youtubeId || "",
+        videoUrl: youtubeId ? "" : (videoUrl || ""),
+        poster: poster || curRoom?.poster || "",
+        movieVersion: newVer,
+        updatedBy: `Chủ Trì ${state.userName || "Host"}`,
+        updatedByUid: state.uid,
+        isCustomStartZero: true,
+        updatedAt
+      };
+      if (!state.lobbyConfigRooms) state.lobbyConfigRooms = {};
+      state.lobbyConfigRooms[roomId] = {
+        ...(state.lobbyConfigRooms[roomId] || {}),
+        ...roomLobbyPayload
+      };
+      if (state.bookedTicketsByRoom?.[roomId]) {
+        state.bookedTicketsByRoom[roomId].movieTitle = movieTitle;
+        state.bookedTicketsByRoom[roomId].movieVersion = newVer;
+      }
+      const auditPayload = {
+        action: "Chủ Trì đổi phim",
+        roomId,
+        movieTitle,
+        actor: state.userName || "Host",
+        actorUid: state.uid,
+        createdAt: updatedAt
+      };
+      if (rtdb && rtdbMod) {
+        rtdbMod.update(rtdbMod.ref(rtdb, `lobby_config/rooms/${roomId}`), roomLobbyPayload).catch(() => {});
+        rtdbMod.push(rtdbMod.ref(rtdb, "lobby_config/admin_audit_logs"), auditPayload).catch(() => {});
+      } else {
+        fetch(`${RTDB_URL}/lobby_config/admin_audit_logs.json`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(auditPayload)
+        }).catch(() => {});
+      }
+      fetch(`${RTDB_URL}/lobby_config/rooms/${encodeURIComponent(roomId)}.json`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(roomLobbyPayload)
+      }).catch(() => {});
+
+      saveAppStateToStorage();
+      renderHeroBillboard();
+      renderLobby();
+    }
+
     function playVaultItemInRoom(vaultId, forceRoomId = null) {
       const item = state.vaultVideos.find(v => v.id === vaultId);
       if (!item) return;
@@ -9169,6 +9235,12 @@
       closeVideoVaultModal();
       enterRoom(targetRoomId);
       if (isIAmHost() && state.currentRoomId === targetRoomId) {
+        syncHostMovieToLobbyAndSchedule(targetRoomId, {
+          movieTitle: item.title,
+          youtubeId: item.youtubeId || "",
+          videoUrl: item.youtubeId ? "" : item.videoUrl,
+          poster: item.poster || getEffectiveRoom(targetRoomId).poster
+        });
         broadcastRoomVideoSync("switch_movie");
       }
       renderJJKEpisodeLists(vaultId);
@@ -9253,43 +9325,17 @@
         const newVer = String(switchTs);
         if (!state.lastHostSwitchByRoom) state.lastHostSwitchByRoom = {};
         state.lastHostSwitchByRoom[roomId] = switchTs;
-        if (state.bookedTicketsByRoom?.[roomId]) {
-          state.bookedTicketsByRoom[roomId].movieTitle = item.title;
-          state.bookedTicketsByRoom[roomId].movieVersion = newVer;
-        }
 
-        // Tự động cập nhật ngay lên Sảnh chính (lobby_config/rooms/$roomId) cho tất cả người dùng
-        const roomLobbyPayload = {
+        // Tự động cập nhật ngay lên Sảnh chính & Lịch chiếu (lobby_config/rooms/$roomId + audit log) cho tất cả người dùng
+        syncHostMovieToLobbyAndSchedule(roomId, {
           movieTitle: item.title,
-          status: "showing",
-          scheduledAt: 0,
           youtubeId: item.youtubeId || "",
           videoUrl: item.youtubeId ? "" : (item.videoUrl || ""),
           poster: posterUrl || curRoom?.poster || "",
           movieVersion: newVer,
-          updatedBy: `Chủ Trì ${state.userName || "Host"}`,
-          updatedByUid: state.uid,
-          isCustomStartZero: true,
           updatedAt: switchTs
-        };
-        if (!state.lobbyConfigRooms) state.lobbyConfigRooms = {};
-        state.lobbyConfigRooms[roomId] = {
-          ...(state.lobbyConfigRooms[roomId] || {}),
-          ...roomLobbyPayload
-        };
-        if (rtdb && rtdbMod) {
-          rtdbMod.update(rtdbMod.ref(rtdb, `lobby_config/rooms/${roomId}`), roomLobbyPayload).catch(() => {});
-        }
-        fetch(`${RTDB_URL}/lobby_config/rooms/${encodeURIComponent(roomId)}.json`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(roomLobbyPayload)
-        }).catch(() => {});
-
-        saveAppStateToStorage();
+        });
         renderTheaterLeftMovieList();
-        renderHeroBillboard();
-        renderLobby();
 
         // Đồng bộ tức thì phim mới tới toàn bộ khán giả trong phòng
         broadcastRoomVideoSync("switch_movie");
@@ -12069,6 +12115,14 @@
       setupRoomVideoPlayer(room);
       if (state.sidebarTab === "playlist") renderPlaylistQueue();
       if (state.sidebarTab === "trivia") renderTriviaPanel();
+      if (isIAmHost()) {
+        syncHostMovieToLobbyAndSchedule(state.currentRoomId, {
+          movieTitle: finalTitle,
+          youtubeId: ytId,
+          videoUrl: ytId ? "" : cleanUrl,
+          poster: room.poster || ""
+        });
+      }
       broadcastRoomVideoSync("source");
       showToast(`🎬 Đang chiếu: "${finalTitle}"!`, "success");
     }
@@ -12834,32 +12888,16 @@
       };
       rtdbMod.set(rtdbMod.ref(rtdb, `sync/${roomId}`), payload).catch(() => {});
 
-      // Đảm bảo Sảnh chính (lobby_config/rooms/$roomId) luôn khớp với phim Chủ Trì đang phát
+      // Đảm bảo Sảnh chính & Lịch chiếu (lobby_config/rooms/$roomId) luôn khớp với phim Chủ Trì đang phát
       const lobbyRoom = state.lobbyConfigRooms?.[roomId];
       if (room.movieTitle && (!lobbyRoom || lobbyRoom.movieTitle !== room.movieTitle || (room.videoUrl && lobbyRoom.videoUrl !== room.videoUrl))) {
-        const lobbySyncPayload = {
+        syncHostMovieToLobbyAndSchedule(roomId, {
           movieTitle: room.movieTitle,
-          status: "showing",
-          scheduledAt: 0,
           youtubeId: room.youtubeId || "",
           videoUrl: room.youtubeId ? "" : (room.videoUrl || ""),
           poster: room.poster || lobbyRoom?.poster || "",
-          movieVersion: String(state.lastHostSwitchByRoom?.[roomId] || Date.now()),
-          updatedBy: `Chủ Trì ${state.userName || "Host"}`,
-          updatedByUid: state.uid,
-          isCustomStartZero: true,
-          updatedAt: Date.now()
-        };
-        if (!state.lobbyConfigRooms) state.lobbyConfigRooms = {};
-        state.lobbyConfigRooms[roomId] = { ...(lobbyRoom || {}), ...lobbySyncPayload };
-        rtdbMod.update(rtdbMod.ref(rtdb, `lobby_config/rooms/${roomId}`), lobbySyncPayload).catch(() => {});
-        fetch(`${RTDB_URL}/lobby_config/rooms/${encodeURIComponent(roomId)}.json`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(lobbySyncPayload)
-        }).catch(() => {});
-        renderHeroBillboard();
-        renderLobby();
+          movieVersion: String(state.lastHostSwitchByRoom?.[roomId] || Date.now())
+        });
       }
     }
 
@@ -21299,8 +21337,33 @@
       });
     }
 
+    async function prefetchLobbyConfigRoomsOnBoot() {
+      try {
+        const res = await fetch(`${RTDB_URL}/lobby_config/rooms.json?t=${Date.now()}`, { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data || typeof data !== "object") return;
+        state.lobbyConfigRooms = data;
+        Object.keys(data).forEach((rid) => {
+          const cfg = data[rid];
+          if (cfg && state.bookedTicketsByRoom?.[rid]) {
+            if (cfg.movieTitle) state.bookedTicketsByRoom[rid].movieTitle = cfg.movieTitle;
+            if (cfg.movieVersion) state.bookedTicketsByRoom[rid].movieVersion = String(cfg.movieVersion);
+          }
+        });
+        saveAppStateToStorage();
+        renderHeroBillboard();
+        renderLobby();
+        if (state.currentRoomId) {
+          updateRoomHeaderUI();
+          renderTheaterLeftMovieList();
+        }
+      } catch (e) {}
+    }
+
     initCustomSelectMenus();
     if (window.__onCineverseSplashDone) { window.__onCineverseSplashDone(initAmbientTunaBackground); } else { initAmbientTunaBackground(); }
+    prefetchLobbyConfigRoomsOnBoot();
     initFirebase();
   </script>
 </body>
