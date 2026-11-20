@@ -8268,13 +8268,12 @@
     }
 
     function setupRoomVideoPlayer(room) {
+      stopRoomVideoPlayer();
       const videoEl = document.getElementById("html5-video-player");
       const ytWrapper = document.getElementById("youtube-wrapper");
       const upcomingOverlay = document.getElementById("upcoming-overlay");
       const discordOverlay = document.getElementById("discord-live-overlay");
       const seekContainer = document.getElementById("mp4-seek-container");
-
-      stopRoomVideoPlayer();
       resetPlayerControlButtons();
       syncCurrentRoomSubtitleOffset(room);
 
@@ -8458,6 +8457,11 @@
         videoEl.oncanplay = () => {
           if (videoEl.paused) tryAutoPlayRoomVideo();
         };
+        videoEl.onerror = () => {
+          if (videoEl.getAttribute("src")) {
+            showToast("⚠️ Không thể tải nguồn video mới, vui lòng kiểm tra lại kết nối hoặc chọn phim khác.", "warning");
+          }
+        };
         tryAutoPlayRoomVideo();
 
         videoEl.ontimeupdate = () => {
@@ -8495,13 +8499,20 @@
         discordVideo.classList.add("hidden");
       }
       if (videoEl) {
-        videoEl.pause();
+        try { videoEl.pause(); } catch (_) {}
         videoEl.onloadedmetadata = null;
         videoEl.oncanplay = null;
         videoEl.ontimeupdate = null;
-        videoEl.removeAttribute("src");
+        videoEl.onerror = null;
+        try { videoEl.removeAttribute("src"); } catch (_) {}
         try { videoEl.load(); } catch (_) {}
-        videoEl.classList.add("hidden");
+        const freshEl = document.createElement("video");
+        freshEl.id = "html5-video-player";
+        freshEl.className = "w-full h-full object-contain bg-black hidden";
+        freshEl.setAttribute("playsinline", "");
+        freshEl.playsInline = true;
+        freshEl.autoplay = true;
+        try { videoEl.replaceWith(freshEl); } catch (_) { videoEl.classList.add("hidden"); }
       }
       if (ytWrapper) {
         ytWrapper.innerHTML = "";
