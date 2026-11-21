@@ -278,6 +278,11 @@
       -webkit-mask-image: linear-gradient(0deg, transparent 0%, #000 22%, #000 100%);
       mask-image: linear-gradient(0deg, transparent 0%, #000 22%, #000 100%);
     }
+    @media (min-width: 1280px) {
+      #lobby-rooms-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      }
+    }
 
     #rophim-totop {
       position: fixed;
@@ -2473,13 +2478,13 @@
       <div class="ambient-mist-blob blob-amber"></div>
       <div class="ambient-mist-blob blob-rose"></div>
     </div>
-    <canvas id="ambient-tuna-canvas"></canvas>
+    <canvas id="ambient-tuna-canvas" style="display:none !important;"></canvas>
   </div>
 
   <!-- HEADER CHUNG (FLOATING IPHONE LIQUID GLASS CAPSULE) -->
-  <header class="sticky top-0 z-40 px-2.5 sm:px-5 pt-2.5 sm:pt-3 pb-1 pointer-events-none">
+  <header class="sticky top-0 z-40 px-2.5 sm:px-5 lg:px-6 pt-2.5 sm:pt-3 pb-1 pointer-events-none">
     <div id="ios-liquid-nav-bar"
-      class="ios-liquid-navbar pointer-events-auto max-w-7xl mx-auto rounded-[26px] sm:rounded-full px-3.5 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3">
+      class="ios-liquid-navbar pointer-events-auto w-full rounded-[26px] sm:rounded-full px-3.5 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3">
       <div class="relative z-10 flex items-center gap-2.5 sm:gap-3 cursor-pointer" onclick="window.appActions.closeHanoiCinemaFinder(); window.appActions.leaveRoom()">
         <img id="header-web-avatar" src="assets/web-logo.png" alt="CineVerse Lotte"
              class="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover shadow-lg border border-white/25 bg-black" />
@@ -2554,7 +2559,7 @@
   <!-- ========================================================= -->
   <!-- VIEW 1: SẢNH CHỜ 6 PHÒNG CHIẾU (LOBBY VIEW)               -->
   <!-- ========================================================= -->
-  <main id="lobby-view" class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 space-y-6">
+  <main id="lobby-view" class="flex-1 w-full px-3 sm:px-6 lg:px-8 pt-2 pb-8 space-y-6">
     <!-- NETFLIX HERO BILLBOARD SLIDER (TỰ ĐỘNG CHẠY GIỚI THIỆU CÁC PHIM ĐANG CHIẾU) -->
     <div id="netflix-billboard"
          onmouseenter="window.appActions.pauseHeroSlider(true)"
@@ -2737,7 +2742,7 @@
         <i class="fa-solid fa-clapperboard text-amber-300 mr-1.5" style="-webkit-text-fill-color:#ffd875;"></i>Phòng Chiếu Đang Hoạt Động
       </h2>
     </div>
-    <div id="lobby-rooms-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    <div id="lobby-rooms-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
 
     <!-- Nút Lên Đầu Trang kiểu RoPhim (#totop) -->
     <button id="rophim-totop" type="button" onclick="window.appActions.scrollToTopSmooth()"
@@ -3014,7 +3019,7 @@
   <!-- ========================================================= -->
   <!-- VIEW 2: BÊN TRONG PHÒNG CHIẾU LOTTE CINEMA (POV HÀNG F)   -->
   <!-- ========================================================= -->
-  <section id="room-view" class="hidden flex-1 max-w-[1620px] w-full mx-auto px-3 sm:px-4 py-3 space-y-3">
+  <section id="room-view" class="hidden flex-1 w-full px-2.5 sm:px-5 py-3 space-y-3">
 
     <!-- THANH ĐIỀU HƯỚNG & FLOATING DROPDOWN GỌN GÀNG TRÊN CÙNG -->
     <div class="relative z-40 dimmable-ui liquid-glass-card flex flex-wrap items-center justify-between gap-2 rounded-2xl px-3.5 py-2.5 shadow-xl">
@@ -21064,7 +21069,11 @@
       enforceMandatoryAuthGate();
     });
     function initAmbientTunaBackground() {
+      // Đã tắt hiệu ứng cá bơi theo yêu cầu người dùng
       const canvas = document.getElementById("ambient-tuna-canvas");
+      if (canvas) canvas.style.display = "none";
+      return;
+      /* disabled tuna animation */
       if (!canvas) return;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
