@@ -170,6 +170,59 @@
     /* ======================================================= */
     /* ROPHIM UI & HIỆU ỨNG THỊ GIÁC (AMBIENT BLUR, MASK, QTIP)*/
     /* ======================================================= */
+    body {
+      background-color: #191b24 !important;
+    }
+    #ambient-tuna-backdrop {
+      background: radial-gradient(circle at 50% 18%, rgba(47, 51, 70, 0.55), #191b24 76%) !important;
+    }
+    #netflix-billboard {
+      background: #202331 !important;
+      border-color: rgba(255, 216, 117, 0.16) !important;
+    }
+    .liquid-glass-card {
+      background: linear-gradient(180deg, rgba(40, 43, 58, 0.88), rgba(25, 27, 36, 0.96)) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    .rophim-tag-model {
+      background: #ffffff;
+      color: #191b24;
+      font-weight: 900;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 10px;
+      letter-spacing: 0.04em;
+    }
+    .rophim-tag-classic {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #f1f5f9;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .rophim-card-cta {
+      background: #2f3346 !important;
+      color: #ffd875 !important;
+      border: 1px solid rgba(255, 216, 117, 0.25) !important;
+    }
+    .lobby-zoom-card:hover .rophim-card-cta {
+      background: linear-gradient(39deg, #fecf59 0%, #fff1cc 100%) !important;
+      color: #191b24 !important;
+      border-color: transparent !important;
+    }
+    .rophim-rank-num {
+      font-style: italic;
+      font-weight: 900;
+      line-height: 1;
+      background: linear-gradient(39deg, #fecf59 0%, #fff1cc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.85));
+    }
     #ios-liquid-nav-bar {
       transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
     }
@@ -2550,16 +2603,15 @@
                preload="none"
                class="hidden absolute inset-0 w-full h-full object-cover opacity-75 transition-opacity duration-700"></video>
 
-        <!-- Lớp phủ Gradient đa hướng chuẩn giao diện Netflix -->
-        <div class="absolute inset-0 bg-gradient-to-r from-[#090809] via-[#090809]/85 to-transparent"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-[#090809] via-transparent to-black/40"></div>
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_80%_30%,transparent_25%,#090809_100%)] opacity-80"></div>
+        <!-- Lớp phủ Gradient mềm kiểu RoPhim để lộ Ambient Blur & chiều sâu poster -->
+        <div class="absolute inset-0 bg-gradient-to-r from-[#191b24]/95 via-[#191b24]/55 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#191b24] via-transparent to-[#191b24]/30"></div>
       </div>
 
       <!-- Thanh trạng thái trên cùng của Billboard -->
       <div class="relative z-10 px-6 sm:px-10 pt-6 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-2.5">
-          <span class="px-2.5 py-1 rounded bg-red-600 text-white font-black text-[11px] tracking-widest uppercase shadow-lg shadow-red-600/40">
+          <span class="px-2.5 py-1 rounded-md bg-amber-400/20 border border-amber-300/45 text-amber-300 font-black text-[11px] tracking-widest uppercase shadow-lg">
             CINEVERSE ORIGINAL
           </span>
           <span id="hero-room-badge" class="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-extrabold">
@@ -2587,20 +2639,20 @@
       <!-- Nội dung giới thiệu phim chính giữa (Trái: Thông tin phim Netflix | Phải: Carousel chọn nhanh phim) -->
       <div class="relative z-10 px-6 sm:px-10 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
         <div id="hero-content-col" class="lg:col-span-7 space-y-3.5 rophim-slide-enter">
-          <!-- Dòng Metadata chuẩn Netflix -->
-          <div class="flex flex-wrap items-center gap-2.5 text-xs font-bold">
-            <span id="hero-rank-badge" class="px-2 py-0.5 rounded bg-rose-600 text-white font-black text-[10px] uppercase tracking-wider">
+          <!-- Dòng Metadata kiểu RoPhim (.tag-model + .tag-classic) -->
+          <div class="flex flex-wrap items-center gap-2 text-xs font-bold">
+            <span id="hero-rank-badge" class="rophim-gold-btn px-2.5 py-0.5 rounded font-black text-[10px] uppercase tracking-wider">
               TOP 1 THỊNH HÀNH
             </span>
-            <span id="hero-match-score" class="text-emerald-400 font-extrabold">99% Phù hợp</span>
-            <span id="hero-year" class="text-slate-300">2026</span>
-            <span id="hero-quality-badge" class="px-1.5 py-0.5 rounded border border-white/30 text-[10px] text-slate-200 font-black">
+            <span id="hero-match-score" class="rophim-tag-classic text-emerald-300 font-extrabold">99% Phù hợp</span>
+            <span id="hero-year" class="rophim-tag-classic">2026</span>
+            <span id="hero-quality-badge" class="rophim-tag-model">
               4K IMAX
             </span>
-            <span class="px-1.5 py-0.5 rounded border border-amber-400/40 text-[10px] text-amber-300 font-bold">
+            <span class="rophim-tag-classic text-amber-200">
               VI / EN SUB
             </span>
-            <span id="hero-duration" class="text-slate-300 font-semibold">19:59</span>
+            <span id="hero-duration" class="rophim-tag-classic">19:59</span>
           </div>
 
           <!-- Tên bộ phim cỡ lớn -->
@@ -2619,11 +2671,11 @@
             <p><span class="text-slate-500 font-semibold">Thể loại:</span> <span id="hero-genre" class="text-amber-300 font-semibold">Hành động • Kỳ ảo • Quái vật Khổng lồ</span></p>
           </div>
 
-          <!-- Cụm nút hành động chuẩn Netflix + Bắt buộc Đặt Vé trước khi vào phòng -->
+          <!-- Cụm nút hành động kiểu RoPhim (Vàng Gold Gradient + Kính mờ) -->
           <div class="pt-2 flex flex-wrap items-center gap-3 relative z-20">
             <button type="button" onclick="window.appActions.openBookingModalForHero()" style="touch-action: manipulation;"
-              class="cv-smooth-btn px-5 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-[0_10px_30px_rgba(225,29,72,0.4)] transition transform hover:scale-[1.02] cursor-pointer">
-              <img src="./assets/web-logo.png" alt="CineVerse" class="w-5 h-5 rounded-full object-cover border border-white/40 bg-black shrink-0" />
+              class="cv-smooth-btn rophim-gold-btn px-6 py-3 rounded-full font-black text-xs sm:text-sm flex items-center gap-2.5 transition transform hover:scale-[1.03] cursor-pointer">
+              <i class="fa-solid fa-play text-sm"></i>
               <span>Đặt Vé & Chọn Ghế Ngay</span>
             </button>
 
@@ -6905,7 +6957,7 @@
         return;
       }
 
-      grid.innerHTML = rooms.map(room => {
+      grid.innerHTML = rooms.map((room, idx) => {
         const seats = state.seatsByRoom[room.id] || {};
         const count = Object.keys(seats).length;
         const maxCap = room.maxSeats || 48;
@@ -6942,9 +6994,12 @@
                 </div>
               </div>
 
-              <div class="absolute bottom-3 inset-x-3 pointer-events-none">
-                <p class="text-[11px] text-slate-300 font-semibold">${escapeHTML(room.genre)} • ${escapeHTML(room.duration)}</p>
-                <h3 class="text-base font-black text-white line-clamp-1">${escapeHTML(room.movieTitle)}</h3>
+              <div class="absolute bottom-3 inset-x-3 flex items-end gap-2.5 pointer-events-none">
+                <span class="rophim-rank-num text-3xl leading-none shrink-0">${idx + 1}</span>
+                <div class="min-w-0 flex-1">
+                  <p class="text-[11px] text-amber-200/85 font-semibold truncate">${escapeHTML(room.genre)} • ${escapeHTML(room.duration)}</p>
+                  <h3 class="text-base font-black text-white line-clamp-1">${escapeHTML(room.movieTitle)}</h3>
+                </div>
               </div>
             </div>
 
@@ -6952,10 +7007,10 @@
               <div class="space-y-1.5">
                 <div class="flex justify-between text-[11px] text-slate-400">
                   <span>Tỷ lệ lấp đầy ghế</span>
-                  <span class="text-white font-bold">${percent}% (${count} ghế có người)</span>
+                  <span class="text-amber-200 font-bold">${percent}% (${count} ghế có người)</span>
                 </div>
                 <div class="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
-                  <div class="h-full bg-rose-600" style="width:${percent}%"></div>
+                  <div class="h-full bg-gradient-to-r from-amber-400 to-yellow-200" style="width:${percent}%"></div>
                 </div>
               </div>
 
@@ -6977,8 +7032,8 @@
                   return `
                     <button type="button"
                       onclick="event.stopPropagation(); window.appActions.openBookingModal('${room.id}')"
-                      class="cv-smooth-btn cta-primary-btn w-full py-2.5 px-3 rounded-xl font-black text-[11px] transition cursor-pointer flex items-center justify-center gap-1.5">
-                      <img src="./assets/web-logo.png" alt="CineVerse" class="w-4 h-4 rounded-full object-cover border border-white/40 bg-black shrink-0" />
+                      class="cv-smooth-btn rophim-card-cta w-full py-2.5 px-3 rounded-xl font-black text-[11px] transition cursor-pointer flex items-center justify-center gap-1.5">
+                      <i class="fa-solid fa-play text-[10px]"></i>
                       <span>Đặt Vé & Chọn Ghế</span>
                     </button>
                   `;
