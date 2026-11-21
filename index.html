@@ -287,6 +287,32 @@
       }
     }
 
+    @media (max-width: 1023px) {
+      #hero-thumbs-strip {
+        display: flex !important;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 4px 2px;
+        scrollbar-width: none;
+      }
+      #hero-thumbs-strip::-webkit-scrollbar {
+        display: none;
+      }
+      #hero-thumbs-strip > button.lobby-zoom-tile {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        border-radius: 9999px !important;
+        padding: 0 !important;
+      }
+      #hero-thumbs-strip > button.lobby-zoom-tile > span,
+      #hero-thumbs-strip > button.lobby-zoom-tile > div {
+        display: none !important;
+      }
+    }
+
     #rophim-totop {
       position: fixed;
       right: 1.25rem;
@@ -2485,34 +2511,35 @@
   </div>
 
   <!-- HEADER CHUNG (FLOATING IPHONE LIQUID GLASS CAPSULE) -->
-  <header class="sticky top-0 z-40 px-2.5 sm:px-5 lg:px-6 pt-2.5 sm:pt-3 pb-1 pointer-events-none">
+  <header class="sticky top-0 z-40 px-2 sm:px-5 lg:px-6 pt-1.5 sm:pt-3 pb-1 pointer-events-none">
     <div id="ios-liquid-nav-bar"
-      class="ios-liquid-navbar pointer-events-auto w-full rounded-[26px] sm:rounded-full px-3.5 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3">
-      <div class="relative z-10 flex items-center gap-2.5 sm:gap-3 cursor-pointer" onclick="window.appActions.closeHanoiCinemaFinder(); window.appActions.leaveRoom()">
+      class="ios-liquid-navbar pointer-events-auto w-full rounded-2xl sm:rounded-full px-3 sm:px-5 py-1.5 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-3">
+      <div class="relative z-10 flex items-center gap-2 sm:gap-3 cursor-pointer min-w-0" onclick="window.appActions.closeHanoiCinemaFinder(); window.appActions.leaveRoom()">
         <img id="header-web-avatar" src="assets/web-logo.png" alt="CineVerse Lotte"
-             class="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover shadow-lg border border-white/25 bg-black" />
-        <div>
+             class="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover shadow-lg border border-white/25 bg-black shrink-0" />
+        <div class="min-w-0">
           <div class="flex items-center gap-2">
-            <span class="font-black text-base sm:text-lg tracking-tight text-white">CINEVERSE <span class="text-slate-200/90 font-extrabold">LOTTE</span></span>
-            <span class="ios-liquid-pill text-[9px] sm:text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full">Live 3D POV</span>
+            <span class="font-black text-sm sm:text-lg tracking-tight text-white truncate">CINEVERSE <span class="text-amber-300 font-extrabold">LOTTE</span></span>
+            <span class="hidden sm:inline-flex ios-liquid-pill text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full">Live 3D POV</span>
           </div>
           <p class="hidden sm:block text-[11px] text-slate-300/80">Rạp phim 3D trực tuyến • Xem chung đồng bộ • Chọn ghế & Vé NFT • Tìm rạp Hà Nội</p>
         </div>
       </div>
 
-      <div id="header-lobby-actions" class="relative z-10 flex flex-wrap items-center gap-1.5 sm:gap-2">
+      <div id="header-lobby-actions" class="relative z-10 flex items-center gap-1.5 sm:gap-2 shrink-0">
         <!-- Nút phụ Apple Liquid Glass: Tìm Rạp Hà Nội -->
         <button type="button" id="btn-open-hanoi-cinemas" onclick="window.appActions.openHanoiCinemaFinder()"
-          class="cv-smooth-btn ios-liquid-pill flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-2 rounded-full text-xs font-bold transition cursor-pointer">
+          class="cv-smooth-btn ios-liquid-pill flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold transition cursor-pointer">
           <i class="fa-solid fa-location-dot text-rose-400"></i>
-          <span>Tìm Rạp Hà Nội</span>
+          <span class="hidden md:inline">Tìm Rạp Hà Nội</span>
+          <span class="md:hidden hidden sm:inline">Rạp HN</span>
         </button>
 
         <!-- Nút phụ Apple Liquid Glass: Tủ Vé NFT & Ký Ức -->
         <button type="button" onclick="window.appActions.openMemoryCapsuleModal()"
-          class="cv-smooth-btn ios-liquid-pill flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-2 rounded-full text-xs font-bold transition cursor-pointer">
-          <i class="fa-solid fa-id-card-clip text-slate-200"></i>
-          <span>Tủ Vé NFT</span>
+          class="cv-smooth-btn ios-liquid-pill flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold transition cursor-pointer">
+          <i class="fa-solid fa-id-card-clip text-amber-300"></i>
+          <span class="hidden sm:inline">Tủ Vé NFT</span>
           <span id="capsule-count-badge" class="px-1.5 py-0.5 rounded-full bg-white/15 border border-white/20 text-[10px] font-black text-white">1</span>
         </button>
 
@@ -2526,10 +2553,10 @@
 
         <!-- Nút phụ Apple Liquid Glass: Tên khán giả -->
         <button type="button" onclick="window.appActions.openNameModal()"
-          class="cv-smooth-btn ios-liquid-pill flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-2 rounded-full text-xs font-bold transition cursor-pointer">
+          class="cv-smooth-btn ios-liquid-pill flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold transition cursor-pointer">
           <i class="fa-solid fa-circle-user text-slate-200"></i>
-          <span><strong id="header-username" class="text-white">Khán giả</strong></span>
-          <i class="fa-solid fa-pen text-[10px] text-slate-300/80"></i>
+          <span class="max-w-[72px] sm:max-w-none truncate"><strong id="header-username" class="text-white">Khán giả</strong></span>
+          <i class="fa-solid fa-pen text-[9px] sm:text-[10px] text-slate-300/80"></i>
         </button>
       </div>
     </div>
@@ -2567,7 +2594,7 @@
     <div id="netflix-billboard"
          onmouseenter="window.appActions.pauseHeroSlider(true)"
          onmouseleave="window.appActions.pauseHeroSlider(false)"
-         class="relative rounded-3xl overflow-hidden border border-white/15 bg-black min-h-[430px] sm:min-h-[480px] shadow-[0_25px_70px_rgba(0,0,0,0.95)] flex flex-col justify-between">
+         class="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-white/15 bg-black min-h-[360px] sm:min-h-[480px] shadow-[0_25px_70px_rgba(0,0,0,0.95)] flex flex-col justify-between">
 
       <!-- Lớp nền: Ambient Blur kiểu RoPhim + Hình Poster độ nét cao + Video Preview -->
       <div class="absolute inset-0 overflow-hidden bg-black">
@@ -2644,15 +2671,17 @@
             Godzilla vs. Kong (2021) - 1080p WEBRip
           </h1>
 
-          <!-- Mô tả cốt truyện hấp dẫn (Synopsis) -->
-          <p id="hero-synopsis" class="text-xs sm:text-sm text-slate-200 leading-relaxed line-clamp-2 sm:line-clamp-3 max-w-2xl drop-shadow">
+          <!-- Dòng phụ vàng Gold kiểu RoPhim (thể loại) -->
+          <p class="text-xs sm:text-sm text-amber-300 font-bold truncate" id="hero-genre">Hành động • Kỳ ảo • Quái vật Khổng lồ</p>
+
+          <!-- Mô tả cốt truyện (chỉ hiện từ màn hình vừa trở lên để Mobile thoáng sạch kiểu RoPhim) -->
+          <p id="hero-synopsis" class="hidden sm:line-clamp-3 text-sm text-slate-200 leading-relaxed max-w-2xl drop-shadow">
             Hai siêu quái vật huyền thoại Godzilla và Kong bước vào trận đại chiến chấn động thế giới, trong khi nhân loại tiến sâu vào Trái Đất Rỗng để khám phá nguồn gốc thật sự của các Titan.
           </p>
 
-          <!-- Diễn viên / Đạo diễn / Thể loại -->
-          <div class="text-xs text-slate-300 space-y-0.5">
-            <p class="hidden sm:block"><span class="text-slate-400 font-semibold">Nghệ sĩ / Kênh:</span> <strong id="hero-cast" class="text-slate-100">Panda Review, Jason Behr, Amanda Brooks</strong></p>
-            <p class="truncate"><span class="text-slate-400 font-semibold">Thể loại:</span> <span id="hero-genre" class="text-amber-300 font-semibold">Hành động • Kỳ ảo • Quái vật Khổng lồ</span></p>
+          <!-- Diễn viên / Kênh (chỉ hiện từ màn hình vừa trở lên) -->
+          <div class="hidden sm:block text-xs text-slate-300">
+            <p><span class="text-slate-400 font-semibold">Nghệ sĩ / Kênh:</span> <strong id="hero-cast" class="text-slate-100">Panda Review, Jason Behr, Amanda Brooks</strong></p>
           </div>
 
           <!-- Cụm nút hành động kiểu RoPhim (Vàng Gold Gradient + Kính mờ) -->
@@ -2682,9 +2711,9 @@
           </div>
         </div>
 
-        <!-- Cột phải: Khay Poster thu nhỏ (chỉ hiện trên Desktop >= lg để Mobile gọn sạch) -->
-        <div class="hidden lg:block lg:col-span-5 space-y-2">
-          <div class="flex items-center justify-between text-[11px] font-extrabold uppercase tracking-wider text-slate-300">
+        <!-- Cột phải: Chấm tròn Poster kiểu RoPhim trên Mobile / Khay Thumbnail trên Desktop -->
+        <div class="lg:col-span-5 space-y-2">
+          <div class="hidden lg:flex items-center justify-between text-[11px] font-extrabold uppercase tracking-wider text-slate-300">
             <span><i class="fa-solid fa-fire text-rose-500 mr-1.5"></i>Danh sách Phim Đang & Sắp Chiếu</span>
             <span id="hero-slide-counter" class="text-amber-400 font-mono">01 / 06</span>
           </div>
