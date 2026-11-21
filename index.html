@@ -1409,9 +1409,11 @@
       transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), max-width 0.45s ease, box-shadow 0.45s ease;
     }
     body.theater-dimmed #room-view {
-      max-width: 85vw !important;
+      max-width: 1440px !important;
+      width: 100% !important;
       margin-left: auto !important;
       margin-right: auto !important;
+      padding-top: 8px !important;
       transition: max-width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     }
     body.theater-dimmed .auditorium-wrapper {
@@ -1421,10 +1423,11 @@
       width: 100%;
       margin-left: auto;
       margin-right: auto;
+      padding-top: 10px !important;
       background:
-        radial-gradient(ellipse at 50% 22%, rgba(56, 189, 248, 0.08) 0%, rgba(2, 2, 5, 0.98) 54%, #000000 100%) !important;
-      border-color: #08080c !important;
-      box-shadow: inset 0 0 150px #000000, 0 0 90px #000000 !important;
+        radial-gradient(ellipse at 50% 18%, rgba(245, 197, 24, 0.08) 0%, rgba(11, 11, 15, 0.98) 54%, #050508 100%) !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+      box-shadow: inset 0 0 120px #000000, 0 0 80px #000000 !important;
     }
     body.theater-dimmed #theater-left-movies-aside {
       grid-column: 1 / -1 !important;
@@ -1440,23 +1443,35 @@
     }
     body.theater-dimmed .screen-stage-box {
       transform: none;
-      width: 100%;
+      width: 96%;
+      max-width: 1180px;
+      margin: 4px auto 0 !important;
       z-index: 35;
     }
     @media (min-width: 768px) {
       body.theater-dimmed #cinema-screen {
+        aspect-ratio: 19 / 9 !important;
+        max-height: 54vh;
+        box-shadow: 0 0 70px rgba(245, 197, 24, 0.16), 0 0 130px rgba(56, 189, 248, 0.16) !important;
+      }
+      body.theater-dimmed[data-screen-ratio="18-9"] #cinema-screen {
         aspect-ratio: 18 / 9 !important;
-        max-height: 78vh;
-        box-shadow: 0 0 90px rgba(56, 189, 248, 0.28), 0 0 150px rgba(244, 63, 94, 0.14) !important;
+        max-height: 56vh;
       }
       body.theater-dimmed #html5-video-player {
-        object-fit: contain !important;
-        object-position: center center !important;
+        object-fit: cover !important;
+        object-position: center bottom !important;
       }
       body.theater-dimmed .imax-curve-arch-bottom {
         height: 6px !important;
         opacity: 0.35;
       }
+    }
+    /* Khi thanh điều khiển hiện hoặc focus, dịch phụ đề riêng lên để không bị che */
+    #screen-stage-box:has(#cinema-control-bar:hover) #lyrics-overlay,
+    #screen-stage-box:has(#cinema-control-bar:focus-within) #lyrics-overlay,
+    body.controls-active #lyrics-overlay {
+      transform: translateY(-28px);
     }
     body.theater-dimmed .theater-sidebar-card {
       grid-column: 1 / -1 !important;
@@ -1466,30 +1481,30 @@
       margin-right: auto;
     }
     body.theater-dimmed .ceiling-canopy {
-      background: linear-gradient(180deg, #000000 0%, #040406 100%) !important;
-      border-bottom-color: #09090d !important;
-      box-shadow: inset 0 -10px 25px rgba(56, 189, 248, 0.06);
+      background: linear-gradient(180deg, #000000 0%, #07070b 100%) !important;
+      border-bottom-color: rgba(245, 197, 24, 0.18) !important;
+      box-shadow: inset 0 -10px 25px rgba(245, 197, 24, 0.06);
     }
     body.theater-dimmed .ceiling-spot {
-      background: #161312 !important;
-      box-shadow: none !important;
-      opacity: 0.12;
+      background: #3a2a12 !important;
+      box-shadow: 0 0 12px rgba(245, 197, 24, 0.25) !important;
+      opacity: 0.38;
     }
     body.theater-dimmed .ceiling-cove-led {
-      opacity: 0.14;
+      opacity: 0.3;
     }
     body.theater-dimmed .wall-left,
     body.theater-dimmed .wall-right {
-      background-color: #030305 !important;
-      border-color: #08080c !important;
-      filter: brightness(0.24) contrast(1.22);
+      background-color: #08080c !important;
+      border-color: rgba(245, 197, 24, 0.16) !important;
+      filter: brightness(0.55) contrast(1.12);
     }
     body.theater-dimmed .wall-sconce-beam {
-      opacity: 0.18;
+      opacity: 0.42;
     }
     body.theater-dimmed .cinema-curtain-l,
     body.theater-dimmed .cinema-curtain-r {
-      filter: brightness(0.45) contrast(1.15);
+      filter: brightness(0.58) contrast(1.12);
     }
     /* Biển báo lối thoát hiểm EXIT vẫn sáng xanh dịu đúng chuẩn rạp chiếu phim */
     body.theater-dimmed .exit-sign-badge {
@@ -1498,22 +1513,51 @@
     }
     /* Luồng tia máy chiếu IMAX Laser rõ nét hơn trong bóng tối */
     body.theater-dimmed .imax-projector-beam {
-      opacity: 0.98;
+      opacity: 0.88;
     }
-    /* Hàng ghế chìm vào bóng tối rạp, chỉ hắt nhẹ ánh sáng màn hình lên viền đỉnh tựa đầu */
+    /* Phối cảnh bậc thang Stadium hạ dần từ F (cao/gần nhất) -> A (thấp/sát màn) + chất liệu nhung vẫn rõ mã ghế khi tắt đèn */
     body.theater-dimmed .seat-row-tier {
-      background: linear-gradient(180deg, rgba(6, 6, 9, 0.92) 0%, rgba(2, 2, 4, 0.98) 100%) !important;
-      border-color: rgba(255, 255, 255, 0.03) !important;
+      background: linear-gradient(180deg, rgba(16, 14, 20, 0.88) 0%, rgba(9, 8, 13, 0.96) 100%) !important;
+      border-color: rgba(245, 197, 24, 0.14) !important;
     }
-    body.theater-dimmed .cinema-chair:not(.chair-mine):not(:hover) {
-      filter: brightness(0.28) saturate(0.7) contrast(1.15);
-      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.98), inset 0 1.5px 2px rgba(186, 230, 253, 0.25) !important;
+    body.theater-dimmed .cinema-chair:not(.chair-mine):not(.chair-pending):not(:hover) {
+      filter: brightness(0.74) contrast(1.08);
+      box-shadow:
+        0 10px 18px rgba(0, 0, 0, 0.95),
+        inset 0 2px 5px rgba(245, 197, 24, 0.22) !important;
     }
     body.theater-dimmed .cinema-chair.chair-mine {
-      filter: brightness(0.72);
+      filter: brightness(1.02);
+      border-color: #F5C518 !important;
+      box-shadow: 0 0 18px rgba(245, 197, 24, 0.55) !important;
+    }
+    .cinema-chair.chair-pending {
+      border: 2px solid #F5C518 !important;
+      box-shadow: 0 0 0 2px rgba(245, 197, 24, 0.45), 0 0 20px rgba(245, 197, 24, 0.72) !important;
+      filter: brightness(1.12) !important;
+      transform: translateY(-3px);
+      z-index: 24;
+    }
+    .cinema-chair.chair-occupied {
+      cursor: not-allowed !important;
     }
     body.theater-dimmed .cinema-chair:hover:not(.chair-occupied) {
-      filter: brightness(0.95);
+      filter: brightness(1.05);
+    }
+    #seating-map-scroll-wrap {
+      overflow-x: auto;
+      max-width: 100%;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 4px;
+    }
+    #seating-map {
+      min-width: 560px;
+    }
+    #floating-lights-on-btn {
+      display: none;
+    }
+    body.theater-dimmed #floating-lights-on-btn {
+      display: inline-flex;
     }
     /* Đèn LED xanh dẫn đường bậc cầu thang sáng nổi bật khi tắt đèn rạp */
     body.theater-dimmed .led-dot {
@@ -4575,6 +4619,10 @@
                       class="hidden px-2 py-1 rounded-lg bg-stone-900/90 border border-white/15 text-[10px] font-mono text-slate-300 cursor-pointer" title="Trạng thái kết nối Mic WebRTC (Bấm để mở khóa loa nếu bị trình duyệt chặn)">
                       ICE: --
                     </button>
+                    <button type="button" id="btn-screen-ratio-toggle" onclick="window.appActions.toggleDimmedScreenRatio()"
+                      class="cv-smooth-btn liquid-glass-pill px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer" title="Chuyển tỷ lệ màn hình cong khi tắt đèn (19:9 / 18:9)">
+                      <i class="fa-solid fa-tv mr-1 text-amber-300"></i><span id="screen-ratio-label">19:9</span>
+                    </button>
                     <button type="button" onclick="window.appActions.toggleFullscreen()"
                       class="cv-smooth-btn liquid-glass-pill px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer" title="Phóng to toàn màn hình">
                       <i class="fa-solid fa-expand"></i>
@@ -4795,8 +4843,43 @@
             </div>
           </div>
 
-          <!-- SƠ ĐỒ 6 HÀNG GHẾ TỪ A ĐẾN F (CỐ ĐỊNH 48 GHẾ, CLICK NHẠY BÉN 100%) -->
-          <div id="seating-map" class="space-y-2.5 pt-1 pb-1"></div>
+          <!-- Nút nổi Bật đèn rạp luôn dễ tìm khi đang ở chế độ Tắt đèn -->
+          <button type="button" id="floating-lights-on-btn" onclick="window.appActions.toggleDimLights()"
+            class="fixed top-16 right-4 z-50 px-3.5 py-2 rounded-full font-extrabold text-xs items-center gap-1.5 shadow-2xl cursor-pointer"
+            style="background:#F5C518;color:#0B0B0F;border:1px solid #FFE270;">
+            <i class="fa-solid fa-lightbulb"></i>
+            <span>Bật đèn rạp</span>
+          </button>
+
+          <!-- SƠ ĐỒ 6 HÀNG GHẾ TỪ A ĐẾN F (Cuộn ngang riêng trên mobile để từng ghế đủ lớn dễ chạm) -->
+          <div id="seating-map-scroll-wrap">
+            <div id="seating-map" class="space-y-2.5 pt-1 pb-1"></div>
+          </div>
+
+          <!-- Thanh xác nhận đổi ghế trong phòng (chỉ hiện khi chọn ghế mới để đổi) -->
+          <div id="inroom-seat-confirm-bar" class="hidden rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-3 shadow-2xl"
+            style="background:#16161D;border:1px solid rgba(245,197,24,0.55);">
+            <div class="flex items-center gap-2.5 text-xs">
+              <span class="px-2.5 py-1 rounded-lg font-black" style="background:#F5C518;color:#0B0B0F;" id="inroom-pending-seat-badge">B4</span>
+              <div>
+                <p class="font-extrabold text-white">Đang chọn đổi sang ghế <strong id="inroom-pending-seat-text" style="color:#F5C518;">B4</strong></p>
+                <p class="text-[11px]" style="color:#A1A1AA;">Ghế hiện tại chỉ cập nhật sau khi bạn bấm xác nhận</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="window.appActions.cancelPendingRoomSeatChange()"
+                class="px-3.5 py-2 rounded-xl text-xs font-bold text-white cursor-pointer"
+                style="background:#0B0B0F;border:1px solid rgba(255,255,255,0.2);">
+                Hủy chọn
+              </button>
+              <button type="button" id="btn-confirm-inroom-seat" onclick="window.appActions.confirmPendingRoomSeatChange()"
+                class="px-4 py-2 rounded-xl text-xs font-black cursor-pointer flex items-center gap-1.5"
+                style="background:#F5C518;color:#0B0B0F;">
+                <span>Xác nhận đổi ghế</span>
+                <i class="fa-solid fa-arrow-right text-[11px]"></i>
+              </button>
+            </div>
+          </div>
 
           <!-- Chỉ dẫn góc nhìn hàng ghế F -->
           <div class="dimmable-ui text-center text-[11px] text-slate-400 font-semibold pt-0.5">
@@ -9270,9 +9353,72 @@
       }
     }
 
+    function toggleDimmedScreenRatio() {
+      const next = state.dimmedScreenRatio === "18-9" ? "19-9" : "18-9";
+      state.dimmedScreenRatio = next;
+      document.body.setAttribute("data-screen-ratio", next);
+      const lbl = document.getElementById("screen-ratio-label");
+      if (lbl) lbl.textContent = next === "18-9" ? "18:9" : "19:9";
+      showToast(`Đã chuyển tỷ lệ màn hình cong sang ${next === "18-9" ? "18:9" : "19:9"}`, "info");
+      playSeatClickSFX();
+    }
+
+    function cancelPendingRoomSeatChange() {
+      state.pendingRoomSeatChange = "";
+      document.getElementById("inroom-seat-confirm-bar")?.classList.add("hidden");
+      renderSeatingMap();
+    }
+
+    function confirmPendingRoomSeatChange() {
+      if (!state.currentRoomId || !state.pendingRoomSeatChange) return;
+      const roomId = state.currentRoomId;
+      const targetSeat = state.pendingRoomSeatChange;
+      const roomSeats = state.seatsByRoom[roomId] || {};
+      const occ = roomSeats[targetSeat];
+      if (occ && occ.uid !== state.uid) {
+        state.pendingRoomSeatChange = "";
+        document.getElementById("inroom-seat-confirm-bar")?.classList.add("hidden");
+        renderSeatingMap();
+        showToast(`❌ Ghế ${targetSeat} vừa bị ${occ.userName || "người khác"} lấy! Vui lòng chọn ghế khác.`, "error");
+        return;
+      }
+      state.pendingRoomSeatChange = "";
+      document.getElementById("inroom-seat-confirm-bar")?.classList.add("hidden");
+      assignSeat(roomId, targetSeat, true);
+    }
+
     function handleSeatClick(seatId) {
       if (!state.currentRoomId || !seatId) return;
-      assignSeat(state.currentRoomId, seatId, true);
+      const roomId = state.currentRoomId;
+      const roomSeats = state.seatsByRoom[roomId] || {};
+      const occ = roomSeats[seatId];
+      const mySeat = getMySeatInRoom(roomId);
+      if (occ && occ.uid !== state.uid) {
+        showToast(`✕ Ghế ${seatId} đã có ${occ.userName || "người khác"} ngồi! Không thể chọn.`, "error");
+        return;
+      }
+      // Bấm vào đúng ghế hiện tại của mình -> hủy chọn đổi ghế nếu đang chọn
+      if (mySeat && seatId === mySeat) {
+        cancelPendingRoomSeatChange();
+        showToast(`Bạn đang ngồi tại ghế ${mySeat}.`, "info");
+        return;
+      }
+      // Chọn ghế mới để đổi (2 bước: chọn -> xác nhận)
+      state.pendingRoomSeatChange = state.pendingRoomSeatChange === seatId ? "" : seatId;
+      const bar = document.getElementById("inroom-seat-confirm-bar");
+      if (bar) {
+        if (state.pendingRoomSeatChange) {
+          const b1 = document.getElementById("inroom-pending-seat-badge");
+          const b2 = document.getElementById("inroom-pending-seat-text");
+          if (b1) b1.textContent = state.pendingRoomSeatChange;
+          if (b2) b2.textContent = state.pendingRoomSeatChange;
+          bar.classList.remove("hidden");
+        } else {
+          bar.classList.add("hidden");
+        }
+      }
+      renderSeatingMap();
+      playSeatClickSFX();
     }
 
     function standUpFromSeat() {
@@ -9309,6 +9455,15 @@
       const roomId = state.currentRoomId || "room-1";
       const roomSeats = state.seatsByRoom[roomId] || {};
       const mySeat = getMySeatInRoom(roomId);
+      if (state.pendingRoomSeatChange) {
+        const pendingOcc = roomSeats[state.pendingRoomSeatChange];
+        if (pendingOcc && pendingOcc.uid !== state.uid) {
+          const lost = state.pendingRoomSeatChange;
+          state.pendingRoomSeatChange = "";
+          document.getElementById("inroom-seat-confirm-bar")?.classList.add("hidden");
+          showToast(`❌ Ghế ${lost} vừa bị ${pendingOcc.userName || "người khác"} lấy! Vui lòng chọn ghế khác.`, "error");
+        }
+      }
 
       // Cập nhật huy hiệu ghế của bạn
       const badge = document.getElementById("my-seat-badge");
@@ -9417,6 +9572,10 @@
           }
           if (isMine) chairClass += " chair-mine";
           else if (isOccupied) chairClass += " chair-occupied";
+          const isPending = Boolean(state.pendingRoomSeatChange && state.pendingRoomSeatChange === seatId && !isOccupied && !isMine);
+          if (isPending) {
+            chairClass += " chair-pending";
+          }
           if (occupant && typeof speakingUids !== "undefined" && speakingUids.has(occupant.uid)) {
             chairClass += " speaking-active";
           }
@@ -9426,11 +9585,13 @@
           const bubble = state.seatBubbles[bubbleKey];
           const hasValidBubble = bubble && bubble.expiresAt > now;
 
-          const tierLabel = isCouple ? "Sweetbox" : isVIP ? "VIP" : "Trống";
+          const tierLabel = isPending ? "Đổi ghế?" : (isCouple ? "Sweetbox" : isVIP ? "VIP" : "Trống");
 
           return `
             <button type="button"
                     data-seat-id="${seatId}"
+                    aria-disabled="${isOccupied ? "true" : "false"}"
+                    aria-pressed="${isMine || isPending ? "true" : "false"}"
                     ${occupant ? `data-occupant-uid="${escapeHTML(occupant.uid)}"` : ""}
                     class="${chairClass}">
               <span class="armrest-l"><span class="cupholder-ring"></span></span>
@@ -9447,7 +9608,7 @@
 
               <!-- Tựa đầu ghế da khâu nổi + Biển số ghế kim loại -->
               <div class="chair-headrest">
-                <span class="chair-seat-plate">${seatId}</span>
+                <span class="chair-seat-plate">${isOccupied ? '✕ ' : isMine ? '✓ ' : ''}${seatId}</span>
               </div>
 
               <!-- Thân lưng ghế da có múi khâu & bóng dáng người ngồi -->
@@ -23015,6 +23176,9 @@
       clearLobbyRoomSearch,
       setHeroPovZone,
       toggleRoomFocusMode,
+      toggleDimmedScreenRatio,
+      cancelPendingRoomSeatChange,
+      confirmPendingRoomSeatChange,
       prevHeroSlide,
       pauseHeroSlider,
       toggleHeroVideoMute,
