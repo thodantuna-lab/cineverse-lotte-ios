@@ -206,7 +206,9 @@
     #hero-content-col {
       width: 100%;
       position: relative;
-      z-index: 10;
+      z-index: 20;
+      margin-top: auto;
+      padding: 2.75rem 1rem 0.5rem;
     }
     .cv-hero-title {
       font-family: 'Inter', 'Roboto', sans-serif;
@@ -412,10 +414,12 @@
       }
       #hero-content-col {
         position: absolute !important;
-        left: 3%;
-        bottom: 8%;
-        max-width: 45%;
-        z-index: 10;
+        left: 3% !important;
+        bottom: 8% !important;
+        max-width: 45% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        z-index: 20 !important;
       }
       .cv-hero-title {
         font-size: clamp(36px, 2.75vw, 42px);
@@ -3007,61 +3011,59 @@
         <i class="fa-solid fa-volume-xmark text-xs"></i>
       </button>
 
-      <!-- Khối thông tin bên trái (Desktop: position absolute left 3% bottom 8% max-width 45%) -->
-      <div class="hero-main-grid relative z-10 mt-auto px-4 sm:px-8 pb-4 pt-12 lg:p-0 lg:static">
-        <div id="hero-content-col" class="rophim-slide-enter">
-          <!-- Tên phim 36px-42px Bold, tự xuống 2 dòng tự nhiên -->
-          <h1 id="hero-movie-title" class="cv-hero-title">
-            Godzilla vs. Kong (2021)
-          </h1>
+      <!-- Khối thông tin bên trái — con trực tiếp của #netflix-billboard (Desktop: left 3% bottom 8% max-width 45%) -->
+      <div id="hero-content-col" class="rophim-slide-enter">
+        <!-- Tên phim 36px-42px Bold, tự xuống 2 dòng tự nhiên -->
+        <h1 id="hero-movie-title" class="cv-hero-title">
+          Godzilla vs. Kong (2021)
+        </h1>
 
-          <!-- Hàng 1: Metadata Badges 24px 1 hàng ngang -->
-          <div class="cv-hero-meta-row">
-            <span id="hero-room-badge" class="cv-hero-meta-gold">
-              <span style="color:#F5C518">Phòng 01</span>
-              <span>• Đang chiếu</span>
-            </span>
-            <span id="hero-age-rating" class="cv-hero-meta-outline">T16+</span>
-            <span id="hero-year" class="cv-hero-meta-outline">2021</span>
-            <span id="hero-duration" class="cv-hero-meta-outline">1h 53m</span>
-            <span id="hero-live-viewers" class="hidden sm:inline-flex cv-hero-meta-outline gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full animate-ping" style="background:#E50914"></span>
-              <span>0/48 khán giả</span>
-            </span>
-          </div>
+        <!-- Hàng 1: Metadata Badges 24px 1 hàng ngang -->
+        <div class="cv-hero-meta-row">
+          <span id="hero-room-badge" class="cv-hero-meta-gold">
+            <span style="color:#F5C518">Phòng 01</span>
+            <span>• Đang chiếu</span>
+          </span>
+          <span id="hero-age-rating" class="cv-hero-meta-outline">T16+</span>
+          <span id="hero-year" class="cv-hero-meta-outline">2021</span>
+          <span id="hero-duration" class="cv-hero-meta-outline">1h 53m</span>
+          <span id="hero-live-viewers" class="hidden sm:inline-flex cv-hero-meta-outline gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full animate-ping" style="background:#E50914"></span>
+            <span>0/48 khán giả</span>
+          </span>
+        </div>
 
-          <!-- Hàng 2: Genre Tags 1 hàng ngang -->
-          <div id="hero-genre-pills" class="cv-hero-genre-row"></div>
-          <span id="hero-genre" class="hidden"></span>
-          <span id="hero-quality-badge" class="hidden"></span>
-          <span id="hero-rank-badge" class="hidden"></span>
-          <span id="hero-match-score" class="hidden"></span>
+        <!-- Hàng 2: Genre Tags 1 hàng ngang -->
+        <div id="hero-genre-pills" class="cv-hero-genre-row"></div>
+        <span id="hero-genre" class="hidden"></span>
+        <span id="hero-quality-badge" class="hidden"></span>
+        <span id="hero-rank-badge" class="hidden"></span>
+        <span id="hero-match-score" class="hidden"></span>
 
-          <!-- Hàng 3: Tóm tắt 3 dòng (#E0E0E0, 14px) -->
-          <p id="hero-synopsis" class="hidden sm:block cv-hero-synopsis">
-            Hai siêu quái vật huyền thoại Godzilla và Kong bước vào trận đại chiến chấn động thế giới, trong khi nhân loại tiến sâu vào Trái Đất Rỗng để khám phá nguồn gốc thật sự của các Titan.
-          </p>
+        <!-- Hàng 3: Tóm tắt 3 dòng (#E0E0E0, 14px) -->
+        <p id="hero-synopsis" class="hidden sm:block cv-hero-synopsis">
+          Hai siêu quái vật huyền thoại Godzilla và Kong bước vào trận đại chiến chấn động thế giới, trong khi nhân loại tiến sâu vào Trái Đất Rỗng để khám phá nguồn gốc thật sự của các Titan.
+        </p>
 
-          <!-- Hàng 4: Nút Play tròn 66px (#F6D365) + Viên thuốc đôi [Heart/Info | Xem Phim] -->
-          <div class="cv-hero-actions">
-            <button type="button" onclick="window.appActions.openBookingModalForHero()" style="touch-action: manipulation;"
-              class="cv-hero-play-circle"
-              title="Đặt Vé &amp; Chọn Ghế Ngay">
-              <i class="fa-solid fa-play" style="font-size:20px;color:#1E2029;margin-left:3px;"></i>
+        <!-- Hàng 4: Nút Play tròn 66px (#F6D365) + Viên thuốc đôi [Heart/Info | Xem Phim] -->
+        <div class="cv-hero-actions">
+          <button type="button" onclick="window.appActions.openBookingModalForHero()" style="touch-action: manipulation;"
+            class="cv-hero-play-circle"
+            title="Đặt Vé &amp; Chọn Ghế Ngay">
+            <i class="fa-solid fa-play" style="font-size:20px;color:#1E2029;margin-left:3px;"></i>
+          </button>
+
+          <div class="cv-hero-pill-group">
+            <button type="button" onclick="window.appActions.openHeroDetailModal()"
+              class="cv-hero-pill-icon-btn"
+              title="Chi tiết phim">
+              <i class="fa-solid fa-heart text-sm lg:text-base"></i>
             </button>
-
-            <div class="cv-hero-pill-group">
-              <button type="button" onclick="window.appActions.openHeroDetailModal()"
-                class="cv-hero-pill-icon-btn"
-                title="Chi tiết phim">
-                <i class="fa-solid fa-heart text-sm lg:text-base"></i>
-              </button>
-              <span class="cv-hero-pill-divider"></span>
-              <button type="button" onclick="window.appActions.enterHeroRoomNow()" style="touch-action: manipulation;"
-                class="cv-hero-pill-text-btn">
-                <span>Xem Phim</span>
-              </button>
-            </div>
+            <span class="cv-hero-pill-divider"></span>
+            <button type="button" onclick="window.appActions.enterHeroRoomNow()" style="touch-action: manipulation;"
+              class="cv-hero-pill-text-btn">
+              <span>Xem Phim</span>
+            </button>
           </div>
         </div>
       </div>
@@ -3072,7 +3074,7 @@
       </div>
 
       <!-- Thanh tiến trình tự động chuyển Slide bên dưới Billboard -->
-      <div class="relative z-10 w-full h-1 bg-white/10 overflow-hidden">
+      <div class="absolute inset-x-0 bottom-0 z-20 w-full h-1 bg-white/10 overflow-hidden">
         <div id="hero-progress-bar" class="h-full cv-progress-red netflix-progress-fill"></div>
       </div>
     </div>
