@@ -1109,97 +1109,6 @@
       border-left: 2px solid #352b27;
     }
 
-    /* ======================================================= */
-    /* DYNAMIC AMBIENT SCREEN GLOW (3-LAYER 3D THEATER LIGHTING) */
-    /* ======================================================= */
-    #theater-room {
-      --ambient-r: 255;
-      --ambient-g: 190;
-      --ambient-b: 120;
-      --ambient-intensity: 0.25;
-      position: relative;
-    }
-    #theater-room::before {
-      content: "";
-      position: absolute;
-      inset: -16px;
-      z-index: 2;
-      pointer-events: none;
-      mix-blend-mode: screen;
-      background: radial-gradient(
-        ellipse 82% 52% at 50% 24%,
-        rgba(var(--ambient-r), var(--ambient-g), var(--ambient-b), calc(var(--ambient-intensity) * 0.36)) 0%,
-        transparent 72%
-      );
-      transition: background 0.6s ease, opacity 0.6s ease;
-    }
-    #theater-room.ambient-glow-off::before {
-      opacity: 0;
-    }
-    .theater-screen-halo {
-      position: absolute;
-      inset: -24% -16% -22% -16%;
-      z-index: 0;
-      pointer-events: none;
-      background: radial-gradient(
-        ellipse at center,
-        rgba(var(--ambient-r), var(--ambient-g), var(--ambient-b), var(--ambient-intensity)) 0%,
-        transparent 70%
-      );
-      filter: blur(38px);
-      transition: background 0.6s ease, box-shadow 0.6s ease, filter 0.6s ease, opacity 0.6s ease;
-    }
-    #theater-room:not(.ambient-glow-off) .lotte-screen-frame {
-      box-shadow:
-        0 28px 65px rgba(0, 0, 0, 0.98),
-        0 0 85px 14px rgba(var(--ambient-r), var(--ambient-g), var(--ambient-b), calc(var(--ambient-intensity) * 0.72)),
-        inset 0 0 32px rgba(0, 0, 0, 0.95) !important;
-      transition: box-shadow 0.6s ease;
-    }
-    #theater-room.ambient-glow-off .theater-screen-halo {
-      opacity: 0;
-    }
-    #theater-room .wall-left,
-    #theater-room .wall-right,
-    #theater-room .ceiling-canopy {
-      transition: background 0.6s ease, box-shadow 0.6s ease, filter 0.6s ease;
-    }
-    #theater-room .wall-left::after,
-    #theater-room .wall-right::after,
-    #theater-room .ceiling-canopy::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      mix-blend-mode: screen;
-      transition: background 0.6s ease, opacity 0.6s ease;
-    }
-    #theater-room .wall-left::after {
-      background: linear-gradient(90deg, rgba(var(--ambient-r), var(--ambient-g), var(--ambient-b), calc(var(--ambient-intensity) * 0.78)) 0%, transparent 94%);
-    }
-    #theater-room .wall-right::after {
-      background: linear-gradient(270deg, rgba(var(--ambient-r), var(--ambient-g), var(--ambient-b), calc(var(--ambient-intensity) * 0.78)) 0%, transparent 94%);
-    }
-    #theater-room .ceiling-canopy::after {
-      background: radial-gradient(ellipse at 50% 100%, rgba(var(--ambient-r), var(--ambient-g), var(--ambient-b), calc(var(--ambient-intensity) * 0.65)) 0%, transparent 74%);
-    }
-    #theater-room.ambient-glow-off .wall-left::after,
-    #theater-room.ambient-glow-off .wall-right::after,
-    #theater-room.ambient-glow-off .ceiling-canopy::after {
-      opacity: 0;
-    }
-    #theater-room:not(.ambient-glow-off) .seat-row-tier[data-row="A"] .chair-headrest,
-    #theater-room:not(.ambient-glow-off) .seat-row-tier[data-row="B"] .chair-headrest,
-    #theater-room:not(.ambient-glow-off) .seat-row-tier[data-row="C"] .chair-headrest,
-    #theater-room:not(.ambient-glow-off) .seat-row-tier[data-row="D"] .chair-headrest,
-    #theater-room:not(.ambient-glow-off) .seat-row-tier[data-row="E"] .chair-headrest {
-      box-shadow:
-        0 3px 6px rgba(0, 0, 0, 0.75),
-        0 -3px 14px rgba(var(--ambient-r), var(--ambient-g), var(--ambient-b), calc(var(--ambient-intensity) * 0.85)),
-        inset 0 1.5px 5px rgba(var(--ambient-r), var(--ambient-g), var(--ambient-b), calc(var(--ambient-intensity) * 0.55)) !important;
-      transition: box-shadow 0.6s ease, filter 0.6s ease;
-    }
-
     .wall-sconce {
       position: relative;
       width: 10px;
@@ -3744,7 +3653,6 @@
 
       <!-- CỘT GIỮA (7/12, mở rộng 9/12 trong Phòng Stream): KHÁN PHÒNG LOTTE CINEMA NHÌN TỪ HÀNG F GIỮA RẠP -->
       <div id="theater-center-auditorium" class="lg:col-span-7 order-1 lg:order-2 auditorium-wrapper rounded-3xl p-3 sm:p-5 space-y-2.5">
-        <div id="theater-room" class="space-y-2.5">
 
         <!-- KIẾN TRÚC RẠP PHIM NHÌN TỪ HÀNG F -->
         <div class="relative z-20 pt-1 pb-1">
@@ -3789,9 +3697,8 @@
           </div>
 
           <!-- KHUNG MÀN HÌNH CONG LÒNG CHẢO IMAX 70MM "THE ODYSSEY" -->
-          <div id="screen-stage-box" class="screen-stage-box relative">
-            <div id="theater-screen-halo" class="theater-screen-halo" aria-hidden="true"></div>
-            <div class="lotte-screen-frame relative z-10">
+          <div id="screen-stage-box" class="screen-stage-box">
+            <div class="lotte-screen-frame">
               <div class="imax-wing-l"></div>
               <div class="imax-wing-r"></div>
               <span id="cinema-screen-placeholder" class="hidden"></span>
@@ -3843,7 +3750,7 @@
                 </button>
 
                 <!-- 1. Trình phát Video HTML5 (.mp4 / file từ máy) -->
-                <video id="html5-video-player" crossorigin="anonymous" class="w-full h-full object-contain bg-black hidden" autoplay playsinline></video>
+                <video id="html5-video-player" class="w-full h-full object-contain bg-black hidden" autoplay playsinline></video>
 
                 <!-- 2. Trình phát YouTube IFrame -->
                 <div id="youtube-wrapper" class="w-full h-full hidden"></div>
@@ -3978,10 +3885,6 @@
                     <button type="button" onclick="window.appActions.toggleSubtitleSettingsPanel()" id="btn-sub-settings"
                       class="cv-smooth-btn liquid-glass-pill px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer" title="Tùy chỉnh vị trí, cỡ chữ & AI Phụ đề">
                       <i class="fa-solid fa-sliders mr-1 text-slate-300"></i>Phụ đề & AI
-                    </button>
-                    <button type="button" id="btn-ambient-glow-bar" onclick="window.appActions.toggleAmbilight()"
-                      class="cv-smooth-btn liquid-glass-pill px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer flex items-center gap-1" title="Bật/Tắt ánh sáng phản chiếu màn hình lên rạp 3D">
-                      <i class="fa-solid fa-sun text-amber-300"></i><span>Ánh sáng rạp: BẬT</span>
                     </button>
                     <button type="button" id="btn-sync-live" onclick="window.appActions.syncLiveTime()"
                       class="cv-smooth-btn liquid-glass-pill px-2.5 py-1.5 rounded-xl text-emerald-300 font-bold transition cursor-pointer" title="Đồng bộ thời gian chiếu với phòng">
@@ -4223,7 +4126,6 @@
             <i class="fa-solid fa-sparkles mr-1 text-rose-400"></i>
             Khán phòng bậc thang Stadium 6 hàng ghế da thật (A–F • 48 chỗ) • Phụ đề chỉ hiện đúng lúc nhân vật cất tiếng nói
           </div>
-        </div>
         </div>
       </div>
 
@@ -12348,98 +12250,44 @@
       saveAppStateToStorage();
     }
 
-    // Dynamic Ambient Screen Glow: Offscreen 8x8 Video Color Sampler (200ms) + 3-Layer 3D Theater Lighting
+    // Đèn Ambilight hắt sáng trần rạp và màn hình theo nhịp phim
     let ambilightInterval = null;
-    let __ambientSamplerCanvas = null;
-    let __ambientSamplerCtx = null;
-
-    function setTheaterAmbientVars(r, g, b, intensity) {
-      const roomEl = document.getElementById("theater-room");
-      if (!roomEl) return;
-      roomEl.style.setProperty("--ambient-r", String(Math.round(r)));
-      roomEl.style.setProperty("--ambient-g", String(Math.round(g)));
-      roomEl.style.setProperty("--ambient-b", String(Math.round(b)));
-      roomEl.style.setProperty("--ambient-intensity", Number(intensity).toFixed(3));
-    }
-
     function startAmbilightLoop() {
       if (ambilightInterval) clearInterval(ambilightInterval);
-      if (!__ambientSamplerCanvas) {
-        __ambientSamplerCanvas = document.createElement("canvas");
-        __ambientSamplerCanvas.width = 8;
-        __ambientSamplerCanvas.height = 8;
-        __ambientSamplerCtx = __ambientSamplerCanvas.getContext("2d", { willReadFrequently: true });
-      }
-
+      const palette = [
+        "rgba(245, 158, 11, 0.32)",
+        "rgba(225, 29, 72, 0.30)",
+        "rgba(16, 185, 129, 0.28)",
+        "rgba(56, 189, 248, 0.30)",
+        "rgba(168, 85, 247, 0.28)"
+      ];
+      let step = 0;
+      let frameEl = null;
+      let canopyEl = null;
       ambilightInterval = setInterval(() => {
         if (document.hidden || !state.currentRoomId) return;
-        const roomEl = document.getElementById("theater-room");
-        if (!roomEl) return;
-
-        if (!state.ambilightEnabled) {
-          roomEl.classList.add("ambient-glow-off");
-          setTheaterAmbientVars(255, 190, 120, 0);
-          return;
-        }
-        roomEl.classList.remove("ambient-glow-off");
-
+        // Bỏ repaint box-shadow 75px khi đang ở Phòng Stream hoặc phát Share màn hình để giữ 60fps tuyệt đối
         const activeRoom = getEffectiveRoom(state.currentRoomId);
-        if (activeRoom?.isDiscordRoom || liveScreenStream || remoteScreenStream) {
-          setTheaterAmbientVars(255, 190, 120, 0.25);
-          return;
-        }
-
+        if (activeRoom?.isDiscordRoom || liveScreenStream || remoteScreenStream) return;
         const vidEl = document.getElementById("html5-video-player");
-        const canSampleVideo = Boolean(
-          vidEl &&
-          !vidEl.classList.contains("hidden") &&
-          !vidEl.paused &&
-          vidEl.readyState >= 2 &&
-          __ambientSamplerCtx
-        );
-
-        if (!canSampleVideo) {
-          // Graceful warm cinema glow fallback for YouTube iframe / external streams / paused state
-          setTheaterAmbientVars(255, 190, 120, 0.25);
+        if (vidEl && !vidEl.classList.contains("hidden") && vidEl.paused) return;
+        if (!frameEl || !frameEl.isConnected) frameEl = document.querySelector(".lotte-screen-frame");
+        if (!canopyEl || !canopyEl.isConnected) canopyEl = document.querySelector(".ceiling-canopy");
+        if (!frameEl || !canopyEl) return;
+        if (!state.ambilightEnabled) {
+          frameEl.style.boxShadow = "0 22px 55px rgba(0,0,0,0.95), 0 12px 45px rgba(254,243,199,0.18)";
+          canopyEl.style.borderBottomColor = "#352c28";
           return;
         }
-
-        try {
-          __ambientSamplerCtx.drawImage(vidEl, 0, 0, 8, 8);
-          const data = __ambientSamplerCtx.getImageData(0, 0, 8, 8).data;
-          let rSum = 0;
-          let gSum = 0;
-          let bSum = 0;
-          const pixels = data.length / 4;
-          for (let i = 0; i < data.length; i += 4) {
-            rSum += data[i];
-            gSum += data[i + 1];
-            bSum += data[i + 2];
-          }
-          const r = rSum / pixels;
-          const g = gSum / pixels;
-          const b = bSum / pixels;
-          const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-          const intensity = 0.15 + (Math.min(255, Math.max(0, luminance)) / 255) * 0.70;
-          setTheaterAmbientVars(r, g, b, intensity);
-        } catch (_) {
-          // Safe CORS fallback: rgba(255, 190, 120, 0.25)
-          setTheaterAmbientVars(255, 190, 120, 0.25);
-        }
-      }, 200);
+        step = (step + 1) % palette.length;
+        const glow = palette[step];
+        frameEl.style.boxShadow = `0 22px 60px rgba(0,0,0,0.95), 0 0 75px 14px ${glow}`;
+        canopyEl.style.borderBottomColor = glow;
+      }, 2200);
     }
 
     function applyAmbilightState(enabled, silent = false) {
       state.ambilightEnabled = Boolean(enabled);
-      const roomEl = document.getElementById("theater-room");
-      if (roomEl) {
-        roomEl.classList.toggle("ambient-glow-off", !state.ambilightEnabled);
-        if (!state.ambilightEnabled) {
-          setTheaterAmbientVars(255, 190, 120, 0);
-        } else {
-          setTheaterAmbientVars(255, 190, 120, 0.25);
-        }
-      }
       const btn = document.getElementById("btn-ambilight");
       if (btn) {
         btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Ambilight: ${state.ambilightEnabled ? 'BẬT' : 'TẮT'}</span>`;
@@ -12447,15 +12295,8 @@
           ? "px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/50 text-amber-300 text-xs font-extrabold flex items-center gap-1.5 transition cursor-pointer"
           : "px-3 py-1.5 rounded-xl bg-stone-800 border border-white/10 text-slate-400 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer";
       }
-      const barBtn = document.getElementById("btn-ambient-glow-bar");
-      if (barBtn) {
-        barBtn.innerHTML = `<i class="fa-solid fa-sun ${state.ambilightEnabled ? 'text-amber-300' : 'text-slate-400'}"></i><span>Ánh sáng rạp: ${state.ambilightEnabled ? 'BẬT' : 'TẮT'}</span>`;
-        barBtn.className = state.ambilightEnabled
-          ? "cv-smooth-btn px-2.5 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/50 text-amber-200 font-extrabold transition cursor-pointer flex items-center gap-1"
-          : "cv-smooth-btn liquid-glass-pill px-2.5 py-1.5 rounded-xl text-slate-400 font-bold transition cursor-pointer flex items-center gap-1";
-      }
       if (!silent) {
-        showToast(state.ambilightEnabled ? "Đã bật ánh sáng rạp đồng bộ màn hình!" : "Đã tắt hiệu ứng ánh sáng rạp.", "info");
+        showToast(state.ambilightEnabled ? "Đã bật đèn Ambilight đồng bộ màn hình!" : "Đã tắt hiệu ứng đèn Ambilight.", "info");
       }
     }
 
