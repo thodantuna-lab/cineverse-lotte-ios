@@ -186,7 +186,48 @@
       background: radial-gradient(circle at 50% 14%, rgba(229, 9, 20, 0.12), var(--cv-black-bg) 72%) !important;
     }
     #lobby-view {
-      padding-bottom: 104px !important;
+      padding: 0.5rem 0.75rem 104px !important;
+    }
+    @media (min-width: 640px) {
+      #lobby-view {
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+      }
+    }
+    @media (min-width: 1024px) {
+      #lobby-view {
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+      }
+    }
+    /* Polyfill missing Tailwind utilities not in #tw-precompiled */
+    .opacity-85 { opacity: 0.85; }
+    .pb-8 { padding-bottom: 2rem; }
+    .px-2\.5 { padding-left: 0.625rem; padding-right: 0.625rem; }
+    .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
+    .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+    .gap-1\.5 { gap: 0.375rem; }
+    .gap-2\.5 { gap: 0.625rem; }
+    .bottom-2\.5 { bottom: 0.625rem; }
+    .mt-0\.5 { margin-top: 0.125rem; }
+    .min-h-\[360px\] { min-height: 360px; }
+    .hover\:bg-black\/80:hover { background-color: rgba(0, 0, 0, 0.8); }
+    .hover\:bg-red-600:hover { background-color: #dc2626; }
+    .from-\[\#0B0B0F\] { --tw-gradient-from: #0B0B0F var(--tw-gradient-from-position); --tw-gradient-to: rgb(11 11 15 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+    .via-\[\#0B0B0F\]\/35 { --tw-gradient-to: rgb(11 11 15 / 0) var(--tw-gradient-to-position); --tw-gradient-stops: var(--tw-gradient-from), rgba(11, 11, 15, 0.35) var(--tw-gradient-via-position), var(--tw-gradient-to); }
+    .shadow-\[0_25px_70px_rgba\(0\,0\,0\,0\.95\)\] { box-shadow: 0 25px 70px rgba(0, 0, 0, 0.95); }
+    @media (min-width: 640px) {
+      .sm\:inline-flex { display: inline-flex; }
+      .sm\:px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .sm\:rounded-3xl { border-radius: 1.5rem; }
+      .sm\:text-\[13px\] { font-size: 13px; }
+    }
+    @media (min-width: 1024px) {
+      .lg\:px-8 { padding-left: 2rem; padding-right: 2rem; }
+      .lg\:text-base { font-size: 1rem; line-height: 1.5rem; }
+    }
+    @media (min-width: 1280px) {
+      .xl\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     }
     #netflix-billboard {
       background: #1E2029 !important;
@@ -584,14 +625,15 @@
       filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.95));
     }
     #ios-liquid-nav-bar {
-      background: rgba(11, 11, 15, 0.90) !important;
+      background: linear-gradient(180deg, rgba(11, 11, 15, 0.96) 0%, rgba(11, 11, 15, 0.86) 100%) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
     }
     #ios-liquid-nav-bar.rophim-scrolled {
       background: rgba(11, 11, 15, 0.97) !important;
-      border-color: rgba(245, 197, 24, 0.28) !important;
+      border-bottom-color: rgba(245, 197, 24, 0.28) !important;
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.78) !important;
     }
 
@@ -678,8 +720,9 @@
     }
     @media (max-width: 639px) {
       #netflix-billboard {
-        min-height: 270px !important;
-        max-height: 330px !important;
+        min-height: 340px !important;
+        max-height: none !important;
+        height: auto !important;
         margin-left: -0.75rem;
         margin-right: -0.75rem;
         border-radius: 0 !important;
@@ -693,7 +736,8 @@
         padding: 0.5rem 0.9rem 0.65rem !important;
         gap: 0.5rem !important;
       }
-      #hero-bg-poster {
+      #hero-bg-poster,
+      #hero-bg-video {
         object-position: center 20% !important;
       }
     }
@@ -2898,10 +2942,10 @@
     <canvas id="ambient-tuna-canvas" style="display:none !important;"></canvas>
   </div>
 
-  <!-- HEADER CHUNG (FLOATING IPHONE LIQUID GLASS CAPSULE) -->
-  <header class="sticky top-0 z-40 px-2 sm:px-5 lg:px-6 pt-1.5 sm:pt-3 pb-1 pointer-events-none">
+  <!-- HEADER CHUNG (NETFLIX-STYLE FULL-WIDTH STICKY DARK GLASS) -->
+  <header class="sticky top-0 z-40 px-0 pt-0 pb-0 pointer-events-none">
     <div id="ios-liquid-nav-bar"
-      class="ios-liquid-navbar pointer-events-auto w-full rounded-2xl sm:rounded-full px-3 sm:px-5 py-1.5 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-3">
+      class="ios-liquid-navbar pointer-events-auto w-full rounded-none px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-3">
       <div class="relative z-10 flex items-center gap-2 sm:gap-3 cursor-pointer min-w-0" onclick="window.appActions.closeHanoiCinemaFinder(); window.appActions.leaveRoom()">
         <img id="header-web-avatar" src="assets/web-logo.png" alt="CineVerse Lotte"
              class="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover shadow-lg border border-white/25 bg-black shrink-0" />
@@ -7232,46 +7276,82 @@
         }
       }
 
-      // Tự động phát 20 giây demo đầu tiên của phim (tắt tiếng mặc định để trình duyệt phát mượt, có thể bật tiếng bằng nút loa)
+      // Tự động phát 20 giây demo đầu tiên của phim (ẩn cho tới khi canplay để không bị màn hình đen, có fallback nếu lỗi mạng)
       if (videoEl) {
         const previewSrc = room.videoUrl || room.previewVideoUrl;
         const demoBadge = document.getElementById("hero-demo-badge");
-        if (previewSrc && !state.currentRoomId) {
-          const isNewSrc = videoEl.getAttribute("data-src") !== previewSrc;
-          if (isNewSrc) {
-            videoEl.setAttribute("data-src", previewSrc);
-            videoEl.src = previewSrc;
-            videoEl.currentTime = 0;
+        const saveData = Boolean(navigator.connection && navigator.connection.saveData);
+        const hideHeroVideo = () => {
+          videoEl.style.opacity = "0";
+          videoEl.classList.add("hidden");
+          if (demoBadge) {
+            demoBadge.classList.add("hidden");
+            demoBadge.classList.remove("inline-flex");
           }
+        };
+        if (!window.__cvHeroVisBound) {
+          window.__cvHeroVisBound = true;
+          document.addEventListener("visibilitychange", () => {
+            const v = document.getElementById("hero-bg-video");
+            if (!v) return;
+            if (document.hidden) {
+              if (!v.paused) v.pause();
+            } else if (!state.currentRoomId && v.getAttribute("data-src") && v.readyState >= 2) {
+              v.play().catch(() => {});
+            }
+          });
+        }
+        if (previewSrc && !state.currentRoomId && !saveData && !document.hidden) {
+          const isNewSrc = videoEl.getAttribute("data-src") !== previewSrc;
+          videoEl.style.transition = "opacity 0.6s ease";
           videoEl.muted = Boolean(state.heroMuted);
           videoEl.preload = "metadata";
+          if (isNewSrc) {
+            videoEl.style.opacity = "0";
+            videoEl.setAttribute("data-src", previewSrc);
+            videoEl.src = previewSrc;
+            try { videoEl.currentTime = 0; } catch (_) {}
+          }
           videoEl.ontimeupdate = () => {
             if (videoEl.currentTime >= 20) {
               videoEl.currentTime = 0;
             }
           };
-          videoEl.classList.remove("hidden");
-          if (demoBadge) {
-            demoBadge.classList.remove("hidden");
-            demoBadge.classList.add("inline-flex");
+          videoEl.oncanplay = () => {
+            if (videoEl.getAttribute("data-src") !== previewSrc || state.currentRoomId) return;
+            videoEl.classList.remove("hidden");
+            videoEl.style.opacity = "0.85";
+            if (demoBadge) {
+              demoBadge.classList.remove("hidden");
+              demoBadge.classList.add("inline-flex");
+            }
+          };
+          videoEl.onerror = () => {
+            hideHeroVideo();
+          };
+          if (videoEl.readyState >= 2 && !isNewSrc) {
+            videoEl.classList.remove("hidden");
+            videoEl.style.opacity = "0.85";
+          } else {
+            videoEl.classList.remove("hidden");
           }
           videoEl.play().catch(() => {
             videoEl.muted = true;
-            videoEl.play().catch(() => {});
+            videoEl.play().catch(() => {
+              hideHeroVideo();
+            });
           });
         } else {
           if (!videoEl.paused) videoEl.pause();
           videoEl.ontimeupdate = null;
-          if (demoBadge) {
-            demoBadge.classList.add("hidden");
-            demoBadge.classList.remove("inline-flex");
-          }
+          videoEl.oncanplay = null;
+          videoEl.onerror = null;
+          hideHeroVideo();
           if (videoEl.getAttribute("src")) {
             videoEl.removeAttribute("src");
             videoEl.removeAttribute("data-src");
             try { videoEl.load(); } catch (_) {}
           }
-          videoEl.classList.add("hidden");
         }
       }
 
