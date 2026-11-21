@@ -3148,12 +3148,12 @@
       <div id="lobby-continue-watching-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
     </section>
 
-    <!-- Bộ lọc phòng chiếu đồng bộ 100% theo số phòng thực tế (12 phòng, 3 nhóm rõ ràng) -->
+    <!-- Bộ lọc phòng chiếu đồng bộ 100% theo số phòng thực tế (8 phòng, 2 nhóm rõ ràng) -->
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div class="flex flex-wrap items-center gap-2">
         <button type="button" onclick="window.appActions.setRoomFilter('all')" id="filter-all"
           class="cv-filter-btn is-active">
-          Tất cả (<span id="filter-count-all">12</span> phòng)
+          Tất cả (<span id="filter-count-all">8</span> phòng)
         </button>
         <button type="button" onclick="window.appActions.setRoomFilter('single')" id="filter-single"
           class="cv-filter-btn">
@@ -3163,13 +3163,9 @@
           class="cv-filter-btn">
           Phòng Đôi &amp; Stream (<span id="filter-count-special">2</span>)
         </button>
-        <button type="button" onclick="window.appActions.setRoomFilter('series')" id="filter-series"
-          class="cv-filter-btn">
-          Phòng Phim Bộ (<span id="filter-count-series">4</span>)
-        </button>
         <button type="button" onclick="window.appActions.setRoomFilter('showing')" id="filter-showing"
           class="cv-filter-btn">
-          Đang chiếu (<span id="filter-count-showing">12</span>)
+          Đang chiếu (<span id="filter-count-showing">8</span>)
         </button>
         <button type="button" onclick="window.appActions.setRoomFilter('upcoming')" id="filter-upcoming"
           class="cv-filter-btn">
@@ -5708,94 +5704,6 @@
         quality: "60FPS + VOICE",
         cast: "Share Màn Hình • Âm Thanh Hệ Thống • 10 Ghế VIP",
         synopsis: "Phòng livestream như Discord dành cho tối đa 10 người: chia sẻ màn hình máy tính/điện thoại kèm tiếng, chat giọng nói trực tiếp và đồng bộ tức thời độ trễ cực thấp."
-      },
-      {
-        id: "room-9",
-        number: "Phòng Phim Bộ 01 🔓",
-        movieTitle: "Chúa Tể Của Những Chiếc Nhẫn- Những Chiếc Nhẫn Quyền Năng (Phần 1) Tập 01 [Vietsub]",
-        genre: "Phim Bộ • Không Luật • Tự Do Đổi Tập",
-        duration: "60:00",
-        durationSec: 3600,
-        status: "showing",
-        isSeriesFreeRoom: true,
-        noSwitchCooldown: true,
-        isCustomStartZero: true,
-        youtubeId: "",
-        videoUrl: `https://pub-c634cb0eca714151876c408aa346c6b5.r2.dev/${encodeURIComponent("Chúa Tể Của Những Chiếc Nhẫn- Những Chiếc Nhẫn Quyền Năng (Phần 1) Tập 01 [Vietsub].mp4")}`,
-        previewVideoUrl: `https://pub-c634cb0eca714151876c408aa346c6b5.r2.dev/${encodeURIComponent("Chúa Tể Của Những Chiếc Nhẫn- Những Chiếc Nhẫn Quyền Năng (Phần 1) Tập 01 [Vietsub].mp4")}`,
-        poster: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1000&q=80",
-        rankBadge: "🔓 KHÔNG LUẬT • 2 PHẦN (16 TẬP)",
-        matchScore: "Tự do đổi tập",
-        ageRating: "T16+",
-        quality: "1080P VIETSUB",
-        cast: "The Rings of Power • Phần 1 & 2",
-        synopsis: "Phòng chuyên chiếu phim bộ dài tập — không giới hạn 30 phút, ai trong phòng cũng có thể tự do chọn tập và chuyển phần ngay lập tức."
-      },
-      {
-        id: "room-10",
-        number: "Phòng Phim Bộ 02 🔓",
-        movieTitle: "Tanya Chiến Ký (Phần 1) Tập 01 [Vietsub]",
-        genre: "Anime Dài Tập • Không Luật • Tự Do Đổi Tập",
-        duration: "24:00",
-        durationSec: 1440,
-        status: "showing",
-        isSeriesFreeRoom: true,
-        noSwitchCooldown: true,
-        isCustomStartZero: true,
-        youtubeId: "",
-        videoUrl: `https://pub-c634cb0eca714151876c408aa346c6b5.r2.dev/${encodeURIComponent("Tanya Chiến Ký (Phần 1) Tập 01 [Vietsub].mp4")}`,
-        previewVideoUrl: `https://pub-c634cb0eca714151876c408aa346c6b5.r2.dev/${encodeURIComponent("Tanya Chiến Ký (Phần 1) Tập 01 [Vietsub].mp4")}`,
-        poster: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1000&q=80",
-        rankBadge: "🔓 KHÔNG LUẬT • 2 PHẦN (22 TẬP)",
-        matchScore: "Tự do đổi tập",
-        ageRating: "T16+",
-        quality: "1080P VIETSUB",
-        cast: "Youjo Senki • Phần 1 & 2",
-        synopsis: "Phòng chuyên chiếu Anime dài tập nhiều phần — không giới hạn thời gian đổi tập, bấm là chuyển ngay."
-      },
-      {
-        id: "room-11",
-        number: "Phòng Phim Bộ 03 🔓",
-        movieTitle: "Chú Thuật Hồi Chiến: Tử Diệt Hồi Du Phần 1 - Tập 48 (Vietsub)",
-        genre: "Anime Dài Tập • Không Luật • Tự Do Đổi Tập",
-        duration: "24:00",
-        durationSec: 1440,
-        status: "showing",
-        isSeriesFreeRoom: true,
-        noSwitchCooldown: true,
-        isCustomStartZero: true,
-        youtubeId: "",
-        videoUrl: `https://pub-c634cb0eca714151876c408aa346c6b5.r2.dev/Ch%C3%BA%20thu%E1%BA%ADt%20h%E1%BB%93i%20chi%E1%BA%BFn/${encodeURIComponent("Chú Thuật Hồi Chiến Tử Diệt Hồi Du Phần 1   Tập 48 (Vietsub)Ani-One Vietnam.mp4")}`,
-        previewVideoUrl: `https://pub-c634cb0eca714151876c408aa346c6b5.r2.dev/Ch%C3%BA%20thu%E1%BA%ADt%20h%E1%BB%93i%20chi%E1%BA%BFn/${encodeURIComponent("Chú Thuật Hồi Chiến Tử Diệt Hồi Du Phần 1   Tập 48 (Vietsub)Ani-One Vietnam.mp4")}`,
-        poster: "./assets/jjk-culling-game.jpg",
-        rankBadge: "🔓 KHÔNG LUẬT • TRỌN BỘ JJK",
-        matchScore: "Tự do đổi tập",
-        ageRating: "T16+",
-        quality: "1080P VIETSUB",
-        cast: "Jujutsu Kaisen • Tử Diệt Hồi Du",
-        synopsis: "Phòng cày bộ Chú Thuật Hồi Chiến liên tục nhiều tập — không khóa, không chờ 30 phút."
-      },
-      {
-        id: "room-12",
-        number: "Phòng Phim Bộ 04 🔓",
-        movieTitle: "Hào Quang (Phần 1) Tập 04 [Vietsub]",
-        genre: "Phim Bộ • Không Luật • Tự Do Đổi Tập",
-        duration: "50:00",
-        durationSec: 3000,
-        status: "showing",
-        isSeriesFreeRoom: true,
-        noSwitchCooldown: true,
-        isCustomStartZero: true,
-        youtubeId: "",
-        videoUrl: `https://pub-c634cb0eca714151876c408aa346c6b5.r2.dev/${encodeURIComponent("Hào Quang (Phần 1) Tập 04 [Vietsub].mp4")}`,
-        previewVideoUrl: `https://pub-c634cb0eca714151876c408aa346c6b5.r2.dev/${encodeURIComponent("Hào Quang (Phần 1) Tập 04 [Vietsub].mp4")}`,
-        poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1000&q=80",
-        rankBadge: "🔓 KHÔNG LUẬT • PHIM BỘ TỰ DO",
-        matchScore: "Tự do đổi tập",
-        ageRating: "T16+",
-        quality: "1080P VIETSUB",
-        cast: "Phòng Phim Bộ Tự Do • Nhiều Phần",
-        synopsis: "Phòng chiếu phim bộ dài tập tự do — mọi thành viên có thể tự chuyển tập, chuyển phần thoải mái không giới hạn."
       }
     ];
 
@@ -7939,14 +7847,6 @@
             icon: "fa-heart",
             color: "#F5C518",
             items: rooms.filter(r => getRoomCategory(r) === "special")
-          },
-          {
-            key: "series",
-            title: "Phòng Phim Bộ Tự Do (Không Luật)",
-            subtitle: "Không giới hạn 30 phút • Tự do chuyển phần & đổi tập liên tục",
-            icon: "fa-layer-group",
-            color: "#F5C518",
-            items: rooms.filter(r => getRoomCategory(r) === "series")
           }
         ];
 
