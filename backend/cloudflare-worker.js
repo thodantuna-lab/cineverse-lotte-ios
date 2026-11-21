@@ -323,6 +323,9 @@ function jsonResponse(payload, status = 200) {
 }
 
 const RTDB_GEMINI_TELEMETRY_BASE = "https://cineverse-ea320-default-rtdb.asia-southeast1.firebasedatabase.app/lobby_config/gemini_usage_logs";
+const GEMINI_COOLDOWN_UNTIL = new Map();
+const POSTER_META_CACHE = new Map();
+let GEMINI_REGION_BLOCKED_UNTIL = 0;
 
 function logGeminiTelemetry(entry, ctx) {
   const promise = fetch(`${RTDB_GEMINI_TELEMETRY_BASE}/${entry.id}.json`, {
@@ -339,6 +342,15 @@ function logGeminiTelemetry(entry, ctx) {
  * Shared Gemini generateContent caller with non-blocking RTDB telemetry.
  */
 async function callGeminiWithTelemetry(modelName, payload, timeoutMs, featureTag, env, ctx, colo = "EDGE") {
+  const now = Date.now();
+  if (GEMINI_REGION_BLOCKED_UNTIL > now) {
+    return { text: "", errorMsg: `User location is not supported [Edge: ${colo}]`, status: 400 };
+  }
+  const cooldownUntil = GEMINI_COOLDOWN_UNTIL.get(modelName) || 0;
+  if (cooldownUntil > now) {
+    return { text: "", errorMsg: "MODEL_COOLDOWN_429", status: 429 };
+  }
+
   const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`;
   const startedAt = Date.now();
   const logId = `g_${startedAt}_${Math.random().toString(36).slice(2, 7)}`;
@@ -367,8 +379,12 @@ async function callGeminiWithTelemetry(modelName, payload, timeoutMs, featureTag
       const raw = String(gemData?.error?.message || `HTTP_${status || "EMPTY"}`);
       if (raw.includes("User location is not supported")) {
         errorMsg = `User location is not supported [Edge: ${colo}]`;
+        GEMINI_REGION_BLOCKED_UNTIL = Date.now() + 300000;
       } else {
         errorMsg = raw.slice(0, 140);
+      }
+      if (status === 429) {
+        GEMINI_COOLDOWN_UNTIL.set(modelName, Date.now() + 60000);
       }
     }
   } catch (e) {
@@ -424,8 +440,9 @@ ${numberedLines}`;
 
     const modelsToTry = [
       "gemini-flash-lite-latest",
-      "gemini-flash-latest",
-      "gemini-3.5-flash-lite"
+      "gemini-3.5-flash-lite",
+      "gemini-2.0-flash-lite",
+      "gemini-flash-latest"
     ];
     let rawText = "";
     let lastError = "EMPTY_RESPONSE";
@@ -438,7 +455,7 @@ ${numberedLines}`;
         responseMimeType: "application/json",
         temperature: 0.3
       };
-      if (modelName === "gemini-flash-latest" || modelName === "gemini-3.5-flash-lite") {
+      if (modelName === "gemini-flash-latest") {
         genCfg.thinkingConfig = { thinkingBudget: 0 };
       }
       const res = await callGeminiWithTelemetry(modelName, {
@@ -754,8 +771,9 @@ Khán giả: ${qTrim}`;
 
     const modelsToTry = [
       "gemini-flash-lite-latest",
-      "gemini-flash-latest",
-      "gemini-3.5-flash-lite"
+      "gemini-3.5-flash-lite",
+      "gemini-2.0-flash-lite",
+      "gemini-flash-latest"
     ];
     let rawText = "";
     let lastError = "EMPTY_RESPONSE";
@@ -765,7 +783,7 @@ Khán giả: ${qTrim}`;
       const modelName = modelsToTry[idx];
       if (idx > 0) await new Promise(r => setTimeout(r, 1200));
       const genCfg = { ...baseGenConfig };
-      if (modelName === "gemini-flash-latest" || modelName === "gemini-3.5-flash-lite") {
+      if (modelName === "gemini-flash-latest") {
         genCfg.thinkingConfig = { thinkingBudget: 0 };
       }
       const res = await callGeminiWithTelemetry(modelName, {
@@ -837,27 +855,37 @@ function buildRegexMovieMeta(rawTitle) {
   };
 }
 
-async function extractCleanMovieMetaWithAI(rawTitle, env, ctx) {
+async function extractCleanMovieMetaWithAI(rawTitle, env, ctx, colo = "EDGE") {
   const fallback = buildRegexMovieMeta(rawTitle);
   if (!env.GEMINI_API_KEY || !rawTitle) return fallback;
+  const cacheKey = rawTitle.toLowerCase().trim();
+  const cached = POSTER_META_CACHE.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.meta;
+  }
   const prompt = `Từ tên file phim sau: "${rawTitle}". Hãy trích xuất tên phim/anime gốc chuẩn quốc tế (tiếng Anh hoặc tên chính thức để tìm poster), loại ("movie" hoặc "tv" hoặc "anime"), và năm phát hành nếu có. Trả về đúng JSON: {"query":"...","type":"movie","year":""}`;
-  const models = ["gemini-flash-lite-latest", "gemini-3.5-flash-lite"];
+  const models = ["gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-2.0-flash-lite"];
   for (const modelName of models) {
     try {
       const genCfg = { responseMimeType: "application/json", temperature: 0.1 };
-      if (modelName === "gemini-3.5-flash-lite") genCfg.thinkingConfig = { thinkingBudget: 0 };
       const res = await callGeminiWithTelemetry(modelName, {
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: genCfg
-      }, 18000, "poster-meta", env, ctx);
+      }, 15000, "poster-meta", env, ctx, colo);
       if (res.text) {
         const parsed = JSON.parse(res.text);
         if (parsed && parsed.query) {
-          return {
+          const meta = {
             query: String(parsed.query).trim(),
             type: String(parsed.type || fallback.type),
             year: String(parsed.year || fallback.year || "")
           };
+          if (POSTER_META_CACHE.size > 500) {
+            const first = POSTER_META_CACHE.keys().next().value;
+            if (first) POSTER_META_CACHE.delete(first);
+          }
+          POSTER_META_CACHE.set(cacheKey, { meta, expiresAt: Date.now() + 86400000 });
+          return meta;
         }
       }
       if (res.errorMsg && res.errorMsg.includes("User location is not supported")) {
@@ -865,6 +893,7 @@ async function extractCleanMovieMetaWithAI(rawTitle, env, ctx) {
       }
     } catch (e) {}
   }
+  POSTER_META_CACHE.set(cacheKey, { meta: fallback, expiresAt: Date.now() + 300000 });
   return fallback;
 }
 
@@ -977,7 +1006,8 @@ async function handlePosterLookup(request, env, ctx) {
 
   // Chỉ gọi Gemini AI trích xuất tên quốc tế khi fast-path regex không tìm được poster
   if (!posterUrl) {
-    const aiMeta = await extractCleanMovieMetaWithAI(rawTitle, env, ctx);
+    const colo = request?.cf?.colo || "EDGE";
+    const aiMeta = await extractCleanMovieMetaWithAI(rawTitle, env, ctx, colo);
     if (aiMeta.query && aiMeta.query.toLowerCase() !== q.toLowerCase()) {
       q = aiMeta.query;
       ({ posterUrl, source } = await lookupPosterByMeta(q, aiMeta.type, rawTitle, env));
@@ -990,14 +1020,12 @@ async function handlePosterLookup(request, env, ctx) {
       status: 200,
       headers: {
         ...CORS_HEADERS,
-        "Cache-Control": posterUrl ? "public, max-age=604800" : "no-store",
+        "Cache-Control": posterUrl ? "public, max-age=604800" : "public, max-age=3600",
         "Content-Type": "application/json; charset=utf-8"
       }
     }
   );
-  if (posterUrl) {
-    await cache.put(cacheKey, response.clone());
-  }
+  await cache.put(cacheKey, response.clone());
   return response;
 }
 
