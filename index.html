@@ -215,9 +215,9 @@
       font-weight: 700;
       color: #FFFFFF;
       letter-spacing: -0.01em;
-      line-height: 1.26;
-      font-size: 1.3rem;
-      text-shadow: 0 3px 16px rgba(0, 0, 0, 0.65);
+      line-height: 1.24;
+      font-size: 1.45rem;
+      text-shadow: 0 3px 16px rgba(0, 0, 0, 0.72);
       white-space: normal;
       text-overflow: clip;
     }
@@ -225,7 +225,7 @@
       margin-top: 12px;
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 8px;
       flex-wrap: nowrap;
       overflow-x: auto;
       scrollbar-width: none;
@@ -237,12 +237,12 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      height: 22px;
+      height: 26px;
       border: 1px solid #F5C518;
-      background: rgba(30, 32, 41, 0.65);
-      border-radius: 4px;
-      padding: 0 7px;
-      font-size: 11px;
+      background: rgba(30, 32, 41, 0.72);
+      border-radius: 5px;
+      padding: 0 9px;
+      font-size: 12.5px;
       font-weight: 700;
       line-height: 1;
       color: #FFFFFF;
@@ -252,12 +252,12 @@
     .cv-hero-meta-outline {
       display: inline-flex;
       align-items: center;
-      height: 22px;
-      border: 1px solid rgba(255, 255, 255, 0.28);
-      background: rgba(30, 32, 41, 0.45);
-      border-radius: 4px;
-      padding: 0 7px;
-      font-size: 11px;
+      height: 26px;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      background: rgba(30, 32, 41, 0.52);
+      border-radius: 5px;
+      padding: 0 9px;
+      font-size: 12.5px;
       font-weight: 600;
       color: #FFFFFF;
       line-height: 1;
@@ -265,10 +265,10 @@
       flex-shrink: 0;
     }
     .cv-hero-genre-row {
-      margin-top: 9px;
+      margin-top: 10px;
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 8px;
       flex-wrap: nowrap;
       overflow-x: auto;
       scrollbar-width: none;
@@ -279,22 +279,22 @@
     .cv-hero-genre-tag {
       display: inline-flex;
       align-items: center;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 3px 9px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 400;
-      color: rgba(255, 255, 255, 0.86);
+      background: rgba(255, 255, 255, 0.12);
+      padding: 4px 11px;
+      border-radius: 5px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.92);
       line-height: 1.3;
       white-space: nowrap;
       flex-shrink: 0;
     }
     .cv-hero-synopsis {
-      margin-top: 12px;
-      max-width: 490px;
-      font-size: 13px;
+      margin-top: 14px;
+      max-width: 530px;
+      font-size: 15px;
       font-weight: 400;
-      color: rgba(255, 255, 255, 0.82);
+      color: rgba(255, 255, 255, 0.88);
       line-height: 1.6;
       display: -webkit-box;
       -webkit-line-clamp: 3;
@@ -422,21 +422,21 @@
         z-index: 20 !important;
       }
       .cv-hero-title {
-        font-size: clamp(32px, 2.5vw, 38px);
+        font-size: clamp(36px, 2.8vw, 44px);
       }
       .cv-hero-play-circle {
-        width: 58px;
-        height: 58px;
+        width: 62px;
+        height: 62px;
       }
       .cv-hero-pill-group {
-        height: 44px;
+        height: 48px;
       }
       .cv-hero-pill-icon-btn {
-        width: 50px;
+        width: 52px;
       }
       .cv-hero-pill-text-btn {
-        padding: 0 22px;
-        font-size: 13px;
+        padding: 0 24px;
+        font-size: 15px;
       }
       .cv-thumbs-dock {
         position: absolute !important;
@@ -513,10 +513,10 @@
     .cv-filter-btn {
       background: var(--cv-black-surface);
       color: var(--cv-muted-text);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 0.5rem 0.9rem;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 0.55rem 1.05rem;
       border-radius: 0.75rem;
-      font-size: 0.75rem;
+      font-size: 0.84rem;
       font-weight: 700;
       transition: all 0.22s ease;
       cursor: pointer;
@@ -571,13 +571,17 @@
       box-shadow: 0 8px 20px rgba(229, 9, 20, 0.4) !important;
     }
     .rophim-rank-num {
+      display: inline-block;
+      padding: 2px 6px 2px 3px;
+      position: relative;
+      z-index: 20;
       font-style: italic;
       font-weight: 900;
-      line-height: 1;
+      line-height: 1.05;
       background: linear-gradient(39deg, #F5C518 0%, #FFE885 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.9));
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.95));
     }
     #ios-liquid-nav-bar {
       background: rgba(11, 11, 15, 0.90) !important;
@@ -3003,13 +3007,18 @@
         <div class="absolute inset-0 cv-hero-vignette-bottom"></div>
       </div>
 
-      <!-- Nút bật/tắt tiếng Trailer gọn nhẹ ở góc trên phải -->
-      <button type="button" onclick="window.appActions.toggleHeroVideoMute()" id="btn-hero-mute"
-        style="position:absolute;top:18px;right:24px;z-index:20;"
-        class="w-9 h-9 rounded-full bg-black/45 hover:bg-black/75 border border-white/20 text-white flex items-center justify-center transition cursor-pointer"
-        title="Bật/Tắt âm thanh Trailer">
-        <i class="fa-solid fa-volume-xmark text-xs"></i>
-      </button>
+      <!-- Tự động chạy 20 giây demo đầu của phim + nút bật/tắt tiếng ở góc trên phải -->
+      <div style="position:absolute;top:18px;right:24px;z-index:20;" class="flex items-center gap-2">
+        <span id="hero-demo-badge" class="hidden px-2.5 py-1 rounded-full bg-black/55 backdrop-blur-md border border-white/15 text-[11px] font-bold text-white items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full animate-pulse" style="background:#E50914"></span>
+          <span>DEMO 20s</span>
+        </span>
+        <button type="button" onclick="window.appActions.toggleHeroVideoMute()" id="btn-hero-mute"
+          class="w-9 h-9 rounded-full bg-black/50 hover:bg-black/80 border border-white/25 text-white flex items-center justify-center transition cursor-pointer"
+          title="Bật/Tắt âm thanh Demo 20s">
+          <i class="fa-solid fa-volume-xmark text-xs"></i>
+        </button>
+      </div>
 
       <!-- Khối thông tin bên trái — con trực tiếp của #netflix-billboard (Desktop: left 3% bottom 8% max-width 45%) -->
       <div id="hero-content-col" class="rophim-slide-enter">
@@ -7223,22 +7232,40 @@
         }
       }
 
-      // Giữ Poster sắc nét làm nền Billboard để không tự động stream file phim 1.5GB–3GB ở sảnh (chỉ bật trailer nếu người dùng chủ động bấm nút loa)
+      // Tự động phát 20 giây demo đầu tiên của phim (tắt tiếng mặc định để trình duyệt phát mượt, có thể bật tiếng bằng nút loa)
       if (videoEl) {
         const previewSrc = room.videoUrl || room.previewVideoUrl;
-        if (previewSrc && !state.currentRoomId && !state.heroMuted) {
-          if (videoEl.getAttribute("data-src") !== previewSrc) {
+        const demoBadge = document.getElementById("hero-demo-badge");
+        if (previewSrc && !state.currentRoomId) {
+          const isNewSrc = videoEl.getAttribute("data-src") !== previewSrc;
+          if (isNewSrc) {
             videoEl.setAttribute("data-src", previewSrc);
             videoEl.src = previewSrc;
+            videoEl.currentTime = 0;
           }
-          videoEl.muted = false;
+          videoEl.muted = Boolean(state.heroMuted);
+          videoEl.preload = "metadata";
+          videoEl.ontimeupdate = () => {
+            if (videoEl.currentTime >= 20) {
+              videoEl.currentTime = 0;
+            }
+          };
           videoEl.classList.remove("hidden");
+          if (demoBadge) {
+            demoBadge.classList.remove("hidden");
+            demoBadge.classList.add("inline-flex");
+          }
           videoEl.play().catch(() => {
             videoEl.muted = true;
             videoEl.play().catch(() => {});
           });
         } else {
           if (!videoEl.paused) videoEl.pause();
+          videoEl.ontimeupdate = null;
+          if (demoBadge) {
+            demoBadge.classList.add("hidden");
+            demoBadge.classList.remove("inline-flex");
+          }
           if (videoEl.getAttribute("src")) {
             videoEl.removeAttribute("src");
             videoEl.removeAttribute("data-src");
@@ -7333,7 +7360,7 @@
           state.heroIndex = (state.heroIndex + 1) % DEFAULT_ROOMS.length;
           renderHeroBillboard();
         }
-      }, 9000);
+      }, 20000);
     }
 
     function selectHeroSlide(index) {
@@ -7364,9 +7391,17 @@
       if (btn) {
         btn.innerHTML = state.heroMuted
           ? `<i class="fa-solid fa-volume-xmark text-xs"></i>`
-          : `<i class="fa-solid fa-volume-high text-xs text-amber-400"></i>`;
+          : `<i class="fa-solid fa-volume-high text-xs" style="color:#F5C518"></i>`;
       }
-      renderHeroBillboard();
+      const videoEl = document.getElementById("hero-bg-video");
+      if (videoEl && !videoEl.classList.contains("hidden")) {
+        videoEl.muted = Boolean(state.heroMuted);
+        if (!state.heroMuted) {
+          videoEl.play().catch(() => {});
+        }
+      } else {
+        renderHeroBillboard();
+      }
     }
 
     function enterHeroRoom() {
@@ -7708,22 +7743,22 @@
               </div>
             </div>
 
-            <div class="absolute bottom-3 inset-x-3 flex items-end gap-2.5 pointer-events-none">
-              <span class="rophim-rank-num text-3xl leading-none shrink-0">${displayIndex}</span>
-              <div class="min-w-0 flex-1">
-                <p class="text-[11px] font-semibold truncate" style="color:#F5C518">${escapeHTML(room.genre)} • ${escapeHTML(room.duration)}</p>
-                <h3 class="text-base font-black text-white line-clamp-1">${escapeHTML(cleanTitle)}</h3>
+            <div class="absolute bottom-3.5 inset-x-3.5 flex items-end gap-2.5 pointer-events-none z-20">
+              <span class="rophim-rank-num text-4xl shrink-0">${displayIndex}</span>
+              <div class="min-w-0 flex-1 pb-0.5">
+                <p class="text-xs font-semibold truncate" style="color:#F5C518">${escapeHTML(room.genre)} • ${escapeHTML(room.duration)}</p>
+                <h3 class="text-[17px] sm:text-lg font-black text-white leading-snug line-clamp-1">${escapeHTML(cleanTitle)}</h3>
               </div>
             </div>
           </div>
 
-          <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
-            <div class="space-y-1.5">
-              <div class="flex justify-between text-[11px]" style="color:#A1A1AA">
+          <div class="p-4 flex-1 flex flex-col justify-between space-y-3.5">
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs sm:text-[13px]" style="color:#A1A1AA">
                 <span>Tỷ lệ lấp đầy ghế</span>
                 <span class="font-bold text-white">${percent}% (${count} ghế)</span>
               </div>
-              <div class="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+              <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
                 <div class="h-full cv-progress-red" style="width:${percent}%"></div>
               </div>
             </div>
@@ -7737,7 +7772,7 @@
                     <button type="button"
                       onclick="event.stopPropagation(); window.appActions.enterRoom('${room.id}')"
                       style="touch-action: manipulation;"
-                      class="cv-smooth-btn cv-btn-gold-outline w-full py-2.5 px-3 rounded-xl font-black text-[11px] transition cursor-pointer flex items-center justify-center gap-1.5">
+                      class="cv-smooth-btn cv-btn-gold-outline w-full py-3 px-3.5 rounded-xl font-black text-[13px] transition cursor-pointer flex items-center justify-center gap-1.5">
                       <i class="fa-solid fa-circle-check"></i>
                       <span>Đã Có Vé (Ghế ${escapeHTML(ticket.seatId)}) • Vào Phòng</span>
                     </button>
@@ -7746,8 +7781,8 @@
                 return `
                   <button type="button"
                     onclick="event.stopPropagation(); window.appActions.openBookingModal('${room.id}')"
-                    class="cv-smooth-btn rophim-card-cta w-full py-2.5 px-3 rounded-xl font-black text-[11px] transition cursor-pointer flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-ticket text-[10px]"></i>
+                    class="cv-smooth-btn rophim-card-cta w-full py-3 px-3.5 rounded-xl font-black text-[13px] transition cursor-pointer flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-ticket text-xs"></i>
                     <span>Đặt Vé &amp; Chọn Ghế</span>
                   </button>
                 `;
@@ -7844,8 +7879,8 @@
                   <i class="fa-solid ${g.icon}"></i>
                 </span>
                 <div>
-                  <h3 class="text-sm font-black text-white">${escapeHTML(g.title)} <span style="color:#F5C518">(${g.items.length} phòng)</span></h3>
-                  <p class="text-[11px]" style="color:#A1A1AA">${escapeHTML(g.subtitle)}</p>
+                  <h3 class="text-base sm:text-lg font-black text-white">${escapeHTML(g.title)} <span style="color:#F5C518">(${g.items.length} phòng)</span></h3>
+                  <p class="text-xs sm:text-[13px]" style="color:#A1A1AA">${escapeHTML(g.subtitle)}</p>
                 </div>
               </div>
             </div>
