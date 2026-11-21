@@ -880,6 +880,8 @@
     }
     body.theater-dimmed #room-view {
       max-width: 85vw !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
       transition: max-width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     }
     body.theater-dimmed .auditorium-wrapper {
@@ -918,8 +920,8 @@
         box-shadow: 0 0 90px rgba(56, 189, 248, 0.28), 0 0 150px rgba(244, 63, 94, 0.14) !important;
       }
       body.theater-dimmed #html5-video-player {
-        object-fit: cover !important;
-        object-position: 50% 85% !important;
+        object-fit: contain !important;
+        object-position: center center !important;
       }
       body.theater-dimmed .imax-curve-arch-bottom {
         height: 6px !important;
