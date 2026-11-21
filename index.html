@@ -189,110 +189,160 @@
       padding-bottom: 104px !important;
     }
     #netflix-billboard {
-      background: var(--cv-black-bg) !important;
+      background: #1E2029 !important;
       border: 0 !important;
+      position: relative;
     }
     .cv-hero-vignette-left {
-      background: linear-gradient(90deg, #0B0B0F 0%, #0B0B0F 16%, rgba(11, 11, 15, 0.8) 38%, rgba(11, 11, 15, 0.22) 60%, transparent 80%);
+      background: linear-gradient(90deg, #1E2029 0%, #1E2029 25%, rgba(30, 32, 41, 0.7) 50%, transparent 100%);
     }
     .cv-hero-vignette-bottom {
-      background: linear-gradient(0deg, #0B0B0F 0%, rgba(11, 11, 15, 0.55) 14%, transparent 40%);
+      background: linear-gradient(0deg, #1E2029 0%, rgba(30, 32, 41, 0.4) 30%, transparent 100%);
     }
-    .cv-hero-vignette-right {
-      background: linear-gradient(270deg, rgba(11, 11, 15, 0.72) 0%, transparent 18%);
+    #hero-bg-poster,
+    #hero-bg-video {
+      object-position: 65% center;
     }
     #hero-content-col {
-      max-width: 530px;
       width: 100%;
+      position: relative;
+      z-index: 10;
     }
     .cv-hero-title {
-      font-family: 'Inter', sans-serif;
-      font-weight: 800;
+      font-family: 'Inter', 'Roboto', sans-serif;
+      font-weight: 700;
       color: #FFFFFF;
       letter-spacing: -0.02em;
       line-height: 1.2;
-      font-size: 1.25rem;
-      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.85);
+      font-size: 1.35rem;
+      text-shadow: 0 4px 18px rgba(0, 0, 0, 0.65);
+      white-space: normal;
+      text-overflow: clip;
+    }
+    .cv-hero-meta-row {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .cv-hero-meta-row::-webkit-scrollbar {
+      display: none;
     }
     .cv-hero-meta-gold {
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      border: 1px solid var(--cv-gold-accent);
-      background: rgba(11, 11, 15, 0.55);
-      border-radius: 6px;
-      padding: 3px 9px;
+      height: 24px;
+      border: 1px solid #F5C518;
+      background: rgba(30, 32, 41, 0.65);
+      border-radius: 4px;
+      padding: 0 8px;
       font-size: 12px;
       font-weight: 700;
-      line-height: 1.2;
+      line-height: 1;
       color: #FFFFFF;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .cv-hero-meta-outline {
       display: inline-flex;
       align-items: center;
-      border: 1px solid rgba(255, 255, 255, 0.42);
-      background: rgba(11, 11, 15, 0.38);
-      border-radius: 6px;
-      padding: 3px 9px;
+      height: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(30, 32, 41, 0.45);
+      border-radius: 4px;
+      padding: 0 8px;
       font-size: 12px;
       font-weight: 600;
       color: #FFFFFF;
-      line-height: 1.2;
+      line-height: 1;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .cv-hero-genre-row {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .cv-hero-genre-row::-webkit-scrollbar {
+      display: none;
     }
     .cv-hero-genre-tag {
       display: inline-flex;
       align-items: center;
-      background: rgba(255, 255, 255, 0.11);
-      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1);
       padding: 4px 10px;
+      border-radius: 4px;
       font-size: 12px;
-      font-weight: 500;
-      color: #E4E4E7;
+      font-weight: 400;
+      color: #FFFFFF;
       line-height: 1.25;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .cv-hero-synopsis {
+      margin-top: 14px;
+      max-width: 90%;
       font-size: 14px;
       font-weight: 400;
-      line-height: 1.65;
-      color: rgba(255, 255, 255, 0.86);
-      max-width: 510px;
+      color: #E0E0E0;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .cv-hero-actions {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      z-index: 20;
     }
     .cv-hero-play-circle {
-      width: 48px;
-      height: 48px;
-      border-radius: 9999px;
-      background: var(--cv-red-primary) !important;
-      color: #FFFFFF !important;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #F6D365 !important;
+      color: #1E2029 !important;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 28px rgba(229, 9, 20, 0.48) !important;
+      box-shadow: 0 8px 26px rgba(246, 211, 101, 0.36) !important;
       transition: transform 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease !important;
       flex-shrink: 0;
       cursor: pointer;
     }
     .cv-hero-play-circle:hover {
-      background: var(--cv-red-hover) !important;
+      background: #FCE38A !important;
       transform: scale(1.06) !important;
-      box-shadow: 0 10px 34px rgba(229, 9, 20, 0.62) !important;
+      box-shadow: 0 10px 32px rgba(252, 227, 138, 0.5) !important;
     }
     .cv-hero-pill-group {
       display: inline-flex;
       align-items: center;
       height: 44px;
-      border-radius: 9999px;
-      border: 1.5px solid rgba(255, 255, 255, 0.16);
-      background: rgba(22, 22, 29, 0.56);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      border-radius: 999px;
+      background: rgba(30, 32, 41, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       overflow: hidden;
       transition: border-color 0.22s ease;
     }
     .cv-hero-pill-group:hover {
-      border-color: rgba(245, 197, 24, 0.55);
+      border-color: rgba(255, 255, 255, 0.5);
     }
     .cv-hero-pill-icon-btn {
-      width: 46px;
+      width: 48px;
       height: 100%;
       display: inline-flex;
       align-items: center;
@@ -303,20 +353,20 @@
       cursor: pointer;
     }
     .cv-hero-pill-icon-btn:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--cv-gold-accent);
+      background: rgba(255, 255, 255, 0.1);
+      color: #F6D365;
       transform: none !important;
     }
     .cv-hero-pill-divider {
       width: 1px;
-      height: 26px;
-      background: rgba(255, 255, 255, 0.14);
+      height: 24px;
+      background: rgba(255, 255, 255, 0.2);
       flex-shrink: 0;
     }
     .cv-hero-pill-text-btn {
       height: 100%;
       padding: 0 20px;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
       color: #FFFFFF;
       background: transparent;
@@ -328,72 +378,86 @@
       white-space: nowrap;
     }
     .cv-hero-pill-text-btn:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--cv-gold-accent);
+      background: rgba(255, 255, 255, 0.1);
+      color: #F6D365;
       transform: none !important;
     }
     .cv-thumbs-dock {
-      background: rgba(11, 11, 15, 0.35);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 10px;
+      position: relative;
+      z-index: 10;
       padding: 6px 8px;
       max-width: 100%;
     }
     @media (min-width: 640px) {
       .cv-hero-title {
-        font-size: 2.125rem;
+        font-size: 36px;
       }
     }
     @media (min-width: 1024px) {
       #netflix-billboard {
-        height: calc(100vh - 82px) !important;
-        min-height: 660px !important;
-        max-height: 820px !important;
+        height: 100vh !important;
+        min-height: 600px !important;
+        max-height: none !important;
         margin-left: -2rem;
         margin-right: -2rem;
         margin-top: -0.5rem;
         border-radius: 0 !important;
       }
+      #hero-bg-poster,
+      #hero-bg-video {
+        width: 82% !important;
+        left: auto !important;
+        right: 0 !important;
+        object-position: center 22% !important;
+      }
+      #hero-content-col {
+        position: absolute !important;
+        left: 3%;
+        bottom: 8%;
+        max-width: 45%;
+        z-index: 10;
+      }
       .cv-hero-title {
-        font-size: 2.625rem;
+        font-size: clamp(36px, 2.75vw, 42px);
       }
       .cv-hero-play-circle {
-        width: 68px;
-        height: 68px;
+        width: 66px;
+        height: 66px;
       }
       .cv-hero-pill-group {
-        height: 52px;
+        height: 48px;
       }
       .cv-hero-pill-icon-btn {
-        width: 54px;
+        width: 52px;
       }
       .cv-hero-pill-text-btn {
         padding: 0 24px;
         font-size: 14px;
       }
       .cv-thumbs-dock {
-        max-width: 560px;
+        position: absolute !important;
+        right: 3%;
+        bottom: 8%;
+        z-index: 10;
+        padding: 0;
+        background: transparent;
+        border: 0;
+        max-width: none;
       }
       #hero-thumbs-strip {
         display: flex !important;
         flex-wrap: nowrap;
-        justify-content: flex-start;
+        justify-content: flex-end;
         align-items: center;
-        gap: 10px;
-        overflow-x: auto;
-        padding: 2px;
-        scrollbar-width: none;
-      }
-      #hero-thumbs-strip::-webkit-scrollbar {
-        display: none;
+        gap: 8px;
+        overflow: visible;
+        padding: 0;
       }
       #hero-thumbs-strip > button.lobby-zoom-tile {
-        width: 68px !important;
-        height: 44px !important;
-        min-width: 68px !important;
-        border-radius: 5px !important;
+        width: 80px !important;
+        height: 48px !important;
+        min-width: 80px !important;
+        border-radius: 6px !important;
         padding: 0 !important;
         flex-shrink: 0;
       }
@@ -2922,21 +2986,20 @@
         <img id="hero-bg-poster"
              src="https://i.ytimg.com/vi/CCyGZFUXcuI/hqdefault.jpg"
              alt="Hero Poster"
-             class="w-full h-full object-cover object-center opacity-70 netflix-hero-bg transition-all duration-700" />
+             class="absolute inset-0 w-full h-full object-cover opacity-85 netflix-hero-bg transition-all duration-700" />
         <video id="hero-bg-video"
                muted
                loop
                playsinline
                preload="none"
-               class="hidden absolute inset-0 w-full h-full object-cover opacity-75 transition-opacity duration-700"></video>
+               class="hidden absolute inset-0 w-full h-full object-cover opacity-80 transition-opacity duration-700"></video>
 
-        <!-- Lớp phủ Vignette tối 3 hướng kiểu rạp chiếu (#0B0B0F -> trong suốt) giống bố cục Ảnh 2 -->
+        <!-- 2 lớp phủ Gradient hòa mượt vào #1E2029 (Horizontal + Vertical) -->
         <div class="absolute inset-0 cv-hero-vignette-left"></div>
         <div class="absolute inset-0 cv-hero-vignette-bottom"></div>
-        <div class="absolute inset-0 cv-hero-vignette-right"></div>
       </div>
 
-      <!-- Nút bật/tắt tiếng Trailer gọn nhẹ ở góc trên phải để khoảng không gian trên poster thông thoáng -->
+      <!-- Nút bật/tắt tiếng Trailer gọn nhẹ ở góc trên phải -->
       <button type="button" onclick="window.appActions.toggleHeroVideoMute()" id="btn-hero-mute"
         style="position:absolute;top:18px;right:24px;z-index:20;"
         class="w-9 h-9 rounded-full bg-black/45 hover:bg-black/75 border border-white/20 text-white flex items-center justify-center transition cursor-pointer"
@@ -2944,16 +3007,16 @@
         <i class="fa-solid fa-volume-xmark text-xs"></i>
       </button>
 
-      <!-- Bố cục Hero Banner chuẩn Ảnh 2: Thông tin bên trái <= 530px + List phim hôm nay góc dưới phải -->
-      <div class="hero-main-grid relative z-10 mt-auto px-4 sm:px-10 lg:px-12 pb-6 sm:pb-10 lg:pb-14 pt-12 flex flex-col lg:flex-row lg:items-end justify-between gap-5">
+      <!-- Khối thông tin bên trái (Desktop: position absolute left 3% bottom 8% max-width 45%) -->
+      <div class="hero-main-grid relative z-10 mt-auto px-4 sm:px-8 pb-4 pt-12 lg:p-0 lg:static">
         <div id="hero-content-col" class="rophim-slide-enter">
-          <!-- Tên phim 42px trên Desktop -->
-          <h1 id="hero-movie-title" class="cv-hero-title line-clamp-1 sm:line-clamp-2">
+          <!-- Tên phim 36px-42px Bold, tự xuống 2 dòng tự nhiên -->
+          <h1 id="hero-movie-title" class="cv-hero-title">
             Godzilla vs. Kong (2021)
           </h1>
 
-          <!-- Hàng 1: Badge viền Vàng Gold + các thẻ viền trắng mảnh -->
-          <div class="mt-2.5 sm:mt-3.5 flex flex-wrap items-center gap-2">
+          <!-- Hàng 1: Metadata Badges 24px 1 hàng ngang -->
+          <div class="cv-hero-meta-row">
             <span id="hero-room-badge" class="cv-hero-meta-gold">
               <span style="color:#F5C518">Phòng 01</span>
               <span>• Đang chiếu</span>
@@ -2967,31 +3030,31 @@
             </span>
           </div>
 
-          <!-- Hàng 2: Các thẻ thể loại tách rời sạch sẽ -->
-          <div id="hero-genre-pills" class="mt-2 sm:mt-2.5 flex flex-wrap items-center gap-1.5 sm:gap-2"></div>
+          <!-- Hàng 2: Genre Tags 1 hàng ngang -->
+          <div id="hero-genre-pills" class="cv-hero-genre-row"></div>
           <span id="hero-genre" class="hidden"></span>
           <span id="hero-quality-badge" class="hidden"></span>
           <span id="hero-rank-badge" class="hidden"></span>
           <span id="hero-match-score" class="hidden"></span>
 
-          <!-- Hàng 3: Tóm tắt nội dung 3 dòng chuẩn 14px -->
-          <p id="hero-synopsis" class="hidden sm:line-clamp-3 cv-hero-synopsis mt-3.5">
+          <!-- Hàng 3: Tóm tắt 3 dòng (#E0E0E0, 14px) -->
+          <p id="hero-synopsis" class="hidden sm:block cv-hero-synopsis">
             Hai siêu quái vật huyền thoại Godzilla và Kong bước vào trận đại chiến chấn động thế giới, trong khi nhân loại tiến sâu vào Trái Đất Rỗng để khám phá nguồn gốc thật sự của các Titan.
           </p>
 
-          <!-- Hàng 4: Nút tròn Play 68px màu Đỏ #E50914 + Viên thuốc đôi [Chi tiết | Xem Phim] -->
-          <div class="mt-4 sm:mt-7 flex items-center gap-3.5 sm:gap-4 relative z-20">
+          <!-- Hàng 4: Nút Play tròn 66px (#F6D365) + Viên thuốc đôi [Heart/Info | Xem Phim] -->
+          <div class="cv-hero-actions">
             <button type="button" onclick="window.appActions.openBookingModalForHero()" style="touch-action: manipulation;"
               class="cv-hero-play-circle"
               title="Đặt Vé &amp; Chọn Ghế Ngay">
-              <i class="fa-solid fa-play text-base lg:text-2xl ml-1"></i>
+              <i class="fa-solid fa-play" style="font-size:20px;color:#1E2029;margin-left:3px;"></i>
             </button>
 
             <div class="cv-hero-pill-group">
               <button type="button" onclick="window.appActions.openHeroDetailModal()"
                 class="cv-hero-pill-icon-btn"
-                title="Chi tiết phim &amp; Diễn viên">
-                <i class="fa-solid fa-circle-info text-base lg:text-lg"></i>
+                title="Chi tiết phim">
+                <i class="fa-solid fa-heart text-sm lg:text-base"></i>
               </button>
               <span class="cv-hero-pill-divider"></span>
               <button type="button" onclick="window.appActions.enterHeroRoomNow()" style="touch-action: manipulation;"
@@ -3001,21 +3064,11 @@
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Góc dưới phải: Dải thumbnail 1 hàng siêu gọn giống Ảnh 2 -->
-        <div class="cv-thumbs-dock shrink-0 flex items-center gap-2">
-          <button type="button" onclick="window.appActions.prevHeroSlide()"
-            class="hidden lg:inline-flex w-7 h-7 rounded-md bg-white/5 hover:bg-white/15 border border-white/10 text-white items-center justify-center cursor-pointer shrink-0 transition"
-            title="Phim trước">
-            <i class="fa-solid fa-chevron-left text-[10px]"></i>
-          </button>
-          <div id="hero-thumbs-strip" class="flex items-center gap-2"></div>
-          <button type="button" onclick="window.appActions.nextHeroSlide()"
-            class="hidden lg:inline-flex w-7 h-7 rounded-md bg-white/5 hover:bg-white/15 border border-white/10 text-white items-center justify-center cursor-pointer shrink-0 transition"
-            title="Phim tiếp theo">
-            <i class="fa-solid fa-chevron-right text-[10px]"></i>
-          </button>
-        </div>
+      <!-- Dải 6 Thumbnail tách riêng góc dưới phải (Desktop: right 3% bottom 8%) -->
+      <div class="cv-thumbs-dock">
+        <div id="hero-thumbs-strip" class="flex items-center gap-2"></div>
       </div>
 
       <!-- Thanh tiến trình tự động chuyển Slide bên dưới Billboard -->
@@ -7244,36 +7297,30 @@
         if (!state.heroPaused) prog.classList.add("netflix-progress-fill");
       }
 
-      // Render dãy thumbnail nhỏ gọn góc dưới phải (chạm lần 1 chọn slide, chạm lần 2 mở đặt vé)
+      // Render tối đa 6 thumbnail góc dưới phải (cửa sổ trượt quanh slide active, viền trắng 2px cho active)
       const strip = document.getElementById("hero-thumbs-strip");
       if (strip) {
-        strip.innerHTML = rooms.map((r, i) => {
+        const maxVisible = 6;
+        let startIdx = 0;
+        if (rooms.length > maxVisible) {
+          startIdx = Math.max(0, Math.min(idx - 2, rooms.length - maxVisible));
+        }
+        const visibleSlice = rooms.slice(startIdx, startIdx + maxVisible);
+        strip.innerHTML = visibleSlice.map((r, offset) => {
+          const i = startIdx + offset;
           const active = i === idx;
           return `
             <button type="button"
                     onclick="${active ? `window.appActions.openBookingModal('${r.id}')` : `window.appActions.selectHeroSlide(${i})`}"
                     title="${escapeHTML(r.number)} • ${escapeHTML(r.displayTitle || sanitizeMovieTitle(r.movieTitle))}"
-                    style="touch-action:manipulation;${active ? 'border-color:#F5C518;box-shadow:0 0 12px rgba(245,197,24,0.45);' : 'border-color:rgba(255,255,255,0.22);'}"
-                    class="lobby-zoom-tile group relative overflow-hidden border-2 transition-all duration-300 cursor-pointer ${
-                      active
-                        ? 'opacity-100 shadow-lg'
-                        : 'opacity-70 hover:opacity-100 hover:border-white/80'
-                    }">
+                    style="touch-action:manipulation;${active ? 'border:2px solid #FFFFFF;opacity:1;' : 'border:none;opacity:0.75;'}"
+                    class="lobby-zoom-tile group relative overflow-hidden transition-all duration-300 cursor-pointer hover:opacity-100">
               <img src="${escapeHTML(r.poster)}" alt="${escapeHTML(r.number)}"
-                   onerror="this.src='https://placehold.co/300x180/16161D/F5C518?text=Room'"
+                   onerror="this.src='https://placehold.co/300x180/1E2029/F6D365?text=Room'"
                    class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
             </button>
           `;
         }).join("");
-        const activeThumb = strip.children[idx];
-        if (activeThumb) {
-          const targetScrollLeft = Math.max(0, activeThumb.offsetLeft - (strip.clientWidth - activeThumb.offsetWidth) / 2);
-          try {
-            strip.scrollTo({ left: targetScrollLeft, behavior: "smooth" });
-          } catch (_) {
-            strip.scrollLeft = targetScrollLeft;
-          }
-        }
       }
     }
 
