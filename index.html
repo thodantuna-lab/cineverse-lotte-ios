@@ -224,6 +224,9 @@
       filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.85));
     }
     #ios-liquid-nav-bar {
+      background: rgba(15, 17, 26, 0.88) !important;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
     }
     #ios-liquid-nav-bar.rophim-scrolled {
@@ -2584,15 +2587,15 @@
                preload="none"
                class="hidden absolute inset-0 w-full h-full object-cover opacity-75 transition-opacity duration-700"></video>
 
-        <!-- Lớp phủ Gradient mềm kiểu RoPhim để lộ Ambient Blur & chiều sâu poster -->
-        <div class="absolute inset-0 bg-gradient-to-r from-[#191b24]/95 via-[#191b24]/55 to-transparent"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-[#191b24] via-transparent to-[#191b24]/30"></div>
+        <!-- Lớp phủ Gradient tối #191b24 giúp chữ luôn rõ nét trên mọi poster sáng/tối -->
+        <div class="absolute inset-0 bg-gradient-to-r from-[#191b24]/95 via-[#191b24]/70 to-[#191b24]/25"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#191b24] via-[#191b24]/75 to-[#191b24]/45"></div>
       </div>
 
       <!-- Thanh trạng thái trên cùng của Billboard -->
-      <div class="relative z-10 px-6 sm:px-10 pt-6 flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-2.5">
-          <span class="px-2.5 py-1 rounded-md bg-amber-400/20 border border-amber-300/45 text-amber-300 font-black text-[11px] tracking-widest uppercase shadow-lg">
+      <div class="relative z-10 px-4 sm:px-10 pt-5 sm:pt-6 flex flex-wrap items-center justify-between gap-2 sm:gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="hidden sm:inline-flex px-2.5 py-1 rounded-md bg-amber-400/20 border border-amber-300/45 text-amber-300 font-black text-[11px] tracking-widest uppercase shadow-lg">
             CINEVERSE ORIGINAL
           </span>
           <span id="hero-room-badge" class="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-extrabold">
@@ -2618,38 +2621,38 @@
       </div>
 
       <!-- Nội dung giới thiệu phim chính giữa (Trái: Thông tin phim Netflix | Phải: Carousel chọn nhanh phim) -->
-      <div class="relative z-10 px-6 sm:px-10 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
-        <div id="hero-content-col" class="lg:col-span-7 space-y-3.5 rophim-slide-enter">
+      <div class="relative z-10 px-4 sm:px-10 py-5 sm:py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
+        <div id="hero-content-col" class="lg:col-span-7 space-y-2.5 sm:space-y-3.5 rophim-slide-enter">
           <!-- Dòng Metadata kiểu RoPhim (.tag-model + .tag-classic) -->
-          <div class="flex flex-wrap items-center gap-2 text-xs font-bold">
+          <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs font-bold">
             <span id="hero-rank-badge" class="rophim-gold-btn px-2.5 py-0.5 rounded font-black text-[10px] uppercase tracking-wider">
               TOP 1 THỊNH HÀNH
             </span>
-            <span id="hero-match-score" class="rophim-tag-classic text-emerald-300 font-extrabold">99% Phù hợp</span>
+            <span id="hero-match-score" class="hidden sm:inline-flex rophim-tag-classic text-emerald-300 font-extrabold">99% Phù hợp</span>
             <span id="hero-year" class="rophim-tag-classic">2026</span>
             <span id="hero-quality-badge" class="rophim-tag-model">
               4K IMAX
             </span>
-            <span class="rophim-tag-classic text-amber-200">
+            <span class="hidden sm:inline-flex rophim-tag-classic text-amber-200">
               VI / EN SUB
             </span>
             <span id="hero-duration" class="rophim-tag-classic">19:59</span>
           </div>
 
           <!-- Tên bộ phim cỡ lớn -->
-          <h1 id="hero-movie-title" class="text-2xl sm:text-4xl lg:text-5xl font-black text-white leading-[1.12] tracking-tight drop-shadow-[0_6px_24px_rgba(0,0,0,0.95)]">
+          <h1 id="hero-movie-title" class="text-xl sm:text-4xl lg:text-5xl font-black text-white leading-[1.14] tracking-tight drop-shadow-[0_6px_24px_rgba(0,0,0,0.95)] line-clamp-2">
             Godzilla vs. Kong (2021) - 1080p WEBRip
           </h1>
 
           <!-- Mô tả cốt truyện hấp dẫn (Synopsis) -->
-          <p id="hero-synopsis" class="text-xs sm:text-sm text-slate-200/95 leading-relaxed line-clamp-3 max-w-2xl drop-shadow">
+          <p id="hero-synopsis" class="text-xs sm:text-sm text-slate-200 leading-relaxed line-clamp-2 sm:line-clamp-3 max-w-2xl drop-shadow">
             Hai siêu quái vật huyền thoại Godzilla và Kong bước vào trận đại chiến chấn động thế giới, trong khi nhân loại tiến sâu vào Trái Đất Rỗng để khám phá nguồn gốc thật sự của các Titan.
           </p>
 
           <!-- Diễn viên / Đạo diễn / Thể loại -->
-          <div class="text-xs text-slate-400 space-y-0.5">
-            <p><span class="text-slate-500 font-semibold">Nghệ sĩ / Kênh:</span> <strong id="hero-cast" class="text-slate-200">Panda Review, Jason Behr, Amanda Brooks</strong></p>
-            <p><span class="text-slate-500 font-semibold">Thể loại:</span> <span id="hero-genre" class="text-amber-300 font-semibold">Hành động • Kỳ ảo • Quái vật Khổng lồ</span></p>
+          <div class="text-xs text-slate-300 space-y-0.5">
+            <p class="hidden sm:block"><span class="text-slate-400 font-semibold">Nghệ sĩ / Kênh:</span> <strong id="hero-cast" class="text-slate-100">Panda Review, Jason Behr, Amanda Brooks</strong></p>
+            <p class="truncate"><span class="text-slate-400 font-semibold">Thể loại:</span> <span id="hero-genre" class="text-amber-300 font-semibold">Hành động • Kỳ ảo • Quái vật Khổng lồ</span></p>
           </div>
 
           <!-- Cụm nút hành động kiểu RoPhim (Vàng Gold Gradient + Kính mờ) -->
@@ -2679,8 +2682,8 @@
           </div>
         </div>
 
-        <!-- Cột phải: Khay Poster thu nhỏ của 6 phim để người dùng bấm lướt như Netflix TV -->
-        <div class="lg:col-span-5 space-y-2">
+        <!-- Cột phải: Khay Poster thu nhỏ (chỉ hiện trên Desktop >= lg để Mobile gọn sạch) -->
+        <div class="hidden lg:block lg:col-span-5 space-y-2">
           <div class="flex items-center justify-between text-[11px] font-extrabold uppercase tracking-wider text-slate-300">
             <span><i class="fa-solid fa-fire text-rose-500 mr-1.5"></i>Danh sách Phim Đang & Sắp Chiếu</span>
             <span id="hero-slide-counter" class="text-amber-400 font-mono">01 / 06</span>
