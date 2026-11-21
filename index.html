@@ -279,30 +279,6 @@
       mask-image: linear-gradient(0deg, transparent 0%, #000 22%, #000 100%);
     }
 
-    @keyframes rophimQtipPop {
-      from { opacity: 0; transform: scale(0.84) translateY(6px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    #rophim-hover-popover {
-      position: fixed;
-      z-index: 65;
-      width: 340px;
-      max-width: calc(100vw - 24px);
-      border-radius: 0.9rem;
-      overflow: hidden;
-      background: linear-gradient(180deg, rgba(47, 51, 70, 0.96), rgba(25, 27, 36, 0.98));
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 216, 117, 0.28);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.78), 0 0 28px rgba(255, 216, 117, 0.12);
-      animation: rophimQtipPop 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
-      pointer-events: auto;
-    }
-    #rophim-hover-popover .rophim-popover-art {
-      -webkit-mask-image: linear-gradient(0deg, transparent, #000 32px);
-      mask-image: linear-gradient(0deg, transparent, #000 32px);
-    }
-
     #rophim-totop {
       position: fixed;
       right: 1.25rem;
@@ -1773,10 +1749,10 @@
         #lobby-rooms-grid > .lobby-zoom-card:nth-child(3n) { transform-origin: right center; }
       }
       #lobby-rooms-grid > .lobby-zoom-card:hover {
-        z-index: 80 !important;
-        transform: scale(1.24) translateY(-6px) !important;
-        box-shadow: 0 28px 64px rgba(0, 0, 0, 0.92), var(--glass-highlight) !important;
-        border-color: rgba(255, 255, 255, 0.32) !important;
+        z-index: 20 !important;
+        transform: translateY(-4px) !important;
+        border-color: rgba(255, 216, 117, 0.45) !important;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.72), 0 0 24px rgba(255, 216, 117, 0.14) !important;
       }
     }
 
@@ -2760,15 +2736,8 @@
       <h2 class="text-sm sm:text-base font-black uppercase tracking-wider rophim-gradient-title">
         <i class="fa-solid fa-clapperboard text-amber-300 mr-1.5" style="-webkit-text-fill-color:#ffd875;"></i>Phòng Chiếu Đang Hoạt Động
       </h2>
-      <span class="text-[11px] text-slate-400 hidden sm:inline">Rê chuột vào thẻ phòng để xem nhanh thông tin</span>
     </div>
     <div id="lobby-rooms-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-
-    <!-- Popover Hover Preview kiểu RoPhim (.qtip-default) -->
-    <div id="rophim-hover-popover" class="hidden"
-         onmouseenter="window.appActions.keepRoomHoverCardOpen()"
-         onmouseleave="window.appActions.cancelRoomHoverCard(true)">
-    </div>
 
     <!-- Nút Lên Đầu Trang kiểu RoPhim (#totop) -->
     <button id="rophim-totop" type="button" onclick="window.appActions.scrollToTopSmooth()"
@@ -6967,8 +6936,6 @@
 
         return `
           <div onclick="window.appActions.enterRoom('${room.id}')"
-               onmouseenter="window.appActions.scheduleRoomHoverCard(event, '${room.id}', this)"
-               onmouseleave="window.appActions.cancelRoomHoverCard()"
                class="lobby-zoom-card liquid-glass-card group rounded-3xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer">
             <div class="relative h-48 overflow-hidden bg-black">
               <img src="${escapeHTML(room.poster)}" alt="${escapeHTML(room.movieTitle)}"
@@ -21548,11 +21515,8 @@
     prefetchLobbyConfigRoomsOnBoot();
     initFirebase();
 
-    // RoPhim UI: Header chuyển nền khi cuộn + Nút lên đầu trang + Popover xem nhanh thẻ phòng
+    // RoPhim UI: Header chuyển nền khi cuộn + Nút lên đầu trang
     (function initRoPhimEffects() {
-      let hoverShowTimer = null;
-      let hoverHideTimer = null;
-
       function updateScrollUI() {
         const nav = document.getElementById("ios-liquid-nav-bar");
         const toTop = document.getElementById("rophim-totop");
@@ -21563,93 +21527,7 @@
       window.addEventListener("scroll", updateScrollUI, { passive: true });
       updateScrollUI();
 
-      function hidePopoverNow() {
-        const pop = document.getElementById("rophim-hover-popover");
-        if (pop) pop.classList.add("hidden");
-      }
-
-      function renderRoomHoverPopover(roomId, cardEl) {
-        const pop = document.getElementById("rophim-hover-popover");
-        if (!pop || !cardEl || state.currentRoomId) return;
-        const room = getEffectiveRoom(roomId);
-        if (!room) return;
-        const seats = state.seatsByRoom[room.id] || {};
-        const count = Object.keys(seats).length;
-        const maxCap = room.maxSeats || 48;
-        const isShowing = room.status === "showing";
-
-        pop.innerHTML = `
-          <div class="relative h-36 bg-black overflow-hidden">
-            <img src="${escapeHTML(room.poster)}" alt="${escapeHTML(room.movieTitle)}"
-                 onerror="this.src='https://placehold.co/800x450/1c1917/fbbf24?text=CineVerse+Lotte'"
-                 class="rophim-popover-art w-full h-full object-cover opacity-90" />
-            <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5">
-              <span class="px-2 py-0.5 rounded-full bg-black/75 border border-white/20 text-[10px] font-black text-white">${escapeHTML(room.number)}</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${isShowing ? "bg-emerald-500/25 text-emerald-300 border border-emerald-400/40" : "bg-amber-500/25 text-amber-300 border border-amber-400/40"}">
-                ${isShowing ? "Đang chiếu" : "Sắp chiếu"}
-              </span>
-            </div>
-            <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/75 border border-white/20 text-[10px] font-bold text-slate-200">
-              ${count}/${maxCap} ghế
-            </span>
-          </div>
-          <div class="p-3.5 space-y-2.5">
-            <div>
-              <h4 class="text-sm font-black text-white leading-snug line-clamp-1">${escapeHTML(room.movieTitle)}</h4>
-              <p class="text-[11px] font-bold text-amber-300 mt-0.5 line-clamp-1">${escapeHTML(room.genre || "Điện ảnh")} • ${escapeHTML(room.duration || "2h")} • ${escapeHTML(room.quality || "HD")}</p>
-            </div>
-            ${room.synopsis ? `<p class="text-[11px] text-slate-300 leading-relaxed line-clamp-3">${escapeHTML(room.synopsis)}</p>` : ""}
-            <div class="flex items-center gap-2 pt-1">
-              <button type="button" onclick="window.appActions.cancelRoomHoverCard(true); window.appActions.enterRoom('${room.id}')"
-                class="rophim-gold-btn flex-1 py-2 px-3 rounded-xl font-black text-xs cursor-pointer flex items-center justify-center gap-1.5">
-                <i class="fa-solid fa-play"></i>
-                <span>Vào Phòng Ngay</span>
-              </button>
-              <button type="button" onclick="window.appActions.cancelRoomHoverCard(true); window.appActions.openBookingModal('${room.id}')"
-                class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white font-bold text-xs cursor-pointer transition"
-                title="Đặt vé & chọn ghế">
-                <i class="fa-solid fa-ticket text-amber-300"></i>
-              </button>
-            </div>
-          </div>
-        `;
-
-        const rect = cardEl.getBoundingClientRect();
-        const popW = Math.min(340, window.innerWidth - 24);
-        const popH = 310;
-        let left = rect.left + (rect.width - popW) / 2;
-        left = Math.max(12, Math.min(left, window.innerWidth - popW - 12));
-        let top = rect.top - 12;
-        if (top + popH > window.innerHeight - 12) {
-          top = Math.max(76, window.innerHeight - popH - 12);
-        }
-        pop.style.left = `${Math.round(left)}px`;
-        pop.style.top = `${Math.round(top)}px`;
-        pop.classList.remove("hidden");
-      }
-
       if (window.appActions) {
-        window.appActions.scheduleRoomHoverCard = function (ev, roomId, cardEl) {
-          if (!window.matchMedia || !window.matchMedia("(hover: hover)").matches) return;
-          if (window.innerWidth < 768) return;
-          clearTimeout(hoverHideTimer);
-          clearTimeout(hoverShowTimer);
-          hoverShowTimer = setTimeout(() => {
-            renderRoomHoverPopover(roomId, cardEl);
-          }, 320);
-        };
-        window.appActions.keepRoomHoverCardOpen = function () {
-          clearTimeout(hoverHideTimer);
-        };
-        window.appActions.cancelRoomHoverCard = function (immediate = false) {
-          clearTimeout(hoverShowTimer);
-          clearTimeout(hoverHideTimer);
-          if (immediate) {
-            hidePopoverNow();
-          } else {
-            hoverHideTimer = setTimeout(hidePopoverNow, 180);
-          }
-        };
         window.appActions.scrollToTopSmooth = function () {
           window.scrollTo({ top: 0, behavior: "smooth" });
         };
