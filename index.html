@@ -16,14 +16,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg-base: #0A0C10;
-      --bg-surface: rgba(20, 24, 32, 0.65);
-      --accent-primary: #E11D48;
-      --text-primary: #F8FAFC;
-      --text-secondary: #94A3B8;
-      --glass-border: rgba(255, 255, 255, 0.14);
-      --glass-highlight: inset 0 1px 1px rgba(255, 255, 255, 0.25);
-      --status-live: #10B981;
+      --cv-black-bg: #0B0B0F;
+      --cv-black-surface: #16161D;
+      --cv-black-elevated: #1D1D27;
+      --cv-red-primary: #E50914;
+      --cv-red-hover: #D91E2A;
+      --cv-gold-accent: #F5C518;
+      --cv-white-text: #FFFFFF;
+      --cv-muted-text: #A1A1AA;
+      --bg-base: var(--cv-black-bg);
+      --bg-surface: rgba(22, 22, 29, 0.88);
+      --accent-primary: var(--cv-red-primary);
+      --text-primary: var(--cv-white-text);
+      --text-secondary: var(--cv-muted-text);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-highlight: inset 0 1px 1px rgba(255, 255, 255, 0.16);
+      --status-live: var(--cv-red-primary);
     }
 
     * {
@@ -168,17 +176,40 @@
     }
 
     /* ======================================================= */
-    /* ROPHIM UI & HIỆU ỨNG THỊ GIÁC (AMBIENT BLUR, MASK, QTIP)*/
+    /* CINEVERSE CINEMATIC DARK UI (ĐỎ #E50914 / ĐEN #0B0B0F / VÀNG #F5C518 / TRẮNG) */
     /* ======================================================= */
     body {
-      background-color: #191b24 !important;
+      background-color: var(--cv-black-bg) !important;
+      color: var(--cv-white-text) !important;
     }
     #ambient-tuna-backdrop {
-      background: radial-gradient(circle at 50% 18%, rgba(47, 51, 70, 0.55), #191b24 76%) !important;
+      background: radial-gradient(circle at 50% 14%, rgba(229, 9, 20, 0.12), var(--cv-black-bg) 72%) !important;
+    }
+    #lobby-view {
+      padding-bottom: 104px !important;
     }
     #netflix-billboard {
-      background: #191b24 !important;
+      background: var(--cv-black-bg) !important;
       border: 0 !important;
+    }
+    .cv-hero-vignette-left {
+      background: linear-gradient(to right, #0B0B0F 25%, rgba(11, 11, 15, 0.4) 65%, transparent 100%);
+    }
+    .cv-hero-vignette-bottom {
+      background: linear-gradient(to top, #0B0B0F 0%, rgba(11, 11, 15, 0.55) 26%, transparent 60%);
+    }
+    #hero-content-col {
+      max-width: 550px;
+      width: 100%;
+    }
+    .cv-thumbs-dock {
+      background: rgba(22, 22, 29, 0.68);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 16px;
+      padding: 8px 10px;
+      max-width: 100%;
     }
     @media (min-width: 1024px) {
       #netflix-billboard {
@@ -188,24 +219,29 @@
         margin-top: -0.5rem;
         border-radius: 0 !important;
       }
+      .cv-thumbs-dock {
+        max-width: 540px;
+      }
       #hero-thumbs-strip {
         display: flex !important;
         flex-wrap: nowrap;
-        justify-content: flex-end;
+        justify-content: flex-start;
         align-items: center;
         gap: 8px;
         overflow-x: auto;
+        padding: 2px;
         scrollbar-width: none;
       }
       #hero-thumbs-strip::-webkit-scrollbar {
         display: none;
       }
       #hero-thumbs-strip > button.lobby-zoom-tile {
-        width: 70px !important;
-        height: 46px !important;
-        min-width: 70px !important;
+        width: 68px !important;
+        height: 44px !important;
+        min-width: 68px !important;
         border-radius: 8px !important;
         padding: 0 !important;
+        flex-shrink: 0;
       }
       #hero-thumbs-strip > button.lobby-zoom-tile > span,
       #hero-thumbs-strip > button.lobby-zoom-tile > div {
@@ -213,12 +249,79 @@
       }
     }
     .liquid-glass-card {
-      background: linear-gradient(180deg, rgba(40, 43, 58, 0.88), rgba(25, 27, 36, 0.96)) !important;
-      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      background: var(--cv-black-surface) !important;
+      border: 1px solid rgba(255, 255, 255, 0.09) !important;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55) !important;
+    }
+    .cv-btn-red {
+      background: var(--cv-red-primary) !important;
+      color: var(--cv-white-text) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      box-shadow: 0 8px 24px rgba(229, 9, 20, 0.38) !important;
+    }
+    .cv-btn-red:hover {
+      background: var(--cv-red-hover) !important;
+      box-shadow: 0 10px 28px rgba(229, 9, 20, 0.55) !important;
+    }
+    .cv-btn-gold-outline {
+      background: rgba(245, 197, 24, 0.14) !important;
+      color: var(--cv-gold-accent) !important;
+      border: 1.5px solid rgba(245, 197, 24, 0.7) !important;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .cv-btn-gold-outline:hover {
+      background: var(--cv-gold-accent) !important;
+      color: var(--cv-black-bg) !important;
+      border-color: var(--cv-gold-accent) !important;
+    }
+    .cv-badge-live {
+      background: rgba(229, 9, 20, 0.2) !important;
+      border: 1px solid rgba(229, 9, 20, 0.65) !important;
+      color: var(--cv-white-text) !important;
+    }
+    .cv-badge-vip {
+      background: rgba(245, 197, 24, 0.16) !important;
+      border: 1px solid rgba(245, 197, 24, 0.55) !important;
+      color: var(--cv-gold-accent) !important;
+    }
+    .cv-progress-red {
+      background: linear-gradient(90deg, #E50914 0%, #FF3B30 100%) !important;
+    }
+    .cv-filter-btn {
+      background: var(--cv-black-surface);
+      color: var(--cv-muted-text);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0.5rem 0.9rem;
+      border-radius: 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      transition: all 0.22s ease;
+      cursor: pointer;
+    }
+    .cv-filter-btn:hover {
+      color: var(--cv-white-text);
+      border-color: rgba(245, 197, 24, 0.45);
+    }
+    .cv-filter-btn.is-active {
+      background: var(--cv-red-primary) !important;
+      color: var(--cv-white-text) !important;
+      border-color: var(--cv-red-primary) !important;
+      font-weight: 800;
+      box-shadow: 0 6px 18px rgba(229, 9, 20, 0.35);
+    }
+    .cv-section-divider {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
     .rophim-tag-model {
       background: #ffffff;
-      color: #191b24;
+      color: #0B0B0F;
       font-weight: 900;
       padding: 2px 7px;
       border-radius: 5px;
@@ -230,41 +333,40 @@
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       border: 1px solid rgba(255, 255, 255, 0.14);
-      color: #f1f5f9;
+      color: var(--cv-white-text);
       padding: 2px 8px;
       border-radius: 6px;
       font-size: 11px;
       font-weight: 700;
     }
     .rophim-card-cta {
-      background: #2f3346 !important;
-      color: #ffd875 !important;
-      border: 1px solid rgba(255, 216, 117, 0.25) !important;
+      background: var(--cv-red-primary) !important;
+      color: var(--cv-white-text) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
     }
     .lobby-zoom-card:hover .rophim-card-cta {
-      background: linear-gradient(39deg, #fecf59 0%, #fff1cc 100%) !important;
-      color: #191b24 !important;
-      border-color: transparent !important;
+      background: var(--cv-red-hover) !important;
+      box-shadow: 0 8px 20px rgba(229, 9, 20, 0.4) !important;
     }
     .rophim-rank-num {
       font-style: italic;
       font-weight: 900;
       line-height: 1;
-      background: linear-gradient(39deg, #fecf59 0%, #fff1cc 100%);
+      background: linear-gradient(39deg, #F5C518 0%, #FFE885 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.85));
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.9));
     }
     #ios-liquid-nav-bar {
-      background: rgba(15, 17, 26, 0.88) !important;
+      background: rgba(11, 11, 15, 0.90) !important;
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
     }
     #ios-liquid-nav-bar.rophim-scrolled {
-      background: rgba(15, 17, 26, 0.94) !important;
-      border-color: rgba(255, 216, 117, 0.22) !important;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65) !important;
+      background: rgba(11, 11, 15, 0.97) !important;
+      border-color: rgba(245, 197, 24, 0.28) !important;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.78) !important;
     }
 
     @keyframes rophimSlideContent {
@@ -276,9 +378,9 @@
     }
 
     #hero-bg-ambient-blur {
-      filter: blur(52px) saturate(1.25);
+      filter: blur(52px) saturate(1.2);
       transform: scale(1.15);
-      opacity: 0.28;
+      opacity: 0.22;
       transition: opacity 0.6s ease;
     }
     #hero-bg-poster {
@@ -287,27 +389,27 @@
     }
 
     .rophim-gradient-title {
-      background: linear-gradient(235deg, #ffffff 35%, #ffd875 130%);
+      background: linear-gradient(235deg, #ffffff 40%, #F5C518 135%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
     .rophim-gold-btn {
-      background: linear-gradient(39deg, #fecf59 0%, #fff1cc 100%) !important;
-      color: #191b24 !important;
-      box-shadow: 0 5px 18px rgba(255, 218, 125, 0.28);
+      background: linear-gradient(39deg, #F5C518 0%, #FFE885 100%) !important;
+      color: #0B0B0F !important;
+      box-shadow: 0 5px 18px rgba(245, 197, 24, 0.32);
     }
     .rophim-gold-btn:hover {
       filter: brightness(1.06);
-      box-shadow: 0 8px 24px rgba(255, 218, 125, 0.42);
+      box-shadow: 0 8px 24px rgba(245, 197, 24, 0.45);
     }
 
     .lobby-zoom-card {
-      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.28s ease !important;
     }
     .lobby-zoom-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(255, 216, 117, 0.45) !important;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.72), 0 0 24px rgba(255, 216, 117, 0.14) !important;
+      transform: scale(1.03) translateY(-3px);
+      border-color: rgba(245, 197, 24, 0.55) !important;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.8), 0 0 22px rgba(245, 197, 24, 0.16) !important;
     }
     .lobby-card-poster {
       -webkit-mask-image: linear-gradient(0deg, transparent 0%, #000 22%, #000 100%);
@@ -320,13 +422,16 @@
     }
 
     @media (max-width: 1023px) {
+      .cv-thumbs-dock {
+        padding: 6px 8px;
+      }
       #hero-thumbs-strip {
         display: flex !important;
         justify-content: center;
         align-items: center;
         gap: 8px;
         overflow-x: auto;
-        padding: 4px 2px;
+        padding: 2px;
         scrollbar-width: none;
       }
       #hero-thumbs-strip::-webkit-scrollbar {
@@ -338,6 +443,7 @@
         min-width: 36px !important;
         border-radius: 9999px !important;
         padding: 0 !important;
+        flex-shrink: 0;
       }
       #hero-thumbs-strip > button.lobby-zoom-tile > span,
       #hero-thumbs-strip > button.lobby-zoom-tile > div {
@@ -346,8 +452,8 @@
     }
     @media (max-width: 639px) {
       #netflix-billboard {
-        min-height: 250px !important;
-        max-height: 300px !important;
+        min-height: 270px !important;
+        max-height: 330px !important;
         margin-left: -0.75rem;
         margin-right: -0.75rem;
         border-radius: 0 !important;
@@ -369,9 +475,16 @@
     #rophim-totop {
       position: fixed;
       right: 1.25rem;
-      bottom: 5.25rem;
+      bottom: 5.5rem;
       z-index: 45;
+      background: var(--cv-black-surface);
+      color: var(--cv-gold-accent);
+      border: 1px solid rgba(245, 197, 24, 0.4);
       transition: all 0.3s ease;
+    }
+    #rophim-totop:hover {
+      background: var(--cv-gold-accent);
+      color: var(--cv-black-bg);
     }
 
     /* Tách tầng GPU riêng cho màn hình video 1080p để phát mượt tối đa */
@@ -1758,14 +1871,14 @@
     }
 
     .cta-primary-btn {
-      background: var(--accent-primary) !important;
-      color: var(--text-primary) !important;
-      border: 1px solid rgba(255, 255, 255, 0.22) !important;
-      box-shadow: 0 10px 28px rgba(225, 29, 72, 0.42), var(--glass-highlight) !important;
+      background: var(--cv-red-primary) !important;
+      color: var(--cv-white-text) !important;
+      border: 1px solid rgba(255, 255, 255, 0.16) !important;
+      box-shadow: 0 10px 28px rgba(229, 9, 20, 0.42), var(--glass-highlight) !important;
     }
     .cta-primary-btn:hover {
-      background: #f43f5e !important;
-      box-shadow: 0 14px 34px rgba(225, 29, 72, 0.58), var(--glass-highlight) !important;
+      background: var(--cv-red-hover) !important;
+      box-shadow: 0 14px 34px rgba(229, 9, 20, 0.58), var(--glass-highlight) !important;
     }
 
     .monochrome-pill {
@@ -1820,26 +1933,22 @@
         transform-origin: center center;
       }
       #hero-thumbs-strip > button.lobby-zoom-tile:hover {
-        z-index: 90 !important;
-        transform: scale(1.48) translateY(-4px) !important;
-        box-shadow: 0 22px 48px rgba(0, 0, 0, 0.92), var(--glass-highlight) !important;
-        border-color: rgba(255, 255, 255, 0.38) !important;
+        z-index: 25 !important;
+        transform: scale(1.08) translateY(-2px) !important;
+        box-shadow: 0 6px 18px rgba(245, 197, 24, 0.35) !important;
+        border-color: var(--cv-gold-accent) !important;
       }
       #lobby-rooms-grid > .lobby-zoom-card {
         position: relative;
         z-index: 10;
-        transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.34s ease, border-color 0.28s ease !important;
+        transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, border-color 0.25s ease !important;
         transform-origin: center center;
-      }
-      @media (min-width: 1024px) {
-        #lobby-rooms-grid > .lobby-zoom-card:nth-child(3n+1) { transform-origin: left center; }
-        #lobby-rooms-grid > .lobby-zoom-card:nth-child(3n) { transform-origin: right center; }
       }
       #lobby-rooms-grid > .lobby-zoom-card:hover {
         z-index: 20 !important;
-        transform: translateY(-4px) !important;
-        border-color: rgba(255, 216, 117, 0.45) !important;
-        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.72), 0 0 24px rgba(255, 216, 117, 0.14) !important;
+        transform: scale(1.03) translateY(-3px) !important;
+        border-color: rgba(245, 197, 24, 0.55) !important;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.8), 0 0 22px rgba(245, 197, 24, 0.16) !important;
       }
     }
 
@@ -2572,10 +2681,10 @@
              class="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover shadow-lg border border-white/25 bg-black shrink-0" />
         <div class="min-w-0">
           <div class="flex items-center gap-2">
-            <span class="font-black text-sm sm:text-lg tracking-tight text-white truncate">CINEVERSE <span class="text-amber-300 font-extrabold">LOTTE</span></span>
-            <span class="hidden sm:inline-flex ios-liquid-pill text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full">Live 3D POV</span>
+            <span class="font-black text-sm sm:text-lg tracking-tight text-white truncate">CINEVERSE <span style="color:#F5C518" class="font-extrabold">LOTTE</span></span>
+            <span class="hidden sm:inline-flex cv-badge-vip text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full">Live 3D POV</span>
           </div>
-          <p class="hidden sm:block text-[11px] text-slate-300/80">Rạp phim 3D trực tuyến • Xem chung đồng bộ • Chọn ghế & Vé NFT • Tìm rạp Hà Nội</p>
+          <p class="hidden sm:block text-[11px]" style="color:#A1A1AA">Rạp phim 3D trực tuyến • Xem chung đồng bộ • Chọn ghế &amp; Vé NFT</p>
         </div>
       </div>
 
@@ -2591,9 +2700,9 @@
         <!-- Nút phụ Apple Liquid Glass: Tủ Vé NFT & Ký Ức -->
         <button type="button" onclick="window.appActions.openMemoryCapsuleModal()"
           class="cv-smooth-btn ios-liquid-pill flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold transition cursor-pointer">
-          <i class="fa-solid fa-id-card-clip text-amber-300"></i>
+          <i class="fa-solid fa-id-card-clip" style="color:#F5C518"></i>
           <span class="hidden sm:inline">Tủ Vé NFT</span>
-          <span id="capsule-count-badge" class="px-1.5 py-0.5 rounded-full bg-white/15 border border-white/20 text-[10px] font-black text-white">1</span>
+          <span id="capsule-count-badge" class="cv-badge-vip px-1.5 py-0.5 rounded-full text-[10px] font-black">1</span>
         </button>
 
         <!-- Nút Quản Trị Admin (Ẩn trên bản Member; dùng qua App Admin riêng) -->
@@ -2667,19 +2776,19 @@
                preload="none"
                class="hidden absolute inset-0 w-full h-full object-cover opacity-75 transition-opacity duration-700"></video>
 
-      <!-- Lớp phủ Gradient mềm kiểu RoPhim: thoáng 65% ảnh bên phải, tối dần bên trái & đáy để chữ rõ nét -->
-        <div class="absolute inset-0 bg-gradient-to-r from-[#191b24] via-[#191b24]/70 via-35% to-transparent"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-[#191b24] via-[#191b24]/45 via-25% to-transparent"></div>
+        <!-- Lớp phủ Vignette tối kiểu rạp chiếu (#0B0B0F -> trong suốt) giúp nhân vật poster nổi bật & chữ luôn nét -->
+        <div class="absolute inset-0 cv-hero-vignette-left"></div>
+        <div class="absolute inset-0 cv-hero-vignette-bottom"></div>
       </div>
 
       <!-- Thanh trạng thái trên cùng của Billboard -->
       <div class="hero-top-bar relative z-10 px-4 sm:px-12 pt-4 sm:pt-6 flex flex-wrap items-center justify-between gap-2 sm:gap-3">
         <div class="flex flex-wrap items-center gap-2">
-          <span id="hero-room-badge" class="px-3 py-1 rounded-full bg-black/45 backdrop-blur-md border border-amber-400/40 text-amber-300 text-xs font-extrabold">
+          <span id="hero-room-badge" class="cv-badge-live px-3 py-1 rounded-full text-xs font-extrabold">
             Phòng 01 • Đang chiếu
           </span>
-          <span id="hero-live-viewers" class="hidden sm:flex px-3 py-1 rounded-full bg-black/45 backdrop-blur-md border border-white/15 text-emerald-400 text-xs font-bold items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span id="hero-live-viewers" class="hidden sm:flex px-3 py-1 rounded-full bg-black/55 backdrop-blur-md border border-white/15 text-xs font-bold items-center gap-1.5" style="color:#FFFFFF">
+            <span class="w-2 h-2 rounded-full animate-ping" style="background:#E50914"></span>
             <span>3 khán giả đang xem</span>
           </span>
         </div>
@@ -2687,135 +2796,152 @@
         <!-- Nút điều khiển Bật/Tắt Video Preview & Tiếng trên Banner -->
         <div class="flex items-center gap-2">
           <button type="button" onclick="window.appActions.toggleHeroVideoMute()" id="btn-hero-mute"
-            class="w-9 h-9 rounded-full bg-black/45 hover:bg-black/75 border border-white/20 text-white flex items-center justify-center transition cursor-pointer"
+            class="w-9 h-9 rounded-full bg-black/55 hover:bg-black/80 border border-white/20 text-white flex items-center justify-center transition cursor-pointer"
             title="Bật/Tắt âm thanh Trailer">
             <i class="fa-solid fa-volume-xmark text-xs"></i>
           </button>
-          <span id="hero-age-rating" class="px-2.5 py-1 rounded bg-black/45 border border-white/15 text-slate-200 text-xs font-black tracking-wider">
+          <span id="hero-age-rating" class="cv-badge-vip px-2.5 py-1 rounded text-xs font-black tracking-wider">
             T16+
           </span>
         </div>
       </div>
 
-      <!-- Nội dung giới thiệu phim kiểu RoPhim (Trái: Thông tin gọn | Phải dưới: Dãy thumbnail nhỏ 1 hàng) -->
+      <!-- Nội dung Hero Banner (Trái <= 550px | Phải dưới: Dock kính mờ chứa 12 thumbnail phòng) -->
       <div class="hero-main-grid relative z-10 px-4 sm:px-12 py-5 sm:py-10 flex flex-col lg:flex-row lg:items-end justify-between gap-5">
-        <div id="hero-content-col" class="max-w-xl space-y-2 sm:space-y-3.5 rophim-slide-enter">
+        <div id="hero-content-col" style="max-width:550px;" class="space-y-2 sm:space-y-3.5 rophim-slide-enter">
           <!-- Tên bộ phim cỡ lớn -->
           <h1 id="hero-movie-title" class="text-lg sm:text-4xl lg:text-5xl font-black text-white leading-[1.15] tracking-tight drop-shadow-[0_6px_24px_rgba(0,0,0,0.95)] line-clamp-1 sm:line-clamp-2">
-            Godzilla vs. Kong (2021) - 1080p WEBRip
+            Godzilla vs. Kong (2021)
           </h1>
 
-          <!-- Dòng phụ vàng Gold kiểu RoPhim (thể loại) -->
-          <p class="text-xs sm:text-sm text-amber-300 font-bold truncate" id="hero-genre">Hành động • Kỳ ảo • Quái vật Khổng lồ</p>
+          <!-- Dòng phụ vàng Gold (#F5C518) -->
+          <p class="text-xs sm:text-sm font-bold truncate" style="color:#F5C518" id="hero-genre">Hành động • Kỳ ảo • Quái vật Khổng lồ</p>
 
-          <!-- Dòng Metadata kiểu RoPhim (.tag-model + .tag-classic) -->
+          <!-- Dòng Metadata chuẩn hệ thống Đỏ/Đen/Vàng/Trắng -->
           <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs font-bold">
-            <span id="hero-rank-badge" class="hidden sm:inline-flex px-2 py-0.5 rounded border border-amber-400/60 bg-amber-400/15 text-amber-300 font-black text-[10px] uppercase tracking-wider">
+            <span id="hero-rank-badge" class="hidden sm:inline-flex cv-badge-vip px-2.5 py-0.5 rounded font-black text-[10px] uppercase tracking-wider">
               TOP 1 THỊNH HÀNH
             </span>
             <span id="hero-quality-badge" class="rophim-tag-model">
               4K IMAX
             </span>
-            <span id="hero-year" class="rophim-tag-classic">2026</span>
-            <span class="hidden sm:inline-flex rophim-tag-classic text-amber-200">
+            <span id="hero-year" class="rophim-tag-classic">2021</span>
+            <span class="hidden sm:inline-flex rophim-tag-classic" style="color:#F5C518">
               VI / EN SUB
             </span>
-            <span id="hero-duration" class="rophim-tag-classic">19:59</span>
-            <span id="hero-match-score" class="hidden sm:inline-flex rophim-tag-classic text-emerald-300 font-extrabold">99% Phù hợp</span>
+            <span id="hero-duration" class="rophim-tag-classic">1h 53m</span>
+            <span id="hero-match-score" class="hidden sm:inline-flex rophim-tag-classic" style="color:#F5C518">99% Phù hợp</span>
           </div>
 
           <!-- Mô tả cốt truyện (chỉ hiện từ màn hình vừa trở lên) -->
-          <p id="hero-synopsis" class="hidden sm:line-clamp-3 text-sm text-slate-200/90 leading-relaxed max-w-xl drop-shadow">
+          <p id="hero-synopsis" class="hidden sm:line-clamp-3 text-sm leading-relaxed drop-shadow" style="color:#E4E4E7">
             Hai siêu quái vật huyền thoại Godzilla và Kong bước vào trận đại chiến chấn động thế giới, trong khi nhân loại tiến sâu vào Trái Đất Rỗng để khám phá nguồn gốc thật sự của các Titan.
           </p>
 
-          <!-- Cụm nút hành động kiểu RoPhim: Nút Play tròn vàng Gold + Viên thuốc kính mờ -->
-          <div class="pt-1 sm:pt-2 flex flex-wrap items-center gap-3 relative z-20">
+          <!-- Cụm nút hành động rõ nhãn (CTA chính màu Đỏ #E50914 + CTA phụ Vào Phòng màu Vàng #F5C518 + Chi tiết) -->
+          <div class="pt-1 sm:pt-2 flex flex-wrap items-center gap-2.5 relative z-20">
             <button type="button" onclick="window.appActions.openBookingModalForHero()" style="touch-action: manipulation;"
-              class="cv-smooth-btn rophim-gold-btn w-11 h-11 sm:w-14 sm:h-14 rounded-full font-black flex items-center justify-center transition transform hover:scale-105 cursor-pointer shrink-0"
-              title="Đặt Vé & Chọn Ghế Ngay">
-              <i class="fa-solid fa-play text-sm sm:text-lg ml-0.5"></i>
+              class="cv-smooth-btn cv-btn-red px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl font-black text-xs sm:text-sm flex items-center gap-2 transition transform hover:scale-[1.03] cursor-pointer">
+              <i class="fa-solid fa-ticket text-xs sm:text-sm"></i>
+              <span>Đặt Vé &amp; Chọn Ghế</span>
             </button>
 
-            <div class="inline-flex items-center rounded-full border border-white/20 bg-black/35 backdrop-blur-md p-1 gap-1">
-              <button type="button" onclick="window.appActions.openBookingModalForHero()"
-                class="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full hover:bg-white/10 text-white font-extrabold text-[11px] sm:text-xs transition cursor-pointer">
-                Đặt Vé & Chọn Ghế
-              </button>
-              <span class="w-px h-4 bg-white/15"></span>
-              <button type="button" onclick="window.appActions.openHeroDetailModal()"
-                class="px-3 py-1.5 sm:py-2 rounded-full hover:bg-white/10 text-slate-200 font-bold text-[11px] sm:text-xs flex items-center gap-1.5 transition cursor-pointer">
-                <i class="fa-solid fa-circle-info text-amber-300"></i>
-                <span>Chi tiết</span>
-              </button>
-            </div>
+            <button type="button" onclick="window.appActions.enterHeroRoomNow()" style="touch-action: manipulation;"
+              class="cv-smooth-btn cv-btn-gold-outline px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl font-extrabold text-xs sm:text-sm flex items-center gap-2 transition cursor-pointer">
+              <i class="fa-solid fa-play text-xs"></i>
+              <span>Vào Phòng Ngay</span>
+            </button>
+
+            <button type="button" onclick="window.appActions.openHeroDetailModal()"
+              class="px-3.5 py-2.5 sm:py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 transition cursor-pointer">
+              <i class="fa-solid fa-circle-info" style="color:#F5C518"></i>
+              <span>Chi tiết</span>
+            </button>
           </div>
         </div>
 
-        <!-- Góc dưới phải: 1 hàng thumbnail nhỏ gọn kiểu RoPhim (không che poster) -->
-        <div class="lg:pb-1 shrink-0">
+        <!-- Góc dưới phải: Thanh điều hướng kính mờ đóng gói 12 thumbnail phòng -->
+        <div class="cv-thumbs-dock shrink-0">
+          <div class="hidden lg:flex items-center justify-between gap-2 pb-1.5 px-0.5 text-[10px] font-black uppercase tracking-wider" style="color:#A1A1AA">
+            <span><i class="fa-solid fa-film mr-1" style="color:#E50914"></i>Chọn Nhanh Phòng Chiếu</span>
+            <span id="hero-slide-counter" style="color:#F5C518" class="font-mono">01 / 12</span>
+          </div>
           <div id="hero-thumbs-strip" class="flex items-center gap-2"></div>
         </div>
       </div>
 
       <!-- Thanh tiến trình tự động chuyển Slide bên dưới Billboard -->
       <div class="relative z-10 w-full h-1 bg-white/10 overflow-hidden">
-        <div id="hero-progress-bar" class="h-full bg-gradient-to-r from-rose-600 via-amber-400 to-rose-500 netflix-progress-fill"></div>
+        <div id="hero-progress-bar" class="h-full cv-progress-red netflix-progress-fill"></div>
       </div>
     </div>
 
-    <!-- Lịch sử đang xem dở (Tự lưu tự động khi lỡ thoát ra / F5) -->
+    <!-- Lịch sử đang xem dở (Lưu theo movie_id chuẩn xác) -->
     <section id="lobby-continue-watching" class="hidden space-y-2.5">
       <div class="flex items-center justify-between gap-2">
         <div class="flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-          <h2 class="text-xs sm:text-sm font-black uppercase tracking-wider rophim-gradient-title">Tiếp Tục Xem Dở</h2>
-          <span id="continue-watching-count" class="px-2 py-0.5 rounded-full bg-rose-600/25 border border-rose-400/40 text-rose-300 text-[10px] font-black">0</span>
+          <span class="w-2 h-2 rounded-full" style="background:#E50914"></span>
+          <h2 class="text-xs sm:text-sm font-black uppercase tracking-wider text-white">Tiếp Tục Xem Dở</h2>
+          <span id="continue-watching-count" class="cv-badge-vip px-2 py-0.5 rounded-full text-[10px] font-black">0</span>
         </div>
         <button type="button" onclick="window.appActions.clearAllWatchHistory()"
-          class="text-[11px] font-bold text-slate-400 hover:text-white transition cursor-pointer">
+          class="text-[11px] font-bold hover:text-white transition cursor-pointer" style="color:#A1A1AA">
           <i class="fa-solid fa-trash-can mr-1"></i>Xóa lịch sử
         </button>
       </div>
-      <div id="lobby-continue-watching-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
+      <div id="lobby-continue-watching-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
     </section>
 
-    <!-- Bộ lọc phòng chiếu -->
+    <!-- Bộ lọc phòng chiếu đồng bộ 100% theo số phòng thực tế (12 phòng, 3 nhóm rõ ràng) -->
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2">
         <button type="button" onclick="window.appActions.setRoomFilter('all')" id="filter-all"
-          class="px-4 py-2 rounded-xl text-xs font-extrabold bg-rose-600 text-white transition cursor-pointer">
-          Tất cả (6 phòng)
+          class="cv-filter-btn is-active">
+          Tất cả (<span id="filter-count-all">12</span> phòng)
+        </button>
+        <button type="button" onclick="window.appActions.setRoomFilter('single')" id="filter-single"
+          class="cv-filter-btn">
+          Phòng Chiếu Lẻ (<span id="filter-count-single">6</span>)
+        </button>
+        <button type="button" onclick="window.appActions.setRoomFilter('special')" id="filter-special"
+          class="cv-filter-btn">
+          Phòng Đôi &amp; Stream (<span id="filter-count-special">2</span>)
+        </button>
+        <button type="button" onclick="window.appActions.setRoomFilter('series')" id="filter-series"
+          class="cv-filter-btn">
+          Phòng Phim Bộ (<span id="filter-count-series">4</span>)
         </button>
         <button type="button" onclick="window.appActions.setRoomFilter('showing')" id="filter-showing"
-          class="px-4 py-2 rounded-xl text-xs font-bold bg-stone-900 hover:bg-stone-800 text-slate-300 border border-white/10 transition cursor-pointer">
-          🟢 Đang chiếu
+          class="cv-filter-btn">
+          Đang chiếu (<span id="filter-count-showing">12</span>)
         </button>
         <button type="button" onclick="window.appActions.setRoomFilter('upcoming')" id="filter-upcoming"
-          class="px-4 py-2 rounded-xl text-xs font-bold bg-stone-900 hover:bg-stone-800 text-slate-300 border border-white/10 transition cursor-pointer">
-          ⏳ Sắp chiếu
+          class="cv-filter-btn">
+          Sắp chiếu (<span id="filter-count-upcoming">0</span>)
         </button>
       </div>
 
       <div class="relative w-full sm:w-64">
-        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-xs" style="color:#A1A1AA"></i>
         <input type="text" oninput="window.appActions.setSearchQuery(this.value)"
           placeholder="Tìm tên phim hoặc số phòng..."
-          class="w-full pl-9 pr-3 py-2 rounded-xl bg-stone-900 border border-white/10 text-xs text-white focus:outline-none focus:border-amber-400" />
+          style="background:#16161D; border:1px solid rgba(255,255,255,0.12);"
+          class="w-full pl-9 pr-3 py-2 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400" />
       </div>
     </div>
 
-    <!-- Danh sách 6 Phòng chiếu -->
+    <!-- Danh sách Phòng chiếu -->
     <div class="flex items-center justify-between gap-2 pt-1">
-      <h2 class="text-sm sm:text-base font-black uppercase tracking-wider rophim-gradient-title">
-        <i class="fa-solid fa-clapperboard text-amber-300 mr-1.5" style="-webkit-text-fill-color:#ffd875;"></i>Phòng Chiếu Đang Hoạt Động
+      <h2 class="text-sm sm:text-base font-black uppercase tracking-wider text-white">
+        <i class="fa-solid fa-clapperboard mr-1.5" style="color:#F5C518;"></i>Phòng Chiếu Đang Hoạt Động
       </h2>
+      <span id="lobby-visible-room-summary" class="text-[11px] font-bold" style="color:#A1A1AA">Hiển thị 12 / 12 phòng</span>
     </div>
     <div id="lobby-rooms-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
 
-    <!-- Nút Lên Đầu Trang kiểu RoPhim (#totop) -->
+    <!-- Nút Lên Đầu Trang -->
     <button id="rophim-totop" type="button" onclick="window.appActions.scrollToTopSmooth()"
-      class="hidden px-3 py-2 rounded-xl bg-white/95 hover:bg-amber-300 text-stone-950 font-black text-[11px] shadow-xl flex items-center gap-1.5 cursor-pointer">
+      class="hidden px-3 py-2 rounded-xl font-black text-[11px] shadow-xl flex items-center gap-1.5 cursor-pointer">
       <i class="fa-solid fa-arrow-up"></i>
       <span>ĐẦU TRANG</span>
     </button>
@@ -5038,10 +5164,11 @@
       </form>
     </div>
     <button type="button" id="owner-chat-fab" onclick="window.appActions.toggleOwnerChatWidget()"
-      class="relative cta-primary-btn h-12 px-4 rounded-full flex items-center gap-2 text-xs font-extrabold shadow-[0_10px_30px_rgba(225,29,72,0.45)] cursor-pointer hover:scale-105 active:scale-95 transition">
-      <i class="fa-solid fa-comment-dots text-base"></i>
+      style="border:1.5px solid rgba(245,197,24,0.55) !important;"
+      class="relative cta-primary-btn h-12 px-4 rounded-full flex items-center gap-2 text-xs font-extrabold shadow-[0_10px_30px_rgba(229,9,20,0.45)] cursor-pointer hover:scale-105 active:scale-95 transition">
+      <i class="fa-solid fa-comment-dots text-base" style="color:#F5C518"></i>
       <span class="hidden sm:inline">Nhắn Chủ Rạp</span>
-      <span id="owner-chat-unread" class="hidden absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black flex items-center justify-center shadow">0</span>
+      <span id="owner-chat-unread" class="hidden absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full text-slate-950 text-[10px] font-black flex items-center justify-center shadow" style="background:#F5C518">0</span>
     </button>
   </div>
 
@@ -6011,6 +6138,71 @@
     const DYNAMIC_MOVIE_META_PENDING = new Set();
     const RESOLVED_CATALOG_META_CACHE = {};
 
+    function sanitizeMovieTitle(rawTitle = "") {
+      const raw = String(rawTitle || "").trim();
+      if (!raw) return "";
+
+      // Tách trước thông tin Phần / Tập (nếu không phải "Tập full") để giữ nguyên cấu trúc phim bộ
+      let seriesSuffix = "";
+      let working = raw;
+      if (!/\btập\s*full\b/i.test(raw)) {
+        const epM = raw.match(/(?:\b(?:tập|ep(?:isode)?)\s*(\d{1,3})\b|\bs(\d{1,2})e(\d{1,3})\b)/i);
+        const seasonM = raw.match(/(?:[([]?\s*(?:phần|mùa|season)\s*(\d{1,2})\s*[)\]]?|\bs(\d{1,2})e\d{1,3}\b)/i);
+        if (epM) {
+          const epStr = String(Number(epM[1] || epM[3] || 0)).padStart(2, "0");
+          const snNum = Number(seasonM?.[1] || seasonM?.[2] || epM[2] || 0);
+          seriesSuffix = snNum > 0 ? `(Phần ${snNum} - Tập ${epStr})` : `Tập ${epStr}`;
+          const cutAt = Math.min(epM.index ?? raw.length, seasonM ? seasonM.index : raw.length);
+          working = raw.slice(0, cutAt).trim();
+        }
+      }
+
+      // Trích xuất năm phát hành nếu có (trước khi cắt tag)
+      const yearMatch = working.match(/\b(19\d{2}|20\d{2})\b/);
+      const year = yearMatch ? yearMatch[1] : "";
+
+      let cleaned = working
+        .replace(/^xem\s+/i, " ")
+        // Cắt toàn bộ tên web lậu, nguồn crawl, studio sub & định dạng audio/video rác
+        .replace(/\[[^\]]*(?:vietsub|thuyết\s*minh|lồng\s*tiếng|yts|rarbg|phimmoi|full)[^\]]*\]/gi, " ")
+        .replace(/\([^\)]*(?:vietsub|thuyết\s*minh|lồng\s*tiếng|phimmoi|yts|rarbg)[^\)]*\)/gi, " ")
+        .replace(/\b(?:phimmoi(?:\.fun|z)?|upco\s*cinema|ani-one(?:\s*vietnam)?|mọt\s*chill|motchill|motphim|8phimx|rarbg|yts(?:\.(?:mx|gg|bz))?|ozlem)\b/gi, " ")
+        .replace(/\b(?:2160p|1080p|720p|4k|fhd|full\s*hd|web[-\s]?rip|web[-\s]?dl|bluray|hdrip|dvdrip|x264|x265|hevc|10bit|aac5?\.1|aac|hindi)\b/gi, " ")
+        .replace(/\b(?:tập\s*full|vietsub|thuyết\s*minh|lồng\s*tiếng|miễn\s*phí)\b/gi, " ")
+        .replace(/5\.1/g, " ")
+        .replace(/\bfull\b\s*$/gi, " ")
+        .replace(/\b(19\d{2}|20\d{2})\b/g, " ")
+        .replace(/\(\s*\)|\[\s*\]/g, " ")
+        .replace(/\s-\s+/g, ": ")
+        .replace(/-\s+(?=[A-ZÀ-Ỵ0-9])/g, ": ")
+        .replace(/[.]+(?=[A-Za-z0-9])/g, " ")
+        .replace(/_+/g, " ")
+        .replace(/[\s\-–—:|+]+$/g, "")
+        .replace(/^[\s\-–—:|+]+/g, "")
+        .replace(/\s{2,}/g, " ")
+        .trim();
+
+      if (!cleaned) cleaned = raw;
+
+      if (seriesSuffix) {
+        return `${cleaned} ${seriesSuffix}`.replace(/\s+/g, " ").trim();
+      }
+      if (year && !cleaned.includes(year)) {
+        return `${cleaned} (${year})`;
+      }
+      return cleaned;
+    }
+
+    function formatDurationHoursMin(sec = 0) {
+      const s = Number(sec) || 0;
+      if (s < 60) return "";
+      const mins = Math.round(s / 60);
+      if (mins < 60) return `${mins}m`;
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      return m > 0 ? `${h}h ${String(m).padStart(2, "0")}m` : `${h}h`;
+    }
+
     function resolveMovieMetadata(title = "", baseRoom = {}) {
       const raw = String(title || "").trim();
       const cacheKey = raw + "||" + String(baseRoom?.genre || "") + "||" + String(baseRoom?.duration || "");
@@ -6459,9 +6651,9 @@
         {
           test: () => t.includes("chu thuat") || t.includes("jujutsu") || t.includes("tu diet"),
           year: "2026",
-          duration: "24:00",
+          duration: "24m / tập",
           ageRating: "T16+",
-          genre: "Anime • Hành động • Siêu nhiên • Ani-One Vietnam",
+          genre: "Anime • Hành động • Siêu nhiên",
           cast: "Itadori Yuji, Fushiguro Megumi, Okkotsu Yuta, Higuruma Hiromi",
           synopsis: (() => {
             const epM = raw.match(/tập\s*(\d+)/i);
@@ -6475,13 +6667,159 @@
               53: "Trận đối đầu căng thẳng tại kết giới Tokyo khi Itadori Yuji tìm kiếm luật sư thiên tài sở hữu 100 điểm — Higuruma Hiromi.",
               54: "Higuruma Hiromi triển khai Lãnh Địa Tru Tử Thuật, buộc Yuji phải đối diện phiên tòa phán xét tội lỗi tại Shibuya.",
               55: "Fushiguro Megumi rơi vào bẫy của nhóm Reggie Star và buộc phải bung toàn bộ Thập Chủng Ảnh Pháp Thuật để sinh tồn.",
-              56: "Lãnh Địa Triển Khai Khảm Hợp Ámế Đình của Megumi va chạm trực diện với chiến thuật phiếu mua hàng hiểm hóc của Reggie.",
+              56: "Lãnh Địa Triển Khai Khảm Hợp Ám Đình của Megumi va chạm trực diện với chiến thuật phiếu mua hàng hiểm hóc của Reggie.",
               57: "Đặc cấp chú thuật sư Okkotsu Yuta đơn độc càn quét kết giới Sendai, đối đầu bốn thế lực mạnh nhất vùng.",
               58: "Đại chiến tam phương tại Sendai bùng nổ khi Yuta triệu hồi toàn bộ sức mạnh của Rika và sao chép chú thuật đỉnh cao.",
               59: "Hakari Kinji chạm trán chú thuật sư cổ đại Kashimo Hajime trong trận chiến sấm sét điên cuồng với Lãnh Địa Tọa Sát Bác Đồ."
             };
             return epSynopses[ep] || "Sau biến cố Shibuya, Itadori Yuji, Fushiguro Megumi và Okkotsu Yuta bước vào trò chơi sinh tử Tử Diệt Hồi Du do Kenjaku kích hoạt nhằm giải phong ấn cho Gojo Satoru.";
           })()
+        },
+        {
+          test: () => t.includes("black panther") || t.includes("chien binh bao den"),
+          year: t.includes("wakanda") ? "2022" : "2018",
+          duration: t.includes("wakanda") ? "2h 41m" : "2h 14m",
+          ageRating: "T13+",
+          genre: "Hành động • Phiêu lưu • Siêu anh hùng Marvel",
+          cast: t.includes("wakanda") ? "Letitia Wright, Lupita Nyong'o, Tenoch Huerta" : "Chadwick Boseman, Michael B. Jordan, Lupita Nyong'o",
+          synopsis: t.includes("wakanda")
+            ? "Sau sự ra đi của Vua T'Challa, Nữ hoàng Ramonda, Shuri và các chiến binh Wakanda chiến đấu bảo vệ vương quốc trước thế lực Namor từ Talokan."
+            : "Hoàng tử T'Challa trở về vương quốc công nghệ ẩn giấu Wakanda để kế vị ngai vàng Chiến Binh Báo Đen trước âm mưu lật đổ của Erik Killmonger."
+        },
+        {
+          test: () => t.includes("qua nhanh qua nguy hiem 10") || t.includes("fast x"),
+          year: "2023",
+          duration: "2h 21m",
+          ageRating: "T16+",
+          genre: "Hành động • Tốc độ • Bom tấn",
+          cast: "Vin Diesel, Jason Momoa, Michelle Rodriguez, Charlize Theron",
+          synopsis: "Dom Toretto và gia đình phải đối mặt với kẻ thù nguy hiểm nhất từ quá khứ — Dante Reyes, kẻ quyết tâm phá hủy mọi thứ Dom yêu quý trên toàn thế giới."
+        },
+        {
+          test: () => t.includes("mat vu phu ho") || t.includes("working man"),
+          year: "2025",
+          duration: "1h 56m",
+          ageRating: "T18+",
+          genre: "Hành động • Hình sự • Giật gân",
+          cast: "Jason Statham, David Harbour, Michael Peña",
+          synopsis: "Lenvon Cade muốn bỏ lại quá khứ đặc nhiệm để sống bình yên làm công nhân xây dựng, nhưng buộc phải tái xuất khi con gái ông chủ bị đường dây tội phạm bắt cóc."
+        },
+        {
+          test: () => t.includes("bi kip luyen rong") || t.includes("how to train your dragon"),
+          year: "2025",
+          duration: "2h 05m",
+          ageRating: "P",
+          genre: "Phiêu lưu • Kỳ ảo • Gia đình",
+          cast: "Mason Thames, Nico Parker, Gerard Butler",
+          synopsis: "Trên hòn đảo Berk nơi người Viking và loài rồng đối đầu truyền kiếp, cậu bé Hiccup kết bạn với chú rồng Răng Sún bí ẩn và thay đổi vận mệnh cả hai giống loài."
+        },
+        {
+          test: () => t.includes("tien nghich") || t.includes("thi tien"),
+          year: "2025",
+          duration: "1h 32m",
+          ageRating: "T13+",
+          genre: "Hoạt hình 3D • Tiên hiệp • Huyền huyễn",
+          cast: "Vương Lâm, Lý Mộ Uyển",
+          synopsis: "Vương Lâm bước vào trận chiến Thi Tiên Cổ Khí đầy khốc liệt để đoạt cơ duyên nghịch thiên cải mệnh trên con đường tu tiên."
+        },
+        {
+          test: () => t.includes("nhung chiec nhan quyen nang") || t.includes("chua te cua nhung chiec nhan"),
+          year: "2024",
+          duration: "1h 05m / tập",
+          ageRating: "T16+",
+          genre: "Kỳ ảo • Sử thi • Phim Bộ",
+          cast: "Morfydd Clark, Charlie Vickers, Robert Aramayo",
+          synopsis: "Lấy bối cảnh Kỷ Đệ Nhị của Trung Địa, loạt phim tái hiện sự trỗi dậy của Chúa tể Bóng tối Sauron và quá trình rèn nên Những Chiếc Nhẫn Quyền Năng."
+        },
+        {
+          test: () => t.includes("tanya chien ky") || t.includes("youjo senki"),
+          year: "2017",
+          duration: "24m / tập",
+          ageRating: "T16+",
+          genre: "Anime • Hành động • Quân sự Giả tưởng",
+          cast: "Tanya Degurechaff, Viktoriya Ivanovna Serebryakov",
+          synopsis: "Một nhân viên văn phòng thực dụng bị tái sinh vào thế giới phép thuật đang chìm trong chiến tranh thế giới và trở thành nữ thiếu tá không quân Tanya Degurechaff."
+        },
+        {
+          test: () => t.includes("hao quang") || t.includes("halo"),
+          year: "2024",
+          duration: "52m / tập",
+          ageRating: "T16+",
+          genre: "Khoa học viễn tưởng • Hành động • Phim Bộ",
+          cast: "Pablo Schreiber, Natascha McElhone, Jen Taylor",
+          synopsis: "Chiến binh siêu hạng Master Chief John-117 dẫn dắt biệt đội Spartan chiến đấu bảo vệ nhân loại trước đế chế người ngoài hành tinh Covenant ở thế kỷ 26."
+        },
+        {
+          test: () => t.includes("ga dien bao thu"),
+          year: "2025",
+          duration: "1h 48m",
+          ageRating: "T18+",
+          genre: "Hành động • Tội phạm • Giật gân",
+          cast: "CineVerse Collection",
+          synopsis: "Một tay súng đơn độc lao vào cuộc truy sát không khoan nhượng để trả giá cho những thế lực đứng sau bi kịch gia đình mình."
+        },
+        {
+          test: () => t.includes("28 nam sau") || t.includes("ngoi den tu than"),
+          year: "2025",
+          duration: "1h 55m",
+          ageRating: "T18+",
+          genre: "Kinh dị • Sinh tồn • Hậu tận thế",
+          cast: "Jodie Comer, Aaron Taylor-Johnson, Ralph Fiennes",
+          synopsis: "Gần ba thập kỷ sau đại dịch Rage Virus bùng phát, những người sống sót phải đối mặt với cơn ác mộng tiến hóa đáng sợ tại Ngôi Đền Tử Thần."
+        },
+        {
+          test: () => t.includes("3 chang ngoc"),
+          year: "2009",
+          duration: "2h 50m",
+          ageRating: "T13+",
+          genre: "Hài hước • Tâm lý • Học đường Kinh điển",
+          cast: "Aamir Khan, R. Madhavan, Sharman Joshi, Kareena Kapoor",
+          synopsis: "Hành trình tìm kiếm người bạn thân mất tích Rancho đưa Farhan và Raju sống lại những năm tháng đại học đầy tiếng cười và cảm xúc."
+        },
+        {
+          test: () => t.includes("harry potter"),
+          year: t.includes("phan 2") ? "2011" : "2010",
+          duration: t.includes("phan 2") ? "2h 10m" : "2h 26m",
+          ageRating: "T13+",
+          genre: "Kỳ ảo • Phiêu lưu • Kinh điển",
+          cast: "Daniel Radcliffe, Emma Watson, Rupert Grint, Ralph Fiennes",
+          synopsis: "Harry, Ron và Hermione bước vào cuộc săn tìm và tiêu diệt các Trường Sinh Linh Giá để đối đầu trận chiến cuối cùng với Chúa tể Voldemort tại Hogwarts."
+        },
+        {
+          test: () => t.includes("nguoi hobbit"),
+          year: "2013",
+          duration: "2h 41m",
+          ageRating: "T13+",
+          genre: "Kỳ ảo • Phiêu lưu • Sử thi",
+          cast: "Martin Freeman, Ian McKellen, Richard Armitage, Benedict Cumberbatch",
+          synopsis: "Bilbo Baggins cùng phù thủy Gandalf và mười ba người lùn tiến vào Ngọn Núi Cô Độc để giành lại vương quốc Erebor từ tay con rồng khổng lồ Smaug."
+        },
+        {
+          test: () => t.includes("transformers"),
+          year: "2017",
+          duration: "2h 34m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Robot",
+          cast: "Mark Wahlberg, Anthony Hopkins, Laura Haddock",
+          synopsis: "Khi Optimus Prime mất tích, Cade Yeager và liên minh Autobots phải giải mã lịch sử bí mật của Transformers trên Trái Đất để ngăn thảm họa diệt vong."
+        },
+        {
+          test: () => t.includes("avengers") && t.includes("endgame"),
+          year: "2019",
+          duration: "3h 01m",
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Siêu anh hùng Marvel",
+          cast: "Robert Downey Jr., Chris Evans, Scarlett Johansson, Chris Hemsworth",
+          synopsis: "Sau cú búng tay hủy diệt nửa vũ trụ của Thanos, những siêu anh hùng Avengers còn sống thực hiện phi vụ du hành lượng tử đảo ngược định mệnh."
+        },
+        {
+          test: () => t.includes("phong stream"),
+          year: "2026",
+          duration: "LIVE 60FPS",
+          ageRating: "LIVE P2P",
+          genre: "Screen Share • Voice Chat • 10 Ghế VIP",
+          cast: "Chia sẻ màn hình • Âm thanh trực tiếp",
+          synopsis: "Phòng livestream như Discord dành cho tối đa 10 người: chia sẻ màn hình máy tính/điện thoại kèm tiếng và trò chuyện trực tiếp độ trễ cực thấp."
         },
         {
           test: () => t.includes("thang tu") || t.includes("ha anh tuan"),
@@ -6523,12 +6861,13 @@
         };
       }
 
-      // Clean title & infer accurate fallback metadata for any new movie without leaking old room's JJK text
-      const cleanName = raw
-        .replace(/\b(phimmoi(?:\.fun|z)?|tập\s*full|vietsub|thuyết\s*minh|lồng\s*tiếng|full\s*hd|fhd|1080p|720p|4k|webrip|bluray|x264|x265|hevc|aac5?\.1|rarbg|yts\.[a-z]+|motchill|motphim|8phimx|upco\s*cinema)\b/gi, " ")
-        .replace(/[-_.\[\]]+/g, " ")
-        .replace(/\s+/g, " ")
-        .trim() || raw;
+      // Clean title & infer accurate fallback duration/metadata for any new movie
+      const cleanName = sanitizeMovieTitle(raw) || raw;
+      const isEp = /\btập\s*\d+\b/i.test(raw);
+      const secDur = Number(baseRoom?.durationSec) || 0;
+      const inferredDuration = (baseRoom && String(baseRoom.movieTitle || "").trim() === raw && baseRoom.duration && baseRoom.duration !== "2h 00m")
+        ? baseRoom.duration
+        : (formatDurationHoursMin(secDur) || (isEp ? "45m / tập" : "1h 52m"));
 
       // Trigger non-blocking background Wikipedia lookup to enrich unknown future titles
       if (raw && !DYNAMIC_MOVIE_META_PENDING.has(t)) {
@@ -6542,7 +6881,7 @@
             if (sum && sum.extract && sum.extract.length > 40) {
               DYNAMIC_MOVIE_META_CACHE[t] = {
                 year: parsedYear || "2025",
-                duration: "2h 00m",
+                duration: inferredDuration,
                 ageRating: "T13+",
                 genre: "Điện ảnh • Chiếu rạp HD",
                 cast: cleanName,
@@ -6561,7 +6900,7 @@
 
       return {
         year: parsedYear || "2025",
-        duration: "2h 00m",
+        duration: inferredDuration,
         ageRating: "T13+",
         genre: "Điện ảnh • Chiếu rạp HD",
         cast: cleanName,
@@ -6577,6 +6916,7 @@
       if (merged.status === "upcoming" && Number(merged.scheduledAt) > 0 && Date.now() >= Number(merged.scheduledAt)) {
         merged.status = "showing";
       }
+      merged.displayTitle = sanitizeMovieTitle(merged.movieTitle);
       merged.poster = resolveMoviePoster(merged.movieTitle, merged.poster, merged.youtubeId);
       const meta = resolveMovieMetadata(merged.movieTitle, base);
       merged.synopsis = meta.synopsis;
@@ -6726,8 +7066,8 @@
       setTxt("hero-match-score", room.matchScore || "98% Phù hợp");
       setTxt("hero-year", room.year || "2025");
       setTxt("hero-quality-badge", room.quality || "4K IMAX");
-      setTxt("hero-duration", room.duration || "15:00");
-      setTxt("hero-movie-title", room.movieTitle);
+      setTxt("hero-duration", room.duration || "1h 52m");
+      setTxt("hero-movie-title", room.displayTitle || sanitizeMovieTitle(room.movieTitle));
       setTxt("hero-synopsis", room.synopsis || "");
       setTxt("hero-cast", room.cast || "CineVerse Lotte");
       setTxt("hero-genre", room.genre || "");
@@ -6758,12 +7098,12 @@
           return `
             <button type="button"
                     onclick="${active ? `window.appActions.openBookingModal('${r.id}')` : `window.appActions.selectHeroSlide(${i})`}"
-                    title="${escapeHTML(r.number)} • ${escapeHTML(r.movieTitle)}"
-                    style="touch-action: manipulation;"
+                    title="${escapeHTML(r.number)} • ${escapeHTML(r.displayTitle || sanitizeMovieTitle(r.movieTitle))}"
+                    style="touch-action:manipulation;${active ? 'border-color:#F5C518;box-shadow:0 0 12px rgba(245,197,24,0.45);' : ''}"
                     class="lobby-zoom-tile group relative overflow-hidden border-2 transition-all duration-300 cursor-pointer ${
                       active
-                        ? 'border-white ring-2 ring-amber-400/50 scale-105 opacity-100 shadow-lg'
-                        : 'border-white/25 opacity-60 hover:opacity-100 hover:border-white/70'
+                        ? 'opacity-100 shadow-lg'
+                        : 'border-white/20 opacity-60 hover:opacity-100 hover:border-white/70'
                     }">
               <img src="${escapeHTML(r.poster)}" alt="${escapeHTML(r.number)}"
                    onerror="this.src='https://placehold.co/300x180/1c1917/fbbf24?text=Room'"
@@ -6846,18 +7186,21 @@
     }
 
     // =========================================================
-    // 1. RENDER SẢNH CHỜ 6 PHÒNG CHIẾU
+    // 1. RENDER SẢNH CHỜ & BỘ LỌC PHÒNG CHIẾU ĐỒNG BỘ
     // =========================================================
+    function getRoomCategory(room) {
+      if (!room) return "single";
+      if (room.isCoupleRoom || room.isDiscordRoom) return "special";
+      if (room.isSeriesFreeRoom || room.noSwitchCooldown) return "series";
+      return "single";
+    }
+
     function setRoomFilter(filter) {
-      state.roomFilter = filter;
-      ["all", "showing", "upcoming"].forEach(k => {
+      state.roomFilter = filter || "all";
+      ["all", "single", "special", "series", "showing", "upcoming"].forEach(k => {
         const btn = document.getElementById(`filter-${k}`);
         if (!btn) return;
-        if (k === filter) {
-          btn.className = "px-4 py-2 rounded-xl text-xs font-extrabold bg-rose-600 text-white transition cursor-pointer";
-        } else {
-          btn.className = "px-4 py-2 rounded-xl text-xs font-bold bg-stone-900 hover:bg-stone-800 text-slate-300 border border-white/10 transition cursor-pointer";
-        }
+        btn.classList.toggle("is-active", k === state.roomFilter);
       });
       renderLobby();
       saveAppStateToStorage();
@@ -6875,6 +7218,26 @@
     window.__activeYtVirtualSec = 0;
     window.__pendingResumeEntry = null;
 
+    function getCanonicalMovieId(obj) {
+      if (!obj) return "";
+      if (obj.movieId && typeof obj.movieId === "string") return obj.movieId;
+      if (obj.youtubeId) return `yt:${String(obj.youtubeId).trim()}`;
+      if (obj.videoUrl) {
+        const cleanUrl = String(obj.videoUrl).trim().split("?")[0];
+        if (cleanUrl) {
+          try {
+            const fileName = decodeURIComponent(cleanUrl.split("/").pop() || "").trim().toLowerCase();
+            if (fileName) return `r2:${fileName}`;
+          } catch (_) {
+            return `url:${cleanUrl}`;
+          }
+        }
+      }
+      const cleanTitle = sanitizeMovieTitle(obj.movieTitle || obj.title || "");
+      const norm = normalizeSearchText(cleanTitle).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      return norm ? `mv:${norm}` : "";
+    }
+
     function getWatchHistoryKey(obj) {
       if (!obj) return "";
       if (obj.youtubeId) return `yt:${String(obj.youtubeId).trim()}`;
@@ -6882,7 +7245,7 @@
         const cleanUrl = String(obj.videoUrl).trim().split("?")[0];
         if (cleanUrl) return `url:${cleanUrl}`;
       }
-      const title = String(obj.movieTitle || obj.title || "").trim().toLowerCase();
+      const title = sanitizeMovieTitle(obj.movieTitle || obj.title || "").trim().toLowerCase();
       return title ? `title:${title}` : "";
     }
 
@@ -6891,7 +7254,7 @@
         const raw = localStorage.getItem(WATCH_HISTORY_STORAGE_KEY);
         if (!raw) return [];
         const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed.filter(x => x && x.key) : [];
+        return Array.isArray(parsed) ? parsed.filter(x => x && (x.movieId || x.key)) : [];
       } catch (_) {
         return [];
       }
@@ -6906,9 +7269,10 @@
 
     function getWatchHistoryEntry(obj) {
       const key = getWatchHistoryKey(obj);
-      if (!key) return null;
+      const movieId = getCanonicalMovieId(obj);
+      if (!key && !movieId) return null;
       const list = loadWatchHistory();
-      return list.find(x => x.key === key) || null;
+      return list.find(x => (movieId && (x.movieId === movieId || getCanonicalMovieId(x) === movieId)) || (key && x.key === key)) || null;
     }
 
     function upsertWatchHistoryEntry(room, currentTime, duration) {
@@ -6917,16 +7281,23 @@
       const dur = Number(duration) || Number(room.durationSec) || 0;
       if (sec < 3) return;
       const key = getWatchHistoryKey(room);
-      if (!key) return;
+      const movieId = getCanonicalMovieId(room);
+      if (!key && !movieId) return;
       const pct = dur > 0 ? Math.min(100, Math.max(1, Math.round((sec / dur) * 100))) : 0;
       const completed = Boolean(dur > 60 && (pct >= 97 || (dur - sec) <= 15));
+      const cleanTitle = sanitizeMovieTitle(room.movieTitle || "Phim CineVerse");
 
-      const list = loadWatchHistory().filter(x => x.key !== key);
+      const list = loadWatchHistory().filter(x => {
+        if (key && x.key === key) return false;
+        if (movieId && (x.movieId === movieId || getCanonicalMovieId(x) === movieId)) return false;
+        return true;
+      });
       list.unshift({
-        key,
-        roomId: room.id || state.currentRoomId || "room-1",
-        roomNumber: room.number || "Phòng chiếu",
-        movieTitle: room.movieTitle || "Phim CineVerse",
+        key: key || movieId,
+        movieId: movieId || key,
+        lastRoomId: room.id || state.currentRoomId || "room-1",
+        movieTitle: room.movieTitle || cleanTitle,
+        displayTitle: cleanTitle,
         videoUrl: room.youtubeId ? "" : (room.videoUrl || ""),
         youtubeId: room.youtubeId || "",
         poster: resolveMoviePoster(room.movieTitle, room.poster, room.youtubeId),
@@ -6966,6 +7337,18 @@
       }
     }
 
+    function findLiveRoomForHistoryItem(item) {
+      if (!item) return null;
+      const targetId = item.movieId || getCanonicalMovieId(item);
+      const liveRooms = DEFAULT_ROOMS.map(r => getEffectiveRoom(r.id));
+      return liveRooms.find(r => {
+        if (targetId && getCanonicalMovieId(r) === targetId) return true;
+        if (item.youtubeId && r.youtubeId && item.youtubeId === r.youtubeId) return true;
+        if (item.videoUrl && r.videoUrl && item.videoUrl === r.videoUrl) return true;
+        return false;
+      }) || null;
+    }
+
     function renderContinueWatchingStrip() {
       const section = document.getElementById("lobby-continue-watching");
       const grid = document.getElementById("lobby-continue-watching-grid");
@@ -6986,36 +7369,39 @@
         const posterUrl = item.poster || resolveMoviePoster(item.movieTitle, "", item.youtubeId);
         const curTxt = formatTime(item.currentTime || 0);
         const durTxt = item.duration > 0 ? formatTime(item.duration) : "HD";
-        const safeKey = encodeURIComponent(item.key);
+        const safeKey = encodeURIComponent(item.key || item.movieId);
+        const displayTitle = sanitizeMovieTitle(item.displayTitle || item.movieTitle);
+        const liveMatch = findLiveRoomForHistoryItem(item);
+        const roomLabel = liveMatch
+          ? `<span class="cv-badge-live absolute top-2 left-2 px-2.5 py-0.5 rounded-full text-[10px] font-black">${escapeHTML(liveMatch.number)} • Đang chiếu</span>`
+          : `<span class="cv-badge-vip absolute top-2 left-2 px-2.5 py-0.5 rounded-full text-[10px] font-black">Kho Phim • Mở tiếp</span>`;
         return `
-          <div class="group relative rounded-2xl overflow-hidden bg-stone-950/90 border border-white/15 hover:border-amber-400/50 transition shadow-xl flex flex-col">
+          <div class="group relative rounded-2xl overflow-hidden transition shadow-xl flex flex-col liquid-glass-card">
             <div onclick="window.appActions.resumeFromWatchHistory('${safeKey}')" class="relative aspect-video w-full bg-black overflow-hidden cursor-pointer">
-              <img src="${escapeHTML(posterUrl)}" alt="${escapeHTML(item.movieTitle)}" loading="lazy"
+              <img src="${escapeHTML(posterUrl)}" alt="${escapeHTML(displayTitle)}" loading="lazy"
                 onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80';"
                 class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
-              <div class="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-transparent"></div>
-              <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/75 border border-white/15 text-[10px] font-black text-amber-300">
-                ${escapeHTML(item.roomNumber || "Phòng chiếu")}
-              </span>
+              <div class="absolute inset-0 bg-gradient-to-t from-[#0B0B0F] via-[#0B0B0F]/35 to-transparent"></div>
+              ${roomLabel}
               <span class="absolute bottom-2.5 right-2 px-2 py-0.5 rounded-lg bg-black/80 font-mono text-[10px] font-bold text-white">
                 ${curTxt} / ${durTxt}
               </span>
               <div class="absolute inset-x-0 bottom-0 h-1 bg-white/15">
-                <div class="h-full bg-rose-500" style="width:${Math.max(4, Math.min(100, item.percent || 5))}%"></div>
+                <div class="h-full cv-progress-red" style="width:${Math.max(4, Math.min(100, item.percent || 5))}%"></div>
               </div>
             </div>
             <div class="p-3 flex items-center justify-between gap-2">
               <div onclick="window.appActions.resumeFromWatchHistory('${safeKey}')" class="min-w-0 flex-1 cursor-pointer">
-                <p class="text-xs font-extrabold text-white truncate group-hover:text-amber-200 transition">${escapeHTML(item.movieTitle)}</p>
-                <p class="text-[10px] text-slate-400 mt-0.5">Đang xem dở • ${item.percent || 1}%</p>
+                <p class="text-xs font-extrabold text-white truncate transition">${escapeHTML(displayTitle)}</p>
+                <p class="text-[10px] mt-0.5" style="color:#A1A1AA">Đã xem ${item.percent || 1}% ${liveMatch ? `• Đang có ở ${escapeHTML(liveMatch.number)}` : "• Phát trực tiếp"}</p>
               </div>
               <div class="flex items-center gap-1.5 shrink-0">
                 <button type="button" onclick="window.appActions.resumeFromWatchHistory('${safeKey}')"
-                  class="px-2.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-extrabold flex items-center gap-1 transition cursor-pointer">
+                  class="cv-btn-red px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold flex items-center gap-1 transition cursor-pointer">
                   <i class="fa-solid fa-play text-[10px]"></i><span>Xem tiếp</span>
                 </button>
                 <button type="button" onclick="window.appActions.removeWatchHistoryItem('${safeKey}')"
-                  class="w-7 h-7 rounded-xl bg-white/5 hover:bg-rose-600 border border-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
+                  class="w-7 h-7 rounded-xl bg-white/5 hover:bg-red-600 border border-white/10 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
                   title="Xóa khỏi danh sách xem dở">
                   <i class="fa-solid fa-xmark text-[11px]"></i>
                 </button>
@@ -7028,10 +7414,20 @@
 
     function resumeFromWatchHistory(encodedKey) {
       const key = decodeURIComponent(encodedKey || "");
-      const item = loadWatchHistory().find(x => x.key === key);
+      const item = loadWatchHistory().find(x => x.key === key || x.movieId === key);
       if (!item) return;
-      const targetRoomId = DEFAULT_ROOMS.some(r => r.id === item.roomId) ? item.roomId : "room-1";
-      window.__pendingResumeEntry = item;
+
+      // Tìm phòng hiện tại thực sự đang chiếu đúng movie_id này; nếu không còn, chọn phòng trống/phòng phim bộ tự do để phát tiếp
+      const liveMatch = findLiveRoomForHistoryItem(item);
+      let targetRoomId = liveMatch?.id || "";
+      if (!targetRoomId) {
+        const freeSeriesRooms = DEFAULT_ROOMS.filter(r => r.isSeriesFreeRoom || r.noSwitchCooldown);
+        const emptyFreeRoom = freeSeriesRooms.find(r => Object.keys(state.seatsByRoom[r.id] || {}).length === 0);
+        const anyEmptyRoom = DEFAULT_ROOMS.find(r => !r.isDiscordRoom && Object.keys(state.seatsByRoom[r.id] || {}).length === 0);
+        targetRoomId = (emptyFreeRoom || anyEmptyRoom || freeSeriesRooms[0] || DEFAULT_ROOMS[0]).id;
+      }
+
+      window.__pendingResumeEntry = { ...item, roomId: targetRoomId };
       const hasTicket = Boolean(state.bookedTicketsByRoom?.[targetRoomId]);
       if (hasTicket) {
         enterRoom(targetRoomId);
@@ -7057,115 +7453,198 @@
       showToast("Đã xóa toàn bộ lịch sử xem dở.", "info");
     }
 
+    function renderRoomCardHTML(room, displayIndex) {
+      const seats = state.seatsByRoom[room.id] || {};
+      const count = Object.keys(seats).length;
+      const maxCap = room.maxSeats || 48;
+      const percent = Math.min(100, Math.round((count / maxCap) * 100));
+      const isShowing = room.status === "showing";
+      const isLocked = Boolean(state.roomLocks[room.id]);
+      const isFreeSeries = Boolean(room.isSeriesFreeRoom || room.noSwitchCooldown);
+      const cleanTitle = room.displayTitle || sanitizeMovieTitle(room.movieTitle);
+
+      return `
+        <div onclick="window.appActions.enterRoom('${room.id}')"
+             class="lobby-zoom-card liquid-glass-card group rounded-3xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer">
+          <div class="relative aspect-video sm:aspect-auto sm:h-48 overflow-hidden bg-black">
+            <img src="${escapeHTML(room.poster)}" alt="${escapeHTML(cleanTitle)}"
+                 onerror="this.src='https://placehold.co/800x450/16161D/F5C518?text=CineVerse+Lotte'"
+                 class="lobby-card-poster w-full h-full object-cover group-hover:scale-105 transition duration-500 opacity-90" />
+            <div class="absolute inset-0 bg-gradient-to-t from-[#16161D] via-[#0B0B0F]/35 to-transparent pointer-events-none"></div>
+
+            <span class="card-preview-timer hidden absolute top-3 right-3 z-20 px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md border border-white/20 text-[10px] font-mono font-bold text-white">
+              ▶ 00:00 / 00:20
+            </span>
+
+            <div class="absolute top-3 inset-x-3 flex items-start justify-between gap-2 pointer-events-none">
+              <div class="flex flex-wrap items-center gap-1.5 min-w-0">
+                <span class="monochrome-pill px-2.5 py-1 rounded-full text-xs font-black">${escapeHTML(room.number)}</span>
+                <span ${(!isShowing && Number(room.scheduledAt) > Date.now()) ? `data-countdown-room="${room.id}"` : ""}
+                      class="${isShowing ? 'cv-badge-live' : 'cv-badge-vip'} px-2.5 py-1 rounded-full text-xs font-extrabold flex items-center gap-1.5">
+                  ${isShowing
+                    ? `<span class="w-1.5 h-1.5 rounded-full animate-pulse" style="background:#E50914"></span><span>Đang chiếu</span>`
+                    : (Number(room.scheduledAt) > Date.now()
+                        ? `⏳ Còn ${formatCountdownRemaining(room.scheduledAt - Date.now())} (${new Date(room.scheduledAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })})`
+                        : '⏳ Sắp chiếu')}
+                </span>
+                ${isFreeSeries ? `<span class="cv-badge-vip px-2 py-1 rounded-full text-[10px] font-black">Tự Do</span>` : ""}
+                ${isLocked ? `<span class="monochrome-pill px-2 py-1 rounded-full text-[10px] font-black"><i class="fa-solid fa-lock mr-1"></i>${(state.isAdminUnlocked && state.adminRoomPins[room.id]) ? `PIN: ${escapeHTML(state.adminRoomPins[room.id])}` : "PIN"}</span>` : ""}
+              </div>
+
+              <div class="card-viewer-pill shrink-0 monochrome-pill px-2.5 py-1 rounded-full text-xs font-bold">
+                <i class="fa-solid fa-users mr-1" style="color:#A1A1AA"></i>${count}/${maxCap} ${(room.isCoupleRoom || room.isDiscordRoom) ? "người" : "khán giả"}
+              </div>
+            </div>
+
+            <div class="absolute bottom-3 inset-x-3 flex items-end gap-2.5 pointer-events-none">
+              <span class="rophim-rank-num text-3xl leading-none shrink-0">${displayIndex}</span>
+              <div class="min-w-0 flex-1">
+                <p class="text-[11px] font-semibold truncate" style="color:#F5C518">${escapeHTML(room.genre)} • ${escapeHTML(room.duration)}</p>
+                <h3 class="text-base font-black text-white line-clamp-1">${escapeHTML(cleanTitle)}</h3>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-[11px]" style="color:#A1A1AA">
+                <span>Tỷ lệ lấp đầy ghế</span>
+                <span class="font-bold text-white">${percent}% (${count} ghế)</span>
+              </div>
+              <div class="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                <div class="h-full cv-progress-red" style="width:${percent}%"></div>
+              </div>
+            </div>
+
+            <div>
+              ${(() => {
+                const hasValid = hasValidTicketForRoom(room.id);
+                const ticket = hasValid ? state.bookedTicketsByRoom?.[room.id] : null;
+                if (ticket && ticket.seatId) {
+                  return `
+                    <button type="button"
+                      onclick="event.stopPropagation(); window.appActions.enterRoom('${room.id}')"
+                      style="touch-action: manipulation;"
+                      class="cv-smooth-btn cv-btn-gold-outline w-full py-2.5 px-3 rounded-xl font-black text-[11px] transition cursor-pointer flex items-center justify-center gap-1.5">
+                      <i class="fa-solid fa-circle-check"></i>
+                      <span>Đã Có Vé (Ghế ${escapeHTML(ticket.seatId)}) • Vào Phòng</span>
+                    </button>
+                  `;
+                }
+                return `
+                  <button type="button"
+                    onclick="event.stopPropagation(); window.appActions.openBookingModal('${room.id}')"
+                    class="cv-smooth-btn rophim-card-cta w-full py-2.5 px-3 rounded-xl font-black text-[11px] transition cursor-pointer flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-ticket text-[10px]"></i>
+                    <span>Đặt Vé &amp; Chọn Ghế</span>
+                  </button>
+                `;
+              })()}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     function renderLobby() {
       renderContinueWatchingStrip();
       const grid = document.getElementById("lobby-rooms-grid");
       if (!grid) return;
 
-      const rooms = DEFAULT_ROOMS.map(r => getEffectiveRoom(r.id)).filter(room => {
-        if (state.roomFilter !== "all" && room.status !== state.roomFilter) return false;
+      const allRooms = DEFAULT_ROOMS.map(r => getEffectiveRoom(r.id));
+      const counts = {
+        all: allRooms.length,
+        single: allRooms.filter(r => getRoomCategory(r) === "single").length,
+        special: allRooms.filter(r => getRoomCategory(r) === "special").length,
+        series: allRooms.filter(r => getRoomCategory(r) === "series").length,
+        showing: allRooms.filter(r => r.status === "showing").length,
+        upcoming: allRooms.filter(r => r.status === "upcoming").length
+      };
+      Object.entries(counts).forEach(([k, val]) => {
+        const el = document.getElementById(`filter-count-${k}`);
+        if (el) el.textContent = String(val);
+      });
+
+      const activeFilter = state.roomFilter || "all";
+      const rooms = allRooms.filter(room => {
+        if (activeFilter === "showing" && room.status !== "showing") return false;
+        else if (activeFilter === "upcoming" && room.status !== "upcoming") return false;
+        else if (activeFilter === "single" || activeFilter === "special" || activeFilter === "series") {
+          if (getRoomCategory(room) !== activeFilter) return false;
+        }
         if (state.searchQuery) {
-          const hay = `${room.number} ${room.movieTitle} ${room.genre}`.toLowerCase();
+          const hay = `${room.number} ${room.movieTitle} ${room.displayTitle || ""} ${room.genre}`.toLowerCase();
           if (!hay.includes(state.searchQuery)) return false;
         }
         return true;
       });
 
+      const summaryEl = document.getElementById("lobby-visible-room-summary");
+      if (summaryEl) {
+        summaryEl.textContent = `Hiển thị ${rooms.length} / ${allRooms.length} phòng`;
+      }
+
       if (rooms.length === 0) {
         grid.innerHTML = `
-          <div class="col-span-full py-12 text-center bg-stone-900/50 border border-white/10 rounded-3xl">
-            <i class="fa-solid fa-film text-3xl text-slate-500 mb-2"></i>
-            <p class="text-sm font-bold text-slate-300">Không tìm thấy phòng chiếu phù hợp</p>
-            <p class="text-xs text-slate-500 mt-1">Thử xóa từ khóa tìm kiếm hoặc chọn bộ lọc "Tất cả (6 phòng)"</p>
+          <div class="col-span-full py-12 text-center rounded-3xl liquid-glass-card">
+            <i class="fa-solid fa-film text-3xl mb-2" style="color:#A1A1AA"></i>
+            <p class="text-sm font-bold text-white">Không tìm thấy phòng chiếu phù hợp</p>
+            <p class="text-xs mt-1" style="color:#A1A1AA">Thử xóa từ khóa tìm kiếm hoặc chọn bộ lọc "Tất cả (${allRooms.length} phòng)"</p>
           </div>
         `;
         return;
       }
 
-      grid.innerHTML = rooms.map((room, idx) => {
-        const seats = state.seatsByRoom[room.id] || {};
-        const count = Object.keys(seats).length;
-        const maxCap = room.maxSeats || 48;
-        const percent = Math.min(100, Math.round((count / maxCap) * 100));
-        const isShowing = room.status === "showing";
-        const isLocked = Boolean(state.roomLocks[room.id]);
+      if (activeFilter === "all" && !state.searchQuery) {
+        const groups = [
+          {
+            key: "single",
+            title: "Phòng Chiếu Lẻ",
+            subtitle: "Phòng 01 – 06 • Phim điện ảnh chiếu rạp",
+            icon: "fa-film",
+            color: "#E50914",
+            items: rooms.filter(r => getRoomCategory(r) === "single")
+          },
+          {
+            key: "special",
+            title: "Phòng Đôi & Stream VIP",
+            subtitle: "Ghế Sweetbox 2 người • Phòng Stream 60fps chia sẻ màn hình",
+            icon: "fa-heart",
+            color: "#F5C518",
+            items: rooms.filter(r => getRoomCategory(r) === "special")
+          },
+          {
+            key: "series",
+            title: "Phòng Phim Bộ Tự Do (Không Luật)",
+            subtitle: "Không giới hạn 30 phút • Tự do chuyển phần & đổi tập liên tục",
+            icon: "fa-layer-group",
+            color: "#F5C518",
+            items: rooms.filter(r => getRoomCategory(r) === "series")
+          }
+        ];
 
-        return `
-          <div onclick="window.appActions.enterRoom('${room.id}')"
-               class="lobby-zoom-card liquid-glass-card group rounded-3xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer">
-            <div class="relative aspect-video sm:aspect-auto sm:h-48 overflow-hidden bg-black">
-              <img src="${escapeHTML(room.poster)}" alt="${escapeHTML(room.movieTitle)}"
-                   onerror="this.src='https://placehold.co/800x450/1c1917/fbbf24?text=CineVerse+Lotte'"
-                   class="lobby-card-poster w-full h-full object-cover group-hover:scale-105 transition duration-500 opacity-90" />
-              <div class="absolute inset-0 bg-gradient-to-t from-[#0A0C10] via-[#0A0C10]/35 to-transparent pointer-events-none"></div>
-
-              <span class="card-preview-timer hidden absolute top-3 right-3 z-20 px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md border border-white/20 text-[10px] font-mono font-bold text-emerald-400">
-                ▶ 00:00 / 00:20
-              </span>
-
-              <div class="absolute top-3 inset-x-3 flex items-start justify-between gap-2 pointer-events-none">
-                <div class="flex flex-wrap items-center gap-1.5 min-w-0">
-                  <span class="monochrome-pill px-2.5 py-1 rounded-full text-xs font-black">${escapeHTML(room.number)}</span>
-                  <span ${(!isShowing && Number(room.scheduledAt) > Date.now()) ? `data-countdown-room="${room.id}"` : ""} class="px-2.5 py-1 rounded-full text-xs font-extrabold ${isShowing ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'monochrome-pill text-slate-300'}">
-                    ${isShowing ? '🟢 Đang chiếu' : (Number(room.scheduledAt) > Date.now() ? `⏳ Còn ${formatCountdownRemaining(room.scheduledAt - Date.now())} (${new Date(room.scheduledAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })})` : '⏳ Sắp chiếu')}
-                  </span>
-                  ${isLocked ? `<span class="monochrome-pill px-2 py-1 rounded-full text-[10px] font-black"><i class="fa-solid fa-lock mr-1"></i>${(state.isAdminUnlocked && state.adminRoomPins[room.id]) ? `PIN: ${escapeHTML(state.adminRoomPins[room.id])}` : "PIN"}</span>` : ""}
-                </div>
-
-                <div class="card-viewer-pill shrink-0 monochrome-pill px-2.5 py-1 rounded-full text-xs font-bold">
-                  <i class="fa-solid fa-users mr-1 text-slate-300"></i>${count}/${maxCap} ${(room.isCoupleRoom || room.isDiscordRoom) ? "người" : "khán giả"}
-                </div>
-              </div>
-
-              <div class="absolute bottom-3 inset-x-3 flex items-end gap-2.5 pointer-events-none">
-                <span class="rophim-rank-num text-3xl leading-none shrink-0">${idx + 1}</span>
-                <div class="min-w-0 flex-1">
-                  <p class="text-[11px] text-amber-200/85 font-semibold truncate">${escapeHTML(room.genre)} • ${escapeHTML(room.duration)}</p>
-                  <h3 class="text-base font-black text-white line-clamp-1">${escapeHTML(room.movieTitle)}</h3>
+        let globalIdx = 0;
+        grid.innerHTML = groups.filter(g => g.items.length > 0).map(g => {
+          const headerHtml = `
+            <div class="cv-section-divider">
+              <div class="flex items-center gap-2.5">
+                <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs" style="background:rgba(255,255,255,0.06);color:${g.color}">
+                  <i class="fa-solid ${g.icon}"></i>
+                </span>
+                <div>
+                  <h3 class="text-sm font-black text-white">${escapeHTML(g.title)} <span style="color:#F5C518">(${g.items.length} phòng)</span></h3>
+                  <p class="text-[11px]" style="color:#A1A1AA">${escapeHTML(g.subtitle)}</p>
                 </div>
               </div>
             </div>
+          `;
+          const cardsHtml = g.items.map(r => renderRoomCardHTML(r, ++globalIdx)).join("");
+          return headerHtml + cardsHtml;
+        }).join("");
+        return;
+      }
 
-            <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
-              <div class="space-y-1.5">
-                <div class="flex justify-between text-[11px] text-slate-400">
-                  <span>Tỷ lệ lấp đầy ghế</span>
-                  <span class="text-amber-200 font-bold">${percent}% (${count} ghế có người)</span>
-                </div>
-                <div class="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
-                  <div class="h-full bg-gradient-to-r from-amber-400 to-yellow-200" style="width:${percent}%"></div>
-                </div>
-              </div>
-
-              <div>
-                ${(() => {
-                  const hasValid = hasValidTicketForRoom(room.id);
-                  const ticket = hasValid ? state.bookedTicketsByRoom?.[room.id] : null;
-                  if (ticket && ticket.seatId) {
-                    return `
-                      <button type="button"
-                        onclick="event.stopPropagation(); window.appActions.enterRoom('${room.id}')"
-                        style="touch-action: manipulation;"
-                        class="cv-smooth-btn liquid-glass-pill w-full py-2.5 px-3 rounded-xl font-black text-[11px] transition cursor-pointer flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-circle-check text-emerald-400"></i>
-                        <span>Đã Có Vé (Ghế ${escapeHTML(ticket.seatId)}) • Vào Phòng</span>
-                      </button>
-                    `;
-                  }
-                  return `
-                    <button type="button"
-                      onclick="event.stopPropagation(); window.appActions.openBookingModal('${room.id}')"
-                      class="cv-smooth-btn rophim-card-cta w-full py-2.5 px-3 rounded-xl font-black text-[11px] transition cursor-pointer flex items-center justify-center gap-1.5">
-                      <i class="fa-solid fa-play text-[10px]"></i>
-                      <span>Đặt Vé & Chọn Ghế</span>
-                    </button>
-                  `;
-                })()}
-              </div>
-            </div>
-          </div>
-        `;
-      }).join("");
+      grid.innerHTML = rooms.map((room, idx) => renderRoomCardHTML(room, idx + 1)).join("");
     }
 
     // =========================================================
@@ -7451,7 +7930,7 @@
       const count = Math.max(1, Object.keys(seats).length);
 
       document.getElementById("room-header-number").textContent = room.number;
-      document.getElementById("room-header-title").textContent = room.movieTitle;
+      document.getElementById("room-header-title").textContent = room.displayTitle || sanitizeMovieTitle(room.movieTitle);
       document.getElementById("room-header-count").textContent = count;
       document.getElementById("chat-room-label").textContent = room.number;
 
@@ -10140,7 +10619,7 @@
                   </span>
                   <div class="absolute bottom-0 inset-x-0 px-2.5 pb-2 pt-5">
                     <p class="text-[11px] font-extrabold leading-snug line-clamp-2 drop-shadow ${isActiveSeries ? "text-amber-300" : "text-white group-hover:text-amber-200"}">
-                      ${escapeHTML(entry.title)}
+                      ${escapeHTML(sanitizeMovieTitle(entry.title))}
                     </p>
                   </div>
                 </div>
@@ -10218,7 +10697,7 @@
               </span>
               <div class="absolute bottom-0 inset-x-0 px-2.5 pb-2 pt-5">
                 <p class="text-[11px] font-extrabold leading-snug line-clamp-2 drop-shadow ${isActive ? "text-amber-300" : "text-white group-hover:text-amber-200"}">
-                  ${escapeHTML(item.title)}
+                  ${escapeHTML(sanitizeMovieTitle(item.title))}
                 </p>
               </div>
               ${hasResume ? `
@@ -17840,6 +18319,11 @@
       openBookingModal(room.id);
     }
 
+    function enterHeroRoomNow() {
+      const room = DEFAULT_ROOMS[state.heroIndex] || DEFAULT_ROOMS[0];
+      enterRoom(room.id);
+    }
+
     function openBookingModalFromBar() {
       const rId = document.getElementById("lobby-book-room")?.value || "room-1";
       if (hasValidTicketForRoom(rId)) {
@@ -21308,6 +21792,7 @@
       openBookingModal,
       closeBookingModal,
       openBookingModalForHero,
+      enterHeroRoomNow,
       openBookingModalFromBar,
       quickBookFromLobbyBar,
       onBookingRoomChange,
