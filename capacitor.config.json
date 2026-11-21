@@ -4,8 +4,14 @@
   "webDir": "www",
   "bundledWebRuntime": false,
   "server": {
+    "url": "https://project-ca-nhan.thodantuna.workers.dev/",
+    "cleartext": false,
     "androidScheme": "https",
-    "iosScheme": "https"
+    "iosScheme": "https",
+    "allowNavigation": [
+      "project-ca-nhan.thodantuna.workers.dev",
+      "*.workers.dev"
+    ]
   },
   "ios": {
     "contentInset": "automatic",
