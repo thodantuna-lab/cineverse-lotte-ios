@@ -211,21 +211,21 @@
       padding: 2.75rem 1rem 0.5rem;
     }
     .cv-hero-title {
-      font-family: 'Inter', 'Roboto', sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-weight: 700;
       color: #FFFFFF;
-      letter-spacing: -0.02em;
-      line-height: 1.2;
-      font-size: 1.35rem;
-      text-shadow: 0 4px 18px rgba(0, 0, 0, 0.65);
+      letter-spacing: -0.01em;
+      line-height: 1.26;
+      font-size: 1.3rem;
+      text-shadow: 0 3px 16px rgba(0, 0, 0, 0.65);
       white-space: normal;
       text-overflow: clip;
     }
     .cv-hero-meta-row {
-      margin-top: 14px;
+      margin-top: 12px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       flex-wrap: nowrap;
       overflow-x: auto;
       scrollbar-width: none;
@@ -237,12 +237,12 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      height: 24px;
+      height: 22px;
       border: 1px solid #F5C518;
       background: rgba(30, 32, 41, 0.65);
       border-radius: 4px;
-      padding: 0 8px;
-      font-size: 12px;
+      padding: 0 7px;
+      font-size: 11px;
       font-weight: 700;
       line-height: 1;
       color: #FFFFFF;
@@ -252,12 +252,12 @@
     .cv-hero-meta-outline {
       display: inline-flex;
       align-items: center;
-      height: 24px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      height: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
       background: rgba(30, 32, 41, 0.45);
       border-radius: 4px;
-      padding: 0 8px;
-      font-size: 12px;
+      padding: 0 7px;
+      font-size: 11px;
       font-weight: 600;
       color: #FFFFFF;
       line-height: 1;
@@ -265,10 +265,10 @@
       flex-shrink: 0;
     }
     .cv-hero-genre-row {
-      margin-top: 10px;
+      margin-top: 9px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       flex-wrap: nowrap;
       overflow-x: auto;
       scrollbar-width: none;
@@ -280,32 +280,32 @@
       display: inline-flex;
       align-items: center;
       background: rgba(255, 255, 255, 0.1);
-      padding: 4px 10px;
+      padding: 3px 9px;
       border-radius: 4px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 400;
-      color: #FFFFFF;
-      line-height: 1.25;
+      color: rgba(255, 255, 255, 0.86);
+      line-height: 1.3;
       white-space: nowrap;
       flex-shrink: 0;
     }
     .cv-hero-synopsis {
-      margin-top: 14px;
-      max-width: 90%;
-      font-size: 14px;
+      margin-top: 12px;
+      max-width: 490px;
+      font-size: 13px;
       font-weight: 400;
-      color: #E0E0E0;
-      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.82);
+      line-height: 1.6;
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
     .cv-hero-actions {
-      margin-top: 24px;
+      margin-top: 20px;
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       position: relative;
       z-index: 20;
     }
@@ -397,9 +397,9 @@
     }
     @media (min-width: 1024px) {
       #netflix-billboard {
-        height: 100vh !important;
-        min-height: 600px !important;
-        max-height: none !important;
+        height: calc(100vh - 76px) !important;
+        min-height: 540px !important;
+        max-height: 760px !important;
         margin-left: -2rem;
         margin-right: -2rem;
         margin-top: -0.5rem;
@@ -415,33 +415,33 @@
       #hero-content-col {
         position: absolute !important;
         left: 3% !important;
-        bottom: 8% !important;
-        max-width: 45% !important;
+        bottom: 7% !important;
+        max-width: 44% !important;
         margin: 0 !important;
         padding: 0 !important;
         z-index: 20 !important;
       }
       .cv-hero-title {
-        font-size: clamp(36px, 2.75vw, 42px);
+        font-size: clamp(32px, 2.5vw, 38px);
       }
       .cv-hero-play-circle {
-        width: 66px;
-        height: 66px;
+        width: 58px;
+        height: 58px;
       }
       .cv-hero-pill-group {
-        height: 48px;
+        height: 44px;
       }
       .cv-hero-pill-icon-btn {
-        width: 52px;
+        width: 50px;
       }
       .cv-hero-pill-text-btn {
-        padding: 0 24px;
-        font-size: 14px;
+        padding: 0 22px;
+        font-size: 13px;
       }
       .cv-thumbs-dock {
         position: absolute !important;
         right: 3%;
-        bottom: 8%;
+        bottom: 7%;
         z-index: 10;
         padding: 0;
         background: transparent;
