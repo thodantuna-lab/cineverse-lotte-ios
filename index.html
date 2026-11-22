@@ -25310,7 +25310,36 @@
       }
     }
       },
-      "betaBranchRules": {
+      "lotteBranchRules": {
+      "lotte_tay_ho": {
+        "source": "https://www.lottecinemavn.com/LCHS/Contents/ticketing/person-seat-select.aspx",
+        "cartSource": "https://www.lottecinemavn.com/LCHS/Contents/ticketing/order-settlement.aspx",
+        "fetchedAt": "2026-11-22T11:30:52+00:00",
+        "effectiveDate": "Chưa công bố trong bảng nguồn",
+        "threeDSurcharge": { "monThu": 20000, "friSunHol": 30000 },
+        "prices": {
+          "mon_thu": {
+            "adult": { "standard": 110000, "vip": 120000 },
+            "u22": { "standard": 65000, "vip": 65000 },
+            "child": { "standard": 65000, "vip": 65000 },
+            "senior": { "standard": 88000, "vip": 98000 }
+          },
+          "fri_sun": {
+            "adult": { "standard": 130000, "vip": 140000 },
+            "u22": { "standard": 95000, "vip": 105000 },
+            "child": { "standard": 95000, "vip": 105000 },
+            "senior": { "standard": 104000, "vip": 114000 }
+          },
+          "holiday": {
+            "adult": { "standard": 135000, "vip": 145000 },
+            "u22": { "standard": 100000, "vip": 110000 },
+            "child": { "standard": 100000, "vip": 110000 },
+            "senior": { "standard": 109000, "vip": 119000 }
+          }
+        }
+      }
+    },
+    "betaBranchRules": {
       "beta_thanh_xuan": {
         "source": "https://www.betacinemas.vn/gia-ve.htm",
         "guideSource": "https://www.betacinemas.vn/dieu-khoan/huong-dan-dat-ve-online.htm",
@@ -26698,6 +26727,53 @@
             updatedAtLabel: betaTimestamps.fetchedAtLabel,
             originKind: "betaOfficial",
             originStatus: "Đã đối chiếu từ betacinemas.vn/gia-ve.htm",
+            liveCheck
+          };
+        }
+      }
+
+      // 2c. Kiểm tra bảng giá chính thức của Lotte Cinema (từ person-seat-select.aspx khi đã đăng nhập)
+      const lotteRule = cinemaId ? CINEVERSE_HANOI_DATA.lotteBranchRules?.[cinemaId] : null;
+      if (lotteRule && (format === "2d" || format === "3d")) {
+        const dayKey = dayCtx.isHoliday ? "holiday" : (dayCtx.dayNum >= 5 ? "fri_sun" : "mon_thu");
+        const audRow = lotteRule.prices?.[dayKey]?.[audience] || null;
+        if (audRow && (seatTier === "standard" || seatTier === "vip")) {
+          const baseVnd = audRow[seatTier];
+          const fmtSur = format === "3d"
+            ? ((dayCtx.isHoliday || dayCtx.dayNum >= 5) ? lotteRule.threeDSurcharge.friSunHol : lotteRule.threeDSurcharge.monThu)
+            : 0;
+          const stdVnd = audRow.standard;
+          const seatSur = seatTier === "vip" ? (baseVnd - stdVnd) : 0;
+          const lotteTimestamps = {
+            fetchedAtLabel: formatIsoVnTimestamp(lotteRule.fetchedAt),
+            snapshotReviewedLabel: formatIsoVnTimestamp(CINEVERSE_HANOI_DATA.snapshotReviewed),
+            effectiveDateLabel: lotteRule.effectiveDate || "Chưa công bố trong bảng nguồn"
+          };
+          const unitVnd = baseVnd + fmtSur;
+          return {
+            available: true,
+            isReferenceFallback: false,
+            statusBadge: "Đã đối chiếu từ trang đặt vé Lotte",
+            unitVnd,
+            totalTicketVnd: unitVnd * safePeople,
+            baseVnd: stdVnd,
+            formatSurchargeVnd: fmtSur,
+            formatSurchargeNote: fmtSur ? `Phụ thu 3D (+${formatVND(fmtSur)}/vé)` : "",
+            seatSurchargeVnd: seatSur,
+            seatSurchargeTotalVnd: seatSur * safePeople,
+            seatNote: seatTier === "vip" ? `Ghế VIP (+${formatVND(seatSur)}/vé so với Tiêu chuẩn)` : "Ghế Tiêu chuẩn (0đ)",
+            holidaySurchargeVnd: 0,
+            unitLabel: "đồng/vé (đã gồm VAT)",
+            channel,
+            channelNote: "Giá đặt vé online chính thức Lotte Cinema (Phí đặt vé: 0đ)",
+            matchedHeader: `Thông tin giá vé West Lake (2D/${format.toUpperCase()} • ${dayKey})`,
+            dayLabel: dayCtx.label,
+            source: lotteRule.source,
+            timestamps: lotteTimestamps,
+            updatedAt: lotteRule.fetchedAt,
+            updatedAtLabel: lotteTimestamps.fetchedAtLabel,
+            originKind: "lotteOfficial",
+            originStatus: "Đã đối chiếu từ lottecinemavn.com (person-seat-select & order-settlement)",
             liveCheck
           };
         }
