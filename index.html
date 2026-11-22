@@ -5059,8 +5059,8 @@
         <div id="hn-budget-details-drawer" class="hidden hn-drawer-body pt-3 border-t border-amber-400/20 space-y-3">
           <p id="hn-branch-pricing-note" class="text-[11px] text-amber-200/90 font-semibold"></p>
 
-          <!-- Bộ chọn bổ sung trên Mobile (và nâng cao trên Desktop: Đối tượng, Hạng ghế, Thời điểm xem) -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+          <!-- Bộ chọn bổ sung trên Mobile (và nâng cao trên Desktop: Đối tượng, Hạng ghế, Nhóm ngày, Kênh mua, Ghế đôi) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 text-xs">
             <div class="space-y-1">
               <label class="text-[10px] font-extrabold uppercase text-slate-400 block">Đối tượng khách</label>
               <select id="hn-budget-audience" onchange="window.appActions.updateHanoiCinemaBudget()"
@@ -5089,6 +5089,22 @@
                 <option value="wed_happy">Thứ Tư Vui Vẻ</option>
                 <option value="fri_sun">Thứ 6, Thứ 7, Chủ Nhật</option>
                 <option value="holiday">Ngày Lễ / Tết (+phụ thu)</option>
+              </select>
+            </div>
+            <div class="space-y-1">
+              <label class="text-[10px] font-extrabold uppercase text-slate-400 block">Kênh mua vé</label>
+              <select id="hn-budget-channel" onchange="window.appActions.updateHanoiCinemaBudget()"
+                class="hn-field-box w-full px-2.5 py-2 text-xs font-bold">
+                <option value="online" selected>Trực tuyến (Online)</option>
+                <option value="counter">Tại quầy (xuất trình thẻ)</option>
+              </select>
+            </div>
+            <div class="space-y-1">
+              <label class="text-[10px] font-extrabold uppercase text-slate-400 block">Đơn vị ghế đôi</label>
+              <select id="hn-budget-sweetbox-unit" onchange="window.appActions.updateHanoiCinemaBudget()"
+                class="hn-field-box w-full px-2.5 py-2 text-xs font-bold">
+                <option value="per_ticket" selected>Theo từng người (+26k/vé)</option>
+                <option value="per_pair">Theo cặp ghế (+26k/cặp 2 vé)</option>
               </select>
             </div>
           </div>
@@ -25276,12 +25292,51 @@
           "comboBaseVnd": null
         },
         "lotte": {
-          "source": "https://www.lottecinemavn.com/LCMS/Contents/Cinema-Mall/popcorn-shop.aspx?type=gateway",
-          "requiresBranchSelection": true,
-          "comboBaseVnd": null
-        }
+      "source": "https://www.lottecinemavn.com/LCHS/Contents/Cinema-Mall/Canteen.aspx",
+      "fetchedAt": "2026-11-22T11:13:00+00:00",
+      "requiresBranchSelection": true,
+      "comboBaseVnd": null,
+      "branchMenus": {
+        "lotte_tay_ho": [
+          { "name": "MeCheese Combo", "vnd": 149000, "channel": "online" },
+          { "name": "Combo Super XXXL (1 Bắp XXXL + 1 Nước XXXL)", "vnd": 169000, "channel": "online" },
+          { "name": "Crunchy 2A CB", "vnd": 175000, "channel": "online" }
+        ],
+        "lotte_ha_dong": [
+          { "name": "XXXL Popcorn Super Size_Onl", "vnd": 99000, "channel": "online" },
+          { "name": "Hot Sale Only Online", "vnd": 109000, "channel": "online" },
+          { "name": "Combo Super XXXL (1 Bắp XXXL + 1 Nước XXXL)", "vnd": 169000, "channel": "online" }
+        ]
+      }
+    }
       },
-      "nccOffer": {
+      "betaBranchRules": {
+      "beta_thanh_xuan": {
+        "source": "https://www.betacinemas.vn/gia-ve.htm",
+        "guideSource": "https://www.betacinemas.vn/dieu-khoan/huong-dan-dat-ve-online.htm",
+        "fetchedAt": "2026-11-22T11:10:00+00:00",
+        "effectiveDate": "Chưa công bố trong bảng nguồn",
+        "vipOrCoupleSurchargeVnd": 5000,
+        "nonMemberSurchargeVnd": 10000,
+        "prices": {
+          "2d": {
+            "mon_wed_thu_fri": { "adult": 45000, "u22": 45000, "child": 45000, "senior": 45000 },
+            "tue_happy": { "adult": 45000, "u22": 45000, "child": 45000, "senior": 45000 },
+            "sat_sun_day": { "adult": 75000, "u22": 45000, "child": 45000, "senior": 45000 },
+            "sat_sun_evening": { "adult": 80000, "u22": 45000, "child": 45000, "senior": 45000 },
+            "holiday": { "adult": 80000, "u22": 80000, "child": 80000, "senior": 80000 }
+          },
+          "3d": {
+            "mon_wed_thu_fri": { "adult": 65000, "u22": 65000, "child": 65000, "senior": 65000 },
+            "tue_happy": { "adult": 65000, "u22": 65000, "child": 65000, "senior": 65000 },
+            "sat_sun_day": { "adult": 95000, "u22": 65000, "child": 65000, "senior": 65000 },
+            "sat_sun_evening": { "adult": 100000, "u22": 65000, "child": 65000, "senior": 65000 },
+            "holiday": { "adult": 100000, "u22": 100000, "child": 100000, "senior": 100000 }
+          }
+        }
+      }
+    },
+    "nccOffer": {
         "source": "https://chieuphimquocgia.com.vn/news-list/9559",
         "format": "2D",
         "vnd": 55000,
@@ -26185,16 +26240,59 @@
       const isPriceCell = (t) => /^\d{2,3}[.,]\d{3}$/.test(String(t || "").trim());
 
       let surcharges = { vip: null, sweetbox: null, threeD: null, holiday: null, raw: "" };
+      let effectiveDate = "Chưa công bố trong bảng nguồn";
       const dataRows = [];
       for (let r = 0; r < grid.length; r++) {
         const rowTexts = (grid[r] || []).map(cell => String(cell?.text || "").trim());
         const joined = rowTexts.join(" ");
+        const effMatch = joined.match(/(?:áp\s*dụng\s*từ|hiệu\s*lực\s*từ)\s*[:\-]?\s*([\d/.-]{6,})/i);
+        if (effMatch) effectiveDate = effMatch[1];
         if (/phụ\s*thu/i.test(joined)) {
           surcharges = parseSurchargesFromText(joined);
           continue;
         }
         dataRows.push({ r, cells: grid[r] || [] });
       }
+
+      const buildRule = (dayText, audienceText, baseVnd) => {
+        const dayMeta = normalizeDayGroupFromText(dayText);
+        const audiences = normalizeAudiencesFromText(audienceText);
+        const isU22 = audiences.includes("u22");
+        const channel = isU22 ? "online_or_counter_with_id" : "online_or_counter";
+        const channelNote = isU22
+          ? "Áp dụng online & tại quầy (U22 cần xuất trình CCCD/Thẻ HSSV dưới 23 tuổi)"
+          : "Áp dụng chung online & tại quầy theo bảng niêm yết chi nhánh";
+        const verifiedMapping = Boolean(
+          formatKey &&
+          dayText &&
+          audienceText &&
+          dayMeta.days.length > 0 &&
+          audiences.length > 0 &&
+          Number.isFinite(baseVnd) &&
+          baseVnd > 0
+        );
+        return {
+          formatKey,
+          columnTitle: {
+            heading: tableObj.heading || "Bảng giá",
+            dayHeader: dayText,
+            audienceHeader: audienceText
+          },
+          dayText,
+          dayGroup: dayMeta.label,
+          days: dayMeta.days,
+          includesHoliday: dayMeta.includesHoliday,
+          audienceText,
+          audiences,
+          channel,
+          channelNote,
+          unit: "per_ticket",
+          unitLabel: "đồng/vé",
+          baseVnd,
+          verifiedMapping,
+          columnSummary: `${dayText} → ${audienceText}`
+        };
+      };
 
       const entries = [];
       const purePriceRow = dataRows.find(dr => dr.cells.length > 0 && dr.cells.every(c => isPriceCell(c.text)));
@@ -26212,18 +26310,7 @@
           }
           const dayText = headerParts[0] || "";
           const audienceText = headerParts[1] || headerParts[0] || "";
-          const dayMeta = normalizeDayGroupFromText(dayText);
-          const audiences = normalizeAudiencesFromText(audienceText);
-          entries.push({
-            formatKey,
-            dayText,
-            days: dayMeta.days,
-            includesHoliday: dayMeta.includesHoliday,
-            audienceText,
-            audiences,
-            baseVnd,
-            columnSummary: `${dayText} → ${audienceText}`
-          });
+          entries.push(buildRule(dayText, audienceText, baseVnd));
         }
       } else {
         for (const dr of dataRows) {
@@ -26238,27 +26325,27 @@
           }
           const dayText = labelParts[0] || "";
           const audienceText = labelParts[1] || labelParts[0] || "";
-          const dayMeta = normalizeDayGroupFromText(dayText);
-          const audiences = normalizeAudiencesFromText(audienceText);
-          entries.push({
-            formatKey,
-            dayText,
-            days: dayMeta.days,
-            includesHoliday: dayMeta.includesHoliday,
-            audienceText,
-            audiences,
-            baseVnd,
-            columnSummary: `${dayText} → ${audienceText}`
-          });
+          entries.push(buildRule(dayText, audienceText, baseVnd));
         }
       }
 
-      return { formatKey, heading: tableObj.heading || "Bảng giá", entries, surcharges };
+      const validRuleCount = entries.filter(e => e.verifiedMapping).length;
+      const unmappedRuleCount = entries.length - validRuleCount;
+      return {
+        formatKey,
+        heading: tableObj.heading || "Bảng giá",
+        effectiveDate,
+        entries,
+        surcharges,
+        validRuleCount,
+        unmappedRuleCount,
+        tableVerified: validRuleCount > 0 && unmappedRuleCount === 0
+      };
     }
 
     const _parsedLiveTableCache = {};
     function inspectAndParseLiveTablesForBranch(branchId) {
-      if (!branchId) return { available: false, status: "missing", reason: "Chưa chọn chi nhánh", tables: [] };
+      if (!branchId) return { available: false, status: "missing", reviewStatus: "missing", reason: "Chưa chọn chi nhánh", tables: [] };
       if (_parsedLiveTableCache[branchId]) return _parsedLiveTableCache[branchId];
 
       const liveEntry = CINEVERSE_HANOI_DATA.liveTables?.[branchId];
@@ -26266,9 +26353,12 @@
         const res = {
           available: false,
           status: "missing",
+          reviewStatus: "missing",
           reason: "Không có bảng liveTables trong dữ liệu tích hợp",
           source: CINEVERSE_HANOI_DATA.branches?.[branchId]?.source || null,
-          attemptedAt: null,
+          fetchedAt: null,
+          snapshotReviewed: CINEVERSE_HANOI_DATA.snapshotReviewed,
+          effectiveDate: "Chưa công bố trong bảng nguồn",
           tables: []
         };
         _parsedLiveTableCache[branchId] = res;
@@ -26279,9 +26369,12 @@
         const res = {
           available: false,
           status: liveEntry.status || "unavailable",
+          reviewStatus: "unavailable",
           error: liveEntry.error || "liveTables không khả dụng",
           source: liveEntry.source || null,
-          attemptedAt: liveEntry.attemptedAt || null,
+          fetchedAt: liveEntry.attemptedAt || null,
+          snapshotReviewed: CINEVERSE_HANOI_DATA.snapshotReviewed,
+          effectiveDate: "Chưa công bố trong bảng nguồn",
           tables: []
         };
         _parsedLiveTableCache[branchId] = res;
@@ -26289,12 +26382,18 @@
       }
 
       const parsedTables = liveEntry.tables.map(parseCineverseLiveTable);
+      const allTablesVerified = parsedTables.length > 0 && parsedTables.every(t => t.tableVerified);
+      const effectiveDate = parsedTables.find(t => t.effectiveDate && !t.effectiveDate.startsWith("Chưa công bố"))?.effectiveDate || "Chưa công bố trong bảng nguồn";
       const res = {
-        available: true,
+        available: allTablesVerified,
         status: liveEntry.status,
-        reviewed: true,
+        reviewStatus: allTablesVerified ? "verified_from_live_table" : "needs_review",
+        reviewed: allTablesVerified,
         source: liveEntry.source,
+        fetchedAt: liveEntry.attemptedAt,
         attemptedAt: liveEntry.attemptedAt,
+        snapshotReviewed: CINEVERSE_HANOI_DATA.snapshotReviewed,
+        effectiveDate,
         tables: parsedTables
       };
       _parsedLiveTableCache[branchId] = res;
@@ -26322,20 +26421,27 @@
       return { dayNum, isHoliday: false, label: `Hôm nay (${names[dayNum]})` };
     }
 
-    function resolveCinemaTicketQuote(cinemaOrBrand, dayType, seatTier, audience, format = "2d") {
+    function resolveCinemaTicketQuote(cinemaOrBrand, dayType, seatTier, audience, format = "2d", channel = "online", sweetboxUnit = "per_ticket", people = 2) {
       const cinemaId = typeof cinemaOrBrand === "object" ? cinemaOrBrand.id : "";
       const branchMeta = cinemaId ? CINEVERSE_HANOI_DATA.branches?.[cinemaId] : null;
       const dayCtx = resolveDayContext(dayType);
       const liveCheck = inspectAndParseLiveTablesForBranch(cinemaId);
+      const safePeople = Math.max(1, parseInt(people, 10) || 1);
 
-      // 1. Kiểm tra liveTables trước khi dùng dữ liệu
-      if (liveCheck.available) {
+      const timestamps = {
+        fetchedAtLabel: liveCheck.fetchedAt ? formatIsoVnTimestamp(liveCheck.fetchedAt) : "Chưa tải được",
+        snapshotReviewedLabel: formatIsoVnTimestamp(CINEVERSE_HANOI_DATA.snapshotReviewed),
+        effectiveDateLabel: liveCheck.effectiveDate || "Chưa công bố trong bảng nguồn"
+      };
+
+      // 1. Chỉ dùng liveTables khi đã vượt qua xác thực ánh xạ cột/ngày/đối tượng (reviewStatus === "verified_from_live_table")
+      if (liveCheck.available && liveCheck.reviewStatus === "verified_from_live_table") {
         const lookupFormat = format === "3d" ? "2d" : format;
-        const table = liveCheck.tables.find(t => t.formatKey === lookupFormat);
+        const table = liveCheck.tables.find(t => t.formatKey === lookupFormat && t.tableVerified);
         if (table) {
-          let matched = table.entries.find(e => e.days.includes(dayCtx.dayNum) && e.audiences.includes(audience));
+          let matched = table.entries.find(e => e.verifiedMapping && e.days.includes(dayCtx.dayNum) && e.audiences.includes(audience));
           if (!matched) {
-            matched = table.entries.find(e => e.days.includes(dayCtx.dayNum) && e.audiences.includes("all"));
+            matched = table.entries.find(e => e.verifiedMapping && e.days.includes(dayCtx.dayNum) && e.audiences.includes("all"));
           }
           if (matched) {
             let formatSurchargeVnd = 0;
@@ -26345,44 +26451,62 @@
                 return {
                   available: false,
                   unitVnd: null,
+                  totalTicketVnd: null,
                   reason: "Chưa có dữ liệu phụ thu 3D trong bảng live",
                   source: liveCheck.source,
-                  updatedAt: liveCheck.attemptedAt,
-                  updatedAtLabel: formatIsoVnTimestamp(liveCheck.attemptedAt),
+                  timestamps,
+                  updatedAt: liveCheck.fetchedAt,
+                  updatedAtLabel: timestamps.fetchedAtLabel,
                   liveCheck
                 };
               }
               const isFriSunHol = dayCtx.dayNum >= 5 || dayCtx.isHoliday;
               formatSurchargeVnd = isFriSunHol ? table.surcharges.threeD.friSunAdd : table.surcharges.threeD.monThuAdd;
-              formatSurchargeNote = `Phụ thu 3D (+${formatVND(formatSurchargeVnd)})`;
+              formatSurchargeNote = `Phụ thu 3D (+${formatVND(formatSurchargeVnd)}/vé)`;
             }
 
-            let seatSurchargeVnd = 0;
+            let seatSurchargePerTicketVnd = 0;
+            let seatSurchargeTotalVnd = 0;
             let seatNote = "Ghế Thường (0đ)";
+            let unitLabel = "đồng/vé";
             if (seatTier === "vip") {
               if (table.surcharges.vip) {
                 if (table.surcharges.vip.exemptAudiences.includes(audience)) {
-                  seatSurchargeVnd = 0;
+                  seatSurchargePerTicketVnd = 0;
                   seatNote = `Ghế VIP: Miễn phụ thu cho ${audience.toUpperCase()} (0đ)`;
                 } else {
-                  seatSurchargeVnd = table.surcharges.vip.add;
-                  seatNote = `Phụ thu Ghế VIP (+${formatVND(seatSurchargeVnd)})`;
+                  seatSurchargePerTicketVnd = table.surcharges.vip.add;
+                  seatSurchargeTotalVnd = seatSurchargePerTicketVnd * safePeople;
+                  seatNote = `Phụ thu Ghế VIP (+${formatVND(seatSurchargePerTicketVnd)}/vé)`;
                 }
               } else {
                 seatNote = `Ghế VIP (${table.heading} không liệt kê phụ thu VIP riêng)`;
               }
             } else if (seatTier === "sweetbox") {
               if (table.surcharges.sweetbox) {
-                seatSurchargeVnd = table.surcharges.sweetbox.add;
-                seatNote = `Phụ thu Sweetbox (+${formatVND(seatSurchargeVnd)})`;
+                const swbAdd = table.surcharges.sweetbox.add;
+                if (sweetboxUnit === "per_pair") {
+                  const pairs = Math.ceil(safePeople / 2);
+                  seatSurchargeTotalVnd = swbAdd * pairs;
+                  seatSurchargePerTicketVnd = Math.round(seatSurchargeTotalVnd / safePeople);
+                  unitLabel = "đồng/cặp ghế đôi";
+                  seatNote = `Sweetbox tính theo cặp: +${formatVND(swbAdd)}/cặp × ${pairs} cặp = +${formatVND(seatSurchargeTotalVnd)} (bảng nguồn ghi '+26.000' không ghi rõ /vé hay /cặp)`;
+                } else {
+                  seatSurchargePerTicketVnd = swbAdd;
+                  seatSurchargeTotalVnd = swbAdd * safePeople;
+                  unitLabel = "đồng/vé (tính theo người)";
+                  seatNote = `Sweetbox tính theo từng vé: +${formatVND(swbAdd)}/vé × ${safePeople} = +${formatVND(seatSurchargeTotalVnd)} (bảng nguồn ghi '+26.000' không ghi rõ /vé hay /cặp)`;
+                }
               } else {
                 return {
                   available: false,
                   unitVnd: null,
+                  totalTicketVnd: null,
                   reason: "Chưa có dữ liệu phụ thu Sweetbox",
                   source: liveCheck.source,
-                  updatedAt: liveCheck.attemptedAt,
-                  updatedAtLabel: formatIsoVnTimestamp(liveCheck.attemptedAt),
+                  timestamps,
+                  updatedAt: liveCheck.fetchedAt,
+                  updatedAtLabel: timestamps.fetchedAtLabel,
                   liveCheck
                 };
               }
@@ -26393,30 +26517,52 @@
               holidaySurchargeVnd = table.surcharges.holiday.add;
             }
 
-            const unitVnd = matched.baseVnd + formatSurchargeVnd + seatSurchargeVnd + holidaySurchargeVnd;
+            const basePlusFmtPlusHolTotal = (matched.baseVnd + formatSurchargeVnd + holidaySurchargeVnd) * safePeople;
+            const totalTicketVnd = basePlusFmtPlusHolTotal + seatSurchargeTotalVnd;
+            const unitVnd = Math.round(totalTicketVnd / safePeople);
+            const channelNote = channel === "counter"
+              ? (audience === "u22" ? "Mua tại quầy: Xuất trình CCCD/Thẻ HSSV U22 để hưởng giá 70.000đ" : "Mua tại quầy: Áp dụng theo bảng niêm yết chi nhánh")
+              : (audience === "u22" ? "Mua Online: Cần xác thực tài khoản thành viên U22/CMND dưới 23 tuổi" : "Mua Online: Áp dụng giá niêm yết trực tuyến (chưa gồm phí tiện ích cổng thanh toán nếu có)");
+
             return {
               available: true,
+              isReferenceFallback: false,
+              statusBadge: "Đã đối chiếu từ liveTables",
               unitVnd,
+              totalTicketVnd,
               baseVnd: matched.baseVnd,
               formatSurchargeVnd,
               formatSurchargeNote,
-              seatSurchargeVnd,
+              seatSurchargeVnd: seatSurchargePerTicketVnd,
+              seatSurchargeTotalVnd,
               seatNote,
               holidaySurchargeVnd,
+              unitLabel,
+              channel,
+              channelNote,
+              ruleMeta: {
+                columnTitle: matched.columnTitle,
+                dayGroup: matched.dayGroup,
+                days: matched.days,
+                audience: matched.audiences,
+                channel: matched.channel,
+                unit: matched.unit
+              },
               matchedHeader: `${table.heading} • ${matched.columnSummary}`,
               dayLabel: dayCtx.label,
               source: liveCheck.source,
-              updatedAt: liveCheck.attemptedAt,
-              updatedAtLabel: formatIsoVnTimestamp(liveCheck.attemptedAt),
+              timestamps,
+              updatedAt: liveCheck.fetchedAt,
+              updatedAtLabel: timestamps.fetchedAtLabel,
               originKind: "liveTables",
-              originStatus: "liveTables (fetched_needs_review → đã đối chiếu)",
+              originStatus: "Đã đối chiếu (verified_from_live_table)",
               liveCheck
             };
           }
         }
       }
 
-      // 2. Fallback sang ticketEvidence nếu liveTables unavailable hoặc chưa có định dạng (ví dụ CGV AEON Long Biên)
+      // 2. Dự phòng từ ticketEvidence khi liveTables unavailable hoặc chưa có định dạng -> BẮT BUỘC gắn nhãn "Giá tham khảo — chưa cập nhật được"
       if (cinemaId && Array.isArray(CINEVERSE_HANOI_DATA.ticketEvidence)) {
         const wantFmt = format.toUpperCase() === "CINE_SUITE" ? "Cine & Suite" : format.toUpperCase();
         const evBase = CINEVERSE_HANOI_DATA.ticketEvidence.find(ev => {
@@ -26443,10 +26589,12 @@
               return {
                 available: false,
                 unitVnd: null,
+                totalTicketVnd: null,
                 reason: "Chưa có dữ liệu phụ thu Ghế VIP",
                 source: evBase.source,
+                timestamps,
                 updatedAt: CINEVERSE_HANOI_DATA.snapshotReviewed,
-                updatedAtLabel: formatIsoVnTimestamp(CINEVERSE_HANOI_DATA.snapshotReviewed),
+                updatedAtLabel: timestamps.snapshotReviewedLabel,
                 liveCheck
               };
             }
@@ -26454,32 +26602,102 @@
             return {
               available: false,
               unitVnd: null,
+              totalTicketVnd: null,
               reason: "Chưa có dữ liệu phụ thu Sweetbox trong ticketEvidence",
               source: evBase.source,
+              timestamps,
               updatedAt: CINEVERSE_HANOI_DATA.snapshotReviewed,
-              updatedAtLabel: formatIsoVnTimestamp(CINEVERSE_HANOI_DATA.snapshotReviewed),
+              updatedAtLabel: timestamps.snapshotReviewedLabel,
               liveCheck
             };
           }
 
+          const unitVnd = evBase.vnd + seatSurchargeVnd;
           return {
             available: true,
-            unitVnd: evBase.vnd + seatSurchargeVnd,
+            isReferenceFallback: true,
+            statusBadge: "Giá tham khảo — chưa cập nhật được",
+            unitVnd,
+            totalTicketVnd: unitVnd * safePeople,
             baseVnd: evBase.vnd,
             formatSurchargeVnd: 0,
             formatSurchargeNote: "",
             seatSurchargeVnd,
+            seatSurchargeTotalVnd: seatSurchargeVnd * safePeople,
             seatNote,
             holidaySurchargeVnd: 0,
+            unitLabel: "đồng/vé",
+            channel,
+            channelNote: "Dữ liệu dự phòng từ bản tham khảo cũ (liveTables không khả dụng)",
             matchedHeader: `ticketEvidence (${evBase.format} • ngày [${(evBase.days || []).join(",")}])`,
             dayLabel: dayCtx.label,
             source: evBase.source,
+            timestamps,
             updatedAt: CINEVERSE_HANOI_DATA.snapshotReviewed,
-            updatedAtLabel: formatIsoVnTimestamp(CINEVERSE_HANOI_DATA.snapshotReviewed),
+            updatedAtLabel: timestamps.snapshotReviewedLabel,
             originKind: "ticketEvidence",
-            originStatus: liveCheck.status === "unavailable"
-              ? `ticketEvidence (liveTables unavailable: ${liveCheck.error || ""})`
-              : "ticketEvidence (indexed_reference_only)",
+            originStatus: `Giá tham khảo — chưa cập nhật được (${liveCheck.error || "liveTables unavailable"})`,
+            liveCheck
+          };
+        }
+      }
+
+      // 2b. Kiểm tra bảng giá chính thức của Beta Cinemas (nếu có trong betaBranchRules)
+      const betaRule = cinemaId ? CINEVERSE_HANOI_DATA.betaBranchRules?.[cinemaId] : null;
+      if (betaRule && betaRule.prices?.[format]) {
+        const fmtTable = betaRule.prices[format];
+        let rowKey = "mon_wed_thu_fri";
+        if (dayCtx.isHoliday) rowKey = "holiday";
+        else if (dayCtx.dayNum === 2) rowKey = "tue_happy";
+        else if (dayCtx.dayNum >= 6) {
+          const vnHour = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" })).getHours();
+          rowKey = (vnHour >= 18 && vnHour < 22) ? "sat_sun_evening" : "sat_sun_day";
+        }
+        const baseVnd = fmtTable[rowKey]?.[audience] ?? null;
+        if (baseVnd !== null) {
+          const isHappyTue = dayCtx.dayNum === 2 && !dayCtx.isHoliday;
+          let seatSurchargeVnd = 0;
+          let seatNote = "Ghế Thường (0đ)";
+          if (seatTier === "vip" || seatTier === "sweetbox") {
+            seatSurchargeVnd = isHappyTue ? 0 : betaRule.vipOrCoupleSurchargeVnd;
+            seatNote = isHappyTue
+              ? "Happy Day (Thứ 3): Miễn phụ thu ghế VIP/đôi (0đ)"
+              : `Phụ thu ghế VIP/đôi (+${formatVND(seatSurchargeVnd)}/vé)`;
+          }
+          const isPreferential = audience === "u22" || audience === "child" || audience === "senior";
+          const channelNote = isPreferential && channel === "online"
+            ? "Lưu ý: Giá ưu đãi HSSV/Trẻ em/Cao tuổi chỉ áp dụng tại quầy (không bán online theo hướng dẫn Beta)"
+            : (isPreferential ? "Mua tại quầy: Xuất trình giấy tờ ưu đãi HSSV/Trẻ em/Cao tuổi" : "Mua Online/Tại quầy: Khách không phải thành viên cộng thêm +10.000đ/vé");
+          const betaTimestamps = {
+            fetchedAtLabel: formatIsoVnTimestamp(betaRule.fetchedAt),
+            snapshotReviewedLabel: formatIsoVnTimestamp(CINEVERSE_HANOI_DATA.snapshotReviewed),
+            effectiveDateLabel: betaRule.effectiveDate || "Chưa công bố trong bảng nguồn"
+          };
+          const unitVnd = baseVnd + seatSurchargeVnd;
+          return {
+            available: true,
+            isReferenceFallback: false,
+            statusBadge: "Đã đối chiếu từ trang chính thức Beta",
+            unitVnd,
+            totalTicketVnd: unitVnd * safePeople,
+            baseVnd,
+            formatSurchargeVnd: 0,
+            formatSurchargeNote: "",
+            seatSurchargeVnd,
+            seatSurchargeTotalVnd: seatSurchargeVnd * safePeople,
+            seatNote,
+            holidaySurchargeVnd: 0,
+            unitLabel: "đồng/vé (thành viên)",
+            channel,
+            channelNote,
+            matchedHeader: `GIÁ VÉ RẠP BETA THANH XUÂN (${format.toUpperCase()} • ${rowKey})`,
+            dayLabel: dayCtx.label,
+            source: betaRule.source,
+            timestamps: betaTimestamps,
+            updatedAt: betaRule.fetchedAt,
+            updatedAtLabel: betaTimestamps.fetchedAtLabel,
+            originKind: "betaOfficial",
+            originStatus: "Đã đối chiếu từ betacinemas.vn/gia-ve.htm",
             liveCheck
           };
         }
@@ -26488,12 +26706,16 @@
       // 3. Thiếu dữ liệu -> Bắt buộc trả về Chưa có dữ liệu
       return {
         available: false,
+        isReferenceFallback: false,
+        statusBadge: "Chưa có dữ liệu",
         unitVnd: null,
+        totalTicketVnd: null,
         reason: "Chưa có dữ liệu",
         dayLabel: dayCtx.label,
         source: liveCheck.source || branchMeta?.source || null,
-        updatedAt: liveCheck.attemptedAt || CINEVERSE_HANOI_DATA.snapshotReviewed,
-        updatedAtLabel: formatIsoVnTimestamp(liveCheck.attemptedAt || CINEVERSE_HANOI_DATA.snapshotReviewed),
+        timestamps,
+        updatedAt: liveCheck.fetchedAt || CINEVERSE_HANOI_DATA.snapshotReviewed,
+        updatedAtLabel: liveCheck.fetchedAt ? timestamps.fetchedAtLabel : timestamps.snapshotReviewedLabel,
         originKind: "missing",
         originStatus: liveCheck.status === "unavailable"
           ? `Chưa có dữ liệu (liveTables: ${liveCheck.error || "unavailable"})`
@@ -26528,6 +26750,20 @@
       }
       if (brand === "Lotte Cinema") {
         const l = CINEVERSE_HANOI_DATA.concessions?.lotte;
+        const cinemaId = typeof cinemaOrBrand === "object" ? cinemaOrBrand.id : "";
+        const menu = cinemaId ? l?.branchMenus?.[cinemaId] : null;
+        if (Array.isArray(menu) && menu.length > 0) {
+          const item = menu[0];
+          return {
+            required: true,
+            available: true,
+            totalVnd: item.vnd,
+            label: item.name,
+            note: `Giá online từ Canteen Lotte (${item.name}: ${formatVND(item.vnd)} / combo)`,
+            source: l?.source || null,
+            updatedAtLabel: formatIsoVnTimestamp(l?.fetchedAt || CINEVERSE_HANOI_DATA.snapshotReviewed)
+          };
+        }
         return {
           required: true,
           available: false,
@@ -27282,24 +27518,26 @@
       const seatTier = document.getElementById("hn-budget-seat-tier")?.value || "vip";
       const dayType = document.getElementById("hn-budget-daytype")?.value || "auto";
       const comboMode = document.getElementById("hn-budget-combo")?.value || "shared";
+      const channel = document.getElementById("hn-budget-channel")?.value || "online";
+      const sweetboxUnit = document.getElementById("hn-budget-sweetbox-unit")?.value || "per_ticket";
 
-      const ticketQuote = resolveCinemaTicketQuote(selected, dayType, seatTier, audience, format);
+      const ticketQuote = resolveCinemaTicketQuote(selected, dayType, seatTier, audience, format, channel, sweetboxUnit, people);
       const comboQuote = resolveCinemaConcessionQuote(selected, comboMode);
       const parkingQuote = resolveCinemaParkingQuote(comboMode);
       const liveCheck = ticketQuote.liveCheck || inspectAndParseLiveTablesForBranch(selected.id);
 
       const branchNoteEl = document.getElementById("hn-branch-pricing-note");
       if (branchNoteEl) {
-        if (liveCheck.available) {
-          branchNoteEl.textContent = `📌 ${selected.name}: Đã kiểm tra liveTables (status: ${liveCheck.status}) & đối chiếu cột/ngày/đối tượng/phụ thu • Cập nhật: ${formatIsoVnTimestamp(liveCheck.attemptedAt)}`;
-        } else if (liveCheck.status === "unavailable") {
-          branchNoteEl.textContent = `⚠️ ${selected.name}: liveTables unavailable (${liveCheck.error || "lỗi cấu trúc"}) → ${ticketQuote.available ? "đối chiếu từ ticketEvidence" : "Chưa có dữ liệu"}`;
+        if (liveCheck.available && liveCheck.reviewStatus === "verified_from_live_table") {
+          branchNoteEl.textContent = `📌 ${selected.name}: Đã đối chiếu từ liveTables • Tải thành công: ${ticketQuote.timestamps.fetchedAtLabel} • Rà soát: ${ticketQuote.timestamps.snapshotReviewedLabel} • Hiệu lực rạp: ${ticketQuote.timestamps.effectiveDateLabel}`;
+        } else if (ticketQuote.isReferenceFallback) {
+          branchNoteEl.textContent = `⚠️ ${selected.name}: Giá tham khảo — chưa cập nhật được (liveTables: ${liveCheck.error || "unavailable"}) • Bản tham khảo: ${ticketQuote.timestamps.snapshotReviewedLabel}`;
         } else {
           branchNoteEl.textContent = `ℹ️ ${selected.name}: Chưa có dữ liệu liveTables hoặc ticketEvidence trong cineverse_hanoi.json.`;
         }
       }
 
-      const ticketTotal = ticketQuote.available ? ticketQuote.unitVnd * people : null;
+      const ticketTotal = ticketQuote.available ? ticketQuote.totalTicketVnd : null;
       const missingParts = [];
       if (ticketTotal === null) missingParts.push("vé");
       if (!comboQuote.available) missingParts.push("bắp nước");
@@ -27325,9 +27563,10 @@
       }
       if (pill) {
         if (allKnown) {
-          pill.textContent = `${ticketQuote.originKind} • ${formatVND(perPerson)} / người`;
+          pill.textContent = `${ticketQuote.statusBadge} • ${formatVND(perPerson)} / người`;
         } else if (ticketTotal !== null) {
-          pill.textContent = `${formatVND(ticketQuote.unitVnd)}/vé • Bắp nước/xe: Chưa có dữ liệu`;
+          const prefix = ticketQuote.isReferenceFallback ? "Giá tham khảo — chưa cập nhật được • " : "";
+          pill.textContent = `${prefix}${formatVND(ticketQuote.unitVnd)}/vé • Bắp nước/xe: Chưa có dữ liệu`;
         } else {
           pill.textContent = "Chưa có dữ liệu giá cho lựa chọn này";
         }
@@ -27346,44 +27585,53 @@
       const mobComboSel = document.getElementById("hn-budget-combo-mob");
       if (mobComboSel) mobComboSel.value = comboMode;
 
-      const renderSourceLine = (url, updatedLabel) => {
+      const renderSourceLine = (url, tsObj, fallbackTsLabel) => {
         const srcHtml = url
           ? `<a href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer" class="underline text-amber-300/90 hover:text-amber-200 break-all">${escapeHTML(url.replace(/^https?:\/\/(www\.)?/, ""))}</a>`
           : `<span>Chưa có dữ liệu</span>`;
-        return `<span class="text-[9px] text-slate-400 block mt-1 leading-snug">Nguồn: ${srcHtml} • Cập nhật: ${escapeHTML(updatedLabel || "Chưa có dữ liệu")}</span>`;
+        if (tsObj) {
+          return `<span class="text-[9px] text-slate-400 block mt-1 leading-snug">Nguồn: ${srcHtml}<br>Tải live: ${escapeHTML(tsObj.fetchedAtLabel)} • Rà soát: ${escapeHTML(tsObj.snapshotReviewedLabel)} • Hiệu lực rạp: ${escapeHTML(tsObj.effectiveDateLabel)}</span>`;
+        }
+        return `<span class="text-[9px] text-slate-400 block mt-1 leading-snug">Nguồn: ${srcHtml} • Cập nhật: ${escapeHTML(fallbackTsLabel || "Chưa có dữ liệu")}</span>`;
       };
 
       const box = document.getElementById("hn-budget-breakdown-box");
       if (box) {
         const fmtLabel = HANOI_FORMAT_SURCHARGE[format]?.label || format.toUpperCase();
+        const refWarningBadge = ticketQuote.isReferenceFallback
+          ? `<span class="inline-block px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-400/50 text-amber-300 text-[9px] font-black mb-1">Giá tham khảo — chưa cập nhật được</span>`
+          : (ticketQuote.available ? `<span class="inline-block px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 text-[9px] font-black mb-1">${escapeHTML(ticketQuote.statusBadge)}</span>` : "");
+
         box.innerHTML = `
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
             <div class="p-3 rounded-xl bg-stone-900 border border-white/10">
+              ${refWarningBadge}
               <span class="text-[10px] text-slate-400 block">Tiền vé (${people} người • ${escapeHTML(fmtLabel)})</span>
               <strong class="text-sm font-black ${ticketTotal !== null ? "text-white" : "text-slate-400"}">${ticketTotal !== null ? formatVND(ticketTotal) : "Chưa có dữ liệu"}</strong>
               ${ticketQuote.available
-                ? `<span class="text-[10px] text-amber-300 block">${formatVND(ticketQuote.unitVnd)}/vé (Gốc ${formatVND(ticketQuote.baseVnd)}${ticketQuote.formatSurchargeVnd ? ` + 3D ${formatVND(ticketQuote.formatSurchargeVnd)}` : ""}${ticketQuote.seatSurchargeVnd ? ` + Ghế ${formatVND(ticketQuote.seatSurchargeVnd)}` : ""}${ticketQuote.holidaySurchargeVnd ? ` + Lễ ${formatVND(ticketQuote.holidaySurchargeVnd)}` : ""})</span>
-                   <span class="text-[9px] text-emerald-300/90 block">${escapeHTML(ticketQuote.matchedHeader || "")} • ${escapeHTML(ticketQuote.seatNote || "")}</span>`
+                ? `<span class="text-[10px] text-amber-300 block">${formatVND(ticketQuote.unitVnd)}/vé (Gốc ${formatVND(ticketQuote.baseVnd)}${ticketQuote.formatSurchargeVnd ? ` + 3D ${formatVND(ticketQuote.formatSurchargeVnd)}` : ""}${ticketQuote.seatSurchargeVnd ? ` + Ghế ${formatVND(ticketQuote.seatSurchargeVnd)}` : ""}${ticketQuote.holidaySurchargeVnd ? ` + Lễ ${formatVND(ticketQuote.holidaySurchargeVnd)}` : ""}) • Đơn vị: ${escapeHTML(ticketQuote.unitLabel || "đồng/vé")}</span>
+                   <span class="text-[9px] text-emerald-300/90 block">${escapeHTML(ticketQuote.matchedHeader || "")} • ${escapeHTML(ticketQuote.seatNote || "")}</span>
+                   <span class="text-[9px] text-sky-300/90 block">${escapeHTML(ticketQuote.channelNote || "")}</span>`
                 : `<span class="text-[10px] text-amber-300/80 block">${escapeHTML(ticketQuote.originStatus || "Chưa có dữ liệu")}</span>`}
-              ${renderSourceLine(ticketQuote.source, ticketQuote.updatedAtLabel)}
+              ${renderSourceLine(ticketQuote.source, ticketQuote.timestamps, ticketQuote.updatedAtLabel)}
             </div>
             <div class="p-3 rounded-xl bg-stone-900 border border-white/10">
               <span class="text-[10px] text-slate-400 block">Bắp nước</span>
               <strong class="text-sm font-black ${comboQuote.available ? "text-white" : "text-slate-400"}">${comboQuote.available ? formatVND(comboQuote.totalVnd) : "Chưa có dữ liệu"}</strong>
               <span class="text-[10px] text-slate-300 block">${escapeHTML(comboQuote.note || comboQuote.label)}</span>
-              ${renderSourceLine(comboQuote.source, comboQuote.updatedAtLabel)}
+              ${renderSourceLine(comboQuote.source, null, comboQuote.updatedAtLabel)}
             </div>
             <div class="p-3 rounded-xl bg-stone-900 border border-white/10">
               <span class="text-[10px] text-slate-400 block">Gửi xe</span>
               <strong class="text-sm font-black ${parkingQuote.available ? "text-white" : "text-slate-400"}">${parkingQuote.available ? formatVND(parkingQuote.totalVnd) : "Chưa có dữ liệu"}</strong>
               <span class="text-[10px] text-slate-300 block">${escapeHTML(parkingQuote.note || parkingQuote.label)}</span>
-              ${renderSourceLine(parkingQuote.source, parkingQuote.updatedAtLabel)}
+              ${renderSourceLine(parkingQuote.source, null, parkingQuote.updatedAtLabel)}
             </div>
             <div class="p-3 rounded-xl bg-amber-500/15 border border-amber-400/40">
               <span class="text-[10px] text-amber-200 font-bold block">TỔNG NGÂN SÁCH (${escapeHTML(selected.name)})</span>
               <strong class="text-base font-black ${allKnown ? "text-amber-300" : "text-slate-200"}">${allKnown ? formatVND(grandTotal) : "Chưa có dữ liệu"}</strong>
               <span class="text-[10px] text-slate-300 block">${allKnown ? `Chia đều: ${formatVND(perPerson)}/người` : `Thiếu giá: ${missingParts.join(", ")}${ticketTotal !== null ? ` • Riêng tiền vé: ${formatVND(ticketTotal)}` : ""}`}</span>
-              ${renderSourceLine(ticketQuote.source, ticketQuote.updatedAtLabel)}
+              ${renderSourceLine(ticketQuote.source, ticketQuote.timestamps, ticketQuote.updatedAtLabel)}
             </div>
           </div>
         `;
