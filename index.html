@@ -1451,17 +1451,18 @@
     @media (min-width: 768px) {
       body.theater-dimmed #cinema-screen {
         aspect-ratio: 19 / 9 !important;
-        max-height: 54vh;
+        max-height: 64vh;
         box-shadow: 0 0 70px rgba(245, 197, 24, 0.16), 0 0 130px rgba(56, 189, 248, 0.16) !important;
       }
       body.theater-dimmed[data-screen-ratio="18-9"] #cinema-screen {
         aspect-ratio: 18 / 9 !important;
-        max-height: 56vh;
+        max-height: 66vh;
       }
       body.theater-dimmed #html5-video-player {
-        object-fit: cover !important;
-        object-position: center bottom !important;
+        object-fit: contain !important;
+        object-position: center center !important;
       }
+      body.theater-dimmed .imax-curve-arch-top,
       body.theater-dimmed .imax-curve-arch-bottom {
         height: 6px !important;
         opacity: 0.35;
