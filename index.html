@@ -3500,6 +3500,30 @@
       border-radius: 16px;
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
     }
+    .hn-stage-budget-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    @media (min-width: 1024px) {
+      .hn-stage-budget-group .hn-map-stage {
+        height: 420px;
+        min-height: 420px;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        border-bottom: 0;
+      }
+      .hn-stage-budget-group #hn-cinema-list {
+        height: 420px;
+        max-height: 420px;
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+      .hn-stage-budget-group .hn-budget-dock {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+      }
+    }
     .hn-price-pop {
       animation: hnPricePop 0.35s ease;
     }
@@ -3633,8 +3657,8 @@
       .hn-budget-inline-desktop {
         display: flex;
         align-items: center;
-        gap: 8px;
-        flex-wrap: wrap;
+        gap: 6px;
+        flex-wrap: nowrap;
       }
     }
     @media (max-width: 1023px) {
@@ -4877,41 +4901,36 @@
         </div>
       </div>
 
-      <!-- 3. Khung chính 2 cột: Trái Danh sách rạp (5/12) | Phải Bản đồ tương tác + Thẻ nổi rạp đang chọn (7/12) -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-        <!-- Cột Trái: Danh sách rạp -->
-        <div id="hn-list-pane" class="lg:col-span-5 min-w-0 flex flex-col">
-          <div id="hn-cinema-list" class="space-y-2.5 max-h-[470px] lg:max-h-[510px] overflow-y-auto pr-1"></div>
-        </div>
+      <!-- 3. Khung chính 2 cột + Thanh Dự trù chuyến đi tiếp xúc trực tiếp với đáy Bản đồ -->
+      <div class="hn-stage-budget-group">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+          <!-- Cột Trái: Danh sách rạp (chiều cao bằng đúng Bản đồ, cuộn để xem hết) -->
+          <div id="hn-list-pane" class="lg:col-span-5 min-w-0 flex flex-col">
+            <div id="hn-cinema-list" class="space-y-2.5 max-h-[430px] overflow-y-auto pr-1"></div>
+          </div>
 
-        <!-- Cột Phải: Bản đồ Dark Luxury + Thẻ rạp đang chọn nổi phía dưới -->
-        <div id="hn-map-pane" class="hn-pane-hidden-mobile lg:col-span-7 min-w-0">
-          <div id="hn-google-map-wrap" class="hn-map-stage">
-            <!-- Nhãn ghim vàng nổi phía trên bản đồ -->
-            <div class="hn-map-top-badge">
-              <i class="fa-solid fa-location-dot text-amber-400 hn-map-pin-dot text-xs"></i>
-              <span id="hn-map-pin-label" class="text-[11px] font-black text-amber-200 truncate max-w-[200px]">Lotte Tây Hồ</span>
-            </div>
+          <!-- Cột Phải: Bản đồ Dark Luxury + Thẻ rạp đang chọn nổi phía dưới -->
+          <div id="hn-map-pane" class="hn-pane-hidden-mobile lg:col-span-7 min-w-0">
+            <div id="hn-google-map-wrap" class="hn-map-stage">
+              <!-- Nút chuyển bản đồ Tối / Sáng -->
+              <button type="button" id="hn-map-theme-btn" onclick="window.appActions.toggleHanoiMapTheme()"
+                class="absolute top-3 right-3 z-20 px-2.5 py-1.5 rounded-xl bg-black/80 hover:bg-black border border-amber-400/35 text-[10px] font-extrabold text-amber-200 cursor-pointer transition"
+                title="Đổi giao diện bản đồ Tối / Sáng">
+                <i class="fa-solid fa-moon mr-1"></i><span>Bản đồ tối</span>
+              </button>
 
-            <!-- Nút chuyển bản đồ Tối / Sáng -->
-            <button type="button" id="hn-map-theme-btn" onclick="window.appActions.toggleHanoiMapTheme()"
-              class="absolute top-3 right-3 z-20 px-2.5 py-1.5 rounded-xl bg-black/80 hover:bg-black border border-amber-400/35 text-[10px] font-extrabold text-amber-200 cursor-pointer transition"
-              title="Đổi giao diện bản đồ Tối / Sáng">
-              <i class="fa-solid fa-moon mr-1"></i><span>Bản đồ tối</span>
-            </button>
+              <!-- Google Maps thực tế (lazy-load, mặc định lọc màu tối sang trọng) -->
+              <iframe id="hn-google-map-iframe"
+                title="Bản đồ Rạp Phim Hà Nội"
+                class="w-full h-full border-0 hn-map-iframe-dark"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                src="about:blank"
+                data-src="https://maps.google.com/maps?q=Lotte+Mall+West+Lake+Hanoi+272+Vo+Chi+Cong+Ha+Noi&t=&z=15&ie=UTF8&iwloc=&output=embed">
+              </iframe>
 
-            <!-- Google Maps thực tế (lazy-load, mặc định lọc màu tối sang trọng) -->
-            <iframe id="hn-google-map-iframe"
-              title="Bản đồ Rạp Phim Hà Nội"
-              class="w-full h-full border-0 hn-map-iframe-dark"
-              loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"
-              src="about:blank"
-              data-src="https://maps.google.com/maps?q=Lotte+Mall+West+Lake+Hanoi+272+Vo+Chi+Cong+Ha+Noi&t=&z=15&ie=UTF8&iwloc=&output=embed">
-            </iframe>
-
-            <!-- Thẻ nổi Rạp đang chọn góc dưới bản đồ (khớp bố cục ảnh demo) -->
-            <div class="hn-map-overlay-card">
+              <!-- Thẻ nổi Rạp đang chọn góc dưới bản đồ -->
+              <div class="hn-map-overlay-card">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="min-w-0 flex-1 space-y-1.5">
                   <div class="flex items-center gap-2 min-w-0">
@@ -4954,7 +4973,7 @@
         <!-- Thanh tóm tắt chính -->
         <div class="hn-budget-main-row">
           <!-- Trái: Tiêu đề + 3 bộ chọn nhanh trên Desktop (Mobile mở gọn qua nút chi tiết) -->
-          <div class="flex flex-wrap items-center gap-2.5 flex-1 min-w-0">
+          <div class="flex items-center gap-2.5 min-w-0 shrink-0">
             <button type="button" onclick="window.appActions.toggleHanoiBudgetDetails()"
               class="flex items-center gap-2 text-left cursor-pointer shrink-0">
               <span class="w-8 h-8 rounded-xl bg-amber-400/15 border border-amber-400/40 text-amber-300 flex items-center justify-center">
@@ -5113,6 +5132,7 @@
           <!-- Bảng kết quả dự trù chi tiết + so sánh 3 hệ thống rạp -->
           <div id="hn-budget-breakdown-box" class="rounded-2xl p-3 sm:p-3.5 bg-black/50 border border-white/10 space-y-3"></div>
         </div>
+      </div>
       </div>
 
       <!-- 5. Lịch Chiếu Thực Tế Hôm Nay & Bảng Giá Chính Thức (Mở nhanh từ nút Lịch chiếu hoặc luôn xem được ngay bên dưới) -->
@@ -25230,24 +25250,23 @@
           const lng = pos.coords.longitude;
           const acc = Math.round(Number(pos.coords.accuracy || 0));
           const realAddr = await reverseGeocodeRealAddress(lat, lng);
-          // Giới hạn kiểm tra trong phạm vi địa giới Hà Nội (20.80..21.35, 105.50..106.05)
+          // Kiểm tra trong phạm vi địa giới Hà Nội (20.80..21.35, 105.50..106.05) nhưng LUÔN giữ tọa độ GPS THẬT để tính đúng khoảng cách!
           const inHanoi = lat >= 20.80 && lat <= 21.35 && lng >= 105.50 && lng <= 106.05;
+          hanoiFinderState.realLat = lat;
+          hanoiFinderState.realLng = lng;
+          hanoiFinderState.userLat = lat;
+          hanoiFinderState.userLng = lng;
+          hanoiFinderState.hasRealGps = true;
+          hanoiFinderState.accuracyMeters = acc;
+          hanoiFinderState.realAddress = realAddr;
           if (inHanoi) {
-            hanoiFinderState.userLat = lat;
-            hanoiFinderState.userLng = lng;
-            hanoiFinderState.hasRealGps = true;
-            hanoiFinderState.accuracyMeters = acc;
-            hanoiFinderState.realAddress = realAddr;
             hanoiFinderState.locationLabel = realAddr || `Vị trí GPS thực tế tại Hà Nội (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
             if (!silent) showToast("📍 Đã lấy vị trí GPS thực tế của bạn tại Hà Nội & sắp xếp rạp gần nhất!", "success");
           } else {
-            hanoiFinderState.userLat = 21.0285;
-            hanoiFinderState.userLng = 105.8542;
-            hanoiFinderState.hasRealGps = false;
             hanoiFinderState.locationLabel = realAddr
-              ? `${realAddr} (Ngoài HN → tìm rạp tại Trung tâm HN)`
-              : `Ngoài Hà Nội (${lat.toFixed(4)}, ${lng.toFixed(4)}) → Tự động khóa vùng tìm kiếm tại Trung tâm Hà Nội`;
-            if (!silent) showToast("📍 Tọa độ hiện tại nằm ngoài Hà Nội — Hệ thống đã tự động giới hạn tìm kiếm tại TP. Hà Nội!", "info");
+              ? `${realAddr} (Tính khoảng cách thực tế đến rạp Hà Nội)`
+              : `Vị trí GPS thực tế (${lat.toFixed(4)}, ${lng.toFixed(4)}) → Tính khoảng cách đến rạp Hà Nội`;
+            if (!silent) showToast("📍 Đã lấy vị trí GPS thực tế của bạn & tính khoảng cách thực đến các rạp tại Hà Nội!", "info");
           }
           if (btnLbl) btnLbl.textContent = "Đã dùng vị trí của tôi";
           if (gpsBtn) gpsBtn.classList.remove("is-locating");
@@ -25277,10 +25296,20 @@
     }
 
     function onHanoiDistrictChange(distKey) {
-      const info = HANOI_DISTRICT_CENTERS[distKey] || HANOI_DISTRICT_CENTERS.gps;
-      hanoiFinderState.userLat = info.lat;
-      hanoiFinderState.userLng = info.lng;
-      hanoiFinderState.locationLabel = `${info.label} (${info.lat.toFixed(4)}, ${info.lng.toFixed(4)})`;
+      if (distKey === "gps" && typeof hanoiFinderState.realLat === "number" && typeof hanoiFinderState.realLng === "number") {
+        hanoiFinderState.userLat = hanoiFinderState.realLat;
+        hanoiFinderState.userLng = hanoiFinderState.realLng;
+        hanoiFinderState.hasRealGps = true;
+        hanoiFinderState.locationLabel = hanoiFinderState.realAddress || `Vị trí GPS thực tế (${hanoiFinderState.realLat.toFixed(4)}, ${hanoiFinderState.realLng.toFixed(4)})`;
+      } else {
+        const info = HANOI_DISTRICT_CENTERS[distKey] || HANOI_DISTRICT_CENTERS.gps;
+        hanoiFinderState.userLat = info.lat;
+        hanoiFinderState.userLng = info.lng;
+        hanoiFinderState.locationLabel = `${info.label} (${info.lat.toFixed(4)}, ${info.lng.toFixed(4)})`;
+        if (distKey === "gps" && !hanoiFinderState.hasRealGps) {
+          locateUserInHanoi(true);
+        }
+      }
       const nearest = getSortedHanoiCinemas()[0];
       if (nearest) hanoiFinderState.selectedCinemaId = nearest.id;
       syncUserFinderLocationToAdmin(
@@ -25288,7 +25317,7 @@
         hanoiFinderState.userLng,
         hanoiFinderState.locationLabel,
         nearest ? `${nearest.name} (${nearest.roadKm} km)` : "",
-        false
+        Boolean(distKey === "gps" && hanoiFinderState.hasRealGps)
       );
       renderHanoiCinemaFinderUI();
     }
@@ -25381,7 +25410,9 @@
       return HANOI_REAL_CINEMAS.map(c => {
         const straightKm = calcHaversineKm(hanoiFinderState.userLat, hanoiFinderState.userLng, c.lat, c.lng);
         const roadKm = Number((straightKm * 1.25).toFixed(1));
-        const driveMins = Math.max(4, Math.round((roadKm / 24) * 60));
+        const driveMins = roadKm >= 25
+          ? Math.round((roadKm / 48) * 60)
+          : Math.max(4, Math.round((roadKm / 24) * 60));
         const estPairPrice = getTicketUnitPriceForCinema(c, "auto", "vip", "adult", "2d") * 2;
         return { ...c, roadKm, driveMins, estPairPrice };
       }).filter(c => {
