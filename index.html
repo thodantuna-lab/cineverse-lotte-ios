@@ -24924,14 +24924,6 @@
           "chain": "Lotte Cinema",
           "name": "Lotte Cinema Hà Đông (Mê Linh Plaza)"
         },
-        "lotte_long_bien": {
-          "chain": "Lotte Cinema",
-          "name": "Lotte Cinema Long Biên (Savico)"
-        },
-        "lotte_minh_khai": {
-          "chain": "Lotte Cinema",
-          "name": "Lotte Cinema Minh Khai (Green Pearl)"
-        },
         "cgv_ba_trieu": {
           "chain": "CGV Cinemas",
           "name": "CGV Vincom Center Bà Triệu",
@@ -27028,13 +27020,11 @@
       "cine_suite": { add: 0, label: "Cine & Suite" }
     };
 
-    // Danh sách 19 cụm rạp thực tế đang hoạt động tại TP. Hà Nội (Đã loại bỏ các rạp đóng cửa vĩnh viễn như Landmark 72 & Thăng Long Big C)
+    // Danh sách 17 cụm rạp thực tế đang hoạt động tại TP. Hà Nội (chỉ giữ 3 rạp Lotte còn mở bán: Tây Hồ, Kosmo, Hà Đông)
     const HANOI_REAL_CINEMAS = [
       { id: "lotte_tay_ho", brand: "Lotte Cinema", name: "Lotte Cinema Tây Hồ (Lotte Mall West Lake)", district: "Tây Hồ", address: "Tầng 4, Lotte Mall West Lake Hanoi, 272 Võ Chí Công, Phú Thượng, Tây Hồ, Hà Nội", lat: 21.0765, lng: 105.8118, screens: "9 phòng (Charlotte VIP, CineComfort)", mapQuery: "Lotte+Cinema+West+Lake+272+Vo+Chi+Cong+Ha+Noi" },
       { id: "lotte_kosmo", brand: "Lotte Cinema", name: "Lotte Cinema Kosmo Tây Hồ", district: "Bắc Từ Liêm", address: "Tầng 2, Tòa nhà Kosmo Tây Hồ, 161 Xuân La, Xuân Tảo, Bắc Từ Liêm, Hà Nội", lat: 21.0647, lng: 105.8032, screens: "5 phòng Digital 2D/3D", mapQuery: "Lotte+Cinema+Kosmo+Tay+Ho+161+Xuan+La+Ha+Noi" },
       { id: "lotte_ha_dong", brand: "Lotte Cinema", name: "Lotte Cinema Hà Đông (Mê Linh Plaza)", district: "Hà Đông", address: "Tầng 4, TTTM Mê Linh Plaza Hà Đông, Tô Hiệu, Hà Cầu, Hà Đông, Hà Nội", lat: 20.9635, lng: 105.7706, screens: "7 phòng Digital", mapQuery: "Lotte+Cinema+Ha+Dong+Me+Linh+Plaza+To+Hieu+Ha+Noi" },
-      { id: "lotte_long_bien", brand: "Lotte Cinema", name: "Lotte Cinema Long Biên (Savico)", district: "Long Biên", address: "Tầng 3, TTTM Savico Megamall, 7-9 Nguyễn Văn Linh, Gia Thụy, Long Biên, Hà Nội", lat: 21.0504, lng: 105.8942, screens: "6 phòng chiếu chuẩn Hàn Quốc", mapQuery: "Lotte+Cinema+Long+Bien+Savico+Megamall+Ha+Noi" },
-      { id: "lotte_minh_khai", brand: "Lotte Cinema", name: "Lotte Cinema Minh Khai (Green Pearl)", district: "Hai Bà Trưng", address: "Tầng 3, TTTM Green Pearl, 378 Minh Khai, Vĩnh Tuy, Hai Bà Trưng, Hà Nội", lat: 20.9958, lng: 105.8682, screens: "5 phòng Digital HD", mapQuery: "Lotte+Cinema+Minh+Khai+378+Minh+Khai+Ha+Noi" },
 
       { id: "cgv_ba_trieu", brand: "CGV Cinemas", name: "CGV Vincom Center Bà Triệu", district: "Hai Bà Trưng", address: "Tầng 6, TTTM Vincom Center Bà Triệu, 191 Bà Triệu, Lê Đại Hành, Hai Bà Trưng, Hà Nội", lat: 21.0114, lng: 105.8496, screens: "10 phòng (4DX, Starium, Gold Class)", mapQuery: "CGV+Vincom+Ba+Trieu+191+Ba+Trieu+Ha+Noi" },
       { id: "cgv_metropolis", brand: "CGV Cinemas", name: "CGV Vincom Metropolis Liễu Giai", district: "Ba Đình", address: "Tầng 4, TTTM Vincom Metropolis, 29 Liễu Giai, Ngọc Khánh, Ba Đình, Hà Nội", lat: 21.0315, lng: 105.8139, screens: "8 phòng (IMAX Laser, L'Amour)", mapQuery: "CGV+Vincom+Metropolis+29+Lieu+Giai+Ha+Noi" },
