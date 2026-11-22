@@ -1525,8 +1525,8 @@
       aspect-ratio: 17 / 9 !important;
     }
     body:not(.stream-room-active):not(.mobile-cinema-fullscreen) #html5-video-player {
-      object-fit: cover !important;
-      object-position: center 84% !important;
+      object-fit: contain !important;
+      object-position: center center !important;
       width: 100% !important;
       height: 100% !important;
     }
@@ -4637,14 +4637,14 @@
     #discord-live-video {
       filter: none !important;
     }
-    body.screen-fit-contain #html5-video-player,
-    body.screen-fit-contain #discord-live-video {
-      object-fit: contain !important;
-      object-position: center center !important;
-    }
-    body:not(.screen-fit-contain):not(.stream-room-active):not(.mobile-cinema-fullscreen) #html5-video-player {
+    body.screen-fit-cover #html5-video-player,
+    body.screen-fit-cover #discord-live-video {
       object-fit: cover !important;
       object-position: center bottom !important;
+    }
+    body:not(.screen-fit-cover):not(.stream-room-active):not(.mobile-cinema-fullscreen) #html5-video-player {
+      object-fit: contain !important;
+      object-position: center center !important;
     }
     body.controls-bar-visible #lyrics-overlay {
       bottom: 54px !important;
@@ -6212,7 +6212,7 @@
                     <button type="button" id="btn-screen-fit-toggle" onclick="window.appActions.toggleScreenFitMode()"
                       class="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-sky-300 text-[10px] font-extrabold transition cursor-pointer opacity-80 hover:opacity-100"
                       title="Chuyển chế độ khung hình: Lấp đầy (Cover giữ phần dưới) hoặc Toàn khung (Contain)">
-                      <span id="screen-fit-label">Cover</span>
+                      <span id="screen-fit-label">Contain</span>
                     </button>
                     <button type="button" id="btn-screen-ratio-toggle" onclick="window.appActions.toggleDimmedScreenRatio()"
                       class="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-amber-300 text-[10px] font-extrabold transition cursor-pointer opacity-75 hover:opacity-100"
@@ -29443,13 +29443,13 @@
     }
 
     function toggleScreenFitMode() {
-      const isContain = document.body.classList.toggle("screen-fit-contain");
+      const isCover = document.body.classList.toggle("screen-fit-cover");
       const lbl = document.getElementById("screen-fit-label");
-      if (lbl) lbl.textContent = isContain ? "Contain" : "Cover";
+      if (lbl) lbl.textContent = isCover ? "Cover" : "Contain";
       showToast(
-        isContain
-          ? "🖼️ Chế độ Contain: Hiển thị toàn bộ khung hình gốc không cắt cạnh."
-          : "🎬 Chế độ Cover: Phủ kín màn cong, ưu tiên giữ phần phụ đề phía dưới.",
+        isCover
+          ? "🎬 Chế độ Cover: Phủ kín màn cong, ưu tiên giữ phần phụ đề phía dưới."
+          : "🖼️ Chế độ Contain: Hiển thị đầy đủ 100% nội dung khung hình phim không bị cắt.",
         "info"
       );
     }
