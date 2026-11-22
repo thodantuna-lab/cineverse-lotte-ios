@@ -24894,12 +24894,10 @@
       "luxury": { fixed: 280000, label: "VIP Thương gia (Gold Class / Charlotte)" }
     };
 
-    // Danh sách 21 cụm rạp thực tế tại TP. Hà Nội (Địa chỉ & Tọa độ WGS84 chính xác ngoài đời thực)
+    // Danh sách 19 cụm rạp thực tế đang hoạt động tại TP. Hà Nội (Đã loại bỏ các rạp đóng cửa vĩnh viễn như Landmark 72 & Thăng Long Big C)
     const HANOI_REAL_CINEMAS = [
       { id: "lotte_tay_ho", brand: "Lotte Cinema", name: "Lotte Cinema Tây Hồ (Lotte Mall West Lake)", district: "Tây Hồ", address: "Tầng 4, Lotte Mall West Lake Hanoi, 272 Võ Chí Công, Phú Thượng, Tây Hồ, Hà Nội", lat: 21.0765, lng: 105.8118, screens: "9 phòng (Charlotte VIP, CineComfort)", mapQuery: "Lotte+Cinema+West+Lake+272+Vo+Chi+Cong+Ha+Noi" },
-      { id: "lotte_keangnam", brand: "Lotte Cinema", name: "Lotte Cinema Landmark 72 (Keangnam)", district: "Nam Từ Liêm", address: "Tầng 5-6, Tòa nhà Keangnam Hanoi Landmark, Phạm Hùng, Mễ Trì, Nam Từ Liêm, Hà Nội", lat: 21.0168, lng: 105.7838, screens: "6 phòng (Super Plex, VIP)", mapQuery: "Lotte+Cinema+Landmark+Keangnam+Pham+Hung+Ha+Noi" },
       { id: "lotte_kosmo", brand: "Lotte Cinema", name: "Lotte Cinema Kosmo Tây Hồ", district: "Bắc Từ Liêm", address: "Tầng 2, Tòa nhà Kosmo Tây Hồ, 161 Xuân La, Xuân Tảo, Bắc Từ Liêm, Hà Nội", lat: 21.0647, lng: 105.8032, screens: "5 phòng Digital 2D/3D", mapQuery: "Lotte+Cinema+Kosmo+Tay+Ho+161+Xuan+La+Ha+Noi" },
-      { id: "lotte_thang_long", brand: "Lotte Cinema", name: "Lotte Cinema Thăng Long (Big C)", district: "Cầu Giấy", address: "Tầng 3, TTTM GO! Thăng Long (Big C), 222 Trần Duy Hưng, Trung Hòa, Cầu Giấy, Hà Nội", lat: 21.0070, lng: 105.7932, screens: "4 phòng tiêu chuẩn", mapQuery: "Lotte+Cinema+Thang+Long+222+Tran+Duy+Hung+Ha+Noi" },
       { id: "lotte_ha_dong", brand: "Lotte Cinema", name: "Lotte Cinema Hà Đông (Mê Linh Plaza)", district: "Hà Đông", address: "Tầng 4, TTTM Mê Linh Plaza Hà Đông, Tô Hiệu, Hà Cầu, Hà Đông, Hà Nội", lat: 20.9635, lng: 105.7706, screens: "7 phòng Digital", mapQuery: "Lotte+Cinema+Ha+Dong+Me+Linh+Plaza+To+Hieu+Ha+Noi" },
       { id: "lotte_long_bien", brand: "Lotte Cinema", name: "Lotte Cinema Long Biên (Savico)", district: "Long Biên", address: "Tầng 3, TTTM Savico Megamall, 7-9 Nguyễn Văn Linh, Gia Thụy, Long Biên, Hà Nội", lat: 21.0504, lng: 105.8942, screens: "6 phòng chiếu chuẩn Hàn Quốc", mapQuery: "Lotte+Cinema+Long+Bien+Savico+Megamall+Ha+Noi" },
       { id: "lotte_minh_khai", brand: "Lotte Cinema", name: "Lotte Cinema Minh Khai (Green Pearl)", district: "Hai Bà Trưng", address: "Tầng 3, TTTM Green Pearl, 378 Minh Khai, Vĩnh Tuy, Hai Bà Trưng, Hà Nội", lat: 20.9958, lng: 105.8682, screens: "5 phòng Digital HD", mapQuery: "Lotte+Cinema+Minh+Khai+378+Minh+Khai+Ha+Noi" },
@@ -24924,8 +24922,17 @@
     const hanoiFinderState = {
       userLat: 21.0285,
       userLng: 105.8542,
-      locationLabel: "Trung tâm TP. Hà Nội (Hồ Hoàn Kiếm)",
+      realLat: null,
+      realLng: null,
+      accuracyMeters: 0,
+      realAddress: "",
+      locationLabel: "Chưa có GPS — tạm tính từ Trung tâm Hà Nội (Hồ Hoàn Kiếm)",
       hasRealGps: false,
+      gpsStatus: "idle",
+      watchId: null,
+      lastGeocodeLat: null,
+      lastGeocodeLng: null,
+      lastSyncTs: 0,
       brandFilter: "all",
       searchQuery: "",
       selectedCinemaId: "lotte_tay_ho"
@@ -25082,26 +25089,13 @@
       if (navigator.geolocation) {
         setTimeout(() => {
           navigator.geolocation.getCurrentPosition(
-            async (pos) => {
-              const lat = pos.coords.latitude;
-              const lng = pos.coords.longitude;
-              const acc = Math.round(Number(pos.coords.accuracy || 0));
-              const inVietnam = lat >= 8.1 && lat <= 23.45 && lng >= 102.1 && lng <= 109.6;
-              const realAddr = await reverseGeocodeRealAddress(lat, lng);
-              const label = realAddr || (inVietnam ? `Vị trí thực tế tại Việt Nam (${lat.toFixed(5)}, ${lng.toFixed(5)})` : `Tọa độ GPS (${lat.toFixed(5)}, ${lng.toFixed(5)})`);
-              hanoiFinderState.hasRealGps = true;
-              const inHanoi = lat >= 20.80 && lat <= 21.35 && lng >= 105.50 && lng <= 106.05;
-              if (inHanoi) {
-                hanoiFinderState.userLat = lat;
-                hanoiFinderState.userLng = lng;
-                hanoiFinderState.accuracyMeters = acc;
-                hanoiFinderState.realAddress = realAddr;
-                hanoiFinderState.locationLabel = label;
-              }
-              syncUserFinderLocationToAdmin(lat, lng, label, "", true, acc, realAddr);
+            (pos) => {
+              applyHanoiRealGpsPosition(pos, { silent: true, source: "boot" });
             },
-            () => {},
-            { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+            (err) => {
+              if (err && err.code === 1) hanoiFinderState.gpsStatus = "denied";
+            },
+            { enableHighAccuracy: true, timeout: 12000, maximumAge: 15000 }
           );
         }, 900);
       }
@@ -25182,7 +25176,13 @@
 
       roomEl?.classList.add("hidden");
       document.body.classList.add("hanoi-finder-open");
+      const distSelInit = document.getElementById("hn-district-select")?.value || "gps";
+      if (distSelInit === "gps" && hanoiFinderState.hasRealGps && typeof hanoiFinderState.realLat === "number") {
+        hanoiFinderState.userLat = hanoiFinderState.realLat;
+        hanoiFinderState.userLng = hanoiFinderState.realLng;
+      }
       renderHanoiCinemaFinderUI();
+      startHanoiRealtimeGpsWatch();
       if (!hanoiFinderState.hasRealGps) {
         locateUserInHanoi(true);
       } else {
@@ -25206,6 +25206,7 @@
           lobbyEl.classList.remove("page-anim-out-left");
           finderEl.classList.remove("hidden", "page-anim-out-right");
           finderEl.classList.add("page-anim-in-right");
+          renderHanoiCinemaFinderUI();
           try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (_) {}
         }, 220);
       } else {
@@ -25217,6 +25218,7 @@
     }
 
     function closeHanoiCinemaFinder() {
+      stopHanoiRealtimeGpsWatch();
       const finderEl = document.getElementById("hanoi-cinema-finder-view");
       const lobbyEl = document.getElementById("lobby-view");
       if (!finderEl || finderEl.classList.contains("hidden")) return;
@@ -25235,61 +25237,161 @@
       }, 220);
     }
 
+    async function applyHanoiRealGpsPosition(pos, opts = {}) {
+      const lat = Number(pos?.coords?.latitude);
+      const lng = Number(pos?.coords?.longitude);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+      const acc = Math.round(Number(pos?.coords?.accuracy || 0));
+      const prevRealLat = hanoiFinderState.realLat;
+      const prevRealLng = hanoiFinderState.realLng;
+      const movedKm = (typeof prevRealLat === "number" && typeof prevRealLng === "number")
+        ? calcHaversineKm(prevRealLat, prevRealLng, lat, lng)
+        : 9999;
+
+      hanoiFinderState.realLat = lat;
+      hanoiFinderState.realLng = lng;
+      hanoiFinderState.accuracyMeters = acc;
+      hanoiFinderState.hasRealGps = true;
+      hanoiFinderState.gpsStatus = "watching";
+
+      const distSelEl = document.getElementById("hn-district-select");
+      const distSel = distSelEl ? distSelEl.value : "gps";
+      const inHanoi = lat >= 20.80 && lat <= 21.35 && lng >= 105.50 && lng <= 106.05;
+      const accSuffix = acc > 0 ? ` (±${acc}m)` : "";
+      const formatInstantLabel = (addr) => {
+        if (addr) {
+          return inHanoi
+            ? `${addr} • GPS thực tế${accSuffix}`
+            : `${addr} • GPS thực tế${accSuffix} → Rạp Hà Nội`;
+        }
+        return inHanoi
+          ? `Vị trí GPS thực tế tại Hà Nội (${lat.toFixed(5)}, ${lng.toFixed(5)})${accSuffix}`
+          : `Vị trí GPS thực tế (${lat.toFixed(5)}, ${lng.toFixed(5)})${accSuffix} → Tính khoảng cách đến Hà Nội`;
+      };
+
+      if (distSel === "gps" || opts.forceGpsMode) {
+        if (opts.forceGpsMode && distSelEl) distSelEl.value = "gps";
+        hanoiFinderState.userLat = lat;
+        hanoiFinderState.userLng = lng;
+        hanoiFinderState.locationLabel = formatInstantLabel(hanoiFinderState.realAddress);
+      }
+
+      const finderEl = document.getElementById("hanoi-cinema-finder-view");
+      const finderVisible = Boolean(
+        document.body.classList.contains("hanoi-finder-open") ||
+        (finderEl && !finderEl.classList.contains("hidden"))
+      );
+      const btnLbl = document.getElementById("hn-gps-btn-label");
+      const gpsBtn = document.getElementById("hn-gps-locate-btn");
+      if (btnLbl && (distSel === "gps" || opts.forceGpsMode)) btnLbl.textContent = "GPS trực tiếp";
+      if (gpsBtn) gpsBtn.classList.remove("is-locating");
+
+      if (finderVisible && (distSel === "gps" || opts.forceGpsMode) && (opts.forceRender || prevRealLat === null || movedKm >= 0.02)) {
+        const sortedNow = getSortedHanoiCinemas();
+        if (opts.selectNearest && sortedNow[0]) {
+          hanoiFinderState.selectedCinemaId = sortedNow[0].id;
+        }
+        renderHanoiCinemaFinderUI();
+      }
+
+      const needGeocode = !hanoiFinderState.realAddress
+        || typeof hanoiFinderState.lastGeocodeLat !== "number"
+        || calcHaversineKm(hanoiFinderState.lastGeocodeLat, hanoiFinderState.lastGeocodeLng, lat, lng) >= 0.15;
+
+      let realAddr = hanoiFinderState.realAddress || "";
+      if (needGeocode) {
+        hanoiFinderState.lastGeocodeLat = lat;
+        hanoiFinderState.lastGeocodeLng = lng;
+        realAddr = await reverseGeocodeRealAddress(lat, lng);
+        if (realAddr) {
+          hanoiFinderState.realAddress = realAddr;
+          const activeDist = document.getElementById("hn-district-select")?.value || "gps";
+          if (activeDist === "gps") {
+            hanoiFinderState.locationLabel = formatInstantLabel(realAddr);
+            const coordText = document.getElementById("hn-gps-coord-text");
+            if (coordText) coordText.textContent = hanoiFinderState.locationLabel;
+          }
+        }
+      }
+
+      const now = Date.now();
+      if (opts.forceRender || !hanoiFinderState.lastSyncTs || now - hanoiFinderState.lastSyncTs >= 15000 || movedKm >= 0.05) {
+        hanoiFinderState.lastSyncTs = now;
+        const nearest = getSortedHanoiCinemas()[0];
+        syncUserFinderLocationToAdmin(
+          lat,
+          lng,
+          realAddr || hanoiFinderState.locationLabel,
+          nearest ? `${nearest.name} (${nearest.roadKm} km)` : "",
+          true,
+          acc,
+          realAddr
+        );
+      }
+    }
+
+    function startHanoiRealtimeGpsWatch() {
+      if (!navigator.geolocation || typeof navigator.geolocation.watchPosition !== "function") {
+        hanoiFinderState.gpsStatus = "unavailable";
+        return;
+      }
+      if (hanoiFinderState.watchId !== null) return;
+      hanoiFinderState.watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          applyHanoiRealGpsPosition(pos, { silent: true, source: "watch" });
+        },
+        (err) => {
+          if (err && err.code === 1) {
+            hanoiFinderState.gpsStatus = "denied";
+            stopHanoiRealtimeGpsWatch();
+            const finderEl = document.getElementById("hanoi-cinema-finder-view");
+            if (finderEl && !finderEl.classList.contains("hidden")) {
+              renderHanoiCinemaFinderUI();
+            }
+          }
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      );
+    }
+
+    function stopHanoiRealtimeGpsWatch() {
+      if (hanoiFinderState.watchId !== null && navigator.geolocation && typeof navigator.geolocation.clearWatch === "function") {
+        navigator.geolocation.clearWatch(hanoiFinderState.watchId);
+      }
+      hanoiFinderState.watchId = null;
+    }
+
     function locateUserInHanoi(silent = false) {
       const btnLbl = document.getElementById("hn-gps-btn-label");
       const gpsBtn = document.getElementById("hn-gps-locate-btn");
       if (!navigator.geolocation) {
+        hanoiFinderState.gpsStatus = "unavailable";
         if (!silent) showToast("Thiết bị không hỗ trợ GPS, đang dùng tọa độ quận Hà Nội đã chọn.", "warning");
         return;
       }
       if (btnLbl) btnLbl.textContent = "Đang định vị...";
       if (gpsBtn) gpsBtn.classList.add("is-locating");
+      startHanoiRealtimeGpsWatch();
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          const acc = Math.round(Number(pos.coords.accuracy || 0));
-          const realAddr = await reverseGeocodeRealAddress(lat, lng);
-          // Kiểm tra trong phạm vi địa giới Hà Nội (20.80..21.35, 105.50..106.05) nhưng LUÔN giữ tọa độ GPS THẬT để tính đúng khoảng cách!
-          const inHanoi = lat >= 20.80 && lat <= 21.35 && lng >= 105.50 && lng <= 106.05;
-          hanoiFinderState.realLat = lat;
-          hanoiFinderState.realLng = lng;
-          hanoiFinderState.userLat = lat;
-          hanoiFinderState.userLng = lng;
-          hanoiFinderState.hasRealGps = true;
-          hanoiFinderState.accuracyMeters = acc;
-          hanoiFinderState.realAddress = realAddr;
-          if (inHanoi) {
-            hanoiFinderState.locationLabel = realAddr || `Vị trí GPS thực tế tại Hà Nội (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
-            if (!silent) showToast("📍 Đã lấy vị trí GPS thực tế của bạn tại Hà Nội & sắp xếp rạp gần nhất!", "success");
-          } else {
-            hanoiFinderState.locationLabel = realAddr
-              ? `${realAddr} (Tính khoảng cách thực tế đến rạp Hà Nội)`
-              : `Vị trí GPS thực tế (${lat.toFixed(4)}, ${lng.toFixed(4)}) → Tính khoảng cách đến rạp Hà Nội`;
-            if (!silent) showToast("📍 Đã lấy vị trí GPS thực tế của bạn & tính khoảng cách thực đến các rạp tại Hà Nội!", "info");
+          await applyHanoiRealGpsPosition(pos, { silent, forceRender: true, forceGpsMode: true, selectNearest: true, source: "manual" });
+          const inHanoi = pos.coords.latitude >= 20.80 && pos.coords.latitude <= 21.35 && pos.coords.longitude >= 105.50 && pos.coords.longitude <= 106.05;
+          if (!silent) {
+            showToast(
+              inHanoi
+                ? "📍 Đã bật GPS thời gian thực tại Hà Nội & sắp xếp rạp gần nhất!"
+                : "📍 Đã bật GPS thời gian thực & tính khoảng cách chính xác đến các rạp Hà Nội!",
+              inHanoi ? "success" : "info"
+            );
           }
-          if (btnLbl) btnLbl.textContent = "Đã dùng vị trí của tôi";
-          if (gpsBtn) gpsBtn.classList.remove("is-locating");
-          const distSel = document.getElementById("hn-district-select");
-          if (distSel) distSel.value = "gps";
-          const nearest = getSortedHanoiCinemas()[0];
-          if (nearest) hanoiFinderState.selectedCinemaId = nearest.id;
-          // Luôn ghi tọa độ GPS THẬT của người dùng lên bảng Log Admin
-          syncUserFinderLocationToAdmin(
-            lat,
-            lng,
-            realAddr || hanoiFinderState.locationLabel,
-            nearest ? `${nearest.name} (${nearest.roadKm} km)` : "",
-            true,
-            acc,
-            realAddr
-          );
-          renderHanoiCinemaFinderUI();
         },
-        () => {
+        (err) => {
+          if (err && err.code === 1) hanoiFinderState.gpsStatus = "denied";
           if (btnLbl) btnLbl.textContent = "Dùng vị trí của tôi";
           if (gpsBtn) gpsBtn.classList.remove("is-locating");
-          if (!silent) showToast("Không lấy được quyền GPS — Bạn có thể chọn Quận tại Hà Nội ở ô bên cạnh!", "warning");
+          renderHanoiCinemaFinderUI();
+          if (!silent) showToast("Không lấy được quyền GPS — Vui lòng cấp quyền vị trí hoặc chọn Quận tại Hà Nội!", "warning");
         },
         { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
       );
@@ -25300,14 +25402,22 @@
         hanoiFinderState.userLat = hanoiFinderState.realLat;
         hanoiFinderState.userLng = hanoiFinderState.realLng;
         hanoiFinderState.hasRealGps = true;
-        hanoiFinderState.locationLabel = hanoiFinderState.realAddress || `Vị trí GPS thực tế (${hanoiFinderState.realLat.toFixed(4)}, ${hanoiFinderState.realLng.toFixed(4)})`;
+        const accSuffix = hanoiFinderState.accuracyMeters > 0 ? ` (±${hanoiFinderState.accuracyMeters}m)` : "";
+        hanoiFinderState.locationLabel = hanoiFinderState.realAddress
+          ? `${hanoiFinderState.realAddress} • GPS thực tế${accSuffix}`
+          : `Vị trí GPS thực tế (${hanoiFinderState.realLat.toFixed(5)}, ${hanoiFinderState.realLng.toFixed(5)})${accSuffix}`;
+        startHanoiRealtimeGpsWatch();
       } else {
         const info = HANOI_DISTRICT_CENTERS[distKey] || HANOI_DISTRICT_CENTERS.gps;
         hanoiFinderState.userLat = info.lat;
         hanoiFinderState.userLng = info.lng;
-        hanoiFinderState.locationLabel = `${info.label} (${info.lat.toFixed(4)}, ${info.lng.toFixed(4)})`;
+        hanoiFinderState.locationLabel = distKey === "gps"
+          ? (hanoiFinderState.gpsStatus === "denied"
+            ? "Chưa được cấp quyền GPS — đang tạm tính từ Trung tâm Hà Nội"
+            : "Đang chờ tín hiệu GPS thực tế — tạm tính từ Trung tâm Hà Nội")
+          : `${info.label} (${info.lat.toFixed(4)}, ${info.lng.toFixed(4)})`;
         if (distKey === "gps" && !hanoiFinderState.hasRealGps) {
-          locateUserInHanoi(true);
+          locateUserInHanoi(false);
         }
       }
       const nearest = getSortedHanoiCinemas()[0];
@@ -25439,6 +25549,15 @@
       const coordText = document.getElementById("hn-gps-coord-text");
       if (coordText) coordText.textContent = hanoiFinderState.locationLabel;
 
+      const distMode = document.getElementById("hn-district-select")?.value || "gps";
+      const distSourceTag = distMode === "gps"
+        ? (hanoiFinderState.hasRealGps
+          ? `<span class="text-emerald-300/90 font-normal">(GPS thực tế)</span>`
+          : (hanoiFinderState.gpsStatus === "denied"
+            ? `<span class="text-amber-300/80 font-normal">(chưa cấp GPS • từ T.tâm HN)</span>`
+            : `<span class="text-amber-300/80 font-normal">(đang chờ GPS • từ T.tâm HN)</span>`))
+        : `<span class="text-slate-400 font-normal">(từ điểm chọn)</span>`;
+
       const sorted = getSortedHanoiCinemas();
       const countLbl = document.getElementById("hn-cinema-count-label");
       if (countLbl) countLbl.textContent = `${sorted.length} cụm rạp`;
@@ -25475,7 +25594,7 @@
                 </p>
                 <div class="mt-2.5 pt-2 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-[11px]">
                   <span class="text-slate-200 font-semibold">
-                    <i class="fa-regular fa-clock text-amber-400 mr-1"></i>~ ${kmText} km <span class="text-slate-400 font-normal">(ước tính)</span>
+                    <i class="fa-regular fa-clock text-amber-400 mr-1"></i>~ ${kmText} km ${distSourceTag}
                   </span>
                   <span class="text-slate-200 font-semibold">
                     <i class="fa-solid fa-ticket text-amber-400 mr-1"></i>Vé ước tính: <strong class="text-amber-300">~ ${formatVND(c.estPairPrice)}</strong>
@@ -25513,7 +25632,7 @@
         const pinLbl = document.getElementById("hn-map-pin-label");
         if (pinLbl) pinLbl.textContent = selected.name;
         const distBadge = document.getElementById("hn-selected-distance-badge");
-        if (distBadge) distBadge.innerHTML = `<i class="fa-regular fa-clock text-amber-400 mr-1"></i>~ ${kmText} km <span class="text-slate-400 font-normal">(ước tính)</span>`;
+        if (distBadge) distBadge.innerHTML = `<i class="fa-regular fa-clock text-amber-400 mr-1"></i>~ ${kmText} km ${distSourceTag}`;
         const priceBadge = document.getElementById("hn-selected-price-badge");
         if (priceBadge) priceBadge.innerHTML = `<i class="fa-solid fa-ticket text-amber-400 mr-1"></i>Vé ước tính: <strong class="text-amber-300">~ ${formatVND(estPair)}</strong>`;
         const nameEl = document.getElementById("hn-selected-name");
