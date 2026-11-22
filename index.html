@@ -2672,13 +2672,60 @@
       min-width: 0;
       width: 100%;
     }
+    #booking-scroll-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    #booking-footer-bar {
+      flex-shrink: 0;
+      background: #16161D;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 10px 14px max(12px, env(safe-area-inset-bottom));
+    }
+    body.booking-modal-open #owner-chat-widget {
+      top: calc(58px + env(safe-area-inset-top)) !important;
+      bottom: auto !important;
+      right: 12px !important;
+      z-index: 75 !important;
+    }
+    body.booking-modal-open #owner-chat-fab {
+      display: none !important;
+    }
     @media (max-width: 1023px) {
-      #booking-summary-card {
-        margin-top: 4px;
-        margin-bottom: 12px;
+      #booking-modal {
+        padding: 0 !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        overflow: hidden !important;
+      }
+      #booking-modal-panel {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
+        border-radius: 0 !important;
+        border: 0 !important;
+      }
+      #booking-modal-header {
+        padding-top: max(10px, env(safe-area-inset-top)) !important;
+      }
+      #booking-preview-movie-card {
+        display: none !important;
+      }
+      #booking-scroll-body {
+        padding-bottom: 24px !important;
       }
     }
     @media (min-width: 1024px) {
+      #booking-modal-panel {
+        max-height: 92dvh;
+      }
+      #booking-footer-bar {
+        padding: 12px 20px;
+      }
       #booking-summary-card {
         position: sticky;
         top: 0;
@@ -5741,37 +5788,53 @@
   <!-- ========================================================= -->
   <!-- MODAL ĐẶT VÉ TRỰC TUYẾN & SƠ ĐỒ CHỌN GHẾ NHƯ RẠP THẬT     -->
   <!-- ========================================================= -->
-  <div id="booking-modal" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title" aria-describedby="booking-modal-subtitle" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
-    <div id="booking-modal-panel" tabindex="-1" class="rounded-2xl sm:rounded-3xl max-w-6xl w-full max-h-[94vh] flex flex-col overflow-hidden focus:outline-none">
+  <div id="booking-modal" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title" aria-describedby="booking-modal-subtitle" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-4">
+    <div id="booking-modal-panel" tabindex="-1" class="rounded-2xl sm:rounded-3xl max-w-6xl w-full flex flex-col overflow-hidden focus:outline-none">
       <div id="booking-sr-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
-      <!-- Header Đặt Vé -->
-      <div class="px-4 sm:px-5 py-3.5 border-b border-white/10 flex items-center justify-between gap-3" style="background:#16161D;">
-        <div class="flex items-center gap-3 min-w-0">
-          <img src="./assets/web-logo.png" alt="CineVerse Logo" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover border border-amber-400/40 shadow-lg shrink-0" />
-          <div class="min-w-0">
-            <div class="flex flex-wrap items-center gap-2">
-              <h3 id="booking-modal-title" class="text-sm sm:text-lg font-black text-white truncate">Đặt Vé Rạp Chiếu Phim Trực Tuyến</h3>
-              <span id="booking-modal-mode-badge" class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase" style="background:rgba(245,197,24,0.16);border:1px solid rgba(245,197,24,0.55);color:#F5C518;">IMAX Laser 70mm</span>
+      <!-- A. ĐẦU MÀN HÌNH ĐẶT VÉ (Cố định trên cùng, chừa safe-area, luôn thấy tiêu đề & nút đóng) -->
+      <div id="booking-modal-header" class="shrink-0 px-3.5 sm:px-5 py-2.5 sm:py-3.5 border-b border-white/10 flex items-center justify-between gap-2.5" style="background:#16161D;">
+        <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+          <img id="booking-header-poster" src="./assets/web-logo.png" alt="Poster phim" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover border border-amber-400/40 shadow-lg shrink-0" />
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-1.5">
+              <span id="booking-header-room-chip" class="px-2 py-0.5 rounded-md text-[10px] font-black" style="background:#E50914;color:#FFFFFF;">Phòng 01</span>
+              <span id="booking-modal-mode-badge" class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase" style="background:rgba(245,197,24,0.16);border:1px solid rgba(245,197,24,0.55);color:#F5C518;">CHẾ ĐỘ FREE</span>
             </div>
-            <p id="booking-modal-subtitle" class="text-[11px] sm:text-xs" style="color:#A1A1AA;">Chọn suất chiếu, bấm chọn ghế trên sơ đồ 6 hàng (A–F) và xác nhận vé ngay</p>
+            <h3 id="booking-modal-title" class="text-sm sm:text-base font-black text-white leading-snug line-clamp-2 mt-0.5">Đặt Vé Rạp Chiếu Phim Trực Tuyến</h3>
+            <p id="booking-modal-subtitle" class="hidden sm:block text-[11px]" style="color:#A1A1AA;">Chọn suất chiếu, bấm chọn ghế trên sơ đồ và xác nhận vé ngay</p>
           </div>
         </div>
-        <button type="button" id="booking-close-btn" onclick="window.appActions.closeBookingModal()"
-          aria-label="Đóng màn đặt vé"
-          class="w-9 h-9 rounded-full text-white flex items-center justify-center transition cursor-pointer shrink-0"
-          style="background:#1D1D27;border:1px solid rgba(255,255,255,0.16);">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button type="button" id="btn-toggle-booking-meta" onclick="window.appActions.toggleBookingMetaDrawer()"
+            aria-expanded="false"
+            class="lg:hidden px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-white cursor-pointer"
+            style="background:#0B0B0F;border:1px solid rgba(245,197,24,0.45);color:#F5C518;">
+            Đổi phòng/suất
+          </button>
+          <button type="button" id="booking-header-chat-btn" onclick="window.appActions.toggleOwnerChatWidget()"
+            aria-label="Nhắn Chủ Rạp"
+            title="Nhắn Chủ Rạp"
+            class="w-9 h-9 rounded-full flex items-center justify-center transition cursor-pointer shrink-0"
+            style="background:#E50914;color:#FFFFFF;border:1.5px solid rgba(245,197,24,0.55);">
+            <i class="fa-solid fa-comment-dots text-xs" style="color:#F5C518;"></i>
+          </button>
+          <button type="button" id="booking-close-btn" onclick="window.appActions.closeBookingModal()"
+            aria-label="Đóng màn đặt vé"
+            class="w-9 h-9 rounded-full text-white flex items-center justify-center transition cursor-pointer shrink-0"
+            style="background:#1D1D27;border:1px solid rgba(255,255,255,0.22);">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
       </div>
 
-      <!-- Body Đặt Vé: Trái Phim/Suất/Sơ Đồ Ghế (7/12) | Phải Tóm Tắt & Xác Nhận (5/12) -->
-      <div class="p-3.5 sm:p-5 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 text-xs items-start">
-        <!-- Cột Trái: 1. Phim & Phòng -> 2. Sơ Đồ Ghế & Chú Giải -->
+      <!-- B. THÂN MÀN HÌNH (1 vùng cuộn dọc chính duy nhất, cuộn được tới đầu & cuối) -->
+      <div id="booking-scroll-body" class="p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 text-xs items-start">
+        <!-- Cột Trái: Đổi Phòng/Suất (thu gọn mặc định trên mobile) + Sơ Đồ Ghế -->
         <div class="lg:col-span-7 xl:col-span-8 space-y-3.5">
-          <div class="cv-booking-card p-3.5 space-y-3">
+          <div id="booking-meta-drawer" class="hidden lg:block cv-booking-card p-3.5 space-y-3">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div class="space-y-1">
-                <label class="text-[11px] font-extrabold uppercase tracking-wider block" style="color:#F5C518;">1. Chọn Phim &amp; Phòng Chiếu</label>
+                <label for="booking-room-select" class="text-[11px] font-extrabold uppercase tracking-wider block" style="color:#F5C518;">1. Chọn Phim &amp; Phòng Chiếu</label>
                 <select id="booking-room-select" onchange="window.appActions.onBookingRoomChange(this.value)"
                   style="background:#0B0B0F;border:1px solid rgba(255,255,255,0.16);"
                   class="w-full px-3 py-2.5 rounded-xl text-white font-bold text-xs focus:outline-none focus:border-amber-400">
@@ -5780,7 +5843,7 @@
               </div>
 
               <div class="space-y-1">
-                <label class="text-[11px] font-extrabold uppercase tracking-wider block" style="color:#F5C518;">Combo Bắp Nước</label>
+                <label for="booking-combo-select" class="text-[11px] font-extrabold uppercase tracking-wider block" style="color:#F5C518;">Combo Bắp Nước</label>
                 <select id="booking-combo-select" onchange="window.appActions.onBookingComboChange(this.value)"
                   style="background:#0B0B0F;border:1px solid rgba(255,255,255,0.16);"
                   class="w-full px-3 py-2.5 rounded-xl text-white font-bold text-xs focus:outline-none focus:border-amber-400">
@@ -5796,11 +5859,36 @@
             </div>
           </div>
 
+          <!-- Góc nhìn ghế đang chọn (đặt ngay trên sơ đồ ghế, có thể thu gọn) -->
+          <div id="booking-pov-preview" class="cv-booking-card rounded-2xl p-3 sm:p-4 border border-white/10 space-y-2" style="background:#0B0B0F;">
+            <button type="button" id="btn-toggle-booking-pov" onclick="window.appActions.toggleBookingPovCollapse()"
+              class="w-full flex items-center justify-between gap-2 text-left cursor-pointer">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider" style="color:#F5C518;">Xem trước góc nhìn ghế</span>
+              <span class="flex items-center gap-1.5">
+                <span id="booking-pov-seat-chip" class="px-2 py-0.5 rounded-md text-[10px] font-black" style="background:#F5C518;color:#0B0B0F;">Ghế F4</span>
+                <i id="booking-pov-chevron" class="fa-solid fa-chevron-up text-[10px]" style="color:#A1A1AA;"></i>
+              </span>
+            </button>
+            <div id="booking-pov-collapsible" class="space-y-2 pt-1">
+              <div class="cv-pov-stage" style="height:102px;">
+                <div id="booking-pov-screen" class="cv-pov-screen">
+                  <img id="booking-pov-poster" src="" alt="Mô phỏng góc nhìn từ ghế đang chọn" />
+                </div>
+                <div class="cv-pov-seats-silhouette" aria-hidden="true">
+                  <span></span><span></span><span></span><span></span><span></span>
+                </div>
+              </div>
+              <p id="booking-pov-desc" class="text-[10px] leading-snug" style="color:#A1A1AA;">
+                Mô phỏng góc nhìn theo vùng ghế: Hàng F (Toàn cảnh) • Góc giữa màn hình.
+              </p>
+            </div>
+          </div>
+
           <!-- 2. Sơ đồ chọn ghế trực quan (cuộn ngang mượt trên màn hình nhỏ) -->
-          <div class="cv-booking-card p-3.5 sm:p-4 space-y-3">
+          <div class="cv-booking-card p-3 sm:p-4 space-y-3">
             <div class="flex items-center justify-between gap-2">
-              <span class="text-[11px] font-extrabold uppercase tracking-wider" style="color:#F5C518;">2. Sơ Đồ Ghế Ngồi</span>
-              <span class="text-[10px] sm:hidden" style="color:#A1A1AA;">Vuốt ngang nếu cần • Chạm để chọn/bỏ</span>
+              <span class="text-[11px] font-extrabold uppercase tracking-wider" style="color:#F5C518;">Sơ Đồ Ghế Ngồi</span>
+              <span class="text-[10px] sm:hidden" style="color:#A1A1AA;">Vuốt ngang sơ đồ • Chạm ghế để chọn/bỏ</span>
             </div>
 
             <!-- Màn hình cong IMAX mô phỏng -->
@@ -5809,13 +5897,13 @@
               <span class="text-[9px] font-black uppercase tracking-[0.25em]" style="color:#F5C518;">MÀN HÌNH IMAX</span>
             </div>
 
-            <!-- Lưới ghế (cuộn ngang an toàn trên mobile, không tràn trang) -->
+            <!-- Lưới ghế (cuộn ngang an toàn trong vùng sơ đồ) -->
             <div id="booking-seat-scroll-wrap">
               <div id="booking-seat-grid" class="space-y-2"></div>
             </div>
 
             <!-- Chú giải trạng thái & hạng ghế ngay dưới sơ đồ (ký hiệu nhất quán với ghế) -->
-            <div id="booking-seat-legend" class="flex flex-wrap items-center justify-center gap-3 pt-2.5 border-t border-white/10 text-[11px] font-semibold" style="color:#E4E4E7;">
+            <div id="booking-seat-legend" class="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 pt-2.5 border-t border-white/10 text-[11px] font-semibold" style="color:#E4E4E7;">
               <span class="flex items-center gap-1.5"><span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold" style="background:#1D1D27;border:1.5px solid rgba(255,255,255,0.32);">□</span><span data-legend-tier="standard">Trống (A–C)</span></span>
               <span class="flex items-center gap-1.5"><span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold" style="background:rgba(245,197,24,0.16);border:1.5px solid rgba(245,197,24,0.65);color:#FDE68A;">★</span><span data-legend-tier="vip">VIP (D–E)</span></span>
               <span class="flex items-center gap-1.5"><span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold" style="background:rgba(229,9,20,0.18);border:1.5px solid rgba(229,9,20,0.68);color:#FECDD3;">♥</span><span data-legend-tier="sweetbox">Sweetbox (F)</span></span>
@@ -5825,36 +5913,14 @@
           </div>
         </div>
 
-        <!-- Cột Phải: 3. Xem Trước Góc Nhìn Ghế Đang Chọn -> 4. Tóm Tắt & Xác Nhận -->
-        <div id="booking-summary-card" class="lg:col-span-5 xl:col-span-4 flex flex-col justify-between cv-booking-card p-4 space-y-4">
-          <div id="booking-summary-view" class="flex flex-col justify-between h-full space-y-4">
+        <!-- Cột Phải: Thông tin vé gọn -->
+        <div id="booking-summary-card" class="lg:col-span-5 xl:col-span-4 flex flex-col justify-between cv-booking-card p-3.5 sm:p-4 space-y-3">
+          <div id="booking-summary-view" class="flex flex-col justify-between h-full space-y-3">
             <div class="space-y-3">
-              <!-- 3. Xem trước góc nhìn ghế đang chọn (đồng bộ trực tiếp với mã ghế F5/D4/A2...) -->
-              <div id="booking-pov-preview" class="rounded-2xl p-3 border border-white/10 space-y-2" style="background:#0B0B0F;">
-                <div class="flex items-center justify-between gap-2">
-                  <span class="text-[11px] font-extrabold uppercase tracking-wider" style="color:#F5C518;">3. Góc Nhìn Ghế Đang Chọn</span>
-                  <span id="booking-pov-seat-chip" class="px-2 py-0.5 rounded-md text-[10px] font-black" style="background:#F5C518;color:#0B0B0F;">Ghế F4</span>
-                </div>
-                <div class="cv-pov-stage" style="height:106px;">
-                  <div id="booking-pov-screen" class="cv-pov-screen">
-                    <img id="booking-pov-poster" src="" alt="Mô phỏng góc nhìn từ ghế đang chọn" />
-                  </div>
-                  <div class="cv-pov-seats-silhouette" aria-hidden="true">
-                    <span></span><span></span><span></span><span></span><span></span>
-                  </div>
-                </div>
-                <p id="booking-pov-desc" class="text-[10px] leading-snug" style="color:#A1A1AA;">
-                  Mô phỏng góc nhìn theo vùng ghế: Hàng F (Toàn cảnh) • Góc giữa màn hình.
-                </p>
-              </div>
-
-              <div class="flex items-center justify-between gap-2 pt-1">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider" style="color:#F5C518;">4. Tóm Tắt &amp; Xác Nhận</span>
-              </div>
-
-              <div class="flex gap-3 items-center border-b border-white/10 pb-3">
+              <!-- Card thông tin phim phụ (ẩn trên mobile để tránh lặp tiêu đề/poster) -->
+              <div id="booking-preview-movie-card" class="flex gap-3 items-center border-b border-white/10 pb-3">
                 <img id="booking-preview-poster" src="" alt="Poster"
-                  class="w-16 h-22 rounded-xl object-cover border border-white/15 bg-black shrink-0" />
+                  class="w-14 h-20 rounded-xl object-cover border border-white/15 bg-black shrink-0" />
                 <div class="min-w-0 space-y-1">
                   <span id="booking-preview-room" class="px-2 py-0.5 rounded font-black text-[10px] text-white" style="background:#E50914;">Phòng 01</span>
                   <h4 id="booking-preview-title" class="text-sm font-black text-white line-clamp-2">Tên bộ phim</h4>
@@ -5863,10 +5929,11 @@
               </div>
 
               <div class="space-y-1">
-                <label class="text-[11px] font-bold" style="color:#A1A1AA;">Tên người đặt vé (in lên Vé &amp; Thẻ NFT):</label>
+                <label for="booking-user-name" class="text-[11px] font-bold" style="color:#A1A1AA;">Tên người đặt vé (in lên Vé &amp; Thẻ NFT):</label>
                 <input id="booking-user-name" type="text" maxlength="24" placeholder="Nhập tên của bạn..."
+                  onfocus="setTimeout(() => this.scrollIntoView({ block: 'center', behavior: 'smooth' }), 180)"
                   style="background:#0B0B0F;border:1px solid rgba(255,255,255,0.16);"
-                  class="w-full px-3 py-2 rounded-xl text-white font-bold text-xs focus:outline-none focus:border-amber-400" />
+                  class="w-full px-3 py-2.5 rounded-xl text-white font-bold text-xs focus:outline-none focus:border-amber-400" />
               </div>
 
               <!-- Thông báo lỗi inline màu đỏ (#E50914) -->
@@ -5941,12 +6008,6 @@
                 <span>Sau khi xác nhận, hệ thống tự động lưu <strong>1 Thẻ Ký Ức Điện Ảnh NFT</strong> vào Tủ Vé của bạn.</span>
               </div>
             </div>
-
-            <button id="booking-confirm-btn" type="button" onclick="window.appActions.confirmCinemaBooking()"
-              class="cv-booking-confirm-btn w-full py-3 rounded-xl font-black text-xs sm:text-sm transition cursor-pointer flex items-center justify-center gap-2">
-              <i class="fa-solid fa-check-double"></i>
-              <span id="booking-confirm-btn-text">Xác Nhận Đặt Vé &amp; Vào Ghế Ngồi Ngay</span>
-            </button>
           </div>
 
           <!-- Cửa sổ QR thanh toán (thay thế cột phải khi bấm Thanh Toán ở Chế độ Trả Phí) -->
@@ -6010,6 +6071,26 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- C. THANH XÁC NHẬN DƯỚI ĐÁY (Luôn thấy ở cuối màn hình, chừa safe-area-inset-bottom) -->
+      <div id="booking-footer-bar" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+        <div class="flex items-center justify-between sm:justify-start gap-3 text-xs min-w-0">
+          <div class="min-w-0">
+            <span class="text-[10px] uppercase tracking-wider block" style="color:#A1A1AA;">Ghế đã chọn</span>
+            <strong id="booking-footer-seat-chip" class="text-sm font-black truncate block" style="color:#F5C518;">F4 • Sweetbox Đôi</strong>
+          </div>
+          <div class="h-6 w-px bg-white/10 hidden sm:block"></div>
+          <div class="text-right sm:text-left shrink-0">
+            <span class="text-[10px] uppercase tracking-wider block" style="color:#A1A1AA;">Thanh toán</span>
+            <strong id="booking-footer-price" class="text-sm font-black text-emerald-400">Miễn phí</strong>
+          </div>
+        </div>
+        <button id="booking-confirm-btn" type="button" onclick="window.appActions.confirmCinemaBooking()"
+          class="cv-booking-confirm-btn w-full sm:w-auto sm:min-w-[260px] px-5 py-3 rounded-xl font-black text-xs sm:text-sm transition cursor-pointer flex items-center justify-center gap-2">
+          <i class="fa-solid fa-check-double"></i>
+          <span id="booking-confirm-btn-text">Đặt Ghế F4 &amp; Vào Phòng</span>
+        </button>
       </div>
     </div>
   </div>
@@ -19722,12 +19803,15 @@
 
       renderBookingModalUI();
       const modalEl = document.getElementById("booking-modal");
+      document.body.classList.add("booking-modal-open");
       modalEl?.classList.remove("hidden");
       bindBookingDialogKeyboard();
       requestAnimationFrame(() => {
+        const scrollBody = document.getElementById("booking-scroll-body");
+        if (scrollBody) scrollBody.scrollTop = 0;
+        const closeBtn = document.getElementById("booking-close-btn");
         const panel = document.getElementById("booking-modal-panel");
-        const selectedBtn = candidateSeat ? modalEl?.querySelector(`button[data-seat-id="${candidateSeat}"]`) : null;
-        if (selectedBtn && !selectedBtn.disabled) selectedBtn.focus({ preventScroll: true });
+        if (closeBtn) closeBtn.focus({ preventScroll: true });
         else panel?.focus({ preventScroll: true });
       });
       playSeatClickSFX();
@@ -19735,6 +19819,7 @@
 
     function closeBookingModal() {
       backToBookingSummary();
+      document.body.classList.remove("booking-modal-open");
       const modalEl = document.getElementById("booking-modal");
       modalEl?.classList.add("hidden");
       if (__bookingDialogKeyHandler) {
@@ -19821,6 +19906,28 @@
       state.bookingDraft.comboPrice = parseInt(parts[1] || "0", 10) || 0;
       state.bookingDraft.comboName = parts[2] || (state.bookingDraft.comboIcon ? "Combo Bắp Nước" : "Không kèm bắp nước");
       renderBookingModalUI();
+    }
+
+    function toggleBookingMetaDrawer() {
+      const drawer = document.getElementById("booking-meta-drawer");
+      const btn = document.getElementById("btn-toggle-booking-meta");
+      if (!drawer) return;
+      const isHidden = drawer.classList.contains("hidden");
+      drawer.classList.toggle("hidden", !isHidden);
+      if (btn) btn.setAttribute("aria-expanded", isHidden ? "true" : "false");
+      if (isHidden) {
+        const scrollBody = document.getElementById("booking-scroll-body");
+        if (scrollBody) scrollBody.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+
+    function toggleBookingPovCollapse() {
+      const col = document.getElementById("booking-pov-collapsible");
+      const chev = document.getElementById("booking-pov-chevron");
+      if (!col) return;
+      const isHidden = col.classList.contains("hidden");
+      col.classList.toggle("hidden", !isHidden);
+      if (chev) chev.style.transform = isHidden ? "rotate(180deg)" : "rotate(0deg)";
     }
 
     function selectBookingShowtime(showtime) {
@@ -19925,19 +20032,17 @@
       const modalTitleEl = document.getElementById("booking-modal-title");
       const modalSubEl = document.getElementById("booking-modal-subtitle");
       const modeBadgeEl = document.getElementById("booking-modal-mode-badge");
+      const headerPosterEl = document.getElementById("booking-header-poster");
+      if (headerPosterEl && room.poster) headerPosterEl.src = room.poster;
+      const headerRoomChip = document.getElementById("booking-header-room-chip");
+      if (headerRoomChip) headerRoomChip.textContent = room.number;
       if (modalTitleEl) {
-        if (!isPaidMode) {
-          modalTitleEl.textContent = isInRoomSeatChange
-            ? `Đổi Ghế Ngồi Trong ${room.number} (Chế Độ Free)`
-            : "Đặt Vé & Chọn Ghế Vào Phòng Ngay (Chế Độ Free)";
-        } else {
-          modalTitleEl.textContent = "Đặt Vé Rạp Chiếu Phim Trực Tuyến (Box Office)";
-        }
+        modalTitleEl.textContent = room.displayTitle || sanitizeMovieTitle(room.movieTitle);
       }
       if (modalSubEl) {
         modalSubEl.textContent = !isPaidMode
-          ? "Chế độ Free: Không thu phí & không tính doanh thu • Bấm xác nhận là vào thẳng phòng hoặc đổi ghế ngay (giới hạn đổi ghế 10 phút/lần)"
-          : "Chọn suất chiếu, bấm chọn ghế trên sơ đồ và nhận Vé Điện Tử kèm Thẻ Ký Ức NFT độc bản";
+          ? `${formatShowtimeForCurrentMode(state.bookingDraft.showtime)} • Chế độ Free`
+          : `${formatShowtimeForCurrentMode(state.bookingDraft.showtime)} • Box Office`;
       }
       if (modeBadgeEl) {
         modeBadgeEl.textContent = !isPaidMode ? "🆓 CHẾ ĐỘ FREE" : "IMAX Laser 70mm";
@@ -20165,6 +20270,26 @@
         if (totalPriceEl) totalPriceEl.textContent = formatVND(total);
       }
 
+      const footerSeatChip = document.getElementById("booking-footer-seat-chip");
+      const footerPriceEl = document.getElementById("booking-footer-price");
+      if (footerSeatChip) {
+        footerSeatChip.textContent = isRoomFull
+          ? "Phòng đã hết ghế"
+          : (hasSeat ? `${selectedSeat} • ${tier.split("•")[0].trim()}` : "Chưa chọn ghế");
+        footerSeatChip.style.color = hasSeat ? "#F5C518" : "#E50914";
+      }
+      if (footerPriceEl) {
+        if (!hasSeat || isRoomFull) {
+          footerPriceEl.textContent = "--";
+          footerPriceEl.className = "text-sm font-black text-slate-400";
+        } else if (isPaidMode) {
+          footerPriceEl.textContent = formatVND(total);
+          footerPriceEl.className = "text-sm font-black text-amber-300";
+        } else {
+          footerPriceEl.textContent = "Miễn phí";
+          footerPriceEl.className = "text-sm font-black text-emerald-400";
+        }
+      }
       const confirmBtn = document.getElementById("booking-confirm-btn");
       const btnTextEl = document.getElementById("booking-confirm-btn-text");
       if (confirmBtn) {
@@ -23179,6 +23304,8 @@
       toggleDimmedScreenRatio,
       cancelPendingRoomSeatChange,
       confirmPendingRoomSeatChange,
+      toggleBookingMetaDrawer,
+      toggleBookingPovCollapse,
       prevHeroSlide,
       pauseHeroSlider,
       toggleHeroVideoMute,
