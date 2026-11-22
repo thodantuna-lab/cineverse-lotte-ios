@@ -5009,10 +5009,11 @@
                 aria-label="Định dạng phòng chiếu"
                 class="hn-field-box px-2.5 py-1.5 text-xs font-bold cursor-pointer">
                 <option value="2d" selected>2D</option>
-                <option value="3d">3D (Kèm kính)</option>
-                <option value="imax">IMAX / Super Plex</option>
-                <option value="4dx">4DX / ScreenX</option>
-                <option value="luxury">VIP Thương gia</option>
+                <option value="3d">3D</option>
+                <option value="imax">IMAX</option>
+                <option value="4dx">4DX</option>
+                <option value="screenx">ScreenX</option>
+                <option value="cine_suite">Cine &amp; Suite</option>
               </select>
 
               <select id="hn-budget-combo" onchange="window.appActions.updateHanoiCinemaBudget()"
@@ -5064,29 +5065,30 @@
               <label class="text-[10px] font-extrabold uppercase text-slate-400 block">Đối tượng khách</label>
               <select id="hn-budget-audience" onchange="window.appActions.updateHanoiCinemaBudget()"
                 class="hn-field-box w-full px-2.5 py-2 text-xs font-bold">
-                <option value="adult" selected>Người lớn tiêu chuẩn</option>
-                <option value="u22">U22 / Học sinh - Sinh viên</option>
-                <option value="child">Trẻ em / Người cao tuổi</option>
+                <option value="adult" selected>Người lớn</option>
+                <option value="u22">U22 / Dưới 23 tuổi</option>
+                <option value="child">Trẻ em</option>
+                <option value="senior">Người cao tuổi</option>
               </select>
             </div>
             <div class="space-y-1">
               <label class="text-[10px] font-extrabold uppercase text-slate-400 block">Hạng ghế ngồi</label>
               <select id="hn-budget-seat-tier" onchange="window.appActions.updateHanoiCinemaBudget()"
                 class="hn-field-box w-full px-2.5 py-2 text-xs font-bold">
-                <option value="standard">Ghế Thường (Standard)</option>
-                <option value="vip" selected>Ghế VIP (Trung tâm)</option>
+                <option value="standard">Ghế Thường</option>
+                <option value="vip" selected>Ghế VIP</option>
                 <option value="sweetbox">Ghế đôi Sweetbox</option>
               </select>
             </div>
             <div class="space-y-1">
-              <label class="text-[10px] font-extrabold uppercase text-slate-400 block">Thời điểm xem</label>
+              <label class="text-[10px] font-extrabold uppercase text-slate-400 block">Nhóm ngày chiếu</label>
               <select id="hn-budget-daytype" onchange="window.appActions.updateHanoiCinemaBudget()"
                 class="hn-field-box w-full px-2.5 py-2 text-xs font-bold">
-                <option value="auto" selected>🕒 Theo giờ thực tế hôm nay</option>
-                <option value="weekday_day">T2, T4, T5 (Trước 17:00)</option>
-                <option value="weekday_night">T2, T4, T5 (Sau 17:00)</option>
-                <option value="happy_tue">Ngày Thành Viên (T3 / T4 Beta)</option>
-                <option value="weekend">Cuối tuần (T6, T7, CN &amp; Lễ)</option>
+                <option value="auto" selected>🕒 Theo ngày hôm nay</option>
+                <option value="mon_tue_thu">Thứ 2, Thứ 3, Thứ 5</option>
+                <option value="wed_happy">Thứ Tư Vui Vẻ</option>
+                <option value="fri_sun">Thứ 6, Thứ 7, Chủ Nhật</option>
+                <option value="holiday">Ngày Lễ / Tết (+phụ thu)</option>
               </select>
             </div>
           </div>
@@ -5113,7 +5115,8 @@
                 <option value="3d">3D</option>
                 <option value="imax">IMAX</option>
                 <option value="4dx">4DX</option>
-                <option value="luxury">VIP</option>
+                <option value="screenx">ScreenX</option>
+                <option value="cine_suite">Cine &amp; Suite</option>
               </select>
             </div>
             <div class="space-y-1">
@@ -24886,12 +24889,1096 @@
       }
     };
 
+    // Dữ liệu giá vé & bắp nước tích hợp từ cineverse_hanoi.json / cineverse_hanoi.py
+    const CINEVERSE_HANOI_DATA = {
+      "snapshotReviewed": "2026-11-22",
+      "currency": "VND",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "status": "indexed_reference_only",
+      "branches": {
+        "lotte_tay_ho": {
+          "chain": "Lotte Cinema",
+          "name": "Lotte Cinema Tây Hồ (Lotte Mall West Lake)"
+        },
+        "lotte_kosmo": {
+          "chain": "Lotte Cinema",
+          "name": "Lotte Cinema Kosmo Tây Hồ"
+        },
+        "lotte_ha_dong": {
+          "chain": "Lotte Cinema",
+          "name": "Lotte Cinema Hà Đông (Mê Linh Plaza)"
+        },
+        "lotte_long_bien": {
+          "chain": "Lotte Cinema",
+          "name": "Lotte Cinema Long Biên (Savico)"
+        },
+        "lotte_minh_khai": {
+          "chain": "Lotte Cinema",
+          "name": "Lotte Cinema Minh Khai (Green Pearl)"
+        },
+        "cgv_ba_trieu": {
+          "chain": "CGV Cinemas",
+          "name": "CGV Vincom Center Bà Triệu",
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-center-ba-trieu/"
+        },
+        "cgv_metropolis": {
+          "chain": "CGV Cinemas",
+          "name": "CGV Vincom Metropolis Liễu Giai",
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-metropolis-lieu-giai/"
+        },
+        "cgv_nguyen_chi_thanh": {
+          "chain": "CGV Cinemas",
+          "name": "CGV Vincom Nguyễn Chí Thanh",
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-nguyen-chi-thanh/"
+        },
+        "cgv_royal_city": {
+          "chain": "CGV Cinemas",
+          "name": "CGV Vincom Mega Mall Royal City"
+        },
+        "cgv_times_city": {
+          "chain": "CGV Cinemas",
+          "name": "CGV Vincom Mega Mall Times City"
+        },
+        "cgv_iph": {
+          "chain": "CGV Cinemas",
+          "name": "CGV Indochina Plaza Hà Nội (IPH)"
+        },
+        "cgv_tran_duy_hung": {
+          "chain": "CGV Cinemas",
+          "name": "CGV Vincom Trần Duy Hưng"
+        },
+        "cgv_trang_tien": {
+          "chain": "CGV Cinemas",
+          "name": "CGV Tràng Tiền Plaza (Hồ Gươm)"
+        },
+        "cgv_aeon_long_bien": {
+          "chain": "CGV Cinemas",
+          "name": "CGV AEON Mall Long Biên",
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-aeon-long-bien/"
+        },
+        "cgv_aeon_ha_dong": {
+          "chain": "CGV Cinemas",
+          "name": "CGV AEON Mall Hà Đông"
+        },
+        "beta_thanh_xuan": {
+          "chain": "Beta Cinemas",
+          "name": "Beta Cinemas Thanh Xuân"
+        },
+        "beta_my_dinh": {
+          "chain": "Beta Cinemas",
+          "name": "Beta Cinemas Mỹ Đình"
+        },
+        "beta_giai_phong": {
+          "chain": "Beta Cinemas",
+          "name": "Beta Cinemas Giải Phóng"
+        },
+        "beta_dan_phuong": {
+          "chain": "Beta Cinemas",
+          "name": "Beta Cinemas Đan Phượng"
+        },
+        "ncc": {
+          "chain": "NCC",
+          "name": "Trung tâm Chiếu phim Quốc gia"
+        },
+        "cinestar_parkcity": {
+          "chain": "Cinestar",
+          "name": "Cinestar Parkcity Hà Nội",
+          "source": "https://cinestar.com.vn/book-tickets/85e300f7-6aa7-48bc-b29f-405255918bba/"
+        }
+      },
+      "ticketEvidence": [
+        {
+          "branch": "cgv_metropolis",
+          "format": "2D",
+          "seat": "thường",
+          "audience": "adult",
+          "days": [
+            1,
+            2,
+            4
+          ],
+          "excludeHolidays": true,
+          "unit": "ticket",
+          "vnd": 115000,
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-metropolis-lieu-giai/"
+        },
+        {
+          "branch": "cgv_metropolis",
+          "format": "2D",
+          "seat": "thường",
+          "audience": "adult",
+          "days": [
+            5,
+            6,
+            7
+          ],
+          "excludeHolidays": true,
+          "unit": "ticket",
+          "vnd": 135000,
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-metropolis-lieu-giai/"
+        },
+        {
+          "branch": "cgv_metropolis",
+          "format": "IMAX",
+          "audience": "adult",
+          "days": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "excludeHolidays": true,
+          "unit": "ticket_base",
+          "vnd": 153000,
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-metropolis-lieu-giai/"
+        },
+        {
+          "branch": "cgv_metropolis",
+          "format": "IMAX",
+          "audience": "adult",
+          "days": [
+            5,
+            6,
+            7
+          ],
+          "excludeHolidays": true,
+          "unit": "ticket_base",
+          "vnd": 183000,
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-metropolis-lieu-giai/"
+        },
+        {
+          "branch": "cgv_metropolis",
+          "format": "2D",
+          "seat": "VIP",
+          "audience": "adult",
+          "unit": "seat_surcharge",
+          "vnd": 5500,
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-metropolis-lieu-giai/"
+        },
+        {
+          "branch": "cgv_nguyen_chi_thanh",
+          "format": "2D",
+          "seat": "thường",
+          "audience": "adult",
+          "days": [
+            1,
+            2,
+            4
+          ],
+          "excludeHolidays": true,
+          "unit": "ticket",
+          "vnd": 110000,
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-nguyen-chi-thanh/"
+        },
+        {
+          "branch": "cgv_nguyen_chi_thanh",
+          "format": "2D",
+          "seat": "thường",
+          "audience": "adult",
+          "days": [
+            5,
+            6,
+            7
+          ],
+          "excludeHolidays": true,
+          "unit": "ticket",
+          "vnd": 130000,
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-nguyen-chi-thanh/"
+        },
+        {
+          "branch": "cgv_nguyen_chi_thanh",
+          "format": "2D",
+          "seat": "VIP",
+          "audience": "adult",
+          "unit": "seat_surcharge",
+          "vnd": 5500,
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-nguyen-chi-thanh/"
+        },
+        {
+          "branch": "cgv_ba_trieu",
+          "format": "2D",
+          "seat": "thường",
+          "audience": "adult",
+          "days": [
+            1,
+            2,
+            4
+          ],
+          "excludeHolidays": true,
+          "unit": "ticket",
+          "vnd": 115000,
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-center-ba-trieu/"
+        },
+        {
+          "branch": "cgv_ba_trieu",
+          "format": "2D",
+          "seat": "thường",
+          "audience": "adult",
+          "days": [
+            5,
+            6,
+            7
+          ],
+          "excludeHolidays": true,
+          "unit": "ticket",
+          "vnd": 135000,
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-center-ba-trieu/"
+        },
+        {
+          "branch": "cgv_ba_trieu",
+          "format": "4DX",
+          "audience": "adult",
+          "days": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "excludeHolidays": true,
+          "unit": "ticket_base",
+          "vnd": 153000,
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-center-ba-trieu/"
+        },
+        {
+          "branch": "cgv_ba_trieu",
+          "format": "4DX",
+          "audience": "adult",
+          "days": [
+            5,
+            6,
+            7
+          ],
+          "excludeHolidays": true,
+          "unit": "ticket_base",
+          "vnd": 183000,
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-center-ba-trieu/"
+        },
+        {
+          "branch": "cgv_ba_trieu",
+          "format": "2D",
+          "seat": "VIP",
+          "audience": "adult",
+          "unit": "seat_surcharge",
+          "vnd": 5500,
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-center-ba-trieu/"
+        },
+        {
+          "branch": "cgv_aeon_long_bien",
+          "format": "2D",
+          "seat": "thường",
+          "audience": "adult",
+          "days": [
+            1,
+            2,
+            4
+          ],
+          "excludeHolidays": true,
+          "unit": "ticket",
+          "vnd": 105000,
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-aeon-long-bien/"
+        },
+        {
+          "branch": "cgv_aeon_long_bien",
+          "format": "2D",
+          "seat": "thường",
+          "audience": "adult",
+          "days": [
+            5,
+            6,
+            7
+          ],
+          "excludeHolidays": true,
+          "unit": "ticket",
+          "vnd": 125000,
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-aeon-long-bien/"
+        },
+        {
+          "branch": "cgv_aeon_long_bien",
+          "format": "ScreenX",
+          "audience": "adult",
+          "days": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "excludeHolidays": true,
+          "unit": "ticket_base",
+          "vnd": 143000,
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-aeon-long-bien/"
+        },
+        {
+          "branch": "cgv_aeon_long_bien",
+          "format": "ScreenX",
+          "audience": "adult",
+          "days": [
+            5,
+            6,
+            7
+          ],
+          "excludeHolidays": true,
+          "unit": "ticket_base",
+          "vnd": 173000,
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-aeon-long-bien/"
+        },
+        {
+          "branch": "cgv_aeon_long_bien",
+          "format": "2D",
+          "seat": "VIP",
+          "audience": "adult",
+          "unit": "seat_surcharge",
+          "vnd": 5500,
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-aeon-long-bien/"
+        }
+      ],
+      "concessions": {
+        "bhd": {
+          "source": "https://www.bhdstar.vn/20-11-nay-bhd-star-co-qua-cho-ca-lop/",
+          "scope": "Chiến dịch 20/11/2026. Chưa xác nhận còn bán tại từng rạp.",
+          "items": [
+            [
+              "Điểm 10",
+              124000,
+              1,
+              1,
+              1
+            ],
+            [
+              "Nhất Quỷ Nhì Ma",
+              145000,
+              1,
+              2,
+              1
+            ],
+            [
+              "Họp Lớp",
+              495000,
+              5,
+              5,
+              5
+            ]
+          ],
+          "columns": [
+            "name",
+            "comboVnd",
+            "popcorn",
+            "drink",
+            "side"
+          ]
+        },
+        "cgv": {
+          "source": "https://www.cgv.vn/default/faq/",
+          "scope": "FAQ hãng, chưa có đơn giá combo theo chi nhánh",
+          "counterUpgradeVnd": {
+            "caramel": 9000,
+            "cheese": 15000
+          },
+          "comboBaseVnd": null
+        },
+        "lotte": {
+          "source": "https://www.lottecinemavn.com/LCMS/Contents/Cinema-Mall/popcorn-shop.aspx?type=gateway",
+          "requiresBranchSelection": true,
+          "comboBaseVnd": null
+        }
+      },
+      "nccOffer": {
+        "source": "https://chieuphimquocgia.com.vn/news-list/9559",
+        "format": "2D",
+        "vnd": 55000,
+        "seat": "đồng hạng",
+        "days": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "excludeHolidays": true,
+        "audience": "thành viên U22 xuất trình thẻ tại quầy",
+        "limitPerDay": 1,
+        "concessionDiscountPercent": 20,
+        "concessionLimit": "1 bắp và 1 nước hoặc 1 combo mỗi ngày, cần giấy tờ theo chương trình"
+      },
+      "liveTables": {
+        "cgv_ba_trieu": {
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-center-ba-trieu/",
+          "attemptedAt": "2026-11-22T10:25:15.890153+00:00",
+          "tables": [
+            {
+              "heading": "BẢNG GIÁ VÉ",
+              "rows": [
+                [
+                  {
+                    "text": "Từ thứ hai đến chủ nhật",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "thứ hai, thứ ba, thứ năm",
+                    "colspan": "3",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Thứ Tư Vui Vẻ",
+                    "colspan": "1",
+                    "rowspan": "2"
+                  },
+                  {
+                    "text": "thứ sáu, thứ bảy,chủ nhật và ngày lễ",
+                    "colspan": "3",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "Khách hàng dưới 23 tuổi/Thành viên U22",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "người cao tuổi",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "trẻ em",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "người lớn",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "trẻ em",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "người cao tuổi",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "người lớn",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "70.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "83.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "68.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "115.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "79.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "68.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "93.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "135.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "PHỤ THU: Ghế VIP: +5.500 ( Miễn phụ thu cho U22 và trẻ em ) Sweetbox : +26.000 (Thứ Hai, Thứ Ba, Thứ Tư, Thứ Năm, Thứ Sáu, Thứ Bảy, Chủ Nhật ) 3D : +32.000 (Thứ Hai, Thứ Ba, Thứ Tư, Thứ Năm) +53.000 (Thứ Sáu, Thứ Bảy, Chủ Nhật và Ngày Lễ ) Lễ/Tết : +11.000",
+                    "colspan": "8",
+                    "rowspan": "1"
+                  }
+                ]
+              ]
+            },
+            {
+              "heading": "BẢNG GIÁ VÉ 4DX",
+              "rows": [
+                [
+                  {
+                    "text": "Thứ Hai, Thứ Ba, Thứ Tư, Thứ Năm",
+                    "colspan": "3",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Thứ Sáu, Thứ 7, Chủ Nhật và Lễ/Tết",
+                    "colspan": "3",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "Người cao tuổi, trẻ em",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Khách hàng dưới 23 tuổi/Thành viên U22",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "người lớn",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Người cao tuổi, trẻ em",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Khách hàng dưới 23 tuổi/Thành viên U22",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "người lớn",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "123.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "133.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "153.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "153.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "133.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "183.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "PHỤ THU: 3D : +32.000 VND (Thứ Hai, Thứ Ba, Thứ Tư, Thứ Năm) +53.000 VND (Thứ Sáu, Thứ 7, Chủ Nhật và Lễ/Tết) Sweetbox : +26.000VND Tet/Holiday : +11.000VND",
+                    "colspan": "8",
+                    "rowspan": "1"
+                  }
+                ]
+              ]
+            }
+          ],
+          "status": "fetched_needs_review"
+        },
+        "cgv_metropolis": {
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-metropolis-lieu-giai/",
+          "attemptedAt": "2026-11-22T10:25:18.846772+00:00",
+          "tables": [
+            {
+              "heading": "BẢNG GIÁ VÉ",
+              "rows": [
+                [
+                  {
+                    "text": "Từ thứ hai đến chủ nhật",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "thứ hai, thứ ba, thứ năm",
+                    "colspan": "3",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Thứ tư vui vẻ",
+                    "colspan": "1",
+                    "rowspan": "2"
+                  },
+                  {
+                    "text": "thứ sáu, thứ bảy,chủ nhật và ngày lễ",
+                    "colspan": "3",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "Khách hàng dưới 23 tuổi/Thành viên U22",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Trẻ em",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Người cao tuổi",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "người lớn",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Trẻ em",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Người cao tuổi",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Người lớn",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "70.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "68.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "83.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "115.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "79.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "68.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "93.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "135.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "PHỤ THU: Ghế VIP: +5.500 ( Miễn phụ thu cho U22 và Trẻ em ) Sweetbox : +26.000 (Thứ Hai, Thứ Ba, Thứ Tư, Thứ Năm, Thứ Sáu, Thứ Bảy, Chủ Nhật ) 3D : +32.000 (Thứ Hai, Thứ Ba, Thứ Tư, Thứ Năm) +53.000 (Thứ Sáu, Thứ Bảy, Chủ Nhật và Ngày Lễ ) Lễ/Tết : +11.000",
+                    "colspan": "8",
+                    "rowspan": "1"
+                  }
+                ]
+              ]
+            },
+            {
+              "heading": "BẢNG GIÁ VÉ IMAX",
+              "rows": [
+                [
+                  {
+                    "text": "Thứ Hai, Thứ Ba, Thứ Tư, Thứ Năm",
+                    "colspan": "3",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Thứ Sáu, Thứ 7, Chủ Nhật và Lễ/Tết",
+                    "colspan": "3",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "Người cao tuổi, trẻ em",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Khách hàng dưới 23 tuổi/Thành viên U22",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "người lớn",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Người cao tuổi, trẻ em",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Khách hàng dưới 23 tuổi/Thành viên U22",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "người lớn",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "123.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "133.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "153.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "153.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "133.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "183.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "PHỤ THU: 3D : +32.000 VND (Thứ Hai, Thứ Ba, Thứ Tư, Thứ Năm) +53.000 VND (Thứ Sáu, Thứ 7, Chủ Nhật và Lễ/Tết) Sweetbox : +26.000VND Tet/Holiday : +11.000VND",
+                    "colspan": "8",
+                    "rowspan": "1"
+                  }
+                ]
+              ]
+            }
+          ],
+          "status": "fetched_needs_review"
+        },
+        "cgv_nguyen_chi_thanh": {
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-vincom-nguyen-chi-thanh/",
+          "attemptedAt": "2026-11-22T10:25:20.644234+00:00",
+          "tables": [
+            {
+              "heading": "Bảng giá vé 2D",
+              "rows": [
+                [
+                  {
+                    "text": "Từ thứ hai đến chủ nhật",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Khách hàng dưới 23 tuổi/Thành viên U22",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "70.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "thứ hai, thứ ba,& thứ năm",
+                    "colspan": "1",
+                    "rowspan": "4"
+                  }
+                ],
+                [
+                  {
+                    "text": "trẻ em",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "68.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "người cao tuổi",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "73.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "người lớn",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "105.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "Thứ Tư Vui Vẻ",
+                    "colspan": "2",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "79.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "thứ sáu, thứ bảy, chủ nhật, & ngày lễ",
+                    "colspan": "1",
+                    "rowspan": "4"
+                  }
+                ],
+                [
+                  {
+                    "text": "trẻ em",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "68.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "người cao tuổi",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "83.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "người lớn",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "125.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "Phụ Thu: Ghế VIP ( Miễn phụ thu cho U22 ): +5.500 Sweetbox +26.000 (Thứ Hai, Thứ Ba, Thứ Tư, Thứ Năm, Thứ Sáu, Thứ Bảy, Chủ Nhật ) 3D +32.000 (Thứ Hai, Thứ Ba, Thứ Năm) +53.000 (Thứ Sáu, Thứ Bảy, Chủ Nhật và Ngày Lễ ) Lễ/Tết +11.000",
+                    "colspan": "3",
+                    "rowspan": "1"
+                  }
+                ]
+              ]
+            },
+            {
+              "heading": "Bảng giá vé Rạp Cine & Suite",
+              "rows": [
+                [
+                  {
+                    "text": "Từ thứ hai đến thứ sáu",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Thứ hai, thứ ba, thứ năm",
+                    "colspan": "3",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "thứ tư vui vẻ",
+                    "colspan": "1",
+                    "rowspan": "2"
+                  },
+                  {
+                    "text": "Thứ sáu, thứ bảy, chủ nhật và ngày lễ",
+                    "colspan": "3",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "Khách hàng dưới 23 tuổi/Thành viên U22",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "trẻ em",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "người cao tuổi",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Người lớn",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "trẻ em",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "người cao tuổi",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "Người lớn",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "65.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "80.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "90.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "110.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "95.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "90.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "100.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  },
+                  {
+                    "text": "130.000",
+                    "colspan": "1",
+                    "rowspan": "1"
+                  }
+                ],
+                [
+                  {
+                    "text": "PHỤ THU: Ghế VIP: +5.000 ( Miễn phụ thu cho U22 ) 3D : +30.000 (Thứ Hai, Thứ Ba, Thứ Tư, Thứ Năm) +50.000 (Thứ Sáu, Thứ Bảy, Chủ Nhật và Ngày Lễ ) Lễ/Tết : +10.000",
+                    "colspan": "8",
+                    "rowspan": "1"
+                  }
+                ]
+              ]
+            }
+          ],
+          "status": "fetched_needs_review"
+        },
+        "cgv_aeon_long_bien": {
+          "source": "https://www.cgv.vn/default/cinox/site/cgv-aeon-long-bien/",
+          "attemptedAt": "2026-11-22T10:25:22.716802+00:00",
+          "status": "unavailable",
+          "error": "Không đọc được bảng giá theo cấu trúc đã biết"
+        }
+      }
+    };
+
     const HANOI_FORMAT_SURCHARGE = {
-      "2d": { add: 0, label: "2D Tiêu chuẩn" },
-      "3d": { add: 40000, label: "3D (+40.000đ)" },
-      "imax": { add: 60000, label: "IMAX / Super Plex (+60.000đ)" },
-      "4dx": { add: 55000, label: "4DX / ScreenX (+55.000đ)" },
-      "luxury": { fixed: 280000, label: "VIP Thương gia (Gold Class / Charlotte)" }
+      "2d": { add: 0, label: "2D" },
+      "3d": { add: 0, label: "3D" },
+      "imax": { add: 0, label: "IMAX" },
+      "4dx": { add: 0, label: "4DX" },
+      "screenx": { add: 0, label: "ScreenX" },
+      "cine_suite": { add: 0, label: "Cine & Suite" }
     };
 
     // Danh sách 19 cụm rạp thực tế đang hoạt động tại TP. Hà Nội (Đã loại bỏ các rạp đóng cửa vĩnh viễn như Landmark 72 & Thăng Long Big C)
@@ -24950,39 +26037,540 @@
       return R * c;
     }
 
+    function formatIsoVnTimestamp(isoOrDateStr) {
+      if (!isoOrDateStr) return "Chưa có dữ liệu";
+      if (/^\d{4}-\d{2}-\d{2}$/.test(isoOrDateStr)) {
+        const [y, m, d] = isoOrDateStr.split("-");
+        return `${d}/${m}/${y} (snapshotReviewed)`;
+      }
+      const dObj = new Date(isoOrDateStr);
+      if (Number.isNaN(dObj.getTime())) return String(isoOrDateStr);
+      return dObj.toLocaleString("vi-VN", {
+        timeZone: "Asia/Ho_Chi_Minh",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      }) + " (GMT+7)";
+    }
+
+    function parseVndNumber(raw) {
+      const m = String(raw || "").match(/(\d{1,3}(?:[.,]\d{3})+|\d{4,7})/);
+      if (!m) return null;
+      const digits = m[1].replace(/[.,]/g, "");
+      const num = parseInt(digits, 10);
+      return Number.isFinite(num) ? num : null;
+    }
+
+    function normalizeDayGroupFromText(txt) {
+      const s = String(txt || "").toLowerCase();
+      const includesHoliday = /lễ|tết|holiday/i.test(s);
+      if (/từ\s*thứ\s*hai\s*đến\s*chủ\s*nhật/.test(s)) {
+        return { days: [1, 2, 3, 4, 5, 6, 7], includesHoliday, label: txt };
+      }
+      if (/từ\s*thứ\s*hai\s*đến\s*thứ\s*sáu/.test(s)) {
+        return { days: [1, 2, 3, 4, 5], includesHoliday, label: txt };
+      }
+      if (/thứ\s*(tư|4)\s*vui\s*vẻ/.test(s)) {
+        return { days: [3], includesHoliday: false, label: txt };
+      }
+      const days = new Set();
+      if (/thứ\s*(hai|2)\b/.test(s)) days.add(1);
+      if (/thứ\s*(ba|3)\b/.test(s)) days.add(2);
+      if (/thứ\s*(tư|4)\b/.test(s)) days.add(3);
+      if (/thứ\s*(năm|5)\b/.test(s)) days.add(4);
+      if (/thứ\s*(sáu|6)\b/.test(s)) days.add(5);
+      if (/thứ\s*(bảy|7)\b/.test(s)) days.add(6);
+      if (/chủ\s*nhật/.test(s)) days.add(7);
+      return { days: Array.from(days).sort((a, b) => a - b), includesHoliday, label: txt };
+    }
+
+    function normalizeAudiencesFromText(txt) {
+      const s = String(txt || "").toLowerCase();
+      const out = [];
+      if (/u22|dưới\s*23/.test(s)) out.push("u22");
+      if (/trẻ\s*em/.test(s)) out.push("child");
+      if (/người\s*cao\s*tuổi/.test(s)) out.push("senior");
+      if (/người\s*lớn/.test(s)) out.push("adult");
+      if (out.length === 0 && /thứ\s*(tư|4)\s*vui\s*vẻ/.test(s)) out.push("all");
+      return out;
+    }
+
+    function expandTableGrid(rows) {
+      const grid = [];
+      for (let r = 0; r < rows.length; r++) {
+        if (!grid[r]) grid[r] = [];
+        let c = 0;
+        for (const cell of rows[r]) {
+          while (grid[r][c] !== undefined) c++;
+          const rs = Math.max(1, parseInt(cell.rowspan || "1", 10) || 1);
+          const cs = Math.max(1, parseInt(cell.colspan || "1", 10) || 1);
+          for (let dr = 0; dr < rs; dr++) {
+            if (!grid[r + dr]) grid[r + dr] = [];
+            for (let dc = 0; dc < cs; dc++) {
+              grid[r + dr][c + dc] = {
+                text: cell.text || "",
+                originRow: r,
+                originCol: c,
+                rowspan: rs,
+                colspan: cs
+              };
+            }
+          }
+          c += cs;
+        }
+      }
+      return grid;
+    }
+
+    function parseSurchargesFromText(text) {
+      const src = String(text || "");
+      const sur = { vip: null, sweetbox: null, threeD: null, holiday: null, raw: src };
+
+      const vipMatch = src.match(/Ghế\s*VIP(?:\s*\(([^)]*)\))?\s*:?\s*\+([\d.,]+)(?:\s*\(([^)]*)\))?/i);
+      if (vipMatch) {
+        const add = parseVndNumber(vipMatch[2]);
+        const noteTxt = `${vipMatch[1] || ""} ${vipMatch[3] || ""}`.toLowerCase();
+        const exemptAudiences = [];
+        if (/miễn/.test(noteTxt)) {
+          if (/u22/.test(noteTxt)) exemptAudiences.push("u22");
+          if (/trẻ\s*em/.test(noteTxt)) exemptAudiences.push("child");
+          if (/cao\s*tuổi/.test(noteTxt)) exemptAudiences.push("senior");
+        }
+        if (add !== null) sur.vip = { add, exemptAudiences, note: vipMatch[0].trim() };
+      }
+
+      const swbMatch = src.match(/Sweetbox\s*:?\s*\+([\d.,]+)/i);
+      if (swbMatch) {
+        const add = parseVndNumber(swbMatch[1]);
+        if (add !== null) sur.sweetbox = { add, note: swbMatch[0].trim() };
+      }
+
+      const threeDSection = src.match(/3D\s*:?\s*\+([\d.,]+)[^+]*\+([\d.,]+)/i);
+      if (threeDSection) {
+        const monThuAdd = parseVndNumber(threeDSection[1]);
+        const friSunAdd = parseVndNumber(threeDSection[2]);
+        if (monThuAdd !== null && friSunAdd !== null) {
+          sur.threeD = {
+            monThuAdd,
+            friSunAdd,
+            note: `3D: +${monThuAdd.toLocaleString("vi-VN")}đ (T2–T5), +${friSunAdd.toLocaleString("vi-VN")}đ (T6–CN & Lễ)`
+          };
+        }
+      }
+
+      const holMatch = src.match(/(?:Lễ\s*\/\s*Tết|Tet\s*\/\s*Holiday)\s*:?\s*\+([\d.,]+)/i);
+      if (holMatch) {
+        const add = parseVndNumber(holMatch[1]);
+        if (add !== null) sur.holiday = { add, note: holMatch[0].trim() };
+      }
+
+      return sur;
+    }
+
+    function detectTableFormatKey(heading) {
+      const h = String(heading || "").toLowerCase();
+      if (/imax/.test(h)) return "imax";
+      if (/4dx/.test(h)) return "4dx";
+      if (/cine\s*&\s*suite/.test(h)) return "cine_suite";
+      if (/screenx/.test(h)) return "screenx";
+      return "2d";
+    }
+
+    function parseCineverseLiveTable(tableObj) {
+      const formatKey = detectTableFormatKey(tableObj.heading);
+      const grid = expandTableGrid(tableObj.rows || []);
+      const isPriceCell = (t) => /^\d{2,3}[.,]\d{3}$/.test(String(t || "").trim());
+
+      let surcharges = { vip: null, sweetbox: null, threeD: null, holiday: null, raw: "" };
+      const dataRows = [];
+      for (let r = 0; r < grid.length; r++) {
+        const rowTexts = (grid[r] || []).map(cell => String(cell?.text || "").trim());
+        const joined = rowTexts.join(" ");
+        if (/phụ\s*thu/i.test(joined)) {
+          surcharges = parseSurchargesFromText(joined);
+          continue;
+        }
+        dataRows.push({ r, cells: grid[r] || [] });
+      }
+
+      const entries = [];
+      const purePriceRow = dataRows.find(dr => dr.cells.length > 0 && dr.cells.every(c => isPriceCell(c.text)));
+      if (purePriceRow) {
+        const priceRowIdx = purePriceRow.r;
+        const colCount = purePriceRow.cells.length;
+        for (let c = 0; c < colCount; c++) {
+          const baseVnd = parseVndNumber(purePriceRow.cells[c].text);
+          if (baseVnd === null) continue;
+          const headerParts = [];
+          for (let hr = 0; hr < priceRowIdx; hr++) {
+            const cell = grid[hr]?.[c];
+            const txt = String(cell?.text || "").trim();
+            if (txt && !headerParts.includes(txt)) headerParts.push(txt);
+          }
+          const dayText = headerParts[0] || "";
+          const audienceText = headerParts[1] || headerParts[0] || "";
+          const dayMeta = normalizeDayGroupFromText(dayText);
+          const audiences = normalizeAudiencesFromText(audienceText);
+          entries.push({
+            formatKey,
+            dayText,
+            days: dayMeta.days,
+            includesHoliday: dayMeta.includesHoliday,
+            audienceText,
+            audiences,
+            baseVnd,
+            columnSummary: `${dayText} → ${audienceText}`
+          });
+        }
+      } else {
+        for (const dr of dataRows) {
+          const texts = dr.cells.map(c => String(c?.text || "").trim());
+          const priceCol = texts.findIndex(t => isPriceCell(t));
+          if (priceCol < 0) continue;
+          const baseVnd = parseVndNumber(texts[priceCol]);
+          if (baseVnd === null) continue;
+          const labelParts = [];
+          for (let c = 0; c < priceCol; c++) {
+            if (texts[c] && !labelParts.includes(texts[c])) labelParts.push(texts[c]);
+          }
+          const dayText = labelParts[0] || "";
+          const audienceText = labelParts[1] || labelParts[0] || "";
+          const dayMeta = normalizeDayGroupFromText(dayText);
+          const audiences = normalizeAudiencesFromText(audienceText);
+          entries.push({
+            formatKey,
+            dayText,
+            days: dayMeta.days,
+            includesHoliday: dayMeta.includesHoliday,
+            audienceText,
+            audiences,
+            baseVnd,
+            columnSummary: `${dayText} → ${audienceText}`
+          });
+        }
+      }
+
+      return { formatKey, heading: tableObj.heading || "Bảng giá", entries, surcharges };
+    }
+
+    const _parsedLiveTableCache = {};
+    function inspectAndParseLiveTablesForBranch(branchId) {
+      if (!branchId) return { available: false, status: "missing", reason: "Chưa chọn chi nhánh", tables: [] };
+      if (_parsedLiveTableCache[branchId]) return _parsedLiveTableCache[branchId];
+
+      const liveEntry = CINEVERSE_HANOI_DATA.liveTables?.[branchId];
+      if (!liveEntry) {
+        const res = {
+          available: false,
+          status: "missing",
+          reason: "Không có bảng liveTables trong dữ liệu tích hợp",
+          source: CINEVERSE_HANOI_DATA.branches?.[branchId]?.source || null,
+          attemptedAt: null,
+          tables: []
+        };
+        _parsedLiveTableCache[branchId] = res;
+        return res;
+      }
+
+      if (liveEntry.status !== "fetched_needs_review" || !Array.isArray(liveEntry.tables) || liveEntry.tables.length === 0) {
+        const res = {
+          available: false,
+          status: liveEntry.status || "unavailable",
+          error: liveEntry.error || "liveTables không khả dụng",
+          source: liveEntry.source || null,
+          attemptedAt: liveEntry.attemptedAt || null,
+          tables: []
+        };
+        _parsedLiveTableCache[branchId] = res;
+        return res;
+      }
+
+      const parsedTables = liveEntry.tables.map(parseCineverseLiveTable);
+      const res = {
+        available: true,
+        status: liveEntry.status,
+        reviewed: true,
+        source: liveEntry.source,
+        attemptedAt: liveEntry.attemptedAt,
+        tables: parsedTables
+      };
+      _parsedLiveTableCache[branchId] = res;
+      return res;
+    }
+
+    function resolveDayContext(dayType) {
+      if (dayType === "mon_tue_thu" || dayType === "weekday_day" || dayType === "weekday_night") {
+        return { dayNum: 1, isHoliday: false, label: "Thứ 2, Thứ 3, Thứ 5" };
+      }
+      if (dayType === "wed_happy" || dayType === "happy_tue") {
+        return { dayNum: 3, isHoliday: false, label: "Thứ Tư Vui Vẻ" };
+      }
+      if (dayType === "fri_sun" || dayType === "weekend") {
+        return { dayNum: 6, isHoliday: false, label: "Thứ 6, Thứ 7, Chủ Nhật" };
+      }
+      if (dayType === "holiday") {
+        return { dayNum: 7, isHoliday: true, label: "Ngày Lễ / Tết" };
+      }
+      const vnNowStr = new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" });
+      const now = new Date(vnNowStr);
+      const jsDay = now.getDay();
+      const dayNum = jsDay === 0 ? 7 : jsDay;
+      const names = { 1: "Thứ Hai", 2: "Thứ Ba", 3: "Thứ Tư Vui Vẻ", 4: "Thứ Năm", 5: "Thứ Sáu", 6: "Thứ Bảy", 7: "Chủ Nhật" };
+      return { dayNum, isHoliday: false, label: `Hôm nay (${names[dayNum]})` };
+    }
+
+    function resolveCinemaTicketQuote(cinemaOrBrand, dayType, seatTier, audience, format = "2d") {
+      const cinemaId = typeof cinemaOrBrand === "object" ? cinemaOrBrand.id : "";
+      const branchMeta = cinemaId ? CINEVERSE_HANOI_DATA.branches?.[cinemaId] : null;
+      const dayCtx = resolveDayContext(dayType);
+      const liveCheck = inspectAndParseLiveTablesForBranch(cinemaId);
+
+      // 1. Kiểm tra liveTables trước khi dùng dữ liệu
+      if (liveCheck.available) {
+        const lookupFormat = format === "3d" ? "2d" : format;
+        const table = liveCheck.tables.find(t => t.formatKey === lookupFormat);
+        if (table) {
+          let matched = table.entries.find(e => e.days.includes(dayCtx.dayNum) && e.audiences.includes(audience));
+          if (!matched) {
+            matched = table.entries.find(e => e.days.includes(dayCtx.dayNum) && e.audiences.includes("all"));
+          }
+          if (matched) {
+            let formatSurchargeVnd = 0;
+            let formatSurchargeNote = "";
+            if (format === "3d") {
+              if (!table.surcharges.threeD) {
+                return {
+                  available: false,
+                  unitVnd: null,
+                  reason: "Chưa có dữ liệu phụ thu 3D trong bảng live",
+                  source: liveCheck.source,
+                  updatedAt: liveCheck.attemptedAt,
+                  updatedAtLabel: formatIsoVnTimestamp(liveCheck.attemptedAt),
+                  liveCheck
+                };
+              }
+              const isFriSunHol = dayCtx.dayNum >= 5 || dayCtx.isHoliday;
+              formatSurchargeVnd = isFriSunHol ? table.surcharges.threeD.friSunAdd : table.surcharges.threeD.monThuAdd;
+              formatSurchargeNote = `Phụ thu 3D (+${formatVND(formatSurchargeVnd)})`;
+            }
+
+            let seatSurchargeVnd = 0;
+            let seatNote = "Ghế Thường (0đ)";
+            if (seatTier === "vip") {
+              if (table.surcharges.vip) {
+                if (table.surcharges.vip.exemptAudiences.includes(audience)) {
+                  seatSurchargeVnd = 0;
+                  seatNote = `Ghế VIP: Miễn phụ thu cho ${audience.toUpperCase()} (0đ)`;
+                } else {
+                  seatSurchargeVnd = table.surcharges.vip.add;
+                  seatNote = `Phụ thu Ghế VIP (+${formatVND(seatSurchargeVnd)})`;
+                }
+              } else {
+                seatNote = `Ghế VIP (${table.heading} không liệt kê phụ thu VIP riêng)`;
+              }
+            } else if (seatTier === "sweetbox") {
+              if (table.surcharges.sweetbox) {
+                seatSurchargeVnd = table.surcharges.sweetbox.add;
+                seatNote = `Phụ thu Sweetbox (+${formatVND(seatSurchargeVnd)})`;
+              } else {
+                return {
+                  available: false,
+                  unitVnd: null,
+                  reason: "Chưa có dữ liệu phụ thu Sweetbox",
+                  source: liveCheck.source,
+                  updatedAt: liveCheck.attemptedAt,
+                  updatedAtLabel: formatIsoVnTimestamp(liveCheck.attemptedAt),
+                  liveCheck
+                };
+              }
+            }
+
+            let holidaySurchargeVnd = 0;
+            if (dayCtx.isHoliday && table.surcharges.holiday) {
+              holidaySurchargeVnd = table.surcharges.holiday.add;
+            }
+
+            const unitVnd = matched.baseVnd + formatSurchargeVnd + seatSurchargeVnd + holidaySurchargeVnd;
+            return {
+              available: true,
+              unitVnd,
+              baseVnd: matched.baseVnd,
+              formatSurchargeVnd,
+              formatSurchargeNote,
+              seatSurchargeVnd,
+              seatNote,
+              holidaySurchargeVnd,
+              matchedHeader: `${table.heading} • ${matched.columnSummary}`,
+              dayLabel: dayCtx.label,
+              source: liveCheck.source,
+              updatedAt: liveCheck.attemptedAt,
+              updatedAtLabel: formatIsoVnTimestamp(liveCheck.attemptedAt),
+              originKind: "liveTables",
+              originStatus: "liveTables (fetched_needs_review → đã đối chiếu)",
+              liveCheck
+            };
+          }
+        }
+      }
+
+      // 2. Fallback sang ticketEvidence nếu liveTables unavailable hoặc chưa có định dạng (ví dụ CGV AEON Long Biên)
+      if (cinemaId && Array.isArray(CINEVERSE_HANOI_DATA.ticketEvidence)) {
+        const wantFmt = format.toUpperCase() === "CINE_SUITE" ? "Cine & Suite" : format.toUpperCase();
+        const evBase = CINEVERSE_HANOI_DATA.ticketEvidence.find(ev => {
+          if (ev.branch !== cinemaId) return false;
+          if (ev.unit !== "ticket" && ev.unit !== "ticket_base") return false;
+          if ((ev.format || "").toLowerCase() !== wantFmt.toLowerCase()) return false;
+          if ((ev.audience || "").toLowerCase() !== audience.toLowerCase()) return false;
+          if (Array.isArray(ev.days) && !ev.days.includes(dayCtx.dayNum)) return false;
+          if (dayCtx.isHoliday && ev.excludeHolidays) return false;
+          return true;
+        });
+
+        if (evBase) {
+          let seatSurchargeVnd = 0;
+          let seatNote = "Ghế Thường (0đ)";
+          if (seatTier === "vip") {
+            const evVip = CINEVERSE_HANOI_DATA.ticketEvidence.find(
+              ev => ev.branch === cinemaId && ev.unit === "seat_surcharge" && (ev.seat || "").toLowerCase() === "vip"
+            );
+            if (evVip) {
+              seatSurchargeVnd = evVip.vnd;
+              seatNote = `Phụ thu Ghế VIP (+${formatVND(seatSurchargeVnd)} theo ticketEvidence)`;
+            } else {
+              return {
+                available: false,
+                unitVnd: null,
+                reason: "Chưa có dữ liệu phụ thu Ghế VIP",
+                source: evBase.source,
+                updatedAt: CINEVERSE_HANOI_DATA.snapshotReviewed,
+                updatedAtLabel: formatIsoVnTimestamp(CINEVERSE_HANOI_DATA.snapshotReviewed),
+                liveCheck
+              };
+            }
+          } else if (seatTier === "sweetbox") {
+            return {
+              available: false,
+              unitVnd: null,
+              reason: "Chưa có dữ liệu phụ thu Sweetbox trong ticketEvidence",
+              source: evBase.source,
+              updatedAt: CINEVERSE_HANOI_DATA.snapshotReviewed,
+              updatedAtLabel: formatIsoVnTimestamp(CINEVERSE_HANOI_DATA.snapshotReviewed),
+              liveCheck
+            };
+          }
+
+          return {
+            available: true,
+            unitVnd: evBase.vnd + seatSurchargeVnd,
+            baseVnd: evBase.vnd,
+            formatSurchargeVnd: 0,
+            formatSurchargeNote: "",
+            seatSurchargeVnd,
+            seatNote,
+            holidaySurchargeVnd: 0,
+            matchedHeader: `ticketEvidence (${evBase.format} • ngày [${(evBase.days || []).join(",")}])`,
+            dayLabel: dayCtx.label,
+            source: evBase.source,
+            updatedAt: CINEVERSE_HANOI_DATA.snapshotReviewed,
+            updatedAtLabel: formatIsoVnTimestamp(CINEVERSE_HANOI_DATA.snapshotReviewed),
+            originKind: "ticketEvidence",
+            originStatus: liveCheck.status === "unavailable"
+              ? `ticketEvidence (liveTables unavailable: ${liveCheck.error || ""})`
+              : "ticketEvidence (indexed_reference_only)",
+            liveCheck
+          };
+        }
+      }
+
+      // 3. Thiếu dữ liệu -> Bắt buộc trả về Chưa có dữ liệu
+      return {
+        available: false,
+        unitVnd: null,
+        reason: "Chưa có dữ liệu",
+        dayLabel: dayCtx.label,
+        source: liveCheck.source || branchMeta?.source || null,
+        updatedAt: liveCheck.attemptedAt || CINEVERSE_HANOI_DATA.snapshotReviewed,
+        updatedAtLabel: formatIsoVnTimestamp(liveCheck.attemptedAt || CINEVERSE_HANOI_DATA.snapshotReviewed),
+        originKind: "missing",
+        originStatus: liveCheck.status === "unavailable"
+          ? `Chưa có dữ liệu (liveTables: ${liveCheck.error || "unavailable"})`
+          : "Chưa có dữ liệu trong cineverse_hanoi.json",
+        liveCheck
+      };
+    }
+
+    function resolveCinemaConcessionQuote(cinemaOrBrand, comboMode) {
+      if (comboMode === "none") {
+        return {
+          required: false,
+          available: true,
+          totalVnd: 0,
+          label: "Không chọn bắp nước",
+          source: null,
+          updatedAtLabel: "Không áp dụng"
+        };
+      }
+      const brand = typeof cinemaOrBrand === "object" ? cinemaOrBrand.brand : cinemaOrBrand;
+      if (brand === "CGV Cinemas") {
+        const c = CINEVERSE_HANOI_DATA.concessions?.cgv;
+        return {
+          required: true,
+          available: false,
+          totalVnd: null,
+          label: "Chưa có dữ liệu",
+          note: `${c?.scope || "Chưa có đơn giá combo theo chi nhánh"} (nâng cấp vị quầy: Caramel +${formatVND(c?.counterUpgradeVnd?.caramel || 9000)}, Cheese +${formatVND(c?.counterUpgradeVnd?.cheese || 15000)})`,
+          source: c?.source || null,
+          updatedAtLabel: formatIsoVnTimestamp(CINEVERSE_HANOI_DATA.snapshotReviewed)
+        };
+      }
+      if (brand === "Lotte Cinema") {
+        const l = CINEVERSE_HANOI_DATA.concessions?.lotte;
+        return {
+          required: true,
+          available: false,
+          totalVnd: null,
+          label: "Chưa có dữ liệu",
+          note: l?.requiresBranchSelection ? "Trang nguồn yêu cầu chọn chi nhánh trực tiếp (comboBaseVnd: null)" : "Chưa có đơn giá combo",
+          source: l?.source || null,
+          updatedAtLabel: formatIsoVnTimestamp(CINEVERSE_HANOI_DATA.snapshotReviewed)
+        };
+      }
+      return {
+        required: true,
+        available: false,
+        totalVnd: null,
+        label: "Chưa có dữ liệu",
+        note: "Chưa có dữ liệu giá bắp nước cho hệ thống rạp này",
+        source: null,
+        updatedAtLabel: formatIsoVnTimestamp(CINEVERSE_HANOI_DATA.snapshotReviewed)
+      };
+    }
+
+    function resolveCinemaParkingQuote(comboMode) {
+      if (comboMode === "none") {
+        return { required: false, available: true, totalVnd: 0, label: "Không chọn gửi xe", source: null, updatedAtLabel: "Không áp dụng" };
+      }
+      return {
+        required: true,
+        available: false,
+        totalVnd: null,
+        label: "Chưa có dữ liệu",
+        note: "Thiếu dữ liệu phí gửi xe trong nguồn cineverse_hanoi.json",
+        source: null,
+        updatedAtLabel: formatIsoVnTimestamp(CINEVERSE_HANOI_DATA.snapshotReviewed)
+      };
+    }
+
     function resolveAutoDayType() {
-      const now = new Date();
-      const day = now.getDay(); // 0=CN, 1=T2, 2=T3, ..., 6=T7
-      const hour = now.getHours();
-      if (day === 0 || day === 5 || day === 6) return "weekend";
-      if (day === 2) return "happy_tue";
-      return hour < 17 ? "weekday_day" : "weekday_night";
+      return resolveDayContext("auto");
     }
 
     function getTicketUnitPriceForCinema(cinemaOrBrand, dayType, seatTier, audience, format = "2d") {
-      const brand = typeof cinemaOrBrand === "object" ? cinemaOrBrand.brand : cinemaOrBrand;
-      const cinemaId = typeof cinemaOrBrand === "object" ? cinemaOrBrand.id : "";
-      const cfg = HANOI_CINEMA_PRICING[brand] || HANOI_CINEMA_PRICING["Lotte Cinema"];
-      const branchOvr = cinemaId ? (HANOI_BRANCH_PRICE_OVERRIDES[cinemaId] || null) : null;
-      const fmtInfo = HANOI_FORMAT_SURCHARGE[format] || HANOI_FORMAT_SURCHARGE["2d"];
-
-      if (format === "luxury") {
-        if (branchOvr?.luxuryPrice) return branchOvr.luxuryPrice;
-        return brand === "Beta Cinemas" ? 120000 : 280000;
-      }
-
-      const dt = dayType === "auto" ? resolveAutoDayType() : dayType;
-      const ticketTable = branchOvr?.tickets || cfg.tickets;
-      const row = ticketTable[dt] || ticketTable.weekday_night;
-      let base = row[seatTier] || row.standard;
-      if (audience === "u22" && seatTier !== "sweetbox") {
-        base = row.u22;
-      } else if (audience === "child" && seatTier !== "sweetbox") {
-        base = row.child || row.u22;
-      }
-      const delta = (!branchOvr?.tickets && branchOvr?.delta) ? branchOvr.delta : 0;
-      const fmtAdd = fmtInfo.add || 0;
-      return Math.max(40000, base + delta + fmtAdd);
+      const q = resolveCinemaTicketQuote(cinemaOrBrand, dayType, seatTier, audience, format);
+      return q.available ? q.unitVnd : null;
     }
 
     // Tự động phát bản xem trước (video preview) 20 giây đầu khi hover vào thẻ phim đang chiếu
@@ -25523,7 +27111,8 @@
         const driveMins = roadKm >= 25
           ? Math.round((roadKm / 48) * 60)
           : Math.max(4, Math.round((roadKm / 24) * 60));
-        const estPairPrice = getTicketUnitPriceForCinema(c, "auto", "vip", "adult", "2d") * 2;
+        const unitEst = getTicketUnitPriceForCinema(c, "auto", "vip", "adult", "2d");
+        const estPairPrice = unitEst !== null ? unitEst * 2 : null;
         return { ...c, roadKm, driveMins, estPairPrice };
       }).filter(c => {
         if (hanoiFinderState.brandFilter !== "all" && c.brand !== hanoiFinderState.brandFilter) return false;
@@ -25533,7 +27122,11 @@
         }
         return true;
       }).sort((a, b) => {
-        if (sortMode === "cheapest") return a.estPairPrice - b.estPairPrice || a.roadKm - b.roadKm;
+        if (sortMode === "cheapest") {
+          const ap = a.estPairPrice === null ? Number.POSITIVE_INFINITY : a.estPairPrice;
+          const bp = b.estPairPrice === null ? Number.POSITIVE_INFINITY : b.estPairPrice;
+          return ap - bp || a.roadKm - b.roadKm;
+        }
         if (sortMode === "name") return a.name.localeCompare(b.name, "vi");
         return a.roadKm - b.roadKm;
       });
@@ -25597,7 +27190,7 @@
                     <i class="fa-regular fa-clock text-amber-400 mr-1"></i>~ ${kmText} km ${distSourceTag}
                   </span>
                   <span class="text-slate-200 font-semibold">
-                    <i class="fa-solid fa-ticket text-amber-400 mr-1"></i>Vé ước tính: <strong class="text-amber-300">~ ${formatVND(c.estPairPrice)}</strong>
+                    <i class="fa-solid fa-ticket text-amber-400 mr-1"></i>Vé (2 người): <strong class="${c.estPairPrice !== null ? "text-amber-300" : "text-slate-400"}">${c.estPairPrice !== null ? `~ ${formatVND(c.estPairPrice)}` : "Chưa có dữ liệu"}</strong>
                   </span>
                 </div>
                 ${isSel ? `
@@ -25625,7 +27218,8 @@
         const pCfg = HANOI_CINEMA_PRICING[selected.brand] || HANOI_CINEMA_PRICING["Lotte Cinema"];
         const dKm = selected.roadKm ?? Number((calcHaversineKm(hanoiFinderState.userLat, hanoiFinderState.userLng, selected.lat, selected.lng) * 1.25).toFixed(1));
         const kmText = String(dKm).replace(".", ",");
-        const estPair = selected.estPairPrice ?? (getTicketUnitPriceForCinema(selected, "auto", "vip", "adult", "2d") * 2);
+        const estUnitSel = getTicketUnitPriceForCinema(selected, "auto", "vip", "adult", "2d");
+        const estPair = selected.estPairPrice !== undefined ? selected.estPairPrice : (estUnitSel !== null ? estUnitSel * 2 : null);
 
         const brandBadge = document.getElementById("hn-selected-brand-badge");
         if (brandBadge) brandBadge.innerHTML = renderHanoiBrandMark(selected.brand);
@@ -25634,7 +27228,7 @@
         const distBadge = document.getElementById("hn-selected-distance-badge");
         if (distBadge) distBadge.innerHTML = `<i class="fa-regular fa-clock text-amber-400 mr-1"></i>~ ${kmText} km ${distSourceTag}`;
         const priceBadge = document.getElementById("hn-selected-price-badge");
-        if (priceBadge) priceBadge.innerHTML = `<i class="fa-solid fa-ticket text-amber-400 mr-1"></i>Vé ước tính: <strong class="text-amber-300">~ ${formatVND(estPair)}</strong>`;
+        if (priceBadge) priceBadge.innerHTML = `<i class="fa-solid fa-ticket text-amber-400 mr-1"></i>Vé (2 người): <strong class="${estPair !== null ? "text-amber-300" : "text-slate-400"}">${estPair !== null ? `~ ${formatVND(estPair)}` : "Chưa có dữ liệu"}</strong>`;
         const nameEl = document.getElementById("hn-selected-name");
         if (nameEl) nameEl.textContent = selected.name;
         const addrEl = document.getElementById("hn-selected-address");
@@ -25689,65 +27283,59 @@
       const dayType = document.getElementById("hn-budget-daytype")?.value || "auto";
       const comboMode = document.getElementById("hn-budget-combo")?.value || "shared";
 
+      const ticketQuote = resolveCinemaTicketQuote(selected, dayType, seatTier, audience, format);
+      const comboQuote = resolveCinemaConcessionQuote(selected, comboMode);
+      const parkingQuote = resolveCinemaParkingQuote(comboMode);
+      const liveCheck = ticketQuote.liveCheck || inspectAndParseLiveTablesForBranch(selected.id);
+
       const branchNoteEl = document.getElementById("hn-branch-pricing-note");
-      const branchOvr = HANOI_BRANCH_PRICE_OVERRIDES[selected.id];
       if (branchNoteEl) {
-        branchNoteEl.textContent = branchOvr?.note
-          ? `📌 ${selected.name}: ${branchOvr.note}`
-          : `📌 ${selected.name}: Áp dụng bảng giá niêm yết tiêu chuẩn hệ thống ${selected.brand} tại Hà Nội.`;
+        if (liveCheck.available) {
+          branchNoteEl.textContent = `📌 ${selected.name}: Đã kiểm tra liveTables (status: ${liveCheck.status}) & đối chiếu cột/ngày/đối tượng/phụ thu • Cập nhật: ${formatIsoVnTimestamp(liveCheck.attemptedAt)}`;
+        } else if (liveCheck.status === "unavailable") {
+          branchNoteEl.textContent = `⚠️ ${selected.name}: liveTables unavailable (${liveCheck.error || "lỗi cấu trúc"}) → ${ticketQuote.available ? "đối chiếu từ ticketEvidence" : "Chưa có dữ liệu"}`;
+        } else {
+          branchNoteEl.textContent = `ℹ️ ${selected.name}: Chưa có dữ liệu liveTables hoặc ticketEvidence trong cineverse_hanoi.json.`;
+        }
       }
 
-      const calcForTarget = (cinemaOrBrand) => {
-        const brandName = typeof cinemaOrBrand === "object" ? cinemaOrBrand.brand : cinemaOrBrand;
-        const cfg = HANOI_CINEMA_PRICING[brandName];
-        const unitTicket = getTicketUnitPriceForCinema(cinemaOrBrand, dayType, seatTier, audience, format);
-        const ticketTotal = unitTicket * people;
-        let comboTotal = 0;
-        let comboDesc = "Không mua bắp nước";
-        if (comboMode === "individual") {
-          comboTotal = cfg.combos.solo * people;
-          comboDesc = `${people} x ${cfg.combos.soloLabel}`;
-        } else if (comboMode === "shared" || comboMode === "car_shared") {
-          const couples = Math.floor(people / 2);
-          const rem = people % 2;
-          comboTotal = couples * cfg.combos.couple + rem * cfg.combos.solo;
-          comboDesc = couples > 0
-            ? `${couples} Combo Đôi${rem > 0 ? " + 1 Combo Đơn" : ""}`
-            : `1 ${cfg.combos.soloLabel}`;
-        } else if (comboMode === "popcorn_only") {
-          const packs = Math.ceil(people / 2);
-          comboTotal = packs * (cfg.combos.popcornOnly || 45000);
-          comboDesc = `${packs} Bắp rang bơ lớn`;
-        }
-        let parkingTotal = 0;
-        let parkingDesc = "Không gửi xe";
-        if (comboMode === "car_shared") {
-          const cars = Math.ceil(people / 4);
-          parkingTotal = cars * (cfg.parkingCar || 30000);
-          parkingDesc = `${cars} Ô tô`;
-        } else if (comboMode !== "none") {
-          const bikes = Math.ceil(people / 2);
-          parkingTotal = bikes * cfg.parkingBike;
-          parkingDesc = `${bikes} Xe máy`;
-        }
-        const grandTotal = ticketTotal + comboTotal + parkingTotal;
-        const perPerson = Math.round(grandTotal / people);
-        return { brandName, unitTicket, ticketTotal, comboTotal, comboDesc, parkingTotal, parkingDesc, grandTotal, perPerson };
-      };
+      const ticketTotal = ticketQuote.available ? ticketQuote.unitVnd * people : null;
+      const missingParts = [];
+      if (ticketTotal === null) missingParts.push("vé");
+      if (!comboQuote.available) missingParts.push("bắp nước");
+      if (!parkingQuote.available) missingParts.push("gửi xe");
 
-      const cur = calcForTarget(selected);
+      const allKnown = missingParts.length === 0;
+      const grandTotal = allKnown ? (ticketTotal + comboQuote.totalVnd + parkingQuote.totalVnd) : null;
+      const perPerson = allKnown ? Math.round(grandTotal / people) : null;
+
       const pill = document.getElementById("hn-budget-per-person-pill");
-      if (pill) pill.textContent = `Giá tham khảo • ${formatVND(cur.perPerson)} / người`;
       const totalEl = document.getElementById("hn-budget-total-highlight");
       if (totalEl) {
-        totalEl.textContent = formatVND(cur.grandTotal);
+        if (allKnown) {
+          totalEl.textContent = formatVND(grandTotal);
+        } else if (ticketTotal !== null) {
+          totalEl.textContent = `${formatVND(ticketTotal)} (Vé)`;
+        } else {
+          totalEl.textContent = "Chưa có dữ liệu";
+        }
         totalEl.classList.remove("hn-price-pop");
         void totalEl.offsetWidth;
         totalEl.classList.add("hn-price-pop");
       }
+      if (pill) {
+        if (allKnown) {
+          pill.textContent = `${ticketQuote.originKind} • ${formatVND(perPerson)} / người`;
+        } else if (ticketTotal !== null) {
+          pill.textContent = `${formatVND(ticketQuote.unitVnd)}/vé • Bắp nước/xe: Chưa có dữ liệu`;
+        } else {
+          pill.textContent = "Chưa có dữ liệu giá cho lựa chọn này";
+        }
+      }
+
       const mobSub = document.getElementById("hn-budget-bar-mobile-sub");
       if (mobSub) {
-        const fmtLbl = (HANOI_FORMAT_SURCHARGE[format]?.label || "2D").split(" ")[0];
+        const fmtLbl = HANOI_FORMAT_SURCHARGE[format]?.label || format.toUpperCase();
         const comboShort = comboMode === "none" ? "Chỉ tiền vé" : "Vé + bắp nước";
         mobSub.textContent = `${people} người • ${comboShort} • ${fmtLbl}`;
       }
@@ -25758,46 +27346,44 @@
       const mobComboSel = document.getElementById("hn-budget-combo-mob");
       if (mobComboSel) mobComboSel.value = comboMode;
 
-      const compareBrands = ["Beta Cinemas", "Lotte Cinema", "CGV Cinemas"].map(b =>
-        b === selected.brand ? calcForTarget(selected) : calcForTarget(b)
-      );
+      const renderSourceLine = (url, updatedLabel) => {
+        const srcHtml = url
+          ? `<a href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer" class="underline text-amber-300/90 hover:text-amber-200 break-all">${escapeHTML(url.replace(/^https?:\/\/(www\.)?/, ""))}</a>`
+          : `<span>Chưa có dữ liệu</span>`;
+        return `<span class="text-[9px] text-slate-400 block mt-1 leading-snug">Nguồn: ${srcHtml} • Cập nhật: ${escapeHTML(updatedLabel || "Chưa có dữ liệu")}</span>`;
+      };
+
       const box = document.getElementById("hn-budget-breakdown-box");
       if (box) {
+        const fmtLabel = HANOI_FORMAT_SURCHARGE[format]?.label || format.toUpperCase();
         box.innerHTML = `
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
             <div class="p-3 rounded-xl bg-stone-900 border border-white/10">
-              <span class="text-[10px] text-slate-400 block">Tiền vé (${people} người)</span>
-              <strong class="text-sm font-black text-white">${formatVND(cur.ticketTotal)}</strong>
-              <span class="text-[10px] text-amber-300 block">${formatVND(cur.unitTicket)} / vé (${HANOI_FORMAT_SURCHARGE[format]?.label || "2D"})</span>
+              <span class="text-[10px] text-slate-400 block">Tiền vé (${people} người • ${escapeHTML(fmtLabel)})</span>
+              <strong class="text-sm font-black ${ticketTotal !== null ? "text-white" : "text-slate-400"}">${ticketTotal !== null ? formatVND(ticketTotal) : "Chưa có dữ liệu"}</strong>
+              ${ticketQuote.available
+                ? `<span class="text-[10px] text-amber-300 block">${formatVND(ticketQuote.unitVnd)}/vé (Gốc ${formatVND(ticketQuote.baseVnd)}${ticketQuote.formatSurchargeVnd ? ` + 3D ${formatVND(ticketQuote.formatSurchargeVnd)}` : ""}${ticketQuote.seatSurchargeVnd ? ` + Ghế ${formatVND(ticketQuote.seatSurchargeVnd)}` : ""}${ticketQuote.holidaySurchargeVnd ? ` + Lễ ${formatVND(ticketQuote.holidaySurchargeVnd)}` : ""})</span>
+                   <span class="text-[9px] text-emerald-300/90 block">${escapeHTML(ticketQuote.matchedHeader || "")} • ${escapeHTML(ticketQuote.seatNote || "")}</span>`
+                : `<span class="text-[10px] text-amber-300/80 block">${escapeHTML(ticketQuote.originStatus || "Chưa có dữ liệu")}</span>`}
+              ${renderSourceLine(ticketQuote.source, ticketQuote.updatedAtLabel)}
             </div>
             <div class="p-3 rounded-xl bg-stone-900 border border-white/10">
-              <span class="text-[10px] text-slate-400 block">Bắp nước (${escapeHTML(cur.comboDesc)})</span>
-              <strong class="text-sm font-black text-rose-300">${formatVND(cur.comboTotal)}</strong>
-              <span class="text-[10px] text-slate-400 block">+ Gửi xe (${cur.parkingDesc}): ${formatVND(cur.parkingTotal)}</span>
+              <span class="text-[10px] text-slate-400 block">Bắp nước</span>
+              <strong class="text-sm font-black ${comboQuote.available ? "text-white" : "text-slate-400"}">${comboQuote.available ? formatVND(comboQuote.totalVnd) : "Chưa có dữ liệu"}</strong>
+              <span class="text-[10px] text-slate-300 block">${escapeHTML(comboQuote.note || comboQuote.label)}</span>
+              ${renderSourceLine(comboQuote.source, comboQuote.updatedAtLabel)}
+            </div>
+            <div class="p-3 rounded-xl bg-stone-900 border border-white/10">
+              <span class="text-[10px] text-slate-400 block">Gửi xe</span>
+              <strong class="text-sm font-black ${parkingQuote.available ? "text-white" : "text-slate-400"}">${parkingQuote.available ? formatVND(parkingQuote.totalVnd) : "Chưa có dữ liệu"}</strong>
+              <span class="text-[10px] text-slate-300 block">${escapeHTML(parkingQuote.note || parkingQuote.label)}</span>
+              ${renderSourceLine(parkingQuote.source, parkingQuote.updatedAtLabel)}
             </div>
             <div class="p-3 rounded-xl bg-amber-500/15 border border-amber-400/40">
-              <span class="text-[10px] text-amber-200 font-bold block">TỔNG NGÂN SÁCH CẢ NHÓM</span>
-              <strong class="text-base font-black text-amber-300">${formatVND(cur.grandTotal)}</strong>
-              <span class="text-[10px] text-emerald-300 block truncate">${escapeHTML(selected.name)}</span>
-            </div>
-            <div class="p-3 rounded-xl bg-emerald-500/15 border border-emerald-400/40">
-              <span class="text-[10px] text-emerald-200 font-bold block">CHIA ĐỀU MỖI NGƯỜI</span>
-              <strong class="text-base font-black text-emerald-300">${formatVND(cur.perPerson)}</strong>
-              <span class="text-[10px] text-slate-300 block">Đã gồm vé + bắp nước + xe</span>
-            </div>
-          </div>
-          <div class="pt-2 border-t border-white/10">
-            <p class="text-[11px] font-extrabold text-slate-300 mb-2">📊 So sánh tổng chi phí cho ${people} người giữa 3 hệ thống rạp tại Hà Nội:</p>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              ${compareBrands.map(b => `
-                <div class="px-3 py-2 rounded-xl border flex items-center justify-between ${b.brandName === selected.brand ? "bg-amber-500/15 border-amber-400 text-white" : "bg-stone-900/70 border-white/10 text-slate-300"}">
-                  <div>
-                    <span class="font-black text-xs block">${escapeHTML(b.brandName)}</span>
-                    <span class="text-[10px] text-slate-400">${formatVND(b.perPerson)}/người</span>
-                  </div>
-                  <strong class="text-xs font-black text-amber-300">${formatVND(b.grandTotal)}</strong>
-                </div>
-              `).join("")}
+              <span class="text-[10px] text-amber-200 font-bold block">TỔNG NGÂN SÁCH (${escapeHTML(selected.name)})</span>
+              <strong class="text-base font-black ${allKnown ? "text-amber-300" : "text-slate-200"}">${allKnown ? formatVND(grandTotal) : "Chưa có dữ liệu"}</strong>
+              <span class="text-[10px] text-slate-300 block">${allKnown ? `Chia đều: ${formatVND(perPerson)}/người` : `Thiếu giá: ${missingParts.join(", ")}${ticketTotal !== null ? ` • Riêng tiền vé: ${formatVND(ticketTotal)}` : ""}`}</span>
+              ${renderSourceLine(ticketQuote.source, ticketQuote.updatedAtLabel)}
             </div>
           </div>
         `;
@@ -25866,17 +27452,17 @@
         priceTableEl.innerHTML = `
           <div class="p-3 rounded-2xl bg-stone-950 border border-white/10 space-y-1">
             <span class="text-[10px] font-black uppercase text-emerald-300">Thứ 3 Happy Day / U22</span>
-            <p class="text-sm font-black text-white">${formatVND(Math.min(pTueStd, pTueU22))} – ${formatVND(Math.max(pTueStd, pTueU22))}</p>
+            <p class="text-sm font-black text-white">${(pTueStd !== null && pTueU22 !== null) ? `${formatVND(Math.min(pTueStd, pTueU22))} – ${formatVND(Math.max(pTueStd, pTueU22))}` : "Chưa có dữ liệu"}</p>
             <p class="text-[10px] text-slate-400">Áp dụng tại ${escapeHTML(selected.brand)} (${escapeHTML(selected.district)})</p>
           </div>
           <div class="p-3 rounded-2xl bg-stone-950 border border-white/10 space-y-1">
             <span class="text-[10px] font-black uppercase text-amber-300">Ngày thường (T2, T4, T5)</span>
-            <p class="text-sm font-black text-white">${formatVND(pWkDay)} – ${formatVND(pWkNightVip)}</p>
+            <p class="text-sm font-black text-white">${(pWkDay !== null && pWkNightVip !== null) ? `${formatVND(pWkDay)} – ${formatVND(pWkNightVip)}` : "Chưa có dữ liệu"}</p>
             <p class="text-[10px] text-slate-400">Standard trước 17h → VIP sau 17h</p>
           </div>
           <div class="p-3 rounded-2xl bg-stone-950 border border-white/10 space-y-1">
             <span class="text-[10px] font-black uppercase text-rose-300">Cuối tuần (T6, T7, CN &amp; Lễ)</span>
-            <p class="text-sm font-black text-white">${formatVND(pWeekendStd)} – ${formatVND(pWeekendSwb)}</p>
+            <p class="text-sm font-black text-white">${(pWeekendStd !== null && pWeekendSwb !== null) ? `${formatVND(pWeekendStd)} – ${formatVND(pWeekendSwb)}` : "Chưa có dữ liệu"}</p>
             <p class="text-[10px] text-slate-400">Standard 2D → Ghế đôi Sweetbox</p>
           </div>
         `;
@@ -25914,7 +27500,7 @@
                     : "bg-stone-950 hover:bg-stone-800 border-white/15 text-white"
                 }">
                 <span class="font-mono font-black text-xs block ${isSoon ? "text-amber-300" : "text-white"}">${hhmm} ${isSoon ? "⚡" : ""}</span>
-                <span class="text-[10px] text-emerald-300 font-bold block">${formatVND(slotPrice)}</span>
+                <span class="text-[10px] ${slotPrice !== null ? "text-emerald-300" : "text-slate-400"} font-bold block">${slotPrice !== null ? formatVND(slotPrice) : "Chưa có dữ liệu"}</span>
               </a>
             `;
           }).join("");
