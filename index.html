@@ -719,6 +719,62 @@
         padding-right: 2px;
       }
     }
+
+    /* Giữ Header, Thanh điều khiển video và Khu vực ghế rõ nét ở chế độ Tắt đèn (khớp Ảnh 2) */
+    body.theater-dimmed #room-top-header.dimmable-ui,
+    body.theater-dimmed #cinema-control-bar.dimmable-ui,
+    body.theater-dimmed #auditorium-bottom-dock {
+      opacity: 0.96 !important;
+      filter: none !important;
+    }
+    body.theater-dimmed .cinema-chair:not(.chair-mine):not(.chair-pending):not(:hover) {
+      filter: brightness(0.84) contrast(1.06) !important;
+    }
+
+
+    /* Fit toàn bộ Màn chiếu + Thanh điều khiển + 6 hàng ghế A-F + Thanh đáy trong 1366x768 */
+    @media (min-width: 1200px) {
+      #room-top-header {
+        flex-wrap: nowrap !important;
+        height: 52px !important;
+        max-height: 54px !important;
+      }
+      body:not(.stream-room-active) #cinema-screen {
+        max-height: min(42vh, 390px) !important;
+      }
+      body.theater-dimmed:not(.stream-room-active) #cinema-screen {
+        max-height: min(48vh, 450px) !important;
+      }
+      #seating-map {
+        gap: 4px !important;
+      }
+      #seating-map .seat-row-tier {
+        padding: 3px 8px !important;
+      }
+      #seating-map .cinema-chair {
+        min-height: 36px !important;
+      }
+      #cinema-seat-legend-bar {
+        padding-top: 4px !important;
+        padding-bottom: 4px !important;
+      }
+    }
+
+    body.in-room-active #owner-chat-fab,
+    body.in-room-active #owner-chat-drawer {
+      display: none !important;
+    }
+    @media (min-width: 1200px) {
+      #room-top-header .cv-room-hdr-actions {
+        flex-wrap: nowrap !important;
+      }
+      #btn-toggle-movie-drawer {
+        display: none !important;
+      }
+      body.theater-dimmed #btn-toggle-movie-drawer {
+        display: inline-flex !important;
+      }
+    }
     @media (prefers-reduced-motion: reduce) {
       .cv-stage-auditorium,
       .cv-sheet-panel,
@@ -4385,7 +4441,374 @@
         transform: none !important;
       }
     }
-  </style>
+  
+    /* ======================================================= */
+    /* PHÒNG CHIẾU REDESIGN: BẬT ĐÈN (ẢNH 1) & TẮT ĐÈN (ẢNH 2) */
+    /* ======================================================= */
+    body.in-room-active > header {
+      display: none !important;
+    }
+    body.in-room-active #room-view {
+      padding-top: 6px !important;
+      padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
+      min-height: 100dvh;
+    }
+    #room-top-header {
+      min-height: 48px;
+      max-height: 56px;
+      background: linear-gradient(180deg, rgba(16, 15, 21, 0.96) 0%, rgba(10, 10, 14, 0.94) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.09) !important;
+      transition: opacity 0.35s ease, background 0.35s ease, border-color 0.35s ease;
+    }
+    .cv-light-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 4px 10px 4px 11px;
+      border-radius: 999px;
+      background: rgba(245, 197, 24, 0.14);
+      border: 1px solid rgba(245, 197, 24, 0.55);
+      color: #fde68a;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+    }
+    .cv-light-switch-track {
+      width: 30px;
+      height: 16px;
+      border-radius: 999px;
+      background: #F5C518;
+      position: relative;
+      transition: background 0.3s ease;
+    }
+    .cv-light-switch-thumb {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      background: #0B0B0F;
+      transition: transform 0.3s ease;
+    }
+    body.theater-dimmed .cv-light-switch {
+      background: rgba(24, 24, 32, 0.92);
+      border-color: rgba(245, 197, 24, 0.42);
+      color: #f5c518;
+    }
+    body.theater-dimmed .cv-light-switch-track {
+      background: #2b2718;
+    }
+    body.theater-dimmed .cv-light-switch-thumb {
+      background: #F5C518;
+      transform: translateX(-14px);
+    }
+
+    /* Layout 3 cột Desktop >= 1200px (Trái 224px | Giữa 1fr | Phải 304px) */
+    .cv-room-workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      margin-top: 8px !important;
+    }
+    @media (min-width: 1200px) {
+      .cv-room-workspace {
+        grid-template-columns: 224px minmax(0, 1fr) 304px;
+        gap: 14px;
+      }
+      #theater-left-movies-aside {
+        grid-column: 1 !important;
+        order: 1 !important;
+        width: 100%;
+        height: min(700px, calc(100dvh - 82px)) !important;
+      }
+      #theater-center-auditorium {
+        grid-column: 2 !important;
+        order: 2 !important;
+      }
+      #theater-right-sidebar-col {
+        grid-column: 3 !important;
+        order: 3 !important;
+        width: 100%;
+      }
+      #theater-right-sidebar-col .theater-sidebar-card {
+        height: min(700px, calc(100dvh - 82px)) !important;
+      }
+    }
+
+    /* Dưới 1200px: Thư viện phim thành Drawer trượt từ trái */
+    @media (max-width: 1199px) {
+      #theater-left-movies-aside {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: min(300px, 86vw);
+        height: 100dvh !important;
+        z-index: 95;
+        border-radius: 0 20px 20px 0 !important;
+        transform: translateX(-105%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
+      }
+      body.movie-drawer-open #theater-left-movies-aside {
+        display: flex !important;
+        transform: translateX(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+
+    /* Chế độ Tắt đèn (Ảnh 2) & Thu gọn panels */
+    body.theater-dimmed .cv-room-workspace,
+    #room-view.room-panels-collapsed .cv-room-workspace {
+      grid-template-columns: minmax(0, 1fr) !important;
+    }
+    body.theater-dimmed #theater-center-auditorium,
+    #room-view.room-panels-collapsed #theater-center-auditorium {
+      grid-column: 1 / -1 !important;
+      max-width: 1260px;
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    body.theater-dimmed:not(.movie-drawer-open) #theater-left-movies-aside,
+    #room-view.room-panels-collapsed:not(.movie-drawer-open) #theater-left-movies-aside {
+      display: none !important;
+    }
+    body.theater-dimmed:not(.dimmed-chat-open) #theater-right-sidebar-col,
+    #room-view.room-panels-collapsed:not(.dimmed-chat-open) #theater-right-sidebar-col {
+      display: none !important;
+    }
+    /* Cho phép chủ động mở lại Thư viện phim hoặc Chat khi đang Tắt đèn dưới dạng panel nổi */
+    body.theater-dimmed.movie-drawer-open #theater-left-movies-aside {
+      display: flex !important;
+      position: fixed !important;
+      top: 58px;
+      left: 12px;
+      bottom: 14px;
+      width: min(290px, 86vw);
+      height: auto !important;
+      z-index: 95;
+      border-radius: 20px !important;
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    body.theater-dimmed.dimmed-chat-open #theater-right-sidebar-col,
+    #room-view.room-panels-collapsed.dimmed-chat-open #theater-right-sidebar-col {
+      display: block !important;
+      position: fixed !important;
+      top: 58px;
+      right: 12px;
+      bottom: max(14px, env(safe-area-inset-bottom));
+      width: min(320px, 92vw);
+      z-index: 95;
+    }
+    body.theater-dimmed.dimmed-chat-open #theater-right-sidebar-col .theater-sidebar-card,
+    #room-view.room-panels-collapsed.dimmed-chat-open #theater-right-sidebar-col .theater-sidebar-card {
+      height: 100% !important;
+    }
+
+    /* Ánh sáng 2 chế độ: Tách lớp Video khỏi lớp Nội thất */
+    #cinema-screen,
+    #html5-video-player,
+    #youtube-wrapper,
+    #discord-live-video {
+      filter: none !important;
+    }
+    body.screen-fit-contain #html5-video-player,
+    body.screen-fit-contain #discord-live-video {
+      object-fit: contain !important;
+      object-position: center center !important;
+    }
+    body:not(.screen-fit-contain):not(.stream-room-active):not(.mobile-cinema-fullscreen) #html5-video-player {
+      object-fit: cover !important;
+      object-position: center bottom !important;
+    }
+    body.controls-bar-visible #lyrics-overlay {
+      bottom: 54px !important;
+    }
+
+    /* Chế độ Tắt đèn: tắt đèn tường, giảm sáng rèm/tường/sàn, giữ phản xạ màn hình + đèn bậc thang vàng dịu */
+    body.theater-dimmed .wall-sconce-beam {
+      opacity: 0 !important;
+    }
+    body.theater-dimmed .wall-sconce {
+      opacity: 0.18;
+      box-shadow: none !important;
+    }
+    body.theater-dimmed .cinema-curtain-l,
+    body.theater-dimmed .cinema-curtain-r {
+      filter: brightness(0.38) contrast(1.08);
+    }
+    body.theater-dimmed .auditorium-wrapper {
+      background:
+        radial-gradient(ellipse 68% 36% at 50% 24%, rgba(255, 224, 160, 0.08) 0%, rgba(10, 9, 13, 0.96) 56%, #050507 100%) !important;
+    }
+    body.theater-dimmed .led-dot {
+      background: #fbbf24 !important;
+      box-shadow: 0 0 8px 2px rgba(251, 191, 36, 0.72) !important;
+    }
+    /* Tăng sáng tạm thời khu vực ghế khi mở chọn ghế trong chế độ Tắt đèn */
+    body.theater-dimmed.seats-picker-lit #stream-seats-collapsible {
+      position: relative;
+      z-index: 45;
+      filter: brightness(1.22);
+      transition: filter 0.35s ease;
+    }
+
+    /* Độ dốc khán phòng thật 6 hàng A -> F (A gần màn & nhỏ hơn, F xa màn & lớn hơn, nhìn lưng ghế từ sau F) */
+    #seating-map .seat-row-tier {
+      margin-left: auto;
+      margin-right: auto;
+      padding: 5px 10px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(24, 18, 21, 0.72) 0%, rgba(12, 10, 14, 0.9) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: background 0.35s ease, border-color 0.35s ease, filter 0.35s ease;
+    }
+    #seating-map .seat-row-tier[data-row="A"] { width: 78%; transform: scale(0.90); transform-origin: center bottom; }
+    #seating-map .seat-row-tier[data-row="B"] { width: 82%; transform: scale(0.92); transform-origin: center bottom; }
+    #seating-map .seat-row-tier[data-row="C"] { width: 86%; transform: scale(0.94); transform-origin: center bottom; }
+    #seating-map .seat-row-tier[data-row="D"] { width: 91%; transform: scale(0.96); transform-origin: center bottom; }
+    #seating-map .seat-row-tier[data-row="E"] { width: 95%; transform: scale(0.98); transform-origin: center bottom; }
+    #seating-map .seat-row-tier[data-row="F"] { width: 100%; transform: scale(1); transform-origin: center bottom; }
+
+    /* Ghế nỉ đỏ burgundy & hàng VIP vàng đồng tiết chế */
+    .cinema-chair {
+      background: linear-gradient(180deg, #741624 0%, #520d18 65%, #37070f 100%) !important;
+      border-color: rgba(244, 63, 94, 0.28) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 6px 14px rgba(0,0,0,0.65);
+    }
+    .cinema-chair.chair-vip:not(.chair-mine):not(.chair-occupied) {
+      background: linear-gradient(180deg, #9a6c16 0%, #6b480c 65%, #462e06 100%) !important;
+      border-color: rgba(245, 197, 24, 0.45) !important;
+    }
+    .cinema-chair.chair-selecting {
+      opacity: 0.72;
+      pointer-events: none;
+      border: 2px dashed #F5C518 !important;
+    }
+    /* Đèn bậc cầu thang lối đi giữa tông vàng ấm đồng bộ Ảnh 1 & Ảnh 2 */
+    .aisle-stairs {
+      min-width: 54px;
+      padding: 3px 6px;
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(28, 22, 18, 0.9) 0%, rgba(12, 10, 12, 0.96) 100%);
+      border-bottom: 2px solid rgba(251, 191, 36, 0.52);
+    }
+    .led-dot {
+      background: #fbbf24 !important;
+      box-shadow: 0 0 6px rgba(251, 191, 36, 0.65);
+    }
+
+    /* Thanh điều khiển 7 nút 1 hàng: tối thiểu 44x44px, co giãn vừa 360px, auto-hide mượt */
+    .cv-icon-bar-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 4px 8px;
+      flex-wrap: nowrap;
+    }
+    .cv-bar-icon-btn,
+    .cv-bar-play-btn {
+      min-width: 44px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    @media (max-width: 400px) {
+      .cv-icon-bar-row { gap: 0; padding: 3px 4px; }
+      .cv-bar-icon-btn { min-width: 40px; min-height: 44px; padding: 0 4px; }
+      .cv-bar-sep { margin: 0 2px !important; }
+    }
+    #cinema-control-bar.controls-auto-hidden {
+      opacity: 0.14;
+      transition: opacity 0.35s ease;
+    }
+    #cinema-control-bar:hover,
+    #cinema-control-bar:focus-within,
+    #cinema-control-bar.controls-active {
+      opacity: 1 !important;
+    }
+
+    /* Thanh đáy khán phòng (Ảnh 1 & Ảnh 2) */
+    .cv-auditorium-bottom-dock {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 16px;
+      background: rgba(14, 14, 19, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .cv-bottom-pill-btn {
+      min-height: 36px;
+      padding: 6px 12px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      font-size: 11px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .cv-bottom-pill-btn:hover {
+      background: rgba(245, 197, 24, 0.14);
+      border-color: rgba(245, 197, 24, 0.45);
+      color: #fde68a;
+    }
+
+    /* Mobile Portrait & Landscape */
+    @media (max-width: 767px) {
+      #theater-center-auditorium {
+        padding: 8px !important;
+        border-radius: 18px !important;
+      }
+      #seating-map {
+        min-width: 460px;
+      }
+      #theater-right-sidebar-col .theater-sidebar-card {
+        height: min(480px, 68dvh) !important;
+      }
+    }
+    @media (max-width: 900px) and (orientation: landscape) {
+      body.in-room-active #cinema-screen {
+        max-height: 68dvh !important;
+      }
+      body.in-room-active #stream-seats-collapsible {
+        display: none;
+      }
+      body.in-room-active.seats-picker-lit #stream-seats-collapsible {
+        display: block;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .auditorium-wrapper,
+      .screen-stage-box,
+      #room-top-header,
+      .wall-sconce-beam,
+      .cinema-curtain-l,
+      .cinema-curtain-r,
+      #cinema-control-bar,
+      #theater-left-movies-aside {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+</style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-rose-500 selection:text-white">
 
@@ -4804,6 +5227,34 @@
   <!-- ========================================================= -->
   <!-- VIEW 1B: GIAO DIỆN TÁCH BIỆT - TÌM RẠP HÀ NỘI LUXURY GOLD & OBSIDIAN (WEB + APP) -->
   <!-- ========================================================= -->
+  
+  <!-- Bottom Sheet / Modal Sơ đồ ghế 2D đồng bộ (hỗ trợ Mobile & bàn phím) -->
+  <div id="seat-2d-modal" class="hidden fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+    role="dialog" aria-modal="true" aria-labelledby="seat-2d-modal-title">
+    <div class="w-full sm:max-w-2xl max-h-[88dvh] rounded-t-3xl sm:rounded-3xl bg-[#111118] border border-amber-400/35 shadow-2xl flex flex-col overflow-hidden"
+      style="padding-bottom: max(12px, env(safe-area-inset-bottom));">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#171720]">
+        <div>
+          <h3 id="seat-2d-modal-title" class="text-sm font-black text-white flex items-center gap-2">
+            <i class="fa-solid fa-chair text-amber-300"></i>
+            <span>Sơ đồ ghế 2D • Chọn &amp; Đổi ghế</span>
+          </h3>
+          <p class="text-[11px] text-slate-400">Hàng A gần màn nhất → Hàng F cao nhất • Bấm ghế trống để chọn đổi</p>
+        </div>
+        <button type="button" onclick="window.appActions.closeSeat2DModal()"
+          class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer"
+          aria-label="Đóng sơ đồ ghế 2D">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="p-3 sm:p-4 overflow-y-auto space-y-3">
+        <div class="w-3/4 mx-auto h-2 rounded-full bg-gradient-to-r from-transparent via-amber-400/70 to-transparent text-center"></div>
+        <p class="text-center text-[10px] uppercase tracking-[0.25em] text-amber-300/80 font-black">Màn hình cong phía trước</p>
+        <div id="seat-2d-grid" class="space-y-2"></div>
+      </div>
+    </div>
+  </div>
+
   <section id="hanoi-cinema-finder-view" class="hidden flex-1 max-w-7xl w-full mx-auto px-2.5 sm:px-5 py-3 sm:py-5 overflow-x-clip">
     <div class="hn-luxury-shell p-3.5 sm:p-5 lg:p-6 space-y-4">
 
@@ -5187,10 +5638,14 @@
   <!-- ========================================================= -->
   <section id="room-view" class="hidden flex-1 w-full px-2.5 sm:px-5 py-3 space-y-3">
 
-    <!-- THANH ĐIỀU HƯỚNG & FLOATING DROPDOWN GỌN GÀNG TRÊN CÙNG -->
-    <div class="relative z-40 dimmable-ui liquid-glass-card flex flex-wrap items-center justify-between gap-2 rounded-2xl px-3.5 py-2.5 shadow-xl">
+    <!-- THANH ĐIỀU HƯỚNG PHÒNG CHIẾU GỌN (48-56px) -->
+    <div id="room-top-header" class="relative z-40 dimmable-ui liquid-glass-card flex flex-wrap items-center justify-between gap-2 rounded-2xl px-3 py-1.5 shadow-xl">
       <!-- Trái: Nút quay lại + Thông tin phòng đang chiếu -->
-      <div class="flex items-center gap-2.5 min-w-0">
+      <div class="flex items-center gap-2 min-w-0">
+        <div class="flex items-center gap-1.5 shrink-0 pr-1.5 border-r border-white/10">
+          <img src="assets/web-logo.png" alt="CineVerse Lotte" class="w-7 h-7 rounded-lg object-cover border border-amber-400/50" />
+          <span class="hidden xl:inline text-xs font-black tracking-wide text-white">CINEVERSE <span class="text-rose-500">LOTTE</span></span>
+        </div>
         <button type="button" onclick="window.appActions.leaveRoom()"
           class="cv-smooth-btn liquid-glass-pill px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shrink-0">
           <i class="fa-solid fa-arrow-left"></i>
@@ -5212,7 +5667,7 @@
             </button>
             <div id="voice-audio-container" class="fixed -left-[9999px] top-0 w-px h-px opacity-0 pointer-events-none" aria-hidden="true"></div>
           </div>
-          <h2 id="room-header-title" class="text-xs sm:text-sm font-extrabold text-white mt-0.5 truncate max-w-[200px] sm:max-w-xs md:max-w-md">Tên bộ phim</h2>
+          <h2 id="room-header-title" class="hidden 2xl:block text-xs font-extrabold text-white truncate max-w-[180px]">Tên bộ phim</h2>
         </div>
       </div>
 
@@ -5225,6 +5680,14 @@
           aria-expanded="false" aria-controls="stream-seats-collapsible" title="Mở hoặc ẩn sơ đồ ghế để xem vị trí và đổi ghế">
           <i class="fa-solid fa-chair text-amber-300"></i>
           <span id="btn-stream-seats-label">Sơ đồ ghế</span>
+        </button>
+
+        <!-- Nút mở Thư viện phim (Drawer dưới 1200px hoặc khi Tắt đèn) -->
+        <button type="button" id="btn-toggle-movie-drawer" onclick="window.appActions.toggleMovieLibraryDrawer()"
+          class="xl:hidden cv-smooth-btn liquid-glass-pill px-2.5 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition cursor-pointer"
+          aria-expanded="false" aria-controls="theater-left-movies-aside" title="Mở thư viện phim">
+          <i class="fa-solid fa-clapperboard text-rose-400"></i>
+          <span class="hidden sm:inline">Thư viện</span>
         </button>
 
         <!-- Nút thu gọn Chat & Tiện ích phụ để ưu tiên màn chiếu (đặc biệt hữu ích trên Mobile) -->
@@ -5320,7 +5783,7 @@
           <button type="button" onclick="window.appActions.toggleRoomDropdown('view')"
             class="cv-smooth-btn liquid-glass-pill px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition cursor-pointer">
             <i class="fa-solid fa-eye text-rose-400"></i>
-            <span class="hidden md:inline">Góc nhìn & Hiệu ứng</span>
+            <span class="hidden md:inline">Góc nhìn</span>
             <span class="md:hidden">Góc nhìn</span>
             <i class="fa-solid fa-chevron-down text-[10px] opacity-80"></i>
           </button>
@@ -5359,16 +5822,21 @@
           </div>
         </div>
 
-        <!-- 5. Nút tắt/bật đèn rạp nhanh 1 chạm -->
+        <!-- 5. Công tắc gạt Bật / Tắt đèn rạp (theo Ảnh 1 & Ảnh 2) -->
         <button type="button" onclick="window.appActions.toggleDimLights()" id="btn-dim-lights"
-          class="cv-smooth-btn liquid-glass-pill px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer" title="Tắt/bật ánh sáng rạp">
-          <i class="fa-solid fa-lightbulb text-slate-300"></i> <span class="hidden lg:inline">Tắt đèn rạp</span>
+          class="cv-light-switch" role="switch" aria-checked="false" aria-label="Chuyển chế độ bật hoặc tắt đèn rạp" title="Bật / Tắt đèn rạp">
+          <i class="fa-solid fa-sun text-amber-300"></i>
+          <span id="btn-dim-lights-label">Bật đèn</span>
+          <span class="cv-light-switch-track" aria-hidden="true"><span class="cv-light-switch-thumb"></span></span>
         </button>
       </div>
     </div>
 
-    <!-- Bố cục chính 3 cột: Trái (2/12) List Phim Đang Có | Giữa (7/12) Khán phòng | Phải (3/12) Chat & Tiện ích -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+    <!-- Backdrop Drawer Thư viện phim (dưới 1200px hoặc khi mở trong chế độ Tắt đèn) -->
+    <div id="cv-movie-drawer-backdrop" class="hidden fixed inset-0 bg-black/70 backdrop-blur-xs z-[90]" onclick="window.appActions.toggleMovieLibraryDrawer(false)" aria-hidden="true"></div>
+
+    <!-- Bố cục chính 3 cột Desktop >= 1200px: Trái (224px) Thư viện | Giữa (1fr) Khán phòng | Phải (304px) Chat -->
+    <div class="cv-room-workspace">
 
       <!-- CỘT TRÁI (2/12): DANH SÁCH PHIM ĐANG CÓ (TRÀN VIỀN, ẨN THANH CUỘN) -->
       <aside id="theater-left-movies-aside" class="lg:col-span-2 order-2 lg:order-1 dimmable-ui liquid-glass-card rounded-2xl overflow-hidden shadow-xl flex flex-col lg:h-[660px]">
@@ -5377,7 +5845,10 @@
             <i class="fa-solid fa-clapperboard text-rose-400 text-xs"></i>
             <span class="text-xs font-black text-white truncate">Phim Đang Có</span>
           </div>
-          <span id="theater-left-movie-count" class="monochrome-pill px-2 py-0.5 rounded-full text-[10px] font-black">0</span>
+          <div class="flex items-center gap-1.5">
+            <span id="theater-left-movie-count" class="monochrome-pill px-2 py-0.5 rounded-full text-[10px] font-black">0</span>
+            <button type="button" onclick="window.appActions.toggleMovieLibraryDrawer(false)" class="xl:hidden w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer" aria-label="Đóng thư viện phim"><i class="fa-solid fa-xmark text-xs"></i></button>
+          </div>
         </div>
         <!-- Ô tìm kiếm tên phim trong danh sách phim -->
         <div class="px-2 py-2 border-b border-white/10 bg-white/[0.01] shrink-0">
@@ -5720,6 +6191,11 @@
                       class="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-emerald-300 text-[10px] font-extrabold transition cursor-pointer opacity-75 hover:opacity-100"
                       title="Đồng bộ thời gian chiếu với phòng">
                       <i class="fa-solid fa-rotate mr-1"></i>Live
+                    </button>
+                    <button type="button" id="btn-screen-fit-toggle" onclick="window.appActions.toggleScreenFitMode()"
+                      class="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-sky-300 text-[10px] font-extrabold transition cursor-pointer opacity-80 hover:opacity-100"
+                      title="Chuyển chế độ khung hình: Lấp đầy (Cover giữ phần dưới) hoặc Toàn khung (Contain)">
+                      <span id="screen-fit-label">Cover</span>
                     </button>
                     <button type="button" id="btn-screen-ratio-toggle" onclick="window.appActions.toggleDimmedScreenRatio()"
                       class="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-amber-300 text-[10px] font-extrabold transition cursor-pointer opacity-75 hover:opacity-100"
@@ -6080,7 +6556,35 @@
           <!-- Chỉ dẫn góc nhìn hàng ghế F -->
           <div id="cinema-stadium-caption" class="dimmable-ui text-center text-[11px] text-slate-400 font-semibold pt-0.5">
             <i class="fa-solid fa-sparkles mr-1 text-rose-400"></i>
-            Khán phòng bậc thang Stadium 6 hàng ghế da thật (A–F • 48 chỗ) • Phụ đề chỉ hiện đúng lúc nhân vật cất tiếng nói
+            Khán phòng bậc thang Stadium 6 hàng ghế da thật (A–F • 48 chỗ) • A gần màn nhất, F cao nhất nhìn xuống
+          </div>
+
+          <!-- Thanh đáy khán phòng (Ảnh 1 & Ảnh 2): Thư viện | Ghế của bạn | Đổi ghế (2D Sheet) | Góc nhìn | Chat -->
+          <div id="auditorium-bottom-dock" class="cv-auditorium-bottom-dock">
+            <button type="button" id="dock-btn-movies" onclick="window.appActions.toggleMovieLibraryDrawer()"
+              class="cv-bottom-pill-btn" aria-label="Mở thư viện phim">
+              <i class="fa-solid fa-film text-rose-400"></i>
+              <span>Thư viện phim</span>
+            </button>
+            <span class="cv-bottom-pill-btn cursor-default">
+              <i class="fa-solid fa-couch text-amber-300"></i>
+              <span>Ghế của bạn <strong id="bottom-dock-seat-label" class="text-amber-300 font-black">--</strong></span>
+            </span>
+            <button type="button" id="dock-btn-change-seat" onclick="window.appActions.openSeat2DModal()"
+              class="cv-bottom-pill-btn" aria-label="Mở sơ đồ ghế 2D để đổi ghế">
+              <i class="fa-solid fa-repeat text-amber-300"></i>
+              <span>Đổi ghế</span>
+            </button>
+            <button type="button" id="dock-btn-pov" onclick="window.appActions.toggleRoomDropdown('view')"
+              class="cv-bottom-pill-btn" aria-label="Đổi góc nhìn khán giả">
+              <i class="fa-solid fa-camera text-sky-300"></i>
+              <span>Góc nhìn <i class="fa-solid fa-chevron-down text-[9px] ml-0.5"></i></span>
+            </button>
+            <button type="button" id="dock-btn-chat" onclick="window.appActions.toggleDimmedChatOverlay()"
+              class="cv-bottom-pill-btn" aria-label="Mở hoặc thu gọn khung Chat">
+              <i class="fa-solid fa-comments text-emerald-300"></i>
+              <span>Chat</span>
+            </button>
           </div>
         </div>
       </div>
@@ -6177,7 +6681,7 @@
             </button>
             <button type="button" onclick="window.appActions.switchSidebarTab('playlist')" id="tab-btn-playlist"
               class="py-2 rounded-xl liquid-glass-pill flex items-center justify-center gap-1 transition cursor-pointer">
-              <i class="fa-solid fa-list-ol text-slate-300"></i> <span>Vote Phim</span>
+              <i class="fa-solid fa-list-ol text-slate-300"></i> <span>Vote</span>
             </button>
             <button type="button" onclick="window.appActions.switchSidebarTab('trivia')" id="tab-btn-trivia"
               class="py-2 rounded-xl liquid-glass-pill flex items-center justify-center gap-1 transition cursor-pointer">
@@ -6231,6 +6735,10 @@
                 </div>
               </div>
 
+              <button type="button" id="chat-new-msg-btn" onclick="window.appActions.scrollChatToBottom()"
+                class="hidden mx-auto mb-1.5 px-3 py-1 rounded-full bg-amber-400 text-slate-950 font-black text-[11px] shadow-lg cursor-pointer">
+                ↓ Tin nhắn mới
+              </button>
               <!-- Thanh hiển thị hiệu ứng đang soạn tin nhắn kiểu Messenger (Avatar + 3 chấm nhảy sóng) -->
               <div id="chat-typing-bar" class="hidden px-3 py-1.5 bg-black/50 border-t border-white/5 flex items-center gap-2 text-[11px] text-slate-300"></div>
 
@@ -10288,6 +10796,7 @@
       document.getElementById("lobby-view").classList.add("hidden");
       document.getElementById("hanoi-cinema-finder-view")?.classList.add("hidden");
       document.getElementById("room-view").classList.remove("hidden");
+      document.body.classList.add("in-room-active");
       document.getElementById("header-lobby-actions")?.classList.add("hidden");
 
       // Nếu khán giả chưa ngồi trên sơ đồ phòng này -> xếp ngồi đúng ghế đã đặt vé
@@ -10390,6 +10899,9 @@
       try { syncMyOnlinePresence?.(); } catch (_) {}
       try { logMemberActivity?.("leave_room", "Khán giả rời phòng chiếu về Sảnh chính"); } catch (_) {}
       document.getElementById("room-view").classList.add("hidden");
+      document.body.classList.remove("in-room-active", "movie-drawer-open", "dimmed-chat-open", "seats-picker-lit");
+      document.getElementById("cv-movie-drawer-backdrop")?.classList.add("hidden");
+      document.getElementById("seat-2d-modal")?.classList.add("hidden");
       document.getElementById("hanoi-cinema-finder-view")?.classList.add("hidden");
       document.getElementById("lobby-view").classList.remove("hidden");
       document.getElementById("header-lobby-actions")?.classList.remove("hidden");
@@ -10501,6 +11013,8 @@
       if (seatBadgeEl) {
         seatBadgeEl.textContent = mySeatId ? `Ghế ${mySeatId}` : "Chưa có ghế";
       }
+      const bottomDockSeat = document.getElementById("bottom-dock-seat-label");
+      if (bottomDockSeat) bottomDockSeat.textContent = mySeatId || "--";
       if (mySeatId && state.lastAppliedSeatPov !== `${state.currentRoomId}:${mySeatId}`) {
         state.lastAppliedSeatPov = `${state.currentRoomId}:${mySeatId}`;
         setPOVZoom(mapSeatIdToPovZone(mySeatId));
@@ -10641,8 +11155,8 @@
       renderSeatingMap();
     }
 
-    function confirmPendingRoomSeatChange() {
-      if (!state.currentRoomId || !state.pendingRoomSeatChange) return;
+    async function confirmPendingRoomSeatChange() {
+      if (!state.currentRoomId || !state.pendingRoomSeatChange || state.isSwitchingSeat) return;
       const roomId = state.currentRoomId;
       const targetSeat = state.pendingRoomSeatChange;
       const roomSeats = state.seatsByRoom[roomId] || {};
@@ -10654,9 +11168,21 @@
         showToast(`❌ Ghế ${targetSeat} vừa bị ${occ.userName || "người khác"} lấy! Vui lòng chọn ghế khác.`, "error");
         return;
       }
-      state.pendingRoomSeatChange = "";
-      document.getElementById("inroom-seat-confirm-bar")?.classList.add("hidden");
-      assignSeat(roomId, targetSeat, true);
+      state.isSwitchingSeat = true;
+      const btn = document.getElementById("btn-confirm-inroom-seat");
+      if (btn) { btn.disabled = true; btn.setAttribute("aria-busy", "true"); }
+      const seatEl = document.querySelector(`#seating-map [data-seat-id="${targetSeat}"]`);
+      if (seatEl) { seatEl.classList.add("chair-selecting"); seatEl.setAttribute("aria-busy", "true"); }
+      try {
+        await assignSeat(roomId, targetSeat, true);
+      } finally {
+        state.isSwitchingSeat = false;
+        state.pendingRoomSeatChange = "";
+        document.getElementById("inroom-seat-confirm-bar")?.classList.add("hidden");
+        if (btn) { btn.disabled = false; btn.removeAttribute("aria-busy"); }
+        renderSeatingMap();
+        if (typeof renderSeat2DGrid === "function") renderSeat2DGrid();
+      }
     }
 
     function handleSeatClick(seatId) {
@@ -13533,7 +14059,25 @@
     }
 
     function applyDimLightsState(dimmed, silent = false) {
+      const prevDimmed = Boolean(state.dimmed);
       state.dimmed = Boolean(dimmed);
+      const roomView = document.getElementById("room-view");
+
+      if (state.dimmed && !prevDimmed) {
+        state.preDimPanels = {
+          collapsed: Boolean(roomView && roomView.classList.contains("room-panels-collapsed"))
+        };
+        document.body.classList.remove("movie-drawer-open", "dimmed-chat-open");
+        document.getElementById("cv-movie-drawer-backdrop")?.classList.add("hidden");
+      } else if (!state.dimmed && prevDimmed) {
+        document.body.classList.remove("dimmed-chat-open", "seats-picker-lit");
+        if (roomView && state.preDimPanels && typeof state.preDimPanels.collapsed === "boolean") {
+          roomView.classList.toggle("room-panels-collapsed", state.preDimPanels.collapsed);
+          const lbl = document.getElementById("btn-toggle-room-focus-label");
+          if (lbl) lbl.textContent = state.preDimPanels.collapsed ? "Hiện chat & phim" : "Thu gọn chat";
+        }
+      }
+
       document.body.classList.toggle("theater-dimmed", state.dimmed);
       if (state.dimmed) {
         const ownerDrawer = document.getElementById("owner-chat-drawer");
@@ -13541,19 +14085,16 @@
       }
       const btn = document.getElementById("btn-dim-lights");
       if (btn) {
-        btn.innerHTML = state.dimmed
-          ? `<i class="fa-solid fa-sun text-amber-300 animate-pulse"></i> <span class="hidden lg:inline">Bật đèn rạp</span>`
-          : `<i class="fa-solid fa-lightbulb text-amber-400"></i> <span class="hidden lg:inline">Tắt đèn rạp</span>`;
-        btn.className = state.dimmed
-          ? "px-2.5 py-1.5 rounded-xl bg-amber-500/25 hover:bg-amber-500/40 text-amber-200 text-xs font-extrabold flex items-center gap-1.5 border border-amber-400/60 shadow-[0_0_16px_rgba(245,158,11,0.35)] transition cursor-pointer"
-          : "px-2.5 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 border border-white/10 transition cursor-pointer";
+        btn.setAttribute("aria-checked", state.dimmed ? "true" : "false");
+        const lbl = document.getElementById("btn-dim-lights-label");
+        if (lbl) lbl.textContent = state.dimmed ? "Tắt đèn" : "Bật đèn";
       }
       if (!silent) {
         playSeatClickSFX();
         showToast(
           state.dimmed
-            ? "🌑 Đã tắt toàn bộ đèn trần rạp! Chỉ còn ánh sáng màn hình cong IMAX & đèn LED cầu thang."
-            : "💡 Đã bật lại hệ thống đèn Halogen kháng phòng!",
+            ? "🌑 Đã tắt đèn rạp! Khán phòng mở rộng toàn chiều ngang."
+            : "💡 Đã bật lại đèn rạp và khôi phục bố cục bảng điều khiển!",
           "info"
         );
       }
@@ -14923,9 +15464,29 @@
       }
     }
 
+    function scrollChatToBottom() {
+      const box = document.getElementById("chat-messages");
+      if (!box) return;
+      box.scrollTop = box.scrollHeight;
+      document.getElementById("chat-new-msg-btn")?.classList.add("hidden");
+    }
+
     function renderChatMessages() {
       const box = document.getElementById("chat-messages");
       if (!box || !state.currentRoomId) return;
+
+      if (box.dataset.scrollBound !== "1") {
+        box.dataset.scrollBound = "1";
+        box.addEventListener("scroll", () => {
+          const distFromBottom = box.scrollHeight - box.scrollTop - box.clientHeight;
+          if (distFromBottom <= 40) {
+            document.getElementById("chat-new-msg-btn")?.classList.add("hidden");
+          }
+        });
+      }
+
+      const wasNearBottom = (box.scrollHeight - box.scrollTop - box.clientHeight) <= 64;
+      const prevScrollTop = box.scrollTop;
 
       const list = state.chatByRoom[state.currentRoomId] || [];
       if (list.length === 0) {
@@ -14934,7 +15495,13 @@
       }
 
       box.innerHTML = list.map(buildChatMessageHTML).join("");
-      box.scrollTop = box.scrollHeight;
+      if (wasNearBottom) {
+        box.scrollTop = box.scrollHeight;
+        document.getElementById("chat-new-msg-btn")?.classList.add("hidden");
+      } else {
+        box.scrollTop = prevScrollTop;
+        document.getElementById("chat-new-msg-btn")?.classList.remove("hidden");
+      }
     }
 
     // =========================================================
@@ -28812,6 +29379,165 @@
       });
     }
 
+    let _lastMovieDrawerOpener = null;
+    function toggleMovieLibraryDrawer(forceState = null) {
+      const isOpen = document.body.classList.contains("movie-drawer-open");
+      const next = forceState !== null ? Boolean(forceState) : !isOpen;
+      if (next && !isOpen) _lastMovieDrawerOpener = document.activeElement;
+      document.body.classList.toggle("movie-drawer-open", next);
+      document.getElementById("cv-movie-drawer-backdrop")?.classList.toggle("hidden", !next);
+      const btn = document.getElementById("btn-toggle-movie-drawer");
+      if (btn) btn.setAttribute("aria-expanded", next ? "true" : "false");
+      if (next) {
+        setTimeout(() => document.getElementById("theater-movie-search-input")?.focus(), 80);
+      } else if (_lastMovieDrawerOpener && typeof _lastMovieDrawerOpener.focus === "function") {
+        _lastMovieDrawerOpener.focus();
+        _lastMovieDrawerOpener = null;
+      }
+    }
+
+    function toggleDimmedChatOverlay(forceState = null) {
+      const roomView = document.getElementById("room-view");
+      const isDimOrCollapsed = document.body.classList.contains("theater-dimmed") || roomView?.classList.contains("room-panels-collapsed");
+      if (isDimOrCollapsed) {
+        const isOpen = document.body.classList.contains("dimmed-chat-open");
+        const next = forceState !== null ? Boolean(forceState) : !isOpen;
+        document.body.classList.toggle("dimmed-chat-open", next);
+        if (next) {
+          setTimeout(() => document.getElementById("chat-input")?.focus(), 80);
+        }
+      } else {
+        toggleRoomFocusMode(forceState);
+      }
+    }
+
+    function toggleScreenFitMode() {
+      const isContain = document.body.classList.toggle("screen-fit-contain");
+      const lbl = document.getElementById("screen-fit-label");
+      if (lbl) lbl.textContent = isContain ? "Contain" : "Cover";
+      showToast(
+        isContain
+          ? "🖼️ Chế độ Contain: Hiển thị toàn bộ khung hình gốc không cắt cạnh."
+          : "🎬 Chế độ Cover: Phủ kín màn cong, ưu tiên giữ phần phụ đề phía dưới.",
+        "info"
+      );
+    }
+
+    let _lastSeat2DOpener = null;
+    function renderSeat2DGrid() {
+      const grid = document.getElementById("seat-2d-grid");
+      if (!grid || !state.currentRoomId) return;
+      const roomId = state.currentRoomId;
+      const roomSeats = state.seatsByRoom[roomId] || {};
+      const mySeat = getMySeatInRoom(roomId);
+      grid.innerHTML = ROWS.map(row => {
+        const isVIP = row === "D" || row === "E";
+        const isCouple = row === "F";
+        const cols = [1, 2, 3, 4, 5, 6, 7, 8];
+        const btns = cols.map(col => {
+          const seatId = `${row}${col}`;
+          const occ = roomSeats[seatId];
+          const isMine = occ && occ.uid === state.uid;
+          const isOcc = occ && occ.uid !== state.uid;
+          const cls = isMine
+            ? "bg-amber-400 text-slate-950 border-amber-200 font-black"
+            : isOcc
+            ? "bg-slate-800 text-slate-400 border-slate-600 cursor-not-allowed opacity-70"
+            : isCouple
+            ? "bg-rose-900/90 hover:bg-rose-700 text-white border-rose-400/50 cursor-pointer"
+            : isVIP
+            ? "bg-amber-800/80 hover:bg-amber-600 text-amber-100 border-amber-400/50 cursor-pointer"
+            : "bg-rose-950/90 hover:bg-rose-800 text-rose-100 border-rose-500/40 cursor-pointer";
+          return `<button type="button" data-seat-2d="${seatId}" ${isOcc ? "disabled" : ""}
+            aria-label="Ghế ${seatId}, ${isCouple ? "Sweetbox" : isVIP ? "VIP" : "Thường"}, ${isMine ? "ghế của bạn" : isOcc ? "đã có " + escapeHTML(occ.userName) : "trống"}"
+            onclick="window.appActions.selectSeatFrom2DModal('${seatId}')"
+            class="h-11 min-w-[36px] flex-1 rounded-xl border text-[11px] font-extrabold flex flex-col items-center justify-center transition ${cls}">
+            <span>${seatId}</span>
+            ${isMine ? '<span class="text-[8px] leading-none">Bạn</span>' : isOcc ? '<i class="fa-solid fa-user text-[8px] opacity-80"></i>' : ''}
+          </button>`;
+        }).join("");
+        return `<div class="flex items-center gap-1.5">
+          <span class="w-5 text-center text-[11px] font-black ${isVIP ? "text-amber-400" : "text-slate-400"}">${row}</span>
+          <div class="flex-1 flex gap-1">${btns.split("<!--split-->")}</div>
+        </div>`;
+      }).join("");
+    }
+
+    function openSeat2DModal() {
+      const modal = document.getElementById("seat-2d-modal");
+      if (!modal) return;
+      _lastSeat2DOpener = document.activeElement;
+      if (document.body.classList.contains("theater-dimmed")) {
+        document.body.classList.add("seats-picker-lit");
+      }
+      renderSeat2DGrid();
+      modal.classList.remove("hidden");
+      setTimeout(() => modal.querySelector("button")?.focus(), 60);
+    }
+
+    function closeSeat2DModal() {
+      const modal = document.getElementById("seat-2d-modal");
+      if (modal) modal.classList.add("hidden");
+      document.body.classList.remove("seats-picker-lit");
+      if (_lastSeat2DOpener && typeof _lastSeat2DOpener.focus === "function") {
+        _lastSeat2DOpener.focus();
+        _lastSeat2DOpener = null;
+      }
+    }
+
+    function selectSeatFrom2DModal(seatId) {
+      closeSeat2DModal();
+      handleSeatClick(seatId);
+      document.getElementById("inroom-seat-confirm-bar")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    // Auto-hide thanh điều khiển video sau 3s khi đang phát & nâng phụ đề khi thanh hiện
+    let _ctrlHideTimer = null;
+    function pokeCinemaControlsVisible() {
+      const bar = document.getElementById("cinema-control-bar");
+      if (!bar) return;
+      bar.classList.remove("controls-auto-hidden");
+      bar.classList.add("controls-active");
+      document.body.classList.add("controls-bar-visible");
+      clearTimeout(_ctrlHideTimer);
+      _ctrlHideTimer = setTimeout(() => {
+        const subOpen = !document.getElementById("subtitle-settings-panel")?.classList.contains("hidden");
+        const vid = document.getElementById("html5-video-player");
+        const isPlayingHtml5 = vid && !vid.classList.contains("hidden") && !vid.paused;
+        if (isPlayingHtml5 && !subOpen && !bar.matches(":hover") && !bar.matches(":focus-within")) {
+          bar.classList.add("controls-auto-hidden");
+          bar.classList.remove("controls-active");
+          document.body.classList.remove("controls-bar-visible");
+        }
+      }, 3000);
+    }
+
+    (function bindRoomAccessibilityAndViewport() {
+      if (typeof window === "undefined") return;
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          if (!document.getElementById("seat-2d-modal")?.classList.contains("hidden")) {
+            closeSeat2DModal();
+            return;
+          }
+          if (document.body.classList.contains("movie-drawer-open")) {
+            toggleMovieLibraryDrawer(false);
+            return;
+          }
+          if (document.body.classList.contains("dimmed-chat-open")) {
+            toggleDimmedChatOverlay(false);
+          }
+        }
+      });
+      ["mousemove", "touchstart", "focusin"].forEach(evt => {
+        document.addEventListener(evt, (e) => {
+          if (document.body.classList.contains("in-room-active") && e.target?.closest?.("#screen-stage-box")) {
+            pokeCinemaControlsVisible();
+          }
+        }, { passive: true });
+      });
+    })();
+
     window.appActions = {
       setRoomFilter,
       setSearchQuery,
@@ -28848,6 +29574,13 @@
       setHeroPovZone,
       toggleRoomFocusMode,
       toggleDimmedScreenRatio,
+      toggleMovieLibraryDrawer,
+      toggleDimmedChatOverlay,
+      toggleScreenFitMode,
+      openSeat2DModal,
+      closeSeat2DModal,
+      selectSeatFrom2DModal,
+      scrollChatToBottom,
       cancelPendingRoomSeatChange,
       confirmPendingRoomSeatChange,
       toggleBookingMetaDrawer,
