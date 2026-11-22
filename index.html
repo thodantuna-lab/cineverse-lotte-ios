@@ -743,7 +743,16 @@
         max-height: min(42vh, 390px) !important;
       }
       body.theater-dimmed:not(.stream-room-active) #cinema-screen {
-        max-height: min(48vh, 450px) !important;
+        width: min(100%, calc(min(68vh, 600px) * 17 / 9)) !important;
+        max-height: min(68vh, 600px) !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+      body.theater-dimmed[data-screen-ratio="18-9"]:not(.stream-room-active) #cinema-screen {
+        width: min(100%, calc(min(68vh, 600px) * 18 / 9)) !important;
+      }
+      body.theater-dimmed[data-screen-ratio="19-9"]:not(.stream-room-active) #cinema-screen {
+        width: min(100%, calc(min(68vh, 600px) * 19 / 9)) !important;
       }
       #seating-map {
         gap: 4px !important;
@@ -1511,6 +1520,10 @@
     body[data-screen-ratio="18-9"]:not(.stream-room-active):not(.mobile-cinema-fullscreen) #cinema-screen {
       aspect-ratio: 18 / 9 !important;
     }
+    body[data-screen-ratio="17-9"]:not(.stream-room-active):not(.mobile-cinema-fullscreen) #cinema-screen,
+    body.theater-dimmed:not(.stream-room-active):not(.mobile-cinema-fullscreen):not([data-screen-ratio="18-9"]):not([data-screen-ratio="19-9"]) #cinema-screen {
+      aspect-ratio: 17 / 9 !important;
+    }
     body:not(.stream-room-active):not(.mobile-cinema-fullscreen) #html5-video-player {
       object-fit: cover !important;
       object-position: center 84% !important;
@@ -1524,13 +1537,17 @@
     }
     @media (min-width: 768px) {
       body.theater-dimmed:not(.stream-room-active) #cinema-screen {
-        aspect-ratio: 19 / 9 !important;
-        max-height: 64vh;
+        aspect-ratio: 17 / 9 !important;
+        max-height: 68vh;
         box-shadow: 0 0 70px rgba(245, 197, 24, 0.16), 0 0 130px rgba(56, 189, 248, 0.16) !important;
       }
       body.theater-dimmed[data-screen-ratio="18-9"]:not(.stream-room-active) #cinema-screen {
         aspect-ratio: 18 / 9 !important;
         max-height: 66vh;
+      }
+      body.theater-dimmed[data-screen-ratio="19-9"]:not(.stream-room-active) #cinema-screen {
+        aspect-ratio: 19 / 9 !important;
+        max-height: 64vh;
       }
     }
 
@@ -11140,12 +11157,15 @@
     }
 
     function toggleDimmedScreenRatio() {
-      const next = state.dimmedScreenRatio === "18-9" ? "19-9" : "18-9";
+      const order = ["17-9", "18-9", "19-9"];
+      const cur = state.dimmedScreenRatio || (state.dimmed ? "17-9" : "19-9");
+      const next = order[(order.indexOf(cur) + 1) % order.length];
       state.dimmedScreenRatio = next;
       document.body.setAttribute("data-screen-ratio", next);
       const lbl = document.getElementById("screen-ratio-label");
-      if (lbl) lbl.textContent = next === "18-9" ? "18:9" : "19:9";
-      showToast(`Đã chuyển tỷ lệ màn hình cong sang ${next === "18-9" ? "18:9" : "19:9"}`, "info");
+      const nice = next.replace("-", ":");
+      if (lbl) lbl.textContent = nice;
+      showToast(`Đã chuyển tỷ lệ màn hình cong sang ${nice}`, "info");
       playSeatClickSFX();
     }
 
@@ -14079,6 +14099,17 @@
       }
 
       document.body.classList.toggle("theater-dimmed", state.dimmed);
+      if (state.dimmed) {
+        state.dimmedScreenRatio = "17-9";
+        document.body.setAttribute("data-screen-ratio", "17-9");
+        const rLbl = document.getElementById("screen-ratio-label");
+        if (rLbl) rLbl.textContent = "17:9";
+      } else {
+        state.dimmedScreenRatio = "19-9";
+        document.body.setAttribute("data-screen-ratio", "19-9");
+        const rLbl = document.getElementById("screen-ratio-label");
+        if (rLbl) rLbl.textContent = "19:9";
+      }
       if (state.dimmed) {
         const ownerDrawer = document.getElementById("owner-chat-drawer");
         if (ownerDrawer) ownerDrawer.classList.add("hidden");
