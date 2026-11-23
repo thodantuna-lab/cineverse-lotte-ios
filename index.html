@@ -4257,30 +4257,46 @@
     }
 
     /* ======================================================= */
-    /* PHÒNG STREAM CINEVERSE (BLACK - RED - GOLD, WEBRTC UX)  */
+    /* PHÒNG STREAM CINEVERSE (ĐỘC LẬP KHỎI PHÒNG CHIẾU PHIM) */
     /* ======================================================= */
     body.stream-room-active #room-view {
       max-width: 1520px;
       margin-left: auto;
       margin-right: auto;
     }
-    /* Ẩn nút nổi Nhắn Chủ Rạp trong Phòng Stream để không đè lên nút Gửi Chat hay thanh Dock */
     body.stream-room-active #owner-chat-widget {
       display: none !important;
     }
+    /* Gỡ toàn bộ điều khiển phòng chiếu khỏi Header & Khán phòng Stream */
+    body.stream-room-active #room-header-seat-badge,
     body.stream-room-active #room-header-status,
     body.stream-room-active #room-header-title,
-    body.stream-room-active #dropdown-view-root {
-      display: none !important;
-    }
-    body.stream-room-active #theater-center-auditorium {
-      background: linear-gradient(180deg, #111118 0%, #0B0B0F 100%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.08) !important;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7) !important;
-      transform: none !important;
-      filter: none !important;
-    }
-    /* Trong Phòng Stream: lược bỏ trang trí rạp chiếu phim để tối đa diện tích trình chiếu rõ chữ */
+    body.stream-room-active #btn-stream-toggle-seats,
+    body.stream-room-active #btn-toggle-movie-drawer,
+    body.stream-room-active #btn-toggle-room-focus,
+    body.stream-room-active #dropdown-service-root,
+    body.stream-room-active #dropdown-view-root,
+    body.stream-room-active #btn-dim-lights,
+    body.stream-room-active #floating-lights-on-btn,
+    body.stream-room-active #btn-wp-end-for-all,
+    body.stream-room-active #btn-room-leave,
+    body.stream-room-active #btn-room-host,
+    body.stream-room-active #dropdown-host .cinema-only-item,
+    body.stream-room-active #theater-left-movies-aside,
+    body.stream-room-active #cv-movie-drawer-backdrop,
+    body.stream-room-active #cinema-control-bar,
+    body.stream-room-active #subtitle-settings-panel,
+    body.stream-room-active #lyrics-overlay,
+    body.stream-room-active #upcoming-overlay,
+    body.stream-room-active #html5-video-player,
+    body.stream-room-active #youtube-wrapper,
+    body.stream-room-active #floating-reactions-layer,
+    body.stream-room-active #cinema-playpause-osd,
+    body.stream-room-active #stream-seats-collapsible,
+    body.stream-room-active #cinema-seat-legend-bar,
+    body.stream-room-active #cinema-stadium-caption,
+    body.stream-room-active #auditorium-bottom-dock,
+    body.stream-room-active #inroom-seat-confirm-bar,
     body.stream-room-active .wall-left,
     body.stream-room-active .wall-right,
     body.stream-room-active .cinema-curtain-l,
@@ -4293,20 +4309,115 @@
     body.stream-room-active .imax-curve-arch-top,
     body.stream-room-active .imax-curve-arch-bottom,
     body.stream-room-active .imax-screen-sheen,
-    body.stream-room-active #cinema-seat-legend-bar,
-    body.stream-room-active #cinema-stadium-caption {
+    body.stream-room-active .cinema-sidebar-topbar,
+    body.stream-room-active .cinema-sidebar-tabs,
+    body.stream-room-active .cinema-chat-only {
       display: none !important;
     }
-    body.stream-room-active .screen-stage-box {
+
+    body.stream-room-active #stream-header-conn-pill,
+    body.stream-room-active #stream-chat-subheader {
+      display: inline-flex !important;
+    }
+    body.stream-room-active #stream-sidebar-tabs {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px;
+      padding: 6px;
+      background: rgba(0, 0, 0, 0.42);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px 16px 0 0;
+    }
+    @media (min-width: 1024px) {
+      body.stream-room-active .cv-room-workspace {
+        grid-template-columns: minmax(0, 1fr) 320px !important;
+        gap: 14px !important;
+      }
+      body.stream-room-active #theater-center-auditorium {
+        grid-column: 1 !important;
+        order: 1 !important;
+        min-width: 0;
+      }
+      body.stream-room-active #theater-right-sidebar-col {
+        grid-column: 2 !important;
+        order: 2 !important;
+        width: 100% !important;
+      }
+      body.stream-room-active #theater-right-sidebar-col .theater-sidebar-card {
+        height: min(680px, calc(100dvh - 86px)) !important;
+      }
+      body.stream-room-active #stream-mobile-tabs {
+        display: none !important;
+      }
+      body.stream-room-active #stream-stage-workspace[data-stream-mode="sharing"] #stream-transport-badge {
+        display: none !important;
+      }
+    }
+
+    body.stream-room-active #theater-center-auditorium {
+      background: linear-gradient(180deg, #111118 0%, #0B0B0F 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7) !important;
+      transform: none !important;
+      filter: none !important;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px !important;
+    }
+
+    /* Vùng chính Stream: Chế độ Grid (chưa ai chia sẻ) vs Chế độ Sharing (ưu tiên màn hình + dải camera nhỏ bên cạnh) */
+    body.stream-room-active #stream-stage-workspace {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      min-width: 0;
+    }
+    body.stream-room-active #stream-stage-workspace[data-stream-mode="grid"] #screen-stage-box {
+      display: none !important;
+    }
+    body.stream-room-active #stream-stage-workspace[data-stream-mode="grid"] #stream-camera-strip-wrap {
+      display: flex !important;
+      flex-direction: column;
+      width: 100%;
+      min-height: 360px;
+      margin-top: 0 !important;
+      padding: 14px !important;
+      background: #0b0b10 !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      border-radius: 16px !important;
+    }
+    body.stream-room-active #stream-stage-workspace[data-stream-mode="grid"] #stream-camera-strip {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      overflow-x: visible !important;
+      overflow-y: auto;
+      padding: 4px 0;
+      align-content: start;
+      flex: 1;
+    }
+    body.stream-room-active #stream-stage-workspace[data-stream-mode="grid"] .stream-cam-card {
+      width: 100% !important;
+      flex: none !important;
+      aspect-ratio: 16 / 10;
+      max-height: 300px;
+    }
+
+    body.stream-room-active #stream-stage-workspace[data-stream-mode="sharing"] #screen-stage-box {
+      display: block !important;
       width: 100% !important;
       max-width: none !important;
+      min-width: 0;
+      flex: 1 1 auto;
       perspective: none !important;
       transform: none !important;
       margin: 0 !important;
     }
     body.stream-room-active .lotte-screen-frame {
       padding: 0 !important;
-      border-radius: 18px !important;
+      border-radius: 16px !important;
       border: 1px solid rgba(255, 255, 255, 0.12) !important;
       background: #07070b !important;
       box-shadow: 0 16px 42px rgba(0, 0, 0, 0.72) !important;
@@ -4314,8 +4425,8 @@
     }
     body.stream-room-active #cinema-screen {
       aspect-ratio: 16 / 9 !important;
-      max-height: 46vh !important;
-      border-radius: 16px !important;
+      max-height: 54vh !important;
+      border-radius: 15px !important;
       background: #060609 !important;
     }
     body.stream-room-active #discord-live-video {
@@ -4323,9 +4434,42 @@
       object-position: center center !important;
       background: #050508 !important;
     }
-    body.stream-room-active #stream-seats-collapsible.stream-seats-hidden {
-      display: none !important;
+
+    @media (min-width: 1024px) {
+      body.stream-room-active #stream-stage-workspace[data-stream-mode="sharing"] {
+        flex-direction: row !important;
+        align-items: stretch !important;
+      }
+      body.stream-room-active #stream-stage-workspace[data-stream-mode="sharing"] #stream-camera-strip-wrap {
+        width: 204px !important;
+        flex-shrink: 0;
+        margin-top: 0 !important;
+        max-height: 54vh;
+        display: flex !important;
+        flex-direction: column;
+        background: #0c0c12 !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 16px !important;
+        padding: 10px !important;
+      }
+      body.stream-room-active #stream-stage-workspace[data-stream-mode="sharing"] #stream-camera-strip {
+        flex-direction: column !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        gap: 8px;
+        flex: 1;
+        padding-bottom: 0 !important;
+      }
+      body.stream-room-active #stream-stage-workspace[data-stream-mode="sharing"] .stream-cam-card {
+        width: 100% !important;
+        flex: 0 0 auto !important;
+        aspect-ratio: 16 / 10;
+      }
+      body.stream-room-active #stream-stage-workspace[data-stream-layout="focus"][data-stream-mode="sharing"] #stream-camera-strip-wrap {
+        display: none !important;
+      }
     }
+
     .stream-cam-strip-scroll {
       display: flex;
       align-items: stretch;
@@ -4339,8 +4483,8 @@
     }
     .stream-cam-card {
       position: relative;
-      flex: 0 0 164px;
-      width: 164px;
+      flex: 0 0 160px;
+      width: 160px;
       aspect-ratio: 16 / 10;
       border-radius: 14px;
       overflow: hidden;
@@ -4365,17 +4509,41 @@
     .stream-cam-card.is-live-cam {
       background: #07070b;
     }
+    .stream-cam-card [data-strip-avatar] {
+      padding-bottom: 24px;
+    }
+    body.stream-room-active #discord-voice-diag-badge {
+      display: none !important;
+    }
+
+    /* Thanh điều khiển chính 4 nút: Mic -> Camera -> Chia sẻ màn hình -> Rời phòng */
+    body.stream-room-active #discord-bottom-dock {
+      display: flex !important;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: #16161D;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    #stream-primary-controls {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, auto));
+      gap: 8px;
+      align-items: center;
+    }
     .stream-dock-btn {
-      min-height: 38px;
-      padding: 0 12px;
+      min-height: 44px;
+      padding: 0 14px;
       border-radius: 12px;
       font-size: 12px;
       font-weight: 800;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+      gap: 7px;
+      transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
@@ -4386,6 +4554,30 @@
     .stream-dock-btn:focus-visible {
       outline: 2px solid #F5C518;
       outline-offset: 2px;
+    }
+    .stream-dock-btn.stream-btn-error {
+      border-color: #f43f5e !important;
+      box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.45);
+    }
+    #discord-dock-stop-btn {
+      background: #E50914 !important;
+      border: 1px solid #fb7185 !important;
+      color: #ffffff !important;
+    }
+    #discord-dock-stop-btn:hover {
+      background: #f43f5e !important;
+    }
+    #stream-settings-popover {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      right: 0;
+      width: min(340px, 92vw);
+      background: #14141c;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+      z-index: 80;
     }
     #stream-cam-spotlight-modal {
       position: fixed;
@@ -4400,13 +4592,37 @@
       backdrop-filter: blur(4px);
       z-index: 64;
     }
+
     @media (max-width: 1023px) {
       body.stream-room-active #room-view {
         padding-top: max(6px, env(safe-area-inset-top)) !important;
-        padding-bottom: calc(82px + env(safe-area-inset-bottom)) !important;
+        padding-bottom: calc(88px + env(safe-area-inset-bottom)) !important;
       }
-      body.stream-room-active #cinema-screen {
-        max-height: 44dvh !important;
+      body.stream-room-active #theater-center-auditorium {
+        padding: 10px !important;
+        gap: 8px !important;
+      }
+      body.stream-room-active #stream-stage-workspace[data-stream-mode="grid"] #stream-camera-strip-wrap {
+        min-height: 250px;
+        padding: 10px !important;
+      }
+      body.stream-room-active #stream-stage-workspace[data-stream-mode="grid"] #stream-camera-strip {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+        gap: 8px;
+      }
+      body.stream-room-active #stream-stage-workspace[data-stream-mode="sharing"] #cinema-screen {
+        max-height: 40dvh !important;
+      }
+      body.stream-room-active #stream-stage-workspace[data-stream-mode="sharing"] #stream-camera-strip-wrap {
+        margin-top: 0 !important;
+        padding: 8px !important;
+        background: #0c0c12 !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 14px !important;
+      }
+      body.stream-room-active #stream-stage-workspace[data-stream-mode="sharing"] .stream-cam-card {
+        flex: 0 0 132px;
+        width: 132px;
       }
       body.stream-room-active #discord-bottom-dock {
         position: fixed !important;
@@ -4414,41 +4630,53 @@
         right: 0;
         bottom: 0;
         z-index: 60 !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
         border-radius: 16px 16px 0 0 !important;
         background: rgba(11, 11, 15, 0.98) !important;
         border: 0 !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
-        padding: 8px 10px max(10px, env(safe-area-inset-bottom)) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.16) !important;
+        padding: 8px 8px max(10px, env(safe-area-inset-bottom)) !important;
         box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.88) !important;
-        justify-content: flex-start !important;
+        display: block !important;
+      }
+      body.stream-room-active #stream-primary-controls {
+        width: 100%;
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
         gap: 6px !important;
       }
-      body.stream-room-active #discord-bottom-dock::-webkit-scrollbar {
-        display: none;
+      body.stream-room-active #stream-primary-controls .stream-dock-btn {
+        flex-direction: column !important;
+        gap: 3px !important;
+        min-height: 50px !important;
+        padding: 6px 4px !important;
+        font-size: 10.5px !important;
+        line-height: 1.15 !important;
+        white-space: normal !important;
+        text-align: center !important;
       }
-      body.stream-room-active #discord-bottom-dock > div {
-        flex-wrap: nowrap !important;
-        flex-shrink: 0 !important;
+      body.stream-room-active #stream-secondary-controls {
+        display: none !important;
       }
-      body.stream-room-active #discord-quality-select {
-        max-width: 112px;
-        height: 40px;
+      body.stream-room-active #stream-permission-banner {
+        position: fixed !important;
+        left: 8px;
+        right: 8px;
+        bottom: calc(74px + env(safe-area-inset-bottom)) !important;
+        z-index: 61 !important;
+        margin: 0 !important;
+      }
+      body.stream-room-active #stream-settings-popover {
+        position: fixed !important;
+        left: 10px;
+        right: 10px;
+        bottom: calc(76px + env(safe-area-inset-bottom)) !important;
+        width: auto !important;
+        max-height: 68dvh;
+        overflow-y: auto;
+        z-index: 75 !important;
       }
       body.stream-room-active.stream-keyboard-open #discord-bottom-dock {
         display: none !important;
-      }
-      body.stream-room-active .stream-cam-card {
-        flex: 0 0 144px;
-        width: 144px;
-      }
-      body.stream-room-active .stream-dock-btn {
-        min-height: 40px;
-        padding: 0 10px;
-        font-size: 11px;
       }
       /* Mobile slide-up drawer cho Chat & Thành viên */
       body.stream-room-active #theater-right-sidebar-col {
@@ -4478,14 +4706,15 @@
     }
     @media (max-width: 1023px) and (orientation: landscape) and (max-height: 520px) {
       body.stream-room-active #cinema-screen {
-        max-height: 62dvh !important;
+        max-height: 58dvh !important;
       }
       body.stream-room-active #room-view {
-        padding-bottom: calc(64px + env(safe-area-inset-bottom)) !important;
+        padding-bottom: calc(68px + env(safe-area-inset-bottom)) !important;
       }
-      body.stream-room-active .stream-dock-btn {
-        min-height: 36px;
-        padding: 0 8px;
+      body.stream-room-active #stream-primary-controls .stream-dock-btn {
+        flex-direction: row !important;
+        min-height: 40px !important;
+        padding: 4px 6px !important;
       }
     }
     /* ======================================================= */
@@ -7466,7 +7695,11 @@
               <span class="w-2 h-2 rounded-full bg-slate-400"></span>
               <span>Chưa có ai chia sẻ</span>
             </span>
-            <span class="monochrome-pill px-2 py-0.5 rounded-full text-[11px]"><i class="fa-solid fa-users mr-1 text-slate-300"></i><strong id="room-header-count" class="text-white">1</strong> khách</span>
+            <span class="monochrome-pill px-2.5 py-0.5 rounded-full text-[11px]"><i class="fa-solid fa-users mr-1 text-slate-300"></i><strong id="room-header-count" class="text-white">1</strong> <span id="room-header-count-suffix">khách</span></span>
+            <span id="stream-header-conn-pill" class="hidden px-2.5 py-0.5 rounded-full font-bold text-[11px] items-center gap-1.5 border border-emerald-500/35 bg-emerald-500/15 text-emerald-300">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span id="stream-header-conn-label">Đã kết nối</span>
+            </span>
             <button type="button" id="btn-room-host" onclick="window.appActions.toggleRoomHost()"
               class="cv-smooth-btn liquid-glass-pill px-2.5 py-0.5 rounded-full font-bold text-[11px] transition cursor-pointer">
               <i class="fa-solid fa-crown mr-1 text-slate-300"></i>Nhận Chủ Trì
@@ -7505,7 +7738,7 @@
         </button>
 
         <!-- 1. Dropdown: Tiện ích (Bắp nước, Vé QR, Rủ bạn) -->
-        <div class="relative" data-dropdown-root>
+        <div id="dropdown-service-root" class="relative" data-dropdown-root>
           <button type="button" onclick="window.appActions.toggleRoomDropdown('service')"
             class="cv-smooth-btn liquid-glass-pill px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition cursor-pointer">
             <i class="fa-solid fa-popcorn text-slate-300"></i>
@@ -7542,7 +7775,7 @@
         </div>
 
         <!-- 3. Dropdown: Chủ phòng (Host Controls) -->
-        <div class="relative" data-dropdown-root>
+        <div id="dropdown-host-root" class="relative" data-dropdown-root>
           <button type="button" onclick="window.appActions.toggleRoomDropdown('host')"
             class="cv-smooth-btn liquid-glass-pill px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition cursor-pointer">
             <i class="fa-solid fa-crown text-slate-300"></i>
@@ -7557,15 +7790,15 @@
               <span>Chủ phòng (Host): <strong id="host-name-badge" class="text-white">Bạn</strong></span>
             </div>
             <button type="button" onclick="window.appActions.hostBroadcastSync('play')"
-              class="cv-smooth-btn liquid-glass-pill w-full px-3 py-2 rounded-xl font-bold flex items-center gap-2 transition cursor-pointer">
+              class="cinema-only-item cv-smooth-btn liquid-glass-pill w-full px-3 py-2 rounded-xl font-bold flex items-center gap-2 transition cursor-pointer">
               <i class="fa-solid fa-tower-broadcast text-emerald-400"></i>Đồng bộ Phát Cả Phòng
             </button>
             <button type="button" onclick="window.appActions.hostBroadcastSync('pause')"
-              class="cv-smooth-btn liquid-glass-pill w-full px-3 py-2 rounded-xl font-bold flex items-center gap-2 transition cursor-pointer">
+              class="cinema-only-item cv-smooth-btn liquid-glass-pill w-full px-3 py-2 rounded-xl font-bold flex items-center gap-2 transition cursor-pointer">
               <i class="fa-solid fa-mug-hot text-slate-300"></i>Giải Lao Cả Phòng
             </button>
             <button type="button" onclick="window.appActions.playCinemaBellSFX()"
-              class="cv-smooth-btn liquid-glass-pill w-full px-3 py-2 rounded-xl font-bold flex items-center gap-2 transition cursor-pointer">
+              class="cinema-only-item cv-smooth-btn liquid-glass-pill w-full px-3 py-2 rounded-xl font-bold flex items-center gap-2 transition cursor-pointer">
               <i class="fa-solid fa-bell text-rose-400"></i>Chuông Vào Suất Chiếu
             </button>
             <button type="button" onclick="window.appActions.toggleRoomPinLock()" id="btn-room-lock"
@@ -7576,9 +7809,17 @@
               <div id="host-stream-permission-note" class="px-2.5 py-1.5 rounded-xl bg-black/45 border border-white/10 text-[11px] text-slate-300 leading-snug">
                 Chỉ Chủ phòng mới có thể thu hồi quyền chia sẻ màn hình của người khác.
               </div>
+              <button type="button" id="btn-host-claim-in-menu" onclick="window.appActions.toggleRoomHost(); window.appActions.closeAllDropdowns();"
+                class="cv-smooth-btn liquid-glass-pill w-full px-3 py-2 rounded-xl font-bold flex items-center gap-2 transition cursor-pointer">
+                <i class="fa-solid fa-crown text-amber-300"></i><span>Nhận / Nhường quyền Chủ phòng</span>
+              </button>
               <button type="button" id="btn-host-stop-stream" onclick="window.appActions.forceStopRoomScreenShare()"
                 class="hidden cv-smooth-btn w-full px-3 py-2 rounded-xl bg-rose-600/25 hover:bg-rose-600/45 border border-rose-500/50 text-rose-200 font-extrabold flex items-center gap-2 transition cursor-pointer">
                 <i class="fa-solid fa-stop-circle text-rose-400"></i>Dừng chia sẻ hiện tại (Chủ phòng)
+              </button>
+              <button type="button" id="btn-host-end-for-all" onclick="window.appActions.closeAllDropdowns(); window.appActions.confirmEndWatchPartyForGroup()"
+                class="hidden cv-smooth-btn w-full px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 border border-rose-400 text-white font-black flex items-center gap-2 transition cursor-pointer">
+                <i class="fa-solid fa-power-off"></i><span>Kết thúc phòng cho mọi người</span>
               </button>
             </div>
           </div>
@@ -7722,253 +7963,259 @@
             <div class="ceiling-spot"></div>
           </div>
 
-          <!-- KHUNG MÀN HÌNH CONG LÒNG CHẢO IMAX 70MM "THE ODYSSEY" -->
-          <div id="screen-stage-box" class="screen-stage-box">
-            <div class="lotte-screen-frame">
-              <div class="imax-wing-l"></div>
-              <div class="imax-wing-r"></div>
-              <span id="cinema-screen-placeholder" class="hidden"></span>
-              <div id="cinema-screen"
-                   ondragover="window.appActions.onDragOverScreen(event)"
-                   ondrop="window.appActions.onDropScreen(event)"
-                   class="relative aspect-video w-full bg-black rounded-xl overflow-hidden select-none">
+          <!-- Vùng Sân khấu Chính (Cinema dùng #screen-stage-box | Stream tự chuyển Grid Camera <-> Màn hình chia sẻ + Dải camera cạnh) -->
+          <div id="stream-stage-workspace" data-stream-mode="grid" data-stream-layout="auto">
+            <!-- KHUNG MÀN HÌNH CONG LÒNG CHẢO IMAX 70MM "THE ODYSSEY" (hoặc khung chia sẻ màn hình trong Phòng Stream) -->
+            <div id="screen-stage-box" class="screen-stage-box">
+              <div class="lotte-screen-frame">
+                <div class="imax-wing-l"></div>
+                <div class="imax-wing-r"></div>
+                <span id="cinema-screen-placeholder" class="hidden"></span>
+                <div id="cinema-screen"
+                     ondragover="window.appActions.onDragOverScreen(event)"
+                     ondrop="window.appActions.onDropScreen(event)"
+                     class="relative aspect-video w-full bg-black rounded-xl overflow-hidden select-none">
 
-                <!-- Viền cong vòm trên/dưới & lớp tráng bạc IMAX 70mm The Odyssey -->
-                <div class="imax-curve-arch-top"></div>
-                <div class="imax-curve-arch-bottom"></div>
-                <div class="imax-screen-sheen"></div>
+                  <!-- Viền cong vòm trên/dưới & lớp tráng bạc IMAX 70mm The Odyssey -->
+                  <div class="imax-curve-arch-top"></div>
+                  <div class="imax-curve-arch-bottom"></div>
+                  <div class="imax-screen-sheen"></div>
 
-                <!-- Màn nhung rạp hát vật lý kéo che màn hình khi chủ trì tạm dừng -->
-                <div id="screen-velvet-curtain">
-                  <div class="curtain-valance">
-                    <svg viewBox="0 0 1200 44" preserveAspectRatio="none" class="w-full h-full">
-                      <defs>
-                        <linearGradient id="valanceGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stop-color="#190207" />
-                          <stop offset="55%" stop-color="#5a0a1d" />
-                          <stop offset="100%" stop-color="#2c040d" />
-                        </linearGradient>
-                      </defs>
-                      <path d="M0,0 L1200,0 L1200,26 Q1125,44 1050,24 Q975,44 900,24 Q825,44 750,24 Q675,44 600,24 Q525,44 450,24 Q375,44 300,24 Q225,44 150,24 Q75,44 0,26 Z" fill="url(#valanceGrad)" />
-                      <path d="M0,26 Q75,44 150,24 Q225,44 300,24 Q375,44 450,24 Q525,44 600,24 Q675,44 750,24 Q825,44 900,24 Q975,44 1050,24 Q1125,44 1200,26" fill="none" stroke="rgba(251,191,36,0.45)" stroke-width="2" />
-                    </svg>
-                  </div>
-                  <div class="curtain-half-l"></div>
-                  <div class="curtain-half-r"></div>
-                  <div class="curtain-stage-glow"></div>
-                  <div class="curtain-pause-badge">
-                    <div class="px-4 py-2 rounded-2xl bg-black/75 border border-amber-400/45 backdrop-blur-md shadow-[0_12px_36px_rgba(0,0,0,0.9)] flex flex-col items-center gap-1">
-                      <span class="text-amber-300 text-xs sm:text-sm font-black tracking-[0.22em] uppercase">
-                        <i class="fa-solid fa-pause mr-1.5"></i>Tạm Dừng Chiếu
-                      </span>
-                      <span class="text-[10px] sm:text-[11px] text-amber-100/75 font-semibold">
-                        Chủ trì đang tạm dừng • Đóng màn nhung rạp
-                      </span>
+                  <!-- Màn nhung rạp hát vật lý kéo che màn hình khi chủ trì tạm dừng -->
+                  <div id="screen-velvet-curtain">
+                    <div class="curtain-valance">
+                      <svg viewBox="0 0 1200 44" preserveAspectRatio="none" class="w-full h-full">
+                        <defs>
+                          <linearGradient id="valanceGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#190207" />
+                            <stop offset="55%" stop-color="#5a0a1d" />
+                            <stop offset="100%" stop-color="#2c040d" />
+                          </linearGradient>
+                        </defs>
+                        <path d="M0,0 L1200,0 L1200,26 Q1125,44 1050,24 Q975,44 900,24 Q825,44 750,24 Q675,44 600,24 Q525,44 450,24 Q375,44 300,24 Q225,44 150,24 Q75,44 0,26 Z" fill="url(#valanceGrad)" />
+                        <path d="M0,26 Q75,44 150,24 Q225,44 300,24 Q375,44 450,24 Q525,44 600,24 Q675,44 750,24 Q825,44 900,24 Q975,44 1050,24 Q1125,44 1200,26" fill="none" stroke="rgba(251,191,36,0.45)" stroke-width="2" />
+                      </svg>
                     </div>
-                  </div>
-                </div>
-
-                <!-- Nút thoát toàn màn hình cho iPhone / Android -->
-                <button type="button" id="btn-exit-mobile-fs" onclick="window.appActions.toggleFullscreen()"
-                  class="hidden absolute top-3 right-3 z-[10000] px-3 py-1.5 rounded-xl bg-black/75 hover:bg-rose-600 border border-white/25 text-white text-xs font-black items-center gap-1.5 shadow-2xl backdrop-blur-md cursor-pointer">
-                  <i class="fa-solid fa-compress"></i>
-                  <span>Thu nhỏ</span>
-                </button>
-
-                <!-- 1. Trình phát Video HTML5 (.mp4 / file từ máy) -->
-                <video id="html5-video-player" class="w-full h-full object-contain bg-black hidden" autoplay playsinline></video>
-
-                <!-- 2. Trình phát YouTube IFrame -->
-                <div id="youtube-wrapper" class="w-full h-full hidden"></div>
-
-                <!-- 2b. Lớp phủ Đang kết nối / Đồng bộ / Tải luồng video (Tác vụ cụ thể + Tạm khóa điều khiển) -->
-                <div id="room-player-loading-overlay" role="status" aria-live="polite"
-                     class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center p-4 text-center select-none"
-                     style="background:radial-gradient(circle at center, rgba(16,16,22,0.86) 0%, rgba(7,7,11,0.96) 100%);backdrop-filter:blur(6px);">
-                  <div class="cv-player-spinner-wrap" aria-hidden="true">
-                    <span class="cv-player-spinner-track"></span>
-                    <span class="cv-player-spinner-arc"></span>
-                  </div>
-                  <p id="room-loading-task-label" class="text-sm sm:text-base font-extrabold text-white tracking-tight">Đang kết nối phòng...</p>
-                  <p id="room-loading-task-sub" class="text-[11px] sm:text-xs text-slate-300 mt-1 max-w-sm">Điều khiển phát sẽ mở khóa ngay khi luồng sẵn sàng.</p>
-                </div>
-
-                <!-- 2c. Lớp phủ Lỗi video có thể khắc phục: Thử lại / Về sảnh / Giữ ghế theo xác nhận máy chủ -->
-                <div id="room-player-error-overlay" role="alertdialog" aria-labelledby="room-error-heading" aria-describedby="room-error-seat-status"
-                     class="hidden absolute inset-0 z-30 flex flex-col justify-between p-2.5 sm:p-4 overflow-y-auto"
-                     style="background:radial-gradient(circle at 30% 45%, rgba(42,16,22,0.95) 0%, rgba(11,11,15,0.98) 72%);">
-                  <div style="display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:14px;max-width:560px;width:100%;margin:auto;">
-                    <div class="relative rounded-xl overflow-hidden shrink-0 border border-amber-400/35 shadow-2xl bg-black"
-                         style="width:clamp(74px, 14vw, 108px);aspect-ratio:2/3;">
-                      <img id="room-error-poster-img" src="assets/web-logo.png" alt="Poster phim" width="108" height="162" loading="lazy" decoding="async"
-                           onerror="this.onerror=null;this.src='assets/web-logo.png';"
-                           style="width:100%;height:100%;object-fit:cover;display:block;" />
-                      <div class="absolute inset-x-0 bottom-0 p-1.5 bg-gradient-to-t from-black via-black/80 to-transparent">
-                        <p id="room-error-poster-title" class="cv-serif text-[10px] font-bold text-white leading-tight line-clamp-2 text-center"></p>
-                      </div>
-                    </div>
-
-                    <div class="flex-1 min-w-0 text-left space-y-2" style="max-width:360px;">
-                      <div style="display:flex;flex-direction:column;gap:3px;">
-                        <h3 id="room-error-heading" class="text-sm sm:text-lg font-black text-white leading-tight">Chưa tải được video</h3>
-                        <p id="room-error-reason-text" class="text-[11px] sm:text-xs text-slate-300 leading-snug">Kiểm tra kết nối rồi thử lại.</p>
-                        <p id="room-error-seat-status" class="text-[11px] sm:text-xs font-semibold leading-snug text-amber-200"></p>
-                      </div>
-
-                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:2px;">
-                        <button type="button" id="btn-room-video-retry" onclick="window.appActions.retryCurrentRoomVideo()"
-                          class="px-3 py-2 rounded-xl font-black text-xs inline-flex items-center justify-center gap-1.5 cursor-pointer shadow-lg"
-                          style="min-height:40px;background:linear-gradient(135deg,#F5C518 0%,#EAB308 100%);color:#0B0B0F;">
-                          <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
-                          <span>Thử lại</span>
-                        </button>
-                        <button type="button" id="btn-room-error-back-lobby" onclick="window.appActions.leaveRoom()"
-                          class="px-3 py-2 rounded-xl font-bold text-xs inline-flex items-center justify-center gap-1.5 cursor-pointer"
-                          style="min-height:40px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:#F4F4F5;">
-                          <i class="fa-solid fa-arrow-left text-[11px]" aria-hidden="true"></i>
-                          <span>Về sảnh</span>
-                        </button>
+                    <div class="curtain-half-l"></div>
+                    <div class="curtain-half-r"></div>
+                    <div class="curtain-stage-glow"></div>
+                    <div class="curtain-pause-badge">
+                      <div class="px-4 py-2 rounded-2xl bg-black/75 border border-amber-400/45 backdrop-blur-md shadow-[0_12px_36px_rgba(0,0,0,0.9)] flex flex-col items-center gap-1">
+                        <span class="text-amber-300 text-xs sm:text-sm font-black tracking-[0.22em] uppercase">
+                          <i class="fa-solid fa-pause mr-1.5"></i>Tạm Dừng Chiếu
+                        </span>
+                        <span class="text-[10px] sm:text-[11px] text-amber-100/75 font-semibold">
+                          Chủ trì đang tạm dừng • Đóng màn nhung rạp
+                        </span>
                       </div>
                     </div>
                   </div>
 
-                  <div class="pt-1 flex justify-center shrink-0">
-                    <button type="button" id="btn-room-error-support" onclick="window.appActions.toggleOwnerChatWidget(true)"
-                      class="px-3 py-1 rounded-full text-[10.5px] font-semibold inline-flex items-center gap-1.5 cursor-pointer transition"
-                      style="background:rgba(15,15,20,0.85);border:1px solid rgba(255,255,255,0.14);color:#D4D4D8;">
-                      <i class="fa-solid fa-headset text-amber-300" aria-hidden="true"></i>
-                      <span>Cần hỗ trợ? Liên hệ CineVerse</span>
-                      <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75" aria-hidden="true"></i>
+                  <!-- Nút thoát toàn màn hình cho iPhone / Android -->
+                  <button type="button" id="btn-exit-mobile-fs" onclick="window.appActions.toggleFullscreen()"
+                    class="hidden absolute top-3 right-3 z-[10000] px-3 py-1.5 rounded-xl bg-black/75 hover:bg-rose-600 border border-white/25 text-white text-xs font-black items-center gap-1.5 shadow-2xl backdrop-blur-md cursor-pointer">
+                    <i class="fa-solid fa-compress"></i>
+                    <span>Thu nhỏ</span>
+                  </button>
+
+                  <!-- 1. Trình phát Video HTML5 (.mp4 / file từ máy) -->
+                  <video id="html5-video-player" class="w-full h-full object-contain bg-black hidden" autoplay playsinline></video>
+
+                  <!-- 2. Trình phát YouTube IFrame -->
+                  <div id="youtube-wrapper" class="w-full h-full hidden"></div>
+
+                  <!-- 2b. Lớp phủ Đang kết nối / Đồng bộ / Tải luồng video (Tác vụ cụ thể + Tạm khóa điều khiển) -->
+                  <div id="room-player-loading-overlay" role="status" aria-live="polite"
+                       class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center p-4 text-center select-none"
+                       style="background:radial-gradient(circle at center, rgba(16,16,22,0.86) 0%, rgba(7,7,11,0.96) 100%);backdrop-filter:blur(6px);">
+                    <div class="cv-player-spinner-wrap" aria-hidden="true">
+                      <span class="cv-player-spinner-track"></span>
+                      <span class="cv-player-spinner-arc"></span>
+                    </div>
+                    <p id="room-loading-task-label" class="text-sm sm:text-base font-extrabold text-white tracking-tight">Đang kết nối phòng...</p>
+                    <p id="room-loading-task-sub" class="text-[11px] sm:text-xs text-slate-300 mt-1 max-w-sm">Điều khiển phát sẽ mở khóa ngay khi luồng sẵn sàng.</p>
+                  </div>
+
+                  <!-- 2c. Lớp phủ Lỗi video có thể khắc phục: Thử lại / Về sảnh / Giữ ghế theo xác nhận máy chủ -->
+                  <div id="room-player-error-overlay" role="alertdialog" aria-labelledby="room-error-heading" aria-describedby="room-error-seat-status"
+                       class="hidden absolute inset-0 z-30 flex flex-col justify-between p-2.5 sm:p-4 overflow-y-auto"
+                       style="background:radial-gradient(circle at 30% 45%, rgba(42,16,22,0.95) 0%, rgba(11,11,15,0.98) 72%);">
+                    <div style="display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:14px;max-width:560px;width:100%;margin:auto;">
+                      <div class="relative rounded-xl overflow-hidden shrink-0 border border-amber-400/35 shadow-2xl bg-black"
+                           style="width:clamp(74px, 14vw, 108px);aspect-ratio:2/3;">
+                        <img id="room-error-poster-img" src="assets/web-logo.png" alt="Poster phim" width="108" height="162" loading="lazy" decoding="async"
+                             onerror="this.onerror=null;this.src='assets/web-logo.png';"
+                             style="width:100%;height:100%;object-fit:cover;display:block;" />
+                        <div class="absolute inset-x-0 bottom-0 p-1.5 bg-gradient-to-t from-black via-black/80 to-transparent">
+                          <p id="room-error-poster-title" class="cv-serif text-[10px] font-bold text-white leading-tight line-clamp-2 text-center"></p>
+                        </div>
+                      </div>
+
+                      <div class="flex-1 min-w-0 text-left space-y-2" style="max-width:360px;">
+                        <div style="display:flex;flex-direction:column;gap:3px;">
+                          <h3 id="room-error-heading" class="text-sm sm:text-lg font-black text-white leading-tight">Chưa tải được video</h3>
+                          <p id="room-error-reason-text" class="text-[11px] sm:text-xs text-slate-300 leading-snug">Kiểm tra kết nối rồi thử lại.</p>
+                          <p id="room-error-seat-status" class="text-[11px] sm:text-xs font-semibold leading-snug text-amber-200"></p>
+                        </div>
+
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:2px;">
+                          <button type="button" id="btn-room-video-retry" onclick="window.appActions.retryCurrentRoomVideo()"
+                            class="px-3 py-2 rounded-xl font-black text-xs inline-flex items-center justify-center gap-1.5 cursor-pointer shadow-lg"
+                            style="min-height:40px;background:linear-gradient(135deg,#F5C518 0%,#EAB308 100%);color:#0B0B0F;">
+                            <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+                            <span>Thử lại</span>
+                          </button>
+                          <button type="button" id="btn-room-error-back-lobby" onclick="window.appActions.leaveRoom()"
+                            class="px-3 py-2 rounded-xl font-bold text-xs inline-flex items-center justify-center gap-1.5 cursor-pointer"
+                            style="min-height:40px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:#F4F4F5;">
+                            <i class="fa-solid fa-arrow-left text-[11px]" aria-hidden="true"></i>
+                            <span>Về sảnh</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="pt-1 flex justify-center shrink-0">
+                      <button type="button" id="btn-room-error-support" onclick="window.appActions.toggleOwnerChatWidget(true)"
+                        class="px-3 py-1 rounded-full text-[10.5px] font-semibold inline-flex items-center gap-1.5 cursor-pointer transition"
+                        style="background:rgba(15,15,20,0.85);border:1px solid rgba(255,255,255,0.14);color:#D4D4D8;">
+                        <i class="fa-solid fa-headset text-amber-300" aria-hidden="true"></i>
+                        <span>Cần hỗ trợ? Liên hệ CineVerse</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-75" aria-hidden="true"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- 3. Lớp phủ Phụ đề 1 dòng gọn gàng (Tự động co giãn & đặt gọn trong dải dưới màn hình) -->
+                  <div id="lyrics-overlay"
+                       style="bottom: 12px; justify-content: center;"
+                       class="hidden absolute inset-x-4 pointer-events-none z-20 flex transition-all duration-300 ease-out">
+                    <div id="sub-pill-box"
+                         class="inline-flex items-center max-w-[92%] px-3.5 py-1 rounded-xl bg-black/55 backdrop-blur-sm transition-all duration-300 ease-out">
+                      <p id="sub-single-text"
+                         style="font-size: 16px; text-shadow: 0 2px 10px rgba(0,0,0,0.95), 0 1px 3px rgba(0,0,0,0.98);"
+                         class="text-white font-bold leading-snug tracking-wide text-center transition-all duration-300">
+                        Khúc nhạc hòa cùng nắng chiều dịu dàng để mình gần lại mãi...
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- 4. Lớp phủ khi phòng đang ở trạng thái Sắp Chiếu -->
+                  <div id="upcoming-overlay" class="hidden absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-6 text-center z-20">
+                    <span class="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-extrabold mb-2">
+                      SUẤT CHIẾU SẮP BẮT ĐẦU
+                    </span>
+                    <h3 id="upcoming-title" class="text-lg sm:text-2xl font-black text-white mb-1">Tên phim</h3>
+                    <p class="text-xs text-slate-300 max-w-md mb-4">Bạn có thể chọn ghế trước hoặc bấm nút bên dưới để chiếu thử ngay bộ phim này trên màn hình rạp!</p>
+                    <button type="button" onclick="window.appActions.startUpcomingMovieNow()"
+                      class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs sm:text-sm shadow-lg cursor-pointer">
+                      <i class="fa-solid fa-play mr-1.5"></i>Chiếu Phim Này Ngay
                     </button>
                   </div>
-                </div>
 
-                <!-- 3. Lớp phủ Phụ đề 1 dòng gọn gàng (Tự động co giãn & đặt gọn trong dải dưới màn hình) -->
-                <div id="lyrics-overlay"
-                     style="bottom: 12px; justify-content: center;"
-                     class="hidden absolute inset-x-4 pointer-events-none z-20 flex transition-all duration-300 ease-out">
-                  <div id="sub-pill-box"
-                       class="inline-flex items-center max-w-[92%] px-3.5 py-1 rounded-xl bg-black/55 backdrop-blur-sm transition-all duration-300 ease-out">
-                    <p id="sub-single-text"
-                       style="font-size: 16px; text-shadow: 0 2px 10px rgba(0,0,0,0.95), 0 1px 3px rgba(0,0,0,0.98);"
-                       class="text-white font-bold leading-snug tracking-wide text-center transition-all duration-300">
-                      Khúc nhạc hòa cùng nắng chiều dịu dàng để mình gần lại mãi...
-                    </p>
-                  </div>
-                </div>
+                  <!-- 4b. Lớp phủ Phòng Stream (Màn hình đang được chia sẻ WebRTC / LiveKit SFU + Nút Toàn màn hình ngay trên khung nội dung) -->
+                  <div id="discord-live-overlay" style="transform: translateZ(4px);" class="hidden absolute inset-0 bg-[#07070b] flex flex-col items-center justify-center z-40 pointer-events-auto">
+                    <video id="discord-live-video" autoplay playsinline webkit-playsinline muted class="w-full h-full object-contain bg-black hidden"></video>
 
-                <!-- 4. Lớp phủ khi phòng đang ở trạng thái Sắp Chiếu -->
-                <div id="upcoming-overlay" class="hidden absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-6 text-center z-20">
-                  <span class="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-extrabold mb-2">
-                    SUẤT CHIẾU SẮP BẮT ĐẦU
-                  </span>
-                  <h3 id="upcoming-title" class="text-lg sm:text-2xl font-black text-white mb-1">Tên phim</h3>
-                  <p class="text-xs text-slate-300 max-w-md mb-4">Bạn có thể chọn ghế trước hoặc bấm nút bên dưới để chiếu thử ngay bộ phim này trên màn hình rạp!</p>
-                  <button type="button" onclick="window.appActions.startUpcomingMovieNow()"
-                    class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs sm:text-sm shadow-lg cursor-pointer">
-                    <i class="fa-solid fa-play mr-1.5"></i>Chiếu Phim Này Ngay
-                  </button>
-                </div>
-
-                <!-- 4b. Lớp phủ Phòng Stream (Share Màn Hình & Camera Trực Tiếp WebRTC / LiveKit SFU) -->
-                <div id="discord-live-overlay" style="transform: translateZ(4px);" class="hidden absolute inset-0 bg-[#07070b] flex flex-col items-center justify-center z-40 pointer-events-auto">
-                  <video id="discord-live-video" autoplay playsinline class="w-full h-full object-contain bg-black hidden"></video>
-
-                  <!-- Thanh trạng thái LIVE trung thực ở góc trên + Nút bật tiếng & Toàn màn hình dễ chạm -->
-                  <div id="discord-live-hud" class="hidden absolute top-2 inset-x-2 sm:inset-x-3 z-40 flex items-start justify-between gap-2 pointer-events-none">
-                    <div class="flex flex-wrap items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-black/85 backdrop-blur-md border border-white/15 text-[11px] sm:text-xs font-extrabold min-w-0">
-                      <span id="discord-live-state-pill" class="px-1.5 py-0.5 rounded bg-rose-600 text-white text-[9px] font-black uppercase tracking-wider shrink-0">LIVE</span>
-                      <span id="discord-streamer-name" class="text-white truncate max-w-[120px] sm:max-w-[200px]">Chưa có người phát</span>
-                      <span id="discord-stream-stats" class="text-emerald-300 font-mono text-[10px]">⚡ Đang đo...</span>
-                    </div>
-                    <div class="flex items-center gap-1.5 pointer-events-auto shrink-0">
-                      <span id="discord-no-audio-badge" class="hidden px-2 py-1 rounded-xl bg-amber-500/20 border border-amber-400/50 text-amber-200 text-[10px] font-extrabold whitespace-nowrap"
-                        title="Nguồn chia sẻ hiện không có track âm thanh">
-                        <i class="fa-solid fa-volume-xmark mr-1"></i>Không có tiếng nguồn
-                      </span>
-                      <button type="button" id="discord-unmute-pill" onclick="window.appActions.toggleDiscordViewerMute()"
-                        class="hidden px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-black shadow-lg cursor-pointer whitespace-nowrap"
-                        aria-label="Bật tiếng luồng đang xem">
-                        <i class="fa-solid fa-volume-high mr-1"></i>Bật tiếng
-                      </button>
-                      <button type="button" id="discord-stage-fs-btn" onclick="window.appActions.fullscreenDiscordLive()"
-                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-black/80 hover:bg-white/15 border border-white/20 text-white flex items-center justify-center cursor-pointer shrink-0"
-                        aria-label="Phóng to toàn màn hình" title="Toàn màn hình">
-                        <i class="fa-solid fa-expand text-xs sm:text-sm"></i>
-                      </button>
-                    </div>
-                  </div>
-
-                  <!-- Lưới Camera & Dải Camera nội bộ (giữ tương thích) -->
-                  <div id="discord-camera-grid" class="hidden w-full h-full p-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5 overflow-y-auto items-center justify-center z-20"></div>
-                  <div id="discord-camera-strip" class="hidden absolute bottom-2.5 inset-x-3 z-40 flex items-center gap-2 overflow-x-auto pb-0.5 pointer-events-auto"></div>
-
-                  <!-- Màn hình chờ / Đang kết nối / Lỗi kết nối trung thực -->
-                  <div id="discord-live-idle" class="p-4 sm:p-6 text-center max-w-lg space-y-3 relative z-30">
-                    <div id="discord-idle-icon-wrap" class="w-12 h-12 rounded-2xl bg-[#16161D] border border-amber-400/35 flex items-center justify-center mx-auto text-amber-300 text-xl shadow-lg">
-                      <i class="fa-solid fa-display"></i>
-                    </div>
-                    <div id="discord-idle-default-box" class="space-y-2">
-                      <span class="px-2.5 py-0.5 rounded-full bg-rose-600/20 border border-rose-500/40 text-rose-200 text-[10px] font-black uppercase tracking-wider">
-                        Phòng Stream CineVerse • Tối đa 10 người
-                      </span>
-                      <h3 id="discord-idle-heading" class="text-base sm:text-xl font-black text-white">Chưa có ai chia sẻ màn hình</h3>
-                      <p id="discord-idle-subtext" class="text-xs text-slate-300 leading-relaxed">
-                        Chia sẻ màn hình ứng dụng hoặc phim để cả phòng cùng xem rõ nét. Mic, Camera và Màn hình chỉ bật khi bạn chủ động bấm.
-                      </p>
-                      <div class="pt-1 flex flex-wrap items-center justify-center gap-2">
-                        <button type="button" onclick="window.appActions.handleDiscordDockShareClick()"
-                          class="stream-dock-btn px-4 font-black shadow-lg" style="background:#F5C518;color:#0B0B0F;"
-                          aria-label="Bắt đầu chia sẻ màn hình">
-                          <i class="fa-solid fa-display"></i>
-                          <span>Chia sẻ màn hình</span>
+                    <!-- Thanh trạng thái chia sẻ màn hình + Nút bật tiếng & Toàn màn hình ngay trên khung nội dung -->
+                    <div id="discord-live-hud" class="hidden absolute top-2 inset-x-2 sm:inset-x-3 z-40 flex items-start justify-between gap-2 pointer-events-none">
+                      <div class="flex flex-wrap items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-black/85 backdrop-blur-md border border-white/15 text-[11px] sm:text-xs font-extrabold min-w-0">
+                        <span id="discord-live-state-pill" class="px-1.5 py-0.5 rounded bg-rose-600 text-white text-[9px] font-black uppercase tracking-wider shrink-0">LIVE</span>
+                        <span id="discord-streamer-name" class="text-white truncate max-w-[140px] sm:max-w-[220px]">Chưa có người phát</span>
+                        <span id="discord-stream-stats" class="text-emerald-300 font-mono text-[10px]">⚡ Đang đo...</span>
+                      </div>
+                      <div class="flex items-center gap-1.5 pointer-events-auto shrink-0">
+                        <span id="discord-no-audio-badge" class="hidden px-2 py-1 rounded-xl bg-amber-500/20 border border-amber-400/50 text-amber-200 text-[10px] font-extrabold whitespace-nowrap"
+                          title="Nguồn chia sẻ hiện không có track âm thanh">
+                          <i class="fa-solid fa-volume-xmark mr-1"></i>Không có tiếng nguồn
+                        </span>
+                        <button type="button" id="discord-unmute-pill" onclick="window.appActions.toggleDiscordViewerMute()"
+                          class="hidden px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-black shadow-lg cursor-pointer whitespace-nowrap"
+                          aria-label="Bật tiếng màn hình đang chia sẻ">
+                          <i class="fa-solid fa-volume-high mr-1"></i>Bật tiếng
                         </button>
-                        <button type="button" onclick="window.appActions.toggleDiscordCamera()"
-                          class="stream-dock-btn bg-[#16161D] hover:bg-white/10 border border-white/15 text-white"
-                          aria-label="Bật camera của bạn">
-                          <i class="fa-solid fa-video text-amber-300"></i>
-                          <span>Bật Camera</span>
+                        <button type="button" id="discord-stage-fs-btn" onclick="window.appActions.fullscreenDiscordLive()"
+                          class="w-10 h-10 rounded-xl bg-black/80 hover:bg-white/20 border border-white/25 text-white flex items-center justify-center cursor-pointer shrink-0 shadow-lg"
+                          aria-label="Phóng to toàn màn hình nội dung đang chia sẻ" title="Toàn màn hình">
+                          <i class="fa-solid fa-expand text-sm"></i>
                         </button>
                       </div>
                     </div>
 
-                    <!-- Trạng thái Đang kết nối / Chờ hình / Mất kết nối -->
-                    <div id="discord-viewer-connecting-box" class="hidden mt-2 p-3.5 rounded-2xl bg-[#16161D]/95 border border-amber-400/35 flex flex-col items-center gap-2.5 shadow-xl">
-                      <span id="discord-viewer-connecting-badge" class="px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-200 text-[10px] font-black uppercase">
-                        Đang kết nối
-                      </span>
-                      <p id="discord-viewer-connecting-text" class="text-xs sm:text-sm font-extrabold text-white">
-                        Đang kết nối tới luồng chia sẻ...
-                      </p>
-                      <p id="discord-viewer-connecting-detail" class="text-[11px] text-slate-300">
-                        Đang chờ hình ảnh từ người phát. Nếu mạng chậm, bấm thử lại để đồng bộ lại luồng.
-                      </p>
-                      <div class="flex flex-wrap items-center justify-center gap-2">
-                        <button type="button" id="btn-retry-stream-sync" onclick="window.appActions.retryDiscordViewerSync()"
-                          class="stream-dock-btn px-4 font-black" style="background:#F5C518;color:#0B0B0F;"
-                          aria-label="Thử kết nối lại luồng Stream">
-                          <i class="fa-solid fa-rotate"></i>
-                          <span>Thử kết nối lại</span>
-                        </button>
-                        <button type="button" onclick="window.appActions.toggleDiscordViewerMute()"
-                          class="stream-dock-btn bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs"
-                          aria-label="Kiểm tra bật tiếng Stream">
-                          <i class="fa-solid fa-volume-high"></i>
-                          <span>Bật tiếng</span>
-                        </button>
+                    <!-- Giữ tương thích node ẩn cũ -->
+                    <div id="discord-camera-grid" class="hidden"></div>
+                    <div id="discord-camera-strip" class="hidden"></div>
+
+                    <!-- Trạng thái Đang kết nối / Chờ khung hình màn hình chia sẻ -->
+                    <div id="discord-live-idle" class="p-4 sm:p-6 text-center max-w-lg space-y-3 relative z-30">
+                      <div id="discord-idle-icon-wrap" class="w-12 h-12 rounded-2xl bg-[#16161D] border border-amber-400/35 flex items-center justify-center mx-auto text-amber-300 text-xl shadow-lg">
+                        <i class="fa-solid fa-display"></i>
+                      </div>
+                      <div id="discord-idle-default-box" class="space-y-1.5">
+                        <h3 id="discord-idle-heading" class="text-base sm:text-xl font-black text-white">Chưa có ai chia sẻ màn hình</h3>
+                        <p id="discord-idle-subtext" class="text-xs text-slate-300 leading-relaxed">
+                          Dùng thanh điều khiển bên dưới để bật Mic, Camera hoặc Chia sẻ màn hình.
+                        </p>
+                      </div>
+
+                      <!-- Trạng thái Đang kết nối / Chờ hình / Mất kết nối -->
+                      <div id="discord-viewer-connecting-box" class="hidden mt-2 p-3.5 rounded-2xl bg-[#16161D]/95 border border-amber-400/35 flex flex-col items-center gap-2.5 shadow-xl">
+                        <span id="discord-viewer-connecting-badge" class="px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-200 text-[10px] font-black uppercase">
+                          Đang kết nối
+                        </span>
+                        <p id="discord-viewer-connecting-text" class="text-xs sm:text-sm font-extrabold text-white">
+                          Đang kết nối tới luồng chia sẻ...
+                        </p>
+                        <p id="discord-viewer-connecting-detail" class="text-[11px] text-slate-300">
+                          Đang chờ hình ảnh từ người phát. Nếu mạng chậm, bấm thử lại để đồng bộ lại luồng.
+                        </p>
+                        <div class="flex flex-wrap items-center justify-center gap-2">
+                          <button type="button" id="btn-retry-stream-sync" onclick="window.appActions.retryDiscordViewerSync()"
+                            class="stream-dock-btn px-4 font-black" style="background:#F5C518;color:#0B0B0F;"
+                            aria-label="Thử kết nối lại luồng Stream">
+                            <i class="fa-solid fa-rotate"></i>
+                            <span>Thử kết nối lại</span>
+                          </button>
+                          <button type="button" onclick="window.appActions.toggleDiscordViewerMute()"
+                            class="stream-dock-btn bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs"
+                            aria-label="Kiểm tra bật tiếng Stream">
+                            <i class="fa-solid fa-volume-high"></i>
+                            <span>Bật tiếng</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <!-- 5. Khu vực hiệu ứng cảm xúc bay lên màn hình -->
-                <div id="floating-reactions-layer" class="absolute inset-0 pointer-events-none overflow-hidden z-30"></div>
-                <!-- 6. OSD phản hồi phím Space (Tạm dừng / Tiếp tục) -->
-                <div id="cinema-playpause-osd" aria-hidden="true"></div>
+                  <!-- 5. Khu vực hiệu ứng cảm xúc bay lên màn hình -->
+                  <div id="floating-reactions-layer" class="absolute inset-0 pointer-events-none overflow-hidden z-30"></div>
+                  <!-- 6. OSD phản hồi phím Space (Tạm dừng / Tiếp tục) -->
+                  <div id="cinema-playpause-osd" aria-hidden="true"></div>
+                </div>
               </div>
             </div>
 
-            <!-- Thanh điều khiển Video + Floating Popover Phụ đề nằm nổi không đẩy layout -->
+            <!-- Lưới Camera / Avatar (khi chưa ai chia sẻ) & Dải Camera nhỏ bên cạnh / dưới (khi đang chia sẻ màn hình) -->
+            <div id="stream-camera-strip-wrap" class="hidden rounded-2xl p-2.5 sm:p-3 space-y-2"
+              style="background:#16161D;border:1px solid rgba(255,255,255,0.10);">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2 text-xs font-extrabold text-white min-w-0">
+                  <i class="fa-solid fa-video text-amber-400 shrink-0"></i>
+                  <span id="stream-stage-strip-title" class="truncate">Chưa có ai chia sẻ màn hình · Camera &amp; Thành viên</span>
+                  <span id="stream-cam-strip-count" class="px-2 py-0.5 rounded-full bg-white/10 text-[10px] font-black text-amber-300 shrink-0">0/10</span>
+                  <span id="stream-transport-badge" class="hidden sm:inline-flex px-2 py-0.5 rounded-full bg-black/50 border border-white/10 text-[10px] font-mono text-slate-300">Đang khởi tạo...</span>
+                </div>
+                <button type="button" onclick="window.appActions.retryDiscordViewerSync()"
+                  class="px-2.5 py-1 rounded-xl bg-black/50 hover:bg-white/10 border border-white/15 text-[11px] font-bold text-slate-200 cursor-pointer shrink-0"
+                  title="Làm mới kết nối Stream & Camera">
+                  <i class="fa-solid fa-rotate text-emerald-400 mr-1"></i>Đồng bộ
+                </button>
+              </div>
+              <div id="stream-camera-strip" class="stream-cam-strip-scroll" role="list" aria-label="Danh sách camera và thành viên trong phòng Stream"></div>
+            </div>
+          </div>
+
+            <!-- Thanh điều khiển Video + Điều khiển Phòng Stream -->
             <div class="relative z-30 mt-2">
               <div id="cinema-control-bar" class="dimmable-ui cv-cinema-bar flex flex-col shadow-2xl text-xs">
                 <!-- Hàng 1: Thanh tiến trình tua toàn chiều ngang tông đỏ CineVerse -->
@@ -8085,144 +8332,170 @@
                 </div>
               </div>
 
-              <!-- Banner hướng dẫn cấp quyền Mic / Camera (đặt ngoài khung video để không bao giờ che thông báo kết nối) -->
-              <div id="stream-permission-banner" class="hidden mb-2 rounded-2xl p-3 text-left shadow-xl"
-                style="background:#1c1419;border:1px solid rgba(244,63,94,0.55);">
-                <div class="flex items-start justify-between gap-2">
-                  <div class="space-y-1 text-xs">
+              <!-- Cảnh báo lỗi thiết bị / quyền bị từ chối đặt ngay cạnh thanh điều khiển + nút Thử lại -->
+              <div id="stream-permission-banner" role="alert" class="hidden mb-2 rounded-2xl p-3 text-left shadow-xl"
+                style="background:#1c1419;border:1px solid rgba(244,63,94,0.6);">
+                <div class="flex items-start justify-between gap-2.5">
+                  <div class="space-y-1 text-xs min-w-0 flex-1">
                     <div class="font-black text-rose-300 flex items-center gap-1.5">
-                      <i class="fa-solid fa-triangle-exclamation"></i>
+                      <i class="fa-solid fa-triangle-exclamation shrink-0"></i>
                       <span id="stream-permission-title">Chưa được cấp quyền thiết bị</span>
                     </div>
                     <p id="stream-permission-desc" class="text-[11px] text-slate-200 leading-relaxed"></p>
                   </div>
-                  <button type="button" onclick="window.appActions.dismissStreamPermissionBanner()"
-                    class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center shrink-0 cursor-pointer"
-                    aria-label="Đóng hướng dẫn quyền">
+                  <div class="flex items-center gap-1.5 shrink-0">
+                    <button type="button" id="btn-stream-permission-retry" onclick="window.appActions.retryLastStreamMediaAction()"
+                      class="px-3 py-1.5 rounded-xl font-black text-[11px] cursor-pointer"
+                      style="min-height:36px;background:#F5C518;color:#0B0B0F;">
+                      Thử lại
+                    </button>
+                    <button type="button" onclick="window.appActions.dismissStreamPermissionBanner()"
+                      class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center shrink-0 cursor-pointer"
+                      aria-label="Đóng thông báo lỗi thiết bị">
+                      <i class="fa-solid fa-xmark text-xs"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Popover Cài đặt phụ (Thiết bị Mic/Cam, Bố cục, Chất lượng, Đổi nguồn, Tiếng stream) -->
+              <div id="stream-settings-popover" class="hidden space-y-3 text-xs" role="dialog" aria-label="Cài đặt thiết bị và bố cục phòng Stream">
+                <div class="flex items-center justify-between pb-2 border-b border-white/10">
+                  <span class="font-black text-white flex items-center gap-1.5">
+                    <i class="fa-solid fa-sliders text-amber-300"></i>
+                    <span>Cài đặt thiết bị &amp; bố cục</span>
+                  </span>
+                  <button type="button" onclick="window.appActions.toggleStreamSettingsMenu(false)"
+                    class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer"
+                    aria-label="Đóng cài đặt">
                     <i class="fa-solid fa-xmark text-xs"></i>
+                  </button>
+                </div>
+
+                <div class="space-y-1.5">
+                  <label for="stream-select-mic-device" class="block text-[11px] font-bold text-slate-300">Thiết bị Micro</label>
+                  <select id="stream-select-mic-device" onchange="window.appActions.switchStreamInputDevice('audio', this.value)"
+                    class="w-full h-9 px-2.5 rounded-xl bg-[#0B0B0F] border border-white/15 text-xs text-white cursor-pointer outline-none">
+                    <option value="">Mặc định hệ thống</option>
+                  </select>
+                </div>
+
+                <div class="space-y-1.5">
+                  <label for="stream-select-cam-device" class="block text-[11px] font-bold text-slate-300">Thiết bị Camera</label>
+                  <select id="stream-select-cam-device" onchange="window.appActions.switchStreamInputDevice('video', this.value)"
+                    class="w-full h-9 px-2.5 rounded-xl bg-[#0B0B0F] border border-white/15 text-xs text-white cursor-pointer outline-none">
+                    <option value="">Mặc định hệ thống</option>
+                  </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div class="space-y-1">
+                    <label for="stream-select-layout" class="block text-[11px] font-bold text-slate-300">Bố cục</label>
+                    <select id="stream-select-layout" onchange="window.appActions.setStreamLayoutMode(this.value)"
+                      class="w-full h-9 px-2 rounded-xl bg-[#0B0B0F] border border-white/15 text-[11px] font-bold text-white cursor-pointer outline-none">
+                      <option value="auto" selected>Tự động</option>
+                      <option value="focus">Ưu tiên màn hình</option>
+                      <option value="grid">Lưới camera</option>
+                    </select>
+                  </div>
+                  <div class="space-y-1">
+                    <label for="discord-quality-select" class="block text-[11px] font-bold text-slate-300">Chất lượng phát</label>
+                    <select id="discord-quality-select" onchange="window.appActions.setDiscordStreamQuality(this.value)"
+                      aria-label="Chọn chất lượng chia sẻ màn hình"
+                      class="w-full h-9 px-2 rounded-xl bg-[#0B0B0F] border border-white/15 text-amber-300 text-[11px] font-extrabold cursor-pointer outline-none">
+                      <option value="auto" selected>Tự động</option>
+                      <option value="fhd1080_60">1080p • 60fps</option>
+                      <option value="fhd1080_30">1080p • 30fps</option>
+                      <option value="hd720_60">720p • 60fps</option>
+                      <option value="hd720_30">720p • 30fps</option>
+                      <option value="qhd1440_60">2K • 60fps</option>
+                      <option value="uhd4k_60">4K • 60fps</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-white/10">
+                  <button type="button" id="stream-btn-switch-source" onclick="window.appActions.switchDiscordScreenSource(); window.appActions.toggleStreamSettingsMenu(false);"
+                    class="hidden flex-1 h-9 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-[11px] cursor-pointer">
+                    <i class="fa-solid fa-repeat mr-1"></i>Đổi nguồn chia sẻ
+                  </button>
+                  <button type="button" id="discord-dock-mute-btn" onclick="window.appActions.toggleDiscordViewerMute()"
+                    class="flex-1 h-9 px-3 rounded-xl bg-[#0B0B0F] hover:bg-white/10 border border-white/15 text-emerald-300 font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer"
+                    aria-label="Bật hoặc tắt âm thanh nội dung đang xem" aria-pressed="false">
+                    <i class="fa-solid fa-volume-high"></i>
+                    <span>Tiếng stream</span>
                   </button>
                 </div>
               </div>
 
-              <!-- Thanh điều khiển Phòng Stream: tách rõ Mic, Camera, Chia sẻ màn hình, Dừng chia sẻ, Tiếng stream, Chất lượng, Rời phòng -->
-              <div id="discord-bottom-dock" class="hidden dimmable-ui flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 rounded-2xl shadow-2xl text-xs"
-                style="background:#16161D;border:1px solid rgba(255,255,255,0.12);" role="toolbar" aria-label="Điều khiển phòng Stream">
-                <!-- Cụm 1: Mic & Camera cá nhân -->
-                <div class="flex items-center gap-1.5">
+              <!-- Thanh điều khiển chính Phòng Stream: đúng thứ tự Mic → Camera → Chia sẻ màn hình → Rời phòng -->
+              <div id="discord-bottom-dock" class="hidden dimmable-ui shadow-2xl text-xs"
+                role="toolbar" aria-label="Điều khiển phòng Stream">
+                <div id="stream-primary-controls">
                   <button type="button" id="discord-dock-mic-btn" onclick="window.appActions.toggleVoiceMic()"
                     class="stream-dock-btn bg-[#0B0B0F] hover:bg-white/10 border border-white/15 text-slate-200"
-                    aria-label="Bật hoặc tắt micro của bạn" aria-pressed="false" title="Bật / Tắt micro của bạn">
+                    aria-label="Mic tắt — bấm để bật micro" aria-pressed="false" title="Bật / Tắt Mic">
                     <i class="fa-solid fa-microphone-slash text-rose-400"></i>
-                    <span>Bật Mic</span>
+                    <span>Mic tắt</span>
                   </button>
                   <button type="button" id="discord-dock-cam-btn" onclick="window.appActions.toggleDiscordCamera()"
                     class="stream-dock-btn bg-[#0B0B0F] hover:bg-white/10 border border-white/15 text-slate-200"
-                    aria-label="Bật hoặc tắt camera của bạn" aria-pressed="false" title="Bật / Tắt camera của bạn">
+                    aria-label="Camera tắt — bấm để bật camera" aria-pressed="false" title="Bật / Tắt Camera">
                     <i class="fa-solid fa-video-slash text-slate-400"></i>
-                    <span>Bật Cam</span>
+                    <span>Camera tắt</span>
                   </button>
-                  <button type="button" id="discord-voice-diag-badge" onclick="window.appActions.resumePendingVoiceAudio && window.appActions.resumePendingVoiceAudio()"
-                    class="hidden px-2 py-1.5 rounded-xl bg-black/70 border border-white/15 text-[10px] font-mono text-slate-300 cursor-pointer"
-                    aria-label="Trạng thái kết nối âm thanh" title="Trạng thái kết nối Mic/SFU (Bấm để mở khóa loa nếu bị trình duyệt chặn)">
-                    SFU:--
-                  </button>
-                </div>
-
-                <!-- Cụm 2: Chia sẻ màn hình, Dừng chia sẻ (tách riêng) & Chất lượng (có Tự động) -->
-                <div class="flex flex-wrap items-center gap-1.5">
                   <button type="button" id="discord-dock-share-btn" onclick="window.appActions.handleDiscordDockShareClick()"
                     class="stream-dock-btn border border-amber-400/50 text-[#0B0B0F] font-black" style="background:#F5C518;"
-                    aria-label="Chia sẻ màn hình hoặc đổi nguồn" title="Chia sẻ màn hình / Đổi cửa sổ đang chia sẻ">
+                    aria-label="Chia sẻ màn hình" title="Chia sẻ màn hình">
                     <i class="fa-solid fa-display"></i>
                     <span>Chia sẻ màn hình</span>
                   </button>
-                  <button type="button" id="discord-dock-stop-share-btn" onclick="window.appActions.stopDiscordScreenShare()"
-                    class="hidden stream-dock-btn bg-rose-600/25 hover:bg-rose-600/45 border border-rose-500/60 text-rose-200"
-                    aria-label="Dừng chia sẻ màn hình" title="Chỉ dừng luồng chia sẻ màn hình (giữ mic và camera)">
-                    <i class="fa-solid fa-stop"></i>
-                    <span>Dừng chia sẻ</span>
-                  </button>
-                  <select id="discord-quality-select" onchange="window.appActions.setDiscordStreamQuality(this.value)"
-                    aria-label="Chọn chất lượng chia sẻ màn hình"
-                    class="h-10 px-2.5 rounded-xl bg-[#0B0B0F] border border-white/15 text-amber-300 text-[11px] font-extrabold cursor-pointer outline-none"
-                    title="Chọn chất lượng nguồn chia sẻ (Tự động điều chỉnh theo mạng và thiết bị)">
-                    <option value="auto" selected>Tự động (Auto)</option>
-                    <option value="fhd1080_60">1080p • 60fps</option>
-                    <option value="fhd1080_30">1080p • 30fps</option>
-                    <option value="hd720_60">720p • 60fps</option>
-                    <option value="hd720_30">720p • 30fps</option>
-                    <option value="qhd1440_60">2K • 60fps</option>
-                    <option value="uhd4k_60">4K • 60fps</option>
-                  </select>
-                </div>
-
-                <!-- Cụm 3: Tiếng Stream, Toàn màn hình & Rời phòng (giải phóng mic/cam/màn hình) -->
-                <div class="flex items-center gap-1.5">
-                  <button type="button" id="discord-dock-mute-btn" onclick="window.appActions.toggleDiscordViewerMute()"
-                    class="stream-dock-btn bg-[#0B0B0F] hover:bg-white/10 border border-white/15 text-emerald-300"
-                    aria-label="Bật hoặc tắt âm thanh nội dung đang xem" aria-pressed="false" title="Bật / Tắt tiếng stream đang xem">
-                    <i class="fa-solid fa-volume-high"></i>
-                    <span class="hidden sm:inline">Tiếng stream</span>
-                  </button>
-                  <button type="button" id="discord-dock-fs-btn" onclick="window.appActions.fullscreenDiscordLive()"
-                    class="stream-dock-btn bg-[#0B0B0F] hover:bg-white/10 border border-white/15 text-white"
-                    aria-label="Phóng to toàn màn hình" title="Toàn màn hình">
-                    <i class="fa-solid fa-expand"></i>
-                  </button>
                   <button type="button" id="discord-dock-stop-btn" onclick="window.appActions.leaveRoom()"
-                    class="stream-dock-btn bg-rose-600 hover:bg-rose-500 text-white font-black shadow-lg"
-                    aria-label="Rời phòng và tắt toàn bộ mic, camera, chia sẻ màn hình" title="Rời phòng Stream (tự tắt mic, camera và chia sẻ màn hình)">
+                    class="stream-dock-btn font-black shadow-lg"
+                    aria-label="Rời phòng" title="Rời phòng (tự tắt mic, camera và chia sẻ màn hình)">
                     <i class="fa-solid fa-right-from-bracket"></i>
                     <span>Rời phòng</span>
                   </button>
                 </div>
-              </div>
 
-              <!-- Dải Camera & Thành viên nằm ngay sát vùng trình chiếu (cuộn ngang trên mobile, bấm để phóng lớn) -->
-              <div id="stream-camera-strip-wrap" class="hidden mt-2.5 rounded-2xl p-2.5 sm:p-3 space-y-2"
-                style="background:#16161D;border:1px solid rgba(255,255,255,0.10);">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <div class="flex items-center gap-2 text-xs font-extrabold text-white">
-                    <i class="fa-solid fa-users-viewfinder text-amber-400"></i>
-                    <span>Camera & Thành viên</span>
-                    <span id="stream-cam-strip-count" class="px-2 py-0.5 rounded-full bg-white/10 text-[10px] font-black text-amber-300">0/10</span>
-                    <span id="stream-transport-badge" class="px-2 py-0.5 rounded-full bg-black/50 border border-white/10 text-[10px] font-mono text-slate-300">Đang khởi tạo...</span>
-                  </div>
-                  <div class="flex items-center gap-1.5">
-                    <button type="button" onclick="window.appActions.toggleStreamSeatPanel()"
-                      class="px-2.5 py-1 rounded-xl bg-black/50 hover:bg-white/10 border border-white/15 text-[11px] font-bold text-slate-200 cursor-pointer">
-                      <i class="fa-solid fa-chair text-amber-300 mr-1"></i>Đổi ghế
-                    </button>
-                    <button type="button" onclick="window.appActions.retryDiscordViewerSync()"
-                      class="px-2.5 py-1 rounded-xl bg-black/50 hover:bg-white/10 border border-white/15 text-[11px] font-bold text-slate-200 cursor-pointer"
-                      title="Làm mới kết nối Stream & Camera">
-                      <i class="fa-solid fa-rotate text-emerald-400 mr-1"></i>Đồng bộ lại
-                    </button>
-                  </div>
+                <div id="stream-secondary-controls" class="flex items-center gap-1.5 shrink-0">
+                  <button type="button" id="discord-voice-diag-badge" onclick="window.appActions.resumePendingVoiceAudio && window.appActions.resumePendingVoiceAudio()"
+                    class="hidden px-2 py-1.5 rounded-xl bg-black/70 border border-white/15 text-[10px] font-mono text-slate-300 cursor-pointer"
+                    aria-label="Trạng thái kết nối âm thanh">
+                    SFU:--
+                  </button>
+                  <button type="button" id="discord-dock-settings-btn" onclick="window.appActions.toggleStreamSettingsMenu()"
+                    class="stream-dock-btn bg-[#0B0B0F] hover:bg-white/10 border border-white/15 text-slate-200"
+                    aria-label="Cài đặt thiết bị, bố cục và chất lượng" aria-expanded="false" aria-controls="stream-settings-popover">
+                    <i class="fa-solid fa-sliders text-amber-300"></i>
+                    <span>Cài đặt</span>
+                  </button>
                 </div>
-                <div id="stream-camera-strip" class="stream-cam-strip-scroll" role="list" aria-label="Danh sách camera và thành viên trong phòng Stream"></div>
               </div>
 
-              <!-- Thanh mở nhanh Chat / Thành viên / Sơ đồ ghế trên Mobile (< 1024px) -->
+              <!-- Nút mở nhanh Chat / Thành viên / Cài đặt trên Mobile (< 1024px) — hoàn toàn không có Ghế -->
               <div id="stream-mobile-tabs" class="hidden lg:hidden mt-2 grid grid-cols-3 gap-2">
                 <button type="button" onclick="window.appActions.openStreamMobileSheet('chat')"
-                  class="stream-dock-btn bg-[#16161D] border border-white/15 text-white justify-center">
+                  class="stream-dock-btn bg-[#16161D] border border-white/15 text-white justify-center"
+                  aria-label="Mở bảng Chat">
                   <i class="fa-solid fa-comments text-amber-400"></i>
                   <span>Chat</span>
                 </button>
                 <button type="button" onclick="window.appActions.openStreamMobileSheet('members')"
-                  class="stream-dock-btn bg-[#16161D] border border-white/15 text-white justify-center">
+                  class="stream-dock-btn bg-[#16161D] border border-white/15 text-white justify-center"
+                  aria-label="Mở danh sách Thành viên">
                   <i class="fa-solid fa-users text-rose-400"></i>
                   <span>Thành viên</span>
                 </button>
-                <button type="button" onclick="window.appActions.toggleStreamSeatPanel()"
-                  class="stream-dock-btn bg-[#16161D] border border-white/15 text-white justify-center">
-                  <i class="fa-solid fa-chair text-emerald-400"></i>
-                  <span id="stream-mobile-seat-btn-label">Ghế</span>
+                <button type="button" onclick="window.appActions.toggleStreamSettingsMenu()"
+                  class="stream-dock-btn bg-[#16161D] border border-white/15 text-white justify-center"
+                  aria-label="Mở cài đặt thiết bị và bố cục">
+                  <i class="fa-solid fa-sliders text-emerald-400"></i>
+                  <span>Cài đặt</span>
                 </button>
               </div>
 
-              <!-- FLOATING POPOVER TÙY CHỈNH PHỤ ĐỀ & AI TẠO PHỤ ĐỀ (Không đẩy sơ đồ ghế) -->
+              <!-- FLOATING POPOVER TÙY CHỈNH PHỤ ĐỀ & AI TẠO PHỤ ĐỀ (Chỉ phòng chiếu phim) -->
               <div id="subtitle-settings-panel"
                    class="hidden floating-dropdown-panel absolute bottom-full right-0 mb-2 w-[92vw] sm:w-[440px] max-w-full p-3.5 rounded-2xl bg-stone-950/95 border border-amber-500/40 space-y-3 text-xs shadow-2xl z-50">
                 <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-white/10">
@@ -8343,7 +8616,6 @@
                 </div>
               </div>
             </div>
-          </div>
 
           <!-- Sàn sân khấu uốn cong phía trước màn hình IMAX -->
           <div class="stage-floor flex items-center justify-center">
@@ -8482,8 +8754,8 @@
             </button>
           </div>
 
-          <!-- Thanh trên cùng Sidebar: Đổi tên (Dropdown) | Khán giả (Dropdown) | + 🍿 Bắp nước -->
-          <div class="dimmable-ui relative z-30 flex items-center justify-between gap-1.5 px-2.5 py-2 bg-white/[0.02] border-b border-white/10 rounded-t-2xl text-xs">
+          <!-- Thanh trên cùng Sidebar: Đổi tên (Dropdown) | Khán giả (Dropdown) | + 🍿 Bắp nước (Chỉ phòng chiếu phim) -->
+          <div class="cinema-sidebar-topbar dimmable-ui relative z-30 flex items-center justify-between gap-1.5 px-2.5 py-2 bg-white/[0.02] border-b border-white/10 rounded-t-2xl text-xs">
             <div class="flex items-center gap-1.5 min-w-0">
 
               <!-- Dropdown: Đổi tên hiển thị -->
@@ -8547,8 +8819,20 @@
             </button>
           </div>
 
-          <!-- Thanh chuyển 4 Tab -->
-          <div class="grid grid-cols-4 bg-black/40 border-b border-white/10 p-1 gap-1 text-[11px] font-extrabold">
+          <!-- Thanh chuyển 2 Tab gọn cho Phòng Stream (Chat | Thành viên) -->
+          <div id="stream-sidebar-tabs" class="hidden text-[11px] font-extrabold">
+            <button type="button" onclick="window.appActions.switchStreamSidebarTab('chat')" id="stream-tab-btn-chat"
+              class="py-2 rounded-xl cta-primary-btn flex items-center justify-center gap-1.5 transition cursor-pointer">
+              <i class="fa-solid fa-comments"></i> <span>Chat</span>
+            </button>
+            <button type="button" onclick="window.appActions.switchStreamSidebarTab('members')" id="stream-tab-btn-members"
+              class="py-2 rounded-xl liquid-glass-pill flex items-center justify-center gap-1.5 transition cursor-pointer">
+              <i class="fa-solid fa-users text-slate-300"></i> <span>Thành viên (<span id="stream-members-tab-count">1</span>)</span>
+            </button>
+          </div>
+
+          <!-- Thanh chuyển 4 Tab (Chỉ phòng chiếu phim) -->
+          <div class="cinema-sidebar-tabs grid grid-cols-4 bg-black/40 border-b border-white/10 p-1 gap-1 text-[11px] font-extrabold">
             <button type="button" onclick="window.appActions.switchSidebarTab('chat')" id="tab-btn-chat"
               class="py-2 rounded-xl cta-primary-btn flex items-center justify-center gap-1 transition cursor-pointer">
               <i class="fa-solid fa-comments"></i> <span>Chat</span>
@@ -8572,7 +8856,7 @@
 
             <!-- ==================== TAB 1: KÊNH CHAT RIÊNG ==================== -->
             <div id="sidebar-tab-chat" class="flex-1 flex flex-col overflow-hidden">
-              <div class="px-3.5 py-2 bg-black/30 border-b border-white/5 flex items-center justify-between">
+              <div class="cinema-chat-only px-3.5 py-2 bg-black/30 border-b border-white/5 flex items-center justify-between">
                 <span class="text-[11px] font-bold text-slate-300">
                   <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block mr-1"></span>
                   Chat riêng <strong id="chat-room-label" class="text-white">Phòng 01</strong> (Hiện trên ghế)
@@ -8581,11 +8865,17 @@
                   <i class="fa-solid fa-link mr-0.5"></i>Link ghế cạnh
                 </button>
               </div>
+              <div id="stream-chat-subheader" class="hidden px-3.5 py-2 bg-black/30 border-b border-white/5 items-center justify-between w-full">
+                <span class="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
+                  <span>Chat nhóm trực tiếp</span>
+                </span>
+              </div>
 
               <div id="chat-messages" class="flex-1 overflow-y-auto p-3 space-y-2.5 text-xs"></div>
 
-              <!-- Thả biểu cảm có kèm âm thanh SFX rạp -->
-              <div class="px-3 py-2 bg-black/35 border-t border-white/10 space-y-2">
+              <!-- Thả biểu cảm có kèm âm thanh SFX rạp (Ẩn trong Phòng Stream) -->
+              <div class="cinema-chat-only px-3 py-2 bg-black/35 border-t border-white/10 space-y-2">
                 <div class="flex items-center justify-between gap-1">
                   <button type="button" onclick="window.appActions.sendReaction('🍿')" class="flex-1 py-1 rounded-lg liquid-glass-pill text-sm cursor-pointer" title="Tiếng nhai bắp rang">🍿</button>
                   <button type="button" onclick="window.appActions.sendReaction('👏')" class="flex-1 py-1 rounded-lg liquid-glass-pill text-sm cursor-pointer" title="Tiếng vỗ tay vang rạp">👏</button>
@@ -8723,6 +9013,18 @@
                   Hỏi AI
                 </button>
               </form>
+            </div>
+
+            <!-- ==================== TAB THÀNH VIÊN PHÒNG STREAM ==================== -->
+            <div id="sidebar-tab-members" class="hidden flex-1 flex flex-col overflow-hidden p-3 space-y-2.5 text-xs">
+              <div class="flex items-center justify-between pb-2 border-b border-white/10 shrink-0">
+                <span class="text-[11px] font-black uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
+                  <i class="fa-solid fa-users text-amber-300"></i>
+                  <span>Thành viên tham gia</span>
+                </span>
+                <span id="stream-members-panel-count" class="px-2 py-0.5 rounded-full bg-white/10 text-[10px] font-black text-amber-300">0/10</span>
+              </div>
+              <div id="stream-members-list" class="flex-1 overflow-y-auto space-y-2 pr-1"></div>
             </div>
 
           </div>
@@ -10321,9 +10623,9 @@
       {
         id: "room-8",
         number: "Phòng Stream 🎥",
-        movieTitle: "Phòng Stream Trực Tiếp (10 Ghế VIP)",
-        genre: "Screen Share • Voice Chat • Ultra-Low Latency",
-        duration: "LIVE 60FPS",
+        movieTitle: "Phòng Stream Nhóm (Tối đa 10 người)",
+        genre: "Chia sẻ màn hình • Camera • Thoại nhóm",
+        duration: "TRỰC TIẾP",
         durationSec: 0,
         status: "showing",
         isDiscordRoom: true,
@@ -10332,12 +10634,12 @@
         videoUrl: "",
         previewVideoUrl: "",
         poster: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1000&q=80",
-        rankBadge: "🖥️ PHÒNG STREAM • 10 GHẾ",
+        rankBadge: "🖥️ PHÒNG STREAM • 10 NGƯỜI",
         matchScore: "Độ trễ ~0ms",
-        ageRating: "LIVE P2P",
-        quality: "60FPS + VOICE",
-        cast: "Share Màn Hình • Âm Thanh Hệ Thống • 10 Ghế VIP",
-        synopsis: "Phòng livestream như Discord dành cho tối đa 10 người: chia sẻ màn hình máy tính/điện thoại kèm tiếng, chat giọng nói trực tiếp và đồng bộ tức thời độ trễ cực thấp."
+        ageRating: "LIVE CALL",
+        quality: "HD + VOICE",
+        cast: "Chia sẻ màn hình • Camera • Micro nhóm",
+        synopsis: "Phòng gọi nhóm và chia sẻ màn hình dành cho tối đa 10 thành viên: hỗ trợ mic, camera hai chiều, chia sẻ màn hình kèm âm thanh."
       }
     ];
 
@@ -11766,6 +12068,11 @@
       };
     }
 
+    function isStreamRoom(room) {
+      if (!room) return false;
+      return Boolean(room.isDiscordRoom || room.roomType === "stream_party");
+    }
+
     function getEffectiveRoom(roomId) {
       if (String(roomId || "").startsWith("wp_")) {
         const wpBase = (state.watchPartyRooms && state.watchPartyRooms[roomId]) || {
@@ -11781,6 +12088,13 @@
         };
         const custom = state.roomsCustom[roomId] || {};
         const merged = { ...wpBase, ...custom, isWatchParty: true, isPrivate: true };
+        if (merged.roomType === "stream_party") {
+          merged.isDiscordRoom = true;
+          merged.maxSeats = Number(merged.maxSeats || merged.capacity || 10);
+          if (!merged.number || merged.number === "Phòng Hẹn Riêng") {
+            merged.number = "Phòng Stream Nhóm";
+          }
+        }
         merged.displayTitle = sanitizeMovieTitle(merged.movieTitle);
         merged.poster = resolveMoviePoster(merged.movieTitle, merged.poster, merged.youtubeId);
         const meta = resolveMovieMetadata(merged.movieTitle, wpBase);
@@ -12739,8 +13053,8 @@
           <div class="p-4 flex-1 flex flex-col justify-between space-y-3.5">
             <div class="space-y-2">
               <div class="flex justify-between text-xs sm:text-[13px]" style="color:#A1A1AA">
-                <span>Tỷ lệ lấp đầy ghế</span>
-                <span class="font-bold text-white">${percent}% (${count} ghế)</span>
+                <span>${isStreamRoom(room) ? "Thành viên đang tham gia" : "Tỷ lệ lấp đầy ghế"}</span>
+                <span class="font-bold text-white">${isStreamRoom(room) ? `${count}/${maxCap} người` : `${percent}% (${count} ghế)`}</span>
               </div>
               <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
                 <div class="h-full cv-progress-red" style="width:${percent}%"></div>
@@ -12749,6 +13063,17 @@
 
             <div>
               ${(() => {
+                if (isStreamRoom(room)) {
+                  return `
+                    <button type="button"
+                      onclick="event.stopPropagation(); window.appActions.enterRoom('${room.id}')"
+                      style="touch-action: manipulation;"
+                      class="cv-smooth-btn rophim-card-cta w-full py-3 px-3.5 rounded-xl font-black text-[13px] transition cursor-pointer flex items-center justify-center gap-1.5">
+                      <i class="fa-solid fa-video text-xs"></i>
+                      <span>Vào Phòng Stream</span>
+                    </button>
+                  `;
+                }
                 const hasValid = hasValidTicketForRoom(room.id);
                 const ticket = hasValid ? state.bookedTicketsByRoom?.[room.id] : null;
                 if (ticket && ticket.seatId) {
@@ -12966,22 +13291,23 @@
           {
             room: streamRoom,
             title: "Phòng Stream",
-            desc: "Rạp chiếu riêng cho nhóm đến 10 người: chia sẻ màn hình 60fps, camera và voice chat.",
+            desc: "Phòng gọi nhóm và chia sẻ màn hình tối đa 10 thành viên: bật mic, camera và chia sẻ màn hình kèm âm thanh.",
             img: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80",
             cap: 10,
-            ctaNoTicket: "Đặt phòng Stream",
+            ctaNoTicket: "Vào phòng Stream",
             ctaWithTicket: "Vào phòng Stream"
           }
         ].filter(x => x.room);
 
         specialWrap.innerHTML = specialItems.map(item => {
           const r = item.room;
+          const isStreamCard = isStreamRoom(r);
           const occ = Object.keys(state.seatsByRoom[r.id] || {}).length;
-          const hasTk = hasValidTicketForRoom(r.id);
+          const hasTk = isStreamCard || hasValidTicketForRoom(r.id);
           const isFull = occ >= item.cap && !hasTk;
           const statusTxt = isFull ? `Đã đầy (${occ}/${item.cap})` : `${occ}/${item.cap} người • Đang mở`;
           const ctaTxt = hasTk ? item.ctaWithTicket : item.ctaNoTicket;
-          const clickHandler = hasTk
+          const clickHandler = (isStreamCard || hasTk)
             ? `window.appActions.enterRoom('${r.id}')`
             : `window.appActions.openBookingModal('${r.id}')`;
           return `
@@ -13208,8 +13534,8 @@
         return;
       }
 
-      // Phòng công khai bắt buộc đặt vé; Phòng Hẹn Xem Chung cho phép Chọn ghế ngay khi vào phòng
-      if (!isWpRoom && !options?.fromBooking && !hasValidTicketForRoom(roomId)) {
+      // Phòng công khai bắt buộc đặt vé; Phòng Stream và Phòng Hẹn Xem Chung vào trực tiếp không bắt đặt vé/chọn ghế
+      if (!isWpRoom && !isStreamRoom(room) && !options?.fromBooking && !hasValidTicketForRoom(roomId)) {
         showToast(`🎟️ Vui lòng đặt vé & chọn ghế để vào ${room.number}!`, "info");
         openBookingModal(roomId);
         return;
@@ -13306,19 +13632,19 @@
       try { toggleMobileNavMenu(false); } catch (_) {}
       setRoomLoadingStage("Đang kết nối phòng...", "Đang xác thực ghế & kênh đồng bộ phòng...");
 
-      // Nếu khán giả chưa ngồi trên sơ đồ phòng này -> xếp ngồi đúng ghế đã đặt vé
+      // Nếu khán giả chưa ngồi trên sơ đồ phòng này -> xếp ngồi đúng ghế đã đặt vé (Phòng Stream chỉ giữ slot ẩn, không hiện thông báo ghế)
       const bookedSeatId = state.bookedTicketsByRoom?.[roomId]?.seatId;
       if (!getMySeatInRoom(roomId)) {
         const roomSeats = state.seatsByRoom[roomId] || {};
-        if (bookedSeatId && (!roomSeats[bookedSeatId] || roomSeats[bookedSeatId].uid === state.uid)) {
+        if (isStreamRoom(room)) {
+          const discordSeats = ["F4", "F5", "F3", "F2", "F6", "E4", "E5", "E3", "E2", "E6"];
+          const freeSeat = discordSeats.find(s => !roomSeats[s]);
+          if (freeSeat) assignSeat(roomId, freeSeat, false);
+        } else if (bookedSeatId && (!roomSeats[bookedSeatId] || roomSeats[bookedSeatId].uid === state.uid)) {
           assignSeat(roomId, bookedSeatId, false);
           if (!options?.fromBooking && !options?.fromDiscord) {
             showToast(`🎟️ Đã vào thẳng ${room.number} • Ghế ${bookedSeatId} theo vé đã đặt!`, "success");
           }
-        } else if (room.isDiscordRoom) {
-          const discordSeats = ["F4", "F5", "F3", "F2", "F6", "E4", "E5", "E3", "E2", "E6"];
-          const freeSeat = discordSeats.find(s => !roomSeats[s]);
-          if (freeSeat) assignSeat(roomId, freeSeat, false);
         } else if (!roomSeats["F4"]) {
           assignSeat(roomId, "F4", false);
         } else if (!roomSeats["F5"]) {
@@ -13330,12 +13656,14 @@
       }
 
       try { updateRoomHeaderUI(); } catch (_) {}
-      try { renderSeatingMap(); } catch (_) {}
-      try { renderAudienceList(); } catch (_) {}
+      try { if (!isStreamRoom(room)) renderSeatingMap(); } catch (_) {}
+      try { if (!isStreamRoom(room)) renderAudienceList(); } catch (_) {}
       try { renderChatMessages(); } catch (_) {}
-      if (state.sidebarTab === "playlist") renderPlaylistQueue();
-      if (state.sidebarTab === "trivia") renderTriviaPanel();
-      if (state.sidebarTab === "ai") renderAICompanionMessages();
+      if (!isStreamRoom(room)) {
+        if (state.sidebarTab === "playlist") renderPlaylistQueue();
+        if (state.sidebarTab === "trivia") renderTriviaPanel();
+        if (state.sidebarTab === "ai") renderAICompanionMessages();
+      }
       setRoomLoadingStage("Đang đồng bộ lịch chiếu...", "Đang lấy trạng thái phát từ máy chủ rạp...");
       try { setupRoomVideoPlayer(room); } catch (_) {}
       try { subscribeRoomChat(roomId); } catch (_) {}
@@ -13344,7 +13672,7 @@
       if (room.isWatchParty) {
         try { subscribeWatchPartySeats(roomId); } catch (_) {}
       }
-      if (room.isDiscordRoom) {
+      if (isStreamRoom(room)) {
         try { subscribeRoomLiveScreen(roomId); } catch (_) {}
         try { subscribeRoomLiveCam(roomId); } catch (_) {}
       } else {
@@ -13384,6 +13712,7 @@
         document.getElementById("wp-room-closing-pill")?.classList.add("hidden");
         document.getElementById("wp-room-closing-pill")?.classList.remove("inline-flex");
         document.getElementById("btn-wp-end-for-all")?.classList.add("hidden");
+        document.getElementById("btn-host-end-for-all")?.classList.add("hidden");
         const leaveLblReset = document.getElementById("room-leave-btn-label");
         if (leaveLblReset) leaveLblReset.textContent = "Sảnh chờ";
         clearMyChatTyping();
@@ -13395,6 +13724,9 @@
         cleanupRoomLiveCam(oldRoomId);
       }
       document.body.classList.remove("stream-room-active", "stream-mobile-sheet-chat", "stream-keyboard-open");
+      if (typeof toggleStreamSettingsMenu === "function") toggleStreamSettingsMenu(false);
+      if (typeof dismissStreamPermissionBanner === "function") dismissStreamPermissionBanner();
+      document.getElementById("sidebar-tab-members")?.classList.add("hidden");
       if (typeof closeStreamCamSpotlight === "function") closeStreamCamSpotlight();
       if (typeof closeStreamMobileSheet === "function") closeStreamMobileSheet();
       currentRoomHost = null;
@@ -13516,21 +13848,29 @@
     function updateRoomHeaderUI() {
       if (!state.currentRoomId) return;
       const room = getEffectiveRoom(state.currentRoomId);
+      const isStream = isStreamRoom(room);
       const seats = state.seatsByRoom[state.currentRoomId] || {};
-      const count = Math.max(1, Object.keys(seats).length);
+      const streamMembers = isStream && typeof getStreamParticipantsList === "function"
+        ? getStreamParticipantsList()
+        : null;
+      const count = isStream
+        ? Math.max(1, streamMembers ? streamMembers.length : Object.keys(seats).length)
+        : Math.max(1, Object.keys(seats).length);
 
       document.getElementById("room-header-number").textContent = room.number;
       document.getElementById("room-header-title").textContent = room.displayTitle || sanitizeMovieTitle(room.movieTitle);
       document.getElementById("room-header-count").textContent = count;
+      const suffixEl = document.getElementById("room-header-count-suffix");
+      if (suffixEl) suffixEl.textContent = isStream ? "người tham gia" : "khách";
       document.getElementById("chat-room-label").textContent = room.number;
-      const mySeatId = getMySeatInRoom(state.currentRoomId) || state.bookedTicketsByRoom?.[state.currentRoomId]?.seatId || "";
+      const mySeatId = isStream ? "" : (getMySeatInRoom(state.currentRoomId) || state.bookedTicketsByRoom?.[state.currentRoomId]?.seatId || "");
       const seatBadgeEl = document.getElementById("room-header-seat-badge");
       if (seatBadgeEl) {
         seatBadgeEl.textContent = mySeatId ? `Ghế ${mySeatId}` : "Chưa có ghế";
       }
       const bottomDockSeat = document.getElementById("bottom-dock-seat-label");
       if (bottomDockSeat) bottomDockSeat.textContent = mySeatId || "--";
-      if (mySeatId && state.lastAppliedSeatPov !== `${state.currentRoomId}:${mySeatId}`) {
+      if (!isStream && mySeatId && state.lastAppliedSeatPov !== `${state.currentRoomId}:${mySeatId}`) {
         state.lastAppliedSeatPov = `${state.currentRoomId}:${mySeatId}`;
         setPOVZoom(mapSeatIdToPovZone(mySeatId));
       }
@@ -13546,15 +13886,17 @@
 
       const closingPill = document.getElementById("wp-room-closing-pill");
       const endAllBtn = document.getElementById("btn-wp-end-for-all");
+      const hostMenuEndAllBtn = document.getElementById("btn-host-end-for-all");
       const leaveLbl = document.getElementById("room-leave-btn-label");
+      const isOrg = room.isWatchParty && typeof isWatchPartyOrganizerForRoom === "function" && isWatchPartyOrganizerForRoom(room);
       if (room.isWatchParty) {
         if (leaveLbl) leaveLbl.textContent = "Rời phòng";
         if (closingPill) {
           closingPill.classList.remove("hidden");
           closingPill.classList.add("inline-flex");
         }
-        const isOrg = typeof isWatchPartyOrganizerForRoom === "function" && isWatchPartyOrganizerForRoom(room);
-        if (endAllBtn) endAllBtn.classList.toggle("hidden", !isOrg);
+        if (endAllBtn) endAllBtn.classList.toggle("hidden", isStream || !isOrg);
+        if (hostMenuEndAllBtn) hostMenuEndAllBtn.classList.toggle("hidden", !isOrg);
         if (typeof updateWatchPartyRoomCountdownUI === "function") updateWatchPartyRoomCountdownUI();
       } else {
         if (leaveLbl) leaveLbl.textContent = "Sảnh chờ";
@@ -13563,6 +13905,7 @@
           closingPill.classList.remove("inline-flex");
         }
         if (endAllBtn) endAllBtn.classList.add("hidden");
+        if (hostMenuEndAllBtn) hostMenuEndAllBtn.classList.add("hidden");
       }
 
       // Đồng bộ nút trạng thái khóa PIN của phòng hiện tại (chỉ Admin/Host mới thấy 4 số PIN)
@@ -14840,8 +15183,8 @@
       resetPlayerControlButtons();
       syncCurrentRoomSubtitleOffset(room);
 
-      // Ẩn danh sách phim bên trái & mở rộng màn hình lấp khoảng trống CHỈ TRONG Phòng Stream
-      const isStream = Boolean(room.isDiscordRoom);
+      // Tách hoàn toàn giao diện Phòng Stream khỏi Phòng Chiếu Phim
+      const isStream = isStreamRoom(room);
       document.body.classList.toggle("stream-room-active", isStream);
       const leftMoviesAside = document.getElementById("theater-left-movies-aside");
       const centerAuditorium = document.getElementById("theater-center-auditorium");
@@ -14851,7 +15194,7 @@
         centerAuditorium.classList.toggle("lg:col-span-7", !isStream);
       }
 
-      // Ẩn/hiện thanh điều khiển rạp vs thanh Discord Dock, Camera Strip, Mobile Tabs & nút Ghế Stream
+      // Ẩn/hiện thanh điều khiển rạp vs thanh Điều khiển Stream, Lưới/Dải Camera & Mobile Tabs
       const cinemaBar = document.getElementById("cinema-control-bar");
       const discordDock = document.getElementById("discord-bottom-dock");
       const camStripWrap = document.getElementById("stream-camera-strip-wrap");
@@ -14860,14 +15203,14 @@
       const headerBcPill = document.getElementById("stream-header-broadcaster-pill");
       const hostStreamControls = document.getElementById("host-stream-controls");
       const seatsWrap = document.getElementById("stream-seats-collapsible");
+      const chatInputEl = document.getElementById("chat-input");
       if (cinemaBar) cinemaBar.classList.toggle("hidden", isStream);
       if (discordDock) discordDock.classList.toggle("hidden", !isStream);
       if (camStripWrap) camStripWrap.classList.toggle("hidden", !isStream);
       if (mobileTabs) mobileTabs.classList.toggle("hidden", !isStream);
       if (seatToggleBtn) {
-        seatToggleBtn.classList.toggle("hidden", !isStream);
-        seatToggleBtn.classList.toggle("flex", isStream);
-        seatToggleBtn.setAttribute("aria-expanded", "false");
+        seatToggleBtn.classList.toggle("hidden", true);
+        seatToggleBtn.classList.remove("flex");
       }
       if (headerBcPill) {
         headerBcPill.classList.toggle("hidden", !isStream);
@@ -14877,8 +15220,19 @@
       if (seatsWrap) {
         seatsWrap.classList.toggle("stream-seats-hidden", isStream);
       }
+      if (chatInputEl) {
+        chatInputEl.placeholder = isStream
+          ? "Nhắn tin trong phòng Stream..."
+          : "Nhắn tin (hiện luôn trên ghế của bạn)...";
+      }
       if (!isStream) {
         document.body.classList.remove("stream-mobile-sheet-chat", "stream-keyboard-open");
+        document.getElementById("sidebar-tab-members")?.classList.add("hidden");
+        if (typeof toggleStreamSettingsMenu === "function") toggleStreamSettingsMenu(false);
+        if (typeof switchSidebarTab === "function") switchSidebarTab(state.sidebarTab || "chat");
+      } else {
+        if (typeof switchStreamSidebarTab === "function") switchStreamSidebarTab("chat");
+        if (typeof refreshStreamDeviceLists === "function") refreshStreamDeviceLists();
       }
 
       // Ẩn/hiện các nút tua, tạm dừng, phụ đề phim & đồng bộ rạp khi ở phòng Discord Live hoặc phòng Hẹn Xem Chiếu Rạp (không tua)
@@ -14904,7 +15258,7 @@
         if (el) el.classList.toggle("hidden", isStream);
       });
 
-      // Nếu là phòng Discord Live (Phòng 08 - 10 ghế VIP) -> kích hoạt giao diện Stream trực tiếp
+      // Nếu là phòng Stream -> kích hoạt giao diện Stream trực tiếp & ẩn điều khiển rạp
       if (isStream) {
         hideRoomLoadingAndErrorOverlays();
         if (upcomingOverlay) upcomingOverlay.classList.add("hidden");
@@ -14912,6 +15266,7 @@
         if (discordOverlay) discordOverlay.classList.remove("hidden");
         if (typeof updateDiscordLiveUI === "function") updateDiscordLiveUI();
         if (typeof syncStreamHostControlsUI === "function") syncStreamHostControlsUI();
+        if (typeof renderStreamMembersList === "function") renderStreamMembersList();
         return;
       }
       if (discordOverlay) discordOverlay.classList.add("hidden");
@@ -18180,10 +18535,11 @@
 
     function buildChatMessageHTML(m) {
       const isMe = m.uid === state.uid;
+      const inStream = document.body.classList.contains("stream-room-active");
       return `
         <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}" data-msg-id="${escapeHTML(m.id || '')}">
           <div class="flex items-center gap-1.5 mb-0.5">
-            <span class="px-1.5 py-0.2 rounded bg-stone-800 text-amber-400 font-black text-[10px]">Ghế ${escapeHTML(m.seatId || 'F4')}</span>
+            ${inStream ? "" : `<span class="cinema-chat-only px-1.5 py-0.2 rounded bg-stone-800 text-amber-400 font-black text-[10px]">Ghế ${escapeHTML(m.seatId || 'F4')}</span>`}
             <span class="font-bold text-[11px] ${isMe ? 'text-amber-300' : 'text-slate-300'}">${escapeHTML(m.userName)}</span>
           </div>
           <div class="max-w-[88%] px-3 py-2 rounded-2xl text-xs font-medium ${isMe ? 'bg-amber-500 text-slate-950 font-bold rounded-tr-none' : 'bg-stone-800 text-white rounded-tl-none'}">
@@ -20372,6 +20728,7 @@
         }
       } else if (track.kind === "video" && isLiveKitSource(pub, track, LK, "screen_video")) {
         if (track.receiver) applyDiscordZeroJitter(track.receiver);
+        try { if (typeof pub?.setEnabled === "function") pub.setEnabled(true); } catch (_) {}
         window.__livekitRemoteScreenTrack = track;
         // Đóng kết nối P2P màn hình nếu đang có song song để tránh trùng hình/nhân đôi tiếng
         if (typeof closeAllDiscordPeers === "function" && !liveScreenStream) {
@@ -20391,35 +20748,51 @@
             startedAt: Date.now()
           };
         }
-        logStreamDiag("screen_sfu", "track_subscribed", { from: pUid, readyState: msTrack.readyState });
+        logStreamDiag("screen_sfu", "track_subscribed", { from: pUid, readyState: msTrack.readyState, muted: msTrack.muted });
         const videoEl = document.getElementById("discord-live-video");
-        if (videoEl) {
-          videoEl.srcObject = remoteScreenStream;
-          videoEl.muted = true; // Tiếng SFU screen đi qua ScreenShareAudio element riêng để tránh nhân đôi
+        const tryPlayScreen = () => {
+          if (!videoEl || !remoteScreenStream) return;
+          videoEl.muted = true;
+          videoEl.playsInline = true;
+          videoEl.setAttribute("playsinline", "");
+          videoEl.setAttribute("webkit-playsinline", "");
+          if (videoEl.srcObject !== remoteScreenStream) {
+            videoEl.srcObject = remoteScreenStream;
+          }
           videoEl.play().catch((err) => {
             logStreamDiag("screen_sfu", "video_play_blocked", err, "warn");
           });
-        }
+        };
+        msTrack.onunmute = () => {
+          logStreamDiag("screen_sfu", "track_unmuted", { from: pUid });
+          tryPlayScreen();
+          if (typeof updateDiscordLiveUI === "function") updateDiscordLiveUI();
+        };
+        tryPlayScreen();
         if (typeof updateDiscordLiveUI === "function") updateDiscordLiveUI();
         if (typeof startDiscordStatsMonitor === "function") startDiscordStatsMonitor();
       } else if (track.kind === "video" && isLiveKitSource(pub, track, LK, "camera")) {
         if (track.receiver) applyDiscordZeroJitter(track.receiver);
+        try { if (typeof pub?.setEnabled === "function") pub.setEnabled(true); } catch (_) {}
         const msTrack = track.mediaStreamTrack;
         if (!msTrack) return;
         const camStream = new MediaStream([msTrack]);
         livekitRemoteCamStreams.set(pUid, camStream);
         msTrack.onunmute = () => {
           if (typeof renderDiscordCameras === "function") renderDiscordCameras();
+          if (typeof renderStreamMembersList === "function") renderStreamMembersList();
         };
         msTrack.onended = () => {
           if (livekitRemoteCamStreams.get(pUid) === camStream) {
             livekitRemoteCamStreams.delete(pUid);
             if (typeof renderDiscordCameras === "function") renderDiscordCameras();
+            if (typeof renderStreamMembersList === "function") renderStreamMembersList();
           }
         };
-        logStreamDiag("cam_sfu", "track_subscribed", { from: pUid, readyState: msTrack.readyState });
+        logStreamDiag("cam_sfu", "track_subscribed", { from: pUid, readyState: msTrack.readyState, muted: msTrack.muted });
         if (typeof renderDiscordCameras === "function") renderDiscordCameras();
         if (typeof updateDiscordLiveUI === "function") updateDiscordLiveUI();
+        if (typeof renderStreamMembersList === "function") renderStreamMembersList();
       }
     }
 
@@ -20429,7 +20802,9 @@
         for (const participant of room.remoteParticipants.values()) {
           const pubs = participant.trackPublications ? participant.trackPublications.values() : [];
           for (const pub of pubs) {
-            if (pub && pub.isSubscribed && pub.track) {
+            if (!pub) continue;
+            try { if (!pub.isSubscribed && typeof pub.setSubscribed === "function") pub.setSubscribed(true); } catch (_) {}
+            if (pub.track) {
               attachLiveKitRemoteTrack(pub.track, pub, participant, LK);
             }
           }
@@ -20452,7 +20827,15 @@
       });
       Object.keys(livekitRemoteAudioEls).forEach(k => delete livekitRemoteAudioEls[k]);
       if (livekitRoom) {
-        try { await livekitRoom.disconnect(); } catch (err) {
+        try {
+          const pubs = livekitRoom.localParticipant?.trackPublications?.values?.() || [];
+          for (const pub of pubs) {
+            try { pub?.track?.stop?.(); } catch (_) {}
+            try { pub?.track?.mediaStreamTrack?.stop?.(); } catch (_) {}
+          }
+          await livekitRoom.localParticipant?.setMicrophoneEnabled?.(false).catch(() => {});
+          await livekitRoom.disconnect();
+        } catch (err) {
           logStreamDiag("livekit", "disconnect_err", err, "warn");
         }
         livekitRoom = null;
@@ -20491,17 +20874,17 @@
 
         await disconnectLiveKitRoom();
         const room = new LK.Room({
-          adaptiveStream: true,
-          dynacast: true,
+          adaptiveStream: false,
+          dynacast: false,
           publishDefaults: {
-            videoCodec: "h264",
-            simulcast: true,
+            videoCodec: "vp8",
+            simulcast: false,
             screenShareEncoding: {
-              maxBitrate: 5_000_000,
-              maxFramerate: 60,
+              maxBitrate: 3_500_000,
+              maxFramerate: 30,
               priority: "high"
             },
-            degradationPreference: "balanced",
+            degradationPreference: "maintain-resolution",
             dtx: true,
             red: true
           },
@@ -20514,8 +20897,17 @@
           }
         });
 
+        room.on(LK.RoomEvent.TrackPublished, (pub, participant) => {
+          try { if (pub && !pub.isSubscribed && typeof pub.setSubscribed === "function") pub.setSubscribed(true); } catch (_) {}
+          if (pub?.track) attachLiveKitRemoteTrack(pub.track, pub, participant, LK);
+        });
+
         room.on(LK.RoomEvent.TrackSubscribed, (track, pub, participant) => {
           attachLiveKitRemoteTrack(track, pub, participant, LK);
+        });
+
+        room.on(LK.RoomEvent.TrackUnmuted, (pub, participant) => {
+          if (pub?.track) attachLiveKitRemoteTrack(pub.track, pub, participant, LK);
         });
 
         room.on(LK.RoomEvent.TrackUnsubscribed, (track, pub, participant) => {
@@ -20541,7 +20933,14 @@
             livekitRemoteCamStreams.delete(pUid);
             logStreamDiag("cam_sfu", "track_unsubscribed", { from: pUid });
             if (typeof renderDiscordCameras === "function") renderDiscordCameras();
+            if (typeof renderStreamMembersList === "function") renderStreamMembersList();
           }
+        });
+
+        room.on(LK.RoomEvent.ParticipantConnected, () => {
+          if (typeof renderDiscordCameras === "function") renderDiscordCameras();
+          if (typeof renderStreamMembersList === "function") renderStreamMembersList();
+          if (typeof updateRoomHeaderUI === "function") updateRoomHeaderUI();
         });
 
         room.on(LK.RoomEvent.ParticipantDisconnected, (participant) => {
@@ -20554,7 +20953,9 @@
             if (videoEl) videoEl.srcObject = null;
           }
           if (typeof renderDiscordCameras === "function") renderDiscordCameras();
+          if (typeof renderStreamMembersList === "function") renderStreamMembersList();
           if (typeof updateDiscordLiveUI === "function") updateDiscordLiveUI();
+          if (typeof updateRoomHeaderUI === "function") updateRoomHeaderUI();
         });
 
         room.on(LK.RoomEvent.Reconnecting, () => {
@@ -20839,14 +21240,16 @@
       const btnDockMic = document.getElementById("discord-dock-mic-btn");
       if (btnDockMic) {
         btnDockMic.setAttribute("aria-pressed", voiceMicActive ? "true" : "false");
+        btnDockMic.setAttribute("aria-label", voiceMicActive ? "Mic đang bật — bấm để tắt" : "Mic tắt — bấm để bật");
         btnDockMic.className = voiceMicActive
           ? "stream-dock-btn bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/60 text-emerald-300"
           : "stream-dock-btn bg-[#0B0B0F] hover:bg-white/10 border border-white/15 text-slate-200";
         btnDockMic.innerHTML = voiceMicActive
-          ? `<i class="fa-solid fa-microphone text-emerald-400"></i><span>Mic: Bật</span>`
-          : `<i class="fa-solid fa-microphone-slash text-rose-400"></i><span>Bật Mic</span>`;
+          ? `<i class="fa-solid fa-microphone text-emerald-400"></i><span>Mic bật</span>`
+          : `<i class="fa-solid fa-microphone-slash text-rose-400"></i><span>Mic tắt</span>`;
       }
       if (typeof renderDiscordCameras === "function") renderDiscordCameras();
+      if (typeof renderStreamMembersList === "function") renderStreamMembersList();
     }
 
     function resumePendingVoiceAudio() {
@@ -21443,41 +21846,197 @@
       }
     };
 
-    function showStreamPermissionGuide(kind) {
+    let lastFailedStreamAction = "";
+    let selectedStreamAudioDeviceId = "";
+    let selectedStreamVideoDeviceId = "";
+    let streamLayoutMode = "auto";
+    let activeStreamSidebarTab = "chat";
+
+    function highlightFailedStreamDockBtn(kind = "") {
+      ["discord-dock-mic-btn", "discord-dock-cam-btn", "discord-dock-share-btn"].forEach((id) => {
+        document.getElementById(id)?.classList.remove("stream-btn-error");
+      });
+      const targetId = kind === "mic"
+        ? "discord-dock-mic-btn"
+        : kind === "camera"
+        ? "discord-dock-cam-btn"
+        : kind === "screen"
+        ? "discord-dock-share-btn"
+        : "";
+      if (targetId) {
+        document.getElementById(targetId)?.classList.add("stream-btn-error");
+      }
+    }
+
+    function showStreamPermissionGuide(kind, customMessage = "") {
       const banner = document.getElementById("stream-permission-banner");
       const titleEl = document.getElementById("stream-permission-title");
       const descEl = document.getElementById("stream-permission-desc");
       if (!banner || !titleEl || !descEl) return;
+      lastFailedStreamAction = kind || "";
+      highlightFailedStreamDockBtn(lastFailedStreamAction);
       const isCap = Boolean(window.Capacitor && typeof window.Capacitor.getPlatform === "function" && window.Capacitor.getPlatform() !== "web");
       const platform = isCap ? window.Capacitor.getPlatform() : "";
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent || "") || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
       const label = kind === "mic" ? "Micro" : kind === "camera" ? "Camera" : "Chia sẻ màn hình";
-      titleEl.textContent = `Chưa được cấp quyền ${label}`;
-      if (platform === "android") {
-        descEl.textContent = `Trên ứng dụng Android: mở Cài đặt điện thoại → Ứng dụng → CineVerse Lotte → Quyền → bật quyền ${label}, sau đó thử lại. (Nếu bản APK cũ chưa bật quyền Camera trong hệ thống, hãy dùng trình duyệt Chrome hoặc cập nhật bản APK mới).`;
+      titleEl.textContent = kind === "screen" && customMessage
+        ? "Không thể chia sẻ màn hình"
+        : `Chưa được cấp quyền ${label}`;
+      if (customMessage) {
+        descEl.textContent = customMessage;
+      } else if (platform === "android") {
+        descEl.textContent = `Trên ứng dụng Android: mở Cài đặt điện thoại → Ứng dụng → CineVerse Lotte → Quyền → bật quyền ${label}, sau đó bấm Thử lại.`;
       } else if (platform === "ios" || isIOS) {
-        descEl.textContent = `Trên iPhone / iPad: mở Cài đặt → Safari (hoặc CineVerse) → bật quyền ${label}, hoặc bấm biểu tượng AA / khóa trên thanh địa chỉ rồi chọn Cho phép ${label}.`;
+        descEl.textContent = `Trên iPhone / iPad: mở Cài đặt → Safari → bật quyền ${label}, hoặc bấm biểu tượng khóa trên thanh địa chỉ rồi chọn Cho phép, sau đó bấm Thử lại.`;
       } else {
-        descEl.textContent = `Trên trình duyệt máy tính: bấm biểu tượng Ổ khóa / Cài đặt trang bên trái thanh địa chỉ → chuyển ${label} sang "Cho phép" rồi bấm bật lại.`;
+        descEl.textContent = `Trình duyệt chưa cấp quyền ${label}. Hãy bấm Cho phép ở thanh địa chỉ rồi bấm Thử lại.`;
       }
       banner.classList.remove("hidden");
     }
 
     function dismissStreamPermissionBanner() {
+      lastFailedStreamAction = "";
+      highlightFailedStreamDockBtn("");
       document.getElementById("stream-permission-banner")?.classList.add("hidden");
+    }
+
+    function retryLastStreamMediaAction() {
+      const action = lastFailedStreamAction;
+      dismissStreamPermissionBanner();
+      if (action === "mic") return toggleVoiceMic();
+      if (action === "camera") return toggleDiscordCamera();
+      if (action === "screen") return startDiscordScreenShare();
+    }
+
+    async function refreshStreamDeviceLists() {
+      const micSel = document.getElementById("stream-select-mic-device");
+      const camSel = document.getElementById("stream-select-cam-device");
+      if (!micSel && !camSel) return;
+      if (!navigator.mediaDevices || typeof navigator.mediaDevices.enumerateDevices !== "function") return;
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const mics = devices.filter((d) => d.kind === "audioinput");
+        const cams = devices.filter((d) => d.kind === "videoinput");
+        if (micSel) {
+          const prev = selectedStreamAudioDeviceId || micSel.value || "";
+          micSel.innerHTML = `<option value="">Mặc định hệ thống</option>` + mics.map((d, i) =>
+            `<option value="${escapeHTML(d.deviceId)}">${escapeHTML(d.label || `Micro ${i + 1}`)}</option>`
+          ).join("");
+          micSel.value = mics.some((d) => d.deviceId === prev) ? prev : "";
+        }
+        if (camSel) {
+          const prev = selectedStreamVideoDeviceId || camSel.value || "";
+          camSel.innerHTML = `<option value="">Mặc định hệ thống</option>` + cams.map((d, i) =>
+            `<option value="${escapeHTML(d.deviceId)}">${escapeHTML(d.label || `Camera ${i + 1}`)}</option>`
+          ).join("");
+          camSel.value = cams.some((d) => d.deviceId === prev) ? prev : "";
+        }
+      } catch (_) {}
+    }
+
+    async function switchStreamInputDevice(kind, deviceId) {
+      if (kind === "audio") {
+        selectedStreamAudioDeviceId = deviceId || "";
+        if (voiceMicActive) {
+          await toggleVoiceMic();
+          await toggleVoiceMic();
+        } else {
+          showToast("Đã lưu thiết bị Micro cho lần bật tiếp theo.", "info");
+        }
+      } else if (kind === "video") {
+        selectedStreamVideoDeviceId = deviceId || "";
+        if (localCameraStream) {
+          await stopDiscordCamera();
+          await toggleDiscordCamera();
+        } else {
+          showToast("Đã lưu thiết bị Camera cho lần bật tiếp theo.", "info");
+        }
+      }
+    }
+
+    function setStreamLayoutMode(mode = "auto") {
+      const valid = ["auto", "focus", "grid"].includes(mode) ? mode : "auto";
+      streamLayoutMode = valid;
+      const ws = document.getElementById("stream-stage-workspace");
+      const sel = document.getElementById("stream-select-layout");
+      if (ws) ws.setAttribute("data-stream-layout", valid);
+      if (sel && sel.value !== valid) sel.value = valid;
+      if (typeof updateDiscordLiveUI === "function") updateDiscordLiveUI();
+    }
+
+    function toggleStreamSettingsMenu(forceOpen = null) {
+      const pop = document.getElementById("stream-settings-popover");
+      const btn = document.getElementById("discord-dock-settings-btn");
+      if (!pop) return;
+      const shouldOpen = forceOpen !== null ? Boolean(forceOpen) : pop.classList.contains("hidden");
+      pop.classList.toggle("hidden", !shouldOpen);
+      if (btn) btn.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+      if (shouldOpen) {
+        const swBtn = document.getElementById("stream-btn-switch-source");
+        if (swBtn) swBtn.classList.toggle("hidden", !Boolean(liveScreenStream));
+        refreshStreamDeviceLists();
+      }
+    }
+
+    function updateStreamConnectionPillUI() {
+      const pill = document.getElementById("stream-header-conn-pill");
+      const lbl = document.getElementById("stream-header-conn-label");
+      if (!pill || !lbl) return;
+      const room = state.currentRoomId ? getEffectiveRoom(state.currentRoomId) : null;
+      if (!room || !isStreamRoom(room)) {
+        pill.classList.add("hidden");
+        return;
+      }
+      const dot = pill.querySelector("span.rounded-full");
+      if (livekitConnectionState === "reconnecting") {
+        lbl.textContent = "Đang nối lại...";
+        pill.className = "px-2.5 py-0.5 rounded-full font-bold text-[11px] items-center gap-1.5 border border-amber-400/50 bg-amber-500/20 text-amber-200";
+        if (dot) dot.className = "w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse";
+      } else if (livekitConnectionState === "connecting") {
+        lbl.textContent = "Đang kết nối...";
+        pill.className = "px-2.5 py-0.5 rounded-full font-bold text-[11px] items-center gap-1.5 border border-amber-400/40 bg-amber-500/15 text-amber-200";
+        if (dot) dot.className = "w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse";
+      } else if (livekitConnectionState === "connected") {
+        lbl.textContent = "Đã kết nối";
+        pill.className = "px-2.5 py-0.5 rounded-full font-bold text-[11px] items-center gap-1.5 border border-emerald-500/35 bg-emerald-500/15 text-emerald-300";
+        if (dot) dot.className = "w-1.5 h-1.5 rounded-full bg-emerald-400";
+      } else {
+        lbl.textContent = "Kết nối P2P";
+        pill.className = "px-2.5 py-0.5 rounded-full font-bold text-[11px] items-center gap-1.5 border border-white/15 bg-white/10 text-slate-200";
+        if (dot) dot.className = "w-1.5 h-1.5 rounded-full bg-sky-400";
+      }
     }
 
     function toggleStreamSeatPanel(forceOpen = null) {
       const seatsWrap = document.getElementById("stream-seats-collapsible");
-      const toggleBtn = document.getElementById("btn-stream-toggle-seats");
-      if (!seatsWrap) return;
-      const shouldOpen = forceOpen !== null ? Boolean(forceOpen) : seatsWrap.classList.contains("stream-seats-hidden");
-      seatsWrap.classList.toggle("stream-seats-hidden", !shouldOpen);
-      if (toggleBtn) toggleBtn.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
-      if (shouldOpen) {
-        closeStreamMobileSheet();
-        renderSeatingMap();
-        try { seatsWrap.scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (_) {}
+      if (seatsWrap) seatsWrap.classList.add("stream-seats-hidden");
+    }
+
+    function switchStreamSidebarTab(tab = "chat") {
+      const valid = tab === "members" ? "members" : "chat";
+      activeStreamSidebarTab = valid;
+      const chatPanel = document.getElementById("sidebar-tab-chat");
+      const memPanel = document.getElementById("sidebar-tab-members");
+      const plPanel = document.getElementById("sidebar-tab-playlist");
+      const trPanel = document.getElementById("sidebar-tab-trivia");
+      const aiPanel = document.getElementById("sidebar-tab-ai");
+      [plPanel, trPanel, aiPanel].forEach((el) => el?.classList.add("hidden"));
+      if (chatPanel) chatPanel.classList.toggle("hidden", valid !== "chat");
+      if (memPanel) memPanel.classList.toggle("hidden", valid !== "members");
+      const chatBtn = document.getElementById("stream-tab-btn-chat");
+      const memBtn = document.getElementById("stream-tab-btn-members");
+      if (chatBtn) {
+        chatBtn.className = valid === "chat"
+          ? "py-2 rounded-xl cta-primary-btn flex items-center justify-center gap-1.5 transition cursor-pointer"
+          : "py-2 rounded-xl liquid-glass-pill flex items-center justify-center gap-1.5 transition cursor-pointer";
+      }
+      if (memBtn) {
+        memBtn.className = valid === "members"
+          ? "py-2 rounded-xl cta-primary-btn flex items-center justify-center gap-1.5 transition cursor-pointer"
+          : "py-2 rounded-xl liquid-glass-pill flex items-center justify-center gap-1.5 transition cursor-pointer";
+      }
+      if (valid === "members" && typeof renderStreamMembersList === "function") {
+        renderStreamMembersList();
       }
     }
 
@@ -21485,6 +22044,7 @@
       const backdrop = document.getElementById("stream-mobile-sheet-backdrop");
       const sheetHeader = document.getElementById("stream-mobile-sheet-header");
       const sheetTitle = document.getElementById("stream-mobile-sheet-title");
+      toggleStreamSettingsMenu(false);
       document.body.classList.add("stream-mobile-sheet-chat");
       if (backdrop) backdrop.classList.remove("hidden");
       if (sheetHeader) {
@@ -21493,14 +22053,10 @@
       }
       if (tab === "members") {
         if (sheetTitle) sheetTitle.textContent = "Thành viên trong phòng";
-        if (typeof switchSidebarTab === "function") switchSidebarTab("chat");
-        if (typeof renderAudienceList === "function") renderAudienceList();
-        const audDrop = document.getElementById("dropdown-audience");
-        if (audDrop) audDrop.classList.remove("hidden");
+        switchStreamSidebarTab("members");
       } else {
-        if (sheetTitle) sheetTitle.textContent = "Chat & Tiện ích phòng Stream";
-        document.getElementById("dropdown-audience")?.classList.add("hidden");
-        if (typeof switchSidebarTab === "function") switchSidebarTab("chat");
+        if (sheetTitle) sheetTitle.textContent = "Chat phòng Stream";
+        switchStreamSidebarTab("chat");
       }
     }
 
@@ -21512,24 +22068,107 @@
         sheetHeader.classList.add("hidden");
         sheetHeader.classList.remove("flex");
       }
-      document.getElementById("dropdown-audience")?.classList.add("hidden");
     }
 
     function getStreamParticipantInfo(uid) {
+      const room = state.currentRoomId ? getEffectiveRoom(state.currentRoomId) : null;
+      const isStream = isStreamRoom(room);
       const seats = state.currentRoomId ? (state.seatsByRoom[state.currentRoomId] || {}) : {};
       let seatId = "";
       let userName = "";
       for (const [sId, occ] of Object.entries(seats)) {
         if (occ && occ.uid === uid) {
-          seatId = sId;
+          seatId = isStream ? "" : sId;
           userName = occ.userName || "";
           break;
         }
       }
       if (!userName && uid === state.uid) userName = state.userName || "Bạn";
+      if (!userName && livekitRoom?.remoteParticipants) {
+        for (const p of livekitRoom.remoteParticipants.values()) {
+          if (p?.identity === uid && p?.name) { userName = p.name; break; }
+        }
+      }
       if (!userName && liveCamPeerMeta[uid]?.name) userName = liveCamPeerMeta[uid].name;
       if (!userName && roomVoicePeersMeta[uid]?.userName) userName = roomVoicePeersMeta[uid].userName;
       return { uid, seatId, userName: userName || "Thành viên" };
+    }
+
+    function getStreamParticipantsList() {
+      if (!state.currentRoomId) return [];
+      const seats = state.seatsByRoom[state.currentRoomId] || {};
+      const uids = new Set();
+      if (state.uid) uids.add(state.uid);
+      if (livekitRoom?.remoteParticipants) {
+        for (const p of livekitRoom.remoteParticipants.values()) {
+          if (p?.identity) uids.add(p.identity);
+        }
+      }
+      Object.keys(roomVoicePeersMeta || {}).forEach((u) => { if (u) uids.add(u); });
+      Object.keys(liveCamPeerMeta || {}).forEach((u) => { if (u) uids.add(u); });
+      for (const u of livekitRemoteCamStreams.keys()) uids.add(u);
+      for (const occ of Object.values(seats)) { if (occ?.uid) uids.add(occ.uid); }
+      if (liveScreenBroadcaster?.uid) uids.add(liveScreenBroadcaster.uid);
+
+      const hostUid = currentRoomHost?.uid || "";
+      const list = Array.from(uids).map((uid) => {
+        const info = getStreamParticipantInfo(uid);
+        const isMine = uid === state.uid;
+        const camStream = getActiveCameraStreamForUid(uid);
+        const micOn = isMine ? Boolean(voiceMicActive) : Boolean(roomVoicePeersMeta[uid]?.micOn);
+        const camOn = Boolean(camStream || (isMine ? localCameraStream : liveCamPeerMeta[uid]?.active));
+        const isSharing = Boolean((isMine && liveScreenStream) || (liveScreenBroadcaster?.uid === uid));
+        const isHost = Boolean(hostUid && uid === hostUid);
+        return { ...info, isMine, camStream, micOn, camOn, isSharing, isHost };
+      });
+      list.sort((a, b) => (b.isMine ? 1 : 0) - (a.isMine ? 1 : 0) || (b.isSharing ? 1 : 0) - (a.isSharing ? 1 : 0) || (b.camOn ? 1 : 0) - (a.camOn ? 1 : 0));
+      return list;
+    }
+
+    function renderStreamMembersList() {
+      const room = state.currentRoomId ? getEffectiveRoom(state.currentRoomId) : null;
+      if (!room || !isStreamRoom(room)) return;
+      const list = getStreamParticipantsList();
+      const tabCountEl = document.getElementById("stream-members-tab-count");
+      const panelCountEl = document.getElementById("stream-members-panel-count");
+      if (tabCountEl) tabCountEl.textContent = String(list.length);
+      if (panelCountEl) panelCountEl.textContent = `${list.length}/10`;
+      const container = document.getElementById("stream-members-list");
+      if (!container) return;
+      if (list.length === 0) {
+        container.innerHTML = `<p class="text-slate-400 italic text-center py-6">Chưa có thành viên nào trong phòng.</p>`;
+        return;
+      }
+      const iAmHostNow = isIAmHost();
+      container.innerHTML = list.map((m) => {
+        const initial = (m.userName || "K").trim().charAt(0).toUpperCase();
+        return `
+          <div class="flex items-center justify-between gap-2 px-2.5 py-2 rounded-xl bg-stone-950 border ${m.isMine ? "border-amber-400/40" : "border-white/10"}">
+            <div class="flex items-center gap-2 min-w-0">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xs shrink-0 ${m.isMine ? "bg-amber-400 text-slate-950" : "bg-rose-600 text-white"}">
+                ${escapeHTML(initial)}
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="font-bold text-xs truncate ${m.isMine ? "text-amber-300" : "text-white"}">${escapeHTML(m.userName)}${m.isMine ? " (Bạn)" : ""}</span>
+                  ${m.isHost ? `<span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[9px] font-black">Chủ phòng</span>` : ""}
+                  ${m.isSharing ? `<span class="px-1.5 py-0.5 rounded bg-rose-600/30 text-rose-200 text-[9px] font-black">Đang chia sẻ</span>` : ""}
+                </div>
+                <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
+                  <span><i class="fa-solid ${m.micOn ? "fa-microphone text-emerald-400" : "fa-microphone-slash text-rose-400"} mr-1"></i>${m.micOn ? "Mic bật" : "Mic tắt"}</span>
+                  <span><i class="fa-solid ${m.camOn ? "fa-video text-emerald-400" : "fa-video-slash text-slate-500"} mr-1"></i>${m.camOn ? "Cam bật" : "Cam tắt"}</span>
+                </div>
+              </div>
+            </div>
+            ${iAmHostNow && !m.isMine ? `
+              <button type="button" data-focus-uid="${escapeHTML(m.uid)}" onclick="window.appActions.openHostTransferModal(this.dataset.focusUid)"
+                class="px-2 py-1 rounded-lg bg-white/10 hover:bg-amber-400 text-amber-200 hover:text-slate-950 text-[10px] font-bold cursor-pointer shrink-0">
+                Nhường chủ phòng
+              </button>
+            ` : ""}
+          </div>
+        `;
+      }).join("");
     }
 
     function getActiveCameraStreamForUid(uid) {
@@ -21633,6 +22272,24 @@
     function onLiveKitConnectionChanged(lkState, roomId) {
       if (!roomId || roomId !== state.currentRoomId) return;
       if (lkState === "connected") {
+        if (rtdb && rtdbMod && state.uid) {
+          rtdbMod.update(rtdbMod.ref(rtdb, `webrtc_voice/${roomId}/peers/${state.uid}`), {
+            uid: state.uid,
+            userName: state.userName,
+            micOn: Boolean(voiceMicActive),
+            sfu: true,
+            updatedAt: Date.now()
+          }).catch(() => {});
+          if (localCameraStream) {
+            rtdbMod.update(rtdbMod.ref(rtdb, `webrtc_cam/${roomId}/cam_peers/${state.uid}`), {
+              uid: state.uid,
+              name: state.userName || "Thành viên",
+              active: true,
+              sfu: true,
+              updatedAt: Date.now()
+            }).catch(() => {});
+          }
+        }
         // Nếu đang bật camera cục bộ mà SFU vừa nối xong -> publish lên SFU
         if (localCameraStream && !livekitLocalCamPub && typeof publishLocalCameraToLiveKit === "function") {
           publishLocalCameraToLiveKit(localCameraStream, roomId);
@@ -21675,16 +22332,16 @@
       updateDiscordLiveUI();
     }
 
-    // Ưu tiên codec phần cứng H.264 (NVENC / QuickSync / VideoToolbox) để giữ ≥ 45-60fps ngay cả khi phòng full 10 ghế
+    // Ưu tiên codec VP8 tương thích chéo giữa Laptop và Điện thoại (tránh kẹt profile H.264 khác nhau giữa trình duyệt)
     function preferHardwareH264Codec(pc) {
       try {
         if (!pc || typeof RTCRtpSender === "undefined" || typeof RTCRtpSender.getCapabilities !== "function") return;
         const caps = RTCRtpSender.getCapabilities("video");
         if (!caps || !Array.isArray(caps.codecs)) return;
-        const h264 = caps.codecs.filter((c) => c.mimeType && c.mimeType.toLowerCase() === "video/h264");
-        const rest = caps.codecs.filter((c) => !c.mimeType || c.mimeType.toLowerCase() !== "video/h264");
-        if (h264.length === 0) return;
-        const ordered = [...h264, ...rest];
+        const vp8 = caps.codecs.filter((c) => c.mimeType && c.mimeType.toLowerCase() === "video/vp8");
+        const rest = caps.codecs.filter((c) => !c.mimeType || c.mimeType.toLowerCase() !== "video/vp8");
+        if (vp8.length === 0) return;
+        const ordered = [...vp8, ...rest];
         pc.getTransceivers().forEach((tr) => {
           if (tr?.sender?.track?.kind === "video" && typeof tr.setCodecPreferences === "function") {
             try { tr.setCodecPreferences(ordered); } catch (_) {}
@@ -21886,6 +22543,21 @@
       const connectingDetail = document.getElementById("discord-viewer-connecting-detail");
       const isWaitingRemote = Boolean(otherBroadcaster && !hasRemoteTrack);
 
+      const stageWorkspace = document.getElementById("stream-stage-workspace");
+      const stripTitleEl = document.getElementById("stream-stage-strip-title");
+      const stageShowingScreen = Boolean(isLive || isWaitingRemote);
+      if (stageWorkspace) {
+        const nextMode = stageShowingScreen ? "sharing" : "grid";
+        stageWorkspace.setAttribute("data-stream-mode", nextMode);
+        stageWorkspace.setAttribute("data-stream-layout", streamLayoutMode || "auto");
+      }
+      if (stripTitleEl) {
+        stripTitleEl.textContent = stageShowingScreen
+          ? "Camera"
+          : "Chưa có ai chia sẻ màn hình · Lưới thành viên";
+      }
+      if (typeof updateStreamConnectionPillUI === "function") updateStreamConnectionPillUI();
+
       if (idleDefaultBox) {
         idleDefaultBox.classList.toggle("hidden", isWaitingRemote);
       }
@@ -21928,29 +22600,35 @@
         }
       }
 
-      // Cập nhật thanh nút Dock (tách riêng Chia sẻ / Đổi nguồn và Dừng chia sẻ)
+      // Cập nhật thanh nút Dock chính: Chia sẻ màn hình <-> Dừng chia sẻ
       const dockShareBtn = document.getElementById("discord-dock-share-btn");
-      const dockStopShareBtn = document.getElementById("discord-dock-stop-share-btn");
+      const switchSrcBtn = document.getElementById("stream-btn-switch-source");
       if (dockShareBtn) {
         if (isBroadcasting) {
-          dockShareBtn.style.background = "#16161D";
-          dockShareBtn.className = "stream-dock-btn border border-emerald-400/60 text-emerald-300";
-          dockShareBtn.innerHTML = `<i class="fa-solid fa-repeat"></i><span>Đổi nguồn</span>`;
-          dockShareBtn.title = "Đổi cửa sổ hoặc tab đang chia sẻ (hủy hộp chọn sẽ giữ luồng hiện tại)";
+          dockShareBtn.style.background = "";
+          dockShareBtn.className = "stream-dock-btn bg-rose-600/25 hover:bg-rose-600/40 border border-rose-400/70 text-rose-200 font-black";
+          dockShareBtn.innerHTML = `<i class="fa-solid fa-stop text-rose-300"></i><span>Dừng chia sẻ</span>`;
+          dockShareBtn.setAttribute("aria-label", "Dừng chia sẻ màn hình");
+          dockShareBtn.setAttribute("aria-pressed", "true");
+          dockShareBtn.title = "Dừng chia sẻ màn hình hiện tại (giữ mic và camera)";
         } else if (otherBroadcaster) {
           dockShareBtn.style.background = "#16161D";
           dockShareBtn.className = "stream-dock-btn border border-white/15 text-slate-400";
           dockShareBtn.innerHTML = `<i class="fa-solid fa-display"></i><span>Đang có người phát</span>`;
+          dockShareBtn.setAttribute("aria-label", `${liveScreenBroadcaster?.name || "Thành viên"} đang chia sẻ màn hình`);
+          dockShareBtn.setAttribute("aria-pressed", "false");
           dockShareBtn.title = `${liveScreenBroadcaster?.name || "Thành viên"} đang chia sẻ màn hình`;
         } else {
           dockShareBtn.style.background = "#F5C518";
           dockShareBtn.className = "stream-dock-btn border border-amber-400/50 text-[#0B0B0F] font-black";
           dockShareBtn.innerHTML = `<i class="fa-solid fa-display"></i><span>Chia sẻ màn hình</span>`;
+          dockShareBtn.setAttribute("aria-label", "Chia sẻ màn hình");
+          dockShareBtn.setAttribute("aria-pressed", "false");
           dockShareBtn.title = "Bắt đầu chia sẻ màn hình";
         }
       }
-      if (dockStopShareBtn) {
-        dockStopShareBtn.classList.toggle("hidden", !isBroadcasting);
+      if (switchSrcBtn) {
+        switchSrcBtn.classList.toggle("hidden", !isBroadcasting);
       }
 
       const dockMuteBtn = document.getElementById("discord-dock-mute-btn");
@@ -21958,11 +22636,11 @@
       if (dockMuteBtn) {
         dockMuteBtn.setAttribute("aria-pressed", isDiscordViewerMuted ? "true" : "false");
         dockMuteBtn.className = isDiscordViewerMuted
-          ? "stream-dock-btn bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/50 text-rose-300"
-          : "stream-dock-btn bg-[#0B0B0F] hover:bg-white/10 border border-white/15 text-emerald-300";
+          ? "flex-1 h-9 px-3 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/50 text-rose-300 font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer"
+          : "flex-1 h-9 px-3 rounded-xl bg-[#0B0B0F] hover:bg-white/10 border border-white/15 text-emerald-300 font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer";
         dockMuteBtn.innerHTML = isDiscordViewerMuted
-          ? `<i class="fa-solid fa-volume-xmark"></i><span class="hidden sm:inline">Đang tắt tiếng</span>`
-          : `<i class="fa-solid fa-volume-high"></i><span class="hidden sm:inline">Tiếng stream</span>`;
+          ? `<i class="fa-solid fa-volume-xmark"></i><span>Đang tắt tiếng stream</span>`
+          : `<i class="fa-solid fa-volume-high"></i><span>Tiếng stream</span>`;
       }
       if (unmutePill) {
         unmutePill.classList.toggle("hidden", !(hasRemote && isDiscordViewerMuted));
@@ -22053,12 +22731,13 @@
       }
       if (typeof syncStreamHostControlsUI === "function") syncStreamHostControlsUI();
       if (typeof renderDiscordCameras === "function") renderDiscordCameras();
+      if (typeof renderStreamMembersList === "function") renderStreamMembersList();
     }
 
-    // Bấm nút Share trên thanh điều khiển dưới màn hình
+    // Bấm nút Chia sẻ màn hình / Dừng chia sẻ trên thanh điều khiển chính
     function handleDiscordDockShareClick() {
       if (liveScreenStream) {
-        switchDiscordScreenSource();
+        stopDiscordScreenShare();
       } else {
         startDiscordScreenShare();
       }
@@ -22135,12 +22814,13 @@
       if (!btn) return;
       const active = Boolean(localCameraStream);
       btn.setAttribute("aria-pressed", active ? "true" : "false");
+      btn.setAttribute("aria-label", active ? "Camera đang bật — bấm để tắt" : "Camera tắt — bấm để bật");
       btn.className = active
         ? "stream-dock-btn bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/60 text-emerald-300"
         : "stream-dock-btn bg-[#0B0B0F] hover:bg-white/10 border border-white/15 text-slate-200";
       btn.innerHTML = active
-        ? `<i class="fa-solid fa-video text-emerald-400"></i><span>Cam: Bật</span>`
-        : `<i class="fa-solid fa-video-slash text-slate-400"></i><span>Bật Cam</span>`;
+        ? `<i class="fa-solid fa-video text-emerald-400"></i><span>Camera bật</span>`
+        : `<i class="fa-solid fa-video-slash text-slate-400"></i><span>Camera tắt</span>`;
     }
 
     async function publishLocalCameraToLiveKit(camStream, roomId) {
@@ -22159,7 +22839,7 @@
         const pub = await livekitRoom.localParticipant.publishTrack(vTrack, {
           source: LK.Track.Source.Camera,
           name: "camera",
-          videoCodec: "h264",
+          videoCodec: "vp8",
           simulcast: false,
           videoEncoding: {
             maxBitrate: cfg.maxBitrate,
@@ -22201,14 +22881,15 @@
       dismissStreamPermissionBanner();
       const cfg = getEffectiveCamPreset();
       let camStream = null;
+      const videoConstraints = {
+        width: { ideal: cfg.width },
+        height: { ideal: cfg.height },
+        frameRate: { ideal: cfg.frameRate, max: cfg.frameRate },
+        ...(selectedStreamVideoDeviceId ? { deviceId: { exact: selectedStreamVideoDeviceId } } : { facingMode: "user" })
+      };
       try {
         camStream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: cfg.width },
-            height: { ideal: cfg.height },
-            frameRate: { ideal: cfg.frameRate, max: cfg.frameRate },
-            facingMode: "user"
-          },
+          video: videoConstraints,
           audio: false
         });
       } catch (err) {
@@ -22220,14 +22901,12 @@
         }
         try {
           camStream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "user" },
+            video: selectedStreamVideoDeviceId ? { deviceId: { ideal: selectedStreamVideoDeviceId } } : { facingMode: "user" },
             audio: false
           });
         } catch (err3) {
           logStreamDiag("cam_local", "gum_fallback_err", err3, "error");
-          if (err3 && (err3.name === "NotAllowedError" || err3.name === "PermissionDeniedError")) {
-            showStreamPermissionGuide("camera");
-          }
+          showStreamPermissionGuide("camera", `Không thể mở Camera (${err3?.message || err3?.name || "Lỗi thiết bị"}). Hãy kiểm tra quyền Camera rồi bấm Thử lại.`);
           showToast("Không thể mở Camera: " + (err3?.message || "Lỗi thiết bị"), "error");
           return;
         }
@@ -22527,6 +23206,7 @@
         if (localCameraStream) rebuildDiscordCamConnections(roomId);
         renderDiscordCameras();
         updateDiscordLiveUI();
+        if (typeof updateRoomHeaderUI === "function") updateRoomHeaderUI();
       }, (err) => {
         logStreamDiag("cam_rtdb", "cam_peers_read_err", err, "warn");
       });
@@ -22538,6 +23218,8 @@
         roomVoicePeersMeta = snap.val() || {};
         if (localCameraStream) rebuildDiscordCamConnections(roomId);
         renderDiscordCameras();
+        if (typeof renderStreamMembersList === "function") renderStreamMembersList();
+        if (typeof updateRoomHeaderUI === "function") updateRoomHeaderUI();
       }, (err) => {
         logStreamDiag("cam_rtdb", "room_peers_read_err", err, "warn");
       });
@@ -22664,6 +23346,10 @@
 
     function bindCameraVideoElement(vid, avatarEl, stream, isMine) {
       if (!vid) return;
+      vid.muted = true;
+      vid.playsInline = true;
+      vid.setAttribute("playsinline", "");
+      vid.setAttribute("webkit-playsinline", "");
       if (stream) {
         const reveal = () => {
           vid.classList.remove("hidden");
@@ -22679,7 +23365,9 @@
         }
         vid.classList.remove("hidden");
         vid.classList.toggle("scale-x-[-1]", Boolean(isMine));
-        vid.play().catch((err) => logStreamDiag("cam_ui", "tile_play_err", err, "warn"));
+        if (vid.paused) {
+          vid.play().catch((err) => logStreamDiag("cam_ui", "tile_play_err", err, "warn"));
+        }
         if (avatarEl && (vid.readyState >= 1 || vid.videoWidth > 0)) {
           avatarEl.classList.add("hidden");
         }
@@ -22695,14 +23383,13 @@
       }
     }
 
-    // Hiển thị Dải Camera sát vùng trình chiếu (luôn có tên, trạng thái mic & kết nối, bấm để phóng lớn) + đồng bộ vào ô ghế
+    // Hiển thị Lưới Camera (khi chưa có chia sẻ) hoặc Dải Camera cạnh/dưới nội dung (khi đang chia sẻ), bảo toàn <video> không bị pause khi cập nhật
     function renderDiscordCameras() {
       const grid = document.getElementById("discord-camera-grid");
       const legacyStrip = document.getElementById("discord-camera-strip");
       if (grid) { grid.classList.add("hidden"); grid.innerHTML = ""; }
       if (legacyStrip) { legacyStrip.classList.add("hidden"); legacyStrip.innerHTML = ""; }
 
-      // Hợp nhất nguồn stream từ Local + LiveKit SFU + P2P (KHÔNG bỏ qua stream live chỉ vì cam_peers metadata trễ!)
       const camMap = new Map();
       const transportByUid = new Map();
       if (localCameraStream && state.uid) {
@@ -22722,39 +23409,30 @@
         }
       }
 
-      // 1. Render Dải Camera & Thành viên ngay sát vùng trình chiếu (#stream-camera-strip)
+      // 1. Render Lưới / Dải Camera & Thành viên (#stream-camera-strip)
       const stripEl = document.getElementById("stream-camera-strip");
       const countEl = document.getElementById("stream-cam-strip-count");
       const room = state.currentRoomId ? getEffectiveRoom(state.currentRoomId) : null;
-      if (stripEl && room && room.isDiscordRoom) {
-        const seats = state.seatsByRoom[state.currentRoomId] || {};
-        const participantUids = new Set();
-        if (state.uid) participantUids.add(state.uid);
-        Object.values(seats).forEach((occ) => { if (occ?.uid) participantUids.add(occ.uid); });
-        Object.keys(liveCamPeerMeta || {}).forEach((u) => participantUids.add(u));
-        camMap.forEach((_, u) => participantUids.add(u));
-
-        const list = Array.from(participantUids).map((uid) => {
-          const info = getStreamParticipantInfo(uid);
-          const stream = camMap.get(uid) || null;
-          const isMine = uid === state.uid;
-          const micOn = isMine ? Boolean(voiceMicActive) : Boolean(roomVoicePeersMeta[uid]?.micOn);
-          const isSpeaking = typeof speakingUids !== "undefined" && speakingUids.has(uid);
-          const metaActive = Boolean(liveCamPeerMeta[uid]?.active);
-          const p2pState = liveCamPeers.get(uid)?.connState || "";
+      if (stripEl && room && isStreamRoom(room)) {
+        const list = getStreamParticipantsList().map((item) => {
+          const stream = camMap.get(item.uid) || item.camStream || null;
+          const isSpeaking = typeof speakingUids !== "undefined" && speakingUids.has(item.uid);
+          const metaActive = Boolean(liveCamPeerMeta[item.uid]?.active);
+          const p2pState = liveCamPeers.get(item.uid)?.connState || "";
           const connLabel = stream
-            ? (transportByUid.get(uid) || "LIVE")
+            ? (transportByUid.get(item.uid) || "LIVE")
             : metaActive
               ? (p2pState === "failed" ? "Lỗi Cam" : "Đang nối Cam...")
-              : (roomVoicePeersMeta[uid]?.sfu || (isMine && livekitVoiceActive) ? "SFU" : "Trực tuyến");
-          return { ...info, stream, isMine, micOn, isSpeaking, metaActive, connLabel };
+              : item.isSharing
+                ? "Đang chia sẻ"
+                : (roomVoicePeersMeta[item.uid]?.sfu || (item.isMine && livekitVoiceActive) ? "SFU" : "Trực tuyến");
+          return { ...item, stream, isSpeaking, metaActive, connLabel };
         });
 
         // Ưu tiên: Người đang bật Cam lên đầu -> Bạn -> các thành viên khác
         list.sort((a, b) => (b.stream ? 1 : 0) - (a.stream ? 1 : 0) || (b.isMine ? 1 : 0) - (a.isMine ? 1 : 0));
         if (countEl) countEl.textContent = `${list.length}/10`;
 
-        // Đồng bộ DOM mà không phá hủy <video> đang chạy để tránh nhấp nháy khung hình
         const existingCards = new Map();
         stripEl.querySelectorAll("[data-cam-strip-uid]").forEach((el) => {
           existingCards.set(el.getAttribute("data-cam-strip-uid"), el);
@@ -22764,7 +23442,7 @@
           if (!activeUidSet.has(uid)) el.remove();
         });
 
-        list.forEach((item) => {
+        list.forEach((item, idx) => {
           let card = existingCards.get(item.uid);
           if (!card) {
             card = document.createElement("button");
@@ -22773,7 +23451,7 @@
             card.setAttribute("data-cam-strip-uid", item.uid);
             card.onclick = () => openStreamCamSpotlight(item.uid);
             card.innerHTML = `
-              <video data-strip-video autoplay playsinline muted class="hidden absolute inset-0 w-full h-full object-cover pointer-events-none"></video>
+              <video data-strip-video autoplay playsinline webkit-playsinline muted class="hidden absolute inset-0 w-full h-full object-cover pointer-events-none"></video>
               <div data-strip-avatar class="absolute inset-0 flex flex-col items-center justify-center gap-1 pointer-events-none">
                 <div data-strip-initial class="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm shadow border border-white/20"></div>
                 <span data-strip-cam-hint class="text-[9px] font-bold text-slate-400"></span>
@@ -22782,14 +23460,13 @@
               <span data-strip-mic class="absolute top-1.5 right-1.5 z-10 w-6 h-6 rounded-lg bg-black/75 border border-white/10 flex items-center justify-center text-[10px]"></span>
               <div class="absolute bottom-1.5 inset-x-1.5 z-10 px-2 py-0.5 rounded-lg bg-black/80 backdrop-blur-sm flex items-center justify-between gap-1 text-[10px] font-bold text-white pointer-events-none">
                 <span data-strip-name class="truncate"></span>
-                <span data-strip-seat class="text-[9px] font-black shrink-0 text-amber-300"></span>
               </div>
             `;
             stripEl.appendChild(card);
           }
 
           card.className = `stream-cam-card ${item.isMine ? "is-mine" : ""} ${item.isSpeaking ? "is-speaking" : ""} ${item.stream ? "is-live-cam" : ""}`;
-          card.setAttribute("aria-label", `Mở lớn camera của ${item.userName}${item.seatId ? `, ghế ${item.seatId}` : ""}`);
+          card.setAttribute("aria-label", `Phóng lớn camera của ${item.userName}`);
           const vid = card.querySelector("[data-strip-video]");
           const avatarEl = card.querySelector("[data-strip-avatar]");
           const initEl = card.querySelector("[data-strip-initial]");
@@ -22797,13 +23474,12 @@
           const connEl = card.querySelector("[data-strip-conn]");
           const micEl = card.querySelector("[data-strip-mic]");
           const nameEl = card.querySelector("[data-strip-name]");
-          const seatEl = card.querySelector("[data-strip-seat]");
 
           if (initEl) {
             initEl.textContent = (item.userName || "K").trim().charAt(0).toUpperCase();
             initEl.className = `w-10 h-10 rounded-full flex items-center justify-center font-black text-sm shadow border border-white/20 ${item.isMine ? "bg-amber-400 text-slate-950" : "bg-rose-600/85 text-white"}`;
           }
-          if (hintEl) hintEl.textContent = item.metaActive ? "Đang chờ camera..." : "Cam tắt";
+          if (hintEl) hintEl.textContent = item.metaActive ? "Đang chờ camera..." : "Camera tắt";
           if (connEl) {
             connEl.textContent = item.connLabel;
             connEl.className = `absolute top-1.5 left-1.5 z-10 px-1.5 py-0.5 rounded bg-black/80 border border-white/10 text-[9px] font-extrabold ${item.stream ? "text-emerald-300" : item.metaActive ? "text-amber-300" : "text-slate-300"}`;
@@ -22815,25 +23491,16 @@
             micEl.title = item.micOn ? "Mic đang bật" : "Mic đang tắt";
           }
           if (nameEl) nameEl.textContent = `${item.userName}${item.isMine ? " (Bạn)" : ""}`;
-          if (seatEl) seatEl.textContent = item.seatId || "";
 
           bindCameraVideoElement(vid, avatarEl, item.stream, item.isMine);
-          stripEl.appendChild(card); // Giữ đúng thứ tự sắp xếp
+          // CHỈ chèn lại DOM nếu thứ tự thực sự đổi (tránh trình duyệt tạm dừng <video> đang chạy)
+          const targetRef = stripEl.children[idx] || null;
+          if (targetRef !== card) {
+            stripEl.insertBefore(card, targetRef);
+          }
         });
       }
 
-      // 2. Đồng bộ video camera vào các ô ghế trong #seating-map
-      const seatMap = document.getElementById("seating-map");
-      if (seatMap) {
-        seatMap.querySelectorAll("video[data-tile-cam-uid]").forEach((vid) => {
-          const uid = vid.getAttribute("data-tile-cam-uid");
-          const stream = uid ? camMap.get(uid) : null;
-          const avatarEl = uid ? seatMap.querySelector(`[data-tile-avatar-uid="${CSS.escape(uid)}"]`) : null;
-          bindCameraVideoElement(vid, avatarEl, stream, uid === state.uid);
-        });
-      }
-
-      // 3. Nếu đang mở modal phóng to camera -> cập nhật đồng bộ
       syncStreamCamSpotlightVideo();
     }
 
@@ -23027,12 +23694,12 @@
         const vPub = await livekitRoom.localParticipant.publishTrack(vTrack, {
           source: LK.Track.Source.ScreenShare,
           name: "screen_share",
-          videoCodec: "h264",
-          simulcast: liveScreenQuality === "auto",
-          degradationPreference: cfg.degradationPreference || "balanced",
+          videoCodec: "vp8",
+          simulcast: false,
+          degradationPreference: cfg.degradationPreference || "maintain-resolution",
           videoEncoding: {
             maxBitrate: cfg.maxBitrate,
-            maxFramerate: cfg.frameRate || 60,
+            maxFramerate: cfg.frameRate || 30,
             priority: "high"
           }
         });
@@ -23111,12 +23778,14 @@
         try {
           stream = await acquireDisplayMediaStream(cfg);
         } catch (err) {
-          if (err && (err.message === "USER_CANCELLED" || err.name === "NotAllowedError" || err.name === "AbortError")) {
+          if (err && (err.message === "USER_CANCELLED" || err.name === "NotAllowedError" || err.name === "PermissionDeniedError" || err.name === "AbortError")) {
             logStreamDiag("screen_local", "user_cancelled", err.name || "cancel");
-            showToast("Đã hủy chọn màn hình chia sẻ — phòng vẫn hoạt động bình thường.", "info");
+            showStreamPermissionGuide("screen", "Chưa cấp quyền hoặc nguồn chia sẻ màn hình đã bị hủy. Bấm Thử lại để chọn màn hình cần chia sẻ.");
+            showToast("Không thể bắt đầu chia sẻ màn hình — bấm Thử lại nếu bạn muốn chia sẻ.", "info");
             return;
           }
           logStreamDiag("screen_local", "gdm_failed", err, "error");
+          showStreamPermissionGuide("screen", `Chia sẻ màn hình thất bại: ${err?.message || err?.name || "Lỗi thiết bị"}. Hãy kiểm tra quyền hệ thống rồi bấm Thử lại.`);
           showToast("Không thể mở chia sẻ màn hình: " + (err?.message || "Lỗi thiết bị"), "error");
           return;
         }
@@ -23127,6 +23796,7 @@
       if (!isNativeBlankStream && (!vTrack || vTrack.readyState !== "live")) {
         stream.getTracks().forEach((t) => { try { t.stop(); } catch (_) {} });
         logStreamDiag("screen_local", "no_live_video_track", "Track video không live", "error");
+        showStreamPermissionGuide("screen", "Không nhận được khung hình từ nguồn màn hình vừa chọn. Bấm Thử lại.");
         showToast("Không nhận được khung hình từ nguồn màn hình vừa chọn.", "error");
         return;
       }
@@ -24800,8 +25470,10 @@
       // Chế độ LiveKit SFU đang hoạt động: dùng thẳng pipeline SFU (trên cả Web & App iOS/Android, KHÔNG mở trùng AudioRecord native!)
       if (livekitVoiceActive && livekitRoom?.state === "connected" && livekitRoom?.localParticipant) {
         try {
-          await livekitRoom.localParticipant.setMicrophoneEnabled(true);
+          const sfuAudioOpts = selectedStreamAudioDeviceId ? { deviceId: { exact: selectedStreamAudioDeviceId } } : undefined;
+          await livekitRoom.localParticipant.setMicrophoneEnabled(true, sfuAudioOpts);
           voiceMicActive = true;
+          if (typeof dismissStreamPermissionBanner === "function") dismissStreamPermissionBanner();
           updateVoiceMicButtonUI();
           if (voiceSubtitlesEnabled) startVoiceSpeechRecognition();
           try { logMemberActivity?.("mic_toggle", `Bật Microphone SFU tại ${getEffectiveRoom(roomId)?.number || roomId}`, { micState: "on", roomId }); } catch (_) {}
@@ -24841,13 +25513,18 @@
       }
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (typeof showStreamPermissionGuide === "function") showStreamPermissionGuide("mic", "Trình duyệt này không hỗ trợ bật Micro trực tuyến.");
         showToast("Trình duyệt này không hỗ trợ micro trực tuyến (cần HTTPS hoặc localhost).", "error");
         return;
       }
 
       try {
         const hasLiveTrack = localVoiceStream && localVoiceStream.getAudioTracks().some(t => t.readyState === "live");
-        if (!hasLiveTrack) {
+        if (!hasLiveTrack || selectedStreamAudioDeviceId) {
+          if (localVoiceStream) {
+            localVoiceStream.getTracks().forEach((t) => { try { t.stop(); } catch (_) {} });
+            localVoiceStream = null;
+          }
           try {
             localVoiceStream = await navigator.mediaDevices.getUserMedia({
               audio: {
@@ -24855,19 +25532,24 @@
                 noiseSuppression: true,
                 autoGainControl: true,
                 channelCount: 1,
-                sampleRate: 48000
+                sampleRate: 48000,
+                ...(selectedStreamAudioDeviceId ? { deviceId: { exact: selectedStreamAudioDeviceId } } : {})
               }
             });
           } catch (constraintErr) {
-            localVoiceStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            localVoiceStream = await navigator.mediaDevices.getUserMedia({
+              audio: selectedStreamAudioDeviceId ? { deviceId: { ideal: selectedStreamAudioDeviceId } } : true
+            });
           }
         }
       } catch (micErr) {
         logStreamDiag("mic_p2p", "gum_failed", micErr, "error");
         const errName = micErr && micErr.name ? micErr.name : "";
         if (errName === "NotFoundError" || errName === "DevicesNotFoundError") {
+          if (typeof showStreamPermissionGuide === "function") showStreamPermissionGuide("mic", "Không tìm thấy thiết bị Micro nào trên máy bạn. Hãy cắm micro rồi bấm Thử lại.");
           showToast("Không tìm thấy thiết bị Micro nào trên máy bạn!", "error");
         } else if (errName === "NotReadableError" || errName === "TrackStartError") {
+          if (typeof showStreamPermissionGuide === "function") showStreamPermissionGuide("mic", "Micro đang được ứng dụng khác sử dụng hoặc tạm bận. Hãy đóng ứng dụng khác rồi bấm Thử lại.");
           showToast("Micro đang bị ứng dụng khác sử dụng!", "error");
         } else {
           if (typeof showStreamPermissionGuide === "function") showStreamPermissionGuide("mic");
@@ -24875,6 +25557,7 @@
         }
         return;
       }
+      if (typeof dismissStreamPermissionBanner === "function") dismissStreamPermissionBanner();
 
       const track = localVoiceStream.getAudioTracks()[0];
       if (!track) {
@@ -25668,6 +26351,12 @@
 
     function openBookingModal(preselectRoomId = null, preselectShowtime = null, preselectSeat = null, options = {}) {
       const targetRoomId = preselectRoomId || state.currentRoomId || state.bookingDraft.roomId || "room-1";
+      const targetRoomObj = getEffectiveRoom(targetRoomId);
+      // Phòng Stream không dùng luồng đặt vé/chọn ghế -> vào phòng trực tiếp
+      if (isStreamRoom(targetRoomObj)) {
+        enterRoom(targetRoomId);
+        return;
+      }
       // Nếu đã có vé hợp lệ cho bộ phim đang chiếu của phòng này -> vào thẳng ghế trên vé (trừ khi mở luồng Đổi ghế với forceNewBooking)
       if (!options?.forceNewBooking && hasValidTicketForRoom(targetRoomId)) {
         enterRoom(targetRoomId);
@@ -27485,9 +28174,13 @@
       if (!e.target.closest("[data-dropdown-root]")) {
         closeAllDropdowns(true);
       }
-      if (!e.target.closest("#subtitle-settings-panel") && !e.target.closest("#btn-sub-settings")) {
+      if (!e.target.closest("#subtitle-settings-panel") && !e.target.closest("#btn-sub-settings") && !e.target.closest("#btn-cc-mode")) {
         const subPanel = document.getElementById("subtitle-settings-panel");
         if (subPanel) subPanel.classList.add("hidden");
+      }
+      if (!e.target.closest("#stream-settings-popover") && !e.target.closest("#discord-dock-settings-btn") && !e.target.closest("#stream-mobile-tabs")) {
+        const sp = document.getElementById("stream-settings-popover");
+        if (sp && !sp.classList.contains("hidden")) toggleStreamSettingsMenu(false);
       }
     });
 
@@ -35386,6 +36079,11 @@
       openStreamCamSpotlight,
       closeStreamCamSpotlight,
       dismissStreamPermissionBanner,
+      retryLastStreamMediaAction,
+      toggleStreamSettingsMenu,
+      setStreamLayoutMode,
+      switchStreamInputDevice,
+      switchStreamSidebarTab,
       forceStopRoomScreenShare,
       applySubtitleMode,
       broadcastRoomEffectsSync
@@ -35413,6 +36111,11 @@
       }
       document.addEventListener("keydown", (ev) => {
         if (ev.key === "Escape") {
+          const settingsPop = document.getElementById("stream-settings-popover");
+          if (settingsPop && !settingsPop.classList.contains("hidden")) {
+            toggleStreamSettingsMenu(false);
+            return;
+          }
           const spot = document.getElementById("stream-cam-spotlight-modal");
           if (spot && !spot.classList.contains("hidden")) {
             closeStreamCamSpotlight();
