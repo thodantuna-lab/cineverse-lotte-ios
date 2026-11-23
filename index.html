@@ -6638,6 +6638,113 @@
       .cv-room-row { min-height: 58px; }
     }
 </style>
+<style id='cv-theater-art-deco'>
+body:not(.stream-room-active) #room-view {
+  background: radial-gradient(ellipse at 50% 5%, #29191b, transparent 64%), #0d0c0f;
+  --cv-brass: #856641;
+}
+body:not(.stream-room-active) #room-view :is(#theater-left-movies-aside,.theater-sidebar-card,#cinema-seat-legend-bar) {
+  background: linear-gradient(150deg,#201a1c,#121114 55%);
+  border: 1px solid #514034;
+  border-radius: 14px;
+}
+body:not(.stream-room-active) #room-view #theater-center-auditorium {
+  background: radial-gradient(ellipse at top,#332727,transparent 68%),#100e10;
+  border: 1px solid #574332;
+  border-radius: 16px;
+  padding: clamp(6px,1vw,16px);
+}
+body:not(.stream-room-active) #room-view .lotte-screen-frame {
+  border: 1px solid var(--cv-brass);
+  box-shadow: inset 0 0 0 3px #171316,0 8px 18px #080709;
+}
+body:not(.stream-room-active) #room-view :is(.cinema-curtain-l,.cinema-curtain-r) {
+  background: repeating-linear-gradient(90deg,#220c13 0%,#601e30 18%,#421522 38%,#1a0b10 58%);
+}
+body:not(.stream-room-active) #room-view #cinema-control-bar {
+  background: linear-gradient(#201c1e,#110f12);
+  border: 1px solid #45372d;
+  border-radius: 12px;
+}
+body:not(.stream-room-active) #room-view #btn-play-pause {
+  color: #221304;
+  background: #f7bf45;
+  box-shadow: 0 2px 8px #0008;
+}
+body:not(.stream-room-active) #room-view #theater-left-movie-list .movie-list-card {
+  background: transparent;
+  border-bottom: 1px solid #383033;
+  border-radius: 4px;
+}
+body:not(.stream-room-active) #room-view .movie-list-card > div:first-child {
+  display: grid;
+  grid-template-columns: 52px minmax(0,1fr);
+  grid-template-rows: auto auto;
+  align-content: center;
+  gap: 4px 9px;
+  padding: 8px;
+  aspect-ratio: auto;
+  min-height: 90px;
+  background: transparent;
+}
+body:not(.stream-room-active) #room-view .movie-list-card > div:first-child > img {
+  grid-area: 1 / 1 / 3 / 2;
+  height: 74px;
+  border-radius: 5px;
+}
+body:not(.stream-room-active) #room-view .movie-list-card .bottom-0 {
+  grid-area: 1 / 2;
+  position: static;
+  align-self: end;
+  padding: 0;
+}
+body:not(.stream-room-active) #room-view .movie-list-card .bottom-0 p {font-size: 13px; line-height: 1.35;}
+body:not(.stream-room-active) #room-view .movie-list-card > div:first-child > span.right-2 {
+  grid-area: 2 / 2;
+  position: static;
+  justify-self: start;
+  align-self: start;
+}
+body:not(.stream-room-active) #room-view .movie-list-card > div:first-child > span.left-2 {
+  top: auto;
+  bottom: 8px;
+  max-width: 52px;
+}
+body:not(.stream-room-active) #room-view .movie-list-card .bg-gradient-to-t {opacity: 0;}
+body:not(.stream-room-active) #room-view #chat-messages [data-msg-id] > div:last-child {
+  color: #f8eeeb;
+  background: #282327;
+  border: 1px solid #403439;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+body:not(.stream-room-active) #room-view #chat-messages .items-end[data-msg-id] > div:last-child {
+  background: #38212b;
+  border-color: #603644;
+}
+body:not(.stream-room-active) #room-view #seating-map .cinema-chair:not(.chair-mine) .chair-backrest {
+  border-radius: 30% 30% 9% 9% / 18% 18% 10% 10%;
+  box-shadow: inset 0 2px 1px #ffffff21,inset 4px 0 5px #0006,inset -4px 0 5px #0006;
+}
+body:not(.stream-room-active) #room-view #seating-map .aisle-stairs .led-dot {
+  background: #d5aa67;
+  box-shadow: 0 0 4px #c38b45;
+}
+body:not(.stream-room-active) #room-view :is(button,input):focus-visible {outline: 2px solid #ffd583; outline-offset: 2px;}
+body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditorium {
+  background: #080709;
+  border-color: #282125;
+}
+@media (max-width: 600px) {
+  body:not(.stream-room-active) #room-view #theater-center-auditorium {
+    padding: 4px;
+    border-radius: 10px;
+  }
+  body:not(.stream-room-active) #room-view #cinema-control-bar {
+    margin-inline: 0;
+  }
+}
+</style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-rose-500 selection:text-white">
 
