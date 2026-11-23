@@ -784,6 +784,76 @@
         display: inline-flex !important;
       }
     }
+
+    /* ======================================================= */
+    /* TOP 10 PHIM HOT TRONG TUẦN (CONCEPT SẢNH CHÍNH)         */
+    /* ======================================================= */
+    .cv-top10-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+    }
+    @media (max-width: 1199px) {
+      .cv-top10-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+    @media (max-width: 639px) {
+      .cv-top10-grid {
+        display: flex;
+        overflow-x: auto;
+        gap: 12px;
+        padding-bottom: 6px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+      }
+      .cv-top10-card {
+        flex: 0 0 156px;
+        scroll-snap-align: start;
+      }
+    }
+    .cv-top10-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(22, 22, 29, 0.96) 0%, rgba(11, 11, 15, 0.98) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      overflow: hidden;
+      cursor: pointer;
+      text-align: left;
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .cv-top10-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(245, 197, 24, 0.65);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.75), 0 0 18px rgba(245, 197, 24, 0.16);
+    }
+    .cv-top10-poster-wrap {
+      position: relative;
+      aspect-ratio: 16 / 10;
+      width: 100%;
+      overflow: hidden;
+      background: #09090d;
+    }
+    .cv-top10-rank {
+      position: absolute;
+      left: 8px;
+      bottom: 6px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-style: italic;
+      font-weight: 900;
+      font-size: 32px;
+      line-height: 0.9;
+      text-shadow: 0 4px 14px rgba(0, 0, 0, 0.95), 0 0 2px #000;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .cv-top10-rank.rank-1 { color: #F5C518; }
+    .cv-top10-rank.rank-2 { color: #E2E8F0; }
+    .cv-top10-rank.rank-3 { color: #FB923C; }
+    .cv-top10-rank.rank-other { color: rgba(255, 255, 255, 0.85); font-size: 26px; }
+
     @media (prefers-reduced-motion: reduce) {
       .cv-stage-auditorium,
       .cv-sheet-panel,
@@ -5196,6 +5266,21 @@
         <span class="text-xs" style="color:#A1A1AA;">Trải nghiệm 2 người &amp; phòng xem chung nhóm</span>
       </div>
       <div id="lobby-special-rooms" class="cv-special-grid"></div>
+    </section>
+
+    <!-- 4. BẢNG XẾP HẠNG TOP 10 PHIM HOT TRONG TUẦN -->
+    <section id="lobby-top10-section" class="space-y-3" aria-label="Top 10 Phim Hot Trong Tuần">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5">
+          <h2 class="cv-serif text-xl sm:text-2xl font-bold text-white">Top 10 Phim Hot Trong Tuần</h2>
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider"
+            style="background:rgba(229,9,20,0.2);color:#fda4af;border:1px solid rgba(229,9,20,0.45);">
+            <i class="fa-solid fa-fire mr-1 text-amber-300"></i>Tuần này
+          </span>
+        </div>
+        <span class="text-xs" style="color:#A1A1AA;">Bấm phim để xem chi tiết hoặc đặt vé vào rạp</span>
+      </div>
+      <div id="lobby-top10-grid" class="cv-top10-grid"></div>
     </section>
 
     <!-- Giữ container tương thích cũ (ẩn) để không lỗi tham chiếu -->
@@ -10317,6 +10402,7 @@
       const next = loadWatchHistory().filter(x => x.key !== key);
       saveWatchHistory(next);
       renderContinueWatchingStrip();
+      renderLobbyTop10Movies();
       renderTheaterLeftMovieList();
     }
 
@@ -10498,6 +10584,7 @@
 
     function renderLobby() {
       renderContinueWatchingStrip();
+      renderLobbyTop10Movies();
       const allRooms = DEFAULT_ROOMS.map(r => getEffectiveRoom(r.id));
       const standardRooms = allRooms.filter(r => getRoomCategory(r) === "single");
       const activeRoom = allRooms[((state.heroIndex % allRooms.length) + allRooms.length) % allRooms.length] || standardRooms[0];
@@ -29570,6 +29657,116 @@
       });
     })();
 
+    function buildTop10WeeklyMovies() {
+      const seen = new Set();
+      const items = [];
+      const addCandidate = (title, poster, genre, ageRating, quality, matchScore, roomId = "", roomNumber = "", duration = "") => {
+        const cleanTitle = sanitizeMovieTitle(title || "");
+        const key = normalizeSearchText(cleanTitle).replace(/\s*\(?\d{4}\)?/g, "").trim();
+        if (!cleanTitle || !key || seen.has(key)) return;
+        seen.add(key);
+        const meta = typeof resolveCatalogMeta === "function" ? resolveCatalogMeta(cleanTitle) : {};
+        const resolvedPoster = typeof resolveMoviePoster === "function"
+          ? resolveMoviePoster(cleanTitle, poster || "")
+          : (poster || "assets/web-logo.png");
+        items.push({
+          title: cleanTitle,
+          poster: resolvedPoster || "assets/web-logo.png",
+          genre: genre || meta.genre || "Điện ảnh • Chiếu rạp",
+          ageRating: ageRating || meta.ageRating || "T13+",
+          quality: quality || "FULL HD",
+          matchScore: matchScore || "96% Phù hợp",
+          roomId,
+          roomNumber,
+          duration: duration || meta.duration || "Full"
+        });
+      };
+
+      // 1. Ưu tiên các phim đang chiếu trực tiếp tại 6 phòng sảnh chính
+      DEFAULT_ROOMS.forEach(r => {
+        const eff = getEffectiveRoom(r.id);
+        addCandidate(eff.displayTitle || eff.movieTitle, eff.poster, eff.genre, eff.ageRating, eff.quality, eff.matchScore, eff.id, eff.number, eff.duration);
+      });
+
+      // 2. Bổ sung thêm các phim hot từ Kho Phim R2 (state.vaultVideos)
+      if (Array.isArray(state.vaultVideos)) {
+        const grouped = typeof groupVaultItemsForDisplay === "function" ? groupVaultItemsForDisplay(state.vaultVideos) : [];
+        grouped.forEach(g => {
+          const it = g.type === "single" ? g.item : (g.episodes?.[0]?.item || null);
+          if (it) {
+            addCandidate(g.title || it.title, it.poster || "", it.genre || "", "", "R2 HD", "97% Hot", "", "", "");
+          }
+        });
+      }
+
+      // 3. Fallback danh sách phim nổi bật nếu kho chưa tải xong để luôn đủ Top 10
+      const curatedFallbacks = [
+        { title: "Godzilla vs. Kong (2021)", genre: "Hành động • Quái vật IMAX", ageRating: "T13+", quality: "1080P IMAX", matchScore: "99% Hot" },
+        { title: "Vùng Đất Quỷ Dữ 2026 (Resident Evil 2026)", genre: "Kinh dị • Sinh tồn", ageRating: "T18+", quality: "FULL HD", matchScore: "98% Hot" },
+        { title: "Chú Thuật Hồi Chiến: Tử Diệt Hồi Du", genre: "Anime • Hành động", ageRating: "T16+", quality: "VIETSUB HD", matchScore: "98% Hot" },
+        { title: "Shang-Chi và Huyền Thoại Thập Luân (2021)", genre: "Hành động • Võ thuật Marvel", ageRating: "T13+", quality: "FULL HD", matchScore: "97% Hot" },
+        { title: "Meg 2: Vực Sâu (2023)", genre: "Khoa học viễn tưởng • Quái vật", ageRating: "T13+", quality: "1080P", matchScore: "96% Hot" },
+        { title: "Ác Quỷ Ma Sơ 2 (The Nun 2)", genre: "Kinh dị • Tâm linh", ageRating: "T18+", quality: "FULL HD", matchScore: "95% Hot" },
+        { title: "3 Idiots (Ba Chàng Ngốc)", genre: "Hài hước • Tâm lý Kinh điển", ageRating: "T13+", quality: "1080P", matchScore: "95% Hot" },
+        { title: "Cá Mập Siêu Bạo Chúa (The Meg 2018)", genre: "Hành động • Sinh tồn", ageRating: "T13+", quality: "FULL HD", matchScore: "94% Hot" },
+        { title: "Tiên Nghịch Movie: Thí Tiên Chi Chiến", genre: "Hoạt hình 3D • Tiên hiệp", ageRating: "T13+", quality: "4K VIETSUB", matchScore: "94% Hot" },
+        { title: "Transformers: Bại Binh Phục Hận", genre: "Hành động • Kỹ xảo IMAX", ageRating: "T13+", quality: "1080P", matchScore: "93% Hot" }
+      ];
+      curatedFallbacks.forEach(f => addCandidate(f.title, "", f.genre, f.ageRating, f.quality, f.matchScore, "", "", ""));
+
+      return items.slice(0, 10);
+    }
+
+    function selectTop10Movie(roomId, title) {
+      if (roomId) {
+        selectHeroRoomById(roomId);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+      // Nếu phim không gắn phòng mặc định, chuyển sang Phòng 01 hoặc mở đặt vé phòng đầu
+      selectHeroRoomById("room-1");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      showToast(`🎬 "${title}": Hãy vào phòng chiếu để yêu cầu hoặc chọn chiếu phim này trong Thư viện!`, "info");
+    }
+
+    function renderLobbyTop10Movies() {
+      const grid = document.getElementById("lobby-top10-grid");
+      if (!grid) return;
+      const top10 = buildTop10WeeklyMovies();
+      grid.innerHTML = top10.map((m, idx) => {
+        const rank = idx + 1;
+        const rankCls = rank === 1 ? "rank-1" : rank === 2 ? "rank-2" : rank === 3 ? "rank-3" : "rank-other";
+        return `
+          <button type="button" onclick="window.appActions.selectTop10Movie('${escapeHTML(m.roomId)}', '${escapeHTML(m.title)}')"
+            class="cv-top10-card group" aria-label="Hạng ${rank}: ${escapeHTML(m.title)}">
+            <div class="cv-top10-poster-wrap">
+              <img src="${escapeHTML(m.poster)}" alt="${escapeHTML(m.title)}" loading="lazy"
+                onerror="this.src='assets/web-logo.png'"
+                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+              <div class="absolute inset-0 bg-gradient-to-t from-[#0B0B0F] via-transparent to-black/45"></div>
+              <div class="absolute top-2 left-2 right-2 flex items-center justify-between gap-1">
+                <span class="px-1.5 py-0.5 rounded bg-black/75 border border-white/15 text-[9px] font-black text-amber-300">${escapeHTML(m.ageRating)}</span>
+                ${m.roomNumber
+                  ? `<span class="px-1.5 py-0.5 rounded bg-rose-600/90 text-[9px] font-black text-white">${escapeHTML(m.roomNumber)}</span>`
+                  : `<span class="px-1.5 py-0.5 rounded bg-black/75 border border-white/15 text-[9px] font-bold text-slate-200">${escapeHTML(m.quality)}</span>`}
+              </div>
+              <span class="cv-top10-rank ${rankCls}">#${rank}</span>
+            </div>
+            <div class="p-2.5 space-y-1 flex-1 flex flex-col justify-between">
+              <div>
+                <h3 class="text-xs font-extrabold text-white leading-snug line-clamp-2 group-hover:text-amber-300 transition">${escapeHTML(m.title)}</h3>
+                <p class="text-[10px] text-slate-400 truncate mt-0.5">${escapeHTML(m.genre)}</p>
+              </div>
+              <div class="pt-1 flex items-center justify-between text-[10px] font-bold">
+                <span class="text-amber-300"><i class="fa-solid fa-fire mr-1 text-rose-500"></i>${escapeHTML(m.matchScore)}</span>
+                <span class="text-slate-400">${escapeHTML(m.duration)}</span>
+              </div>
+            </div>
+          </button>
+        `;
+      }).join("");
+    }
+
     window.appActions = {
       setRoomFilter,
       setSearchQuery,
@@ -29609,6 +29806,7 @@
       toggleMovieLibraryDrawer,
       toggleDimmedChatOverlay,
       toggleScreenFitMode,
+      selectTop10Movie,
       openSeat2DModal,
       closeSeat2DModal,
       selectSeatFrom2DModal,
