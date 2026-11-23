@@ -381,6 +381,27 @@
       overflow: hidden;
       overflow-wrap: anywhere;
     }
+    .cv-hero-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+    .cv-hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+    @media (max-width: 520px) {
+      #btn-hero-watch-now {
+        flex: 1 1 100%;
+        width: 100%;
+      }
+      #btn-hero-watch-party {
+        flex: 1 1 auto;
+      }
+    }
     .cv-hero-btn-watch {
       min-height: 52px;
       height: 52px;
@@ -1274,6 +1295,27 @@
       flex-wrap: nowrap;
       position: relative;
       z-index: 20;
+    }
+    .cv-hero-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+    .cv-hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+    @media (max-width: 520px) {
+      #btn-hero-watch-now {
+        flex: 1 1 100%;
+        width: 100%;
+      }
+      #btn-hero-watch-party {
+        flex: 1 1 auto;
+      }
     }
     .cv-hero-btn-watch {
       height: 52px;
@@ -2324,7 +2366,28 @@
       }
     }
     @media (max-width: 340px) {
-      .cv-hero-btn-watch {
+      .cv-hero-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+    .cv-hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+    @media (max-width: 520px) {
+      #btn-hero-watch-now {
+        flex: 1 1 100%;
+        width: 100%;
+      }
+      #btn-hero-watch-party {
+        flex: 1 1 auto;
+      }
+    }
+    .cv-hero-btn-watch {
         font-size: 13.5px !important;
         padding: 0 14px !important;
       }
@@ -11359,6 +11422,7 @@
             }
           };
           videoEl.onerror = () => {
+            if (!state.heroTrailerPlaying) return;
             state.heroTrailerPlaying = false;
             state.heroTrailerRoomId = "";
             hideHeroVideo();
@@ -11373,10 +11437,13 @@
             muteBtn.classList.add("inline-flex");
           }
           videoEl.play().catch(() => {
+            if (!state.heroTrailerPlaying) return;
             videoEl.muted = true;
             state.heroMuted = true;
             videoEl.play().catch(() => {
+              if (!state.heroTrailerPlaying) return;
               state.heroTrailerPlaying = false;
+              state.heroTrailerRoomId = "";
               hideHeroVideo();
               if (trailerIcon) trailerIcon.className = "fa-solid fa-play text-[10px]";
               if (trailerLabel) trailerLabel.textContent = "Xem Trailer";
