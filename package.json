@@ -4,7 +4,7 @@
   "description": "CineVerse Lotte - Watch Party & Discord Live Stream iOS App",
   "private": true,
   "scripts": {
-    "prepare:www": "node -e \"const fs=require('fs');fs.mkdirSync('www/assets',{recursive:true});fs.copyFileSync('index.html','www/index.html');if(fs.existsSync('assets/web-logo.png'))fs.copyFileSync('assets/web-logo.png','www/assets/web-logo.png');\"",
+    "prepare:www": "node -e \"const fs=require('fs');fs.mkdirSync('www/assets',{recursive:true});fs.copyFileSync('index.html','www/index.html');fs.copyFileSync('assets/art-deco.webp','www/assets/art-deco.webp');if(fs.existsSync('assets/web-logo.png'))fs.copyFileSync('assets/web-logo.png','www/assets/web-logo.png');\"",
     "cap:sync": "npm run prepare:www && npx cap sync ios"
   },
   "dependencies": {
