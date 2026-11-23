@@ -2030,35 +2030,107 @@
       overflow-y: auto;
       padding-bottom: max(1rem, env(safe-area-inset-bottom));
     }
+    .cv-wp-invite-sheet {
+      width: 100%;
+      max-width: 740px;
+    }
     .cv-wp-invite-card {
-      background: linear-gradient(145deg, rgba(61, 16, 25, 0.96) 0%, rgba(30, 10, 15, 0.98) 58%, rgba(16, 9, 13, 0.99) 100%);
+      position: relative;
+      background:
+        radial-gradient(ellipse 75% 90% at 80% 50%, rgba(122, 22, 36, 0.34) 0%, rgba(44, 11, 17, 0.96) 56%, rgba(22, 8, 12, 0.99) 100%);
       border: 1px solid rgba(245, 197, 24, 0.45);
       border-radius: 16px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+      padding: 14px;
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.52);
+      overflow: hidden;
+    }
+    .cv-wp-invite-card::before {
+      content: "";
+      position: absolute;
+      top: 10px;
+      bottom: 10px;
+      right: 18px;
+      border-right: 1.5px dashed rgba(245, 197, 24, 0.24);
+      pointer-events: none;
+    }
+    .cv-wp-invite-card::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -9px;
+      width: 16px;
+      height: 16px;
+      margin-top: -8px;
+      border-radius: 50%;
+      background: #120B0E;
+      border: 1px solid rgba(245, 197, 24, 0.45);
+      pointer-events: none;
     }
     .cv-wp-invite-hero {
       display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 14px;
+      grid-template-columns: 88px minmax(0, 1fr);
+      grid-template-areas:
+        "poster head"
+        "times times";
+      gap: 12px 14px;
+      align-items: start;
+      padding-right: 12px;
     }
     .cv-wp-invite-poster {
-      width: 100%;
-      height: 176px;
-      border-radius: 12px;
+      grid-area: poster;
+      width: 88px;
+      height: 124px;
+      border-radius: 10px;
       object-fit: cover;
-      border: 1px solid rgba(245, 197, 24, 0.35);
+      border: 1px solid rgba(245, 197, 24, 0.4);
       display: block;
     }
-    .cv-wp-invite-meta {
+    .cv-wp-invite-head {
+      grid-area: head;
       min-width: 0;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      gap: 6px;
+    }
+    .cv-wp-invite-times {
+      grid-area: times;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
       gap: 8px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .cv-wp-invite-time-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+    .cv-wp-invite-time-col + .cv-wp-invite-time-col {
+      padding-left: 14px;
+      border-left: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .cv-wp-invite-time-big {
+      font-size: 24px;
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      color: #FFFFFF;
+      margin-top: 2px;
+    }
+    .cv-wp-slot-empty {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      border: 1px dashed rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.03);
+      color: rgba(212, 212, 216, 0.45);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      flex-shrink: 0;
     }
     .cv-wp-invite-actions-3,
     .cv-wp-invite-actions-2 {
@@ -2068,17 +2140,28 @@
     }
     @media (min-width: 640px) {
       .cv-wp-invite-card {
-        padding: 20px;
+        padding: 18px 26px 18px 18px;
       }
       .cv-wp-invite-hero {
-        grid-template-columns: 156px minmax(0, 1fr);
-        align-items: start;
-        gap: 18px;
+        grid-template-columns: 162px minmax(0, 1fr);
+        grid-template-areas:
+          "poster head"
+          "poster times";
+        gap: 10px 18px;
+        padding-right: 16px;
       }
       .cv-wp-invite-poster {
-        width: 156px;
-        max-width: 156px;
-        height: 214px;
+        width: 162px;
+        max-width: 162px;
+        height: 224px;
+        border-radius: 12px;
+      }
+      .cv-wp-invite-times {
+        padding-top: 2px;
+        border-top: 0;
+      }
+      .cv-wp-invite-time-big {
+        font-size: 28px;
       }
       .cv-wp-invite-actions-3 {
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -8333,18 +8416,18 @@
 
   <!-- MODAL CHI TIẾT VÉ MỜI / RSVP / DUYỆT THÀNH VIÊN -->
   <div id="watch-party-invite-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="wp-invite-modal-title">
-    <div class="cv-wp-modal-sheet w-full max-w-2xl rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 space-y-4 shadow-2xl"
-      style="background:linear-gradient(180deg, #181014 0%, #0B0B0F 100%);border:1px solid rgba(245,197,24,0.42);">
-      <div class="flex items-center justify-between gap-3 pb-2 border-b border-white/10">
-        <div class="flex items-center gap-2.5 min-w-0">
-          <img src="assets/web-logo.png" alt="CineVerse Lotte" class="w-8 h-8 rounded-full border border-amber-400/50 object-cover shrink-0" />
+    <div class="cv-wp-modal-sheet cv-wp-invite-sheet rounded-t-3xl sm:rounded-3xl p-4 sm:p-6 space-y-4 shadow-2xl"
+      style="background:linear-gradient(180deg, #1B0F13 0%, #0C0A0D 100%);border:1px solid rgba(245,197,24,0.42);">
+      <div class="flex items-center justify-between gap-3 pb-3 border-b border-white/10">
+        <div class="flex items-center gap-3 min-w-0">
+          <img src="assets/web-logo.png" alt="CineVerse Lotte" class="w-9 h-9 rounded-full border border-amber-400/50 object-cover shrink-0" />
           <div class="min-w-0">
-            <h3 id="wp-invite-modal-title" class="cv-serif text-lg sm:text-xl font-bold text-white truncate">Vé mời buổi xem phim</h3>
-            <p id="wp-invite-subtitle" class="text-[11px]" style="color:#A1A1AA;">Chọn ghế khi vào phòng • Múi giờ Asia/Ho_Chi_Minh</p>
+            <h3 id="wp-invite-modal-title" class="cv-serif text-lg sm:text-2xl font-bold text-white truncate">Vé mời buổi xem phim</h3>
+            <p id="wp-invite-subtitle" class="text-[11px] sm:text-xs" style="color:#A1A1AA;">Chọn ghế khi vào phòng</p>
           </div>
         </div>
         <button type="button" onclick="window.appActions.closeWatchPartyInviteModal()"
-          class="min-w-[44px] min-h-[44px] rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white flex items-center justify-center cursor-pointer"
+          class="min-w-[44px] min-h-[44px] rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-slate-300 hover:text-white flex items-center justify-center cursor-pointer"
           aria-label="Đóng vé mời">
           <i class="fa-solid fa-xmark text-base"></i>
         </button>
@@ -32309,12 +32392,31 @@
       const myApv = ev.myMember?.approvalStatus || "";
       const tokParam = ev.inviteToken || wpActiveInviteToken || "";
 
-      const approvedHtml = (ev.approvedMembers || []).map(m => `
-        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1.5" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#F4F4F5;">
-          ${m.isOrganizer ? '<i class="fa-solid fa-crown text-amber-400 text-[10px]"></i>' : '<i class="fa-solid fa-check text-emerald-400 text-[10px]"></i>'}
-          <span>${escapeHTML(m.name)}</span>
-        </span>
-      `).join("");
+      const approvedList = Array.isArray(ev.approvedMembers) ? ev.approvedMembers : [];
+      const approvedCount = Number(ev.approvedCount || approvedList.length || 1);
+      const maxEmptyCircles = Math.min(Math.max(0, Number(ev.capacity || 2) - approvedList.length), 10);
+      const extraEmptyCount = Math.max(0, (Number(ev.capacity || 2) - approvedList.length) - maxEmptyCircles);
+
+      const approvedHtml = approvedList.map(m => {
+        const initCh = String(m.name || "K").trim().charAt(0).toUpperCase();
+        return `
+          <div class="inline-flex items-center gap-2 pr-2">
+            <span class="relative inline-flex items-center justify-center w-8 h-8 rounded-full font-extrabold text-xs shrink-0"
+              style="background:rgba(255,255,255,0.12);border:1px solid ${m.isOrganizer ? "rgba(245,197,24,0.65)" : "rgba(255,255,255,0.22)"};color:#FFFFFF;">
+              ${escapeHTML(initCh)}
+              ${m.isOrganizer ? '<i class="fa-solid fa-crown text-[8px] text-amber-400" style="position:absolute;top:-3px;right:-3px;background:#1A0E12;border-radius:999px;padding:2px;"></i>' : ""}
+            </span>
+            <span class="font-bold text-white text-xs">${escapeHTML(m.name)}</span>
+            ${m.isOrganizer
+              ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1" style="background:rgba(245,197,24,0.14);border:1px solid rgba(245,197,24,0.4);color:#F5C518;"><i class="fa-solid fa-crown text-[9px]"></i>Chủ phòng</span>`
+              : `<span class="text-[10px] text-emerald-300 font-semibold"><i class="fa-solid fa-check mr-0.5"></i>Đã nhận lời</span>`}
+          </div>
+        `;
+      }).join("");
+
+      const emptySlotsHtml = Array.from({ length: maxEmptyCircles }).map(() => `
+        <span class="cv-wp-slot-empty" title="Chỗ trống chờ bạn bè"><i class="fa-regular fa-user" aria-hidden="true"></i></span>
+      `).join("") + (extraEmptyCount > 0 ? `<span class="text-[11px] font-bold ml-1" style="color:#A1A1AA;">+${extraEmptyCount}</span>` : "");
 
       const pendingHtml = ev.isOrganizer && (ev.pendingRequests || []).length > 0 ? `
         <div class="p-3 rounded-2xl space-y-2" style="background:rgba(245,197,24,0.08);border:1px solid rgba(245,197,24,0.32);">
@@ -32352,7 +32454,7 @@
             <p class="font-bold text-white">Đăng nhập tài khoản CineVerse để phản hồi lời mời</p>
             <p class="text-[11px]" style="color:#D4D4D8;">Sau khi đăng nhập Gmail, hệ thống sẽ đưa bạn quay lại đúng tấm vé mời này.</p>
             <button type="button" onclick="window.appActions.loginForWatchPartyInvite('${escapeHTML(tokParam)}')"
-              class="cv-wp-cta-primary mx-auto">
+              class="cv-wp-cta-primary w-full">
               <i class="fa-solid fa-right-to-bracket"></i>
               <span>Đăng nhập để Tham gia</span>
             </button>
@@ -32385,30 +32487,49 @@
         `;
       } else {
         const beforeStart = getWatchPartyServerNow() < Number(ev.startsAt || 0) && ev.status === "scheduled";
+        const primaryOrgCta = ev.status === "open" && ev.canEnterRoom
+          ? `<button type="button" onclick="window.appActions.closeWatchPartyInviteModal(); window.appActions.enterWatchPartyRoom('${escapeHTML(ev.eventId)}')" class="cv-wp-cta-primary w-full"><i class="fa-solid fa-door-open"></i><span>Vào phòng chiếu riêng</span></button>`
+          : ev.status === "create_failed"
+          ? `<button type="button" onclick="window.appActions.retryWatchPartyRoomCreation('${escapeHTML(ev.eventId)}')" class="cv-wp-cta-primary w-full"><i class="fa-solid fa-rotate-right"></i><span>Thử lại tạo phòng (${escapeHTML(ev.lastError || "Lỗi tạm thời")})</span></button>`
+          : `<button type="button" onclick="window.appActions.copyWatchPartyInviteLink('${escapeHTML(ev.eventId)}', '${escapeHTML(ev.inviteToken || "")}')" class="cv-wp-cta-primary w-full"><i class="fa-solid fa-link"></i><span>Sao chép lời mời</span></button>`;
+
         actionSectionHtml = `
-          <div class="space-y-2.5">
-            <div class="cv-wp-invite-actions-3">
-              <button type="button" onclick="window.appActions.copyWatchPartyInviteLink('${escapeHTML(ev.eventId)}', '${escapeHTML(ev.inviteToken || "")}')"
-                class="cv-wp-cta-secondary"><i class="fa-regular fa-copy"></i><span>Sao chép link</span></button>
-              <button type="button" onclick="window.appActions.manageWatchPartyLink('${escapeHTML(ev.eventId)}', 'regenerate_link')"
-                class="cv-wp-cta-secondary"><i class="fa-solid fa-rotate"></i><span>Tạo lại link</span></button>
-              <button type="button" onclick="window.appActions.manageWatchPartyLink('${escapeHTML(ev.eventId)}', 'revoke_link')"
-                class="cv-wp-cta-secondary"><i class="fa-solid fa-ban text-rose-400"></i><span>Thu hồi link</span></button>
+          <div class="space-y-3">
+            ${primaryOrgCta}
+            <div class="${beforeStart ? "cv-wp-invite-actions-2" : ""}">
+              ${beforeStart ? `
+                <button type="button" onclick="window.appActions.closeWatchPartyInviteModal(); window.appActions.openCreateWatchPartyModal('${escapeHTML(ev.eventId)}')"
+                  class="cv-wp-cta-secondary w-full"><i class="fa-solid fa-pen"></i><span>Chỉnh sửa lịch hẹn</span></button>
+              ` : ""}
+              <details class="w-full rounded-xl" style="background:rgba(11,11,15,0.68);border:1px solid rgba(255,255,255,0.18);">
+                <summary class="min-h-[44px] px-4 flex items-center justify-between gap-2 cursor-pointer text-xs font-bold text-white list-none select-none">
+                  <span><i class="fa-solid fa-link mr-2 text-slate-300"></i>Quản lý liên kết</span>
+                  <i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i>
+                </summary>
+                <div class="p-2 pt-0 grid grid-cols-1 gap-1.5 border-t border-white/10 mt-1 pt-2">
+                  <button type="button" onclick="window.appActions.copyWatchPartyInviteLink('${escapeHTML(ev.eventId)}', '${escapeHTML(ev.inviteToken || "")}')"
+                    class="cv-wp-cta-secondary w-full"><i class="fa-regular fa-copy"></i><span>Sao chép link mời</span></button>
+                  <button type="button" onclick="window.appActions.manageWatchPartyLink('${escapeHTML(ev.eventId)}', 'regenerate_link')"
+                    class="cv-wp-cta-secondary w-full"><i class="fa-solid fa-rotate"></i><span>Tạo lại link mới</span></button>
+                  <button type="button" onclick="window.appActions.manageWatchPartyLink('${escapeHTML(ev.eventId)}', 'revoke_link')"
+                    class="cv-wp-cta-secondary w-full"><i class="fa-solid fa-ban text-rose-400"></i><span>Thu hồi link hiện tại</span></button>
+                </div>
+              </details>
+            </div>
+            <div class="text-center text-[11px]" style="color:#A1A1AA;">
+              <i class="fa-solid fa-circle-info mr-1"></i>
+              ${ev.status === "open"
+                ? "Phòng riêng đang mở — bạn và thành viên đã duyệt có thể vào phòng và chọn ghế."
+                : `Phòng riêng sẽ được tạo tự động lúc ${escapeHTML(sInfo.startTime)}.`}
             </div>
             ${beforeStart ? `
-              <div class="cv-wp-invite-actions-2">
-                <button type="button" onclick="window.appActions.closeWatchPartyInviteModal(); window.appActions.openCreateWatchPartyModal('${escapeHTML(ev.eventId)}')"
-                  class="cv-wp-cta-secondary"><i class="fa-solid fa-pen"></i><span>Đổi giờ / Đổi phim</span></button>
+              <div class="pt-1 border-t border-white/10">
                 <button type="button" onclick="window.appActions.cancelWatchPartySchedule('${escapeHTML(ev.eventId)}')"
-                  class="cv-wp-cta-secondary"><i class="fa-solid fa-trash text-rose-400"></i><span>Hủy lịch</span></button>
+                  class="min-h-[44px] px-2 inline-flex items-center gap-2 text-xs font-bold text-rose-400 hover:text-rose-300 cursor-pointer">
+                  <i class="fa-regular fa-trash-can"></i>
+                  <span>Hủy lịch hẹn</span>
+                </button>
               </div>
-            ` : ""}
-            ${ev.status === "open" && ev.canEnterRoom ? `
-              <button type="button" onclick="window.appActions.closeWatchPartyInviteModal(); window.appActions.enterWatchPartyRoom('${escapeHTML(ev.eventId)}')"
-                class="cv-wp-cta-primary w-full"><i class="fa-solid fa-door-open"></i><span>Vào phòng chiếu riêng</span></button>
-            ` : ev.status === "create_failed" ? `
-              <button type="button" onclick="window.appActions.retryWatchPartyRoomCreation('${escapeHTML(ev.eventId)}')"
-                class="cv-wp-cta-primary w-full"><i class="fa-solid fa-rotate-right"></i><span>Thử lại tạo phòng (${escapeHTML(ev.lastError || "Lỗi tạm thời")})</span></button>
             ` : ""}
           </div>
         `;
@@ -32420,24 +32541,46 @@
             <img src="${escapeHTML(ev.poster || "assets/web-logo.png")}" alt="${escapeHTML(ev.movieTitle)}"
               onerror="this.onerror=null;this.src='assets/web-logo.png';"
               class="cv-wp-invite-poster" />
-            <div class="cv-wp-invite-meta">
+            <div class="cv-wp-invite-head">
               <div class="flex flex-wrap items-center justify-between gap-2">
-                <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-300">${escapeHTML(ev.roomTypeLabel)} • ${escapeHTML(ev.inviteCode)}</span>
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold" style="background:${stUi.bg};border:1px solid ${stUi.border};color:${stUi.color};">${escapeHTML(stUi.badge)}</span>
+                <span class="text-[10.5px] font-extrabold uppercase tracking-widest text-amber-300">${escapeHTML(ev.roomTypeLabel)} • ${escapeHTML(ev.inviteCode)}</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold" style="background:${stUi.bg};border:1px solid ${stUi.border};color:${stUi.color};">${escapeHTML(stUi.badge)}</span>
               </div>
               <h4 class="cv-serif italic text-xl sm:text-2xl font-bold text-white leading-tight">${escapeHTML(ev.movieTitle)}</h4>
-              <div class="space-y-1.5 text-xs" style="color:#E4E4E7;">
-                <div><i class="fa-regular fa-calendar mr-1.5 text-amber-300"></i>Bắt đầu: <strong class="text-white">${escapeHTML(sInfo.startFull)}</strong></div>
-                <div><i class="fa-regular fa-clock mr-1.5 text-rose-400"></i>Tự đóng cố định: <strong class="text-white">${escapeHTML(sInfo.endFull)}</strong></div>
-                <div><i class="fa-solid fa-crown mr-1.5 text-amber-300"></i>Người tổ chức: <strong class="text-white">${escapeHTML(ev.organizerName)}</strong> • Đã duyệt <strong class="text-white">${ev.approvedCount}/${ev.capacity}</strong></div>
+            </div>
+            <div class="cv-wp-invite-times">
+              <div class="text-xs font-semibold text-slate-200">
+                <i class="fa-regular fa-calendar mr-1.5 text-amber-300"></i>${escapeHTML(sInfo.startDate)}/${new Date(ev.startsAt || Date.now()).getFullYear()}
+              </div>
+              <div class="cv-wp-invite-time-grid">
+                <div class="cv-wp-invite-time-col">
+                  <div class="text-[11px] font-semibold" style="color:#D4D4D8;"><i class="fa-solid fa-play mr-1.5 text-amber-300 text-[10px]"></i>Bắt đầu</div>
+                  <div class="cv-wp-invite-time-big">${escapeHTML(sInfo.startTime)}</div>
+                </div>
+                <div class="cv-wp-invite-time-col">
+                  <div class="text-[11px] font-semibold" style="color:#D4D4D8;"><i class="fa-solid fa-door-closed mr-1.5 text-slate-400 text-[10px]"></i>Tự đóng phòng</div>
+                  <div class="cv-wp-invite-time-big">${escapeHTML(sInfo.endTime)}</div>
+                </div>
+              </div>
+              <div class="text-[11px]" style="color:#A1A1AA;">
+                <i class="fa-solid fa-globe mr-1.5"></i>Giờ Việt Nam • UTC+7
               </div>
             </div>
           </div>
         </div>
 
-        <div class="space-y-1.5">
-          <div class="font-bold text-slate-300">Thành viên đã xác nhận (${(ev.approvedMembers || []).length}/${ev.capacity})</div>
-          <div class="flex flex-wrap gap-1.5">${approvedHtml}</div>
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between gap-2">
+            <div class="font-bold text-sm text-white flex items-center gap-2">
+              <i class="fa-solid fa-user-group text-amber-300 text-xs"></i>
+              <span>Thành viên đã xác nhận</span>
+            </div>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold" style="background:rgba(245,197,24,0.12);border:1px solid rgba(245,197,24,0.45);color:#F5C518;">${approvedCount}/${ev.capacity}</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            ${approvedHtml}
+            ${emptySlotsHtml}
+          </div>
         </div>
 
         ${pendingHtml}
