@@ -7254,6 +7254,12 @@
 
                 <!-- Hàng 2: 7 nút biểu tượng tối giản căn giữa (Tua -5s | Phát/Tạm dừng đỏ tròn | Tua +5s | Âm lượng | CC | Mic | Toàn màn hình) -->
                 <div class="cv-icon-bar-row">
+                  <div id="wp-cinema-live-badge" class="hidden items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold mr-1"
+                    style="background:rgba(229,9,20,0.22);border:1px solid rgba(229,9,20,0.55);color:#FCA5A5;"
+                    title="Phim tự động chiếu theo giờ vé — không hỗ trợ tua">
+                    <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                    <span>CHIẾU THEO LỊCH RẠP • KHÔNG TUA</span>
+                  </div>
                   <div id="cinema-playback-controls" class="flex items-center">
                     <button type="button" onclick="window.appActions.seekBySeconds(-5)"
                       class="cv-bar-icon-btn" aria-label="Tua lùi 5 giây" title="Tua lùi 5 giây (←)">
@@ -8393,7 +8399,7 @@
             Vui lòng chọn phim và thời gian bắt đầu…
           </p>
           <p class="text-[11px]" style="color:#D4D4D8;">
-            • Chọn ghế khi vào phòng • Phòng tự động mở đúng giờ và tự đóng vào giờ kết thúc cố định (không dời giờ khi tạm dừng hoặc tua).
+            • Chọn ghế khi vào phòng • Đúng giờ vé phim tự động chiếu (không tua; vào muộn xem tiếp đoạn đang chiếu) và tự đóng vào giờ kết thúc cố định.
           </p>
         </div>
 
@@ -11506,7 +11512,7 @@
       const room = getEffectiveRoom(state.currentRoomId);
       if (!room || room.isDiscordRoom || room.status === "upcoming") return;
 
-      const videoEl = document.getElementById("html5-video-player");
+    const videoEl = document.getElementById("html5-video-player");
       const ytWrapper = document.getElementById("youtube-wrapper");
       if (ytWrapper && !ytWrapper.classList.contains("hidden") && room.youtubeId) {
         const curYt = Number(window.__activeYtVirtualSec) || 0;
@@ -13095,7 +13101,7 @@
       const saved = key && typeof state.subtitleOffsetsByKey[key] === "number" ? state.subtitleOffsetsByKey[key] : 0;
       state.subtitleOffsetSec = saved;
       updateSubtitleOffsetUI();
-      const videoEl = document.getElementById("html5-video-player");
+    const videoEl = document.getElementById("html5-video-player");
       if (videoEl && !videoEl.classList.contains("hidden")) {
         renderSubtitleAtTime(room, videoEl.currentTime || 0);
       }
@@ -13132,7 +13138,7 @@
       updateSubtitleOffsetUI();
       const room = getCurrentRoom();
       if (room) persistSubtitleOffsetForRoom(room, state.subtitleOffsetSec);
-      const videoEl = document.getElementById("html5-video-player");
+    const videoEl = document.getElementById("html5-video-player");
       if (room && videoEl && !videoEl.classList.contains("hidden")) {
         renderSubtitleAtTime(room, videoEl.currentTime || 0);
       }
@@ -13145,7 +13151,7 @@
       updateSubtitleOffsetUI();
       const room = getCurrentRoom();
       if (room) persistSubtitleOffsetForRoom(room, 0);
-      const videoEl = document.getElementById("html5-video-player");
+    const videoEl = document.getElementById("html5-video-player");
       if (room && videoEl && !videoEl.classList.contains("hidden")) {
         renderSubtitleAtTime(room, videoEl.currentTime || 0);
       }
@@ -13240,7 +13246,7 @@
 
       if (state.currentRoomId) {
         const room = getEffectiveRoom(state.currentRoomId);
-        const videoEl = document.getElementById("html5-video-player");
+      const videoEl = document.getElementById("html5-video-player");
         const curSec = (videoEl && !videoEl.classList.contains("hidden") && videoEl.currentTime)
           ? videoEl.currentTime
           : ((Date.now() / 1000) % (room.durationSec || 600));
@@ -13534,7 +13540,7 @@
           btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles fa-spin mr-1"></i>${usedAI ? "AI đang dịch" : "Đang dịch"} ${pct}%`;
         }
         if (state.currentRoomId === roomId) {
-          const videoEl = document.getElementById("html5-video-player");
+        const videoEl = document.getElementById("html5-video-player");
           renderSubtitleAtTime(getEffectiveRoom(roomId), videoEl?.currentTime || 0);
         }
         if (done % 100 === 0 || done === cues.length) {
@@ -13569,7 +13575,7 @@
       if (ccBtn) {
         ccBtn.innerHTML = `<span class="cv-cc-box">CC</span>`;
       }
-      const videoEl = document.getElementById("html5-video-player");
+    const videoEl = document.getElementById("html5-video-player");
       renderSubtitleAtTime(getEffectiveRoom(roomId), videoEl?.currentTime || 0);
       syncRoomSubtitlesToRTDB(roomId, cues, sourceLabel);
       showToast(`📝 Đã nạp ${cues.length} câu từ ${sourceLabel}! Đang tự động dịch sang Tiếng Việt...`, "success");
@@ -13652,9 +13658,22 @@
       }
     }
 
+    function isScheduledCinemaWatchPartyRoom(room = null) {
+      const r = room || (state.currentRoomId ? getEffectiveRoom(state.currentRoomId) : null);
+      return Boolean(r && (r.isWatchParty || String(r.id || state.currentRoomId || "").startsWith("wp_")) && Number(r.startsAt || 0) > 0);
+    }
+
+    function getWatchPartyCinemaElapsedSec(room = null, durationSec = 0) {
+      const r = room || (state.currentRoomId ? getEffectiveRoom(state.currentRoomId) : null);
+      if (!r || !r.startsAt) return 0;
+      const elapsed = Math.max(0, (getWatchPartyServerNow() - Number(r.startsAt)) / 1000);
+      if (durationSec > 0) return Math.min(durationSec, elapsed);
+      return elapsed;
+    }
+
     function setupRoomVideoPlayer(room) {
       stopRoomVideoPlayer();
-      const videoEl = document.getElementById("html5-video-player");
+    const videoEl = document.getElementById("html5-video-player");
       const ytWrapper = document.getElementById("youtube-wrapper");
       const upcomingOverlay = document.getElementById("upcoming-overlay");
       const discordOverlay = document.getElementById("discord-live-overlay");
@@ -13703,12 +13722,26 @@
         document.body.classList.remove("stream-mobile-sheet-chat", "stream-keyboard-open");
       }
 
-      // Ẩn/hiện các nút tua, tạm dừng, phụ đề phim & đồng bộ rạp khi ở phòng Discord Live
+      // Ẩn/hiện các nút tua, tạm dừng, phụ đề phim & đồng bộ rạp khi ở phòng Discord Live hoặc phòng Hẹn Xem Chiếu Rạp (không tua)
+      const isScheduledWpCinema = isScheduledCinemaWatchPartyRoom(room);
       const cinemaControls = document.getElementById("cinema-playback-controls");
+      const wpCinemaBadge = document.getElementById("wp-cinema-live-badge");
+      const seekSliderEl = document.getElementById("video-seek-slider");
       const btnCcMode = document.getElementById("btn-cc-mode");
       const btnSubSettings = document.getElementById("btn-sub-settings");
       const btnSyncLive = document.getElementById("btn-sync-live");
-      [cinemaControls, btnCcMode, btnSubSettings, btnSyncLive].forEach((el) => {
+      if (cinemaControls) cinemaControls.classList.toggle("hidden", isStream || isScheduledWpCinema);
+      if (wpCinemaBadge) {
+        wpCinemaBadge.classList.toggle("hidden", isStream || !isScheduledWpCinema);
+        wpCinemaBadge.classList.toggle("inline-flex", !isStream && isScheduledWpCinema);
+      }
+      if (seekSliderEl) {
+        seekSliderEl.disabled = isScheduledWpCinema;
+        seekSliderEl.style.pointerEvents = isScheduledWpCinema ? "none" : "";
+        seekSliderEl.style.opacity = isScheduledWpCinema ? "0.75" : "";
+        seekSliderEl.title = isScheduledWpCinema ? "Phòng chiếu theo lịch rạp thực tế — không được phép tua" : "Kéo để tua thời gian phát";
+      }
+      [btnCcMode, btnSubSettings, btnSyncLive].forEach((el) => {
         if (el) el.classList.toggle("hidden", isStream);
       });
 
@@ -13737,13 +13770,17 @@
         seekContainer.classList.add("hidden");
         const savedHistYt = getWatchHistoryEntry(room);
         const hasOtherHostYt = Boolean(currentRoomHost && currentRoomHost.uid && currentRoomHost.uid !== state.uid);
-        const wpStartPlaying = !room.isWatchParty || Boolean(latestRoomSyncState?.isPlaying);
+        const wpStartPlaying = isScheduledWpCinema ? true : (!room.isWatchParty || Boolean(latestRoomSyncState?.isPlaying));
         state.ytPaused = !wpStartPlaying;
-        const canResumeYt = Boolean(!room.isWatchParty && !hasOtherHostYt && savedHistYt && !savedHistYt.completed && savedHistYt.currentTime >= 5);
-        const startSec = canResumeYt
+        const canResumeYt = Boolean(!isScheduledWpCinema && !room.isWatchParty && !hasOtherHostYt && savedHistYt && !savedHistYt.completed && savedHistYt.currentTime >= 5);
+        const startSec = isScheduledWpCinema
+          ? Math.floor(getWatchPartyCinemaElapsedSec(room, room.durationSec || 0))
+          : canResumeYt
           ? Math.floor(savedHistYt.currentTime)
           : (room.isCustomStartZero ? 0 : Math.floor((Date.now() / 1000) % (room.durationSec || 600)));
-        if (canResumeYt) {
+        if (isScheduledWpCinema && startSec >= 5) {
+          showToast(`🎬 Suất chiếu theo lịch rạp đang phát từ ${formatTime(startSec)} (không hỗ trợ tua).`, "info");
+        } else if (canResumeYt) {
           showToast(`⏩ Đã tự động phát tiếp "${room.movieTitle}" từ ${formatTime(startSec)}!`, "info");
         }
         const host = state.ytUseNoCookie ? "https://www.youtube-nocookie.com" : "https://www.youtube.com";
@@ -13757,7 +13794,7 @@
               id="yt-active-iframe"
               class="w-full h-full border-0"
               referrerpolicy="strict-origin-when-cross-origin"
-              src="${host}/embed/${encodeURIComponent(room.youtubeId)}?autoplay=${wpStartPlaying ? 1 : 0}&mute=0&start=${startSec}&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1${originParam}"
+              src="${host}/embed/${encodeURIComponent(room.youtubeId)}?autoplay=${wpStartPlaying ? 1 : 0}&mute=0&start=${startSec}&controls=${isScheduledWpCinema ? 0 : 1}&disablekb=${isScheduledWpCinema ? 1 : 0}&rel=0&modestbranding=1&playsinline=1&enablejsapi=1${originParam}"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowfullscreen>
             </iframe>
@@ -13797,16 +13834,20 @@
         seekContainer.classList.remove("hidden");
         setScreenCurtainClosed(false);
         videoEl.muted = false;
-        videoEl.loop = true;
+        videoEl.loop = !isScheduledWpCinema;
         videoEl.volume = 0.85;
+        let wpEnforcingClock = false;
 
         const tryAutoPlayRoomVideo = () => {
           if (!videoEl || videoEl.classList.contains("hidden")) return;
           const playBtn = document.getElementById("btn-play-pause");
-          if (room.isWatchParty && !latestRoomSyncState?.isPlaying) {
+          if (room.isWatchParty && !isScheduledWpCinema && !latestRoomSyncState?.isPlaying) {
             try { videoEl.pause(); } catch (_) {}
             if (playBtn) playBtn.innerHTML = `<i class="fa-solid fa-play"></i>`;
             setScreenCurtainClosed(false);
+            return;
+          }
+          if (isScheduledWpCinema && videoEl.duration && getWatchPartyCinemaElapsedSec(room) >= videoEl.duration - 0.5) {
             return;
           }
           videoEl.play().then(() => {
@@ -13819,6 +13860,9 @@
             videoEl.play().then(() => {
               if (playBtn) playBtn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
               setScreenCurtainClosed(false);
+              if (isScheduledWpCinema) {
+                showToast("🔊 Phim đang tự động chiếu theo giờ vé — bấm biểu tượng loa để bật âm thanh!", "info");
+              }
             }).catch(() => {
               if (playBtn) playBtn.innerHTML = `<i class="fa-solid fa-play"></i>`;
             });
@@ -13849,31 +13893,77 @@
           document.getElementById("video-time-total").textContent = formatTime(totalDur);
           if (!didInitialSeek && !room.isLocalBlob && totalDur > 10) {
             didInitialSeek = true;
-            const savedHist = getWatchHistoryEntry(room);
-            const hasOtherHost = Boolean(currentRoomHost && currentRoomHost.uid && currentRoomHost.uid !== state.uid);
-            const canResumeSaved = Boolean(
-              !hasOtherHost &&
-              savedHist &&
-              !savedHist.completed &&
-              savedHist.currentTime >= 5 &&
-              savedHist.currentTime < (totalDur - 15)
-            );
-            if (canResumeSaved) {
-              videoEl.currentTime = savedHist.currentTime;
-              document.getElementById("video-time-current").textContent = formatTime(savedHist.currentTime);
-              const sl = document.getElementById("video-seek-slider");
-              if (sl && totalDur > 0) sl.value = Math.min(100, (savedHist.currentTime / totalDur) * 100);
-              showToast(`⏩ Đã tự động phát tiếp "${room.movieTitle}" từ ${formatTime(savedHist.currentTime)}!`, "info");
-              if (isIAmHost()) {
-                setTimeout(() => broadcastRoomVideoSync("seek"), 350);
+            if (isScheduledWpCinema) {
+              const targetSec = getWatchPartyCinemaElapsedSec(room, totalDur);
+              wpEnforcingClock = true;
+              if (targetSec >= totalDur - 0.5) {
+                videoEl.currentTime = Math.max(0, totalDur - 0.5);
+                try { videoEl.pause(); } catch (_) {}
+                showToast("🎬 Phim chính đã chiếu hết — phòng sẽ tự đóng theo đúng giờ vé.", "info");
+              } else {
+                videoEl.currentTime = targetSec;
+                document.getElementById("video-time-current").textContent = formatTime(targetSec);
+                const sl = document.getElementById("video-seek-slider");
+                if (sl && totalDur > 0) sl.value = Math.min(100, (targetSec / totalDur) * 100);
+                if (targetSec >= 5) {
+                  showToast(`🎬 Bạn vào sau giờ mở — đang chiếu tiếp đoạn ${formatTime(targetSec)} theo lịch rạp.`, "info");
+                }
               }
-            } else if (!room.isCustomStartZero) {
-              videoEl.currentTime = Math.floor((Date.now() / 1000) % totalDur);
+              setTimeout(() => { wpEnforcingClock = false; }, 180);
+            } else {
+              const savedHist = getWatchHistoryEntry(room);
+              const hasOtherHost = Boolean(currentRoomHost && currentRoomHost.uid && currentRoomHost.uid !== state.uid);
+              const canResumeSaved = Boolean(
+                !hasOtherHost &&
+                savedHist &&
+                !savedHist.completed &&
+                savedHist.currentTime >= 5 &&
+                savedHist.currentTime < (totalDur - 15)
+              );
+              if (canResumeSaved) {
+                videoEl.currentTime = savedHist.currentTime;
+                document.getElementById("video-time-current").textContent = formatTime(savedHist.currentTime);
+                const sl = document.getElementById("video-seek-slider");
+                if (sl && totalDur > 0) sl.value = Math.min(100, (savedHist.currentTime / totalDur) * 100);
+                showToast(`⏩ Đã tự động phát tiếp "${room.movieTitle}" từ ${formatTime(savedHist.currentTime)}!`, "info");
+                if (isIAmHost()) {
+                  setTimeout(() => broadcastRoomVideoSync("seek"), 350);
+                }
+              } else if (!room.isCustomStartZero) {
+                videoEl.currentTime = Math.floor((Date.now() / 1000) % totalDur);
+              }
             }
           }
           renderSubtitleAtTime(room, videoEl.currentTime || 0);
           tryAutoPlayRoomVideo();
         };
+        if (isScheduledWpCinema) {
+          let lastSeekWarnAt = 0;
+          videoEl.onseeking = () => {
+            if (wpEnforcingClock || !videoEl.duration) return;
+            const expectedSec = getWatchPartyCinemaElapsedSec(room, videoEl.duration);
+            if (Math.abs((videoEl.currentTime || 0) - expectedSec) > 2.5) {
+              wpEnforcingClock = true;
+              videoEl.currentTime = expectedSec;
+              setTimeout(() => { wpEnforcingClock = false; }, 150);
+              if (Date.now() - lastSeekWarnAt > 2500) {
+                lastSeekWarnAt = Date.now();
+                showToast("🎬 Suất chiếu theo lịch rạp thực tế — không được phép tua phim!", "warning");
+              }
+            }
+          };
+          videoEl.onpause = () => {
+            if (state.currentRoomId !== room.id || videoEl.ended) return;
+            const dur = videoEl.duration || room.durationSec || 0;
+            if (!dur || getWatchPartyCinemaElapsedSec(room, dur) < dur - 1) {
+              setTimeout(() => {
+                if (state.currentRoomId === room.id && videoEl.paused && !videoEl.ended) {
+                  videoEl.play().catch(() => {});
+                }
+              }, 80);
+            }
+          };
+        }
         videoEl.oncanplay = () => {
           if (videoEl.paused) tryAutoPlayRoomVideo();
         };
@@ -13913,7 +14003,7 @@
         clearInterval(lyricTimer);
         lyricTimer = null;
       }
-      const videoEl = document.getElementById("html5-video-player");
+    const videoEl = document.getElementById("html5-video-player");
       const ytWrapper = document.getElementById("youtube-wrapper");
       const lyricsOverlay = document.getElementById("lyrics-overlay");
       const discordOverlay = document.getElementById("discord-live-overlay");
@@ -13967,6 +14057,10 @@
     }
 
     function togglePlayPause(showOsd = false) {
+      if (isScheduledCinemaWatchPartyRoom()) {
+        showToast("🎬 Suất chiếu riêng tự động phát theo giờ vé — không tạm dừng hoặc tua.", "warning");
+        return;
+      }
       const videoEl = document.getElementById("html5-video-player");
       const ytWrapper = document.getElementById("youtube-wrapper");
       const liveVid = document.getElementById("discord-live-video");
@@ -14024,7 +14118,7 @@
     }
 
     function toggleMute() {
-      const videoEl = document.getElementById("html5-video-player");
+    const videoEl = document.getElementById("html5-video-player");
       const ytWrapper = document.getElementById("youtube-wrapper");
       const btn = document.getElementById("btn-mute");
 
@@ -14052,7 +14146,7 @@
 
     function setVolume(val) {
       const vol = parseFloat(val);
-      const videoEl = document.getElementById("html5-video-player");
+    const videoEl = document.getElementById("html5-video-player");
       const ytWrapper = document.getElementById("youtube-wrapper");
       const btn = document.getElementById("btn-mute");
 
@@ -14075,6 +14169,14 @@
 
     function seekVideo(percent) {
       const videoEl = document.getElementById("html5-video-player");
+      if (isScheduledCinemaWatchPartyRoom()) {
+        const sliderEl = document.getElementById("video-seek-slider");
+        if (sliderEl && videoEl && videoEl.duration) {
+          sliderEl.value = Math.min(100, ((videoEl.currentTime || 0) / videoEl.duration) * 100);
+        }
+        showToast("🎬 Suất chiếu theo lịch rạp thực tế — không được phép tua phim!", "warning");
+        return;
+      }
       if (!requireHostPlaybackControl()) {
         const sliderEl = document.getElementById("video-seek-slider");
         if (sliderEl && videoEl && videoEl.duration) {
@@ -14090,8 +14192,12 @@
     }
 
     function seekBySeconds(delta = 5) {
+      if (isScheduledCinemaWatchPartyRoom()) {
+        showToast("🎬 Suất chiếu theo lịch rạp thực tế — không được phép tua phim!", "warning");
+        return;
+      }
       if (!requireHostPlaybackControl()) return;
-      const videoEl = document.getElementById("html5-video-player");
+    const videoEl = document.getElementById("html5-video-player");
       if (!videoEl || videoEl.classList.contains("hidden") || !videoEl.duration) return;
       const nextTime = Math.max(0, Math.min(videoEl.duration, (videoEl.currentTime || 0) + delta));
       videoEl.currentTime = nextTime;
@@ -14156,12 +14262,25 @@
 
     function syncLiveTime() {
       if (!state.currentRoomId) return;
+      const room = getEffectiveRoom(state.currentRoomId);
+      if (isScheduledCinemaWatchPartyRoom(room)) {
+        const videoEl = document.getElementById("html5-video-player");
+        if (videoEl && !videoEl.classList.contains("hidden") && videoEl.duration) {
+          const targetSec = getWatchPartyCinemaElapsedSec(room, videoEl.duration);
+          videoEl.currentTime = targetSec;
+          if (targetSec < videoEl.duration - 0.5) videoEl.play().catch(() => {});
+          showToast(`🎬 Đã đồng bộ chuẩn lịch rạp tại ${formatTime(targetSec)}!`, "success");
+          return;
+        }
+        setupRoomVideoPlayer(room);
+        showToast("🎬 Đã đồng bộ chuẩn giờ chiếu trên vé!", "success");
+        return;
+      }
       if (latestRoomSyncState) {
         applyRemoteVideoSync(state.currentRoomId, latestRoomSyncState, true);
         showToast("Đã đồng bộ đúng giây phát cùng mọi người trong phòng!", "success");
         return;
       }
-      const room = getEffectiveRoom(state.currentRoomId);
       setupRoomVideoPlayer(room);
       showToast("Đã đồng bộ thời gian phát phim cùng toàn bộ phòng chiếu!", "success");
     }
@@ -14175,7 +14294,7 @@
     }
 
     function syncNativeVideoTextTrack(roomId) {
-      const videoEl = document.getElementById("html5-video-player");
+    const videoEl = document.getElementById("html5-video-player");
       if (!videoEl) return;
       videoEl.querySelectorAll("track").forEach(t => {
         if (t.dataset.blobUrl) URL.revokeObjectURL(t.dataset.blobUrl);
@@ -14214,7 +14333,7 @@
 
     async function toggleFullscreen() {
       const screenEl = document.getElementById("cinema-screen");
-      const videoEl = document.getElementById("html5-video-player");
+    const videoEl = document.getElementById("html5-video-player");
       const placeholder = document.getElementById("cinema-screen-placeholder");
       if (!screenEl) return;
 
@@ -16619,7 +16738,7 @@
     // =========================================================
     function hostBroadcastSync(action) {
       if (!state.currentRoomId) return;
-      const videoEl = document.getElementById("html5-video-player");
+    const videoEl = document.getElementById("html5-video-player");
       const ytWrapper = document.getElementById("youtube-wrapper");
       const playBtn = document.getElementById("btn-play-pause");
 
@@ -18535,7 +18654,7 @@
       }
       const roomId = state.currentRoomId;
       const room = getEffectiveRoom(roomId);
-      const videoEl = document.getElementById("html5-video-player");
+    const videoEl = document.getElementById("html5-video-player");
       const ytWrapper = document.getElementById("youtube-wrapper");
       const isYt = Boolean(ytWrapper && !ytWrapper.classList.contains("hidden") && room.youtubeId);
       const isPlaying = isYt ? !state.ytPaused : Boolean(videoEl && !videoEl.paused);
@@ -18603,8 +18722,11 @@
           (data.videoUrl || "") !== (currentRoom.videoUrl || "")
         );
 
+        const isWpLinearCinema = isScheduledCinemaWatchPartyRoom(currentRoom);
         const elapsed = data.isPlaying ? Math.max(0, (Date.now() - (data.updatedAt || Date.now())) / 1000) : 0;
-        const targetTime = Math.max(0, (Number(data.currentTime) || 0) + elapsed);
+        const targetTime = isWpLinearCinema
+          ? getWatchPartyCinemaElapsedSec(currentRoom)
+          : Math.max(0, (Number(data.currentTime) || 0) + elapsed);
 
         if (sourceChanged) {
           state.roomsCustom[roomId] = {
@@ -18626,7 +18748,7 @@
           }
           setupRoomVideoPlayer(getEffectiveRoom(roomId));
           if (!data.youtubeId) {
-            const videoEl = document.getElementById("html5-video-player");
+          const videoEl = document.getElementById("html5-video-player");
             if (videoEl) {
               const prevOnLoaded = videoEl.onloadedmetadata;
               videoEl.onloadedmetadata = (ev) => {
@@ -18644,7 +18766,7 @@
           return;
         }
 
-        const videoEl = document.getElementById("html5-video-player");
+      const videoEl = document.getElementById("html5-video-player");
         const ytWrapper = document.getElementById("youtube-wrapper");
         const btn = document.getElementById("btn-play-pause");
 
@@ -25386,7 +25508,7 @@
       const baseOst = ROOM_SOUNDTRACKS[rId] || `OST: ${room.movieTitle}`;
 
       // Nếu đang phát video trong phòng, kiểm tra xem có câu hát/thoại nào đang vang lên không
-      const videoEl = document.getElementById("html5-video-player");
+    const videoEl = document.getElementById("html5-video-player");
       let curSec = 100;
       if (state.currentRoomId === rId && videoEl && !videoEl.classList.contains("hidden") && videoEl.currentTime > 0) {
         curSec = videoEl.currentTime;
@@ -31568,7 +31690,7 @@
       if (document.visibilityState === "hidden") return false;
       const room = getEffectiveRoom(state.currentRoomId);
       if (!room || room.isDiscordRoom || room.status === "upcoming") return false;
-      const videoEl = document.getElementById("html5-video-player");
+    const videoEl = document.getElementById("html5-video-player");
       if (videoEl && !videoEl.classList.contains("hidden")) {
         return !videoEl.paused && !videoEl.ended && videoEl.readyState >= 2;
       }

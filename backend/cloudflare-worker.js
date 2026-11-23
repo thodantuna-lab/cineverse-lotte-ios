@@ -1848,6 +1848,8 @@ async function provisionWatchPartyRoomOnServer(env, rtdbBase, eventInput, server
         isDiscordRoom: Boolean(typeMeta.isDiscordRoom),
         maxSeats: Number(event.capacity || typeMeta.maxCap || 48),
         isCustomStartZero: true,
+        cinemaScheduleMode: true,
+        allowSeek: false,
         status: "showing",
         closed: false,
         organizerId: event.organizerId,
@@ -1859,14 +1861,18 @@ async function provisionWatchPartyRoomOnServer(env, rtdbBase, eventInput, server
         updatedAt: serverNow
       };
 
+      const elapsedSinceStartSec = Math.max(0, (serverNow - Number(event.startsAt || serverNow)) / 1000);
       const initialSyncPayload = {
         youtubeId: roomPayload.youtubeId,
         videoUrl: roomPayload.videoUrl,
         movieTitle: roomPayload.movieTitle,
         poster: roomPayload.poster,
-        isPlaying: false,
-        currentTime: 0,
-        action: "pause",
+        isPlaying: true,
+        currentTime: elapsedSinceStartSec,
+        action: "play",
+        cinemaScheduleMode: true,
+        allowSeek: false,
+        startsAt: roomPayload.startsAt,
         roomClosed: false,
         endsAt: roomPayload.endsAt,
         scheduleVersion: roomPayload.scheduleVersion,
