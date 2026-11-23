@@ -2078,6 +2078,23 @@ async function handleWatchPartyCreate(request, env, corsHdrs, serverNow = Date.n
     }
 
     const rtdbBase = getWatchPartyRtdbBase(env);
+    const clientRequestId = String(body.clientRequestId || "").trim().replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64);
+    if (clientRequestId) {
+      const idemKey = `${actor.accountKey}__${clientRequestId}`;
+      const existingIdem = await rtdbFetchJson(`${rtdbBase}/lobby_config/watch_parties_v1/idempotency/${encodeURIComponent(idemKey)}.json`).catch(() => null);
+      if (existingIdem?.eventId) {
+        const existingEv = await rtdbFetchJson(`${rtdbBase}/lobby_config/watch_parties_v1/events/${encodeURIComponent(existingIdem.eventId)}.json`).catch(() => null);
+        if (existingEv && existingEv.organizerId === actor.accountKey) {
+          return wpJson({
+            ok: true,
+            idempotent: true,
+            event: formatWatchPartyEventForClient(existingEv, actor.accountKey, serverNow),
+            serverNow
+          }, 200, corsHdrs);
+        }
+      }
+    }
+
     const cfg = await loadWatchPartyConfig(env, rtdbBase);
     const bufferMinutes = Number.isFinite(Number(body.bufferMinutes))
       ? Math.min(30, Math.max(0, Math.round(Number(body.bufferMinutes))))
@@ -2090,6 +2107,7 @@ async function handleWatchPartyCreate(request, env, corsHdrs, serverNow = Date.n
 
     const eventDoc = {
       eventId,
+      clientRequestId: clientRequestId || "",
       organizerId: actor.accountKey,
       organizerEmail: actor.email,
       organizerUid: actor.uid,
@@ -2136,7 +2154,7 @@ async function handleWatchPartyCreate(request, env, corsHdrs, serverNow = Date.n
       }
     };
 
-    await Promise.all([
+    const writeOps = [
       rtdbPutJson(`${rtdbBase}/lobby_config/watch_parties_v1/events/${encodeURIComponent(eventId)}.json`, eventDoc),
       rtdbPutJson(`${rtdbBase}/lobby_config/watch_parties_v1/invites/${encodeURIComponent(inviteToken)}.json`, {
         eventId,
@@ -2144,7 +2162,18 @@ async function handleWatchPartyCreate(request, env, corsHdrs, serverNow = Date.n
         revoked: false,
         createdAt: serverNow
       })
-    ]);
+    ];
+    if (clientRequestId) {
+      const idemKey = `${actor.accountKey}__${clientRequestId}`;
+      writeOps.push(
+        rtdbPutJson(`${rtdbBase}/lobby_config/watch_parties_v1/idempotency/${encodeURIComponent(idemKey)}.json`, {
+          eventId,
+          organizerId: actor.accountKey,
+          createdAt: serverNow
+        })
+      );
+    }
+    await Promise.all(writeOps);
 
     // Nếu người tổ chức chọn bắt đầu ngay lập tức (startsAt <= serverNow), mở phòng ngay
     if (serverNow >= startsAt) {

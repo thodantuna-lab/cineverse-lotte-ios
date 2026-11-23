@@ -2250,6 +2250,7 @@
       display: grid;
       grid-template-columns: 1fr;
       gap: 8px;
+      align-items: start;
     }
     @media (min-width: 640px) {
       .cv-wp-invite-card {
@@ -4078,13 +4079,14 @@
         gap: 3px;
       }
     }
-    body.booking-modal-open #toast-container {
-      top: calc(64px + env(safe-area-inset-top)) !important;
+    body.booking-modal-open #toast-container,
+    body.wp-modal-open #toast-container {
+      top: calc(16px + env(safe-area-inset-top)) !important;
       bottom: auto !important;
       left: 50% !important;
       right: auto !important;
       transform: translateX(-50%);
-      width: min(92vw, 420px);
+      width: min(92vw, 440px);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -4130,7 +4132,8 @@
       right: 12px !important;
       z-index: 75 !important;
     }
-    body.booking-modal-open #owner-chat-fab {
+    body.booking-modal-open #owner-chat-fab,
+    body.wp-modal-open #owner-chat-widget {
       display: none !important;
     }
     @media (max-width: 1023px) {
@@ -8461,11 +8464,19 @@
     <div class="border border-white/15 rounded-3xl max-w-md w-full max-h-[92vh] overflow-y-auto p-5 sm:p-6 space-y-4 shadow-2xl" style="background:#0B0B0F;">
       <div class="flex items-center justify-between">
         <h3 id="name-modal-title" class="text-base font-black text-white"><i class="fa-solid fa-user-shield mr-2" style="color:#F5C518;"></i>Tài Khoản CineVerse</h3>
-        <button id="name-modal-close-btn" type="button" onclick="window.appActions.closeNameModal()" class="text-slate-400 hover:text-white cursor-pointer">
+        <button id="name-modal-close-btn" type="button" onclick="window.appActions.closeNameModal()" class="min-w-[44px] min-h-[44px] rounded-full hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer" aria-label="Đóng hộp thoại đăng nhập">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
-      <p class="text-xs text-slate-300 leading-relaxed">Vui lòng <strong class="text-amber-300">đăng ký tài khoản (xác thực Gmail OTP)</strong> hoặc <strong class="text-sky-300">đăng nhập</strong> để bắt đầu sử dụng rạp chiếu phim và đặt vé CineVerse.</p>
+      <div id="auth-wp-context-banner" class="hidden p-3.5 rounded-2xl space-y-1.5" style="background:rgba(245,197,24,0.10);border:1px solid rgba(245,197,24,0.38);">
+        <div class="flex items-center gap-2 text-amber-300 font-extrabold text-xs">
+          <i class="fa-solid fa-clapperboard"></i>
+          <span>Đăng nhập để lưu lịch hẹn</span>
+        </div>
+        <p class="text-[11px] text-slate-200 leading-relaxed">Lựa chọn của bạn đã được giữ lại. Đăng nhập để lưu lịch, quản lý và mời bạn bè tham gia.</p>
+        <p id="auth-wp-draft-summary" class="text-[11px] font-bold text-amber-200"></p>
+      </div>
+      <p id="name-modal-subtitle" class="text-xs text-slate-300 leading-relaxed">Vui lòng <strong class="text-amber-300">đăng ký tài khoản (xác thực Gmail OTP)</strong> hoặc <strong class="text-sky-300">đăng nhập</strong> để bắt đầu sử dụng rạp chiếu phim và đặt vé CineVerse.</p>
 
       <div id="gmail-auth-status" class="hidden px-3 py-2 rounded-xl bg-emerald-500/15 border border-emerald-400/40 text-xs text-emerald-300 font-semibold flex items-center justify-between gap-2"></div>
 
@@ -8494,9 +8505,16 @@
         </div>
         <div class="space-y-1">
           <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Mật khẩu</label>
-          <input id="login-password-input" type="password" placeholder="Nhập mật khẩu của bạn..."
-            onkeydown="if(event.key==='Enter'){event.preventDefault();window.appActions.confirmNameModal();}"
-            class="w-full px-4 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-sm text-white font-semibold focus:outline-none focus:border-amber-400" />
+          <div class="relative">
+            <input id="login-password-input" type="password" placeholder="Nhập mật khẩu của bạn..."
+              onkeydown="if(event.key==='Enter'){event.preventDefault();window.appActions.confirmNameModal();}"
+              class="w-full pl-4 pr-11 py-2.5 rounded-xl bg-stone-950 border border-white/15 text-sm text-white font-semibold focus:outline-none focus:border-amber-400" />
+            <button type="button" onclick="const inp=document.getElementById('login-password-input');if(inp){inp.type=inp.type==='password'?'text':'password';this.querySelector('i').className=inp.type==='password'?'fa-regular fa-eye':'fa-regular fa-eye-slash';}"
+              class="absolute right-2 top-1/2 -translate-y-1/2 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-white cursor-pointer"
+              aria-label="Hiện hoặc ẩn mật khẩu">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
         </div>
         <div class="flex justify-end">
           <button type="button" onclick="window.appActions.switchAuthTab('forgot')"
@@ -8766,6 +8784,27 @@
       </div>
 
       <div class="space-y-3 text-xs">
+        <div id="wp-draft-restored-banner" class="hidden px-3 py-2 rounded-xl flex items-center justify-between gap-2 text-[11px]"
+          style="background:rgba(245,197,24,0.10);border:1px solid rgba(245,197,24,0.36);color:#FDE68A;">
+          <span><i class="fa-solid fa-bookmark mr-1.5"></i>Đã giữ lại bản nháp lịch hẹn của bạn.</span>
+          <button type="button" onclick="window.appActions.resetWatchPartyDraft()" class="underline font-bold text-amber-300 hover:text-amber-200 cursor-pointer shrink-0">Đặt lại</button>
+        </div>
+        <div id="wp-confirm-ready-banner" class="hidden px-3 py-2.5 rounded-xl text-[11.5px] font-bold"
+          style="background:rgba(16,185,129,0.14);border:1px solid rgba(16,185,129,0.45);color:#6EE7B7;">
+          <i class="fa-solid fa-circle-check mr-1.5"></i>Đã đăng nhập thành công — Kiểm tra lại lịch đã điền và bấm <strong>Xác nhận &amp; Tạo vé mời</strong> để lưu.
+        </div>
+
+        <div id="wp-form-movie-card" class="flex items-center gap-3 p-2.5 rounded-2xl bg-black/45 border border-white/10">
+          <img id="wp-form-movie-poster" src="assets/web-logo.png" alt="Poster phim"
+            onerror="this.onerror=null;this.src='assets/web-logo.png';"
+            class="w-12 h-16 rounded-xl object-cover border border-white/15 shrink-0" />
+          <div class="min-w-0 flex-1 space-y-1">
+            <span class="text-[10px] uppercase tracking-wider font-extrabold text-amber-300 block">Phim đã chọn</span>
+            <h4 id="wp-form-movie-title" class="text-sm font-black text-white truncate">--</h4>
+            <p id="wp-form-movie-meta" class="text-[11px] text-slate-300 truncate">--</p>
+          </div>
+        </div>
+
         <div class="space-y-1">
           <label for="wp-form-movie" class="block font-bold text-slate-200">1. Phim chiếu trong buổi hẹn</label>
           <select id="wp-form-movie" onchange="window.appActions.onWatchPartyMovieOrTimeChange()"
@@ -8782,12 +8821,12 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="space-y-1">
             <label for="wp-form-date" class="block font-bold text-slate-200">2. Ngày bắt đầu (GMT+7)</label>
-            <input id="wp-form-date" type="date" onchange="window.appActions.onWatchPartyMovieOrTimeChange()"
+            <input id="wp-form-date" type="date" onchange="window.appActions.onWatchPartyMovieOrTimeChange()" oninput="window.appActions.onWatchPartyMovieOrTimeChange()"
               class="w-full min-h-[44px] px-3 py-2 rounded-xl bg-stone-950 border border-white/15 text-xs text-white font-bold focus:outline-none focus:border-amber-400" />
           </div>
           <div class="space-y-1">
             <label for="wp-form-time" class="block font-bold text-slate-200">Giờ bắt đầu (GMT+7)</label>
-            <input id="wp-form-time" type="time" onchange="window.appActions.onWatchPartyMovieOrTimeChange()"
+            <input id="wp-form-time" type="time" onchange="window.appActions.onWatchPartyMovieOrTimeChange()" oninput="window.appActions.onWatchPartyMovieOrTimeChange()"
               class="w-full min-h-[44px] px-3 py-2 rounded-xl bg-stone-950 border border-white/15 text-xs text-white font-bold focus:outline-none focus:border-amber-400" />
           </div>
         </div>
@@ -8803,18 +8842,19 @@
             </select>
           </div>
           <div class="space-y-1">
-            <label for="wp-form-capacity" class="block font-bold text-slate-200">Số người tối đa (tính cả bạn)</label>
+            <label for="wp-form-capacity" class="block font-bold text-slate-200">Số thành viên <span id="wp-capacity-hint" class="text-slate-400 font-normal">(tối đa 48)</span></label>
             <input id="wp-form-capacity" type="number" min="2" max="48" value="8"
+              onchange="window.appActions.onWatchPartyMovieOrTimeChange()" oninput="window.appActions.onWatchPartyMovieOrTimeChange()"
               class="w-full min-h-[44px] px-3 py-2 rounded-xl bg-stone-950 border border-white/15 text-xs text-white font-bold focus:outline-none focus:border-amber-400" />
           </div>
         </div>
 
         <div class="space-y-1">
-          <label for="wp-form-visibility" class="block font-bold text-slate-200">4. Quyền tham gia bằng lời mời</label>
-          <select id="wp-form-visibility"
+          <label for="wp-form-visibility" class="block font-bold text-slate-200">4. Quyền riêng tư &amp; tham gia</label>
+          <select id="wp-form-visibility" onchange="window.appActions.onWatchPartyMovieOrTimeChange()"
             class="w-full min-h-[44px] px-3 py-2 rounded-xl bg-stone-950 border border-white/15 text-xs text-white font-semibold focus:outline-none focus:border-amber-400">
-            <option value="invite_approval" selected>Người có link gửi yêu cầu &amp; Chủ buổi hẹn duyệt (Mặc định)</option>
-            <option value="invite_direct">Người có link xác nhận Tham gia sẽ vào thẳng nếu còn chỗ</option>
+            <option value="invite_approval" selected>Chỉ người có lời mời &amp; Chủ buổi hẹn duyệt</option>
+            <option value="invite_direct">Người có link xác nhận Tham gia vào thẳng (nếu còn chỗ)</option>
           </select>
         </div>
 
@@ -10406,6 +10446,7 @@
       watchPartyRooms: {},
       pendingWatchPartyToken: "",
       pendingWatchPartyRoomId: "",
+      pendingWatchPartyCreateAfterAuth: false,
       roomsCustom: {},
       vaultVideos: [
         {
@@ -10588,6 +10629,11 @@
     function showToast(message, type = "info") {
       const container = document.getElementById("toast-container");
       if (!container) return;
+      if (document.body.classList.contains("wp-modal-open") || document.body.classList.contains("booking-modal-open")) {
+        while (container.children.length >= 1) {
+          container.firstElementChild?.remove();
+        }
+      }
       const el = document.createElement("div");
       const bg = type === "success" ? "bg-emerald-600 border-emerald-400" : type === "error" ? "bg-rose-600 border-rose-400" : "bg-stone-900 border-amber-400/50";
       el.className = `px-4 py-2.5 rounded-xl border ${bg} text-white text-xs font-bold shadow-2xl transition-all duration-300`;
@@ -11783,10 +11829,14 @@
       const detail = document.getElementById("hero-detail-modal");
       const booking = document.getElementById("booking-modal");
       const wpCreate = document.getElementById("watch-party-create-modal");
+      const wpInvite = document.getElementById("watch-party-invite-modal");
+      const authModal = document.getElementById("name-modal");
       return Boolean(
         (detail && !detail.classList.contains("hidden")) ||
         (booking && !booking.classList.contains("hidden")) ||
-        (wpCreate && !wpCreate.classList.contains("hidden"))
+        (wpCreate && !wpCreate.classList.contains("hidden")) ||
+        (wpInvite && !wpInvite.classList.contains("hidden")) ||
+        (authModal && !authModal.classList.contains("hidden"))
       );
     }
 
@@ -17689,6 +17739,33 @@
       if (!res.ok) throw new Error(`Không lưu được tài khoản lên máy chủ (HTTP ${res.status})`);
     }
 
+    function syncAuthWatchPartyContextUI() {
+      const ctxBanner = document.getElementById("auth-wp-context-banner");
+      const summaryEl = document.getElementById("auth-wp-draft-summary");
+      const titleEl = document.getElementById("name-modal-title");
+      const subtitleEl = document.getElementById("name-modal-subtitle");
+      const isWpAuth = Boolean(state.pendingWatchPartyCreateAfterAuth);
+      const draft = isWpAuth && typeof loadWatchPartyDraft === "function" ? loadWatchPartyDraft() : null;
+
+      if (isWpAuth && draft) {
+        if (titleEl) {
+          titleEl.innerHTML = `<i class="fa-solid fa-clapperboard mr-2" style="color:#F5C518;"></i>Đăng nhập để lưu lịch hẹn`;
+        }
+        subtitleEl?.classList.add("hidden");
+        ctxBanner?.classList.remove("hidden");
+        if (summaryEl && typeof formatWpDraftSummary === "function") {
+          summaryEl.textContent = formatWpDraftSummary(draft);
+        }
+      } else {
+        if (titleEl) {
+          titleEl.innerHTML = `<i class="fa-solid fa-user-shield mr-2" style="color:#F5C518;"></i>Tài Khoản CineVerse`;
+        }
+        subtitleEl?.classList.remove("hidden");
+        ctxBanner?.classList.add("hidden");
+        if (summaryEl) summaryEl.textContent = "";
+      }
+    }
+
     function switchAuthTab(tab = "login") {
       setAuthModalError("");
       state.authTab = (tab === "register" || tab === "forgot") ? tab : "login";
@@ -17712,17 +17789,23 @@
       panelForgot?.classList.toggle("hidden", state.authTab !== "forgot");
 
       if (state.authTab === "register") {
-        if (btn) btn.textContent = pendingBookingArgs ? "Tạo tài khoản & Đặt vé" : (pendingEnterRoomId ? "Tạo tài khoản & Vào Phòng" : "Tạo tài khoản & Xác thực");
+        if (btn) btn.textContent = state.pendingWatchPartyCreateAfterAuth
+          ? "Tạo tài khoản & Quay lại lịch"
+          : (pendingBookingArgs ? "Tạo tài khoản & Đặt vé" : (pendingEnterRoomId ? "Tạo tài khoản & Vào Phòng" : "Tạo tài khoản & Xác thực"));
       } else if (state.authTab === "forgot") {
         const loginEmailVal = (document.getElementById("login-gmail-input")?.value || "").trim().toLowerCase();
         const forgotEmailEl = document.getElementById("forgot-gmail-input");
         if (forgotEmailEl && !forgotEmailEl.value && loginEmailVal) {
           forgotEmailEl.value = loginEmailVal;
         }
-        if (btn) btn.textContent = "Đặt lại mật khẩu & Đăng nhập";
+        if (btn) btn.textContent = state.pendingWatchPartyCreateAfterAuth
+          ? "Đặt lại & Quay lại lịch"
+          : "Đặt lại mật khẩu & Đăng nhập";
         setTimeout(() => (forgotEmailEl?.value ? document.getElementById("forgot-new-password-input") : forgotEmailEl)?.focus(), 40);
       } else {
-        if (btn) btn.textContent = pendingBookingArgs ? "Đăng nhập & Đặt vé" : (pendingEnterRoomId ? "Đăng nhập & Vào Phòng" : "Đăng nhập");
+        if (btn) btn.textContent = state.pendingWatchPartyCreateAfterAuth
+          ? "Đăng nhập & Quay lại lịch"
+          : (pendingBookingArgs ? "Đăng nhập & Đặt vé" : (pendingEnterRoomId ? "Đăng nhập & Vào Phòng" : "Đăng nhập"));
       }
     }
 
@@ -17808,7 +17891,14 @@
       syncMyOnlinePresence();
       autoLocateMemberLocation(true);
       if (typeof fetchWatchPartyList === "function") fetchWatchPartyList(true);
-      if (state.pendingWatchPartyToken && typeof openWatchPartyInviteByToken === "function") {
+      if (state.pendingWatchPartyCreateAfterAuth && typeof openCreateWatchPartyModal === "function") {
+        state.pendingWatchPartyCreateAfterAuth = false;
+        const d = typeof loadWatchPartyDraft === "function" ? loadWatchPartyDraft() : null;
+        if (d) {
+          try { localStorage.setItem("cv_wp_draft_v1", JSON.stringify({ ...d, pendingConfirm: false })); } catch (_) {}
+        }
+        openCreateWatchPartyModal("", "", { fromAuthReturn: true, confirmStep: true });
+      } else if (state.pendingWatchPartyToken && typeof openWatchPartyInviteByToken === "function") {
         const tok = state.pendingWatchPartyToken;
         state.pendingWatchPartyToken = "";
         setTimeout(() => openWatchPartyInviteByToken(tok), 120);
@@ -17816,6 +17906,36 @@
         const rWp = state.pendingWatchPartyRoomId;
         state.pendingWatchPartyRoomId = "";
         setTimeout(() => enterRoom(rWp), 120);
+      }
+    }
+
+    async function finishAuthModalAndResume({ callSuccessHook = false, inviteInfo = null } = {}) {
+      const targetRoom = pendingEnterRoomId;
+      pendingEnterRoomId = null;
+      const bookArgs = pendingBookingArgs;
+      pendingBookingArgs = null;
+      const wasWpPending = Boolean(state.pendingWatchPartyCreateAfterAuth);
+
+      setActiveWatchPartyDialog(null);
+      if (callSuccessHook) {
+        onMemberAuthenticatedSuccess();
+      }
+      if (wasWpPending) {
+        return;
+      }
+      if (bookArgs) {
+        if (bookArgs.quickBar) await quickBookFromLobbyBar();
+        else openBookingModal(bookArgs.roomId, bookArgs.showtime, bookArgs.seat);
+      } else if (targetRoom) {
+        enterRoom(targetRoom);
+        if (inviteInfo && inviteInfo.roomId === targetRoom) {
+          if (inviteInfo.seatId) {
+            assignSeat(inviteInfo.roomId, inviteInfo.seatId, true);
+          }
+          if (inviteInfo.inviter) {
+            showToast(`👋 Bạn vừa vào rạp theo lời mời của ${inviteInfo.inviter} tại ghế ${inviteInfo.seatId || "F5"}!`, "success");
+          }
+        }
       }
     }
 
@@ -17831,7 +17951,9 @@
         input.value = (saved && !isDefaultGuestName(saved)) ? saved : "";
       }
       refreshGmailModalUI();
-      document.getElementById("name-modal")?.classList.remove("hidden");
+      syncAuthWatchPartyContextUI();
+      if (typeof setActiveWatchPartyDialog === "function") setActiveWatchPartyDialog("auth");
+      else document.getElementById("name-modal")?.classList.remove("hidden");
       setTimeout(() => {
         if (!state.accountLoggedIn) {
           if (state.authTab === "register") document.getElementById("modal-name-input")?.focus();
@@ -17845,7 +17967,20 @@
     function closeNameModal() {
       pendingEnterRoomId = null;
       pendingBookingArgs = null;
-      document.getElementById("name-modal")?.classList.add("hidden");
+      const returnToWpDraft = Boolean(state.pendingWatchPartyCreateAfterAuth && !isAccountAuthenticated());
+      state.pendingWatchPartyCreateAfterAuth = false;
+      syncAuthWatchPartyContextUI();
+      if (typeof loadWatchPartyDraft === "function") {
+        const d = loadWatchPartyDraft();
+        if (d && d.pendingConfirm) {
+          try { localStorage.setItem("cv_wp_draft_v1", JSON.stringify({ ...d, pendingConfirm: false })); } catch (_) {}
+        }
+      }
+      if (typeof setActiveWatchPartyDialog === "function") setActiveWatchPartyDialog(null);
+      else document.getElementById("name-modal")?.classList.add("hidden");
+      if (returnToWpDraft && typeof openCreateWatchPartyModal === "function") {
+        openCreateWatchPartyModal("", "", { fromCancelledAuth: true });
+      }
     }
 
     function logoutGmailAccount() {
@@ -18046,17 +18181,7 @@
         saveMemberAccountSession(state.userEmail, val, "");
         await applyNewUserName(val);
         syncMyOnlinePresence();
-        const targetRoom = pendingEnterRoomId;
-        pendingEnterRoomId = null;
-        const bookArgs = pendingBookingArgs;
-        pendingBookingArgs = null;
-        document.getElementById("name-modal")?.classList.add("hidden");
-        if (bookArgs) {
-          if (bookArgs.quickBar) await quickBookFromLobbyBar();
-          else openBookingModal(bookArgs.roomId, bookArgs.showtime, bookArgs.seat);
-        } else if (targetRoom) {
-          enterRoom(targetRoom);
-        }
+        await finishAuthModalAndResume({ callSuccessHook: false });
         return;
       }
 
@@ -18139,19 +18264,7 @@
           if (forgotNewPassEl) forgotNewPassEl.value = "";
           if (forgotConfirmPassEl) forgotConfirmPassEl.value = "";
           showToast(`✅ Đã đặt lại mật khẩu mới thành công! Chào mừng ${acc.displayName || "Thành viên"}`, "success");
-
-          const targetRoom = pendingEnterRoomId;
-          pendingEnterRoomId = null;
-          const bookArgs = pendingBookingArgs;
-          pendingBookingArgs = null;
-          document.getElementById("name-modal")?.classList.add("hidden");
-          onMemberAuthenticatedSuccess();
-          if (bookArgs) {
-            if (bookArgs.quickBar) await quickBookFromLobbyBar();
-            else openBookingModal(bookArgs.roomId, bookArgs.showtime, bookArgs.seat);
-          } else if (targetRoom) {
-            enterRoom(targetRoom);
-          }
+          await finishAuthModalAndResume({ callSuccessHook: true });
         } catch (err) {
           const msg = `❌ ${err.message || "Không thể đặt lại mật khẩu"}`;
           setAuthModalError(msg);
@@ -18196,20 +18309,8 @@
           state.accountLoggedIn = true;
           saveVerifiedEmail(email, acc.verifiedUid || accKey, acc.displayName || "Thành viên");
           await applyNewUserName(acc.displayName || "Thành viên");
-          onMemberAuthenticatedSuccess();
           showToast(`✅ Đăng nhập thành công! Chào mừng ${acc.displayName}`, "success");
-
-          const targetRoom = pendingEnterRoomId;
-          pendingEnterRoomId = null;
-          const bookArgs = pendingBookingArgs;
-          pendingBookingArgs = null;
-          document.getElementById("name-modal")?.classList.add("hidden");
-          if (bookArgs) {
-            if (bookArgs.quickBar) await quickBookFromLobbyBar();
-            else openBookingModal(bookArgs.roomId, bookArgs.showtime, bookArgs.seat);
-          } else if (targetRoom) {
-            enterRoom(targetRoom);
-          }
+          await finishAuthModalAndResume({ callSuccessHook: true });
         } catch (err) {
           const msg = `❌ ${err.message || "Đăng nhập thất bại"}`;
           setAuthModalError(msg);
@@ -18320,28 +18421,9 @@
       if (btn) { btn.disabled = false; btn.textContent = prevText; }
 
       await applyNewUserName(val);
-      onMemberAuthenticatedSuccess();
-      const targetRoom = pendingEnterRoomId;
-      pendingEnterRoomId = null;
-      const bookArgs = pendingBookingArgs;
-      pendingBookingArgs = null;
       const inviteInfo = pendingInviteSeat;
       pendingInviteSeat = null;
-      document.getElementById("name-modal")?.classList.add("hidden");
-      if (bookArgs) {
-        if (bookArgs.quickBar) await quickBookFromLobbyBar();
-        else openBookingModal(bookArgs.roomId, bookArgs.showtime, bookArgs.seat);
-      } else if (targetRoom) {
-        enterRoom(targetRoom);
-        if (inviteInfo && inviteInfo.roomId === targetRoom) {
-          if (inviteInfo.seatId) {
-            assignSeat(inviteInfo.roomId, inviteInfo.seatId, true);
-          }
-          if (inviteInfo.inviter) {
-            showToast(`👋 Bạn vừa vào rạp theo lời mời của ${inviteInfo.inviter} tại ghế ${inviteInfo.seatId || "F5"}!`, "success");
-          }
-        }
-      }
+      await finishAuthModalAndResume({ callSuccessHook: true, inviteInfo });
     }
 
     function openCustomVideoModal() {
@@ -32815,14 +32897,109 @@
     // =========================================================
     // HẸN XEM CÙNG BẠN BÈ (CLIENT LIFECYCLE, TICKETS & SYNC)
     // =========================================================
+    const WP_DRAFT_STORAGE_KEY = "cv_wp_draft_v1";
     let wpSeatUnsub = null;
     let wpFetchInFlight = null;
     let wpEditEventId = "";
     let wpActiveInviteToken = "";
     let wpActiveInviteEvent = null;
+    let wpSubmitInFlight = false;
     const wpNotifiedOpenIds = new Set();
     const wpWarningsShown = new Set();
     let wpForceClosedGuardRoomId = "";
+
+    function setActiveWatchPartyDialog(dialogKind = null) {
+      const createEl = document.getElementById("watch-party-create-modal");
+      const authEl = document.getElementById("name-modal");
+      const inviteEl = document.getElementById("watch-party-invite-modal");
+
+      if (dialogKind !== "create") createEl?.classList.add("hidden");
+      if (dialogKind !== "auth") authEl?.classList.add("hidden");
+      if (dialogKind !== "invite") inviteEl?.classList.add("hidden");
+
+      if (dialogKind === "create") createEl?.classList.remove("hidden");
+      if (dialogKind === "auth") authEl?.classList.remove("hidden");
+      if (dialogKind === "invite") inviteEl?.classList.remove("hidden");
+
+      document.body.classList.toggle("wp-modal-open", Boolean(dialogKind));
+    }
+
+    function createWpRequestUuid() {
+      try {
+        if (window.crypto && typeof window.crypto.randomUUID === "function") {
+          return "wp_" + window.crypto.randomUUID();
+        }
+      } catch (_) {}
+      return `wp_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    }
+
+    function loadWatchPartyDraft() {
+      try {
+        const raw = localStorage.getItem(WP_DRAFT_STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object" || !parsed.movieId) return null;
+        return parsed;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function clearWatchPartyDraft() {
+      try { localStorage.removeItem(WP_DRAFT_STORAGE_KEY); } catch (_) {}
+      state.pendingWatchPartyCreateAfterAuth = false;
+    }
+
+    function saveWatchPartyDraftFromForm(extra = {}) {
+      if (wpEditEventId) return null;
+      const existing = loadWatchPartyDraft();
+      const movieId = document.getElementById("wp-form-movie")?.value || existing?.movieId || "";
+      const dateVal = document.getElementById("wp-form-date")?.value || "";
+      const timeVal = document.getElementById("wp-form-time")?.value || "";
+      const roomType = document.getElementById("wp-form-room-type")?.value || "private_cinema";
+      const capacity = Number(document.getElementById("wp-form-capacity")?.value || 8);
+      const visibility = document.getElementById("wp-form-visibility")?.value || "invite_approval";
+      const manualDurationMin = String(document.getElementById("wp-form-manual-duration")?.value || "").trim();
+      const movies = getWpMovieCatalogList();
+      const movieObj = movies.find(m => m.movieId === movieId) || movies[0] || null;
+
+      const draft = {
+        movieId: movieObj?.movieId || movieId,
+        movieTitle: movieObj?.movieTitle || existing?.movieTitle || "",
+        date: dateVal,
+        time: timeVal,
+        roomType,
+        capacity,
+        visibility,
+        manualDurationMin,
+        clientRequestId: existing?.clientRequestId || createWpRequestUuid(),
+        pendingConfirm: typeof extra.pendingConfirm === "boolean" ? extra.pendingConfirm : Boolean(existing?.pendingConfirm),
+        updatedAt: Date.now()
+      };
+      try { localStorage.setItem(WP_DRAFT_STORAGE_KEY, JSON.stringify(draft)); } catch (_) {}
+      return draft;
+    }
+
+    function formatWpDraftSummary(draft) {
+      if (!draft) return "";
+      const roomLabel = draft.roomType === "sweetbox"
+        ? "Sweetbox"
+        : draft.roomType === "stream_party"
+        ? "Phòng Stream Nhóm"
+        : "Buổi xem riêng";
+      const parts = [
+        draft.movieTitle || "Buổi xem riêng",
+        draft.time && draft.date ? `${draft.time} (${draft.date.split("-").reverse().slice(0, 2).join("/")})` : (draft.time || draft.date || ""),
+        `${roomLabel} · ${draft.capacity || 8} thành viên`
+      ].filter(Boolean);
+      return parts.join(" • ");
+    }
+
+    function resetWatchPartyDraft() {
+      clearWatchPartyDraft();
+      openCreateWatchPartyModal("", "", { ignoreDraft: true });
+      showToast("Đã đặt lại biểu mẫu lịch hẹn mới.", "info");
+    }
 
     function getWatchPartyServerNow() {
       return Date.now() + Number(state.watchParties?.serverOffsetMs || 0);
@@ -33201,8 +33378,8 @@
             ${ev.isOrganizer && !ev.inviteRevoked && ev.status !== "ended" && ev.status !== "cancelled"
               ? `<button type="button" onclick="window.appActions.copyWatchPartyInviteLink('${escapeHTML(ev.eventId)}', '${escapeHTML(ev.inviteToken || "")}')"
                   class="cv-wp-cta-secondary w-full">
-                  <i class="fa-regular fa-copy" aria-hidden="true"></i>
-                  <span>Sao chép link</span>
+                  <i class="fa-solid fa-link" aria-hidden="true"></i>
+                  <span>Sao chép lời mời</span>
                 </button>`
               : `<button type="button" onclick="window.appActions.openWatchPartyInviteModal('${escapeHTML(ev.eventId)}')"
                   class="cv-wp-cta-secondary w-full">
@@ -33329,23 +33506,51 @@
       openCreateWatchPartyModal("", getCanonicalMovieId(eff));
     }
 
-    function openCreateWatchPartyModal(editEventId = "", preselectMovieId = "") {
-      if (!state.accountLoggedIn || !state.gmailVerified || !state.userEmail) {
-        showToast("🔐 Vui lòng đăng nhập Gmail trước khi tạo lịch hẹn xem cùng bạn bè!", "warning");
-        openNameModal(false);
+    function updateWatchPartyMoviePreviewCard() {
+      const movies = getWpMovieCatalogList();
+      const movieId = document.getElementById("wp-form-movie")?.value || "";
+      const movieObj = movies.find(m => m.movieId === movieId) || movies[0] || null;
+      const posterEl = document.getElementById("wp-form-movie-poster");
+      const titleEl = document.getElementById("wp-form-movie-title");
+      const metaEl = document.getElementById("wp-form-movie-meta");
+      if (!movieObj) return;
+      if (posterEl) {
+        posterEl.src = movieObj.poster || "assets/web-logo.png";
+        posterEl.alt = movieObj.movieTitle;
+      }
+      if (titleEl) titleEl.textContent = movieObj.movieTitle;
+      if (metaEl) {
+        const mins = movieObj.durationSec > 0 ? `${Math.round(movieObj.durationSec / 60)} phút` : "Chưa rõ thời lượng";
+        const parts = [movieObj.ageRating || "T13+", movieObj.genre || "Điện ảnh", mins].filter(Boolean);
+        metaEl.textContent = parts.join(" • ");
+      }
+    }
+
+    function updateWatchPartySubmitButtonLabel() {
+      const submitLbl = document.getElementById("wp-create-submit-label");
+      if (!submitLbl) return;
+      if (wpEditEventId) {
+        submitLbl.textContent = "Lưu thay đổi lịch hẹn";
         return;
       }
+      const isAuthed = Boolean(state.accountLoggedIn && state.gmailVerified && state.userEmail);
+      submitLbl.textContent = isAuthed ? "Xác nhận & Tạo vé mời" : "Tiếp tục";
+    }
+
+    function openCreateWatchPartyModal(editEventId = "", preselectMovieId = "", opts = {}) {
       setWatchPartyCreateError("");
       wpEditEventId = String(editEventId || "");
       const movies = getWpMovieCatalogList();
       const movieSel = document.getElementById("wp-form-movie");
+      const manualInput = document.getElementById("wp-form-manual-duration");
       const dateInput = document.getElementById("wp-form-date");
       const timeInput = document.getElementById("wp-form-time");
       const roomTypeSel = document.getElementById("wp-form-room-type");
       const capInput = document.getElementById("wp-form-capacity");
       const visSel = document.getElementById("wp-form-visibility");
       const titleEl = document.getElementById("wp-create-modal-title");
-      const submitLbl = document.getElementById("wp-create-submit-label");
+      const restoredBanner = document.getElementById("wp-draft-restored-banner");
+      const confirmBanner = document.getElementById("wp-confirm-ready-banner");
 
       if (movieSel) {
         movieSel.innerHTML = movies.map((m) =>
@@ -33356,10 +33561,21 @@
       const editEv = wpEditEventId
         ? (state.watchParties.upcoming || []).find(e => e.eventId === wpEditEventId)
         : null;
+      const savedDraft = !editEv && !opts.ignoreDraft ? loadWatchPartyDraft() : null;
+      const shouldRestoreDraft = Boolean(
+        savedDraft && (
+          opts.fromAuthReturn ||
+          opts.fromCancelledAuth ||
+          !preselectMovieId ||
+          savedDraft.movieId === preselectMovieId
+        )
+      );
+
+      restoredBanner?.classList.add("hidden");
+      confirmBanner?.classList.add("hidden");
 
       if (editEv) {
         if (titleEl) titleEl.textContent = "Chỉnh sửa lịch hẹn";
-        if (submitLbl) submitLbl.textContent = "Lưu thay đổi lịch hẹn";
         if (movieSel) movieSel.value = editEv.movieId;
         const vnParts = new Intl.DateTimeFormat("sv-SE", {
           timeZone: "Asia/Ho_Chi_Minh",
@@ -33370,10 +33586,25 @@
         if (roomTypeSel) roomTypeSel.value = editEv.roomType || "private_cinema";
         if (capInput) capInput.value = String(editEv.capacity || 8);
         if (visSel) visSel.value = editEv.visibility || "invite_approval";
+      } else if (shouldRestoreDraft && savedDraft) {
+        if (titleEl) titleEl.textContent = opts.confirmStep ? "Xác nhận lịch hẹn" : "Hẹn xem cùng bạn bè";
+        if (movieSel && movies.some(m => m.movieId === savedDraft.movieId)) {
+          movieSel.value = savedDraft.movieId;
+        }
+        if (manualInput) manualInput.value = savedDraft.manualDurationMin || "";
+        if (dateInput && savedDraft.date) dateInput.value = savedDraft.date;
+        if (timeInput && savedDraft.time) timeInput.value = savedDraft.time;
+        if (roomTypeSel && savedDraft.roomType) roomTypeSel.value = savedDraft.roomType;
+        if (capInput && savedDraft.capacity) capInput.value = String(savedDraft.capacity);
+        if (visSel && savedDraft.visibility) visSel.value = savedDraft.visibility;
+        if (opts.confirmStep) confirmBanner?.classList.remove("hidden");
+        else restoredBanner?.classList.remove("hidden");
       } else {
         if (titleEl) titleEl.textContent = "Hẹn xem cùng bạn bè";
-        if (submitLbl) submitLbl.textContent = "Xác nhận & Tạo vé mời";
-        if (movieSel && preselectMovieId) movieSel.value = preselectMovieId;
+        if (movieSel && preselectMovieId && movies.some(m => m.movieId === preselectMovieId)) {
+          movieSel.value = preselectMovieId;
+        }
+        if (manualInput) manualInput.value = "";
         const defaultStart = new Date(getWatchPartyServerNow() + 15 * 60000);
         const vnParts = new Intl.DateTimeFormat("sv-SE", {
           timeZone: "Asia/Ho_Chi_Minh",
@@ -33386,32 +33617,44 @@
         if (visSel) visSel.value = "invite_approval";
       }
 
-      onWatchPartyRoomTypeChange();
-      onWatchPartyMovieOrTimeChange();
-      document.getElementById("watch-party-create-modal")?.classList.remove("hidden");
+      onWatchPartyRoomTypeChange(false);
+      onWatchPartyMovieOrTimeChange(false);
+      updateWatchPartySubmitButtonLabel();
+      if (!editEv) saveWatchPartyDraftFromForm({ pendingConfirm: false });
+      setActiveWatchPartyDialog("create");
+      if (opts.confirmStep) {
+        setTimeout(() => document.getElementById("wp-create-submit-btn")?.focus(), 80);
+      }
     }
 
     function closeCreateWatchPartyModal() {
-      document.getElementById("watch-party-create-modal")?.classList.add("hidden");
+      if (!wpEditEventId) {
+        saveWatchPartyDraftFromForm({ pendingConfirm: false });
+      }
       wpEditEventId = "";
+      setActiveWatchPartyDialog(null);
     }
 
-    function onWatchPartyRoomTypeChange() {
+    function onWatchPartyRoomTypeChange(persistDraft = true) {
       const rt = document.getElementById("wp-form-room-type")?.value || "private_cinema";
       const capInput = document.getElementById("wp-form-capacity");
-      if (!capInput) return;
-      const limits = {
-        private_cinema: { min: 2, max: 48, def: 8 },
-        sweetbox: { min: 2, max: 2, def: 2 },
-        stream_party: { min: 2, max: 10, def: 6 }
-      }[rt] || { min: 2, max: 48, def: 8 };
-      capInput.min = String(limits.min);
-      capInput.max = String(limits.max);
-      const cur = Number(capInput.value || limits.def);
-      if (rt === "sweetbox" || cur < limits.min || cur > limits.max) {
-        capInput.value = String(limits.def);
+      const capHint = document.getElementById("wp-capacity-hint");
+      if (capInput) {
+        const limits = {
+          private_cinema: { min: 2, max: 48, def: 8 },
+          sweetbox: { min: 2, max: 2, def: 2 },
+          stream_party: { min: 2, max: 10, def: 6 }
+        }[rt] || { min: 2, max: 48, def: 8 };
+        capInput.min = String(limits.min);
+        capInput.max = String(limits.max);
+        const cur = Number(capInput.value || limits.def);
+        if (rt === "sweetbox" || cur < limits.min || cur > limits.max) {
+          capInput.value = String(limits.def);
+        }
+        capInput.disabled = rt === "sweetbox";
+        if (capHint) capHint.textContent = `(tối đa ${limits.max})`;
       }
-      capInput.disabled = rt === "sweetbox";
+      if (persistDraft) saveWatchPartyDraftFromForm();
     }
 
     function getWatchPartyFormTimes() {
@@ -33438,7 +33681,8 @@
       return { movieObj, durationSec, hasVerifiedDur, startsAt, endsAt, bufMin };
     }
 
-    function onWatchPartyMovieOrTimeChange() {
+    function onWatchPartyMovieOrTimeChange(persistDraft = true) {
+      updateWatchPartyMoviePreviewCard();
       const { movieObj, durationSec, startsAt, endsAt, bufMin } = getWatchPartyFormTimes();
       const durBadge = document.getElementById("wp-preview-duration-badge");
       const txtEl = document.getElementById("wp-preview-time-text");
@@ -33456,15 +33700,13 @@
           txtEl.innerHTML = `Mở phòng lúc <strong class="text-amber-300">${escapeHTML(st.timeLabel)} (${escapeHTML(st.dateLabel)})</strong> • Tự đóng cố định lúc <strong class="text-rose-300">${escapeHTML(en.timeLabel)} (${escapeHTML(en.dateLabel)})</strong> <span class="text-[10px] text-slate-400">(Asia/Ho_Chi_Minh)</span>`;
         }
       }
+      if (persistDraft) saveWatchPartyDraftFromForm();
     }
 
     async function submitWatchPartyForm() {
+      if (wpSubmitInFlight) return;
       setWatchPartyCreateError("");
-      const acc = getWatchPartyAccountPayload();
-      if (!acc.accountEmail) {
-        openNameModal(false);
-        return;
-      }
+
       const { movieObj, durationSec, startsAt } = getWatchPartyFormTimes();
       if (!movieObj) {
         setWatchPartyCreateError("Vui lòng chọn một bộ phim trong danh mục!");
@@ -33480,17 +33722,43 @@
       }
 
       const roomType = document.getElementById("wp-form-room-type")?.value || "private_cinema";
-      const capacity = Number(document.getElementById("wp-form-capacity")?.value || 8);
+      const limits = { private_cinema: [2, 48], sweetbox: [2, 2], stream_party: [2, 10] }[roomType] || [2, 48];
+      const rawCap = Number(document.getElementById("wp-form-capacity")?.value || limits[0]);
+      if (!Number.isFinite(rawCap) || rawCap < limits[0] || rawCap > limits[1]) {
+        setWatchPartyCreateError(`Sức chứa của loại phòng này phải từ ${limits[0]} đến ${limits[1]} người!`);
+        return;
+      }
+      const capacity = Math.round(rawCap);
       const visibility = document.getElementById("wp-form-visibility")?.value || "invite_approval";
 
+      // Nếu khách chưa đăng nhập -> giữ bản nháp & chuyển mượt sang bước Đăng nhập (không chồng modal)
+      const acc = getWatchPartyAccountPayload();
+      const isAuthed = Boolean(state.accountLoggedIn && state.gmailVerified && acc.accountEmail);
+      if (!isAuthed) {
+        state.pendingWatchPartyCreateAfterAuth = true;
+        saveWatchPartyDraftFromForm({ pendingConfirm: true });
+        openNameModal(false);
+        return;
+      }
+
+      const draft = saveWatchPartyDraftFromForm({ pendingConfirm: true });
+      const clientRequestId = draft?.clientRequestId || createWpRequestUuid();
       const btn = document.getElementById("wp-create-submit-btn");
-      if (btn) btn.disabled = true;
+      const submitLbl = document.getElementById("wp-create-submit-label");
+      const prevLbl = submitLbl ? submitLbl.textContent : "";
+
+      wpSubmitInFlight = true;
+      if (btn) {
+        btn.disabled = true;
+        btn.setAttribute("aria-busy", "true");
+      }
+      if (submitLbl) submitLbl.textContent = wpEditEventId ? "Đang lưu..." : "Đang tạo vé mời...";
 
       try {
         const endpoint = wpEditEventId ? "/api/watch-party/update" : "/api/watch-party/create";
         const body = {
           ...acc,
-          ...(wpEditEventId ? { eventId: wpEditEventId, action: "edit" } : {}),
+          ...(wpEditEventId ? { eventId: wpEditEventId, action: "edit" } : { clientRequestId }),
           movieId: movieObj.movieId,
           movieTitle: movieObj.movieTitle,
           poster: movieObj.poster,
@@ -33514,16 +33782,23 @@
         if (!res.ok || !data.ok || !data.event) {
           throw new Error(data?.error || `HTTP_${res.status}`);
         }
-        closeCreateWatchPartyModal();
+        const wasEdit = Boolean(wpEditEventId);
+        wpEditEventId = "";
+        clearWatchPartyDraft();
         await fetchWatchPartyList(true);
-        showToast(wpEditEventId ? "✅ Đã cập nhật lịch hẹn & thông báo cho nhóm!" : "🎉 Đã tạo vé mời buổi xem! Bạn có thể sao chép link gửi bạn bè.", "success");
+        showToast(wasEdit ? "✅ Đã cập nhật lịch hẹn & thông báo cho nhóm!" : "🎉 Đã tạo vé mời buổi xem! Bấm 'Sao chép lời mời' để gửi bạn bè.", "success");
         wpActiveInviteEvent = data.event;
         renderWatchPartyInviteModal();
-        document.getElementById("watch-party-invite-modal")?.classList.remove("hidden");
+        setActiveWatchPartyDialog("invite");
       } catch (err) {
         setWatchPartyCreateError(`❌ Không lưu được lịch hẹn: ${err.message}`);
       } finally {
-        if (btn) btn.disabled = false;
+        wpSubmitInFlight = false;
+        if (btn) {
+          btn.disabled = false;
+          btn.removeAttribute("aria-busy");
+        }
+        if (submitLbl && prevLbl) submitLbl.textContent = prevLbl;
       }
     }
 
@@ -33532,7 +33807,7 @@
       if (!ev) return;
       wpActiveInviteEvent = ev;
       renderWatchPartyInviteModal();
-      document.getElementById("watch-party-invite-modal")?.classList.remove("hidden");
+      setActiveWatchPartyDialog("invite");
       fetchWatchPartyList(true);
     }
 
@@ -33551,7 +33826,7 @@
         }
         wpActiveInviteEvent = data.event;
         renderWatchPartyInviteModal();
-        document.getElementById("watch-party-invite-modal")?.classList.remove("hidden");
+        setActiveWatchPartyDialog("invite");
       } catch (_) {
         showToast("⚠️ Không tải được thông tin vé mời.", "error");
       }
@@ -33563,8 +33838,8 @@
     }
 
     function closeWatchPartyInviteModal() {
-      document.getElementById("watch-party-invite-modal")?.classList.add("hidden");
       wpActiveInviteEvent = null;
+      setActiveWatchPartyDialog(null);
     }
 
     async function copyWatchPartyInviteLink(eventId, token) {
@@ -33695,32 +33970,37 @@
         `;
       } else {
         const beforeStart = getWatchPartyServerNow() < Number(ev.startsAt || 0) && ev.status === "scheduled";
-        const primaryOrgCta = ev.status === "open" && ev.canEnterRoom
-          ? `<button type="button" onclick="window.appActions.closeWatchPartyInviteModal(); window.appActions.enterWatchPartyRoom('${escapeHTML(ev.eventId)}')" class="cv-wp-cta-primary w-full"><i class="fa-solid fa-door-open"></i><span>Vào phòng chiếu riêng</span></button>`
+        const copyPrimaryBtn = ev.inviteRevoked
+          ? `<button type="button" id="wp-btn-copy-invite-primary" disabled class="cv-wp-cta-secondary w-full opacity-55 cursor-not-allowed"><i class="fa-solid fa-ban text-rose-400"></i><span>Link mời đã bị thu hồi</span></button>`
+          : `<button type="button" id="wp-btn-copy-invite-primary" onclick="window.appActions.copyWatchPartyInviteLink('${escapeHTML(ev.eventId)}', '${escapeHTML(ev.inviteToken || "")}')" class="cv-wp-cta-primary w-full"><i class="fa-solid fa-link"></i><span>Sao chép lời mời</span></button>`;
+
+        const statusPrimaryExtra = ev.status === "open" && ev.canEnterRoom
+          ? `<button type="button" onclick="window.appActions.closeWatchPartyInviteModal(); window.appActions.enterWatchPartyRoom('${escapeHTML(ev.eventId)}')" class="cv-wp-cta-secondary w-full" style="border-color:rgba(16,185,129,0.55);color:#6EE7B7;"><i class="fa-solid fa-door-open"></i><span>Vào phòng chiếu riêng</span></button>`
           : ev.status === "create_failed"
-          ? `<button type="button" onclick="window.appActions.retryWatchPartyRoomCreation('${escapeHTML(ev.eventId)}')" class="cv-wp-cta-primary w-full"><i class="fa-solid fa-rotate-right"></i><span>Thử lại tạo phòng (${escapeHTML(ev.lastError || "Lỗi tạm thời")})</span></button>`
-          : `<button type="button" onclick="window.appActions.copyWatchPartyInviteLink('${escapeHTML(ev.eventId)}', '${escapeHTML(ev.inviteToken || "")}')" class="cv-wp-cta-primary w-full"><i class="fa-solid fa-link"></i><span>Sao chép lời mời</span></button>`;
+          ? `<button type="button" onclick="window.appActions.retryWatchPartyRoomCreation('${escapeHTML(ev.eventId)}')" class="cv-wp-cta-secondary w-full" style="border-color:rgba(229,9,20,0.55);color:#FDA4AF;"><i class="fa-solid fa-rotate-right"></i><span>Thử lại tạo phòng (${escapeHTML(ev.lastError || "Lỗi tạm thời")})</span></button>`
+          : "";
 
         actionSectionHtml = `
           <div class="space-y-3">
-            ${primaryOrgCta}
+            ${copyPrimaryBtn}
+            ${statusPrimaryExtra}
             <div class="${beforeStart ? "cv-wp-invite-actions-2" : ""}">
               ${beforeStart ? `
-                <button type="button" onclick="window.appActions.closeWatchPartyInviteModal(); window.appActions.openCreateWatchPartyModal('${escapeHTML(ev.eventId)}')"
+                <button type="button" id="wp-btn-edit-schedule" onclick="window.appActions.openCreateWatchPartyModal('${escapeHTML(ev.eventId)}')"
                   class="cv-wp-cta-secondary w-full"><i class="fa-solid fa-pen"></i><span>Chỉnh sửa lịch hẹn</span></button>
               ` : ""}
-              <details class="w-full rounded-xl" style="background:rgba(11,11,15,0.68);border:1px solid rgba(255,255,255,0.18);">
+              <details id="wp-manage-link-details" class="w-full rounded-xl" style="background:rgba(11,11,15,0.68);border:1px solid rgba(255,255,255,0.18);">
                 <summary class="min-h-[44px] px-4 flex items-center justify-between gap-2 cursor-pointer text-xs font-bold text-white list-none select-none">
-                  <span><i class="fa-solid fa-link mr-2 text-slate-300"></i>Quản lý liên kết</span>
+                  <span><i class="fa-solid fa-ellipsis mr-2 text-slate-300"></i>Quản lý liên kết</span>
                   <i class="fa-solid fa-chevron-down text-[11px] text-slate-400"></i>
                 </summary>
-                <div class="p-2 pt-0 grid grid-cols-1 gap-1.5 border-t border-white/10 mt-1 pt-2">
-                  <button type="button" onclick="window.appActions.copyWatchPartyInviteLink('${escapeHTML(ev.eventId)}', '${escapeHTML(ev.inviteToken || "")}')"
-                    class="cv-wp-cta-secondary w-full"><i class="fa-regular fa-copy"></i><span>Sao chép link mời</span></button>
-                  <button type="button" onclick="window.appActions.manageWatchPartyLink('${escapeHTML(ev.eventId)}', 'regenerate_link')"
+                <div class="p-2 pt-2 grid grid-cols-1 gap-1.5 border-t border-white/10 mt-1">
+                  ${ev.inviteRevoked ? `<p class="text-[10.5px] text-rose-300 px-1 py-0.5">Liên kết cũ đã thu hồi. Tạo lại link mới để mời bạn bè.</p>` : ""}
+                  <button type="button" id="wp-btn-regenerate-link" onclick="window.appActions.manageWatchPartyLink('${escapeHTML(ev.eventId)}', 'regenerate_link')"
                     class="cv-wp-cta-secondary w-full"><i class="fa-solid fa-rotate"></i><span>Tạo lại link mới</span></button>
-                  <button type="button" onclick="window.appActions.manageWatchPartyLink('${escapeHTML(ev.eventId)}', 'revoke_link')"
-                    class="cv-wp-cta-secondary w-full"><i class="fa-solid fa-ban text-rose-400"></i><span>Thu hồi link hiện tại</span></button>
+                  <button type="button" id="wp-btn-revoke-link" onclick="window.appActions.manageWatchPartyLink('${escapeHTML(ev.eventId)}', 'revoke_link')"
+                    ${ev.inviteRevoked ? "disabled" : ""}
+                    class="cv-wp-cta-secondary w-full ${ev.inviteRevoked ? "opacity-50 cursor-not-allowed" : ""}"><i class="fa-solid fa-ban text-rose-400"></i><span>Thu hồi link hiện tại</span></button>
                 </div>
               </details>
             </div>
@@ -34133,6 +34413,7 @@
       openCreateWatchPartyModal,
       openCreateWatchPartyForHero,
       closeCreateWatchPartyModal,
+      resetWatchPartyDraft,
       onWatchPartyMovieOrTimeChange,
       onWatchPartyRoomTypeChange,
       submitWatchPartyForm,
