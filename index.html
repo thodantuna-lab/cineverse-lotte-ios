@@ -1563,16 +1563,191 @@
       filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.95));
     }
     #ios-liquid-nav-bar {
-      background: linear-gradient(180deg, rgba(11, 11, 15, 0.96) 0%, rgba(11, 11, 15, 0.86) 100%) !important;
+      background: linear-gradient(90deg, rgba(10, 8, 11, 0.96) 0%, rgba(16, 10, 14, 0.95) 68%, rgba(48, 12, 20, 0.92) 100%) !important;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
     }
     #ios-liquid-nav-bar.rophim-scrolled {
-      background: rgba(11, 11, 15, 0.97) !important;
-      border-bottom-color: rgba(245, 197, 24, 0.28) !important;
+      background: linear-gradient(90deg, rgba(9, 8, 11, 0.98) 0%, rgba(15, 10, 14, 0.97) 68%, rgba(42, 10, 18, 0.95) 100%) !important;
+      border-bottom-color: rgba(245, 197, 24, 0.25) !important;
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.78) !important;
+    }
+    .cv-nav-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .cv-nav-brand-title {
+      font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+      font-weight: 700;
+      font-size: clamp(15px, 1.45vw, 19px);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #F5F2EB;
+      white-space: nowrap;
+      line-height: 1.1;
+      transition: color 180ms ease;
+    }
+    .cv-nav-brand:hover .cv-nav-brand-title {
+      color: #F5C518;
+    }
+    .cv-nav-links {
+      display: none;
+      align-items: center;
+      gap: 24px;
+    }
+    @media (min-width: 1024px) {
+      .cv-nav-links {
+        display: flex;
+      }
+      .cv-nav-hamburger,
+      #mobile-nav-drawer {
+        display: none !important;
+      }
+    }
+    .cv-nav-username {
+      display: none;
+    }
+    @media (min-width: 640px) {
+      .cv-nav-username {
+        display: inline-block;
+        max-width: 110px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #FFFFFF;
+      }
+    }
+    .cv-nav-link.hidden,
+    .cv-nav-mobile-item.hidden,
+    #header-lobby-actions.hidden {
+      display: none !important;
+    }
+    .cv-nav-link {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 44px;
+      padding: 0 2px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: #D4D4D8;
+      background: transparent;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: color 180ms ease;
+    }
+    .cv-nav-link:hover {
+      color: #FFFFFF;
+    }
+    .cv-nav-link.is-active {
+      color: #F5C518;
+      font-weight: 600;
+    }
+    .cv-nav-link.is-active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 6px;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #EAB308, #FDE047);
+      box-shadow: 0 0 10px rgba(245, 197, 24, 0.45);
+    }
+    .cv-nav-count-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: rgba(245, 197, 24, 0.16);
+      border: 1px solid rgba(245, 197, 24, 0.48);
+      color: #F5C518;
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .cv-nav-utils {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .cv-nav-icon-btn {
+      min-width: 44px;
+      min-height: 44px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #E4E4E7;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      cursor: pointer;
+      transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease;
+    }
+    .cv-nav-icon-btn:hover {
+      color: #F5C518;
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+    #ios-liquid-nav-bar button:focus-visible,
+    #mobile-nav-drawer button:focus-visible {
+      outline: 2px solid #F5C518;
+      outline-offset: 2px;
+    }
+    .cv-nav-mobile-menu {
+      background: linear-gradient(180deg, rgba(14, 11, 16, 0.98) 0%, rgba(10, 9, 12, 0.99) 100%);
+      border-bottom: 1px solid rgba(245, 197, 24, 0.22);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      box-shadow: 0 20px 44px rgba(0, 0, 0, 0.85);
+    }
+    .cv-nav-mobile-item {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 500;
+      color: #E4E4E7;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      transition: background-color 180ms ease, color 180ms ease;
+    }
+    .cv-nav-mobile-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: #FFFFFF;
+    }
+    .cv-nav-mobile-item.is-active {
+      background: rgba(245, 197, 24, 0.12);
+      color: #F5C518;
+      font-weight: 700;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .cv-nav-link,
+      .cv-nav-icon-btn,
+      .cv-nav-mobile-item,
+      .cv-nav-brand-title {
+        transition: none !important;
+      }
     }
 
     @keyframes rophimSlideContent {
@@ -5272,55 +5447,119 @@
     <canvas id="ambient-tuna-canvas" style="display:none !important;"></canvas>
   </div>
 
-  <!-- HEADER CHUNG (NETFLIX-STYLE FULL-WIDTH STICKY DARK GLASS) -->
+  <!-- HEADER CHUNG (PHONG CÁCH ĐIỆN ẢNH SERIF TINH GỌN, ĐỦ CHỨC NĂNG) -->
   <header class="sticky top-0 z-40 px-0 pt-0 pb-0 pointer-events-none">
     <div id="ios-liquid-nav-bar"
-      class="ios-liquid-navbar pointer-events-auto w-full rounded-none px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-3">
-      <div class="relative z-10 flex items-center gap-2 sm:gap-3 cursor-pointer min-w-0" onclick="window.appActions.closeHanoiCinemaFinder(); window.appActions.leaveRoom()">
-        <img id="header-web-avatar" src="assets/web-logo.png" alt="CineVerse Lotte"
-             class="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover shadow-lg border border-white/25 bg-black shrink-0" />
-        <div class="min-w-0">
-          <div class="flex items-center gap-2">
-            <span class="font-black text-sm sm:text-lg tracking-tight text-white truncate">CINEVERSE <span style="color:#F5C518" class="font-extrabold">LOTTE</span></span>
-            <span class="hidden sm:inline-flex cv-badge-vip text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full">Live 3D POV</span>
+      class="ios-liquid-navbar pointer-events-auto w-full rounded-none px-3 sm:px-6 lg:px-8 py-2">
+      <div class="cv-nav-inner">
+        <a href="#top" onclick="event.preventDefault(); window.appActions.closeHanoiCinemaFinder(); window.appActions.leaveRoom(); window.appActions.navGoToSection('home');"
+          class="cv-nav-brand relative z-10 flex items-center gap-2.5 sm:gap-3 cursor-pointer min-w-0 shrink-0"
+          aria-label="CineVerse Lotte — Trang chủ">
+          <img id="header-web-avatar" src="assets/web-logo.png" alt="CineVerse Lotte"
+            class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover shadow-lg border border-white/25 bg-black shrink-0" />
+          <span class="cv-nav-brand-title truncate">CINEVERSE LOTTE</span>
+        </a>
+
+        <div id="header-lobby-actions" class="relative z-10 flex items-center gap-3 lg:gap-7 shrink-0">
+          <nav class="cv-nav-links" aria-label="Điều hướng chính">
+            <button type="button" data-nav-tab="home" onclick="window.appActions.navGoToSection('home')"
+              class="cv-nav-link is-active">
+              <span>Trang chủ</span>
+            </button>
+
+            <button type="button" data-nav-tab="top10" onclick="window.appActions.navGoToSection('top10')"
+              class="cv-nav-link">
+              <span>Top phim</span>
+            </button>
+
+            <button type="button" data-nav-tab="special" onclick="window.appActions.navGoToSection('special')"
+              class="cv-nav-link">
+              <span>Phòng riêng</span>
+            </button>
+
+            <button type="button" id="btn-open-hanoi-cinemas" data-nav-tab="hanoi"
+              onclick="window.appActions.openHanoiCinemaFinder()"
+              class="cv-nav-link">
+              <span>Tìm Rạp Hà Nội</span>
+            </button>
+
+            <button type="button" data-nav-tab="tickets" onclick="window.appActions.openMemoryCapsuleModal()"
+              class="cv-nav-link">
+              <span>Tủ Vé NFT</span>
+              <span id="capsule-count-badge" class="cv-nav-count-chip">1</span>
+            </button>
+
+            <button type="button" id="btn-admin-panel" data-nav-tab="admin"
+              onclick="window.appActions.openAdminPanelModal()"
+              class="hidden cv-nav-link"
+              title="Admin: Setup phim cho từng phòng & đồng bộ tất cả người xem">
+              <i class="fa-solid fa-crown text-[11px] text-rose-400" aria-hidden="true"></i>
+              <span>Admin</span>
+            </button>
+          </nav>
+
+          <div class="cv-nav-utils">
+            <button type="button" id="btn-nav-search" onclick="window.appActions.focusLobbySearch()"
+              class="cv-nav-icon-btn"
+              aria-label="Tìm tên phim hoặc số phòng"
+              title="Tìm phim hoặc phòng chiếu">
+              <i class="fa-solid fa-magnifying-glass text-[15px]" aria-hidden="true"></i>
+            </button>
+
+            <button type="button" id="btn-nav-account" onclick="window.appActions.openNameModal()"
+              class="cv-nav-icon-btn"
+              aria-label="Tài khoản khán giả"
+              title="Tài khoản &amp; Đổi tên khán giả">
+              <i class="fa-regular fa-user text-[16px]" aria-hidden="true"></i>
+              <strong id="header-username" class="cv-nav-username">Khán giả</strong>
+            </button>
+
+            <button type="button" id="btn-mobile-nav-menu"
+              onclick="window.appActions.toggleMobileNavMenu()"
+              class="cv-nav-icon-btn cv-nav-hamburger"
+              aria-label="Mở menu điều hướng"
+              aria-expanded="false"
+              aria-controls="mobile-nav-drawer">
+              <i class="fa-solid fa-bars text-[17px]" aria-hidden="true"></i>
+            </button>
           </div>
-          <p class="hidden sm:block text-[11px]" style="color:#A1A1AA">Rạp phim 3D trực tuyến • Xem chung đồng bộ • Chọn ghế &amp; Vé NFT</p>
         </div>
       </div>
+    </div>
 
-      <div id="header-lobby-actions" class="relative z-10 flex items-center gap-1.5 sm:gap-2 shrink-0">
-        <!-- Nút phụ Apple Liquid Glass: Tìm Rạp Hà Nội -->
-        <button type="button" id="btn-open-hanoi-cinemas" onclick="window.appActions.openHanoiCinemaFinder()"
-          class="cv-smooth-btn ios-liquid-pill flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold transition cursor-pointer">
-          <i class="fa-solid fa-location-dot text-rose-400"></i>
-          <span class="hidden md:inline">Tìm Rạp Hà Nội</span>
-          <span class="md:hidden hidden sm:inline">Rạp HN</span>
-        </button>
-
-        <!-- Nút phụ Apple Liquid Glass: Tủ Vé NFT & Ký Ức -->
-        <button type="button" onclick="window.appActions.openMemoryCapsuleModal()"
-          class="cv-smooth-btn ios-liquid-pill flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold transition cursor-pointer">
-          <i class="fa-solid fa-id-card-clip" style="color:#F5C518"></i>
-          <span class="hidden sm:inline">Tủ Vé NFT</span>
-          <span id="capsule-count-badge" class="cv-badge-vip px-1.5 py-0.5 rounded-full text-[10px] font-black">1</span>
-        </button>
-
-        <!-- Nút Quản Trị Admin (Ẩn trên bản Member; dùng qua App Admin riêng) -->
-        <button type="button" id="btn-admin-panel" onclick="window.appActions.openAdminPanelModal()"
-          class="hidden ios-liquid-pill flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-black transition cursor-pointer"
-          title="Admin: Setup phim cho từng phòng & đồng bộ tất cả người xem">
-          <i class="fa-solid fa-crown text-rose-400"></i>
-          <span class="hidden sm:inline">Admin</span>
-        </button>
-
-        <!-- Nút phụ Apple Liquid Glass: Tên khán giả -->
-        <button type="button" onclick="window.appActions.openNameModal()"
-          class="cv-smooth-btn ios-liquid-pill flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold transition cursor-pointer">
-          <i class="fa-solid fa-circle-user text-slate-200"></i>
-          <span class="max-w-[72px] sm:max-w-none truncate"><strong id="header-username" class="text-white">Khán giả</strong></span>
-          <i class="fa-solid fa-pen text-[9px] sm:text-[10px] text-slate-300/80"></i>
-        </button>
-      </div>
+    <!-- Menu thả xuống tinh gọn cho Mobile / Tablet (<1024px) -->
+    <div id="mobile-nav-drawer" class="hidden lg:hidden pointer-events-auto cv-nav-mobile-menu px-3 py-2.5 space-y-1" role="navigation" aria-label="Menu di động">
+      <button type="button" data-nav-tab="home" onclick="window.appActions.navGoToSection('home'); window.appActions.toggleMobileNavMenu(false);"
+        class="cv-nav-mobile-item is-active">
+        <span>Trang chủ</span>
+        <i class="fa-solid fa-chevron-right text-[11px] opacity-60" aria-hidden="true"></i>
+      </button>
+      <button type="button" data-nav-tab="top10" onclick="window.appActions.navGoToSection('top10'); window.appActions.toggleMobileNavMenu(false);"
+        class="cv-nav-mobile-item">
+        <span>Top phim tuần này</span>
+        <i class="fa-solid fa-chevron-right text-[11px] opacity-60" aria-hidden="true"></i>
+      </button>
+      <button type="button" data-nav-tab="special" onclick="window.appActions.navGoToSection('special'); window.appActions.toggleMobileNavMenu(false);"
+        class="cv-nav-mobile-item">
+        <span>Phòng riêng &amp; Stream</span>
+        <i class="fa-solid fa-chevron-right text-[11px] opacity-60" aria-hidden="true"></i>
+      </button>
+      <button type="button" data-nav-tab="hanoi" onclick="window.appActions.openHanoiCinemaFinder(); window.appActions.toggleMobileNavMenu(false);"
+        class="cv-nav-mobile-item">
+        <span>Tìm Rạp Hà Nội</span>
+        <i class="fa-solid fa-location-dot text-xs text-rose-400" aria-hidden="true"></i>
+      </button>
+      <button type="button" data-nav-tab="tickets" onclick="window.appActions.openMemoryCapsuleModal(); window.appActions.toggleMobileNavMenu(false);"
+        class="cv-nav-mobile-item">
+        <span>Tủ Vé NFT</span>
+        <span id="mobile-capsule-count-badge" class="cv-nav-count-chip">1</span>
+      </button>
+      <button type="button" id="mobile-btn-admin-panel" data-nav-tab="admin"
+        onclick="window.appActions.openAdminPanelModal(); window.appActions.toggleMobileNavMenu(false);"
+        class="hidden cv-nav-mobile-item">
+        <span class="text-rose-300">Quản trị Admin</span>
+        <i class="fa-solid fa-crown text-xs text-rose-400" aria-hidden="true"></i>
+      </button>
     </div>
   </header>
 
@@ -11233,6 +11472,7 @@
       document.getElementById("room-view").classList.remove("hidden");
       document.body.classList.add("in-room-active");
       document.getElementById("header-lobby-actions")?.classList.add("hidden");
+      try { toggleMobileNavMenu(false); } catch (_) {}
 
       // Nếu khán giả chưa ngồi trên sơ đồ phòng này -> xếp ngồi đúng ghế đã đặt vé
       const bookedSeatId = state.bookedTicketsByRoom?.[roomId]?.seatId;
@@ -24599,6 +24839,8 @@
       const list = state.memoryCapsules || [];
       const countBadge = document.getElementById("capsule-count-badge");
       if (countBadge) countBadge.textContent = String(list.length);
+      const mobCountBadge = document.getElementById("mobile-capsule-count-badge");
+      if (mobCountBadge) mobCountBadge.textContent = String(list.length);
 
       // Cập nhật thống kê Hồ sơ Điện ảnh (Cinematic Profile)
       const totalEl = document.getElementById("profile-capsule-total");
@@ -29036,6 +29278,8 @@
     }
 
     function openHanoiCinemaFinder() {
+      try { setActiveNavTab("hanoi"); } catch (_) {}
+      try { toggleMobileNavMenu(false); } catch (_) {}
       if (state.currentRoomId) {
         leaveRoom();
       }
@@ -29090,6 +29334,7 @@
 
     function closeHanoiCinemaFinder() {
       stopHanoiRealtimeGpsWatch();
+      try { setActiveNavTab("home"); } catch (_) {}
       const finderEl = document.getElementById("hanoi-cinema-finder-view");
       const lobbyEl = document.getElementById("lobby-view");
       if (!finderEl || finderEl.classList.contains("hidden")) return;
@@ -30655,7 +30900,89 @@
       }
     });
 
+    function setActiveNavTab(tabKey = "home") {
+      document.querySelectorAll("[data-nav-tab]").forEach((el) => {
+        const isMatch = el.getAttribute("data-nav-tab") === tabKey;
+        el.classList.toggle("is-active", isMatch);
+        if (isMatch) el.setAttribute("aria-current", "page");
+        else el.removeAttribute("aria-current");
+      });
+    }
+
+    function toggleMobileNavMenu(forceState) {
+      const drawer = document.getElementById("mobile-nav-drawer");
+      const btn = document.getElementById("btn-mobile-nav-menu");
+      if (!drawer || !btn) return;
+      const shouldOpen = typeof forceState === "boolean" ? forceState : drawer.classList.contains("hidden");
+      drawer.classList.toggle("hidden", !shouldOpen);
+      btn.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+      if (shouldOpen) {
+        const deskAdmin = document.getElementById("btn-admin-panel");
+        const mobAdmin = document.getElementById("mobile-btn-admin-panel");
+        if (deskAdmin && mobAdmin) {
+          mobAdmin.classList.toggle("hidden", deskAdmin.classList.contains("hidden"));
+        }
+        const cBadge = document.getElementById("capsule-count-badge");
+        const mobCBadge = document.getElementById("mobile-capsule-count-badge");
+        if (cBadge && mobCBadge) mobCBadge.textContent = cBadge.textContent || "0";
+      }
+    }
+
+    function navGoToSection(tabKey = "home") {
+      toggleMobileNavMenu(false);
+      if (typeof closeHanoiCinemaFinder === "function") closeHanoiCinemaFinder();
+      if (state.currentRoomId && typeof leaveRoom === "function") leaveRoom();
+      setActiveNavTab(tabKey);
+
+      const headerH = document.getElementById("ios-liquid-nav-bar")?.getBoundingClientRect().height || 64;
+      const scrollBehavior = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ? "auto" : "smooth";
+
+      if (tabKey === "home") {
+        window.scrollTo({ top: 0, behavior: scrollBehavior });
+        return;
+      }
+      const targetId = tabKey === "top10" ? "lobby-top10-section" : tabKey === "special" ? "lobby-special-section" : "";
+      const el = targetId ? document.getElementById(targetId) : null;
+      if (el) {
+        const y = Math.max(0, el.getBoundingClientRect().top + window.scrollY - headerH - 14);
+        window.scrollTo({ top: y, behavior: scrollBehavior });
+      }
+    }
+
+    function focusLobbySearch() {
+      toggleMobileNavMenu(false);
+      if (typeof closeHanoiCinemaFinder === "function") closeHanoiCinemaFinder();
+      if (state.currentRoomId && typeof leaveRoom === "function") leaveRoom();
+      const desktopSearch = document.getElementById("desktop-room-search");
+      if (window.innerWidth >= 1024 && desktopSearch) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        setTimeout(() => {
+          try { desktopSearch.focus(); } catch (_) {}
+        }, 120);
+      } else if (typeof openMobileRoomsSheet === "function") {
+        openMobileRoomsSheet();
+        setTimeout(() => {
+          try { document.getElementById("mobile-room-search")?.focus(); } catch (_) {}
+        }, 160);
+      }
+    }
+
+    document.addEventListener("click", (ev) => {
+      const drawer = document.getElementById("mobile-nav-drawer");
+      const btn = document.getElementById("btn-mobile-nav-menu");
+      if (!drawer || drawer.classList.contains("hidden")) return;
+      if (drawer.contains(ev.target) || btn?.contains(ev.target)) return;
+      toggleMobileNavMenu(false);
+    });
+    document.addEventListener("keydown", (ev) => {
+      if (ev.key === "Escape") toggleMobileNavMenu(false);
+    });
+
     window.appActions = {
+      setActiveNavTab,
+      navGoToSection,
+      focusLobbySearch,
+      toggleMobileNavMenu,
       setRoomFilter,
       setSearchQuery,
       setTheaterMovieSearch,
@@ -31518,6 +31845,17 @@
         const y = window.scrollY || document.documentElement.scrollTop || 0;
         if (nav) nav.classList.toggle("rophim-scrolled", y > 24);
         if (toTop) toTop.classList.toggle("hidden", y <= 360);
+
+        if (!state.currentRoomId && !document.body.classList.contains("hanoi-finder-open")) {
+          const headerH = nav ? nav.getBoundingClientRect().height : 64;
+          const top10El = document.getElementById("lobby-top10-section");
+          const specEl = document.getElementById("lobby-special-section");
+          const specTop = specEl ? specEl.getBoundingClientRect().top : Infinity;
+          const top10Top = top10El ? top10El.getBoundingClientRect().top : Infinity;
+          if (specTop <= headerH + 140) setActiveNavTab("special");
+          else if (top10Top <= headerH + 140) setActiveNavTab("top10");
+          else setActiveNavTab("home");
+        }
       }
       window.addEventListener("scroll", updateScrollUI, { passive: true });
       updateScrollUI();
