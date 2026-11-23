@@ -789,18 +789,6 @@
       body:not(.stream-room-active) #cinema-screen {
         max-height: min(42vh, 390px) !important;
       }
-      body.theater-dimmed:not(.stream-room-active) #cinema-screen {
-        width: min(100%, calc(min(68vh, 600px) * 17 / 9)) !important;
-        max-height: min(68vh, 600px) !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
-      }
-      body.theater-dimmed[data-screen-ratio="18-9"]:not(.stream-room-active) #cinema-screen {
-        width: min(100%, calc(min(68vh, 600px) * 18 / 9)) !important;
-      }
-      body.theater-dimmed[data-screen-ratio="19-9"]:not(.stream-room-active) #cinema-screen {
-        width: min(100%, calc(min(68vh, 600px) * 19 / 9)) !important;
-      }
       #seating-map {
         gap: 4px !important;
       }
@@ -2593,7 +2581,6 @@
     body.theater-dimmed .screen-stage-box {
       transform: none;
       width: 96%;
-      max-width: 1180px;
       margin: 4px auto 0 !important;
       z-index: 35;
     }
@@ -2619,22 +2606,6 @@
       height: 6px !important;
       opacity: 0.35;
     }
-    @media (min-width: 768px) {
-      body.theater-dimmed:not(.stream-room-active) #cinema-screen {
-        aspect-ratio: 17 / 9 !important;
-        max-height: 68vh;
-        box-shadow: 0 0 70px rgba(245, 197, 24, 0.16), 0 0 130px rgba(56, 189, 248, 0.16) !important;
-      }
-      body.theater-dimmed[data-screen-ratio="18-9"]:not(.stream-room-active) #cinema-screen {
-        aspect-ratio: 18 / 9 !important;
-        max-height: 66vh;
-      }
-      body.theater-dimmed[data-screen-ratio="19-9"]:not(.stream-room-active) #cinema-screen {
-        aspect-ratio: 19 / 9 !important;
-        max-height: 64vh;
-      }
-    }
-
     /* ======================================================= */
     /* THANH ĐIỀU KHIỂN PHIM CINEVERSE (MINIMAL CINEMA BAR)    */
     /* ======================================================= */
@@ -6399,6 +6370,36 @@
       }
     }
     /* Sảnh chiếu: sân khấu và vùng đọc dùng hai hàng độc lập. */
+    /* Give the picture the extra space when the auditorium lights go down. */
+    body.theater-dimmed:not(.stream-room-active):not(.mobile-cinema-fullscreen) #room-view {
+      --dim-screen-height: 85dvh;
+      max-width: none !important;
+      padding-inline: clamp(2px, 1vw, 16px);
+    }
+    body.theater-dimmed[data-screen-ratio="18-9"] #room-view { --dim-screen-ratio: 2; }
+    body.theater-dimmed[data-screen-ratio="19-9"] #room-view { --dim-screen-ratio: calc(19 / 9); }
+    body.theater-dimmed:not(.stream-room-active):not(.mobile-cinema-fullscreen) #theater-center-auditorium {
+      max-width: none;
+      padding: 4px !important;
+    }
+    body.theater-dimmed:not(.stream-room-active):not(.mobile-cinema-fullscreen) .ceiling-canopy {
+      height: 6px;
+      overflow: hidden;
+    }
+    body.theater-dimmed:not(.stream-room-active):not(.mobile-cinema-fullscreen) #screen-stage-box {
+      width: calc(80% + var(--seat-view-width, 82%) * .2) !important;
+      max-width: calc(var(--dim-screen-height) * var(--dim-screen-ratio, calc(17 / 9)) + 12px);
+      margin: 0 auto !important;
+    }
+    body.theater-dimmed:not(.stream-room-active):not(.mobile-cinema-fullscreen) .lotte-screen-frame {
+      padding: 3px 4px;
+      transform: none;
+    }
+    body.theater-dimmed:not(.stream-room-active):not(.mobile-cinema-fullscreen) #cinema-screen {
+      width: 100%;
+      max-height: none !important;
+    }
+
     #room-view :is(.wall-left,.wall-right,.cinema-curtain-l,.cinema-curtain-r) { transition: filter 450ms ease; }
     #room-view :is(.wall-sconce,.wall-sconce-beam,.ceiling-spot,.ceiling-cove-led) { transition: opacity 450ms ease; }
     #room-view .led-dot { transition: opacity 450ms ease 100ms; }
@@ -17124,9 +17125,11 @@
       state.povZoom = mode;
       const box = document.getElementById("screen-stage-box");
       if (!box) return;
-      if (mode === "rowF") box.style.width = "82%";
-      if (mode === "rowD") box.style.width = "90%";
-      if (mode === "front") box.style.width = "98%";
+      const widths = { rowF: "82%", rowD: "90%", front: "98%" };
+      if (widths[mode]) {
+        box.style.width = widths[mode];
+        box.style.setProperty("--seat-view-width", widths[mode]);
+      }
 
       ["rowF", "rowD", "front"].forEach(k => {
         const b = document.getElementById(`pov-btn-${k}`);
