@@ -1786,6 +1786,71 @@
       grid-template-columns: 1fr;
       gap: 16px;
     }
+    .cv-wp-empty-card {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 14px;
+      padding: 16px;
+      border-radius: 16px;
+      background: linear-gradient(145deg, rgba(46, 13, 20, 0.9) 0%, rgba(20, 9, 13, 0.96) 100%);
+      border: 1px solid rgba(245, 197, 24, 0.34);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.52);
+    }
+    .cv-wp-empty-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(116, 22, 36, 0.42);
+      border: 1px solid rgba(245, 197, 24, 0.28);
+      color: #E7D29A;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    @media (min-width: 768px) {
+      .cv-wp-empty-card {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 96px;
+        max-height: 116px;
+        padding: 16px 24px;
+      }
+    }
+    .cv-discover-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    @media (min-width: 768px) {
+      .cv-discover-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+      }
+    }
+    .cv-discover-card {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #120D10;
+      border: 1px solid rgba(245, 197, 24, 0.26);
+      aspect-ratio: 2 / 3;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 12px;
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+    .cv-discover-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(245, 197, 24, 0.68);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.72);
+    }
     .cv-wp-ticket {
       position: relative;
       display: flex;
@@ -6274,15 +6339,15 @@
             <p class="text-[11px] sm:text-xs" style="color:#A1A1AA;">Múi giờ Asia/Ho_Chi_Minh • Phòng riêng mở đúng giờ hẹn &amp; chọn ghế khi vào phòng</p>
           </div>
         </div>
-        <div class="flex flex-wrap items-center gap-2">
+        <div id="wp-header-actions" class="hidden flex-wrap items-center gap-2">
           <button type="button" id="btn-wp-refresh" onclick="window.appActions.refreshWatchParties(true)"
             class="cv-wp-cta-secondary" title="Cập nhật số người đã nhận lời &amp; trạng thái phòng">
             <i id="wp-refresh-icon" class="fa-solid fa-rotate" aria-hidden="true"></i>
             <span>Cập nhật</span>
           </button>
-          <button type="button" onclick="window.appActions.openCreateWatchPartyModal()"
+          <button type="button" id="btn-wp-header-create" onclick="window.appActions.openCreateWatchPartyModal()"
             class="cv-wp-cta-primary">
-            <i class="fa-solid fa-plus" aria-hidden="true"></i>
+            <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i>
             <span>Tạo lịch hẹn</span>
           </button>
         </div>
@@ -6298,10 +6363,16 @@
         <div id="wp-history-list" class="cv-wp-list-grid pt-3"></div>
       </details>
 
-      <div class="text-[11px] flex flex-wrap items-center justify-between gap-2 pt-1" style="color:#A1A1AA;">
-        <span id="wp-policy-footnote">Quy tắc giờ đóng cố định: Giờ bắt đầu + Thời lượng phim + 10 phút đệm ổn định (không đổi khi tua/tạm dừng)</span>
-        <span class="text-[10px]">Ghế được chọn ngay khi vào phòng</span>
-      </div>
+      <details id="wp-policy-details" class="rounded-xl px-3.5 py-1 text-xs" style="background:rgba(11,11,15,0.55);border:1px solid rgba(255,255,255,0.08);color:#A1A1AA;">
+        <summary class="cursor-pointer min-h-[44px] flex items-center justify-between gap-2 font-semibold text-slate-300 select-none">
+          <span><i class="fa-solid fa-circle-info mr-1.5" style="color:#F5C518;"></i>Quy định giờ mở &amp; tự đóng phòng riêng</span>
+          <span class="text-[11px]" style="color:#F5C518;">Xem giải thích ▾</span>
+        </summary>
+        <div class="pb-2.5 pt-1.5 space-y-1 text-[11.5px] leading-relaxed border-t border-white/10" style="color:#D4D4D8;">
+          <p id="wp-policy-footnote">• <strong>Giờ tự đóng cố định:</strong> Giờ bắt đầu + Thời lượng phim + 10 phút đệm ổn định đầu buổi (không dời giờ khi vào muộn hoặc xem lại).</p>
+          <p>• <strong>Chiếu chuẩn lịch rạp:</strong> Đúng giờ ghi trên vé hệ thống tự mở phòng riêng và tự phát phim (không tua); thành viên chọn ghế khi vào phòng.</p>
+        </div>
+      </details>
     </section>
 
     <!-- 1B. BẢNG XẾP HẠNG TOP 10 TUẦN NÀY (DƯỚI BANNER, TRƯỚC XEM TIẾP) -->
@@ -6316,7 +6387,7 @@
           <span id="top10-updated-at" class="text-[11px] font-medium" style="color:#A1A1AA;">Đang đồng bộ máy chủ…</span>
         </div>
 
-        <div class="cv-top10-toolbar">
+        <div id="top10-toolbar" class="cv-top10-toolbar">
           <div class="flex items-center gap-2">
             <span class="cv-top10-tab-active" role="status">
               <i class="fa-solid fa-crown text-xs" style="color:#F5C518;" aria-hidden="true"></i>
@@ -6329,10 +6400,11 @@
             <button type="button" id="btn-top10-rules"
               onclick="window.appActions.toggleTop10FormulaInfo()"
               class="cv-top10-info-btn"
+              style="min-height:44px;padding:0 12px;"
               aria-expanded="false"
               aria-controls="top10-formula-info">
               <i class="fa-solid fa-circle-info text-xs" style="color:#F5C518;" aria-hidden="true"></i>
-              <span>Quy tắc tính</span>
+              <span>Cách tính</span>
             </button>
           </div>
         </div>
@@ -31610,7 +31682,11 @@
       }
 
       // 1. Trạng thái Đang tải
+      const toolbarEl = document.getElementById("top10-toolbar");
+      const footerEl = document.getElementById("lobby-top10-footer");
       if (state.top10.status === "loading" || state.top10.status === "idle") {
+        if (toolbarEl) toolbarEl.style.display = "";
+        if (footerEl) footerEl.style.display = "";
         const skelRows = Array.from({ length: 4 }, (_, i) => `
           <div class="cv-top10-row animate-pulse" style="padding:10px 12px;gap:10px;">
             <div class="w-7 h-6 rounded bg-white/10"></div>
@@ -31642,6 +31718,8 @@
 
       // 2. Trạng thái Lỗi tải
       if (state.top10.status === "error" && !data) {
+        if (toolbarEl) toolbarEl.style.display = "";
+        if (footerEl) footerEl.style.display = "";
         body.innerHTML = `
           <div class="rounded-2xl p-6 sm:p-8 text-center space-y-3" style="background:rgba(20,20,28,0.86);border:1px solid rgba(229,9,20,0.35);">
             <div class="w-11 h-11 mx-auto rounded-full flex items-center justify-center" style="background:rgba(229,9,20,0.16);color:#FDA4AF;">
@@ -31676,35 +31754,90 @@
       });
       window.__resolvedTop10ItemsById = nextLookup;
 
-      // 3. Trạng thái Chưa có lượt xem hợp lệ trong tuần
+      // 3. Trạng thái Chưa có lượt xem hợp lệ trong tuần -> Gọn + nút "Cách tính" + mục "Khám phá phim" (không gắn thứ hạng)
       if (resolvedItems.length === 0) {
-        const minMins = data?.config?.minValidMinutes || 10;
-        const winRange = data?.weekStartDateLabel && data?.weekEndDateLabel
-          ? `${data.weekStartDateLabel} – ${data.weekEndDateLabel}`
-          : "tuần này";
+        if (toolbarEl) toolbarEl.style.display = "none";
+        if (footerEl) footerEl.style.display = "none";
+        const discoverRooms = DEFAULT_ROOMS
+          .map(r => getEffectiveRoom(r.id))
+          .filter(r => r && !r.isCoupleRoom && !r.isDiscordRoom && r.status !== "upcoming")
+          .slice(0, 4);
+        const discoverCardsHtml = discoverRooms.map((r) => `
+          <button type="button" onclick="window.appActions.openBookingModal('${escapeHTML(r.id)}')"
+            class="cv-discover-card" aria-label="Khám phá phim ${escapeHTML(r.movieTitle)}">
+            <img src="${escapeHTML(r.poster || "assets/web-logo.png")}" alt="${escapeHTML(r.movieTitle)}" loading="eager"
+              onerror="this.onerror=null;this.src='assets/web-logo.png';"
+              style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(11,11,15,0.06) 25%, rgba(14,8,10,0.92) 100%);pointer-events:none;"></div>
+            <div class="relative z-10 space-y-1">
+              <div class="cv-serif italic text-base sm:text-lg font-bold text-white leading-tight line-clamp-2">${escapeHTML(r.movieTitle)}</div>
+              <div class="text-[11px] font-medium truncate" style="color:#D4D4D8;">${escapeHTML((r.genre || "Điện ảnh").split("•")[0].trim())}</div>
+            </div>
+          </button>
+        `).join("");
+
         body.innerHTML = `
-          <div class="rounded-2xl p-6 sm:p-8 text-center space-y-3" style="background:rgba(20,20,28,0.86);border:1px solid rgba(255,255,255,0.1);">
-            <div class="w-11 h-11 mx-auto rounded-full flex items-center justify-center" style="background:rgba(245,197,24,0.14);color:#F5C518;">
-              <i class="fa-solid fa-film text-lg" aria-hidden="true"></i>
+          <div class="space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-white/10">
+              <div class="flex items-center gap-2 text-xs sm:text-sm" style="color:#D4D4D8;">
+                <span>Bảng xếp hạng đang chờ lượt xem đầu tiên</span>
+                <button type="button" onclick="window.appActions.toggleTop10FormulaInfo()"
+                  class="w-7 h-7 rounded-full inline-flex items-center justify-center border border-white/15 hover:border-amber-400/50 cursor-pointer"
+                  aria-label="Giải thích cách tính xếp hạng" title="Không gắn thứ hạng khi chưa có lượt xem">
+                  <i class="fa-solid fa-info text-[10px] text-amber-300" aria-hidden="true"></i>
+                </button>
+              </div>
+              <button type="button" onclick="window.appActions.toggleTop10FormulaInfo()"
+                class="cv-top10-info-btn" style="min-height:44px;padding:0 14px;">
+                <i class="fa-solid fa-circle-info text-xs" style="color:#F5C518;" aria-hidden="true"></i>
+                <span>Cách tính</span>
+              </button>
             </div>
-            <div class="space-y-1">
-              <h3 class="text-sm sm:text-base font-extrabold text-white">Tuần này chưa có lượt xem hợp lệ</h3>
-              <p class="text-xs max-w-lg mx-auto" style="color:#A1A1AA;">
-                Bảng xếp hạng kỳ ${escapeHTML(winRange)} sẽ hiển thị ngay khi có khán giả đăng nhập xem tối thiểu ${escapeHTML(String(minMins))} phút một bộ phim.
-              </p>
+
+            <div class="space-y-3" id="lobby-discover-movies">
+              <div class="flex flex-wrap items-center gap-2.5">
+                <span class="cv-wp-accent-bar" aria-hidden="true"></span>
+                <h3 class="cv-serif text-xl sm:text-2xl font-bold text-white">Khám phá phim</h3>
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold"
+                  style="background:rgba(116,22,36,0.42);border:1px solid rgba(245,197,24,0.32);color:#E7D29A;">Gợi ý khám phá</span>
+              </div>
+              <div class="cv-discover-grid">${discoverCardsHtml}</div>
             </div>
-            <button type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})"
-              class="cv-top10-cta-primary mx-auto">
-              <i class="fa-solid fa-clapperboard" aria-hidden="true"></i>
-              <span>Khám phá phòng chiếu</span>
-            </button>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div class="rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-3"
+                style="background:linear-gradient(135deg, rgba(46,13,20,0.85) 0%, rgba(16,10,14,0.95) 100%);border:1px solid rgba(245,197,24,0.28);">
+                <div class="space-y-1">
+                  <h4 class="cv-serif text-lg sm:text-xl font-bold text-white">Sweetbox</h4>
+                  <p class="text-xs leading-relaxed" style="color:#D4D4D8;">Không gian xem phim riêng tư dành cho 2 người với ghế đôi VIP.</p>
+                </div>
+                <button type="button" onclick="window.appActions.navGoToSection('special')"
+                  class="cv-wp-cta-primary self-start">
+                  <span>Khám phá Sweetbox</span>
+                  <i class="fa-solid fa-arrow-right text-xs" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div class="rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-3"
+                style="background:linear-gradient(135deg, rgba(28,16,38,0.82) 0%, rgba(12,12,18,0.96) 100%);border:1px solid rgba(245,197,24,0.28);">
+                <div class="space-y-1">
+                  <h4 class="cv-serif text-lg sm:text-xl font-bold text-white">Phòng Stream</h4>
+                  <p class="text-xs leading-relaxed" style="color:#D4D4D8;">Cùng bạn bè xem phim, trò chuyện và chia sẻ cảm xúc theo thời gian thực.</p>
+                </div>
+                <button type="button" onclick="window.appActions.openBookingModal('room-discord')"
+                  class="cv-wp-cta-primary self-start">
+                  <span>Vào Phòng Stream</span>
+                  <i class="fa-solid fa-arrow-right text-xs" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
           </div>
         `;
-        if (footerNoteEl) footerNoteEl.textContent = `Kỳ ${winRange} • Hiện có 0 phim đạt ngưỡng lượt xem hợp lệ.`;
         return;
       }
 
       // 4. Trạng thái Có dữ liệu (1..10 phim thực tế)
+      if (toolbarEl) toolbarEl.style.display = "";
+      if (footerEl) footerEl.style.display = "";
       const hasPrev = Boolean(data?.hasPreviousWeekData);
       const top1 = resolvedItems[0];
       const rest = resolvedItems.slice(1, 10);
@@ -32136,6 +32269,10 @@
         return state.watchParties;
       }
 
+      if (!state.watchParties.upcoming?.length && state.watchParties.status !== "ready") {
+        state.watchParties.status = "loading";
+        renderLobbyWatchParties();
+      }
       const workerBase = getTop10WorkerBaseUrl();
       wpFetchInFlight = (async () => {
         try {
@@ -32175,13 +32312,19 @@
             }
           }
           return state.watchParties;
-        } catch (_) {
-          if (state.watchParties.status === "idle") {
-            state.watchParties.status = "ready";
+        } catch (err) {
+          if (!state.watchParties.upcoming?.length && !state.watchParties.history?.length) {
+            state.watchParties = {
+              ...state.watchParties,
+              status: "error",
+              error: String(err?.message || "Không thể tải danh sách lịch hẹn"),
+              lastFetchedAt: Date.now()
+            };
             renderLobbyWatchParties();
           }
           return null;
-          return wpFetchInFlight;
+        } finally {
+          wpFetchInFlight = null;
         }
       })();
       return wpFetchInFlight;
@@ -32343,31 +32486,81 @@
       const histWrap = document.getElementById("wp-history-details");
       const histEl = document.getElementById("wp-history-list");
       const histCntEl = document.getElementById("wp-history-count");
+      const headerActions = document.getElementById("wp-header-actions");
       if (!upEl) return;
 
+      const status = String(state.watchParties?.status || "ready");
       const upcoming = Array.isArray(state.watchParties?.upcoming) ? state.watchParties.upcoming : [];
       const history = Array.isArray(state.watchParties?.history) ? state.watchParties.history : [];
 
-      if (upcoming.length === 0) {
+      if (status === "loading" && upcoming.length === 0) {
+        if (headerActions) {
+          headerActions.classList.add("hidden");
+          headerActions.classList.remove("flex");
+        }
         upEl.innerHTML = `
-          <div class="cv-wp-ticket p-5 sm:p-6 flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="cv-wp-empty-card animate-pulse" aria-label="Đang tải lịch hẹn">
             <div class="flex items-center gap-3.5 min-w-0">
-              <img src="assets/web-logo.png" alt="CineVerse Lotte" class="w-12 h-12 rounded-2xl object-cover border border-amber-400/45 shrink-0" />
-              <div class="space-y-1 min-w-0">
-                <h3 class="cv-serif text-lg sm:text-xl font-bold text-white">Chưa có buổi hẹn xem phim nào</h3>
-                <p class="text-xs leading-relaxed" style="color:#D4D4D8;">
-                  Đặt lịch chọn phim trước, gửi vé mời riêng cho bạn bè — đúng giờ hệ thống tự mở phòng riêng cho nhóm.
-                </p>
+              <div class="w-12 h-12 rounded-xl bg-white/10 shrink-0"></div>
+              <div class="space-y-2 flex-1">
+                <div class="h-4 w-44 rounded bg-white/10"></div>
+                <div class="h-3 w-56 rounded bg-white/10"></div>
+              </div>
+            </div>
+            <div class="h-11 w-36 rounded-xl bg-amber-400/20 shrink-0"></div>
+          </div>
+        `;
+      } else if (status === "error" && upcoming.length === 0) {
+        if (headerActions) {
+          headerActions.classList.add("hidden");
+          headerActions.classList.remove("flex");
+        }
+        upEl.innerHTML = `
+          <div class="cv-wp-empty-card" style="border-color:rgba(229,9,20,0.42);">
+            <div class="flex items-center gap-3.5 min-w-0">
+              <span class="cv-wp-empty-icon" style="color:#FDA4AF;border-color:rgba(229,9,20,0.4);">
+                <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+              </span>
+              <div class="space-y-0.5 min-w-0">
+                <h3 class="text-sm sm:text-base font-extrabold text-white">Không tải được lịch hẹn của bạn</h3>
+                <p class="text-xs truncate" style="color:#D4D4D8;">${escapeHTML(state.watchParties?.error || "Kết nối máy chủ tạm thời gián đoạn.")}</p>
+              </div>
+            </div>
+            <button type="button" onclick="window.appActions.refreshWatchParties(true)"
+              class="cv-wp-cta-primary shrink-0">
+              <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+              <span>Thử lại</span>
+            </button>
+          </div>
+        `;
+      } else if (upcoming.length === 0) {
+        if (headerActions) {
+          headerActions.classList.add("hidden");
+          headerActions.classList.remove("flex");
+        }
+        upEl.innerHTML = `
+          <div class="cv-wp-empty-card">
+            <div class="flex items-center gap-3.5 min-w-0">
+              <span class="cv-wp-empty-icon">
+                <i class="fa-regular fa-calendar-plus" aria-hidden="true"></i>
+              </span>
+              <div class="space-y-0.5 min-w-0">
+                <h3 class="text-base sm:text-lg font-extrabold text-white leading-snug">Chưa có lịch hẹn</h3>
+                <p class="text-xs leading-snug" style="color:#D4D4D8;">Chọn phim và hẹn bạn cùng xem</p>
               </div>
             </div>
             <button type="button" onclick="window.appActions.openCreateWatchPartyModal()"
               class="cv-wp-cta-primary shrink-0">
-              <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i>
-              <span>Tạo buổi xem đầu tiên</span>
+              <i class="fa-regular fa-calendar-plus" aria-hidden="true"></i>
+              <span>Tạo lịch hẹn</span>
             </button>
           </div>
         `;
       } else {
+        if (headerActions) {
+          headerActions.classList.remove("hidden");
+          headerActions.classList.add("flex");
+        }
         upEl.innerHTML = upcoming.map(renderWatchPartyTicketCardHtml).join("");
       }
 
