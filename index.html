@@ -361,8 +361,8 @@
     .cv-stage-info {
       position: relative;
       z-index: 10;
-      padding: 14px 16px 16px;
-      background: linear-gradient(180deg, rgba(11, 11, 15, 0.72) 0%, #0B0B0F 34%);
+      padding: 18px 16px 16px;
+      background: linear-gradient(180deg, rgba(11, 11, 15, 0.42) 0%, rgba(11, 11, 15, 0.88) 32%, #0B0B0F 100%);
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -374,8 +374,11 @@
       color: #FFFFFF;
       line-height: 1.18;
       font-size: 26px;
-      text-shadow: 0 3px 16px rgba(0, 0, 0, 0.85);
-      white-space: normal;
+      text-shadow: 0 4px 18px rgba(0, 0, 0, 0.94), 0 1px 4px rgba(0, 0, 0, 0.95);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
       overflow-wrap: anywhere;
     }
     .cv-hero-btn-watch {
@@ -691,9 +694,12 @@
       .cv-stage-info {
         position: relative;
         z-index: 12;
-        max-width: 560px;
-        padding: 24px 28px 26px;
-        background: linear-gradient(90deg, rgba(11, 11, 15, 0.94) 0%, rgba(11, 11, 15, 0.78) 65%, transparent 100%);
+        max-width: 580px;
+        padding: 28px 32px 26px 28px;
+        border-radius: 0 18px 0 0;
+        background:
+          linear-gradient(180deg, rgba(11, 11, 15, 0.16) 0%, rgba(11, 11, 15, 0.86) 44%, rgba(11, 11, 15, 0.98) 100%),
+          linear-gradient(90deg, rgba(11, 11, 15, 0.96) 0%, rgba(11, 11, 15, 0.84) 68%, rgba(11, 11, 15, 0) 100%);
       }
       .cv-hero-title {
         font-size: clamp(32px, 2.7vw, 44px);
@@ -6172,6 +6178,8 @@
     <section id="netflix-billboard"
          onmouseenter="window.appActions.pauseHeroSlider(true)"
          onmouseleave="window.appActions.pauseHeroSlider(false)"
+         onfocusin="window.appActions.pauseHeroSlider(true)"
+         onfocusout="window.appActions.handleHeroFocusOut(event)"
          class="cv-cinema-hero"
          aria-label="Khu màn chiếu rạp phim và chọn phòng">
 
@@ -6181,12 +6189,13 @@
           <div class="cv-wall-sconce-l" aria-hidden="true"></div>
           <div class="cv-wall-sconce-r" aria-hidden="true"></div>
 
-          <!-- Bề mặt màn chiếu giới hạn poster & video demo -->
+          <!-- Bề mặt màn chiếu: mặc định hiển thị Poster, chỉ tải Trailer khi người dùng bấm -->
           <div id="hero-stage-screen-box" class="cv-stage-screen-box">
-            <img id="hero-bg-ambient-blur" src="https://i.ytimg.com/vi/CCyGZFUXcuI/hqdefault.jpg" alt="" aria-hidden="true" class="hidden" />
+            <img id="hero-bg-ambient-blur" src="https://image.tmdb.org/t/p/w780/ilXdDgVbJUXuBiH8AAvzdjVgAUF.jpg" alt="" aria-hidden="true" class="hidden" />
             <img id="hero-bg-poster"
-                 src="https://i.ytimg.com/vi/CCyGZFUXcuI/hqdefault.jpg"
-                 alt="Phim đang chiếu trên màn hình rạp" />
+                 src="https://image.tmdb.org/t/p/w780/ilXdDgVbJUXuBiH8AAvzdjVgAUF.jpg"
+                 onerror="this.onerror=null;this.src='assets/web-logo.png';"
+                 alt="Poster phim đang chiếu trên màn hình rạp" />
             <video id="hero-bg-video"
                    muted
                    loop
@@ -6194,16 +6203,18 @@
                    preload="none"
                    class="hidden"></video>
 
-            <!-- DEMO 20s + Loa ở góc trên phải màn chiếu -->
+            <!-- Nút phát / dừng Trailer chủ động + Loa ở góc trên phải màn chiếu -->
             <div style="position:absolute;top:10px;right:10px;z-index:12;" class="flex items-center gap-1.5">
-              <span id="hero-demo-badge" class="hidden px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-[10px] font-bold text-white items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full animate-pulse" style="background:#E50914"></span>
-                <span>DEMO 20s</span>
-              </span>
+              <button type="button" id="btn-hero-play-trailer" onclick="window.appActions.toggleHeroTrailer()"
+                style="touch-action:manipulation;"
+                class="min-h-[38px] px-3 rounded-full bg-black/75 hover:bg-black/95 backdrop-blur-md border border-amber-400/45 text-[11px] font-bold text-white inline-flex items-center gap-1.5 cursor-pointer transition">
+                <i id="hero-trailer-icon" class="fa-solid fa-play text-[10px]" style="color:#F5C518;" aria-hidden="true"></i>
+                <span id="hero-trailer-label">Xem Trailer</span>
+              </button>
               <button type="button" onclick="window.appActions.toggleHeroVideoMute()" id="btn-hero-mute"
-                aria-label="Bật hoặc tắt âm thanh demo"
-                class="w-8 h-8 rounded-full bg-black/65 hover:bg-black/85 border border-white/25 text-white flex items-center justify-center transition cursor-pointer"
-                title="Bật/Tắt âm thanh Demo 20s">
+                aria-label="Bật hoặc tắt âm thanh trailer"
+                class="hidden w-9 h-9 rounded-full bg-black/75 hover:bg-black/95 border border-white/25 text-white items-center justify-center transition cursor-pointer"
+                title="Bật/Tắt âm thanh Trailer">
                 <i class="fa-solid fa-volume-xmark text-xs"></i>
               </button>
             </div>
@@ -6232,16 +6243,16 @@
               <span style="color:#F5C518">Phòng 01</span>
               <span>• Đang chiếu</span>
             </span>
-            <span id="hero-age-rating" class="cv-hero-meta-outline">T16+</span>
-            <span id="hero-year" class="cv-hero-meta-outline">2021</span>
-            <span id="hero-duration" class="cv-hero-meta-outline">1h 53m</span>
+            <span id="hero-age-rating" class="cv-hero-meta-outline">T13+</span>
+            <span id="hero-year" class="cv-hero-meta-outline">2009</span>
+            <span id="hero-duration" class="cv-hero-meta-outline">2h 30m</span>
             <span id="hero-live-viewers" class="hidden sm:inline-flex cv-hero-meta-outline gap-1.5">
               <span class="w-1.5 h-1.5 rounded-full animate-ping" style="background:#E50914"></span>
               <span>0/48 ghế</span>
             </span>
           </div>
 
-          <h1 id="hero-movie-title" class="cv-hero-title">Godzilla vs. Kong (2021)</h1>
+          <h1 id="hero-movie-title" class="cv-hero-title">Transformers: Bại Binh Phục Hận (2009)</h1>
 
           <div id="hero-genre-pills" class="hidden"></div>
           <span id="hero-genre" class="hidden"></span>
@@ -6250,7 +6261,7 @@
           <span id="hero-match-score" class="hidden"></span>
 
           <p id="hero-synopsis" class="text-xs sm:text-sm leading-relaxed line-clamp-2" style="color:#D4D4D8;">
-            Hai siêu quái vật huyền thoại Godzilla và Kong bước vào trận đại chiến chấn động thế giới.
+            Sam Witwicky nắm giữ ký hiệu cổ đại dẫn tới nguồn năng lượng Energon trên Trái Đất, buộc Optimus Prime và liên minh Autobots phải chiến đấu chống lại sự trỗi dậy của The Fallen và đội quân Decepticons.
           </p>
 
           <div class="cv-hero-actions" style="margin-top:4px;">
@@ -6258,12 +6269,11 @@
               class="cv-hero-btn-watch flex-1 sm:flex-none">
               <i id="btn-hero-watch-icon" class="fa-solid fa-couch" aria-hidden="true"></i>
               <span id="btn-hero-watch-label">Chọn ghế · Phòng 01</span>
-              <i class="fa-solid fa-chevron-right text-xs" aria-hidden="true"></i>
             </button>
 
-            <button type="button" id="btn-hero-watch-party" onclick="window.appActions.openCreateWatchPartyForHero()" style="touch-action: manipulation;"
+            <button type="button" id="btn-hero-watch-party" onclick="window.appActions.openCreateWatchPartyForHero()" style="touch-action: manipulation;min-height:52px;border-radius:999px;padding:0 18px;"
               class="cv-wp-cta-secondary">
-              <i class="fa-solid fa-calendar-plus" style="color:#F5C518;" aria-hidden="true"></i>
+              <i class="fa-solid fa-user-group" style="color:#F5C518;" aria-hidden="true"></i>
               <span>Hẹn xem cùng</span>
             </button>
 
@@ -9563,22 +9573,23 @@
       {
         id: "room-1",
         number: "Phòng 01",
-        movieTitle: "Godzilla vs. Kong (2021) - 1080p WEBRip",
-        genre: "Hành động • Quái vật • Cloudflare R2 HD",
-        duration: "113:09",
-        durationSec: 6789,
+        movieTitle: "Transformers: Bại Binh Phục Hận Full [Vietsub]",
+        genre: "Hành động • Khoa học viễn tưởng • Robot",
+        duration: "2h 30m",
+        durationSec: 9000,
+        year: "2009",
         status: "showing",
         isCustomStartZero: true,
         youtubeId: "",
-        videoUrl: "https://pub-c634cb0eca714151876c408aa346c6b5.r2.dev/Godzilla_vs_Kong/Godzilla.Vs..Kong.2021.1080p.WEBRip.x264.AAC5.1-%5BYTS.MX%5D.mp4",
-        previewVideoUrl: "https://pub-c634cb0eca714151876c408aa346c6b5.r2.dev/Godzilla_vs_Kong/Godzilla.Vs..Kong.2021.1080p.WEBRip.x264.AAC5.1-%5BYTS.MX%5D.mp4",
-        poster: "https://upload.wikimedia.org/wikipedia/en/6/63/Godzilla_vs._Kong.png",
+        videoUrl: "https://pub-c634cb0eca714151876c408aa346c6b5.r2.dev/Transformers-%20B%E1%BA%A1i%20Binh%20Ph%E1%BB%A5c%20H%E1%BA%ADn%20Full%20%5BVietsub%5D.mp4",
+        previewVideoUrl: "https://pub-c634cb0eca714151876c408aa346c6b5.r2.dev/Transformers-%20B%E1%BA%A1i%20Binh%20Ph%E1%BB%A5c%20H%E1%BA%ADn%20Full%20%5BVietsub%5D.mp4",
+        poster: "https://image.tmdb.org/t/p/w780/ilXdDgVbJUXuBiH8AAvzdjVgAUF.jpg",
         rankBadge: "BOM TẤN R2 • TỰ ĐỘNG .SRT",
         matchScore: "99% Phù hợp",
         ageRating: "T13+",
         quality: "1080P IMAX",
-        cast: "Alexander Skarsgård, Millie Bobby Brown, Rebecca Hall",
-        synopsis: "Hai siêu quái vật huyền thoại Godzilla và Kong bước vào trận đại chiến chấn động thế giới, trong khi nhân loại tiến sâu vào Trái Đất Rỗng để khám phá nguồn gốc thật sự của các Titan."
+        cast: "Shia LaBeouf, Megan Fox, Josh Duhamel, Tyrese Gibson",
+        synopsis: "Sam Witwicky nắm giữ ký hiệu cổ đại dẫn tới nguồn năng lượng Energon trên Trái Đất, buộc Optimus Prime và liên minh Autobots phải chiến đấu chống lại sự trỗi dậy của The Fallen và đội quân Decepticons."
       },
       {
         id: "room-2",
@@ -10103,6 +10114,9 @@
       ytMuted: false,
       heroIndex: 0,
       heroPaused: false,
+      heroUserLocked: false,
+      heroTrailerPlaying: false,
+      heroTrailerRoomId: "",
       heroMuted: true,
       subtitleMode: "vi", // 'vi' (Tiếng Việt) | 'en' (Tiếng Anh) | 'off' (Tắt)
       subtitleConfig: {
@@ -10633,7 +10647,17 @@
           synopsis: "Chuyển đến thị trấn nhỏ vùng Trung Tây để bắt đầu cuộc sống mới, Quinn và nhóm bạn trẻ bất ngờ trở thành con mồi trong cuộc săn lùng đẫm máu của kẻ sát nhân mang mặt nạ chú hề Frendo giữa cánh đồng ngô."
         },
         {
-          test: () => t.includes("chu he ma quai") || /\bit\s*\(2017\)/i.test(raw),
+          test: () => t.includes("ga he ma quai 2") || t.includes("chu he ma quai 2") || t.includes("it chapter two"),
+          year: "2019",
+          duration: "2h 49m",
+          durationSec: 10140,
+          ageRating: "T18+",
+          genre: "Kinh dị • Bí ẩn • Siêu nhiên",
+          cast: "Bill Skarsgård, Jessica Chastain, James McAvoy, Bill Hader",
+          synopsis: "Hai mươi bảy năm sau mùa hè kinh hoàng năm 1989, các thành viên Hội Kẻ Thua Cuộc nay đã trưởng thành buộc phải trở lại thị trấn Derry để thực hiện lời thề máu và tiêu diệt vĩnh viễn ác linh Pennywise."
+        },
+        {
+          test: () => t.includes("chu he ma quai") || t.includes("ga he ma quai") || /\bit\s*\(2017\)/i.test(raw),
           year: "2017",
           duration: "2h 15m",
           ageRating: "T18+",
@@ -11004,9 +11028,20 @@
           synopsis: "Bilbo Baggins cùng phù thủy Gandalf và mười ba người lùn tiến vào Ngọn Núi Cô Độc để giành lại vương quốc Erebor từ tay con rồng khổng lồ Smaug."
         },
         {
+          test: () => t.includes("transformers") && (t.includes("bai binh") || t.includes("phuc han") || t.includes("revenge") || !t.includes("last knight")),
+          year: "2009",
+          duration: "2h 30m",
+          durationSec: 9000,
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Robot",
+          cast: "Shia LaBeouf, Megan Fox, Josh Duhamel, Tyrese Gibson",
+          synopsis: "Sam Witwicky nắm giữ ký hiệu cổ đại dẫn tới nguồn năng lượng Energon trên Trái Đất, buộc Optimus Prime và liên minh Autobots phải chiến đấu chống lại sự trỗi dậy của The Fallen và đội quân Decepticons."
+        },
+        {
           test: () => t.includes("transformers"),
           year: "2017",
           duration: "2h 34m",
+          durationSec: 9240,
           ageRating: "T13+",
           genre: "Hành động • Khoa học viễn tưởng • Robot",
           cast: "Mark Wahlberg, Anthony Hopkins, Laura Haddock",
@@ -11016,6 +11051,7 @@
           test: () => t.includes("avengers") && t.includes("endgame"),
           year: "2019",
           duration: "3h 01m",
+          durationSec: 10860,
           ageRating: "T13+",
           genre: "Hành động • Khoa học viễn tưởng • Siêu anh hùng Marvel",
           cast: "Robert Downey Jr., Chris Evans, Scarlett Johansson, Chris Hemsworth",
@@ -11046,6 +11082,7 @@
           return {
             year: entry.year || parsedYear || "2025",
             duration: entry.duration || "2h 00m",
+            durationSec: Number(entry.durationSec) || 0,
             ageRating: entry.ageRating || "T13+",
             genre: entry.genre,
             cast: entry.cast,
@@ -11157,8 +11194,10 @@
       merged.cast = meta.cast;
       merged.genre = meta.genre;
       merged.duration = meta.duration;
+      merged.durationSec = Number(meta.durationSec) || (String(merged.movieTitle || "") === String(base.movieTitle || "") ? Number(base.durationSec || 0) : 0) || Number(adminCfg.durationSec || custom.durationSec || 0) || 6780;
       merged.ageRating = meta.ageRating;
       merged.year = meta.year;
+      merged.movieId = getCanonicalMovieId(merged);
       return merged;
     }
 
@@ -11260,17 +11299,28 @@
         billboardEl.style.setProperty("--cv-seat-glow", glowPalette[idx % glowPalette.length]);
       }
 
-      // Tự động phát 20 giây demo đầu tiên của phim (ẩn cho tới khi canplay để không bị màn hình đen, có fallback nếu lỗi mạng)
+      const trailerBtn = document.getElementById("btn-hero-play-trailer");
+      const trailerIcon = document.getElementById("hero-trailer-icon");
+      const trailerLabel = document.getElementById("hero-trailer-label");
+      const muteBtn = document.getElementById("btn-hero-mute");
+      const previewSrc = room.previewVideoUrl || room.videoUrl || "";
+      const shouldPlayTrailer = Boolean(state.heroTrailerPlaying && state.heroTrailerRoomId === room.id && previewSrc && !state.currentRoomId && !document.hidden);
+
+      if (trailerBtn) {
+        trailerBtn.classList.toggle("hidden", !previewSrc);
+        trailerBtn.setAttribute("aria-pressed", shouldPlayTrailer ? "true" : "false");
+      }
+      if (trailerIcon) trailerIcon.className = shouldPlayTrailer ? "fa-solid fa-stop text-[10px]" : "fa-solid fa-play text-[10px]";
+      if (trailerLabel) trailerLabel.textContent = shouldPlayTrailer ? "Dừng Trailer" : "Xem Trailer";
+
+      // Chỉ tải & phát trailer khi người dùng chủ động bấm Xem Trailer (tiết kiệm băng thông, luôn hiện Poster ban đầu)
       if (videoEl) {
-        const previewSrc = room.videoUrl || room.previewVideoUrl;
-        const demoBadge = document.getElementById("hero-demo-badge");
-        const saveData = Boolean(navigator.connection && navigator.connection.saveData);
         const hideHeroVideo = () => {
           videoEl.style.opacity = "0";
           videoEl.classList.add("hidden");
-          if (demoBadge) {
-            demoBadge.classList.add("hidden");
-            demoBadge.classList.remove("inline-flex");
+          if (muteBtn) {
+            muteBtn.classList.add("hidden");
+            muteBtn.classList.remove("inline-flex");
           }
         };
         if (!window.__cvHeroVisBound) {
@@ -11278,16 +11328,16 @@
           document.addEventListener("visibilitychange", () => {
             const v = document.getElementById("hero-bg-video");
             if (!v) return;
-            if (document.hidden) {
-              if (!v.paused) v.pause();
-            } else if (!state.currentRoomId && v.getAttribute("data-src") && v.readyState >= 2) {
+            if (document.hidden && !v.paused) {
+              v.pause();
+            } else if (!document.hidden && state.heroTrailerPlaying && !state.currentRoomId && v.getAttribute("data-src") && v.readyState >= 2) {
               v.play().catch(() => {});
             }
           });
         }
-        if (previewSrc && !state.currentRoomId && !saveData && !document.hidden) {
+        if (shouldPlayTrailer) {
           const isNewSrc = videoEl.getAttribute("data-src") !== previewSrc;
-          videoEl.style.transition = "opacity 0.6s ease";
+          videoEl.style.transition = "opacity 0.45s ease";
           videoEl.muted = Boolean(state.heroMuted);
           videoEl.preload = "metadata";
           if (isNewSrc) {
@@ -11297,32 +11347,40 @@
             try { videoEl.currentTime = 0; } catch (_) {}
           }
           videoEl.ontimeupdate = () => {
-            if (videoEl.currentTime >= 20) {
-              videoEl.currentTime = 0;
-            }
+            if (videoEl.currentTime >= 25) videoEl.currentTime = 0;
           };
           videoEl.oncanplay = () => {
-            if (videoEl.getAttribute("data-src") !== previewSrc || state.currentRoomId) return;
+            if (!state.heroTrailerPlaying || state.heroTrailerRoomId !== room.id || state.currentRoomId) return;
             videoEl.classList.remove("hidden");
-            videoEl.style.opacity = "0.85";
-            if (demoBadge) {
-              demoBadge.classList.remove("hidden");
-              demoBadge.classList.add("inline-flex");
+            videoEl.style.opacity = "0.9";
+            if (muteBtn) {
+              muteBtn.classList.remove("hidden");
+              muteBtn.classList.add("inline-flex");
             }
           };
           videoEl.onerror = () => {
+            state.heroTrailerPlaying = false;
+            state.heroTrailerRoomId = "";
             hideHeroVideo();
+            if (trailerIcon) trailerIcon.className = "fa-solid fa-play text-[10px]";
+            if (trailerLabel) trailerLabel.textContent = "Xem Trailer";
+            if (trailerBtn) trailerBtn.setAttribute("aria-pressed", "false");
+            showToast("⚠️ Trailer tạm thời không khả dụng — đang hiển thị poster phim.", "warning");
           };
-          if (videoEl.readyState >= 2 && !isNewSrc) {
-            videoEl.classList.remove("hidden");
-            videoEl.style.opacity = "0.85";
-          } else {
-            videoEl.classList.remove("hidden");
+          videoEl.classList.remove("hidden");
+          if (muteBtn) {
+            muteBtn.classList.remove("hidden");
+            muteBtn.classList.add("inline-flex");
           }
           videoEl.play().catch(() => {
             videoEl.muted = true;
+            state.heroMuted = true;
             videoEl.play().catch(() => {
+              state.heroTrailerPlaying = false;
               hideHeroVideo();
+              if (trailerIcon) trailerIcon.className = "fa-solid fa-play text-[10px]";
+              if (trailerLabel) trailerLabel.textContent = "Xem Trailer";
+              showToast("⚠️ Không phát được trailer — đang hiển thị poster phim.", "warning");
             });
           });
         } else {
@@ -11382,21 +11440,18 @@
         `;
       }
 
-      // Đồng bộ nhãn nút Hero với hành vi thực tế ("Chọn ghế · Phòng 02" hoặc "Vào rạp · Phòng 02" + "Đổi ghế")
-      const hasTicketForHero = hasValidTicketForRoom(room.id);
+      // Luôn giữ 1 nút chính "Chọn ghế · Phòng XX", nút phụ "Hẹn xem cùng" và nút Chi tiết
       const heroWatchLabel = document.getElementById("btn-hero-watch-label");
       const heroWatchIcon = document.getElementById("btn-hero-watch-icon");
       const heroSeatBtn = document.getElementById("btn-hero-book-seat");
       if (heroWatchLabel) {
-        heroWatchLabel.textContent = hasTicketForHero
-          ? `Vào rạp · ${room.number}`
-          : `Chọn ghế · ${room.number}`;
+        heroWatchLabel.textContent = `Chọn ghế · ${room.number}`;
       }
       if (heroWatchIcon) {
-        heroWatchIcon.className = hasTicketForHero ? "fa-solid fa-play" : "fa-solid fa-couch";
+        heroWatchIcon.className = "fa-solid fa-couch";
       }
       if (heroSeatBtn) {
-        heroSeatBtn.classList.toggle("hidden", !hasTicketForHero);
+        heroSeatBtn.classList.add("hidden");
       }
 
       // Đồng bộ thanh tóm tắt phòng hiện tại trên Mobile
@@ -11454,10 +11509,21 @@
       }
     }
 
+    function isHeroDetailOrBookingOpen() {
+      const detail = document.getElementById("hero-detail-modal");
+      const booking = document.getElementById("booking-modal");
+      const wpCreate = document.getElementById("watch-party-create-modal");
+      return Boolean(
+        (detail && !detail.classList.contains("hidden")) ||
+        (booking && !booking.classList.contains("hidden")) ||
+        (wpCreate && !wpCreate.classList.contains("hidden"))
+      );
+    }
+
     function startHeroAutoSlide() {
       if (heroIntervalTimer) clearInterval(heroIntervalTimer);
       heroIntervalTimer = setInterval(() => {
-        if (!state.heroPaused && !state.currentRoomId) {
+        if (!state.heroPaused && !state.heroUserLocked && !state.heroTrailerPlaying && !state.currentRoomId && !isHeroDetailOrBookingOpen()) {
           state.heroIndex = (state.heroIndex + 1) % DEFAULT_ROOMS.length;
           renderHeroBillboard();
         }
@@ -11466,24 +11532,58 @@
 
     function selectHeroSlide(index) {
       state.heroIndex = index;
+      state.heroUserLocked = true;
+      state.heroTrailerPlaying = false;
+      state.heroTrailerRoomId = "";
       renderHeroBillboard();
-      startHeroAutoSlide();
     }
 
     function nextHeroSlide() {
       state.heroIndex = (state.heroIndex + 1) % DEFAULT_ROOMS.length;
+      state.heroUserLocked = true;
+      state.heroTrailerPlaying = false;
+      state.heroTrailerRoomId = "";
       renderHeroBillboard();
-      startHeroAutoSlide();
     }
 
     function prevHeroSlide() {
       state.heroIndex = (state.heroIndex - 1 + DEFAULT_ROOMS.length) % DEFAULT_ROOMS.length;
+      state.heroUserLocked = true;
+      state.heroTrailerPlaying = false;
+      state.heroTrailerRoomId = "";
       renderHeroBillboard();
-      startHeroAutoSlide();
     }
 
     function pauseHeroSlider(paused) {
       state.heroPaused = Boolean(paused);
+    }
+
+    function handleHeroFocusOut(ev) {
+      const box = document.getElementById("netflix-billboard");
+      if (!box) return;
+      const nextTarget = ev?.relatedTarget;
+      if (nextTarget && box.contains(nextTarget)) return;
+      state.heroPaused = false;
+    }
+
+    function toggleHeroTrailer() {
+      const base = DEFAULT_ROOMS[state.heroIndex] || DEFAULT_ROOMS[0];
+      const room = getEffectiveRoom(base.id);
+      if (state.heroTrailerPlaying && state.heroTrailerRoomId === room.id) {
+        state.heroTrailerPlaying = false;
+        state.heroTrailerRoomId = "";
+      } else {
+        const previewSrc = room.previewVideoUrl || room.videoUrl || "";
+        if (!previewSrc) {
+          showToast("⚠️ Phim này chưa có video trailer.", "warning");
+          return;
+        }
+        state.heroUserLocked = true;
+        state.heroPaused = true;
+        state.heroTrailerPlaying = true;
+        state.heroTrailerRoomId = room.id;
+      }
+      renderHeroBillboard();
     }
 
     function toggleHeroVideoMute() {
@@ -11523,6 +11623,7 @@
     }
 
     function openHeroDetailModal() {
+      pauseHeroSlider(true);
       activeDetailModalAction = null;
       const ctaBtn = document.getElementById("detail-modal-cta-btn");
       if (ctaBtn) {
@@ -11534,16 +11635,17 @@
       document.getElementById("detail-modal-room").textContent = `${room.number} • ${room.status === "showing" ? "Đang chiếu" : "Sắp chiếu"}`;
       document.getElementById("detail-modal-match").textContent = room.matchScore || "98% Phù hợp";
       document.getElementById("detail-modal-rating").textContent = room.ageRating || "T13+";
-      document.getElementById("detail-modal-title").textContent = room.movieTitle;
+      document.getElementById("detail-modal-title").textContent = room.displayTitle || sanitizeMovieTitle(room.movieTitle);
       document.getElementById("detail-modal-synopsis").textContent = room.synopsis || "";
       document.getElementById("detail-modal-cast").textContent = room.cast || "";
-      document.getElementById("detail-modal-genre").textContent = `${room.genre} • Thời lượng ${room.duration}`;
+      document.getElementById("detail-modal-genre").textContent = `${room.genre} • Năm ${room.year || ""} • Thời lượng ${room.duration}`;
       document.getElementById("hero-detail-modal")?.classList.remove("hidden");
     }
 
     function closeHeroDetailModal() {
       document.getElementById("hero-detail-modal")?.classList.add("hidden");
       activeDetailModalAction = null;
+      pauseHeroSlider(false);
     }
 
     function enterHeroRoomFromModal() {
@@ -11920,8 +12022,10 @@
       const idx = DEFAULT_ROOMS.findIndex(r => r.id === roomId);
       if (idx < 0) return;
       state.heroIndex = idx;
+      state.heroUserLocked = true;
+      state.heroTrailerPlaying = false;
+      state.heroTrailerRoomId = "";
       renderHeroBillboard();
-      startHeroAutoSlide();
       if (opts.closeSheet) {
         closeMobileRoomsSheet();
       } else if (opts.preserveFocusId) {
@@ -15323,6 +15427,12 @@
       }
       if (t.includes("dao dau lau") || t.includes("skull island")) {
         return "https://image.tmdb.org/t/p/w780/ktotbBFrmO58kAKoPvpbChy53EB.jpg";
+      }
+      if (t.includes("transformers")) {
+        return "https://image.tmdb.org/t/p/w780/ilXdDgVbJUXuBiH8AAvzdjVgAUF.jpg";
+      }
+      if (t.includes("ga he ma quai 2") || t.includes("chu he ma quai 2") || t.includes("it chapter two")) {
+        return "https://image.tmdb.org/t/p/w780/ccCusWCSi5EhVTrxVLmkTwH11aZ.jpg";
       }
       if (t.includes("godzilla")) {
         return "https://image.tmdb.org/t/p/w780/ayKhR40ClDEivfmubfcXeyNPo2r.jpg";
@@ -24628,11 +24738,8 @@
 
     function enterHeroRoomNow() {
       const room = DEFAULT_ROOMS[state.heroIndex] || DEFAULT_ROOMS[0];
-      if (hasValidTicketForRoom(room.id)) {
-        enterRoom(room.id);
-      } else {
-        openBookingModal(room.id, null, getPreferredSeatForHeroPov(room));
-      }
+      state.heroUserLocked = true;
+      openBookingModal(room.id, null, getPreferredSeatForHeroPov(room), { forceNewBooking: hasValidTicketForRoom(room.id) });
     }
 
     function openBookingModalFromBar() {
@@ -32160,8 +32267,8 @@
         const mId = getCanonicalMovieId(obj);
         if (!mId || seen.has(mId)) return;
         seen.add(mId);
-        const meta = typeof resolveCatalogMeta === "function" ? resolveCatalogMeta(title) : {};
-        let durSec = Number(obj.durationSec || 0);
+        const meta = typeof resolveMovieMetadata === "function" ? resolveMovieMetadata(title, obj) : {};
+        let durSec = Number(meta.durationSec || obj.durationSec || 0);
         if (!durSec && meta.duration) {
           const hm = String(meta.duration).match(/(\d+)\s*h\s*(\d+)?/i);
           const mm = String(meta.duration).match(/^(\d{1,3}):(\d{2})$/);
@@ -33416,6 +33523,8 @@
       prevHeroSlide,
       pauseHeroSlider,
       toggleHeroVideoMute,
+      toggleHeroTrailer,
+      handleHeroFocusOut,
       enterHeroRoom,
       openHeroDetailModal,
       closeHeroDetailModal,
