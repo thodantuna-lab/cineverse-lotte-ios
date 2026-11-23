@@ -1806,7 +1806,7 @@
       .cv-wp-ticket {
         flex-direction: row;
         align-items: stretch;
-        min-height: 200px;
+        min-height: 214px;
       }
     }
     .cv-wp-ticket-main {
@@ -1819,48 +1819,52 @@
     @media (min-width: 768px) {
       .cv-wp-ticket-main {
         display: grid;
-        grid-template-columns: minmax(170px, 235px) minmax(0, 1fr);
+        grid-template-columns: minmax(210px, 290px) minmax(0, 1fr);
         align-items: stretch;
       }
     }
     .cv-wp-poster-wrap {
       position: relative;
-      height: 176px;
+      height: 186px;
       overflow: hidden;
       background: #09080A;
     }
     @media (min-width: 768px) {
       .cv-wp-poster-wrap {
         height: auto;
-        min-height: 200px;
+        min-height: 214px;
       }
     }
     .cv-wp-poster-fade {
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, rgba(11, 11, 15, 0.18) 0%, rgba(28, 10, 14, 0.88) 100%);
+      background: linear-gradient(180deg, rgba(11, 11, 15, 0.08) 0%, rgba(28, 10, 14, 0.45) 60%, rgba(32, 10, 15, 0.98) 100%);
       pointer-events: none;
     }
     @media (min-width: 768px) {
       .cv-wp-poster-fade {
-        background: linear-gradient(90deg, rgba(11, 11, 15, 0.10) 0%, rgba(28, 10, 14, 0.55) 68%, rgba(36, 11, 16, 0.98) 100%);
+        background: linear-gradient(90deg, rgba(11, 11, 15, 0.04) 0%, rgba(11, 11, 15, 0.08) 42%, rgba(34, 10, 15, 0.68) 76%, rgba(38, 11, 17, 0.98) 100%);
       }
     }
     .cv-wp-body {
-      padding: 16px 18px;
+      padding: 18px 20px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 11px;
       min-width: 0;
     }
     .cv-wp-eyebrow {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      width: min(100%, 240px);
+      margin: 0 auto;
       font-size: 10px;
       font-weight: 700;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
       color: #E7D29A;
     }
@@ -1869,13 +1873,13 @@
       content: "";
       flex: 1;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(245, 197, 24, 0.35), transparent);
+      background: linear-gradient(90deg, transparent, rgba(245, 197, 24, 0.42), transparent);
     }
     .cv-wp-title {
       font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
       font-style: italic;
       font-weight: 700;
-      font-size: clamp(20px, 2.2vw, 27px);
+      font-size: clamp(22px, 2.4vw, 31px);
       line-height: 1.15;
       color: #FFF8EA;
       display: -webkit-box;
@@ -6106,7 +6110,12 @@
             <p class="text-[11px] sm:text-xs" style="color:#A1A1AA;">Múi giờ Asia/Ho_Chi_Minh • Phòng riêng mở đúng giờ hẹn &amp; chọn ghế khi vào phòng</p>
           </div>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" id="btn-wp-refresh" onclick="window.appActions.refreshWatchParties(true)"
+            class="cv-wp-cta-secondary" title="Cập nhật số người đã nhận lời &amp; trạng thái phòng">
+            <i id="wp-refresh-icon" class="fa-solid fa-rotate" aria-hidden="true"></i>
+            <span>Cập nhật</span>
+          </button>
           <button type="button" onclick="window.appActions.openCreateWatchPartyModal()"
             class="cv-wp-cta-primary">
             <i class="fa-solid fa-plus" aria-hidden="true"></i>
@@ -31819,11 +31828,44 @@
             renderLobbyWatchParties();
           }
           return null;
-        } finally {
-          wpFetchInFlight = null;
+          return wpFetchInFlight;
         }
       })();
       return wpFetchInFlight;
+    }
+
+    let wpRtdbUnsub = null;
+    let wpRtdbDebounceTimer = null;
+    function subscribeWatchPartiesRealtime() {
+      if (wpRtdbUnsub || !rtdb || !rtdbMod || typeof rtdbMod.onValue !== "function") return;
+      try {
+        const eventsRef = rtdbMod.ref(rtdb, "lobby_config/watch_parties_v1/events");
+        let isInitialSnapshot = true;
+        wpRtdbUnsub = rtdbMod.onValue(eventsRef, () => {
+          if (isInitialSnapshot) {
+            isInitialSnapshot = false;
+            return;
+          }
+          clearTimeout(wpRtdbDebounceTimer);
+          wpRtdbDebounceTimer = setTimeout(() => {
+            if (typeof fetchWatchPartyList === "function") fetchWatchPartyList(true);
+          }, 350);
+        });
+      } catch (_) {}
+    }
+
+    async function refreshWatchParties(showFeedback = true) {
+      const icon = document.getElementById("wp-refresh-icon");
+      if (icon) icon.classList.add("fa-spin");
+      try {
+        const result = await fetchWatchPartyList(true);
+        if (showFeedback && result) {
+          showToast("🔄 Đã cập nhật số người đã nhận lời & trạng thái lịch hẹn.", "info");
+        }
+        return result;
+      } finally {
+        if (icon) icon.classList.remove("fa-spin");
+      }
     }
 
     function getWatchPartyStatusDisplay(ev) {
@@ -31850,6 +31892,12 @@
       const sInfo = getWpStatusDisplayTime(ev);
       const stUi = getWatchPartyStatusDisplay(ev);
       const approved = Array.isArray(ev.approvedMembers) ? ev.approvedMembers : [];
+      const acceptedCount = Number(ev.approvedCount || approved.length || 1);
+      const pendingCount = Number(ev.pendingCount || 0);
+      const isPrivateRoomLabel = ev.roomType === "sweetbox" ? "Sweetbox" : ev.roomType === "stream_party" ? "Stream nhóm" : "Phòng riêng";
+      const attendeesSummaryHtml = pendingCount > 0
+        ? `${escapeHTML(isPrivateRoomLabel)} • <strong class="text-white">${acceptedCount} người đã nhận lời</strong> <span class="text-amber-300">(${pendingCount} chờ xác nhận)</span>`
+        : `${escapeHTML(isPrivateRoomLabel)} • <strong class="text-white">${acceptedCount} người đã nhận lời</strong> <span style="color:#A1A1AA;">(${acceptedCount}/${ev.capacity})</span>`;
       const avatarsHtml = approved.slice(0, 4).map((m) => {
         const initial = String(m.name || "K").trim().charAt(0).toUpperCase();
         return `<span class="cv-wp-avatar-dot" title="${escapeHTML(m.name)}">${escapeHTML(initial)}</span>`;
@@ -31870,36 +31918,28 @@
                 onerror="this.onerror=null;this.src='assets/web-logo.png';"
                 class="w-full h-full object-cover" />
               <div class="cv-wp-poster-fade"></div>
-              <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold"
-                style="background:rgba(11,11,15,0.82);border:1px solid rgba(255,255,255,0.16);color:#F4F4F5;">
-                <img src="assets/web-logo.png" alt="" class="w-3.5 h-3.5 rounded-full object-cover" />
-                <span>Chọn ghế khi vào phòng</span>
-              </div>
             </div>
 
             <div class="cv-wp-body">
-              <div class="space-y-1.5">
+              <div class="w-full space-y-1.5">
                 <div class="cv-wp-eyebrow">
                   <span>${escapeHTML(ev.roomTypeLabel || "Buổi xem riêng")}</span>
                 </div>
                 <h3 class="cv-wp-title">${escapeHTML(ev.movieTitle)}</h3>
               </div>
 
-              <div class="cv-top10-meta-line text-xs" style="color:#E4E4E7;">
-                <span><i class="fa-regular fa-calendar mr-1 text-amber-300" aria-hidden="true"></i>${escapeHTML(sInfo.startDate)}</span>
-                <span class="opacity-40" aria-hidden="true">|</span>
-                <span class="font-bold text-white"><i class="fa-regular fa-clock mr-1 text-amber-300" aria-hidden="true"></i>${escapeHTML(sInfo.startTime)}</span>
-                <span class="opacity-40" aria-hidden="true">•</span>
-                <span class="text-[11px]" style="color:#A1A1AA;">Đóng phòng ${escapeHTML(sInfo.endTime)}</span>
+              <div class="space-y-1">
+                <div class="cv-top10-meta-line justify-center text-sm" style="color:#E4E4E7;">
+                  <span><i class="fa-regular fa-calendar mr-1.5 text-amber-300" aria-hidden="true"></i>${escapeHTML(sInfo.startDate)}</span>
+                  <span class="opacity-40" aria-hidden="true">|</span>
+                  <span class="text-lg sm:text-xl font-extrabold text-white tracking-wide"><i class="fa-regular fa-clock mr-1.5 text-amber-300 text-sm align-middle" aria-hidden="true"></i>${escapeHTML(sInfo.startTime)}</span>
+                </div>
+                <div class="text-[11px]" style="color:#A1A1AA;">Đóng phòng cố định ${escapeHTML(sInfo.endTime)} • Tổ chức: <strong class="text-slate-200">${escapeHTML(ev.organizerName)}</strong></div>
               </div>
 
-              <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-                <div class="flex items-center gap-2 min-w-0">
-                  <div class="cv-wp-avatars">${avatarsHtml}${moreCount}</div>
-                  <span class="text-[11px] truncate" style="color:#D4D4D8;">
-                    Tổ chức: <strong class="text-white">${escapeHTML(ev.organizerName)}</strong> • ${ev.approvedCount}/${ev.capacity} người
-                  </span>
-                </div>
+              <div class="flex flex-wrap items-center justify-center gap-2.5 pt-0.5">
+                <div class="cv-wp-avatars">${avatarsHtml}${moreCount}</div>
+                <span class="text-xs" style="color:#E4E4E7;">${attendeesSummaryHtml}</span>
                 <span class="px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold shrink-0"
                   style="background:${stUi.bg};border:1px solid ${stUi.border};color:${stUi.color};">
                   ${escapeHTML(stUi.badge)}
@@ -32735,6 +32775,7 @@
       toggleDimmedChatOverlay,
       toggleScreenFitMode,
       refreshWeeklyTop10,
+      refreshWatchParties,
       openCreateWatchPartyModal,
       openCreateWatchPartyForHero,
       closeCreateWatchPartyModal,
@@ -33569,6 +33610,7 @@
     if (typeof fetchWeeklyTop10 === "function") fetchWeeklyTop10(false);
     if (typeof fetchWatchPartyList === "function") fetchWatchPartyList(false);
     initFirebase();
+    setTimeout(() => { if (typeof subscribeWatchPartiesRealtime === "function") subscribeWatchPartiesRealtime(); }, 1500);
 
     // RoPhim UI: Header chuyển nền khi cuộn + Nút lên đầu trang
     (function initRoPhimEffects() {
