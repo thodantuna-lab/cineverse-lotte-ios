@@ -5387,14 +5387,15 @@
                 <i class="fa-solid fa-moon mr-1"></i><span>Bản đồ tối</span>
               </button>
 
-              <!-- Google Maps thực tế (lazy-load, mặc định lọc màu tối sang trọng) -->
+              <!-- Google Maps thực tế (ẩn hộp place-card góc trên trái bằng bù trừ top âm) -->
               <iframe id="hn-google-map-iframe"
                 title="Bản đồ Rạp Phim Hà Nội"
-                class="w-full h-full border-0 hn-map-iframe-dark"
+                class="w-full border-0 hn-map-iframe-dark"
+                style="height: calc(100% + 128px); margin-top: -128px;"
                 loading="lazy"
                 referrerpolicy="no-referrer-when-downgrade"
                 src="about:blank"
-                data-src="https://maps.google.com/maps?q=Lotte+Mall+West+Lake+Hanoi+272+Vo+Chi+Cong+Ha+Noi&t=&z=15&ie=UTF8&iwloc=&output=embed">
+                data-src="https://maps.google.com/maps?q=Lotte+Mall+West+Lake+Hanoi+272+Vo+Chi+Cong+Ha+Noi&t=&z=15&ie=UTF8&iwloc=near&output=embed">
               </iframe>
 
               <!-- Thẻ nổi Rạp đang chọn góc dưới bản đồ -->
