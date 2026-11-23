@@ -2037,8 +2037,8 @@
       box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
     }
     .cv-wp-invite-hero {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
       gap: 14px;
     }
     .cv-wp-invite-poster {
@@ -2047,11 +2047,9 @@
       border-radius: 12px;
       object-fit: cover;
       border: 1px solid rgba(245, 197, 24, 0.35);
-      flex-shrink: 0;
       display: block;
     }
     .cv-wp-invite-meta {
-      flex: 1 1 0%;
       min-width: 0;
       display: flex;
       flex-direction: column;
@@ -2069,12 +2067,13 @@
         padding: 20px;
       }
       .cv-wp-invite-hero {
-        flex-direction: row;
-        align-items: stretch;
+        grid-template-columns: 156px minmax(0, 1fr);
+        align-items: start;
         gap: 18px;
       }
       .cv-wp-invite-poster {
         width: 156px;
+        max-width: 156px;
         height: 214px;
       }
       .cv-wp-invite-actions-3 {
