@@ -4335,6 +4335,7 @@
       flex-direction: column;
       gap: 10px;
       padding: 12px !important;
+      overflow: visible !important;
     }
 
     /* Vùng chính Stream: Chế độ Grid (chưa ai chia sẻ) vs Chế độ Sharing (ưu tiên màn hình + dải camera nhỏ bên cạnh) */
@@ -4538,17 +4539,133 @@
     #discord-dock-stop-btn:hover {
       background: #f43f5e !important;
     }
-    #stream-settings-popover {
+      #stream-settings-popover {
       position: absolute;
       bottom: calc(100% + 8px);
       right: 0;
-      width: min(340px, 92vw);
+      width: min(370px, 94vw);
+      max-height: min(64dvh, 420px);
+      overflow-y: auto;
       background: #14141c;
       border: 1px solid rgba(255, 255, 255, 0.16);
       border-radius: 16px;
-      padding: 14px;
+      padding: 13px 14px;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
-      z-index: 80;
+      z-index: 85;
+    }
+    /* Discord Audio Control Panel (Âm lượng đầu vào, Cấp độ đầu vào VU Meter, Âm lượng đầu ra, Tắt tiếng, Spatial Audio) */
+    .discord-audio-panel {
+      background: #0d0d13;
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      border-radius: 14px;
+      padding: 12px 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+    }
+    .discord-range-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: linear-gradient(
+        90deg,
+        #5865F2 0%,
+        #5865F2 var(--discord-pct, 50%),
+        #2b2d38 var(--discord-pct, 50%),
+        #2b2d38 100%
+      );
+      outline: none;
+      cursor: pointer;
+    }
+    .discord-range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 2px solid #5865F2;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.65);
+      cursor: pointer;
+      transition: transform 0.12s ease;
+    }
+    .discord-range-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.12);
+    }
+    .discord-range-slider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 2px solid #5865F2;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.65);
+      cursor: pointer;
+    }
+    .discord-vu-meter {
+      display: grid;
+      grid-template-columns: repeat(22, minmax(0, 1fr));
+      gap: 4px;
+      height: 18px;
+      align-items: center;
+      padding: 2px 0;
+    }
+    .discord-vu-bar {
+      height: 14px;
+      border-radius: 999px;
+      background: #2b2d38;
+      transition: background-color 0.06s ease, box-shadow 0.06s ease, transform 0.06s ease;
+    }
+    .discord-vu-bar.is-lit-low {
+      background: #23a55a;
+      box-shadow: 0 0 6px rgba(35, 165, 90, 0.65);
+    }
+    .discord-vu-bar.is-lit-mid {
+      background: #5865F2;
+      box-shadow: 0 0 6px rgba(88, 101, 242, 0.7);
+    }
+    .discord-vu-bar.is-lit-high {
+      background: #f0b232;
+      box-shadow: 0 0 7px rgba(240, 178, 50, 0.8);
+    }
+    .discord-vu-bar.is-lit-peak {
+      background: #f23f43;
+      box-shadow: 0 0 8px rgba(242, 63, 67, 0.85);
+    }
+    .discord-check-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 3px 0;
+      cursor: pointer;
+      user-select: none;
+    }
+    .discord-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      border: 1.5px solid rgba(255, 255, 255, 0.35);
+      background: #14141c;
+      display: inline-grid;
+      place-content: center;
+      cursor: pointer;
+      transition: background-color 0.14s ease, border-color 0.14s ease;
+      flex-shrink: 0;
+    }
+    .discord-checkbox:checked {
+      background: #5865F2;
+      border-color: #5865F2;
+    }
+    .discord-checkbox:checked::before {
+      content: "✓";
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1;
     }
     #stream-cam-spotlight-modal {
       position: fixed;
@@ -8126,10 +8243,11 @@
                         <span id="discord-stream-stats" class="text-emerald-300 font-mono text-[10px]">⚡ Đang đo...</span>
                       </div>
                       <div class="flex items-center gap-1.5 pointer-events-auto shrink-0">
-                        <span id="discord-no-audio-badge" class="hidden px-2 py-1 rounded-xl bg-amber-500/20 border border-amber-400/50 text-amber-200 text-[10px] font-extrabold whitespace-nowrap"
-                          title="Nguồn chia sẻ hiện không có track âm thanh">
-                          <i class="fa-solid fa-volume-xmark mr-1"></i>Không có tiếng nguồn
-                        </span>
+                        <button type="button" id="discord-no-audio-badge" onclick="window.appActions.switchDiscordScreenSource()"
+                          class="hidden px-2.5 py-1 rounded-xl bg-amber-500/25 hover:bg-amber-500/40 border border-amber-400/60 text-amber-200 text-[10px] font-extrabold whitespace-nowrap cursor-pointer"
+                          title="Nguồn chia sẻ hiện không có âm thanh — bấm để chọn lại Tab hoặc bật Chia sẻ âm thanh hệ thống">
+                          <i class="fa-solid fa-volume-xmark mr-1"></i>Chưa bật tiếng nguồn · Bấm đổi nguồn
+                        </button>
                         <button type="button" id="discord-unmute-pill" onclick="window.appActions.toggleDiscordViewerMute()"
                           class="hidden px-2.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-black shadow-lg cursor-pointer whitespace-nowrap"
                           aria-label="Bật tiếng màn hình đang chia sẻ">
@@ -8359,12 +8477,12 @@
                 </div>
               </div>
 
-              <!-- Popover Cài đặt phụ (Thiết bị Mic/Cam, Bố cục, Chất lượng, Đổi nguồn, Tiếng stream) -->
-              <div id="stream-settings-popover" class="hidden space-y-3 text-xs" role="dialog" aria-label="Cài đặt thiết bị và bố cục phòng Stream">
+              <!-- Popover Cài đặt phụ (Bộ xử lý âm thanh Discord, Thiết bị Mic/Cam, Bố cục, Chất lượng 720p/45fps & 1080p/60fps, Đổi nguồn, Tiếng stream) -->
+              <div id="stream-settings-popover" class="hidden space-y-3 text-xs" role="dialog" aria-label="Cài đặt âm thanh, thiết bị và chất lượng phòng Stream">
                 <div class="flex items-center justify-between pb-2 border-b border-white/10">
                   <span class="font-black text-white flex items-center gap-1.5">
                     <i class="fa-solid fa-sliders text-amber-300"></i>
-                    <span>Cài đặt thiết bị &amp; bố cục</span>
+                    <span>Cài đặt Âm thanh &amp; Phát Stream</span>
                   </span>
                   <button type="button" onclick="window.appActions.toggleStreamSettingsMenu(false)"
                     class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer"
@@ -8373,20 +8491,74 @@
                   </button>
                 </div>
 
-                <div class="space-y-1.5">
-                  <label for="stream-select-mic-device" class="block text-[11px] font-bold text-slate-300">Thiết bị Micro</label>
-                  <select id="stream-select-mic-device" onchange="window.appActions.switchStreamInputDevice('audio', this.value)"
-                    class="w-full h-9 px-2.5 rounded-xl bg-[#0B0B0F] border border-white/15 text-xs text-white cursor-pointer outline-none">
-                    <option value="">Mặc định hệ thống</option>
-                  </select>
+                <!-- Khối điều khiển Âm thanh chuẩn Discord (Âm lượng đầu vào, Cấp độ đầu vào VU Meter, Âm lượng đầu ra, Tắt tiếng, Spatial Audio) -->
+                <div class="discord-audio-panel" aria-label="Bộ điều khiển âm thanh kiểu Discord">
+                  <div class="space-y-1.5">
+                    <div class="flex items-center justify-between">
+                      <label for="stream-input-volume-slider" class="text-[12px] font-bold text-slate-100">Âm Lượng Đầu Vào</label>
+                      <span id="stream-input-volume-label" class="text-[11px] font-mono font-bold text-indigo-300">100%</span>
+                    </div>
+                    <input id="stream-input-volume-slider" type="range" min="0" max="200" step="1" value="100"
+                      style="--discord-pct: 50%;"
+                      oninput="window.appActions.setStreamInputVolume(this.value)"
+                      class="discord-range-slider" aria-label="Âm lượng đầu vào micro từ 0% đến 200%" />
+                  </div>
+
+                  <div class="space-y-1.5">
+                    <div class="flex items-center justify-between">
+                      <span class="text-[12px] font-bold text-slate-100">Cấp độ đầu vào</span>
+                      <span id="stream-input-level-db" class="text-[10px] font-mono text-slate-400">-∞ dB</span>
+                    </div>
+                    <div id="stream-input-vu-meter" class="discord-vu-meter" role="meter" aria-label="Cấp độ đầu vào âm thanh thời gian thực" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                      <span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span><span class="discord-vu-bar"></span>
+                    </div>
+                  </div>
+
+                  <div class="space-y-1.5">
+                    <div class="flex items-center justify-between">
+                      <label for="stream-output-volume-slider" class="text-[12px] font-bold text-slate-100">Âm Lượng Đầu Ra</label>
+                      <span id="stream-output-volume-label" class="text-[11px] font-mono font-bold text-indigo-300">100%</span>
+                    </div>
+                    <input id="stream-output-volume-slider" type="range" min="0" max="200" step="1" value="100"
+                      style="--discord-pct: 50%;"
+                      oninput="window.appActions.setStreamOutputVolume(this.value)"
+                      class="discord-range-slider" aria-label="Âm lượng đầu ra của giọng nói và màn hình chia sẻ từ 0% đến 200%" />
+                  </div>
+
+                  <div class="pt-2 border-t border-white/10 space-y-2">
+                    <label for="stream-audio-mute-checkbox" class="discord-check-row">
+                      <span class="text-[12px] font-bold text-slate-100">Tắt tiếng</span>
+                      <input id="stream-audio-mute-checkbox" type="checkbox"
+                        onchange="window.appActions.setStreamAudioMuteToggle(this.checked)"
+                        class="discord-checkbox" aria-label="Tắt tiếng" />
+                    </label>
+                    <label for="stream-spatial-audio-checkbox" class="discord-check-row">
+                      <div class="min-w-0">
+                        <span class="text-[12px] font-bold text-slate-100 block">Spatial Audio</span>
+                        <span id="stream-spatial-audio-status" class="text-[10px] text-indigo-300 block">Âm thanh vòm 3D HRTF đang bật</span>
+                      </div>
+                      <input id="stream-spatial-audio-checkbox" type="checkbox" checked
+                        onchange="window.appActions.setStreamSpatialAudio(this.checked)"
+                        class="discord-checkbox" aria-label="Spatial Audio âm thanh không gian 3D" />
+                    </label>
+                  </div>
                 </div>
 
-                <div class="space-y-1.5">
-                  <label for="stream-select-cam-device" class="block text-[11px] font-bold text-slate-300">Thiết bị Camera</label>
-                  <select id="stream-select-cam-device" onchange="window.appActions.switchStreamInputDevice('video', this.value)"
-                    class="w-full h-9 px-2.5 rounded-xl bg-[#0B0B0F] border border-white/15 text-xs text-white cursor-pointer outline-none">
-                    <option value="">Mặc định hệ thống</option>
-                  </select>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div class="space-y-1">
+                    <label for="stream-select-mic-device" class="block text-[11px] font-bold text-slate-300">Thiết bị Micro</label>
+                    <select id="stream-select-mic-device" onchange="window.appActions.switchStreamInputDevice('audio', this.value)"
+                      class="w-full h-9 px-2 rounded-xl bg-[#0B0B0F] border border-white/15 text-[11px] text-white cursor-pointer outline-none">
+                      <option value="">Mặc định hệ thống</option>
+                    </select>
+                  </div>
+                  <div class="space-y-1">
+                    <label for="stream-select-cam-device" class="block text-[11px] font-bold text-slate-300">Thiết bị Camera</label>
+                    <select id="stream-select-cam-device" onchange="window.appActions.switchStreamInputDevice('video', this.value)"
+                      class="w-full h-9 px-2 rounded-xl bg-[#0B0B0F] border border-white/15 text-[11px] text-white cursor-pointer outline-none">
+                      <option value="">Mặc định hệ thống</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2">
@@ -8404,13 +8576,13 @@
                     <select id="discord-quality-select" onchange="window.appActions.setDiscordStreamQuality(this.value)"
                       aria-label="Chọn chất lượng chia sẻ màn hình"
                       class="w-full h-9 px-2 rounded-xl bg-[#0B0B0F] border border-white/15 text-amber-300 text-[11px] font-extrabold cursor-pointer outline-none">
-                      <option value="auto" selected>Tự động</option>
-                      <option value="fhd1080_60">1080p • 60fps</option>
-                      <option value="fhd1080_30">1080p • 30fps</option>
+                      <option value="fhd1080_60" selected>1080p • 60fps (Chuẩn Discord Nitro)</option>
+                      <option value="hd720_45">720p • 45fps (Tối thiểu mượt)</option>
                       <option value="hd720_60">720p • 60fps</option>
-                      <option value="hd720_30">720p • 30fps</option>
+                      <option value="fhd1080_45">1080p • 45fps</option>
                       <option value="qhd1440_60">2K • 60fps</option>
                       <option value="uhd4k_60">4K • 60fps</option>
+                      <option value="auto">Tự động (1080p 60fps → ≥720p 45fps)</option>
                     </select>
                   </div>
                 </div>
@@ -8418,7 +8590,7 @@
                 <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-white/10">
                   <button type="button" id="stream-btn-switch-source" onclick="window.appActions.switchDiscordScreenSource(); window.appActions.toggleStreamSettingsMenu(false);"
                     class="hidden flex-1 h-9 px-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-[11px] cursor-pointer">
-                    <i class="fa-solid fa-repeat mr-1"></i>Đổi nguồn chia sẻ
+                    <i class="fa-solid fa-repeat mr-1"></i>Đổi nguồn / Bật tiếng tab
                   </button>
                   <button type="button" id="discord-dock-mute-btn" onclick="window.appActions.toggleDiscordViewerMute()"
                     class="flex-1 h-9 px-3 rounded-xl bg-[#0B0B0F] hover:bg-white/10 border border-white/15 text-emerald-300 font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer"
@@ -20709,14 +20881,28 @@
           try { livekitRemoteAudioEls[elKey].remove(); } catch (_) {}
           delete livekitRemoteAudioEls[elKey];
         }
+        if (typeof detachDiscordOutputAudioPipeline === "function") {
+          detachDiscordOutputAudioPipeline(`lk_${elKey}`);
+        }
         const el = track.attach();
         el.autoplay = true;
         el.playsInline = true;
-        el.volume = 1;
+        el.setAttribute("autoplay", "");
+        el.setAttribute("playsinline", "");
+        el.volume = Math.max(0, Math.min(1, (typeof discordOutputVolumePct === "number" ? discordOutputVolumePct : 100) / 100));
         el.muted = isScreenAudio ? !!isDiscordViewerMuted : false;
         el.style.display = "none";
         document.body.appendChild(el);
         livekitRemoteAudioEls[elKey] = el;
+
+        const msTrack = track.mediaStreamTrack;
+        if (msTrack && typeof attachDiscordOutputAudioPipeline === "function") {
+          const outStream = new MediaStream([msTrack]);
+          attachDiscordOutputAudioPipeline(`lk_${elKey}`, outStream, el, pUid, isScreenAudio);
+          if (!isScreenAudio && typeof attachVoiceVadMonitor === "function") {
+            attachVoiceVadMonitor(pUid, outStream);
+          }
+        }
         logStreamDiag("livekit", "audio_subscribed", { from: pUid, isScreenAudio, muted: el.muted });
         const playRes = el.play();
         if (playRes && typeof playRes.catch === "function") {
@@ -20883,12 +21069,16 @@
             videoCodec: "vp8",
             simulcast: false,
             screenShareEncoding: {
-              maxBitrate: 3_500_000,
-              maxFramerate: 30,
+              maxBitrate: 8_000_000,
+              maxFramerate: 60,
               priority: "high"
             },
-            degradationPreference: "maintain-resolution",
-            dtx: true,
+            degradationPreference: "maintain-framerate",
+            audioPreset: {
+              maxBitrate: 128_000,
+              priority: "high"
+            },
+            dtx: false,
             red: true
           },
           audioCaptureDefaults: {
@@ -20918,6 +21108,9 @@
           if (track.kind === "audio") {
             const isScreenAudio = isLiveKitSource(pub, track, LK, "screen_audio");
             const elKey = `${pUid}_${isScreenAudio ? "sa" : "mic"}`;
+            if (typeof detachDiscordOutputAudioPipeline === "function") {
+              detachDiscordOutputAudioPipeline(`lk_${elKey}`);
+            }
             if (livekitRemoteAudioEls[elKey]) {
               try { track.detach(livekitRemoteAudioEls[elKey]); } catch (_) {}
               try { livekitRemoteAudioEls[elKey].remove(); } catch (_) {}
@@ -21253,6 +21446,7 @@
       }
       if (typeof renderDiscordCameras === "function") renderDiscordCameras();
       if (typeof renderStreamMembersList === "function") renderStreamMembersList();
+      if (typeof syncDiscordAudioControlsUI === "function") syncDiscordAudioControlsUI();
     }
 
     function resumePendingVoiceAudio() {
@@ -21263,6 +21457,11 @@
         }
         if (window.__sharedScreenAudioCtx && window.__sharedScreenAudioCtx.state === "suspended") {
           window.__sharedScreenAudioCtx.resume().catch(() => {});
+        }
+        if (discordAudioEngineCtx && discordAudioEngineCtx.state === "suspended") {
+          discordAudioEngineCtx.resume().then(() => {
+            if (typeof syncAllDiscordOutputAudioPipelines === "function") syncAllDiscordOutputAudioPipelines();
+          }).catch(() => {});
         }
       } catch (_) {}
 
@@ -21275,12 +21474,17 @@
           }).catch(() => {});
         }
       }
+      if (typeof syncAllDiscordOutputAudioPipelines === "function") {
+        syncAllDiscordOutputAudioPipelines();
+      }
       Object.entries(livekitRemoteAudioEls || {}).forEach(([k, el]) => {
         if (!el) return;
         const isSa = k.endsWith("_sa");
-        el.muted = isSa ? !!isDiscordViewerMuted : false;
-        el.volume = 1;
-        if (el.paused && !el.muted) {
+        if (!discordOutputPipelines.has(`lk_${k}`)) {
+          el.muted = isSa ? !!isDiscordViewerMuted : false;
+          el.volume = Math.max(0, Math.min(1, discordOutputVolumePct / 100));
+        }
+        if (el.paused && (!isSa || !isDiscordViewerMuted)) {
           el.play().catch(() => {});
         }
       });
@@ -21288,8 +21492,6 @@
       const container = document.getElementById("voice-audio-container");
       if (container && container.firstElementChild) {
         container.querySelectorAll("audio").forEach(a => {
-          a.muted = false;
-          a.volume = 1;
           if (a.srcObject && a.paused) {
             a.play().catch(() => {});
           }
@@ -21307,6 +21509,9 @@
     function closeVoicePeer(remoteUid) {
       const entry = voicePeers[remoteUid];
       if (!entry) return;
+      if (typeof detachDiscordOutputAudioPipeline === "function") {
+        detachDiscordOutputAudioPipeline(`p2p_voice_${remoteUid}`);
+      }
       if (entry.iceDisconnectTimer) {
         clearTimeout(entry.iceDisconnectTimer);
         entry.iceDisconnectTimer = null;
@@ -21371,7 +21576,10 @@
         const playRemoteAudio = () => {
           audioEl.srcObject = stream;
           audioEl.muted = false;
-          audioEl.volume = 1;
+          audioEl.volume = Math.max(0, Math.min(1, discordOutputVolumePct / 100));
+          if (typeof attachDiscordOutputAudioPipeline === "function") {
+            attachDiscordOutputAudioPipeline(`p2p_voice_${remoteUid}`, stream, audioEl, remoteUid, false);
+          }
           audioEl.play().catch(() => {
             if (!window.__voiceAutoplayToastShown) {
               window.__voiceAutoplayToastShown = true;
@@ -21691,10 +21899,10 @@
       startVoiceStatsMonitor();
     }
 
-    // ==================== DISCORD LIVE SCREEN SHARE (ULTRA-LOW LATENCY WEBRTC) ====================
+    // ==================== DISCORD LIVE SCREEN SHARE (ULTRA-LOW LATENCY WEBRTC • 720p/45fps → 1080p/60fps) ====================
     let liveScreenStream = null;
     let remoteScreenStream = null;
-    let liveScreenQuality = "auto"; // Mặc định Tự động ("auto" | "fhd1080_60" | "fhd1080_30" | "hd720_60" | "hd720_30" | "qhd1440_60" | "uhd4k_60")
+    let liveScreenQuality = "fhd1080_60"; // Mặc định 1080p 60fps chuẩn Discord Nitro (tự bảo vệ sàn tối thiểu ≥ 720p/45fps)
     let liveScreenRoomId = null;
     let liveScreenBroadcaster = null; // { uid, name, quality, sfu, hasAudio, startedAt }
     let liveScreenPeers = new Map(); // uid -> { pc, pendingIce: [], connectionState }
@@ -21713,37 +21921,37 @@
     let handledScreenIceIdsRef = null;
     let lastHandledScreenOfferTsRef = { value: 0 };
 
-    const MIN_SCREEN_SHARE_FPS = 30;
+    const MIN_SCREEN_SHARE_FPS = 45;
     let screenFpsGuardScale = 1.0;
 
     const DISCORD_QUALITY_PRESETS = {
       auto: {
-        label: "Tự động",
+        label: "1080p 60fps (Auto ≥720p/45fps)",
         width: 1920,
         height: 1080,
         frameRate: 60,
-        minFrameRate: 24,
-        maxBitrate: 5_000_000,
-        degradationPreference: "balanced",
-        contentHint: "detail"
+        minFrameRate: 45,
+        maxBitrate: 7_500_000,
+        degradationPreference: "maintain-framerate",
+        contentHint: "motion"
       },
       hd720_30: {
-        label: "720p 30fps",
+        label: "720p 45fps",
         width: 1280,
         height: 720,
-        frameRate: 30,
-        minFrameRate: 20,
-        maxBitrate: 2_200_000,
-        degradationPreference: "balanced",
-        contentHint: "detail"
+        frameRate: 45,
+        minFrameRate: 45,
+        maxBitrate: 3_500_000,
+        degradationPreference: "maintain-framerate",
+        contentHint: "motion"
       },
       hd720_45: {
         label: "720p 45fps",
         width: 1280,
         height: 720,
         frameRate: 45,
-        minFrameRate: 30,
-        maxBitrate: 3_000_000,
+        minFrameRate: 45,
+        maxBitrate: 3_800_000,
         degradationPreference: "maintain-framerate",
         contentHint: "motion"
       },
@@ -21752,28 +21960,28 @@
         width: 1280,
         height: 720,
         frameRate: 60,
-        minFrameRate: 30,
-        maxBitrate: 4_000_000,
+        minFrameRate: 45,
+        maxBitrate: 4_800_000,
         degradationPreference: "maintain-framerate",
         contentHint: "motion"
       },
       fhd1080_30: {
-        label: "1080p 30fps",
+        label: "1080p 45fps",
         width: 1920,
         height: 1080,
-        frameRate: 30,
-        minFrameRate: 20,
-        maxBitrate: 4_000_000,
-        degradationPreference: "balanced",
-        contentHint: "detail"
+        frameRate: 45,
+        minFrameRate: 45,
+        maxBitrate: 6_200_000,
+        degradationPreference: "maintain-framerate",
+        contentHint: "motion"
       },
       fhd1080_45: {
         label: "1080p 45fps",
         width: 1920,
         height: 1080,
         frameRate: 45,
-        minFrameRate: 30,
-        maxBitrate: 6_000_000,
+        minFrameRate: 45,
+        maxBitrate: 6_500_000,
         degradationPreference: "maintain-framerate",
         contentHint: "motion"
       },
@@ -21782,8 +21990,8 @@
         width: 1920,
         height: 1080,
         frameRate: 60,
-        minFrameRate: 30,
-        maxBitrate: 8_000_000,
+        minFrameRate: 45,
+        maxBitrate: 8_500_000,
         degradationPreference: "maintain-framerate",
         contentHint: "motion"
       },
@@ -21792,28 +22000,28 @@
         width: 2560,
         height: 1440,
         frameRate: 45,
-        minFrameRate: 30,
-        maxBitrate: 9_500_000,
+        minFrameRate: 45,
+        maxBitrate: 10_000_000,
         degradationPreference: "maintain-framerate",
         contentHint: "motion"
       },
       qhd1440_30: {
-        label: "2K 30fps",
+        label: "2K 45fps",
         width: 2560,
         height: 1440,
-        frameRate: 30,
-        minFrameRate: 20,
-        maxBitrate: 7_500_000,
-        degradationPreference: "balanced",
-        contentHint: "detail"
+        frameRate: 45,
+        minFrameRate: 45,
+        maxBitrate: 9_500_000,
+        degradationPreference: "maintain-framerate",
+        contentHint: "motion"
       },
       qhd1440_60: {
         label: "2K 60fps",
         width: 2560,
         height: 1440,
         frameRate: 60,
-        minFrameRate: 30,
-        maxBitrate: 12_000_000,
+        minFrameRate: 45,
+        maxBitrate: 12_500_000,
         degradationPreference: "maintain-framerate",
         contentHint: "motion"
       },
@@ -21822,32 +22030,461 @@
         width: 3840,
         height: 2160,
         frameRate: 45,
-        minFrameRate: 30,
-        maxBitrate: 15_000_000,
+        minFrameRate: 45,
+        maxBitrate: 15_500_000,
         degradationPreference: "maintain-framerate",
         contentHint: "motion"
       },
       uhd4k_30: {
-        label: "4K 30fps",
+        label: "4K 45fps",
         width: 3840,
         height: 2160,
-        frameRate: 30,
-        minFrameRate: 20,
-        maxBitrate: 12_000_000,
-        degradationPreference: "balanced",
-        contentHint: "detail"
+        frameRate: 45,
+        minFrameRate: 45,
+        maxBitrate: 14_000_000,
+        degradationPreference: "maintain-framerate",
+        contentHint: "motion"
       },
       uhd4k_60: {
         label: "4K 60fps",
         width: 3840,
         height: 2160,
         frameRate: 60,
-        minFrameRate: 30,
+        minFrameRate: 45,
         maxBitrate: 20_000_000,
         degradationPreference: "maintain-framerate",
         contentHint: "motion"
       }
     };
+
+    // ==================== DISCORD AUDIO DSP ENGINE (INPUT GAIN, VU METER, OUTPUT GAIN, MUTE, HRTF SPATIAL AUDIO) ====================
+    let discordAudioEngineCtx = null;
+    let discordInputVolumePct = 100;  // 0..200% (0.0 .. 2.0x GainNode)
+    let discordOutputVolumePct = 100; // 0..200% (0.0 .. 2.0x GainNode)
+    let discordSpatialAudioEnabled = true;
+    let discordInputRawStream = null;
+    let discordInputProcessedStream = null;
+    let discordInputNodes = null; // { source, hpf, compressor, gainNode, analyser, dest, dataArray }
+    let discordVuMeterTimer = null;
+    let discordCurrentInputLevelPct = 0;
+    const discordOutputPipelines = new Map(); // key -> { source, gainNode, panner, isScreenAudio, uid, mediaEl, streamId }
+
+    function loadPersistedDiscordAudioPrefs() {
+      try {
+        const raw = localStorage.getItem("cineverse_discord_audio_prefs_v1");
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (typeof parsed.inputVol === "number") discordInputVolumePct = Math.max(0, Math.min(200, parsed.inputVol));
+        if (typeof parsed.outputVol === "number") discordOutputVolumePct = Math.max(0, Math.min(200, parsed.outputVol));
+        if (typeof parsed.spatial === "boolean") discordSpatialAudioEnabled = parsed.spatial;
+      } catch (_) {}
+    }
+    loadPersistedDiscordAudioPrefs();
+
+    function savePersistedDiscordAudioPrefs() {
+      try {
+        localStorage.setItem("cineverse_discord_audio_prefs_v1", JSON.stringify({
+          inputVol: discordInputVolumePct,
+          outputVol: discordOutputVolumePct,
+          spatial: discordSpatialAudioEnabled
+        }));
+      } catch (_) {}
+    }
+
+    function getOrCreateDiscordAudioEngineCtx() {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      if (!discordAudioEngineCtx || discordAudioEngineCtx.state === "closed") {
+        discordAudioEngineCtx = new AC({ latencyHint: "interactive", sampleRate: 48000 });
+      }
+      if (discordAudioEngineCtx.state === "suspended") {
+        discordAudioEngineCtx.resume().catch(() => {});
+      }
+      try {
+        const listener = discordAudioEngineCtx.listener;
+        if (listener) {
+          if (listener.positionX) {
+            listener.positionX.value = 0;
+            listener.positionY.value = 0;
+            listener.positionZ.value = 0;
+            listener.forwardX.value = 0;
+            listener.forwardY.value = 0;
+            listener.forwardZ.value = -1;
+            listener.upX.value = 0;
+            listener.upY.value = 1;
+            listener.upZ.value = 0;
+          } else if (typeof listener.setPosition === "function") {
+            listener.setPosition(0, 0, 0);
+          }
+        }
+      } catch (_) {}
+      return discordAudioEngineCtx;
+    }
+
+    // Xây dựng chuỗi DSP đầu vào chuẩn Discord: Mic Raw -> HighPass 85Hz (khử ù nền) -> DynamicsCompressor -> Input Gain (0-200%) -> Analyser (22-bar VU) -> Outbound Track
+    function buildDiscordProcessedMicStream(rawStream) {
+      if (!rawStream || !rawStream.getAudioTracks().length) return rawStream;
+      const ctx = getOrCreateDiscordAudioEngineCtx();
+      if (!ctx) return rawStream;
+      try {
+        if (discordInputNodes) {
+          try { discordInputNodes.source.disconnect(); } catch (_) {}
+          try { discordInputNodes.hpf.disconnect(); } catch (_) {}
+          try { discordInputNodes.compressor.disconnect(); } catch (_) {}
+          try { discordInputNodes.gainNode.disconnect(); } catch (_) {}
+          discordInputNodes = null;
+        }
+        discordInputRawStream = rawStream;
+        const source = ctx.createMediaStreamSource(rawStream);
+        const hpf = ctx.createBiquadFilter();
+        hpf.type = "highpass";
+        hpf.frequency.value = 85;
+        hpf.Q.value = 0.707;
+
+        const compressor = ctx.createDynamicsCompressor();
+        compressor.threshold.value = -24;
+        compressor.knee.value = 18;
+        compressor.ratio.value = 3.5;
+        compressor.attack.value = 0.003;
+        compressor.release.value = 0.18;
+
+        const gainNode = ctx.createGain();
+        gainNode.gain.value = voiceMicActive ? (discordInputVolumePct / 100) : 0;
+
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.32;
+
+        const dest = ctx.createMediaStreamDestination();
+        source.connect(hpf);
+        hpf.connect(compressor);
+        compressor.connect(gainNode);
+        gainNode.connect(analyser);
+        gainNode.connect(dest);
+
+        const dataArray = new Uint8Array(analyser.fftSize);
+        discordInputNodes = { source, hpf, compressor, gainNode, analyser, dest, dataArray };
+        discordInputProcessedStream = dest.stream;
+        startDiscordVuMeterLoop();
+        return discordInputProcessedStream;
+      } catch (err) {
+        logStreamDiag("audio_dsp", "build_input_failed", err, "warn");
+        return rawStream;
+      }
+    }
+
+    function computeSpatialPositionForPeer(uid, isScreenAudio = false) {
+      if (!discordSpatialAudioEnabled) return { x: 0, y: 0, z: -1 };
+      if (isScreenAudio) {
+        // Âm thanh màn hình chia sẻ đặt ở chính giữa sân khấu phía trước, rộng và rõ
+        return { x: 0, y: 0.12, z: -0.85 };
+      }
+      const list = (typeof getStreamParticipantsList === "function" ? getStreamParticipantsList() : [])
+        .filter((p) => p && !p.isMine);
+      const total = Math.max(1, list.length);
+      let idx = list.findIndex((p) => p.uid === uid);
+      if (idx < 0) {
+        let hash = 0;
+        const str = String(uid || "peer");
+        for (let i = 0; i < str.length; i++) hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        idx = Math.abs(hash) % Math.max(2, total);
+      }
+      // Phân bổ thành viên theo vòng cung 120 độ (-60° .. +60°) phía trước người nghe chuẩn HRTF Discord
+      const angleDeg = total === 1
+        ? -28
+        : -60 + (idx / Math.max(1, total - 1)) * 120;
+      const rad = (angleDeg * Math.PI) / 180;
+      return {
+        x: Number((Math.sin(rad) * 1.45).toFixed(3)),
+        y: 0,
+        z: Number((-Math.cos(rad) * 1.25).toFixed(3))
+      };
+    }
+
+    function applySpatialParamsToPanner(panner, uid, isScreenAudio = false) {
+      if (!panner) return;
+      try {
+        panner.panningModel = discordSpatialAudioEnabled ? "HRTF" : "equalpower";
+        panner.distanceModel = "inverse";
+        panner.refDistance = 1;
+        panner.maxDistance = 100;
+        panner.rolloffFactor = discordSpatialAudioEnabled ? 0.65 : 0;
+        const pos = computeSpatialPositionForPeer(uid, isScreenAudio);
+        if (panner.positionX) {
+          panner.positionX.value = pos.x;
+          panner.positionY.value = pos.y;
+          panner.positionZ.value = pos.z;
+        } else if (typeof panner.setPosition === "function") {
+          panner.setPosition(pos.x, pos.y, pos.z);
+        }
+      } catch (_) {}
+    }
+
+    // Kết nối bất kỳ luồng âm thanh đầu ra nào (Giọng nói thành viên hoặc Âm thanh màn hình chia sẻ) qua bộ khuếch đại Đầu Ra (0-200%) & Spatial Audio HRTF
+    function attachDiscordOutputAudioPipeline(key, stream, mediaEl, uid = "", isScreenAudio = false) {
+      const effectiveGain = (isScreenAudio && isDiscordViewerMuted) ? 0 : (discordOutputVolumePct / 100);
+      if (mediaEl) {
+        mediaEl.volume = Math.max(0, Math.min(1, effectiveGain));
+      }
+      if (!stream || !stream.getAudioTracks || stream.getAudioTracks().length === 0) return;
+      const ctx = getOrCreateDiscordAudioEngineCtx();
+      if (!ctx) return;
+
+      const streamId = stream.id || (stream.getAudioTracks()[0]?.id || "");
+      const existing = discordOutputPipelines.get(key);
+      if (existing && existing.streamId === streamId) {
+        existing.gainNode.gain.value = effectiveGain;
+        applySpatialParamsToPanner(existing.panner, uid, isScreenAudio);
+        if (mediaEl && ctx.state === "running") {
+          mediaEl.volume = 0.0001;
+          mediaEl.muted = false;
+        }
+        return;
+      }
+      if (existing) {
+        try { existing.source.disconnect(); } catch (_) {}
+        try { existing.panner.disconnect(); } catch (_) {}
+        try { existing.gainNode.disconnect(); } catch (_) {}
+        discordOutputPipelines.delete(key);
+      }
+
+      try {
+        const source = ctx.createMediaStreamSource(stream);
+        const panner = ctx.createPanner();
+        applySpatialParamsToPanner(panner, uid, isScreenAudio);
+        const gainNode = ctx.createGain();
+        gainNode.gain.value = effectiveGain;
+        source.connect(panner);
+        panner.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        if (mediaEl) {
+          // Giữ mediaEl chạy ở mức âm lượng cực nhỏ 0.0001 để Chrome vẫn cấp tài nguyên decode WebRTC track trong khi phát chính qua Web Audio DSP (hỗ trợ khuếch đại lên tới 200% + HRTF 3D!)
+          if (ctx.state === "running") {
+            mediaEl.volume = 0.0001;
+            mediaEl.muted = false;
+          } else {
+            mediaEl.volume = Math.max(0, Math.min(1, effectiveGain));
+            mediaEl.muted = isScreenAudio ? Boolean(isDiscordViewerMuted) : false;
+          }
+        }
+        discordOutputPipelines.set(key, { source, panner, gainNode, isScreenAudio, uid, mediaEl, streamId });
+      } catch (err) {
+        logStreamDiag("audio_dsp", "attach_output_failed", err, "warn");
+      }
+    }
+
+    function detachDiscordOutputAudioPipeline(key) {
+      const entry = discordOutputPipelines.get(key);
+      if (!entry) return;
+      try { entry.source.disconnect(); } catch (_) {}
+      try { entry.panner.disconnect(); } catch (_) {}
+      try { entry.gainNode.disconnect(); } catch (_) {}
+      discordOutputPipelines.delete(key);
+    }
+
+    function syncAllDiscordOutputAudioPipelines() {
+      const ctx = discordAudioEngineCtx;
+      if (ctx && ctx.state === "suspended") {
+        ctx.resume().catch(() => {});
+      }
+      for (const [key, entry] of discordOutputPipelines.entries()) {
+        const gainVal = (entry.isScreenAudio && isDiscordViewerMuted) ? 0 : (discordOutputVolumePct / 100);
+        if (entry.gainNode) entry.gainNode.gain.value = gainVal;
+        applySpatialParamsToPanner(entry.panner, entry.uid, entry.isScreenAudio);
+        if (entry.mediaEl) {
+          if (ctx && ctx.state === "running") {
+            entry.mediaEl.volume = 0.0001;
+            entry.mediaEl.muted = false;
+          } else {
+            entry.mediaEl.volume = Math.max(0, Math.min(1, gainVal));
+            entry.mediaEl.muted = entry.isScreenAudio ? Boolean(isDiscordViewerMuted) : false;
+          }
+        }
+      }
+      // Đồng bộ cho các phần tử <audio> hoặc <video> chưa qua WebAudio
+      Object.entries(livekitRemoteAudioEls || {}).forEach(([k, el]) => {
+        if (!el) return;
+        if (!discordOutputPipelines.has(`lk_${k}`)) {
+          const isSa = k.endsWith("_sa");
+          el.muted = isSa ? Boolean(isDiscordViewerMuted) : false;
+          el.volume = Math.max(0, Math.min(1, discordOutputVolumePct / 100));
+        }
+      });
+      const videoEl = document.getElementById("discord-live-video");
+      if (videoEl && !liveScreenStream && remoteScreenStream && !remoteScreenStream._viaSfu) {
+        if (!discordOutputPipelines.has("p2p_screen_audio")) {
+          videoEl.muted = Boolean(isDiscordViewerMuted);
+          videoEl.volume = Math.max(0, Math.min(1, discordOutputVolumePct / 100));
+        }
+      }
+    }
+
+    function updateDiscordVuMeterBarsUI(levelPct = 0, dbText = "-∞ dB") {
+      discordCurrentInputLevelPct = Math.max(0, Math.min(100, Math.round(levelPct)));
+      const meter = document.getElementById("stream-input-vu-meter");
+      const dbEl = document.getElementById("stream-input-level-db");
+      if (dbEl) dbEl.textContent = dbText;
+      if (!meter) return;
+      meter.setAttribute("aria-valuenow", String(discordCurrentInputLevelPct));
+      const bars = meter.querySelectorAll(".discord-vu-bar");
+      const total = bars.length || 22;
+      const litCount = Math.round((discordCurrentInputLevelPct / 100) * total);
+      bars.forEach((bar, i) => {
+        bar.classList.remove("is-lit-low", "is-lit-mid", "is-lit-high", "is-lit-peak");
+        if (i < litCount) {
+          const ratio = (i + 1) / total;
+          if (ratio > 0.86) bar.classList.add("is-lit-peak");
+          else if (ratio > 0.68) bar.classList.add("is-lit-high");
+          else if (ratio > 0.42) bar.classList.add("is-lit-mid");
+          else bar.classList.add("is-lit-low");
+        }
+      });
+    }
+
+    function startDiscordVuMeterLoop() {
+      if (discordVuMeterTimer) return;
+      discordVuMeterTimer = setInterval(() => {
+        if (!state.currentRoomId) {
+          updateDiscordVuMeterBarsUI(0, "-∞ dB");
+          return;
+        }
+        // Lấy dữ liệu từ bộ DSP đầu vào hoặc từ voiceVadMonitors của người dùng hiện tại
+        let analyser = discordInputNodes?.analyser;
+        let dataArray = discordInputNodes?.dataArray;
+        if (!analyser && typeof voiceVadMonitors !== "undefined") {
+          const vadEntry = voiceVadMonitors.get(state.uid);
+          if (vadEntry) {
+            analyser = vadEntry.analyser;
+            dataArray = vadEntry.dataArray;
+          }
+        }
+        if (!voiceMicActive || !analyser || !dataArray || discordInputVolumePct === 0) {
+          updateDiscordVuMeterBarsUI(0, "-∞ dB");
+          return;
+        }
+        if (discordAudioEngineCtx && discordAudioEngineCtx.state === "suspended") {
+          discordAudioEngineCtx.resume().catch(() => {});
+        }
+        analyser.getByteTimeDomainData(dataArray);
+        let sumSq = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+          const norm = (dataArray[i] - 128) / 128;
+          sumSq += norm * norm;
+        }
+        const rms = Math.sqrt(sumSq / dataArray.length);
+        const scaledRms = rms * (discordInputNodes ? 1 : (discordInputVolumePct / 100));
+        if (scaledRms < 0.002) {
+          updateDiscordVuMeterBarsUI(0, "-∞ dB");
+          return;
+        }
+        const db = Math.max(-60, Math.min(0, 20 * Math.log10(scaledRms)));
+        const pct = Math.max(5, Math.min(100, Math.round(((db + 55) / 55) * 100)));
+        updateDiscordVuMeterBarsUI(pct, `${db.toFixed(1)} dB`);
+      }, 65);
+    }
+
+    function syncDiscordAudioControlsUI() {
+      const inSlider = document.getElementById("stream-input-volume-slider");
+      const inLbl = document.getElementById("stream-input-volume-label");
+      if (inSlider) {
+        inSlider.value = String(discordInputVolumePct);
+        inSlider.style.setProperty("--discord-pct", `${(discordInputVolumePct / 200) * 100}%`);
+      }
+      if (inLbl) inLbl.textContent = `${discordInputVolumePct}%`;
+
+      const outSlider = document.getElementById("stream-output-volume-slider");
+      const outLbl = document.getElementById("stream-output-volume-label");
+      if (outSlider) {
+        outSlider.value = String(discordOutputVolumePct);
+        outSlider.style.setProperty("--discord-pct", `${(discordOutputVolumePct / 200) * 100}%`);
+      }
+      if (outLbl) outLbl.textContent = `${discordOutputVolumePct}%`;
+
+      const muteChk = document.getElementById("stream-audio-mute-checkbox");
+      if (muteChk) {
+        muteChk.checked = !voiceMicActive;
+      }
+
+      const spatialChk = document.getElementById("stream-spatial-audio-checkbox");
+      const spatialStatus = document.getElementById("stream-spatial-audio-status");
+      if (spatialChk) spatialChk.checked = Boolean(discordSpatialAudioEnabled);
+      if (spatialStatus) {
+        spatialStatus.textContent = discordSpatialAudioEnabled
+          ? "Âm thanh vòm 3D HRTF đang bật"
+          : "Âm thanh Stereo tiêu chuẩn";
+        spatialStatus.className = discordSpatialAudioEnabled
+          ? "text-[10px] text-indigo-300 block"
+          : "text-[10px] text-slate-400 block";
+      }
+    }
+
+    function setStreamInputVolume(val) {
+      const num = Math.max(0, Math.min(200, Math.round(Number(val) || 0)));
+      discordInputVolumePct = num;
+      savePersistedDiscordAudioPrefs();
+      if (discordInputNodes?.gainNode) {
+        discordInputNodes.gainNode.gain.value = voiceMicActive ? (num / 100) : 0;
+      }
+      if (localVoiceStream) {
+        localVoiceStream.getAudioTracks().forEach((t) => {
+          t.enabled = Boolean(voiceMicActive && num > 0);
+        });
+      }
+      syncDiscordAudioControlsUI();
+      if (!voiceMicActive || num === 0) updateDiscordVuMeterBarsUI(0, "-∞ dB");
+    }
+
+    function setStreamOutputVolume(val) {
+      const num = Math.max(0, Math.min(200, Math.round(Number(val) || 0)));
+      discordOutputVolumePct = num;
+      savePersistedDiscordAudioPrefs();
+      syncAllDiscordOutputAudioPipelines();
+      syncDiscordAudioControlsUI();
+    }
+
+    async function setStreamAudioMuteToggle(muted) {
+      const shouldMute = Boolean(muted);
+      if (shouldMute && voiceMicActive) {
+        await toggleVoiceMic();
+      } else if (!shouldMute && !voiceMicActive) {
+        await toggleVoiceMic();
+      }
+      syncDiscordAudioControlsUI();
+    }
+
+    function setStreamSpatialAudio(enabled) {
+      discordSpatialAudioEnabled = Boolean(enabled);
+      savePersistedDiscordAudioPrefs();
+      syncAllDiscordOutputAudioPipelines();
+      syncDiscordAudioControlsUI();
+      showToast(
+        discordSpatialAudioEnabled
+          ? "🎧 Đã bật Spatial Audio (Âm thanh không gian 3D HRTF chuẩn Discord)."
+          : "🔊 Đã chuyển về âm thanh Stereo tiêu chuẩn.",
+        "info"
+      );
+    }
+
+    window.__discordAudioInspect = () => ({
+      minFpsConst: MIN_SCREEN_SHARE_FPS,
+      presets: DISCORD_QUALITY_PRESETS,
+      inputVol: discordInputVolumePct,
+      outputVol: discordOutputVolumePct,
+      spatial: discordSpatialAudioEnabled,
+      inputLevelPct: discordCurrentInputLevelPct,
+      hasInputDsp: Boolean(discordInputNodes),
+      inputGainVal: discordInputNodes?.gainNode?.gain?.value ?? null,
+      sfuAudioKeys: Object.keys(livekitRemoteAudioEls || {}),
+      outputPipelines: Array.from(discordOutputPipelines.entries()).map(([k, e]) => ({
+        key: k,
+        isScreenAudio: Boolean(e.isScreenAudio),
+        gain: Number((e.gainNode?.gain?.value || 0).toFixed(2)),
+        panningModel: e.panner?.panningModel || "",
+        x: Number((e.panner?.positionX?.value || 0).toFixed(2)),
+        z: Number((e.panner?.positionZ?.value || 0).toFixed(2))
+      }))
+    });
 
     let lastFailedStreamAction = "";
     let selectedStreamAudioDeviceId = "";
@@ -21977,6 +22614,8 @@
       if (shouldOpen) {
         const swBtn = document.getElementById("stream-btn-switch-source");
         if (swBtn) swBtn.classList.toggle("hidden", !Boolean(liveScreenStream));
+        if (typeof syncDiscordAudioControlsUI === "function") syncDiscordAudioControlsUI();
+        if (typeof startDiscordVuMeterLoop === "function") startDiscordVuMeterLoop();
         refreshStreamDeviceLists();
       }
     }
@@ -22684,8 +23323,13 @@
         if (videoEl.srcObject !== remoteScreenStream) videoEl.srcObject = remoteScreenStream;
         // Nếu nhận qua SFU thì âm thanh đi qua audio element riêng -> giữ videoEl.muted = true để tránh nhân đôi tiếng
         const viaSfu = Boolean(remoteScreenStream && remoteScreenStream._viaSfu);
-        videoEl.muted = viaSfu ? true : isDiscordViewerMuted;
-        videoEl.volume = 1;
+        const hasRemoteAudioTrack = Boolean(remoteScreenStream && remoteScreenStream.getAudioTracks().length > 0);
+        if (!viaSfu && hasRemoteAudioTrack && typeof attachDiscordOutputAudioPipeline === "function") {
+          attachDiscordOutputAudioPipeline("p2p_screen_audio", remoteScreenStream, videoEl, remoteScreenStream._broadcasterUid || "", true);
+        } else {
+          videoEl.muted = viaSfu ? true : isDiscordViewerMuted;
+          videoEl.volume = Math.max(0, Math.min(1, discordOutputVolumePct / 100));
+        }
         const onFrameReady = () => {
           viewerStreamState = "playing";
           if (statePillEl) {
@@ -22696,6 +23340,8 @@
         videoEl.onplaying = onFrameReady;
         videoEl.onloadeddata = onFrameReady;
         videoEl.play().catch((err) => {
+          // Ignore AbortError when srcObject is updated rapidly; only mark muted on NotAllowedError
+          if (err && err.name !== "NotAllowedError") return;
           logStreamDiag("screen_remote", "autoplay_blocked", err, "warn");
           videoEl.muted = true;
           isDiscordViewerMuted = true;
@@ -23632,26 +24278,30 @@
       return outStream;
     }
 
-    // Hàm tiện ích mở nguồn màn hình có fallback mượt, không làm sập phiên hiện tại khi người dùng hủy
+    // Hàm tiện ích mở nguồn màn hình chuẩn Discord (ưu tiên 1080p/60fps → tối thiểu 720p/45fps + bật sẵn âm thanh Tab & Hệ thống)
     async function acquireDisplayMediaStream(cfg) {
-      const targetFps = Math.max(cfg.minFrameRate || MIN_SCREEN_SHARE_FPS, cfg.frameRate || 60);
+      const targetFps = Math.max(MIN_SCREEN_SHARE_FPS, cfg.frameRate || 60);
       try {
         return await navigator.mediaDevices.getDisplayMedia({
           video: {
-            width: { ideal: cfg.width },
-            height: { ideal: cfg.height },
-            frameRate: { ideal: targetFps },
-            cursor: "always"
+            width: { ideal: cfg.width, max: Math.max(1920, cfg.width) },
+            height: { ideal: cfg.height, max: Math.max(1080, cfg.height) },
+            frameRate: { ideal: targetFps, max: targetFps },
+            cursor: "always",
+            displaySurface: "monitor"
           },
           audio: {
             echoCancellation: false,
             noiseSuppression: false,
             autoGainControl: false,
+            channelCount: 2,
+            sampleRate: 48000,
             suppressLocalAudioPlayback: false
           },
           surfaceSwitching: "include",
-          selfBrowserSurface: "exclude",
-          systemAudio: "include"
+          selfBrowserSurface: "include",
+          systemAudio: "include",
+          monitorTypeSurfaces: "include"
         });
       } catch (err) {
         if (err && (err.name === "NotAllowedError" || err.name === "AbortError")) {
@@ -23686,6 +24336,14 @@
       const aTrack = stream.getAudioTracks()[0] || null;
       if (!vTrack) return false;
       try {
+        try { vTrack.contentHint = cfg.contentHint || "motion"; } catch (_) {}
+        try {
+          await vTrack.applyConstraints({
+            width: { ideal: cfg.width },
+            height: { ideal: cfg.height },
+            frameRate: { ideal: Math.max(MIN_SCREEN_SHARE_FPS, cfg.frameRate || 60) }
+          });
+        } catch (_) {}
         if (livekitLocalScreenVideoPub?.track) {
           try { await livekitRoom.localParticipant.unpublishTrack(livekitLocalScreenVideoPub.track, false); } catch (_) {}
           livekitLocalScreenVideoPub = null;
@@ -23694,33 +24352,44 @@
           try { await livekitRoom.localParticipant.unpublishTrack(livekitLocalScreenAudioPub.track, false); } catch (_) {}
           livekitLocalScreenAudioPub = null;
         }
+        const targetFps = Math.max(MIN_SCREEN_SHARE_FPS, cfg.frameRate || 60);
         const vPub = await livekitRoom.localParticipant.publishTrack(vTrack, {
           source: LK.Track.Source.ScreenShare,
           name: "screen_share",
           videoCodec: "vp8",
           simulcast: false,
-          degradationPreference: cfg.degradationPreference || "maintain-resolution",
+          degradationPreference: "maintain-framerate",
           videoEncoding: {
-            maxBitrate: cfg.maxBitrate,
-            maxFramerate: cfg.frameRate || 30,
+            maxBitrate: cfg.maxBitrate || 8_500_000,
+            maxFramerate: targetFps,
             priority: "high"
           }
         });
         livekitLocalScreenVideoPub = vPub || null;
+        const sfuSender = vPub?.track?.sender || getLiveKitScreenShareSender();
+        if (sfuSender) {
+          await applyDiscordSenderParams(sfuSender, cfg, false, true);
+        }
         if (aTrack) {
           try {
+            aTrack.enabled = true;
+            try { aTrack.contentHint = "music"; } catch (_) {}
             const aPub = await livekitRoom.localParticipant.publishTrack(aTrack, {
               source: LK.Track.Source.ScreenShareAudio,
               name: "screen_share_audio",
               dtx: false,
-              red: true
+              red: true,
+              audioPreset: {
+                maxBitrate: 192_000,
+                priority: "high"
+              }
             });
             livekitLocalScreenAudioPub = aPub || null;
           } catch (aErr) {
             logStreamDiag("screen_sfu", "publish_audio_err", aErr, "warn");
           }
         }
-        logStreamDiag("screen_sfu", "published", { hasAudio: Boolean(aTrack), quality: liveScreenQuality });
+        logStreamDiag("screen_sfu", "published", { hasAudio: Boolean(aTrack), quality: liveScreenQuality, targetFps });
         return Boolean(vPub);
       } catch (err) {
         logStreamDiag("screen_sfu", "publish_video_err", err, "error");
@@ -24000,23 +24669,29 @@
       }
     }
 
-    // Bật / tắt âm thanh nội dung Stream ở phía người xem (đồng bộ cả <video> P2P lẫn <audio> LiveKit SFU ScreenShareAudio!)
+    // Bật / tắt âm thanh nội dung Stream ở phía người xem (đồng bộ cả <video> P2P, <audio> LiveKit SFU ScreenShareAudio & Web Audio DSP!)
     function toggleDiscordViewerMute() {
       isDiscordViewerMuted = !isDiscordViewerMuted;
+      if (typeof syncAllDiscordOutputAudioPipelines === "function") {
+        syncAllDiscordOutputAudioPipelines();
+      }
       const videoEl = document.getElementById("discord-live-video");
       if (videoEl && !liveScreenStream) {
         const viaSfu = Boolean(remoteScreenStream && remoteScreenStream._viaSfu);
-        videoEl.muted = viaSfu ? true : isDiscordViewerMuted;
+        if (!discordOutputPipelines.has("p2p_screen_audio")) {
+          videoEl.muted = viaSfu ? true : isDiscordViewerMuted;
+          videoEl.volume = Math.max(0, Math.min(1, discordOutputVolumePct / 100));
+        }
         if (!isDiscordViewerMuted && !viaSfu) {
-          videoEl.volume = 1;
           videoEl.play().catch((err) => logStreamDiag("screen_audio", "unmute_video_play_err", err, "warn"));
         }
       }
-      // FIX SMOKING GUN: Cập nhật trực tiếp tất cả kênh ScreenShareAudio của LiveKit SFU!
       Object.entries(livekitRemoteAudioEls || {}).forEach(([k, el]) => {
         if (!el || !k.endsWith("_sa")) return;
-        el.muted = isDiscordViewerMuted;
-        el.volume = 1;
+        if (!discordOutputPipelines.has(`lk_${k}`)) {
+          el.muted = isDiscordViewerMuted;
+          el.volume = Math.max(0, Math.min(1, discordOutputVolumePct / 100));
+        }
         if (!isDiscordViewerMuted) {
           el.play().catch((err) => logStreamDiag("screen_audio", "unmute_sfu_audio_err", err, "warn"));
         }
@@ -24308,7 +24983,10 @@
             }
             const src = audioCtx.createBufferSource();
             src.buffer = audioBuf;
-            src.connect(audioCtx.destination);
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.value = isDiscordViewerMuted ? 0 : (discordOutputVolumePct / 100);
+            src.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
             const now = audioCtx.currentTime;
             if (nextTime < now || nextTime > now + 0.3) nextTime = now + 0.02;
             src.start(nextTime);
@@ -25419,8 +26097,23 @@
         localVoiceStream.getTracks().forEach(t => t.stop());
         localVoiceStream = null;
       }
+      if (discordInputRawStream) {
+        discordInputRawStream.getTracks().forEach(t => { try { t.stop(); } catch (_) {} });
+        discordInputRawStream = null;
+      }
+      if (discordInputNodes) {
+        try { discordInputNodes.source.disconnect(); } catch (_) {}
+        try { discordInputNodes.hpf.disconnect(); } catch (_) {}
+        try { discordInputNodes.compressor.disconnect(); } catch (_) {}
+        try { discordInputNodes.gainNode.disconnect(); } catch (_) {}
+        discordInputNodes = null;
+      }
+      for (const k of Array.from(discordOutputPipelines.keys())) {
+        detachDiscordOutputAudioPipeline(k);
+      }
       voiceMicActive = false;
       updateVoiceMicButtonUI();
+      updateDiscordVuMeterBarsUI(0, "-∞ dB");
       if (myVoiceDisconnect) {
         try { myVoiceDisconnect.cancel(); } catch (e) {}
         myVoiceDisconnect = null;
@@ -25443,10 +26136,21 @@
         stopVoiceSpeechRecognition();
         setSpeakingState(state.uid, false);
         setLocalMicSelfMonitor(null, false);
+        if (discordInputNodes?.gainNode) {
+          discordInputNodes.gainNode.gain.value = 0;
+        }
+        updateDiscordVuMeterBarsUI(0, "-∞ dB");
         if (localVoiceStream) {
           localVoiceStream.getAudioTracks().forEach(t => { t.enabled = false; });
         }
+        if (discordInputRawStream) {
+          discordInputRawStream.getAudioTracks().forEach(t => { t.enabled = false; });
+        }
         if (livekitVoiceActive && livekitRoom?.localParticipant) {
+          const micPub = livekitRoom.localParticipant.getTrackPublication?.(window.LivekitClient?.Track?.Source?.Microphone);
+          if (micPub?.track) {
+            livekitRoom.localParticipant.unpublishTrack(micPub.track, false).catch(() => {});
+          }
           livekitRoom.localParticipant.setMicrophoneEnabled(false).catch(() => {});
         }
         if (isNativeAndroidVoiceAvailable()) {
@@ -25470,12 +26174,55 @@
         return;
       }
 
-      // Chế độ LiveKit SFU đang hoạt động: dùng thẳng pipeline SFU (trên cả Web & App iOS/Android, KHÔNG mở trùng AudioRecord native!)
+      // Chế độ LiveKit SFU đang hoạt động: thu âm qua chuỗi Discord DSP (HighPass 85Hz + Compressor + Input Gain 0-200% + 22-bar VU Meter) rồi publish lên SFU!
       if (livekitVoiceActive && livekitRoom?.state === "connected" && livekitRoom?.localParticipant) {
         try {
-          const sfuAudioOpts = selectedStreamAudioDeviceId ? { deviceId: { exact: selectedStreamAudioDeviceId } } : undefined;
-          await livekitRoom.localParticipant.setMicrophoneEnabled(true, sfuAudioOpts);
+          let rawMicStream = discordInputRawStream;
+          const hasLiveRaw = rawMicStream && rawMicStream.getAudioTracks().some(t => t.readyState === "live");
+          if (!hasLiveRaw || selectedStreamAudioDeviceId) {
+            if (rawMicStream) {
+              rawMicStream.getTracks().forEach((t) => { try { t.stop(); } catch (_) {} });
+            }
+            rawMicStream = await navigator.mediaDevices.getUserMedia({
+              audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true,
+                channelCount: 1,
+                sampleRate: 48000,
+                ...(selectedStreamAudioDeviceId ? { deviceId: { exact: selectedStreamAudioDeviceId } } : {})
+              }
+            });
+          }
+          rawMicStream.getAudioTracks().forEach((t) => { t.enabled = true; });
           voiceMicActive = true;
+          const processedStream = buildDiscordProcessedMicStream(rawMicStream);
+          localVoiceStream = processedStream || rawMicStream;
+          if (discordInputNodes?.gainNode) {
+            discordInputNodes.gainNode.gain.value = discordInputVolumePct / 100;
+          }
+          attachVoiceVadMonitor(state.uid, localVoiceStream);
+          startDiscordVuMeterLoop();
+
+          const LK = window.LivekitClient;
+          const outTrack = localVoiceStream.getAudioTracks()[0];
+          const existingMicPub = livekitRoom.localParticipant.getTrackPublication?.(LK?.Track?.Source?.Microphone);
+          if (existingMicPub?.track) {
+            try { await livekitRoom.localParticipant.unpublishTrack(existingMicPub.track, false); } catch (_) {}
+          }
+          if (outTrack && LK) {
+            await livekitRoom.localParticipant.publishTrack(outTrack, {
+              source: LK.Track.Source.Microphone,
+              name: "microphone",
+              dtx: true,
+              red: true,
+              audioPreset: { maxBitrate: 96_000, priority: "high" }
+            });
+          } else {
+            const sfuAudioOpts = selectedStreamAudioDeviceId ? { deviceId: { exact: selectedStreamAudioDeviceId } } : undefined;
+            await livekitRoom.localParticipant.setMicrophoneEnabled(true, sfuAudioOpts);
+          }
+
           if (typeof dismissStreamPermissionBanner === "function") dismissStreamPermissionBanner();
           updateVoiceMicButtonUI();
           if (voiceSubtitlesEnabled) startVoiceSpeechRecognition();
@@ -25494,9 +26241,10 @@
               updatedAt: Date.now()
             }).catch(() => {});
           }
-          showToast("🎙️ Micro đã bật (SFU tốc độ cao)! Đã kích hoạt phát tiếng trực tiếp trong phòng.", "success");
+          showToast("🎙️ Micro đã bật (Chuẩn âm thanh Discord DSP • SFU tốc độ cao)!", "success");
           return;
         } catch (sfuMicErr) {
+          voiceMicActive = false;
           logStreamDiag("mic_sfu", "enable_failed", sfuMicErr, "warn");
           const errName = sfuMicErr?.name || "";
           if (errName === "NotAllowedError" || errName === "PermissionDeniedError") {
@@ -25522,14 +26270,18 @@
       }
 
       try {
-        const hasLiveTrack = localVoiceStream && localVoiceStream.getAudioTracks().some(t => t.readyState === "live");
-        if (!hasLiveTrack || selectedStreamAudioDeviceId) {
+        const hasLiveRaw = discordInputRawStream && discordInputRawStream.getAudioTracks().some(t => t.readyState === "live");
+        if (!hasLiveRaw || selectedStreamAudioDeviceId) {
+          if (discordInputRawStream) {
+            discordInputRawStream.getTracks().forEach((t) => { try { t.stop(); } catch (_) {} });
+            discordInputRawStream = null;
+          }
           if (localVoiceStream) {
             localVoiceStream.getTracks().forEach((t) => { try { t.stop(); } catch (_) {} });
             localVoiceStream = null;
           }
           try {
-            localVoiceStream = await navigator.mediaDevices.getUserMedia({
+            discordInputRawStream = await navigator.mediaDevices.getUserMedia({
               audio: {
                 echoCancellation: true,
                 noiseSuppression: true,
@@ -25540,10 +26292,16 @@
               }
             });
           } catch (constraintErr) {
-            localVoiceStream = await navigator.mediaDevices.getUserMedia({
+            discordInputRawStream = await navigator.mediaDevices.getUserMedia({
               audio: selectedStreamAudioDeviceId ? { deviceId: { ideal: selectedStreamAudioDeviceId } } : true
             });
           }
+        }
+        discordInputRawStream.getAudioTracks().forEach((t) => { t.enabled = true; });
+        voiceMicActive = true;
+        localVoiceStream = buildDiscordProcessedMicStream(discordInputRawStream) || discordInputRawStream;
+        if (discordInputNodes?.gainNode) {
+          discordInputNodes.gainNode.gain.value = discordInputVolumePct / 100;
         }
       } catch (micErr) {
         logStreamDiag("mic_p2p", "gum_failed", micErr, "error");
@@ -25562,24 +26320,27 @@
       }
       if (typeof dismissStreamPermissionBanner === "function") dismissStreamPermissionBanner();
 
+      const rawTrack = discordInputRawStream?.getAudioTracks?.()[0];
+      if (rawTrack) {
+        rawTrack.onended = () => {
+          if (voiceMicActive) {
+            voiceMicActive = false;
+            stopVoiceSpeechRecognition();
+            setSpeakingState(state.uid, false);
+            updateVoiceMicButtonUI();
+            if (rtdb && rtdbMod && state.currentRoomId) {
+              rtdbMod.update(rtdbMod.ref(rtdb, `webrtc_voice/${state.currentRoomId}/peers/${state.uid}`), { micOn: false, updatedAt: Date.now() }).catch(() => {});
+            }
+            showToast("⚠️ Thiết bị Micro vừa ngắt kết nối.", "warning");
+          }
+        };
+      }
       const track = localVoiceStream.getAudioTracks()[0];
       if (!track) {
         showToast("Không nhận được tín hiệu âm thanh từ Micro!", "error");
         return;
       }
       track.enabled = true;
-      track.onended = () => {
-        if (voiceMicActive) {
-          voiceMicActive = false;
-          stopVoiceSpeechRecognition();
-          setSpeakingState(state.uid, false);
-          updateVoiceMicButtonUI();
-          if (rtdb && rtdbMod && state.currentRoomId) {
-            rtdbMod.update(rtdbMod.ref(rtdb, `webrtc_voice/${state.currentRoomId}/peers/${state.uid}`), { micOn: false, updatedAt: Date.now() }).catch(() => {});
-          }
-          showToast("⚠️ Thiết bị Micro vừa ngắt kết nối.", "warning");
-        }
-      };
       voiceMicActive = true;
       updateVoiceMicButtonUI();
       attachVoiceVadMonitor(state.uid, localVoiceStream);
@@ -36086,6 +36847,10 @@
       toggleStreamSettingsMenu,
       setStreamLayoutMode,
       switchStreamInputDevice,
+      setStreamInputVolume,
+      setStreamOutputVolume,
+      setStreamAudioMuteToggle,
+      setStreamSpatialAudio,
       switchStreamSidebarTab,
       forceStopRoomScreenShare,
       applySubtitleMode,
