@@ -786,73 +786,328 @@
     }
 
     /* ======================================================= */
-    /* TOP 10 PHIM HOT TRONG TUẦN (CONCEPT SẢNH CHÍNH)         */
+    /* TOP 10 TUẦN NÀY (CONCEPT SẢNH CHÍNH CINEVERSE LOTTE)    */
     /* ======================================================= */
-    .cv-top10-grid {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 14px;
+    .cv-top10-shell {
+      position: relative;
+      scroll-margin-top: 78px;
+      border-radius: 20px;
+      background:
+        radial-gradient(ellipse 85% 65% at 18% 10%, rgba(229, 9, 20, 0.14) 0%, rgba(16, 16, 22, 0.96) 56%),
+        #0B0B0F;
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      padding: 20px 22px;
+      box-shadow: 0 20px 56px rgba(0, 0, 0, 0.72);
+      overflow: hidden;
     }
-    @media (max-width: 1199px) {
-      .cv-top10-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+    .cv-top10-heading {
+      font-size: clamp(24px, 2.5vw, 34px);
+      font-weight: 800;
+      line-height: 1.12;
+      letter-spacing: -0.015em;
+      background: linear-gradient(180deg, #FFF7D6 0%, #F5C518 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: #F5C518;
+    }
+    .cv-top10-divider {
+      display: inline-block;
+      width: 1px;
+      height: 22px;
+      background: rgba(255, 255, 255, 0.22);
+      flex-shrink: 0;
+    }
+    .cv-top10-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px 16px;
+      margin-top: 12px;
+      margin-bottom: 16px;
+    }
+    .cv-top10-tab-active {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 8px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(245, 197, 24, 0.72);
+      background: linear-gradient(180deg, rgba(245, 197, 24, 0.16) 0%, rgba(180, 125, 12, 0.08) 100%);
+      color: #FFF8DC;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .cv-top10-info-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 44px;
+      padding: 6px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(20, 20, 28, 0.85);
+      color: #E4E4E7;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease;
+    }
+    .cv-top10-info-btn:hover {
+      border-color: rgba(245, 197, 24, 0.55);
+      background: rgba(245, 197, 24, 0.1);
+      color: #F5C518;
+    }
+    .cv-top10-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    @media (min-width: 1024px) {
+      .cv-top10-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 40fr) minmax(0, 60fr);
+        gap: 18px;
+        align-items: stretch;
       }
     }
-    @media (max-width: 639px) {
-      .cv-top10-grid {
-        display: flex;
-        overflow-x: auto;
-        gap: 12px;
-        padding-bottom: 6px;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-      }
-      .cv-top10-card {
-        flex: 0 0 156px;
-        scroll-snap-align: start;
-      }
-    }
-    .cv-top10-card {
+    .cv-top10-featured {
       position: relative;
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
+      min-height: 310px;
       border-radius: 16px;
-      background: linear-gradient(180deg, rgba(22, 22, 29, 0.96) 0%, rgba(11, 11, 15, 0.98) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.09);
       overflow: hidden;
-      cursor: pointer;
-      text-align: left;
-      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+      background: #14141C;
+      border: 1px solid rgba(245, 197, 24, 0.28);
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65);
+      transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
     }
-    .cv-top10-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(245, 197, 24, 0.65);
-      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.75), 0 0 18px rgba(245, 197, 24, 0.16);
+    @media (min-width: 1024px) {
+      .cv-top10-featured {
+        min-height: 410px;
+        height: 100%;
+      }
     }
-    .cv-top10-poster-wrap {
-      position: relative;
-      aspect-ratio: 16 / 10;
-      width: 100%;
-      overflow: hidden;
-      background: #09090d;
+    .cv-top10-featured:hover,
+    .cv-top10-featured:focus-within {
+      border-color: rgba(245, 197, 24, 0.68);
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.82), 0 0 24px rgba(245, 197, 24, 0.14);
     }
-    .cv-top10-rank {
+    .cv-top10-featured-bg {
       position: absolute;
-      left: 8px;
-      bottom: 6px;
-      font-family: Georgia, "Times New Roman", serif;
-      font-style: italic;
-      font-weight: 900;
-      font-size: 32px;
-      line-height: 0.9;
-      text-shadow: 0 4px 14px rgba(0, 0, 0, 0.95), 0 0 2px #000;
-      pointer-events: none;
-      z-index: 2;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.88;
+      transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
     }
-    .cv-top10-rank.rank-1 { color: #F5C518; }
-    .cv-top10-rank.rank-2 { color: #E2E8F0; }
-    .cv-top10-rank.rank-3 { color: #FB923C; }
-    .cv-top10-rank.rank-other { color: rgba(255, 255, 255, 0.85); font-size: 26px; }
+    .cv-top10-featured:hover .cv-top10-featured-bg {
+      transform: scale(1.03);
+      opacity: 0.94;
+    }
+    .cv-top10-featured-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(11, 11, 15, 0.62) 0%,
+        rgba(11, 11, 15, 0.18) 38%,
+        rgba(11, 11, 15, 0.88) 76%,
+        rgba(11, 11, 15, 0.98) 100%
+      );
+      pointer-events: none;
+    }
+    .cv-top10-featured-num {
+      font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+      font-style: italic;
+      font-weight: 800;
+      font-size: clamp(44px, 4.2vw, 60px);
+      line-height: 0.88;
+      color: #F5C518;
+      text-shadow: 0 6px 20px rgba(0, 0, 0, 0.92);
+      user-select: none;
+    }
+    .cv-top10-cta-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 18px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, #F8D147 0%, #EAB308 100%);
+      color: #0B0B0F;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform 180ms ease, filter 180ms ease, box-shadow 180ms ease;
+      box-shadow: 0 8px 20px rgba(245, 197, 24, 0.25);
+    }
+    .cv-top10-cta-primary:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
+    .cv-top10-cta-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 44px;
+      padding: 0 14px;
+      border-radius: 10px;
+      background: rgba(11, 11, 15, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #F4F4F5;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color 180ms ease, background-color 180ms ease;
+    }
+    .cv-top10-cta-secondary:hover {
+      border-color: rgba(245, 197, 24, 0.55);
+      background: rgba(20, 20, 28, 0.95);
+    }
+    .cv-top10-columns {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    @media (min-width: 1024px) {
+      .cv-top10-columns {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        align-items: stretch;
+      }
+    }
+    .cv-top10-col {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      min-width: 0;
+    }
+    .cv-top10-row {
+      display: flex;
+      align-items: stretch;
+      min-height: 68px;
+      border-radius: 12px;
+      background: rgba(20, 20, 28, 0.84);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
+    }
+    .cv-top10-row:hover,
+    .cv-top10-row:focus-within {
+      border-color: rgba(245, 197, 24, 0.45);
+      background: rgba(28, 28, 38, 0.96);
+      transform: translateX(2px);
+    }
+    .cv-top10-row-main {
+      flex: 1 1 auto;
+      min-width: 0;
+      min-height: 68px;
+      padding: 8px 8px 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+      background: transparent;
+      cursor: pointer;
+    }
+    .cv-top10-row-num {
+      width: 28px;
+      flex-shrink: 0;
+      text-align: center;
+      font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+      font-style: italic;
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 1;
+      color: #D4D4D8;
+    }
+    .cv-top10-row-num.top-2 { color: #F4F4F5; }
+    .cv-top10-row-num.top-3 { color: #F5C518; }
+    .cv-top10-row-thumb {
+      width: 72px;
+      height: 48px;
+      flex-shrink: 0;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #09090D;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+    }
+    .cv-top10-row-detail-btn {
+      width: 44px;
+      min-width: 44px;
+      min-height: 44px;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #A1A1AA;
+      border-left: 1px solid rgba(255, 255, 255, 0.07);
+      background: transparent;
+      cursor: pointer;
+      transition: color 180ms ease, background-color 180ms ease;
+    }
+    .cv-top10-row-detail-btn:hover {
+      color: #F5C518;
+      background: rgba(245, 197, 24, 0.08);
+    }
+    .cv-top10-live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(24, 12, 16, 0.9);
+      border: 1px solid rgba(229, 9, 20, 0.55);
+      color: #FFE4E6;
+      font-size: 10.5px;
+      font-weight: 800;
+      white-space: nowrap;
+      backdrop-filter: blur(8px);
+    }
+    .cv-top10-meta-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px 8px;
+    }
+    .cv-top10-move-up { color: #34D399; font-weight: 800; }
+    .cv-top10-move-down { color: #FB7185; font-weight: 800; }
+    .cv-top10-move-new {
+      color: #F5C518;
+      background: rgba(245, 197, 24, 0.14);
+      border: 1px solid rgba(245, 197, 24, 0.35);
+      border-radius: 999px;
+      padding: 1px 6px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .cv-top10-move-same { color: #A1A1AA; font-weight: 700; }
+    .cv-top10-shell button:focus-visible {
+      outline: 2px solid #F5C518;
+      outline-offset: 2px;
+    }
+    @media (max-width: 639px) {
+      .cv-top10-shell {
+        padding: 14px 12px;
+        border-radius: 16px;
+      }
+      .cv-top10-row-main {
+        padding: 8px 6px 8px 8px;
+        gap: 8px;
+      }
+      .cv-top10-row-thumb {
+        width: 62px;
+        height: 44px;
+      }
+    }
 
     @media (prefers-reduced-motion: reduce) {
       .cv-stage-auditorium,
@@ -860,9 +1115,17 @@
       .cv-stage-screen-box img,
       .cv-stage-screen-box video,
       .cv-stage-left,
-      .cv-stage-seat-sil {
+      .cv-stage-seat-sil,
+      .cv-top10-featured,
+      .cv-top10-featured-bg,
+      .cv-top10-cta-primary,
+      .cv-top10-cta-secondary,
+      .cv-top10-row,
+      .cv-top10-row-detail-btn,
+      .cv-top10-info-btn {
         animation: none !important;
         transition: none !important;
+        transform: none !important;
       }
     }
     /* Polyfill missing Tailwind utilities not in #tw-precompiled */
@@ -5244,6 +5507,66 @@
       </aside>
     </section>
 
+    <!-- 1B. BẢNG XẾP HẠNG TOP 10 TUẦN NÀY (DƯỚI BANNER, TRƯỚC XEM TIẾP) -->
+    <section id="lobby-top10-section" class="cv-top10-shell" aria-label="Top 10 tuần này">
+      <div class="cv-top10-header">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex flex-wrap items-center gap-3">
+            <h2 class="cv-serif cv-top10-heading">Top 10 tuần này</h2>
+            <span class="cv-top10-divider" aria-hidden="true"></span>
+            <span id="top10-week-range" class="text-sm font-semibold" style="color:#E4E4E7;">Tuần Thứ Hai – Chủ nhật (GMT+7)</span>
+          </div>
+          <span id="top10-updated-at" class="text-[11px] font-medium" style="color:#A1A1AA;">Đang đồng bộ máy chủ…</span>
+        </div>
+
+        <div class="cv-top10-toolbar">
+          <div class="flex items-center gap-2">
+            <span class="cv-top10-tab-active" role="status">
+              <i class="fa-solid fa-crown text-xs" style="color:#F5C518;" aria-hidden="true"></i>
+              <span>Được xem nhiều trong CineVerse</span>
+            </span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs italic" style="color:#A1A1AA;">Xếp theo lượt xem hợp lệ trong tuần</span>
+            <button type="button" id="btn-top10-rules"
+              onclick="window.appActions.toggleTop10FormulaInfo()"
+              class="cv-top10-info-btn"
+              aria-expanded="false"
+              aria-controls="top10-formula-info">
+              <i class="fa-solid fa-circle-info text-xs" style="color:#F5C518;" aria-hidden="true"></i>
+              <span>Quy tắc tính</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="top10-formula-info" class="hidden mb-4 p-3.5 rounded-xl text-xs space-y-1.5"
+          style="background:rgba(11,11,15,0.92);border:1px solid rgba(245,197,24,0.3);color:#D4D4D8;">
+          <div class="flex flex-wrap items-center justify-between gap-2 text-white font-bold">
+            <span><i class="fa-solid fa-scale-balanced mr-1.5" style="color:#F5C518;"></i>Phép tính xếp hạng máy chủ CineVerse</span>
+            <span id="top10-exact-window" class="text-[11px] font-semibold" style="color:#F5C518;"></span>
+          </div>
+          <p id="top10-formula-desc" class="leading-relaxed">
+            Mỗi tài khoản xem tích lũy tối thiểu <strong class="text-white">10 phút</strong> trong tuần (Thứ Hai–Chủ nhật, múi giờ <code class="text-amber-300">Asia/Ho_Chi_Minh</code>) được tính tối đa <strong class="text-white">1 lượt hợp lệ/phim/tuần</strong>; loại trừ tài khoản kiểm thử và khách vãng lai theo cấu hình.
+          </p>
+          <p class="text-[11px]" style="color:#A1A1AA;">
+            Phá hòa cố định khi bằng lượt: Lượt xem hợp lệ cao hơn → Tổng thời gian xem đạt chuẩn cao hơn → Thời điểm đạt ngưỡng 10 phút sớm hơn → Mã phim A–Z.
+          </p>
+        </div>
+      </div>
+
+      <div id="lobby-top10-body" aria-live="polite"></div>
+
+      <div id="lobby-top10-footer" class="mt-3 pt-2.5 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-[11px]" style="color:#A1A1AA;">
+        <span id="top10-footer-note">Dữ liệu thực từ máy chủ CineVerse • Múi giờ Asia/Ho_Chi_Minh</span>
+        <button type="button" onclick="window.appActions.refreshWeeklyTop10()"
+          class="cv-top10-info-btn" style="min-height:44px;padding:0 12px;">
+          <i class="fa-solid fa-rotate text-[11px]" aria-hidden="true"></i>
+          <span>Cập nhật bảng</span>
+        </button>
+      </div>
+    </section>
+
     <!-- 2. XEM TIẾP THEO HÌNH CUỐNG VÉ -->
     <section id="lobby-continue-watching" class="hidden space-y-3" aria-label="Phim đang xem tiếp">
       <div class="flex items-center justify-between gap-2">
@@ -5266,21 +5589,6 @@
         <span class="text-xs" style="color:#A1A1AA;">Trải nghiệm 2 người &amp; phòng xem chung nhóm</span>
       </div>
       <div id="lobby-special-rooms" class="cv-special-grid"></div>
-    </section>
-
-    <!-- 4. BẢNG XẾP HẠNG TOP 10 PHIM HOT TRONG TUẦN -->
-    <section id="lobby-top10-section" class="space-y-3" aria-label="Top 10 Phim Hot Trong Tuần">
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <div class="flex items-center gap-2.5">
-          <h2 class="cv-serif text-xl sm:text-2xl font-bold text-white">Top 10 Phim Hot Trong Tuần</h2>
-          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider"
-            style="background:rgba(229,9,20,0.2);color:#fda4af;border:1px solid rgba(229,9,20,0.45);">
-            <i class="fa-solid fa-fire mr-1 text-amber-300"></i>Tuần này
-          </span>
-        </div>
-        <span class="text-xs" style="color:#A1A1AA;">Bấm phim để xem chi tiết hoặc đặt vé vào rạp</span>
-      </div>
-      <div id="lobby-top10-grid" class="cv-top10-grid"></div>
     </section>
 
     <!-- Giữ container tương thích cũ (ẩn) để không lỗi tham chiếu -->
@@ -7341,9 +7649,9 @@
             class="px-4 py-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-slate-300 text-xs font-bold cursor-pointer">
             Đóng
           </button>
-          <button type="button" onclick="window.appActions.closeHeroDetailModal(); window.appActions.openBookingModalForHero();"
-            class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white text-xs font-black flex items-center gap-2 shadow-lg cursor-pointer">
-            <i class="fa-solid fa-ticket"></i> Đặt Vé & Chọn Ghế Ngay
+          <button type="button" id="detail-modal-cta-btn" onclick="window.appActions.triggerDetailModalCta()"
+            class="px-6 py-2.5 min-h-[44px] rounded-xl bg-gradient-to-r from-rose-600 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white text-xs font-black flex items-center gap-2 shadow-lg cursor-pointer">
+            <i class="fa-solid fa-ticket"></i> Đặt Vé &amp; Chọn Ghế Ngay
           </button>
         </div>
       </div>
@@ -8762,6 +9070,7 @@
       customSubtitlesByRoom: {},
       subtitleOffsetSec: 0,
       subtitleOffsetsByKey: (() => { try { return JSON.parse(localStorage.getItem("cineverse_sub_offsets_v1") || "{}"); } catch (e) { return {}; } })(),
+      top10: { status: "idle", data: null, error: "", lastFetchedAt: 0 },
       roomsCustom: {},
       vaultVideos: [
         {
@@ -10121,7 +10430,24 @@
       enterRoom(room.id);
     }
 
+    let activeDetailModalAction = null;
+
+    function triggerDetailModalCta() {
+      const fn = activeDetailModalAction;
+      closeHeroDetailModal();
+      if (typeof fn === "function") {
+        fn();
+      } else {
+        openBookingModalForHero();
+      }
+    }
+
     function openHeroDetailModal() {
+      activeDetailModalAction = null;
+      const ctaBtn = document.getElementById("detail-modal-cta-btn");
+      if (ctaBtn) {
+        ctaBtn.innerHTML = `<i class="fa-solid fa-ticket"></i> Đặt Vé &amp; Chọn Ghế Ngay`;
+      }
       const base = DEFAULT_ROOMS[state.heroIndex] || DEFAULT_ROOMS[0];
       const room = getEffectiveRoom(base.id);
       document.getElementById("detail-modal-poster").src = room.poster;
@@ -10137,6 +10463,7 @@
 
     function closeHeroDetailModal() {
       document.getElementById("hero-detail-modal")?.classList.add("hidden");
+      activeDetailModalAction = null;
     }
 
     function enterHeroRoomFromModal() {
@@ -10585,6 +10912,9 @@
     function renderLobby() {
       renderContinueWatchingStrip();
       renderLobbyTop10Movies();
+      if (typeof fetchWeeklyTop10 === "function" && state.top10?.status === "idle") {
+        fetchWeeklyTop10(false);
+      }
       const allRooms = DEFAULT_ROOMS.map(r => getEffectiveRoom(r.id));
       const standardRooms = allRooms.filter(r => getRoomCategory(r) === "single");
       const activeRoom = allRooms[((state.heroIndex % allRooms.length) + allRooms.length) % allRooms.length] || standardRooms[0];
@@ -12619,6 +12949,7 @@
     }
 
     function stopRoomVideoPlayer() {
+      try { if (typeof flushTop10WatchHeartbeat === "function") flushTop10WatchHeartbeat(true); } catch (_) {}
       if (window.__activeHlsInstance) {
         try { window.__activeHlsInstance.destroy(); } catch (_) {}
         window.__activeHlsInstance = null;
@@ -24610,6 +24941,7 @@
         updateVaultBadgeCount();
         renderVideoVaultGrid();
         renderJJKEpisodeLists();
+        try { if (typeof renderLobbyTop10Movies === "function") renderLobbyTop10Movies(); } catch (_) {}
         autoResolveMissingPostersWithAI();
 
         if (statusEl) {
@@ -29657,115 +29989,671 @@
       });
     })();
 
-    function buildTop10WeeklyMovies() {
-      const seen = new Set();
-      const items = [];
-      const addCandidate = (title, poster, genre, ageRating, quality, matchScore, roomId = "", roomNumber = "", duration = "") => {
-        const cleanTitle = sanitizeMovieTitle(title || "");
-        const key = normalizeSearchText(cleanTitle).replace(/\s*\(?\d{4}\)?/g, "").trim();
-        if (!cleanTitle || !key || seen.has(key)) return;
-        seen.add(key);
-        const meta = typeof resolveCatalogMeta === "function" ? resolveCatalogMeta(cleanTitle) : {};
-        const resolvedPoster = typeof resolveMoviePoster === "function"
-          ? resolveMoviePoster(cleanTitle, poster || "")
-          : (poster || "assets/web-logo.png");
-        items.push({
-          title: cleanTitle,
-          poster: resolvedPoster || "assets/web-logo.png",
-          genre: genre || meta.genre || "Điện ảnh • Chiếu rạp",
-          ageRating: ageRating || meta.ageRating || "T13+",
-          quality: quality || "FULL HD",
-          matchScore: matchScore || "96% Phù hợp",
-          roomId,
-          roomNumber,
-          duration: duration || meta.duration || "Full"
-        });
-      };
+    // =========================================================
+    // TOP 10 TUẦN NÀY (LƯỢT XEM HỢP LỆ TRÊN MÁY CHỦ + HEARTBEAT)
+    // =========================================================
+    let top10FetchInFlight = null;
+    window.__resolvedTop10ItemsById = {};
+    window.__top10WatchAcc = {
+      movieId: "",
+      title: "",
+      roomId: "",
+      poster: "",
+      genre: "",
+      year: "",
+      accumulatedSec: 0,
+      flushing: false
+    };
 
-      // 1. Ưu tiên các phim đang chiếu trực tiếp tại 6 phòng sảnh chính
-      DEFAULT_ROOMS.forEach(r => {
-        const eff = getEffectiveRoom(r.id);
-        addCandidate(eff.displayTitle || eff.movieTitle, eff.poster, eff.genre, eff.ageRating, eff.quality, eff.matchScore, eff.id, eff.number, eff.duration);
-      });
-
-      // 2. Bổ sung thêm các phim hot từ Kho Phim R2 (state.vaultVideos)
-      if (Array.isArray(state.vaultVideos)) {
-        const grouped = typeof groupVaultItemsForDisplay === "function" ? groupVaultItemsForDisplay(state.vaultVideos) : [];
-        grouped.forEach(g => {
-          const it = g.type === "single" ? g.item : (g.episodes?.[0]?.item || null);
-          if (it) {
-            addCandidate(g.title || it.title, it.poster || "", it.genre || "", "", "R2 HD", "97% Hot", "", "", "");
-          }
-        });
-      }
-
-      // 3. Fallback danh sách phim nổi bật nếu kho chưa tải xong để luôn đủ Top 10
-      const curatedFallbacks = [
-        { title: "Godzilla vs. Kong (2021)", genre: "Hành động • Quái vật IMAX", ageRating: "T13+", quality: "1080P IMAX", matchScore: "99% Hot" },
-        { title: "Vùng Đất Quỷ Dữ 2026 (Resident Evil 2026)", genre: "Kinh dị • Sinh tồn", ageRating: "T18+", quality: "FULL HD", matchScore: "98% Hot" },
-        { title: "Chú Thuật Hồi Chiến: Tử Diệt Hồi Du", genre: "Anime • Hành động", ageRating: "T16+", quality: "VIETSUB HD", matchScore: "98% Hot" },
-        { title: "Shang-Chi và Huyền Thoại Thập Luân (2021)", genre: "Hành động • Võ thuật Marvel", ageRating: "T13+", quality: "FULL HD", matchScore: "97% Hot" },
-        { title: "Meg 2: Vực Sâu (2023)", genre: "Khoa học viễn tưởng • Quái vật", ageRating: "T13+", quality: "1080P", matchScore: "96% Hot" },
-        { title: "Ác Quỷ Ma Sơ 2 (The Nun 2)", genre: "Kinh dị • Tâm linh", ageRating: "T18+", quality: "FULL HD", matchScore: "95% Hot" },
-        { title: "3 Idiots (Ba Chàng Ngốc)", genre: "Hài hước • Tâm lý Kinh điển", ageRating: "T13+", quality: "1080P", matchScore: "95% Hot" },
-        { title: "Cá Mập Siêu Bạo Chúa (The Meg 2018)", genre: "Hành động • Sinh tồn", ageRating: "T13+", quality: "FULL HD", matchScore: "94% Hot" },
-        { title: "Tiên Nghịch Movie: Thí Tiên Chi Chiến", genre: "Hoạt hình 3D • Tiên hiệp", ageRating: "T13+", quality: "4K VIETSUB", matchScore: "94% Hot" },
-        { title: "Transformers: Bại Binh Phục Hận", genre: "Hành động • Kỹ xảo IMAX", ageRating: "T13+", quality: "1080P", matchScore: "93% Hot" }
-      ];
-      curatedFallbacks.forEach(f => addCandidate(f.title, "", f.genre, f.ageRating, f.quality, f.matchScore, "", "", ""));
-
-      return items.slice(0, 10);
+    function getTop10WorkerBaseUrl() {
+      const raw = (state.r2WorkerUrl || (typeof loadSavedR2WorkerUrl === "function" ? loadSavedR2WorkerUrl() : DEFAULT_R2_WORKER_URL) || DEFAULT_R2_WORKER_URL);
+      return String(raw).trim().replace(/\/+$/, "");
     }
 
-    function selectTop10Movie(roomId, title) {
-      if (roomId) {
-        selectHeroRoomById(roomId);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+    function normalizeTop10TitleKey(rawTitle = "") {
+      return normalizeSearchText(sanitizeMovieTitle(String(rawTitle || "")))
+        .replace(/\s*\(?\d{4}\)?/g, "")
+        .replace(/[^a-z0-9\u00C0-\u1EF9]+/gi, " ")
+        .trim();
+    }
+
+    function formatTop10ViewsText(count = 0) {
+      const n = Math.max(0, Math.round(Number(count) || 0));
+      if (n < 1000) return `${n.toLocaleString("vi-VN")} lượt xem`;
+      if (n < 1000000) {
+        const k = (n / 1000).toFixed(n % 1000 >= 100 && n < 100000 ? 1 : 0).replace(/\.0$/, "").replace(".", ",");
+        return `${k} nghìn lượt xem`;
+      }
+      const m = (n / 1000000).toFixed(2).replace(/\.?0+$/, "").replace(".", ",");
+      return `${m} triệu lượt xem`;
+    }
+
+    function formatTop10UpdatedVn(tsMs = 0) {
+      if (!tsMs || !Number.isFinite(Number(tsMs))) return "";
+      try {
+        return new Intl.DateTimeFormat("vi-VN", {
+          timeZone: "Asia/Ho_Chi_Minh",
+          hour: "2-digit",
+          minute: "2-digit",
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric"
+        }).format(new Date(Number(tsMs))) + " (GMT+7)";
+      } catch (_) {
+        return "";
+      }
+    }
+
+    function resolveOpenableTop10Item(apiItem) {
+      if (!apiItem || !apiItem.title) return null;
+      const cleanTitle = sanitizeMovieTitle(apiItem.title);
+      const apiTitleKey = normalizeTop10TitleKey(apiItem.title);
+      const apiId = String(apiItem.movieId || "").trim();
+
+      // 1. Khớp với các phòng chiếu đang hoạt động (ưu tiên hiển thị phòng & trạng thái thật)
+      let matchedRoom = null;
+      for (const baseRoom of DEFAULT_ROOMS) {
+        const eff = getEffectiveRoom(baseRoom.id);
+        const effHasSource = Boolean(eff.videoUrl || eff.youtubeId);
+        if (!effHasSource) continue;
+        if (eff.isDiscordRoom && eff.status !== "showing") continue;
+        const effId = getCanonicalMovieId(eff);
+        const effKey = normalizeTop10TitleKey(eff.displayTitle || eff.movieTitle || "");
+        if ((apiId && effId && apiId === effId) || (apiTitleKey && effKey && apiTitleKey === effKey)) {
+          matchedRoom = eff;
+          break;
+        }
+      }
+
+      // 2. Nếu không đang chiếu ngoài phòng sảnh, khớp với Kho Phim Vault mở được
+      let matchedVault = null;
+      if (!matchedRoom && Array.isArray(state.vaultVideos)) {
+        matchedVault = state.vaultVideos.find(v => {
+          if (!v || (!v.videoUrl && !v.youtubeId)) return false;
+          const vId = getCanonicalMovieId(v);
+          const vKey = normalizeTop10TitleKey(v.title || "");
+          return (apiId && vId && apiId === vId) || (apiTitleKey && vKey && apiTitleKey === vKey);
+        }) || null;
+      }
+
+      // 3. Quy tắc: Chỉ hiển thị phim đang có dữ liệu và có thể mở được
+      if (!matchedRoom && !matchedVault) return null;
+
+      const meta = typeof resolveCatalogMeta === "function" ? resolveCatalogMeta(cleanTitle) : {};
+      const resolvedPoster = typeof resolveMoviePoster === "function"
+        ? resolveMoviePoster(cleanTitle, matchedRoom?.poster || matchedVault?.poster || apiItem.poster || "", matchedRoom?.youtubeId || matchedVault?.youtubeId || "")
+        : (matchedRoom?.poster || matchedVault?.poster || apiItem.poster || "assets/web-logo.png");
+      const yearMatch = String(cleanTitle || apiItem.title || "").match(/\b(19\d{2}|20\d{2})\b/);
+      const year = String(apiItem.year || matchedRoom?.year || (yearMatch ? yearMatch[1] : "") || "").trim();
+
+      let roomInfo = null;
+      let primaryLabel = "Xem chi tiết";
+      let primaryIcon = "fa-circle-info";
+      if (matchedRoom) {
+        const occupied = Object.keys(state.seatsByRoom[matchedRoom.id] || {}).length;
+        const maxSeats = matchedRoom.maxSeats || 48;
+        const hasTicket = hasValidTicketForRoom(matchedRoom.id);
+        const isShowing = matchedRoom.status !== "upcoming";
+        const waitMsg = typeof getRoomWaitMessage === "function" ? getRoomWaitMessage(matchedRoom) : "";
+        const seatText = state.seatsLoaded === false
+          ? "Đang cập nhật"
+          : `${occupied}/${maxSeats} ${(matchedRoom.isCoupleRoom || matchedRoom.isDiscordRoom) ? "người" : "ghế"}`;
+
+        roomInfo = {
+          roomId: matchedRoom.id,
+          roomNumber: matchedRoom.number,
+          statusText: isShowing ? "Đang chiếu" : "Sắp chiếu",
+          isShowing,
+          seatText,
+          occupied,
+          maxSeats,
+          hasTicket,
+          waitMsg
+        };
+
+        if (isShowing && !waitMsg) {
+          primaryLabel = hasTicket ? `Vào phòng · ${matchedRoom.number}` : `Chọn ghế · ${matchedRoom.number}`;
+          primaryIcon = hasTicket ? "fa-play" : "fa-couch";
+        } else {
+          primaryLabel = `Chi tiết · ${matchedRoom.number}`;
+          primaryIcon = "fa-clock";
+        }
+      }
+
+      return {
+        ...apiItem,
+        rank: Number(apiItem.rank || 0),
+        movieId: apiId || getCanonicalMovieId(matchedRoom || matchedVault),
+        title: cleanTitle,
+        poster: resolvedPoster || "assets/web-logo.png",
+        genre: apiItem.genre || matchedRoom?.genre || matchedVault?.genre || meta.genre || "Điện ảnh • Chiếu rạp",
+        year,
+        ageRating: matchedRoom?.ageRating || meta.ageRating || "T13+",
+        duration: matchedRoom?.duration || matchedVault?.duration || meta.duration || "HD",
+        synopsis: matchedRoom?.synopsis || meta.synopsis || "Phim thịnh hành được khán giả CineVerse bình chọn và xem nhiều nhất tuần.",
+        cast: matchedRoom?.cast || meta.cast || "Đang cập nhật dàn diễn viên",
+        liveRoom: matchedRoom,
+        vaultItem: matchedVault,
+        roomInfo,
+        primaryLabel,
+        primaryIcon
+      };
+    }
+
+    function openTop10MovieDetail(encodedMovieId) {
+      let movieId = "";
+      try { movieId = decodeURIComponent(String(encodedMovieId || "")); } catch (_) { movieId = String(encodedMovieId || ""); }
+      const item = window.__resolvedTop10ItemsById?.[movieId];
+      if (!item) return;
+
+      document.getElementById("detail-modal-poster").src = item.poster || "assets/web-logo.png";
+      document.getElementById("detail-modal-room").textContent = item.roomInfo
+        ? `${item.roomInfo.roomNumber} • ${item.roomInfo.statusText} (${item.roomInfo.seatText})`
+        : "Top 10 CineVerse • Kho Phim";
+      document.getElementById("detail-modal-match").textContent = `Hạng #${String(item.rank).padStart(2, "0")} • ${formatTop10ViewsText(item.validViews)}`;
+      document.getElementById("detail-modal-rating").textContent = item.ageRating || "T13+";
+      document.getElementById("detail-modal-title").textContent = item.title;
+      document.getElementById("detail-modal-synopsis").textContent = item.synopsis || "";
+      document.getElementById("detail-modal-cast").textContent = item.cast || "";
+      document.getElementById("detail-modal-genre").textContent = `${item.genre}${item.duration ? ` • Thời lượng ${item.duration}` : ""}`;
+
+      const ctaBtn = document.getElementById("detail-modal-cta-btn");
+      if (item.liveRoom) {
+        if (item.roomInfo?.waitMsg) {
+          if (ctaBtn) ctaBtn.innerHTML = `<i class="fa-solid fa-clock"></i> ${escapeHTML(item.roomInfo.roomNumber)} · Chưa tới giờ chiếu`;
+          activeDetailModalAction = () => showToast(item.roomInfo.waitMsg, "warning");
+        } else if (item.roomInfo?.hasTicket) {
+          if (ctaBtn) ctaBtn.innerHTML = `<i class="fa-solid fa-play"></i> Vào phòng · ${escapeHTML(item.roomInfo.roomNumber)}`;
+          activeDetailModalAction = () => enterRoom(item.liveRoom.id);
+        } else {
+          if (ctaBtn) ctaBtn.innerHTML = `<i class="fa-solid fa-couch"></i> Đặt Vé &amp; Chọn Ghế · ${escapeHTML(item.roomInfo.roomNumber)}`;
+          activeDetailModalAction = () => openBookingModal(item.liveRoom.id, null, getPreferredSeatForHeroPov(item.liveRoom));
+        }
+      } else if (item.vaultItem) {
+        const fallbackRoomId = "room-1";
+        const r1 = getEffectiveRoom(fallbackRoomId);
+        const hasR1Ticket = hasValidTicketForRoom(fallbackRoomId);
+        if (ctaBtn) {
+          ctaBtn.innerHTML = hasR1Ticket
+            ? `<i class="fa-solid fa-paper-plane"></i> Yêu cầu chiếu tại ${escapeHTML(r1.number)}`
+            : `<i class="fa-solid fa-couch"></i> Chọn ghế ${escapeHTML(r1.number)} để yêu cầu chiếu`;
+        }
+        activeDetailModalAction = () => {
+          if (hasR1Ticket) {
+            state.currentRoomId = fallbackRoomId;
+            requestMovieForCurrentRoom(item.vaultItem.id);
+            enterRoom(fallbackRoomId);
+          } else {
+            openBookingModal(fallbackRoomId, null, getPreferredSeatForHeroPov(r1));
+            showToast(`🎬 Chọn ghế vào ${r1.number} xong, bạn có thể bấm "${item.title}" trong Thư viện để yêu cầu hoặc phát phim!`, "info");
+          }
+        };
+      }
+
+      document.getElementById("hero-detail-modal")?.classList.remove("hidden");
+    }
+
+    function openTop10PrimaryAction(encodedMovieId) {
+      let movieId = "";
+      try { movieId = decodeURIComponent(String(encodedMovieId || "")); } catch (_) { movieId = String(encodedMovieId || ""); }
+      const item = window.__resolvedTop10ItemsById?.[movieId];
+      if (!item) return;
+
+      if (item.liveRoom) {
+        const waitMsg = item.roomInfo?.waitMsg;
+        if (waitMsg) {
+          openTop10MovieDetail(encodedMovieId);
+          return;
+        }
+        if (hasValidTicketForRoom(item.liveRoom.id)) {
+          enterRoom(item.liveRoom.id);
+        } else {
+          openBookingModal(item.liveRoom.id, null, getPreferredSeatForHeroPov(item.liveRoom));
+        }
         return;
       }
-      // Nếu phim không gắn phòng mặc định, chuyển sang Phòng 01 hoặc mở đặt vé phòng đầu
-      selectHeroRoomById("room-1");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      showToast(`🎬 "${title}": Hãy vào phòng chiếu để yêu cầu hoặc chọn chiếu phim này trong Thư viện!`, "info");
+
+      openTop10MovieDetail(encodedMovieId);
+    }
+
+    function toggleTop10FormulaInfo() {
+      const box = document.getElementById("top10-formula-info");
+      const btn = document.getElementById("btn-top10-rules");
+      if (!box || !btn) return;
+      const willOpen = box.classList.contains("hidden");
+      box.classList.toggle("hidden", !willOpen);
+      btn.setAttribute("aria-expanded", willOpen ? "true" : "false");
+    }
+
+    async function fetchWeeklyTop10(force = false) {
+      const now = Date.now();
+      if (!force && top10FetchInFlight) return top10FetchInFlight;
+      if (!force && state.top10.status === "ready" && (now - (state.top10.lastFetchedAt || 0) < 45000)) {
+        return state.top10.data;
+      }
+
+      const isInitialOrRetry = !state.top10.data || state.top10.status === "error" || force;
+      if (!state.top10.data || state.top10.status === "error") {
+        state.top10.status = "loading";
+        state.top10.error = "";
+        renderLobbyTop10Movies();
+      }
+
+      const base = getTop10WorkerBaseUrl();
+      top10FetchInFlight = (async () => {
+        try {
+          const res = await fetch(`${base}/api/top10/weekly${force ? `?t=${now}` : ""}`, {
+            cache: force ? "no-store" : "default",
+            signal: AbortSignal.timeout(9000)
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if (!data || data.ok === false) {
+            throw new Error(data?.error || "Dữ liệu bảng xếp hạng không hợp lệ");
+          }
+          state.top10 = {
+            status: "ready",
+            data,
+            error: "",
+            lastFetchedAt: Date.now()
+          };
+          renderLobbyTop10Movies();
+          return data;
+        } catch (err) {
+          if (isInitialOrRetry && !state.top10.data) {
+            state.top10 = {
+              status: "error",
+              data: null,
+              error: String(err?.message || "Không thể kết nối máy chủ xếp hạng"),
+              lastFetchedAt: Date.now()
+            };
+            renderLobbyTop10Movies();
+          } else {
+            showToast("⚠️ Không thể làm mới Top 10 lúc này, đang hiển thị dữ liệu gần nhất.", "warning");
+          }
+          return null;
+        } finally {
+          top10FetchInFlight = null;
+        }
+      })();
+
+      return top10FetchInFlight;
+    }
+
+    function refreshWeeklyTop10() {
+      fetchWeeklyTop10(true);
+    }
+
+    function renderTop10MovementBadge(item, hasPreviousWeekData) {
+      if (!hasPreviousWeekData) return "";
+      if (item.movementType === "up") {
+        return `<span class="cv-top10-move-up" aria-label="Tăng ${Math.abs(Number(item.delta) || 1)} bậc">${escapeHTML(item.movementLabel)}</span>`;
+      }
+      if (item.movementType === "down") {
+        return `<span class="cv-top10-move-down" aria-label="Giảm ${Math.abs(Number(item.delta) || 1)} bậc">${escapeHTML(item.movementLabel)}</span>`;
+      }
+      if (item.movementType === "new") {
+        return `<span class="cv-top10-move-new">${escapeHTML(item.movementLabel || "Mới")}</span>`;
+      }
+      if (item.movementType === "same") {
+        return `<span class="cv-top10-move-same" title="Giữ nguyên hạng so với tuần trước">—</span>`;
+      }
+      return "";
     }
 
     function renderLobbyTop10Movies() {
-      const grid = document.getElementById("lobby-top10-grid");
-      if (!grid) return;
-      const top10 = buildTop10WeeklyMovies();
-      grid.innerHTML = top10.map((m, idx) => {
-        const rank = idx + 1;
-        const rankCls = rank === 1 ? "rank-1" : rank === 2 ? "rank-2" : rank === 3 ? "rank-3" : "rank-other";
-        return `
-          <button type="button" onclick="window.appActions.selectTop10Movie('${escapeHTML(m.roomId)}', '${escapeHTML(m.title)}')"
-            class="cv-top10-card group" aria-label="Hạng ${rank}: ${escapeHTML(m.title)}">
-            <div class="cv-top10-poster-wrap">
-              <img src="${escapeHTML(m.poster)}" alt="${escapeHTML(m.title)}" loading="lazy"
-                onerror="this.src='assets/web-logo.png'"
-                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-              <div class="absolute inset-0 bg-gradient-to-t from-[#0B0B0F] via-transparent to-black/45"></div>
-              <div class="absolute top-2 left-2 right-2 flex items-center justify-between gap-1">
-                <span class="px-1.5 py-0.5 rounded bg-black/75 border border-white/15 text-[9px] font-black text-amber-300">${escapeHTML(m.ageRating)}</span>
-                ${m.roomNumber
-                  ? `<span class="px-1.5 py-0.5 rounded bg-rose-600/90 text-[9px] font-black text-white">${escapeHTML(m.roomNumber)}</span>`
-                  : `<span class="px-1.5 py-0.5 rounded bg-black/75 border border-white/15 text-[9px] font-bold text-slate-200">${escapeHTML(m.quality)}</span>`}
-              </div>
-              <span class="cv-top10-rank ${rankCls}">#${rank}</span>
+      const body = document.getElementById("lobby-top10-body");
+      if (!body) return;
+
+      const rangeEl = document.getElementById("top10-week-range");
+      const updatedEl = document.getElementById("top10-updated-at");
+      const exactWinEl = document.getElementById("top10-exact-window");
+      const formulaDescEl = document.getElementById("top10-formula-desc");
+      const footerNoteEl = document.getElementById("top10-footer-note");
+
+      const data = state.top10?.data || null;
+      if (data) {
+        if (rangeEl && data.weekRangeLabel) {
+          rangeEl.textContent = data.weekRangeLabel;
+          rangeEl.title = `Tuần ${data.weekStartDateLabel || ""} – ${data.weekEndDateLabel || ""} (${data.timezone || "Asia/Ho_Chi_Minh"})`;
+        }
+        if (exactWinEl) {
+          exactWinEl.textContent = `Từ ${data.weekStartDateLabel || "T2"} đến ${data.weekEndDateLabel || "CN"} (${data.timezone || "Asia/Ho_Chi_Minh"})`;
+        }
+        if (updatedEl) {
+          const updStr = formatTop10UpdatedVn(data.updatedAt);
+          updatedEl.textContent = updStr ? `Cập nhật: ${updStr}` : "Đã đồng bộ máy chủ";
+        }
+        if (formulaDescEl && data.config?.minValidMinutes) {
+          const mins = data.config.minValidMinutes;
+          formulaDescEl.innerHTML = `Mỗi tài khoản xem tích lũy tối thiểu <strong class="text-white">${escapeHTML(String(mins))} phút</strong> trong tuần (Thứ Hai–Chủ nhật, múi giờ <code class="text-amber-300">Asia/Ho_Chi_Minh</code>) được tính tối đa <strong class="text-white">1 lượt hợp lệ/phim/tuần</strong>; loại trừ tài khoản kiểm thử và khách vãng lai theo cấu hình.`;
+        }
+      }
+
+      // 1. Trạng thái Đang tải
+      if (state.top10.status === "loading" || state.top10.status === "idle") {
+        const skelRows = Array.from({ length: 4 }, (_, i) => `
+          <div class="cv-top10-row animate-pulse" style="padding:10px 12px;gap:10px;">
+            <div class="w-7 h-6 rounded bg-white/10"></div>
+            <div class="w-[72px] h-12 rounded-lg bg-white/10 shrink-0"></div>
+            <div class="flex-1 space-y-2">
+              <div class="h-3.5 w-3/4 rounded bg-white/10"></div>
+              <div class="h-2.5 w-1/2 rounded bg-white/10"></div>
             </div>
-            <div class="p-2.5 space-y-1 flex-1 flex flex-col justify-between">
-              <div>
-                <h3 class="text-xs font-extrabold text-white leading-snug line-clamp-2 group-hover:text-amber-300 transition">${escapeHTML(m.title)}</h3>
-                <p class="text-[10px] text-slate-400 truncate mt-0.5">${escapeHTML(m.genre)}</p>
-              </div>
-              <div class="pt-1 flex items-center justify-between text-[10px] font-bold">
-                <span class="text-amber-300"><i class="fa-solid fa-fire mr-1 text-rose-500"></i>${escapeHTML(m.matchScore)}</span>
-                <span class="text-slate-400">${escapeHTML(m.duration)}</span>
+          </div>
+        `).join("");
+        body.innerHTML = `
+          <div class="cv-top10-layout" aria-label="Đang tải Top 10 tuần này">
+            <div class="cv-top10-featured animate-pulse p-5 justify-end">
+              <div class="space-y-3">
+                <div class="h-5 w-24 rounded bg-white/10"></div>
+                <div class="h-7 w-4/5 rounded bg-white/10"></div>
+                <div class="h-11 w-40 rounded-xl bg-amber-400/20"></div>
               </div>
             </div>
-          </button>
+            <div class="cv-top10-columns">
+              <div class="cv-top10-col">${skelRows}</div>
+              <div class="cv-top10-col hidden lg:flex">${skelRows}</div>
+            </div>
+          </div>
         `;
-      }).join("");
+        if (footerNoteEl) footerNoteEl.textContent = "Đang tải dữ liệu xếp hạng thực tế từ máy chủ CineVerse…";
+        return;
+      }
+
+      // 2. Trạng thái Lỗi tải
+      if (state.top10.status === "error" && !data) {
+        body.innerHTML = `
+          <div class="rounded-2xl p-6 sm:p-8 text-center space-y-3" style="background:rgba(20,20,28,0.86);border:1px solid rgba(229,9,20,0.35);">
+            <div class="w-11 h-11 mx-auto rounded-full flex items-center justify-center" style="background:rgba(229,9,20,0.16);color:#FDA4AF;">
+              <i class="fa-solid fa-triangle-exclamation text-lg" aria-hidden="true"></i>
+            </div>
+            <div class="space-y-1">
+              <h3 class="text-sm sm:text-base font-extrabold text-white">Không tải được Top 10 tuần này</h3>
+              <p class="text-xs max-w-md mx-auto" style="color:#A1A1AA;">${escapeHTML(state.top10.error || "Kết nối máy chủ xếp hạng gián đoạn. Vui lòng thử lại.")}</p>
+            </div>
+            <button type="button" onclick="window.appActions.refreshWeeklyTop10()"
+              class="cv-top10-cta-primary mx-auto">
+              <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+              <span>Thử lại</span>
+            </button>
+          </div>
+        `;
+        if (footerNoteEl) footerNoteEl.textContent = "Tải bảng xếp hạng thất bại • Bấm Thử lại để đồng bộ lại.";
+        return;
+      }
+
+      // Lọc chỉ giữ phim thực sự có dữ liệu và mở được trong CineVerse
+      const rawItems = Array.isArray(data?.items) ? data.items : [];
+      const resolvedItems = [];
+      const nextLookup = {};
+      rawItems.forEach((raw) => {
+        const res = resolveOpenableTop10Item(raw);
+        if (!res) return;
+        const idxRank = resolvedItems.length + 1;
+        res.displayRank = idxRank;
+        resolvedItems.push(res);
+        nextLookup[res.movieId] = res;
+      });
+      window.__resolvedTop10ItemsById = nextLookup;
+
+      // 3. Trạng thái Chưa có lượt xem hợp lệ trong tuần
+      if (resolvedItems.length === 0) {
+        const minMins = data?.config?.minValidMinutes || 10;
+        const winRange = data?.weekStartDateLabel && data?.weekEndDateLabel
+          ? `${data.weekStartDateLabel} – ${data.weekEndDateLabel}`
+          : "tuần này";
+        body.innerHTML = `
+          <div class="rounded-2xl p-6 sm:p-8 text-center space-y-3" style="background:rgba(20,20,28,0.86);border:1px solid rgba(255,255,255,0.1);">
+            <div class="w-11 h-11 mx-auto rounded-full flex items-center justify-center" style="background:rgba(245,197,24,0.14);color:#F5C518;">
+              <i class="fa-solid fa-film text-lg" aria-hidden="true"></i>
+            </div>
+            <div class="space-y-1">
+              <h3 class="text-sm sm:text-base font-extrabold text-white">Tuần này chưa có lượt xem hợp lệ</h3>
+              <p class="text-xs max-w-lg mx-auto" style="color:#A1A1AA;">
+                Bảng xếp hạng kỳ ${escapeHTML(winRange)} sẽ hiển thị ngay khi có khán giả đăng nhập xem tối thiểu ${escapeHTML(String(minMins))} phút một bộ phim.
+              </p>
+            </div>
+            <button type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})"
+              class="cv-top10-cta-primary mx-auto">
+              <i class="fa-solid fa-clapperboard" aria-hidden="true"></i>
+              <span>Khám phá phòng chiếu</span>
+            </button>
+          </div>
+        `;
+        if (footerNoteEl) footerNoteEl.textContent = `Kỳ ${winRange} • Hiện có 0 phim đạt ngưỡng lượt xem hợp lệ.`;
+        return;
+      }
+
+      // 4. Trạng thái Có dữ liệu (1..10 phim thực tế)
+      const hasPrev = Boolean(data?.hasPreviousWeekData);
+      const top1 = resolvedItems[0];
+      const rest = resolvedItems.slice(1, 10);
+      const top1EncodedId = encodeURIComponent(top1.movieId);
+      const top1RankStr = String(top1.displayRank).padStart(2, "0");
+      const top1MoveHtml = renderTop10MovementBadge(top1, hasPrev);
+      const top1MetaParts = [top1.genre.split("•")[0].trim(), top1.year].filter(Boolean).join(" • ");
+
+      const featuredHtml = `
+        <article class="cv-top10-featured" aria-label="Hạng ${top1RankStr}: ${escapeHTML(top1.title)}">
+          <img src="${escapeHTML(top1.poster)}" alt="${escapeHTML(top1.title)}" loading="lazy"
+            onerror="this.onerror=null;this.src='assets/web-logo.png';"
+            class="cv-top10-featured-bg" />
+          <div class="cv-top10-featured-overlay"></div>
+
+          <div class="relative z-10 p-4 sm:p-5 flex items-start justify-between gap-2">
+            <span class="cv-top10-featured-num">${top1RankStr}</span>
+            ${top1.roomInfo
+              ? `<span class="cv-top10-live-pill">
+                  <span class="w-1.5 h-1.5 rounded-full animate-pulse" style="background:${top1.roomInfo.isShowing ? '#E50914' : '#F5C518'};"></span>
+                  <span>${escapeHTML(top1.roomInfo.roomNumber)} • ${escapeHTML(top1.roomInfo.statusText)} • ${escapeHTML(top1.roomInfo.seatText)}</span>
+                </span>`
+              : `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold" style="background:rgba(11,11,15,0.78);border:1px solid rgba(255,255,255,0.16);color:#E4E4E7;">Kho Phim CineVerse</span>`}
+          </div>
+
+          <div class="relative z-10 p-4 sm:p-5 space-y-2.5">
+            <div class="space-y-1">
+              <h3 class="cv-serif text-xl sm:text-2xl font-bold text-white leading-tight line-clamp-2">${escapeHTML(top1.title)}</h3>
+              <div class="cv-top10-meta-line text-xs" style="color:#D4D4D8;">
+                ${top1MetaParts ? `<span>${escapeHTML(top1MetaParts)}</span><span aria-hidden="true">•</span>` : ""}
+                <span class="font-semibold text-white">${escapeHTML(formatTop10ViewsText(top1.validViews))}</span>
+                ${top1MoveHtml}
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2.5 pt-1">
+              <button type="button"
+                onclick="window.appActions.openTop10PrimaryAction('${escapeHTML(top1EncodedId)}')"
+                class="cv-top10-cta-primary flex-1 sm:flex-none">
+                <i class="fa-solid ${escapeHTML(top1.primaryIcon)}" aria-hidden="true"></i>
+                <span>${escapeHTML(top1.primaryLabel)}</span>
+              </button>
+              <button type="button"
+                onclick="window.appActions.openTop10MovieDetail('${escapeHTML(top1EncodedId)}')"
+                class="cv-top10-cta-secondary">
+                <span>Chi tiết</span>
+                <i class="fa-solid fa-chevron-right text-[10px]" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </article>
+      `;
+
+      const renderRowHtml = (item) => {
+        const encId = encodeURIComponent(item.movieId);
+        const rankStr = String(item.displayRank).padStart(2, "0");
+        const numCls = item.displayRank === 2 ? "top-2" : item.displayRank === 3 ? "top-3" : "";
+        const moveHtml = renderTop10MovementBadge(item, hasPrev);
+        const liveBadgeHtml = item.roomInfo
+          ? `<span class="cv-top10-live-pill">
+              <span class="w-1.5 h-1.5 rounded-full" style="background:${item.roomInfo.isShowing ? '#E50914' : '#F5C518'};"></span>
+              <span>${escapeHTML(item.roomInfo.roomNumber)} • ${escapeHTML(item.roomInfo.statusText)}</span>
+            </span>`
+          : "";
+
+        return `
+          <div class="cv-top10-row">
+            <button type="button"
+              onclick="window.appActions.openTop10PrimaryAction('${escapeHTML(encId)}')"
+              class="cv-top10-row-main"
+              aria-label="Hạng ${rankStr}: ${escapeHTML(item.title)} — ${escapeHTML(item.primaryLabel)}">
+              <span class="cv-top10-row-num ${numCls}">${rankStr}</span>
+              <div class="cv-top10-row-thumb">
+                <img src="${escapeHTML(item.poster)}" alt="" loading="lazy"
+                  onerror="this.onerror=null;this.src='assets/web-logo.png';"
+                  class="w-full h-full object-cover" />
+              </div>
+              <div class="min-w-0 flex-1 space-y-1">
+                <div class="flex items-start justify-between gap-1.5">
+                  <span class="text-[13px] font-extrabold text-white leading-snug line-clamp-2">${escapeHTML(item.title)}</span>
+                </div>
+                <div class="cv-top10-meta-line text-[11px]" style="color:#A1A1AA;">
+                  <span class="text-slate-200 font-medium">${escapeHTML(formatTop10ViewsText(item.validViews))}</span>
+                  ${moveHtml}
+                  ${liveBadgeHtml}
+                </div>
+              </div>
+            </button>
+            <button type="button"
+              onclick="window.appActions.openTop10MovieDetail('${escapeHTML(encId)}')"
+              class="cv-top10-row-detail-btn"
+              aria-label="Xem chi tiết ${escapeHTML(item.title)}"
+              title="Xem chi tiết phim">
+              <i class="fa-solid fa-chevron-right text-xs" aria-hidden="true"></i>
+            </button>
+          </div>
+        `;
+      };
+
+      let rightColumnsHtml = "";
+      if (rest.length > 0) {
+        // Desktop: chia cột trái (02–05) và cột phải (06–10) giữ thứ tự đọc dọc rõ ràng
+        const col1Count = rest.length === 9 ? 4 : Math.ceil(rest.length / 2);
+        const col1Items = rest.slice(0, col1Count);
+        const col2Items = rest.slice(col1Count);
+        rightColumnsHtml = `
+          <div class="cv-top10-columns">
+            <div class="cv-top10-col">${col1Items.map(renderRowHtml).join("")}</div>
+            ${col2Items.length > 0 ? `<div class="cv-top10-col">${col2Items.map(renderRowHtml).join("")}</div>` : ""}
+          </div>
+        `;
+      }
+
+      body.innerHTML = `
+        <div class="cv-top10-layout">
+          ${featuredHtml}
+          ${rightColumnsHtml}
+        </div>
+      `;
+
+      if (footerNoteEl) {
+        const countLabel = resolvedItems.length < 10
+          ? `Đang hiển thị ${resolvedItems.length} phim có lượt xem hợp lệ tuần này (chưa đủ 10 phim đạt chuẩn)`
+          : `Đủ 10/10 phim có lượt xem hợp lệ tuần này`;
+        footerNoteEl.textContent = `${countLabel} • Múi giờ ${data?.timezone || "Asia/Ho_Chi_Minh"}`;
+      }
     }
+
+    function isPlaybackActiveInCurrentRoom() {
+      if (!state.currentRoomId) return false;
+      if (document.visibilityState === "hidden") return false;
+      const room = getEffectiveRoom(state.currentRoomId);
+      if (!room || room.isDiscordRoom || room.status === "upcoming") return false;
+      const videoEl = document.getElementById("html5-video-player");
+      if (videoEl && !videoEl.classList.contains("hidden")) {
+        return !videoEl.paused && !videoEl.ended && videoEl.readyState >= 2;
+      }
+      const ytWrapper = document.getElementById("youtube-wrapper");
+      if (ytWrapper && !ytWrapper.classList.contains("hidden") && room.youtubeId) {
+        return !state.ytPaused;
+      }
+      return false;
+    }
+
+    async function flushTop10WatchHeartbeat(useKeepalive = false) {
+      const acc = window.__top10WatchAcc;
+      if (!acc || acc.accumulatedSec < 5 || acc.flushing) return;
+      if (!state.accountLoggedIn || !state.gmailVerified || !state.userEmail) {
+        acc.accumulatedSec = 0;
+        return;
+      }
+
+      const sendSec = Math.min(90, Math.round(acc.accumulatedSec));
+      if (!acc.movieId || !acc.title || sendSec < 1) return;
+
+      acc.accumulatedSec = Math.max(0, acc.accumulatedSec - sendSec);
+      acc.flushing = true;
+
+      const payload = {
+        movieId: acc.movieId,
+        title: acc.title,
+        roomId: acc.roomId,
+        poster: acc.poster,
+        genre: acc.genre,
+        year: acc.year,
+        deltaSec: sendSec,
+        accountKey: String(state.userEmail || "").trim().toLowerCase(),
+        accountEmail: String(state.userEmail || "").trim().toLowerCase(),
+        isGuest: false
+      };
+
+      try {
+        const res = await fetch(`${getTop10WorkerBaseUrl()}/api/top10/heartbeat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          keepalive: Boolean(useKeepalive)
+        });
+        if (!useKeepalive && res.ok) {
+          const resData = await res.json().catch(() => null);
+          if (resData?.qualified) {
+            fetchWeeklyTop10(true);
+          }
+        }
+      } catch (_) {
+        // Giữ nhẹ nhàng nếu mạng chập chờn, không làm gián đoạn xem phim
+      } finally {
+        acc.flushing = false;
+      }
+    }
+
+    function tickTop10WatchAccumulator() {
+      if (!isPlaybackActiveInCurrentRoom()) return;
+      if (!state.accountLoggedIn || !state.gmailVerified || !state.userEmail) return;
+
+      const room = getEffectiveRoom(state.currentRoomId);
+      const movieId = getCanonicalMovieId(room);
+      const cleanTitle = sanitizeMovieTitle(room?.displayTitle || room?.movieTitle || "");
+      if (!movieId || !cleanTitle) return;
+
+      const acc = window.__top10WatchAcc;
+      if (acc.movieId && acc.movieId !== movieId && acc.accumulatedSec >= 5) {
+        flushTop10WatchHeartbeat(false);
+      }
+
+      const yearMatch = String(room?.movieTitle || cleanTitle).match(/\b(19\d{2}|20\d{2})\b/);
+      acc.movieId = movieId;
+      acc.title = cleanTitle;
+      acc.roomId = room.id || state.currentRoomId || "";
+      acc.poster = typeof resolveMoviePoster === "function" ? resolveMoviePoster(cleanTitle, room.poster || "", room.youtubeId || "") : (room.poster || "");
+      acc.genre = room.genre || "";
+      acc.year = yearMatch ? yearMatch[1] : "";
+      acc.accumulatedSec = (Number(acc.accumulatedSec) || 0) + 5;
+
+      if (acc.accumulatedSec >= 30) {
+        flushTop10WatchHeartbeat(false);
+      }
+    }
+
+    setInterval(tickTop10WatchAccumulator, 5000);
+    window.addEventListener("pagehide", () => {
+      flushTop10WatchHeartbeat(true);
+    });
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") {
+        flushTop10WatchHeartbeat(true);
+      }
+    });
 
     window.appActions = {
       setRoomFilter,
@@ -29806,7 +30694,11 @@
       toggleMovieLibraryDrawer,
       toggleDimmedChatOverlay,
       toggleScreenFitMode,
-      selectTop10Movie,
+      refreshWeeklyTop10,
+      openTop10PrimaryAction,
+      openTop10MovieDetail,
+      toggleTop10FormulaInfo,
+      triggerDetailModalCta,
       openSeat2DModal,
       closeSeat2DModal,
       selectSeatFrom2DModal,
@@ -30615,6 +31507,7 @@
     initCustomSelectMenus();
     if (window.__onCineverseSplashDone) { window.__onCineverseSplashDone(initAmbientTunaBackground); } else { initAmbientTunaBackground(); }
     prefetchLobbyConfigRoomsOnBoot();
+    if (typeof fetchWeeklyTop10 === "function") fetchWeeklyTop10(false);
     initFirebase();
 
     // RoPhim UI: Header chuyển nền khi cuộn + Nút lên đầu trang

@@ -1029,6 +1029,480 @@ async function handlePosterLookup(request, env, ctx) {
   return response;
 }
 
+const DEFAULT_TOP10_CONFIG = {
+  minValidSeconds: 600,
+  maxHeartbeatDeltaSec: 90,
+  timezone: "Asia/Ho_Chi_Minh",
+  tzOffsetMs: 7 * 60 * 60 * 1000,
+  excludedAccounts: [
+    "test@",
+    "qa@",
+    "demo@",
+    "bot@",
+    "noreply@",
+    "@test.",
+    "@example.",
+    "test_",
+    "qa_",
+    "admin_test",
+    "guest_"
+  ]
+};
+
+function sanitizeRtdbKey(raw = "") {
+  const cleaned = String(raw || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[.#$/\[\]\s]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return cleaned.slice(0, 96);
+}
+
+function getVietnamWeekWindow(nowMs = Date.now(), overrideWeekKey = "") {
+  const tzOffsetMs = DEFAULT_TOP10_CONFIG.tzOffsetMs;
+  let mondayVnUtcMidnightMs;
+  const match = String(overrideWeekKey || "").trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (match) {
+    const parsed = Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    const d = new Date(parsed);
+    const daysSinceMon = (d.getUTCDay() + 6) % 7;
+    mondayVnUtcMidnightMs = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - daysSinceMon);
+  } else {
+    const vnDate = new Date(Number(nowMs || Date.now()) + tzOffsetMs);
+    const daysSinceMon = (vnDate.getUTCDay() + 6) % 7;
+    mondayVnUtcMidnightMs = Date.UTC(
+      vnDate.getUTCFullYear(),
+      vnDate.getUTCMonth(),
+      vnDate.getUTCDate() - daysSinceMon
+    );
+  }
+  const sundayVnUtcMidnightMs = mondayVnUtcMidnightMs + 6 * 86400000;
+  const prevMondayVnUtcMidnightMs = mondayVnUtcMidnightMs - 7 * 86400000;
+
+  const fmtIsoDate = (utcMs) => {
+    const d = new Date(utcMs);
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(d.getUTCDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+  const fmtVnOffsetIso = (vnUtcMs) => {
+    const d = new Date(vnUtcMs);
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(d.getUTCDate()).padStart(2, "0");
+    const hh = String(d.getUTCHours()).padStart(2, "0");
+    const mm = String(d.getUTCMinutes()).padStart(2, "0");
+    const ss = String(d.getUTCSeconds()).padStart(2, "0");
+    return `${y}-${m}-${day}T${hh}:${mm}:${ss}+07:00`;
+  };
+
+  const monD = new Date(mondayVnUtcMidnightMs);
+  const sunD = new Date(sundayVnUtcMidnightMs);
+  const sDay = monD.getUTCDate();
+  const sMon = monD.getUTCMonth() + 1;
+  const sYear = monD.getUTCFullYear();
+  const eDay = sunD.getUTCDate();
+  const eMon = sunD.getUTCMonth() + 1;
+  const eYear = sunD.getUTCFullYear();
+
+  const weekRangeLabel =
+    sMon === eMon && sYear === eYear
+      ? `${sDay}–${eDay} tháng ${eMon}`
+      : sYear === eYear
+      ? `${String(sDay).padStart(2, "0")}/${String(sMon).padStart(2, "0")}–${String(eDay).padStart(2, "0")}/${String(eMon).padStart(2, "0")}`
+      : `${String(sDay).padStart(2, "0")}/${String(sMon).padStart(2, "0")}/${sYear}–${String(eDay).padStart(2, "0")}/${String(eMon).padStart(2, "0")}/${eYear}`;
+
+  return {
+    timezone: DEFAULT_TOP10_CONFIG.timezone,
+    weekKey: fmtIsoDate(mondayVnUtcMidnightMs),
+    prevWeekKey: fmtIsoDate(prevMondayVnUtcMidnightMs),
+    weekStart: fmtVnOffsetIso(mondayVnUtcMidnightMs),
+    weekEnd: fmtVnOffsetIso(sundayVnUtcMidnightMs + 86399000),
+    weekStartDateLabel: `${String(sDay).padStart(2, "0")}/${String(sMon).padStart(2, "0")}/${sYear}`,
+    weekEndDateLabel: `${String(eDay).padStart(2, "0")}/${String(eMon).padStart(2, "0")}/${eYear}`,
+    weekRangeLabel
+  };
+}
+
+function isExcludedTestAccount(accountKey = "", accountEmail = "", excludedPatterns = DEFAULT_TOP10_CONFIG.excludedAccounts) {
+  const key = String(accountKey || "").trim().toLowerCase();
+  const email = String(accountEmail || "").trim().toLowerCase();
+  const target = email || key;
+  if (!target) return true;
+  if (key.startsWith("guest_") || key.startsWith("anon_") || key === "guest") return true;
+  const patterns = Array.isArray(excludedPatterns) && excludedPatterns.length
+    ? excludedPatterns
+    : DEFAULT_TOP10_CONFIG.excludedAccounts;
+  return patterns.some((rawPat) => {
+    const pat = String(rawPat || "").trim().toLowerCase();
+    if (!pat) return false;
+    return target === pat || target.startsWith(pat) || target.includes(pat) || key === pat || key.startsWith(pat);
+  });
+}
+
+async function loadTop10Config(env, rtdbBase) {
+  const cfg = {
+    minValidSeconds: DEFAULT_TOP10_CONFIG.minValidSeconds,
+    maxHeartbeatDeltaSec: DEFAULT_TOP10_CONFIG.maxHeartbeatDeltaSec,
+    timezone: DEFAULT_TOP10_CONFIG.timezone,
+    excludedAccounts: [...DEFAULT_TOP10_CONFIG.excludedAccounts]
+  };
+  const envMinSec = Number(env?.TOP10_MIN_VALID_SECONDS || 0);
+  if (Number.isFinite(envMinSec) && envMinSec >= 10) {
+    cfg.minValidSeconds = Math.round(envMinSec);
+  }
+  const envExcl = String(env?.TOP10_EXCLUDED_ACCOUNTS || "").trim();
+  if (envExcl) {
+    const extras = envExcl.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+    cfg.excludedAccounts = Array.from(new Set([...cfg.excludedAccounts, ...extras]));
+  }
+  try {
+    const res = await fetch(`${rtdbBase}/lobby_config/weekly_top10_v1/config.json`, { cache: "no-store" });
+    if (res.ok) {
+      const remote = await res.json().catch(() => null);
+      if (remote && typeof remote === "object") {
+        const rMin = Number(remote.minValidSeconds);
+        if (Number.isFinite(rMin) && rMin >= 10) cfg.minValidSeconds = Math.round(rMin);
+        const rMaxDelta = Number(remote.maxHeartbeatDeltaSec);
+        if (Number.isFinite(rMaxDelta) && rMaxDelta >= 5 && rMaxDelta <= 300) {
+          cfg.maxHeartbeatDeltaSec = Math.round(rMaxDelta);
+        }
+        if (Array.isArray(remote.excludedAccounts)) {
+          const rExcl = remote.excludedAccounts.map((s) => String(s || "").trim().toLowerCase()).filter(Boolean);
+          cfg.excludedAccounts = Array.from(new Set([...cfg.excludedAccounts, ...rExcl]));
+        }
+      }
+    }
+  } catch (_) {}
+  return cfg;
+}
+
+function computeWeeklyRanking(weekData, config = DEFAULT_TOP10_CONFIG) {
+  const minSec = Math.max(10, Number(config?.minValidSeconds || DEFAULT_TOP10_CONFIG.minValidSeconds));
+  const excluded = config?.excludedAccounts || DEFAULT_TOP10_CONFIG.excludedAccounts;
+  const moviesObj = weekData && typeof weekData === "object" ? (weekData.movies || weekData) : {};
+  if (!moviesObj || typeof moviesObj !== "object") return [];
+
+  const ranked = [];
+  for (const [safeKey, entry] of Object.entries(moviesObj)) {
+    if (!entry || typeof entry !== "object") continue;
+    const meta = entry.meta && typeof entry.meta === "object" ? entry.meta : {};
+    const movieId = String(meta.movieId || safeKey || "").trim();
+    const title = String(meta.title || "").trim();
+    if (!movieId || !title) continue;
+
+    const accounts = entry.accounts && typeof entry.accounts === "object" ? entry.accounts : {};
+    let validViews = 0;
+    let totalQualifiedWatchSec = 0;
+    let earliestQualifiedAt = Number.MAX_SAFE_INTEGER;
+
+    for (const [accKey, accRec] of Object.entries(accounts)) {
+      if (!accRec || typeof accRec !== "object") continue;
+      if (accRec.isGuest) continue;
+      if (isExcludedTestAccount(accKey, accRec.emailHint || "", excluded)) continue;
+      const watchedSec = Number(accRec.sec || 0);
+      if (watchedSec >= minSec) {
+        validViews += 1;
+        totalQualifiedWatchSec += watchedSec;
+        const qualAt = Number(accRec.firstQualifiedAt || accRec.lastBeatAt || Number.MAX_SAFE_INTEGER);
+        if (Number.isFinite(qualAt) && qualAt < earliestQualifiedAt) {
+          earliestQualifiedAt = qualAt;
+        }
+      }
+    }
+
+    if (validViews <= 0) continue;
+    ranked.push({
+      safeKey,
+      movieId,
+      title,
+      poster: String(meta.poster || ""),
+      genre: String(meta.genre || ""),
+      year: String(meta.year || ""),
+      lastRoomId: String(meta.lastRoomId || ""),
+      validViews,
+      totalQualifiedWatchSec,
+      earliestQualifiedAt,
+      updatedAt: Number(meta.updatedAt || 0)
+    });
+  }
+
+  // Quy tắc sắp xếp & phá hòa cố định (không bao giờ thay đổi ngẫu nhiên):
+  // 1. Lượt xem hợp lệ giảm dần
+  // 2. Tổng thời gian xem của các tài khoản đạt chuẩn giảm dần
+  // 3. Mốc thời gian đầu tiên có tài khoản đạt chuẩn (tăng dần - sớm hơn đứng trên)
+  // 4. movieId theo thứ tự từ điển (tăng dần)
+  ranked.sort((a, b) => {
+    if (b.validViews !== a.validViews) return b.validViews - a.validViews;
+    if (b.totalQualifiedWatchSec !== a.totalQualifiedWatchSec) return b.totalQualifiedWatchSec - a.totalQualifiedWatchSec;
+    if (a.earliestQualifiedAt !== b.earliestQualifiedAt) return a.earliestQualifiedAt - b.earliestQualifiedAt;
+    return a.movieId.localeCompare(b.movieId, "en");
+  });
+
+  return ranked.map((item, idx) => ({
+    ...item,
+    rank: idx + 1
+  }));
+}
+
+function buildTop10ApiPayload(currentWeekData, prevWeekData, weekWindow, config, nowMs = Date.now()) {
+  const currentRanked = computeWeeklyRanking(currentWeekData, config);
+  const prevRanked = computeWeeklyRanking(prevWeekData, config);
+  const hasPreviousWeekData = prevRanked.length > 0;
+  const prevRankMap = new Map(prevRanked.map((item) => [item.movieId, item.rank]));
+
+  let latestUpdatedAt = Number(currentWeekData?.updatedAt || 0);
+  currentRanked.forEach((m) => {
+    if (m.updatedAt > latestUpdatedAt) latestUpdatedAt = m.updatedAt;
+  });
+  if (!latestUpdatedAt) latestUpdatedAt = nowMs;
+
+  const minValidSeconds = Number(config?.minValidSeconds || DEFAULT_TOP10_CONFIG.minValidSeconds);
+  const minValidMinutes = Math.round((minValidSeconds / 60) * 10) / 10;
+
+  const items = currentRanked.slice(0, 10).map((item) => {
+    let movementType = "none";
+    let movementLabel = "";
+    let delta = null;
+    if (hasPreviousWeekData) {
+      if (!prevRankMap.has(item.movieId)) {
+        movementType = "new";
+        movementLabel = "Mới";
+      } else {
+        const prevRank = prevRankMap.get(item.movieId);
+        delta = prevRank - item.rank;
+        if (delta > 0) {
+          movementType = "up";
+          movementLabel = `↑ ${delta} bậc`;
+        } else if (delta < 0) {
+          movementType = "down";
+          movementLabel = `↓ ${Math.abs(delta)} bậc`;
+        } else {
+          movementType = "same";
+          movementLabel = "—";
+        }
+      }
+    }
+    return {
+      rank: item.rank,
+      movieId: item.movieId,
+      title: item.title,
+      poster: item.poster,
+      genre: item.genre,
+      year: item.year,
+      lastRoomId: item.lastRoomId,
+      validViews: item.validViews,
+      totalQualifiedWatchSec: item.totalQualifiedWatchSec,
+      delta,
+      movementType,
+      movementLabel
+    };
+  });
+
+  return {
+    ok: true,
+    board: "cineverse_weekly",
+    boardLabel: "Được xem nhiều trong CineVerse",
+    timezone: weekWindow.timezone,
+    weekKey: weekWindow.weekKey,
+    prevWeekKey: weekWindow.prevWeekKey,
+    weekStart: weekWindow.weekStart,
+    weekEnd: weekWindow.weekEnd,
+    weekStartDateLabel: weekWindow.weekStartDateLabel,
+    weekEndDateLabel: weekWindow.weekEndDateLabel,
+    weekRangeLabel: weekWindow.weekRangeLabel,
+    updatedAt: latestUpdatedAt,
+    updatedAtIso: new Date(latestUpdatedAt + DEFAULT_TOP10_CONFIG.tzOffsetMs).toISOString().replace("Z", "+07:00"),
+    config: {
+      minValidSeconds,
+      minValidMinutes,
+      oneViewPerAccountPerMoviePerWeek: true,
+      testAccountsExcluded: true,
+      tieBreakerOrder: [
+        "validViews DESC",
+        "totalQualifiedWatchSec DESC",
+        "earliestQualifiedAt ASC",
+        "movieId ASC"
+      ]
+    },
+    hasPreviousWeekData,
+    totalEligibleMovies: currentRanked.length,
+    items
+  };
+}
+
+async function handleTop10HeartbeatRequest(request, env, corsHdrs) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const movieId = String(body.movieId || "").trim();
+    const title = String(body.title || "").trim().slice(0, 140);
+    const poster = String(body.poster || "").trim().slice(0, 500);
+    const genre = String(body.genre || "").trim().slice(0, 120);
+    const year = String(body.year || "").trim().slice(0, 16);
+    const roomId = String(body.roomId || "").trim().slice(0, 32);
+    const accountKeyRaw = String(body.accountEmail || body.accountKey || "").trim().toLowerCase();
+    const accountEmail = String(body.accountEmail || "").trim().toLowerCase();
+    const isGuest = Boolean(body.isGuest);
+
+    if (!movieId || !title) {
+      return new Response(JSON.stringify({ ok: false, error: "MISSING_MOVIE_INFO" }), {
+        status: 400,
+        headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8" }
+      });
+    }
+    if (isGuest || !accountKeyRaw || !accountEmail) {
+      return new Response(JSON.stringify({ ok: false, ignored: true, reason: "GUEST_OR_UNAUTHENTICATED" }), {
+        status: 200,
+        headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8" }
+      });
+    }
+
+    const rtdbBase = String(env?.FIREBASE_RTDB_URL || "https://cineverse-ea320-default-rtdb.asia-southeast1.firebasedatabase.app").replace(/\/+$/, "");
+    const config = await loadTop10Config(env, rtdbBase);
+
+    if (isExcludedTestAccount(accountKeyRaw, accountEmail, config.excludedAccounts)) {
+      return new Response(JSON.stringify({ ok: true, ignored: true, reason: "EXCLUDED_TEST_ACCOUNT" }), {
+        status: 200,
+        headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8" }
+      });
+    }
+
+    const nowMs = Date.now();
+    const weekWindow = getVietnamWeekWindow(nowMs);
+    const safeMovieKey = sanitizeRtdbKey(movieId);
+    const safeAccountKey = sanitizeRtdbKey(accountKeyRaw);
+    if (!safeMovieKey || !safeAccountKey) {
+      return new Response(JSON.stringify({ ok: false, error: "INVALID_KEY" }), {
+        status: 400,
+        headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8" }
+      });
+    }
+
+    const moviePath = `${rtdbBase}/lobby_config/weekly_top10_v1/weeks/${encodeURIComponent(weekWindow.weekKey)}/movies/${encodeURIComponent(safeMovieKey)}`;
+    const accUrl = `${moviePath}/accounts/${encodeURIComponent(safeAccountKey)}.json`;
+
+    const existingRes = await fetch(accUrl, { cache: "no-store" });
+    const existing = existingRes.ok ? await existingRes.json().catch(() => null) : null;
+
+    const requestedDelta = Math.max(1, Math.min(config.maxHeartbeatDeltaSec, Math.round(Number(body.deltaSec) || 0)));
+    let safeDelta = requestedDelta;
+    if (existing && Number(existing.lastBeatAt) > 0) {
+      const elapsedSec = Math.max(0, Math.floor((nowMs - Number(existing.lastBeatAt)) / 1000));
+      const maxAllowed = Math.min(config.maxHeartbeatDeltaSec, elapsedSec + 5);
+      safeDelta = Math.min(requestedDelta, Math.max(0, maxAllowed));
+    }
+
+    const prevSec = Number(existing?.sec || 0);
+    const nextSec = prevSec + safeDelta;
+    const qualified = nextSec >= config.minValidSeconds;
+    const firstQualifiedAt = qualified
+      ? (Number(existing?.firstQualifiedAt || 0) > 0 ? Number(existing.firstQualifiedAt) : nowMs)
+      : 0;
+
+    const accPayload = {
+      sec: nextSec,
+      qualified,
+      firstQualifiedAt,
+      lastBeatAt: nowMs,
+      emailHint: accountEmail.slice(0, 80)
+    };
+    const metaPayload = {
+      movieId,
+      title,
+      poster,
+      genre,
+      year,
+      lastRoomId: roomId,
+      updatedAt: nowMs
+    };
+
+    await Promise.all([
+      fetch(accUrl, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(accPayload)
+      }),
+      fetch(`${moviePath}/meta.json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(metaPayload)
+      }),
+      fetch(`${rtdbBase}/lobby_config/weekly_top10_v1/weeks/${encodeURIComponent(weekWindow.weekKey)}/updatedAt.json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nowMs)
+      })
+    ]);
+
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        weekKey: weekWindow.weekKey,
+        watchedSec: nextSec,
+        qualified,
+        minValidSeconds: config.minValidSeconds
+      }),
+      { status: 200, headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } }
+    );
+  } catch (e) {
+    return new Response(JSON.stringify({ ok: false, error: String(e?.message || e) }), {
+      status: 500,
+      headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8" }
+    });
+  }
+}
+
+async function handleTop10WeeklyGetRequest(request, env, corsHdrs) {
+  try {
+    const reqUrl = new URL(request.url);
+    const overrideWeekKey = String(reqUrl.searchParams.get("week") || "").trim();
+    const nowMs = Date.now();
+    const weekWindow = getVietnamWeekWindow(nowMs, overrideWeekKey);
+    const rtdbBase = String(env?.FIREBASE_RTDB_URL || "https://cineverse-ea320-default-rtdb.asia-southeast1.firebasedatabase.app").replace(/\/+$/, "");
+
+    const [config, curRes, prevRes] = await Promise.all([
+      loadTop10Config(env, rtdbBase),
+      fetch(`${rtdbBase}/lobby_config/weekly_top10_v1/weeks/${encodeURIComponent(weekWindow.weekKey)}.json`, { cache: "no-store" }),
+      fetch(`${rtdbBase}/lobby_config/weekly_top10_v1/weeks/${encodeURIComponent(weekWindow.prevWeekKey)}.json`, { cache: "no-store" })
+    ]);
+
+    if (!curRes.ok) {
+      return new Response(JSON.stringify({ ok: false, error: `RTDB_${curRes.status}` }), {
+        status: 502,
+        headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8" }
+      });
+    }
+
+    const currentWeekData = await curRes.json().catch(() => null);
+    const prevWeekData = prevRes.ok ? await prevRes.json().catch(() => null) : null;
+    const payload = buildTop10ApiPayload(currentWeekData, prevWeekData, weekWindow, config, nowMs);
+
+    return new Response(JSON.stringify(payload), {
+      status: 200,
+      headers: {
+        ...corsHdrs,
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "public, max-age=30, s-maxage=30"
+      }
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ ok: false, error: String(e?.message || e) }), {
+      status: 500,
+      headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8" }
+    });
+  }
+}
+
+export {
+  DEFAULT_TOP10_CONFIG,
+  sanitizeRtdbKey,
+  getVietnamWeekWindow,
+  isExcludedTestAccount,
+  computeWeeklyRanking,
+  buildTop10ApiPayload
+};
+
 async function handleWorkerFetch(request, env, corsHdrs, ctx) {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHdrs });
@@ -1105,6 +1579,13 @@ async function handleWorkerFetch(request, env, corsHdrs, ctx) {
         }),
         { status: 200, headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } }
       );
+    }
+
+    if (request.method === "GET" && (path === "/api/top10/weekly" || path.endsWith("/api/top10/weekly"))) {
+      return await handleTop10WeeklyGetRequest(request, env, corsHdrs);
+    }
+    if (request.method === "POST" && (path === "/api/top10/heartbeat" || path.endsWith("/api/top10/heartbeat"))) {
+      return await handleTop10HeartbeatRequest(request, env, corsHdrs);
     }
 
     if (request.method === "GET" && url.pathname.endsWith("/sub")) {
