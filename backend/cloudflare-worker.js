@@ -1500,8 +1500,1169 @@ export {
   getVietnamWeekWindow,
   isExcludedTestAccount,
   computeWeeklyRanking,
-  buildTop10ApiPayload
+  buildTop10ApiPayload,
+  DEFAULT_WATCH_PARTY_CONFIG,
+  computeWatchPartyEndsAt,
+  getWatchPartyMemberStats,
+  isAccountApprovedForWatchParty,
+  provisionWatchPartyRoomOnServer,
+  closeWatchPartyEventOnServer,
+  reconcileSingleWatchParty,
+  reconcileAllWatchParties,
+  handleWatchPartyCreate,
+  handleWatchPartyUpdate,
+  handleWatchPartyRsvp,
+  handleWatchPartyApprove,
+  handleWatchPartyEnter,
+  handleWatchPartyEndGroup,
+  handleWatchPartyRetryRoom,
+  handleWatchPartyList,
+  handleWatchPartyInviteGet,
+  handleWatchPartyRoomGet
 };
+
+// =========================================================
+// WATCH PARTY ("HẸN XEM CÙNG BẠN BÈ") — SERVER ENGINE
+// =========================================================
+const DEFAULT_WATCH_PARTY_CONFIG = {
+  defaultBufferMinutes: 10,
+  minBufferMinutes: 0,
+  maxBufferMinutes: 30,
+  maxRetries: 3,
+  timezone: "Asia/Ho_Chi_Minh",
+  roomTypes: {
+    private_cinema: { key: "private_cinema", label: "Buổi xem riêng", minCap: 2, maxCap: 48, isCoupleRoom: false, isDiscordRoom: false },
+    sweetbox: { key: "sweetbox", label: "Sweetbox", minCap: 2, maxCap: 2, isCoupleRoom: true, isDiscordRoom: false },
+    stream_party: { key: "stream_party", label: "Phòng Stream Nhóm", minCap: 2, maxCap: 10, isCoupleRoom: false, isDiscordRoom: true }
+  }
+};
+
+const WP_EVENT_LOCKS = new Map();
+
+async function withWatchPartyLock(eventId, fn) {
+  const key = String(eventId || "global");
+  const prev = WP_EVENT_LOCKS.get(key) || Promise.resolve();
+  let release;
+  const gate = new Promise((res) => { release = res; });
+  const tail = prev.then(() => gate).catch(() => gate);
+  WP_EVENT_LOCKS.set(key, tail);
+  await prev;
+  try {
+    return await fn();
+  } finally {
+    release();
+    if (WP_EVENT_LOCKS.get(key) === tail) {
+      WP_EVENT_LOCKS.delete(key);
+    }
+  }
+}
+
+function wpJson(payload, status = 200, corsHdrs = CORS_HEADERS) {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: { ...corsHdrs, "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }
+  });
+}
+
+function getWatchPartyRtdbBase(env) {
+  return String(env?.FIREBASE_RTDB_URL || "https://cineverse-ea320-default-rtdb.asia-southeast1.firebasedatabase.app").replace(/\/+$/, "");
+}
+
+async function loadWatchPartyConfig(env, rtdbBase) {
+  const cfg = {
+    defaultBufferMinutes: DEFAULT_WATCH_PARTY_CONFIG.defaultBufferMinutes,
+    maxRetries: DEFAULT_WATCH_PARTY_CONFIG.maxRetries,
+    timezone: DEFAULT_WATCH_PARTY_CONFIG.timezone,
+    roomTypes: DEFAULT_WATCH_PARTY_CONFIG.roomTypes
+  };
+  const envBuf = Number(env?.WATCH_PARTY_BUFFER_MINUTES);
+  if (Number.isFinite(envBuf) && envBuf >= 0 && envBuf <= 30) {
+    cfg.defaultBufferMinutes = Math.round(envBuf);
+  }
+  try {
+    const res = await fetch(`${rtdbBase}/lobby_config/watch_parties_v1/config.json`, { cache: "no-store" });
+    if (res.ok) {
+      const remote = await res.json().catch(() => null);
+      if (remote && typeof remote === "object") {
+        const rBuf = Number(remote.defaultBufferMinutes);
+        if (Number.isFinite(rBuf) && rBuf >= 0 && rBuf <= 30) cfg.defaultBufferMinutes = Math.round(rBuf);
+        const rMaxRet = Number(remote.maxRetries);
+        if (Number.isFinite(rMaxRet) && rMaxRet >= 1 && rMaxRet <= 10) cfg.maxRetries = Math.round(rMaxRet);
+      }
+    }
+  } catch (_) {}
+  return cfg;
+}
+
+function randomAlphaNum(len = 4) {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = new Uint8Array(len);
+  crypto.getRandomValues(bytes);
+  let out = "";
+  for (let i = 0; i < len; i++) {
+    out += chars[bytes[i] % chars.length];
+  }
+  return out;
+}
+
+function generateInviteToken() {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function generateEventId() {
+  return `ev_${Date.now().toString(36)}_${randomAlphaNum(6).toLowerCase()}`;
+}
+
+function generateInviteCode() {
+  return `CV-${randomAlphaNum(4)}`;
+}
+
+function computeWatchPartyEndsAt(startsAtMs, durationSec, bufferMinutes = DEFAULT_WATCH_PARTY_CONFIG.defaultBufferMinutes) {
+  const start = Number(startsAtMs) || 0;
+  const durMs = Math.max(30, Math.round(Number(durationSec) || 0)) * 1000;
+  const bufMs = Math.max(0, Math.round(Number(bufferMinutes) || 0)) * 60 * 1000;
+  return start + durMs + bufMs;
+}
+
+function getWatchPartyMemberStats(event) {
+  const membersObj = event && typeof event.members === "object" && event.members ? event.members : {};
+  let approvedGoingCount = 0;
+  let pendingCount = 0;
+  let maybeCount = 0;
+  let declinedCount = 0;
+  let hasOrganizerEntry = false;
+
+  for (const [k, m] of Object.entries(membersObj)) {
+    if (!m || typeof m !== "object") continue;
+    if (k === event.organizerId || m.isOrganizer) hasOrganizerEntry = true;
+    const rsvp = String(m.rsvp || "");
+    const apv = String(m.approvalStatus || "");
+    if (apv === "approved" && rsvp === "going") approvedGoingCount += 1;
+    else if (apv === "pending" && (rsvp === "going" || rsvp === "maybe")) pendingCount += 1;
+    if (rsvp === "maybe") maybeCount += 1;
+    if (rsvp === "declined") declinedCount += 1;
+  }
+
+  // Bảo đảm người tổ chức luôn được tính vào sức chứa thực
+  if (!hasOrganizerEntry && event?.organizerId) {
+    approvedGoingCount += 1;
+  }
+
+  const capacity = Math.max(2, Number(event?.capacity || 2));
+  const remainingSlots = Math.max(0, capacity - approvedGoingCount);
+  return {
+    approvedGoingCount,
+    pendingCount,
+    maybeCount,
+    declinedCount,
+    capacity,
+    remainingSlots,
+    isFull: remainingSlots <= 0
+  };
+}
+
+function isAccountApprovedForWatchParty(event, accountKey = "") {
+  const cleanKey = sanitizeRtdbKey(accountKey);
+  if (!event || !cleanKey) return false;
+  if (cleanKey === event.organizerId) return true;
+  const member = event.members?.[cleanKey];
+  if (!member) return false;
+  return member.approvalStatus === "approved" && member.rsvp === "going";
+}
+
+function formatWatchPartyEventForClient(event, viewerAccountKey = "", serverNow = Date.now()) {
+  if (!event || typeof event !== "object") return null;
+  const cleanViewer = sanitizeRtdbKey(viewerAccountKey);
+  const stats = getWatchPartyMemberStats(event);
+  const isOrganizer = Boolean(cleanViewer && cleanViewer === event.organizerId);
+  const viewerMember = cleanViewer ? (event.members?.[cleanViewer] || null) : null;
+  const approvedMembers = [];
+  const pendingRequests = [];
+  const allMembers = [];
+
+  for (const m of Object.values(event.members || {})) {
+    if (!m || typeof m !== "object") continue;
+    const safeMember = {
+      accountKey: m.accountKey,
+      name: m.name || "Khán giả",
+      rsvp: m.rsvp || "pending",
+      approvalStatus: m.approvalStatus || "pending",
+      isOrganizer: Boolean(m.isOrganizer),
+      respondedAt: Number(m.respondedAt || 0)
+    };
+    allMembers.push(safeMember);
+    if (safeMember.approvalStatus === "approved" && safeMember.rsvp === "going") {
+      approvedMembers.push(safeMember);
+    } else if (safeMember.approvalStatus === "pending" && (safeMember.rsvp === "going" || safeMember.rsvp === "maybe")) {
+      pendingRequests.push(safeMember);
+    }
+  }
+
+  approvedMembers.sort((a, b) => (b.isOrganizer ? 1 : 0) - (a.isOrganizer ? 1 : 0) || a.respondedAt - b.respondedAt);
+
+  return {
+    eventId: event.eventId,
+    organizerId: event.organizerId,
+    organizerName: event.organizerName || "Chủ buổi hẹn",
+    movieId: event.movieId,
+    movieTitle: event.movieTitle,
+    poster: event.poster || "assets/web-logo.png",
+    videoUrl: isAccountApprovedForWatchParty(event, cleanViewer) ? (event.videoUrl || "") : "",
+    youtubeId: isAccountApprovedForWatchParty(event, cleanViewer) ? (event.youtubeId || "") : "",
+    genre: event.genre || "Điện ảnh • Chiếu riêng",
+    ageRating: event.ageRating || "T13+",
+    year: event.year || "",
+    durationSec: Number(event.durationSec || 0),
+    bufferMinutes: Number(event.bufferMinutes ?? DEFAULT_WATCH_PARTY_CONFIG.defaultBufferMinutes),
+    startsAt: Number(event.startsAt || 0),
+    endsAt: Number(event.endsAt || 0),
+    timezone: event.timezone || DEFAULT_WATCH_PARTY_CONFIG.timezone,
+    roomType: event.roomType || "private_cinema",
+    roomTypeLabel: DEFAULT_WATCH_PARTY_CONFIG.roomTypes[event.roomType]?.label || "Buổi xem riêng",
+    capacity: stats.capacity,
+    approvedCount: stats.approvedGoingCount,
+    pendingCount: stats.pendingCount,
+    remainingSlots: stats.remainingSlots,
+    isFull: stats.isFull,
+    visibility: event.visibility || "invite_approval",
+    status: event.status || "scheduled",
+    roomId: isAccountApprovedForWatchParty(event, cleanViewer) && event.status === "open" ? (event.roomId || "") : "",
+    scheduleVersion: Number(event.scheduleVersion || 1),
+    inviteCode: event.inviteCode || "",
+    inviteToken: isOrganizer ? (event.inviteToken || "") : undefined,
+    inviteRevoked: Boolean(event.inviteRevoked),
+    lastError: event.lastError || "",
+    retryCount: Number(event.retryCount || 0),
+    endedAt: Number(event.endedAt || 0),
+    endedReason: event.endedReason || "",
+    createdAt: Number(event.createdAt || 0),
+    updatedAt: Number(event.updatedAt || 0),
+    isOrganizer,
+    canEnterRoom: Boolean(event.status === "open" && isAccountApprovedForWatchParty(event, cleanViewer)),
+    myMember: viewerMember
+      ? {
+          accountKey: viewerMember.accountKey,
+          name: viewerMember.name || "",
+          rsvp: viewerMember.rsvp,
+          approvalStatus: viewerMember.approvalStatus,
+          isOrganizer: Boolean(viewerMember.isOrganizer)
+        }
+      : null,
+    approvedMembers,
+    pendingRequests: isOrganizer ? pendingRequests : [],
+    serverNow
+  };
+}
+
+async function rtdbFetchJson(url) {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error(`RTDB_READ_${res.status}`);
+  return await res.json().catch(() => null);
+}
+
+async function rtdbPutJson(url, data) {
+  const res = await fetch(url, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error(`RTDB_WRITE_${res.status}`);
+  return data;
+}
+
+async function rtdbDeletePath(url) {
+  await fetch(url, { method: "DELETE" }).catch(() => {});
+}
+
+async function provisionWatchPartyRoomOnServer(env, rtdbBase, eventInput, serverNow = Date.now(), expectedVersion = null) {
+  const eventId = String(eventInput?.eventId || "").trim();
+  if (!eventId) return { ok: false, skipped: true, reason: "MISSING_EVENT_ID" };
+
+  return await withWatchPartyLock(eventId, async () => {
+    const eventUrl = `${rtdbBase}/lobby_config/watch_parties_v1/events/${encodeURIComponent(eventId)}.json`;
+    const event = (await rtdbFetchJson(eventUrl)) || eventInput;
+    if (!event || !event.eventId) return { ok: false, skipped: true, reason: "EVENT_NOT_FOUND" };
+
+    if (expectedVersion !== null && Number(event.scheduleVersion || 1) !== Number(expectedVersion)) {
+      return { ok: false, skipped: true, reason: "STALE_SCHEDULE_VERSION", currentVersion: event.scheduleVersion };
+    }
+    if (event.status === "cancelled" || event.status === "ended") {
+      return { ok: false, skipped: true, reason: `EVENT_ALREADY_${event.status.toUpperCase()}` };
+    }
+    if (serverNow >= Number(event.endsAt || 0)) {
+      return await closeWatchPartyEventOnServerUnsafe(rtdbBase, event, "expired", serverNow);
+    }
+    if (serverNow < Number(event.startsAt || 0)) {
+      return { ok: false, skipped: true, reason: "NOT_STARTED_YET" };
+    }
+
+    const roomId = event.roomId && String(event.roomId).startsWith("wp_")
+      ? String(event.roomId)
+      : `wp_${eventId}`;
+
+    // Idempotent: nếu phòng đã mở đúng roomId + scheduleVersion rồi -> không tạo lại trùng
+    const roomUrl = `${rtdbBase}/lobby_config/watch_parties_v1/rooms/${encodeURIComponent(roomId)}.json`;
+    const existingRoom = await rtdbFetchJson(roomUrl).catch(() => null);
+    if (
+      event.status === "open" &&
+      existingRoom &&
+      existingRoom.eventId === eventId &&
+      Number(existingRoom.scheduleVersion || 1) === Number(event.scheduleVersion || 1) &&
+      !existingRoom.closed
+    ) {
+      return { ok: true, idempotent: true, roomId, event, room: existingRoom };
+    }
+
+    const cfg = await loadWatchPartyConfig(env, rtdbBase);
+    if (Number(event.retryCount || 0) >= cfg.maxRetries && event.status === "create_failed" && !eventInput?._manualRetry) {
+      return { ok: false, skipped: true, reason: "MAX_RETRIES_EXCEEDED", event };
+    }
+
+    try {
+      // Trạng thái chuyển tiếp "creating" theo state machine
+      event.status = "creating";
+      event.updatedAt = serverNow;
+      await rtdbPutJson(eventUrl, event);
+
+      const typeMeta = DEFAULT_WATCH_PARTY_CONFIG.roomTypes[event.roomType] || DEFAULT_WATCH_PARTY_CONFIG.roomTypes.private_cinema;
+      const roomPayload = {
+        id: roomId,
+        roomId,
+        eventId,
+        isWatchParty: true,
+        isPrivate: true,
+        number: event.inviteCode ? `Phòng Riêng ${event.inviteCode}` : "Phòng Hẹn Riêng",
+        movieId: event.movieId || "",
+        movieTitle: event.movieTitle || "Buổi chiếu riêng",
+        poster: event.poster || "assets/web-logo.png",
+        videoUrl: event.youtubeId ? "" : (event.videoUrl || ""),
+        youtubeId: event.youtubeId || "",
+        genre: event.genre || "Điện ảnh • Phòng Riêng",
+        ageRating: event.ageRating || "T13+",
+        year: event.year || "",
+        durationSec: Number(event.durationSec || 0),
+        roomType: event.roomType || "private_cinema",
+        isCoupleRoom: Boolean(typeMeta.isCoupleRoom),
+        isDiscordRoom: Boolean(typeMeta.isDiscordRoom),
+        maxSeats: Number(event.capacity || typeMeta.maxCap || 48),
+        isCustomStartZero: true,
+        status: "showing",
+        closed: false,
+        organizerId: event.organizerId,
+        organizerName: event.organizerName || "Chủ buổi hẹn",
+        startsAt: Number(event.startsAt || 0),
+        endsAt: Number(event.endsAt || 0),
+        scheduleVersion: Number(event.scheduleVersion || 1),
+        createdAt: Number(existingRoom?.createdAt || serverNow),
+        updatedAt: serverNow
+      };
+
+      const initialSyncPayload = {
+        youtubeId: roomPayload.youtubeId,
+        videoUrl: roomPayload.videoUrl,
+        movieTitle: roomPayload.movieTitle,
+        poster: roomPayload.poster,
+        isPlaying: false,
+        currentTime: 0,
+        action: "pause",
+        roomClosed: false,
+        endsAt: roomPayload.endsAt,
+        scheduleVersion: roomPayload.scheduleVersion,
+        uid: event.organizerUid || event.organizerId,
+        userName: event.organizerName || "Chủ buổi hẹn",
+        updatedAt: serverNow
+      };
+
+      const initialHostPayload = {
+        uid: event.organizerUid || event.organizerId,
+        accountKey: event.organizerId,
+        userName: event.organizerName || "Chủ buổi hẹn",
+        claimedAt: serverNow,
+        updatedAt: serverNow
+      };
+
+      await Promise.all([
+        rtdbPutJson(roomUrl, roomPayload),
+        rtdbPutJson(`${rtdbBase}/sync/${encodeURIComponent(roomId)}.json`, initialSyncPayload),
+        rtdbPutJson(`${rtdbBase}/host/${encodeURIComponent(roomId)}.json`, initialHostPayload)
+      ]);
+
+      event.status = "open";
+      event.roomId = roomId;
+      event.roomCreatedAt = event.roomCreatedAt || serverNow;
+      event.lastError = "";
+      event.updatedAt = serverNow;
+      await rtdbPutJson(eventUrl, event);
+
+      return { ok: true, idempotent: false, roomId, event, room: roomPayload };
+    } catch (err) {
+      const nextRetry = Number(event.retryCount || 0) + 1;
+      event.retryCount = nextRetry;
+      event.lastError = String(err?.message || err || "PROVISION_FAILED");
+      event.status = "create_failed";
+      event.updatedAt = serverNow;
+      await rtdbPutJson(eventUrl, event).catch(() => {});
+      return { ok: false, error: event.lastError, retryCount: nextRetry, event };
+    }
+  });
+}
+
+async function closeWatchPartyEventOnServerUnsafe(rtdbBase, eventInput, reason = "ended", serverNow = Date.now(), expectedVersion = null) {
+  const eventId = String(eventInput?.eventId || "").trim();
+  if (!eventId) return { ok: false, skipped: true };
+
+  const eventUrl = `${rtdbBase}/lobby_config/watch_parties_v1/events/${encodeURIComponent(eventId)}.json`;
+  const event = (await rtdbFetchJson(eventUrl)) || eventInput;
+  if (!event) return { ok: false, skipped: true };
+
+  if (expectedVersion !== null && Number(event.scheduleVersion || 1) !== Number(expectedVersion)) {
+    return { ok: false, skipped: true, reason: "STALE_SCHEDULE_VERSION" };
+  }
+  if (event.status === "ended" && event.roomCleanedUp === true) {
+    return { ok: true, idempotent: true, event };
+  }
+
+  const roomId = event.roomId || `wp_${eventId}`;
+  const roomUrl = `${rtdbBase}/lobby_config/watch_parties_v1/rooms/${encodeURIComponent(roomId)}.json`;
+  const existingRoom = await rtdbFetchJson(roomUrl).catch(() => null);
+
+  if (existingRoom) {
+    await rtdbPutJson(roomUrl, {
+      ...existingRoom,
+      status: "ended",
+      closed: true,
+      closedAt: serverNow,
+      closedReason: reason,
+      videoUrl: "",
+      youtubeId: ""
+    }).catch(() => {});
+  }
+
+  await rtdbPutJson(`${rtdbBase}/sync/${encodeURIComponent(roomId)}.json`, {
+    isPlaying: false,
+    currentTime: 0,
+    roomClosed: true,
+    closedReason: reason === "organizer_ended" ? "Chủ buổi hẹn đã kết thúc buổi chiếu" : "Buổi chiếu đã kết thúc",
+    endsAt: Number(event.endsAt || 0),
+    scheduleVersion: Number(event.scheduleVersion || 1),
+    updatedAt: serverNow
+  }).catch(() => {});
+
+  const encRoom = encodeURIComponent(roomId);
+  await Promise.all([
+    rtdbDeletePath(`${rtdbBase}/seats/${encRoom}.json`),
+    rtdbDeletePath(`${rtdbBase}/host/${encRoom}.json`),
+    rtdbDeletePath(`${rtdbBase}/voice/${encRoom}.json`),
+    rtdbDeletePath(`${rtdbBase}/typing/${encRoom}.json`),
+    rtdbDeletePath(`${rtdbBase}/webrtc_voice/${encRoom}.json`),
+    rtdbDeletePath(`${rtdbBase}/webrtc_screen/${encRoom}.json`),
+    rtdbDeletePath(`${rtdbBase}/webrtc_cam/${encRoom}.json`),
+    rtdbDeletePath(`${rtdbBase}/reactions/${encRoom}.json`)
+  ]);
+
+  const updatedEvent = {
+    ...event,
+    status: "ended",
+    roomCleanedUp: true,
+    endedAt: Number(event.endedAt || serverNow),
+    endedReason: reason,
+    updatedAt: serverNow
+  };
+  await rtdbPutJson(eventUrl, updatedEvent);
+  return { ok: true, idempotent: false, roomId, event: updatedEvent };
+}
+
+async function closeWatchPartyEventOnServer(env, rtdbBase, eventInput, reason = "ended", serverNow = Date.now(), expectedVersion = null) {
+  const eventId = String(eventInput?.eventId || "").trim();
+  if (!eventId) return { ok: false, skipped: true };
+  return await withWatchPartyLock(eventId, async () => {
+    return await closeWatchPartyEventOnServerUnsafe(rtdbBase, eventInput, reason, serverNow, expectedVersion);
+  });
+}
+
+async function reconcileSingleWatchParty(env, rtdbBase, event, serverNow = Date.now(), expectedVersion = null) {
+  if (!event || !event.eventId) return { ok: false, skipped: true };
+  if (expectedVersion !== null && Number(event.scheduleVersion || 1) !== Number(expectedVersion)) {
+    return { ok: false, skipped: true, reason: "STALE_SCHEDULE_VERSION" };
+  }
+  if (event.status === "cancelled") {
+    return { ok: true, skipped: true, reason: "CANCELLED", event };
+  }
+  if (serverNow >= Number(event.endsAt || 0)) {
+    return await closeWatchPartyEventOnServer(env, rtdbBase, event, "expired", serverNow, expectedVersion);
+  }
+  if (event.status === "ended") {
+    if (!event.roomCleanedUp) {
+      return await closeWatchPartyEventOnServer(env, rtdbBase, event, event.endedReason || "ended", serverNow, expectedVersion);
+    }
+    return { ok: true, idempotent: true, event };
+  }
+  if (serverNow >= Number(event.startsAt || 0) && (event.status === "scheduled" || event.status === "create_failed" || event.status === "creating" || event.status === "open")) {
+    return await provisionWatchPartyRoomOnServer(env, rtdbBase, event, serverNow, expectedVersion);
+  }
+  return { ok: true, action: "none", event };
+}
+
+async function reconcileAllWatchParties(env, serverNow = Date.now()) {
+  const rtdbBase = getWatchPartyRtdbBase(env);
+  const eventsObj = await rtdbFetchJson(`${rtdbBase}/lobby_config/watch_parties_v1/events.json`).catch(() => null);
+  if (!eventsObj || typeof eventsObj !== "object") {
+    return { ok: true, checked: 0, opened: 0, closed: 0 };
+  }
+  let checked = 0;
+  let opened = 0;
+  let closed = 0;
+
+  for (const ev of Object.values(eventsObj)) {
+    if (!ev || !ev.eventId) continue;
+    checked += 1;
+    if (ev.status === "cancelled") continue;
+    if (ev.status === "ended" && ev.roomCleanedUp) continue;
+    const res = await reconcileSingleWatchParty(env, rtdbBase, ev, serverNow);
+    if (res?.ok && !res.idempotent && res.event?.status === "open") opened += 1;
+    if (res?.ok && !res.idempotent && res.event?.status === "ended") closed += 1;
+  }
+  return { ok: true, checked, opened, closed };
+}
+
+function getValidatedActorAccount(body = {}) {
+  const email = String(body.accountEmail || body.organizerEmail || body.email || "").trim().toLowerCase();
+  const uid = String(body.uid || "").trim();
+  const name = String(body.userName || body.displayName || "").trim().slice(0, 40);
+  const accountKey = sanitizeRtdbKey(email || body.accountKey || "");
+  if (!email || !accountKey || isExcludedTestAccount(accountKey, email, ["guest_", "anon_"])) {
+    return null;
+  }
+  return {
+    accountKey,
+    email,
+    uid: uid || accountKey,
+    name: name || email.split("@")[0]
+  };
+}
+
+async function handleWatchPartyCreate(request, env, corsHdrs, serverNow = Date.now()) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const actor = getValidatedActorAccount(body);
+    if (!actor) {
+      return wpJson({ ok: false, error: "AUTH_REQUIRED" }, 401, corsHdrs);
+    }
+
+    const movieId = String(body.movieId || "").trim();
+    const movieTitle = String(body.movieTitle || "").trim().slice(0, 140);
+    const durationSec = Math.round(Number(body.durationSec || 0));
+    const startsAt = Math.round(Number(body.startsAt || 0));
+    const roomType = DEFAULT_WATCH_PARTY_CONFIG.roomTypes[body.roomType] ? body.roomType : "private_cinema";
+    const typeMeta = DEFAULT_WATCH_PARTY_CONFIG.roomTypes[roomType];
+    const requestedCap = Math.round(Number(body.capacity || typeMeta.maxCap));
+    const capacity = Math.min(typeMeta.maxCap, Math.max(typeMeta.minCap, requestedCap));
+    const visibility = body.visibility === "invite_direct" ? "invite_direct" : "invite_approval";
+
+    if (!movieId || !movieTitle) {
+      return wpJson({ ok: false, error: "MISSING_MOVIE" }, 400, corsHdrs);
+    }
+    if (!Number.isFinite(durationSec) || durationSec < 30 || durationSec > 36000) {
+      return wpJson({ ok: false, error: "INVALID_DURATION_SECONDS" }, 400, corsHdrs);
+    }
+    if (!Number.isFinite(startsAt) || startsAt < serverNow - 15000) {
+      return wpJson({ ok: false, error: "INVALID_STARTS_AT" }, 400, corsHdrs);
+    }
+
+    const rtdbBase = getWatchPartyRtdbBase(env);
+    const cfg = await loadWatchPartyConfig(env, rtdbBase);
+    const bufferMinutes = Number.isFinite(Number(body.bufferMinutes))
+      ? Math.min(30, Math.max(0, Math.round(Number(body.bufferMinutes))))
+      : cfg.defaultBufferMinutes;
+    const endsAt = computeWatchPartyEndsAt(startsAt, durationSec, bufferMinutes);
+
+    const eventId = generateEventId();
+    const inviteCode = generateInviteCode();
+    const inviteToken = generateInviteToken();
+
+    const eventDoc = {
+      eventId,
+      organizerId: actor.accountKey,
+      organizerEmail: actor.email,
+      organizerUid: actor.uid,
+      organizerName: actor.name,
+      movieId,
+      movieTitle,
+      poster: String(body.poster || "").trim().slice(0, 500),
+      videoUrl: String(body.videoUrl || "").trim().slice(0, 800),
+      youtubeId: String(body.youtubeId || "").trim().slice(0, 40),
+      genre: String(body.genre || "").trim().slice(0, 120),
+      ageRating: String(body.ageRating || "T13+").trim().slice(0, 16),
+      year: String(body.year || "").trim().slice(0, 12),
+      durationSec,
+      bufferMinutes,
+      startsAt,
+      endsAt,
+      timezone: cfg.timezone,
+      roomType,
+      capacity,
+      visibility,
+      status: "scheduled",
+      roomId: `wp_${eventId}`,
+      scheduleVersion: 1,
+      inviteCode,
+      inviteToken,
+      inviteRevoked: false,
+      retryCount: 0,
+      lastError: "",
+      roomCleanedUp: false,
+      createdAt: serverNow,
+      updatedAt: serverNow,
+      members: {
+        [actor.accountKey]: {
+          accountKey: actor.accountKey,
+          email: actor.email,
+          uid: actor.uid,
+          name: actor.name,
+          rsvp: "going",
+          approvalStatus: "approved",
+          isOrganizer: true,
+          respondedAt: serverNow,
+          updatedAt: serverNow
+        }
+      }
+    };
+
+    await Promise.all([
+      rtdbPutJson(`${rtdbBase}/lobby_config/watch_parties_v1/events/${encodeURIComponent(eventId)}.json`, eventDoc),
+      rtdbPutJson(`${rtdbBase}/lobby_config/watch_parties_v1/invites/${encodeURIComponent(inviteToken)}.json`, {
+        eventId,
+        inviteCode,
+        revoked: false,
+        createdAt: serverNow
+      })
+    ]);
+
+    // Nếu người tổ chức chọn bắt đầu ngay lập tức (startsAt <= serverNow), mở phòng ngay
+    if (serverNow >= startsAt) {
+      const rec = await reconcileSingleWatchParty(env, rtdbBase, eventDoc, serverNow, eventDoc.scheduleVersion);
+      return wpJson({
+        ok: true,
+        event: formatWatchPartyEventForClient(rec?.event || eventDoc, actor.accountKey, serverNow),
+        serverNow
+      }, 201, corsHdrs);
+    }
+
+    return wpJson({
+      ok: true,
+      event: formatWatchPartyEventForClient(eventDoc, actor.accountKey, serverNow),
+      serverNow
+    }, 201, corsHdrs);
+  } catch (e) {
+    return wpJson({ ok: false, error: String(e?.message || e) }, 500, corsHdrs);
+  }
+}
+
+async function handleWatchPartyUpdate(request, env, corsHdrs, serverNow = Date.now()) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const actor = getValidatedActorAccount(body);
+    const eventId = String(body.eventId || "").trim();
+    const action = String(body.action || "edit").trim(); // "edit" | "cancel" | "regenerate_link" | "revoke_link"
+    if (!actor || !eventId) {
+      return wpJson({ ok: false, error: "MISSING_AUTH_OR_EVENT" }, 400, corsHdrs);
+    }
+
+    const rtdbBase = getWatchPartyRtdbBase(env);
+    return await withWatchPartyLock(eventId, async () => {
+      const eventUrl = `${rtdbBase}/lobby_config/watch_parties_v1/events/${encodeURIComponent(eventId)}.json`;
+      const ev = await rtdbFetchJson(eventUrl);
+      if (!ev) return wpJson({ ok: false, error: "EVENT_NOT_FOUND" }, 404, corsHdrs);
+      if (ev.organizerId !== actor.accountKey) {
+        return wpJson({ ok: false, error: "ONLY_ORGANIZER_ALLOWED" }, 403, corsHdrs);
+      }
+
+      if (action === "revoke_link" || action === "regenerate_link") {
+        if (ev.inviteToken) {
+          await rtdbPutJson(`${rtdbBase}/lobby_config/watch_parties_v1/invites/${encodeURIComponent(ev.inviteToken)}.json`, {
+            eventId,
+            inviteCode: ev.inviteCode,
+            revoked: true,
+            revokedAt: serverNow
+          });
+        }
+        if (action === "revoke_link") {
+          ev.inviteRevoked = true;
+          ev.updatedAt = serverNow;
+          await rtdbPutJson(eventUrl, ev);
+        } else {
+          const newToken = generateInviteToken();
+          const newCode = generateInviteCode();
+          ev.inviteToken = newToken;
+          ev.inviteCode = newCode;
+          ev.inviteRevoked = false;
+          ev.updatedAt = serverNow;
+          await Promise.all([
+            rtdbPutJson(eventUrl, ev),
+            rtdbPutJson(`${rtdbBase}/lobby_config/watch_parties_v1/invites/${encodeURIComponent(newToken)}.json`, {
+              eventId,
+              inviteCode: newCode,
+              revoked: false,
+              createdAt: serverNow
+            })
+          ]);
+        }
+        return wpJson({ ok: true, event: formatWatchPartyEventForClient(ev, actor.accountKey, serverNow), serverNow }, 200, corsHdrs);
+      }
+
+      if (ev.status === "ended" || ev.status === "cancelled") {
+        return wpJson({ ok: false, error: "EVENT_ALREADY_FINALIZED" }, 409, corsHdrs);
+      }
+
+      if (action === "cancel") {
+        if (serverNow >= Number(ev.startsAt || 0) && ev.status === "open") {
+          return wpJson({ ok: false, error: "USE_END_GROUP_INSTEAD" }, 409, corsHdrs);
+        }
+        ev.status = "cancelled";
+        ev.scheduleVersion = Number(ev.scheduleVersion || 1) + 1;
+        ev.endedReason = "cancelled_by_organizer";
+        ev.updatedAt = serverNow;
+        if (ev.inviteToken) {
+          await rtdbPutJson(`${rtdbBase}/lobby_config/watch_parties_v1/invites/${encodeURIComponent(ev.inviteToken)}.json`, {
+            eventId,
+            inviteCode: ev.inviteCode,
+            revoked: true,
+            revokedAt: serverNow
+          }).catch(() => {});
+        }
+        await rtdbPutJson(eventUrl, ev);
+        return wpJson({ ok: true, event: formatWatchPartyEventForClient(ev, actor.accountKey, serverNow), serverNow }, 200, corsHdrs);
+      }
+
+      // action === "edit" -> chỉ cho sửa trước startsAt
+      if (serverNow >= Number(ev.startsAt || 0) || ev.status === "open") {
+        return wpJson({ ok: false, error: "CANNOT_EDIT_AFTER_START" }, 409, corsHdrs);
+      }
+
+      const nextMovieTitle = String(body.movieTitle || ev.movieTitle).trim().slice(0, 140);
+      const nextMovieId = String(body.movieId || ev.movieId).trim();
+      const nextDurationSec = body.durationSec ? Math.round(Number(body.durationSec)) : ev.durationSec;
+      const nextStartsAt = body.startsAt ? Math.round(Number(body.startsAt)) : ev.startsAt;
+      const nextRoomType = DEFAULT_WATCH_PARTY_CONFIG.roomTypes[body.roomType] ? body.roomType : ev.roomType;
+      const typeMeta = DEFAULT_WATCH_PARTY_CONFIG.roomTypes[nextRoomType];
+      const nextCapacity = body.capacity
+        ? Math.min(typeMeta.maxCap, Math.max(typeMeta.minCap, Math.round(Number(body.capacity))))
+        : Math.min(typeMeta.maxCap, Math.max(typeMeta.minCap, ev.capacity));
+
+      const stats = getWatchPartyMemberStats(ev);
+      if (nextCapacity < stats.approvedGoingCount) {
+        return wpJson({ ok: false, error: "CAPACITY_BELOW_APPROVED_COUNT" }, 400, corsHdrs);
+      }
+      if (!Number.isFinite(nextDurationSec) || nextDurationSec < 30) {
+        return wpJson({ ok: false, error: "INVALID_DURATION_SECONDS" }, 400, corsHdrs);
+      }
+      if (!Number.isFinite(nextStartsAt) || nextStartsAt < serverNow - 15000) {
+        return wpJson({ ok: false, error: "INVALID_STARTS_AT" }, 400, corsHdrs);
+      }
+
+      const nextEndsAt = computeWatchPartyEndsAt(nextStartsAt, nextDurationSec, ev.bufferMinutes);
+      ev.movieId = nextMovieId;
+      ev.movieTitle = nextMovieTitle;
+      if (body.poster !== undefined) ev.poster = String(body.poster || "").trim().slice(0, 500);
+      if (body.videoUrl !== undefined) ev.videoUrl = String(body.videoUrl || "").trim().slice(0, 800);
+      if (body.youtubeId !== undefined) ev.youtubeId = String(body.youtubeId || "").trim().slice(0, 40);
+      if (body.genre !== undefined) ev.genre = String(body.genre || "").trim().slice(0, 120);
+      ev.durationSec = nextDurationSec;
+      ev.startsAt = nextStartsAt;
+      ev.endsAt = nextEndsAt;
+      ev.roomType = nextRoomType;
+      ev.capacity = nextCapacity;
+      if (body.visibility === "invite_direct" || body.visibility === "invite_approval") {
+        ev.visibility = body.visibility;
+      }
+      ev.scheduleVersion = Number(ev.scheduleVersion || 1) + 1;
+      ev.lastChangeNotice = `Chủ buổi hẹn đã cập nhật lịch (#v${ev.scheduleVersion})`;
+      ev.updatedAt = serverNow;
+      await rtdbPutJson(eventUrl, ev);
+
+      return wpJson({ ok: true, event: formatWatchPartyEventForClient(ev, actor.accountKey, serverNow), serverNow }, 200, corsHdrs);
+    });
+  } catch (e) {
+    return wpJson({ ok: false, error: String(e?.message || e) }, 500, corsHdrs);
+  }
+}
+
+async function resolveEventIdByTokenOrCode(rtdbBase, token = "", eventId = "") {
+  if (eventId) return eventId;
+  if (!token) return "";
+  const inv = await rtdbFetchJson(`${rtdbBase}/lobby_config/watch_parties_v1/invites/${encodeURIComponent(token)}.json`).catch(() => null);
+  if (inv && inv.eventId && !inv.revoked) return inv.eventId;
+  if (inv && inv.revoked) return "__REVOKED__";
+  return "";
+}
+
+async function handleWatchPartyRsvp(request, env, corsHdrs, serverNow = Date.now()) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const actor = getValidatedActorAccount(body);
+    const token = String(body.token || "").trim();
+    const rsvp = String(body.rsvp || "").trim(); // "going" | "maybe" | "declined"
+    if (!actor) return wpJson({ ok: false, error: "AUTH_REQUIRED" }, 401, corsHdrs);
+    if (!["going", "maybe", "declined"].includes(rsvp)) {
+      return wpJson({ ok: false, error: "INVALID_RSVP" }, 400, corsHdrs);
+    }
+
+    const rtdbBase = getWatchPartyRtdbBase(env);
+    const resolvedId = await resolveEventIdByTokenOrCode(rtdbBase, token, String(body.eventId || "").trim());
+    if (resolvedId === "__REVOKED__") {
+      return wpJson({ ok: false, error: "INVITE_REVOKED" }, 403, corsHdrs);
+    }
+    if (!resolvedId) {
+      return wpJson({ ok: false, error: "INVITE_NOT_FOUND" }, 404, corsHdrs);
+    }
+
+    return await withWatchPartyLock(resolvedId, async () => {
+      const eventUrl = `${rtdbBase}/lobby_config/watch_parties_v1/events/${encodeURIComponent(resolvedId)}.json`;
+      const ev = await rtdbFetchJson(eventUrl);
+      if (!ev) return wpJson({ ok: false, error: "EVENT_NOT_FOUND" }, 404, corsHdrs);
+      if (ev.inviteRevoked && actor.accountKey !== ev.organizerId) {
+        return wpJson({ ok: false, error: "INVITE_REVOKED" }, 403, corsHdrs);
+      }
+      if (ev.status === "cancelled" || ev.status === "ended" || serverNow >= Number(ev.endsAt || 0)) {
+        return wpJson({ ok: false, error: "EVENT_ENDED_OR_CANCELLED" }, 410, corsHdrs);
+      }
+      if (actor.accountKey === ev.organizerId) {
+        return wpJson({ ok: false, error: "ORGANIZER_ALREADY_HOSTING" }, 400, corsHdrs);
+      }
+
+      if (!ev.members || typeof ev.members !== "object") ev.members = {};
+      const existing = ev.members[actor.accountKey];
+      const stats = getWatchPartyMemberStats(ev);
+
+      if (rsvp === "declined") {
+        ev.members[actor.accountKey] = {
+          accountKey: actor.accountKey,
+          email: actor.email,
+          uid: actor.uid,
+          name: actor.name,
+          rsvp: "declined",
+          approvalStatus: "rejected",
+          isOrganizer: false,
+          respondedAt: existing?.respondedAt || serverNow,
+          updatedAt: serverNow
+        };
+      } else {
+        const directApprove = ev.visibility === "invite_direct" && rsvp === "going";
+        const alreadyApprovedGoing = Boolean(existing && existing.approvalStatus === "approved" && existing.rsvp === "going");
+
+        if ((directApprove || rsvp === "going") && !alreadyApprovedGoing && stats.isFull) {
+          return wpJson({ ok: false, error: "ROOM_CAPACITY_FULL", capacity: stats.capacity }, 409, corsHdrs);
+        }
+
+        const nextApproval = existing?.approvalStatus === "approved" && rsvp === "going"
+          ? "approved"
+          : (directApprove ? "approved" : "pending");
+
+        ev.members[actor.accountKey] = {
+          accountKey: actor.accountKey,
+          email: actor.email,
+          uid: actor.uid,
+          name: actor.name,
+          rsvp,
+          approvalStatus: nextApproval,
+          isOrganizer: false,
+          respondedAt: existing?.respondedAt || serverNow,
+          approvedAt: nextApproval === "approved" ? (existing?.approvedAt || serverNow) : 0,
+          updatedAt: serverNow
+        };
+      }
+
+      ev.updatedAt = serverNow;
+      await rtdbPutJson(eventUrl, ev);
+      return wpJson({ ok: true, event: formatWatchPartyEventForClient(ev, actor.accountKey, serverNow), serverNow }, 200, corsHdrs);
+    });
+  } catch (e) {
+    return wpJson({ ok: false, error: String(e?.message || e) }, 500, corsHdrs);
+  }
+}
+
+async function handleWatchPartyApprove(request, env, corsHdrs, serverNow = Date.now()) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const actor = getValidatedActorAccount(body);
+    const eventId = String(body.eventId || "").trim();
+    const targetAccountKey = sanitizeRtdbKey(body.targetAccountKey || "");
+    const decision = String(body.decision || "approve").trim(); // "approve" | "reject"
+    if (!actor || !eventId || !targetAccountKey) {
+      return wpJson({ ok: false, error: "MISSING_PARAMETERS" }, 400, corsHdrs);
+    }
+
+    const rtdbBase = getWatchPartyRtdbBase(env);
+    return await withWatchPartyLock(eventId, async () => {
+      const eventUrl = `${rtdbBase}/lobby_config/watch_parties_v1/events/${encodeURIComponent(eventId)}.json`;
+      const ev = await rtdbFetchJson(eventUrl);
+      if (!ev) return wpJson({ ok: false, error: "EVENT_NOT_FOUND" }, 404, corsHdrs);
+      if (ev.organizerId !== actor.accountKey) {
+        return wpJson({ ok: false, error: "ONLY_ORGANIZER_CAN_APPROVE" }, 403, corsHdrs);
+      }
+      if (ev.status === "ended" || ev.status === "cancelled" || serverNow >= Number(ev.endsAt || 0)) {
+        return wpJson({ ok: false, error: "EVENT_ENDED_OR_CANCELLED" }, 410, corsHdrs);
+      }
+      const targetMember = ev.members?.[targetAccountKey];
+      if (!targetMember) {
+        return wpJson({ ok: false, error: "MEMBER_NOT_FOUND" }, 404, corsHdrs);
+      }
+
+      if (decision === "approve") {
+        const alreadyCounted = targetMember.approvalStatus === "approved" && targetMember.rsvp === "going";
+        const stats = getWatchPartyMemberStats(ev);
+        if (!alreadyCounted && stats.isFull) {
+          return wpJson({ ok: false, error: "ROOM_CAPACITY_FULL", capacity: stats.capacity }, 409, corsHdrs);
+        }
+        targetMember.rsvp = "going";
+        targetMember.approvalStatus = "approved";
+        targetMember.approvedAt = serverNow;
+        targetMember.updatedAt = serverNow;
+      } else {
+        targetMember.approvalStatus = "rejected";
+        targetMember.updatedAt = serverNow;
+      }
+
+      ev.updatedAt = serverNow;
+      await rtdbPutJson(eventUrl, ev);
+      return wpJson({ ok: true, event: formatWatchPartyEventForClient(ev, actor.accountKey, serverNow), serverNow }, 200, corsHdrs);
+    });
+  } catch (e) {
+    return wpJson({ ok: false, error: String(e?.message || e) }, 500, corsHdrs);
+  }
+}
+
+async function handleWatchPartyEnter(request, env, corsHdrs, serverNow = Date.now()) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const actor = getValidatedActorAccount(body);
+    if (!actor) return wpJson({ ok: false, error: "AUTH_REQUIRED" }, 401, corsHdrs);
+
+    const rawEventId = String(body.eventId || "").trim();
+    const rawRoomId = String(body.roomId || "").trim();
+    const eventId = rawEventId || (rawRoomId.startsWith("wp_") ? rawRoomId.slice(3) : "");
+    if (!eventId) return wpJson({ ok: false, error: "MISSING_EVENT_OR_ROOM" }, 400, corsHdrs);
+
+    const rtdbBase = getWatchPartyRtdbBase(env);
+    const eventUrl = `${rtdbBase}/lobby_config/watch_parties_v1/events/${encodeURIComponent(eventId)}.json`;
+    let ev = await rtdbFetchJson(eventUrl);
+    if (!ev) return wpJson({ ok: false, error: "EVENT_NOT_FOUND" }, 404, corsHdrs);
+
+    // Reconcile trên máy chủ nếu đã tới giờ mở hoặc hết giờ
+    const rec = await reconcileSingleWatchParty(env, rtdbBase, ev, serverNow);
+    if (rec?.event) ev = rec.event;
+
+    if (!isAccountApprovedForWatchParty(ev, actor.accountKey)) {
+      return wpJson({ ok: false, error: "NOT_APPROVED_FOR_WATCH_PARTY" }, 403, corsHdrs);
+    }
+    if (ev.status === "cancelled") {
+      return wpJson({ ok: false, error: "EVENT_CANCELLED" }, 410, corsHdrs);
+    }
+    if (ev.status === "ended" || serverNow >= Number(ev.endsAt || 0)) {
+      return wpJson({ ok: false, error: "EVENT_ENDED", event: formatWatchPartyEventForClient(ev, actor.accountKey, serverNow) }, 410, corsHdrs);
+    }
+    if (serverNow < Number(ev.startsAt || 0)) {
+      return wpJson({ ok: false, error: "NOT_STARTED_YET", startsAt: ev.startsAt, serverNow }, 403, corsHdrs);
+    }
+    if (ev.status !== "open") {
+      return wpJson({ ok: false, error: "ROOM_NOT_READY", status: ev.status, lastError: ev.lastError || "" }, 503, corsHdrs);
+    }
+
+    const roomId = ev.roomId || `wp_${eventId}`;
+    const room = await rtdbFetchJson(`${rtdbBase}/lobby_config/watch_parties_v1/rooms/${encodeURIComponent(roomId)}.json`);
+    if (!room || room.closed) {
+      return wpJson({ ok: false, error: "EVENT_ENDED" }, 410, corsHdrs);
+    }
+
+    return wpJson({
+      ok: true,
+      room,
+      event: formatWatchPartyEventForClient(ev, actor.accountKey, serverNow),
+      serverNow
+    }, 200, corsHdrs);
+  } catch (e) {
+    return wpJson({ ok: false, error: String(e?.message || e) }, 500, corsHdrs);
+  }
+}
+
+async function handleWatchPartyEndGroup(request, env, corsHdrs, serverNow = Date.now()) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const actor = getValidatedActorAccount(body);
+    const rawEventId = String(body.eventId || "").trim();
+    const rawRoomId = String(body.roomId || "").trim();
+    const eventId = rawEventId || (rawRoomId.startsWith("wp_") ? rawRoomId.slice(3) : "");
+    if (!actor || !eventId) return wpJson({ ok: false, error: "MISSING_AUTH_OR_EVENT" }, 400, corsHdrs);
+
+    const rtdbBase = getWatchPartyRtdbBase(env);
+    const ev = await rtdbFetchJson(`${rtdbBase}/lobby_config/watch_parties_v1/events/${encodeURIComponent(eventId)}.json`);
+    if (!ev) return wpJson({ ok: false, error: "EVENT_NOT_FOUND" }, 404, corsHdrs);
+    if (ev.organizerId !== actor.accountKey) {
+      return wpJson({ ok: false, error: "ONLY_ORGANIZER_CAN_END_FOR_ALL" }, 403, corsHdrs);
+    }
+
+    const closed = await closeWatchPartyEventOnServer(env, rtdbBase, ev, "organizer_ended", serverNow);
+    return wpJson({
+      ok: true,
+      event: formatWatchPartyEventForClient(closed?.event || ev, actor.accountKey, serverNow),
+      serverNow
+    }, 200, corsHdrs);
+  } catch (e) {
+    return wpJson({ ok: false, error: String(e?.message || e) }, 500, corsHdrs);
+  }
+}
+
+async function handleWatchPartyRetryRoom(request, env, corsHdrs, serverNow = Date.now()) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const actor = getValidatedActorAccount(body);
+    const eventId = String(body.eventId || "").trim();
+    if (!actor || !eventId) return wpJson({ ok: false, error: "MISSING_AUTH_OR_EVENT" }, 400, corsHdrs);
+
+    const rtdbBase = getWatchPartyRtdbBase(env);
+    const ev = await rtdbFetchJson(`${rtdbBase}/lobby_config/watch_parties_v1/events/${encodeURIComponent(eventId)}.json`);
+    if (!ev) return wpJson({ ok: false, error: "EVENT_NOT_FOUND" }, 404, corsHdrs);
+    if (ev.organizerId !== actor.accountKey && !isAccountApprovedForWatchParty(ev, actor.accountKey)) {
+      return wpJson({ ok: false, error: "FORBIDDEN" }, 403, corsHdrs);
+    }
+    const rec = await provisionWatchPartyRoomOnServer(env, rtdbBase, { ...ev, _manualRetry: true }, serverNow);
+    return wpJson({
+      ok: Boolean(rec?.ok),
+      error: rec?.error || "",
+      event: formatWatchPartyEventForClient(rec?.event || ev, actor.accountKey, serverNow),
+      serverNow
+    }, rec?.ok ? 200 : 500, corsHdrs);
+  } catch (e) {
+    return wpJson({ ok: false, error: String(e?.message || e) }, 500, corsHdrs);
+  }
+}
+
+async function handleWatchPartyList(request, env, corsHdrs, serverNow = Date.now()) {
+  try {
+    const url = new URL(request.url);
+    const accountEmail = String(url.searchParams.get("accountEmail") || url.searchParams.get("accountKey") || "").trim().toLowerCase();
+    const accountKey = sanitizeRtdbKey(accountEmail);
+    const rtdbBase = getWatchPartyRtdbBase(env);
+
+    const [cfg, eventsObj] = await Promise.all([
+      loadWatchPartyConfig(env, rtdbBase),
+      rtdbFetchJson(`${rtdbBase}/lobby_config/watch_parties_v1/events.json`).catch(() => null)
+    ]);
+
+    const upcomingOrActive = [];
+    const history = [];
+
+    if (eventsObj && typeof eventsObj === "object" && accountKey) {
+      for (const rawEv of Object.values(eventsObj)) {
+        if (!rawEv || !rawEv.eventId) continue;
+        const isRel = rawEv.organizerId === accountKey || Boolean(rawEv.members?.[accountKey]);
+        if (!isRel) continue;
+
+        let ev = rawEv;
+        // Khi người dùng mở sảnh/lời mời -> tự kiểm tra khôi phục phòng đến hạn hoặc tự đóng nếu đã quá giờ
+        const needReconcile =
+          (ev.status !== "cancelled" && ev.status !== "ended" && serverNow >= Number(ev.endsAt || 0)) ||
+          ((ev.status === "scheduled" || ev.status === "create_failed") && serverNow >= Number(ev.startsAt || 0) && serverNow < Number(ev.endsAt || 0));
+        if (needReconcile) {
+          const rec = await reconcileSingleWatchParty(env, rtdbBase, ev, serverNow);
+          if (rec?.event) ev = rec.event;
+        }
+
+        const formatted = formatWatchPartyEventForClient(ev, accountKey, serverNow);
+        if (!formatted) continue;
+        if (formatted.status === "ended" || formatted.status === "cancelled") {
+          history.push(formatted);
+        } else {
+          upcomingOrActive.push(formatted);
+        }
+      }
+    }
+
+    upcomingOrActive.sort((a, b) => a.startsAt - b.startsAt);
+    history.sort((a, b) => b.startsAt - a.startsAt);
+
+    return wpJson({
+      ok: true,
+      serverNow,
+      config: cfg,
+      upcoming: upcomingOrActive,
+      history
+    }, 200, corsHdrs);
+  } catch (e) {
+    return wpJson({ ok: false, error: String(e?.message || e) }, 500, corsHdrs);
+  }
+}
+
+async function handleWatchPartyInviteGet(request, env, corsHdrs, serverNow = Date.now()) {
+  try {
+    const url = new URL(request.url);
+    const token = String(url.searchParams.get("token") || "").trim();
+    const accountEmail = String(url.searchParams.get("accountEmail") || url.searchParams.get("accountKey") || "").trim().toLowerCase();
+    const accountKey = sanitizeRtdbKey(accountEmail);
+    const rtdbBase = getWatchPartyRtdbBase(env);
+
+    let eventId = String(url.searchParams.get("eventId") || "").trim();
+    if (!eventId && token) {
+      const inv = await rtdbFetchJson(`${rtdbBase}/lobby_config/watch_parties_v1/invites/${encodeURIComponent(token)}.json`).catch(() => null);
+      if (!inv) return wpJson({ ok: false, error: "INVITE_NOT_FOUND" }, 404, corsHdrs);
+      if (inv.revoked) return wpJson({ ok: false, error: "INVITE_REVOKED" }, 403, corsHdrs);
+      eventId = inv.eventId || "";
+    }
+    if (!eventId) return wpJson({ ok: false, error: "MISSING_INVITE" }, 400, corsHdrs);
+
+    let ev = await rtdbFetchJson(`${rtdbBase}/lobby_config/watch_parties_v1/events/${encodeURIComponent(eventId)}.json`);
+    if (!ev) return wpJson({ ok: false, error: "EVENT_NOT_FOUND" }, 404, corsHdrs);
+
+    if (ev.inviteRevoked && accountKey !== ev.organizerId && token) {
+      return wpJson({ ok: false, error: "INVITE_REVOKED" }, 403, corsHdrs);
+    }
+
+    // Khôi phục phòng đến hạn hoặc tự đóng khi mở lời mời
+    if (ev.status !== "cancelled" && ev.status !== "ended") {
+      const rec = await reconcileSingleWatchParty(env, rtdbBase, ev, serverNow);
+      if (rec?.event) ev = rec.event;
+    }
+
+    return wpJson({
+      ok: true,
+      serverNow,
+      event: formatWatchPartyEventForClient(ev, accountKey, serverNow)
+    }, 200, corsHdrs);
+  } catch (e) {
+    return wpJson({ ok: false, error: String(e?.message || e) }, 500, corsHdrs);
+  }
+}
+
+async function handleWatchPartyRoomGet(request, env, corsHdrs, serverNow = Date.now()) {
+  try {
+    const url = new URL(request.url);
+    const roomId = String(url.searchParams.get("roomId") || "").trim();
+    const accountEmail = String(url.searchParams.get("accountEmail") || url.searchParams.get("accountKey") || "").trim().toLowerCase();
+    const accountKey = sanitizeRtdbKey(accountEmail);
+    const eventId = roomId.startsWith("wp_") ? roomId.slice(3) : "";
+    if (!accountKey || !eventId) return wpJson({ ok: false, error: "FORBIDDEN" }, 403, corsHdrs);
+
+    const rtdbBase = getWatchPartyRtdbBase(env);
+    let ev = await rtdbFetchJson(`${rtdbBase}/lobby_config/watch_parties_v1/events/${encodeURIComponent(eventId)}.json`);
+    if (!ev) return wpJson({ ok: false, error: "EVENT_NOT_FOUND" }, 404, corsHdrs);
+    if (!isAccountApprovedForWatchParty(ev, accountKey)) {
+      return wpJson({ ok: false, error: "NOT_APPROVED_FOR_WATCH_PARTY" }, 403, corsHdrs);
+    }
+    const rec = await reconcileSingleWatchParty(env, rtdbBase, ev, serverNow);
+    if (rec?.event) ev = rec.event;
+    const room = await rtdbFetchJson(`${rtdbBase}/lobby_config/watch_parties_v1/rooms/${encodeURIComponent(roomId)}.json`);
+    return wpJson({
+      ok: true,
+      serverNow,
+      room,
+      event: formatWatchPartyEventForClient(ev, accountKey, serverNow)
+    }, 200, corsHdrs);
+  } catch (e) {
+    return wpJson({ ok: false, error: String(e?.message || e) }, 500, corsHdrs);
+  }
+}
 
 async function handleWorkerFetch(request, env, corsHdrs, ctx) {
     if (request.method === "OPTIONS") {
@@ -1586,6 +2747,42 @@ async function handleWorkerFetch(request, env, corsHdrs, ctx) {
     }
     if (request.method === "POST" && (path === "/api/top10/heartbeat" || path.endsWith("/api/top10/heartbeat"))) {
       return await handleTop10HeartbeatRequest(request, env, corsHdrs);
+    }
+
+    // Watch Party ("Hẹn xem cùng bạn bè") API routes
+    if (request.method === "GET" && path.endsWith("/api/watch-party/list")) {
+      return await handleWatchPartyList(request, env, corsHdrs);
+    }
+    if (request.method === "GET" && path.endsWith("/api/watch-party/invite")) {
+      return await handleWatchPartyInviteGet(request, env, corsHdrs);
+    }
+    if (request.method === "GET" && path.endsWith("/api/watch-party/room")) {
+      return await handleWatchPartyRoomGet(request, env, corsHdrs);
+    }
+    if (request.method === "POST" && path.endsWith("/api/watch-party/create")) {
+      return await handleWatchPartyCreate(request, env, corsHdrs);
+    }
+    if (request.method === "POST" && path.endsWith("/api/watch-party/update")) {
+      return await handleWatchPartyUpdate(request, env, corsHdrs);
+    }
+    if (request.method === "POST" && path.endsWith("/api/watch-party/rsvp")) {
+      return await handleWatchPartyRsvp(request, env, corsHdrs);
+    }
+    if (request.method === "POST" && path.endsWith("/api/watch-party/approve")) {
+      return await handleWatchPartyApprove(request, env, corsHdrs);
+    }
+    if (request.method === "POST" && path.endsWith("/api/watch-party/enter")) {
+      return await handleWatchPartyEnter(request, env, corsHdrs);
+    }
+    if (request.method === "POST" && path.endsWith("/api/watch-party/end-group")) {
+      return await handleWatchPartyEndGroup(request, env, corsHdrs);
+    }
+    if (request.method === "POST" && path.endsWith("/api/watch-party/retry-room")) {
+      return await handleWatchPartyRetryRoom(request, env, corsHdrs);
+    }
+    if ((request.method === "GET" || request.method === "POST") && path.endsWith("/api/watch-party/reconcile")) {
+      const summary = await reconcileAllWatchParties(env, Date.now());
+      return wpJson(summary, 200, corsHdrs);
     }
 
     if (request.method === "GET" && url.pathname.endsWith("/sub")) {
@@ -2240,5 +3437,12 @@ export default {
       res.headers.set(k, v);
     }
     return res;
+  },
+  async scheduled(controller, env, ctx) {
+    const task = reconcileAllWatchParties(env, Date.now());
+    if (ctx && typeof ctx.waitUntil === "function") {
+      ctx.waitUntil(task);
+    }
+    await task;
   }
 };

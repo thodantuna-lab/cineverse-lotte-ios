@@ -1745,9 +1745,284 @@
       .cv-nav-link,
       .cv-nav-icon-btn,
       .cv-nav-mobile-item,
-      .cv-nav-brand-title {
+      .cv-nav-brand-title,
+      .cv-wp-ticket,
+      .cv-wp-cta-primary,
+      .cv-wp-cta-secondary {
         transition: none !important;
+        animation: none !important;
       }
+    }
+
+    /* ======================================================= */
+    /* HẸN XEM CÙNG BẠN BÈ (MẪU VÉ BURGUNDY - VIỀN VÀNG)       */
+    /* ======================================================= */
+    .cv-wp-section {
+      position: relative;
+      scroll-margin-top: 78px;
+      border-radius: 20px;
+      background:
+        radial-gradient(ellipse 78% 72% at 88% 15%, rgba(128, 22, 38, 0.22) 0%, rgba(16, 11, 14, 0.96) 58%),
+        #0B0B0F;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      padding: 20px 22px;
+      box-shadow: 0 20px 56px rgba(0, 0, 0, 0.72);
+    }
+    @media (max-width: 639px) {
+      .cv-wp-section {
+        padding: 14px 12px;
+        border-radius: 16px;
+      }
+    }
+    .cv-wp-accent-bar {
+      width: 4px;
+      height: 26px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #E50914 0%, #991B1B 100%);
+      flex-shrink: 0;
+    }
+    .cv-wp-list-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .cv-wp-ticket {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      border-radius: 18px;
+      background:
+        radial-gradient(ellipse 85% 95% at 75% 40%, rgba(116, 22, 36, 0.42) 0%, rgba(44, 13, 19, 0.94) 55%, rgba(20, 9, 12, 0.98) 100%);
+      border: 1px solid rgba(245, 197, 24, 0.45);
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.72), inset 0 0 0 1px rgba(245, 197, 24, 0.08);
+      overflow: hidden;
+      transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+    }
+    .cv-wp-ticket:hover {
+      border-color: rgba(245, 197, 24, 0.78);
+      box-shadow: 0 20px 46px rgba(0, 0, 0, 0.85), 0 0 22px rgba(245, 197, 24, 0.14);
+    }
+    @media (min-width: 768px) {
+      .cv-wp-ticket {
+        flex-direction: row;
+        align-items: stretch;
+        min-height: 200px;
+      }
+    }
+    .cv-wp-ticket-main {
+      position: relative;
+      flex: 1 1 auto;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    @media (min-width: 768px) {
+      .cv-wp-ticket-main {
+        display: grid;
+        grid-template-columns: minmax(170px, 235px) minmax(0, 1fr);
+        align-items: stretch;
+      }
+    }
+    .cv-wp-poster-wrap {
+      position: relative;
+      height: 176px;
+      overflow: hidden;
+      background: #09080A;
+    }
+    @media (min-width: 768px) {
+      .cv-wp-poster-wrap {
+        height: auto;
+        min-height: 200px;
+      }
+    }
+    .cv-wp-poster-fade {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(11, 11, 15, 0.18) 0%, rgba(28, 10, 14, 0.88) 100%);
+      pointer-events: none;
+    }
+    @media (min-width: 768px) {
+      .cv-wp-poster-fade {
+        background: linear-gradient(90deg, rgba(11, 11, 15, 0.10) 0%, rgba(28, 10, 14, 0.55) 68%, rgba(36, 11, 16, 0.98) 100%);
+      }
+    }
+    .cv-wp-body {
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+      min-width: 0;
+    }
+    .cv-wp-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #E7D29A;
+    }
+    .cv-wp-eyebrow::before,
+    .cv-wp-eyebrow::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(245, 197, 24, 0.35), transparent);
+    }
+    .cv-wp-title {
+      font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+      font-style: italic;
+      font-weight: 700;
+      font-size: clamp(20px, 2.2vw, 27px);
+      line-height: 1.15;
+      color: #FFF8EA;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .cv-wp-divider {
+      position: relative;
+      height: 2px;
+      width: 100%;
+      border-top: 1.5px dashed rgba(245, 197, 24, 0.38);
+      flex-shrink: 0;
+    }
+    .cv-wp-divider::before,
+    .cv-wp-divider::after {
+      content: "";
+      position: absolute;
+      top: -10px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #0B0B0F;
+      border: 1px solid rgba(245, 197, 24, 0.45);
+      z-index: 3;
+    }
+    .cv-wp-divider::before { left: -9px; }
+    .cv-wp-divider::after { right: -9px; }
+    @media (min-width: 768px) {
+      .cv-wp-divider {
+        width: 2px;
+        height: auto;
+        border-top: 0;
+        border-left: 1.5px dashed rgba(245, 197, 24, 0.38);
+      }
+      .cv-wp-divider::before,
+      .cv-wp-divider::after {
+        left: -10px;
+        right: auto;
+      }
+      .cv-wp-divider::before { top: -9px; }
+      .cv-wp-divider::after { top: auto; bottom: -9px; }
+    }
+    .cv-wp-stub {
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: stretch;
+      gap: 10px;
+      background: rgba(14, 7, 10, 0.56);
+    }
+    @media (min-width: 768px) {
+      .cv-wp-stub {
+        width: 228px;
+        flex-shrink: 0;
+        padding: 16px 20px;
+      }
+    }
+    .cv-wp-barcode {
+      height: 24px;
+      width: 100%;
+      max-width: 168px;
+      margin: 0 auto;
+      opacity: 0.78;
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(245, 224, 172, 0.85) 0px,
+        rgba(245, 224, 172, 0.85) 2px,
+        transparent 2px,
+        transparent 4px,
+        rgba(245, 224, 172, 0.55) 4px,
+        rgba(245, 224, 172, 0.55) 5px,
+        transparent 5px,
+        transparent 8px,
+        rgba(245, 224, 172, 0.85) 8px,
+        rgba(245, 224, 172, 0.85) 11px,
+        transparent 11px,
+        transparent 13px
+      );
+    }
+    .cv-wp-avatars {
+      display: flex;
+      align-items: center;
+    }
+    .cv-wp-avatar-dot {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1.5px solid #2A0C12;
+      background: linear-gradient(135deg, #F5C518 0%, #B45309 100%);
+      color: #0B0B0F;
+      font-size: 10px;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: -6px;
+      flex-shrink: 0;
+    }
+    .cv-wp-avatar-dot:first-child { margin-left: 0; }
+    .cv-wp-cta-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, #F8D147 0%, #E5A90E 100%);
+      color: #0B0B0F;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform 180ms ease, filter 180ms ease;
+    }
+    .cv-wp-cta-primary:hover { filter: brightness(1.06); transform: translateY(-1px); }
+    .cv-wp-cta-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 44px;
+      padding: 0 14px;
+      border-radius: 10px;
+      background: rgba(11, 11, 15, 0.68);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #F4F4F5;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color 180ms ease, background-color 180ms ease;
+    }
+    .cv-wp-cta-secondary:hover {
+      border-color: rgba(245, 197, 24, 0.6);
+      background: rgba(28, 16, 20, 0.92);
+    }
+    .cv-wp-section button:focus-visible,
+    #watch-party-create-modal button:focus-visible,
+    #watch-party-invite-modal button:focus-visible {
+      outline: 2px solid #F5C518;
+      outline-offset: 2px;
+    }
+    .cv-wp-modal-sheet {
+      max-height: 92dvh;
+      overflow-y: auto;
+      padding-bottom: max(1rem, env(safe-area-inset-bottom));
     }
 
     @keyframes rophimSlideContent {
@@ -5467,6 +5742,11 @@
               <span>Trang chủ</span>
             </button>
 
+            <button type="button" data-nav-tab="watchparty" onclick="window.appActions.navGoToSection('watchparty')"
+              class="cv-nav-link">
+              <span>Lịch hẹn</span>
+            </button>
+
             <button type="button" data-nav-tab="top10" onclick="window.appActions.navGoToSection('top10')"
               class="cv-nav-link">
               <span>Top phim</span>
@@ -5533,6 +5813,11 @@
         class="cv-nav-mobile-item is-active">
         <span>Trang chủ</span>
         <i class="fa-solid fa-chevron-right text-[11px] opacity-60" aria-hidden="true"></i>
+      </button>
+      <button type="button" data-nav-tab="watchparty" onclick="window.appActions.navGoToSection('watchparty'); window.appActions.toggleMobileNavMenu(false);"
+        class="cv-nav-mobile-item">
+        <span>Hẹn xem cùng (Lịch hẹn)</span>
+        <i class="fa-solid fa-calendar-check text-xs text-amber-400" aria-hidden="true"></i>
       </button>
       <button type="button" data-nav-tab="top10" onclick="window.appActions.navGoToSection('top10'); window.appActions.toggleMobileNavMenu(false);"
         class="cv-nav-mobile-item">
@@ -5684,6 +5969,12 @@
               <i class="fa-solid fa-chevron-right text-xs" aria-hidden="true"></i>
             </button>
 
+            <button type="button" id="btn-hero-watch-party" onclick="window.appActions.openCreateWatchPartyForHero()" style="touch-action: manipulation;"
+              class="cv-wp-cta-secondary">
+              <i class="fa-solid fa-calendar-plus" style="color:#F5C518;" aria-hidden="true"></i>
+              <span>Hẹn xem cùng</span>
+            </button>
+
             <button type="button" id="btn-hero-book-seat" onclick="window.appActions.openBookingModalForHero()" style="touch-action: manipulation;"
               class="hidden cv-hero-btn-seat">
               <i class="fa-solid fa-repeat" aria-hidden="true"></i>
@@ -5744,6 +6035,41 @@
 
         <div id="desktop-rooms-list" role="listbox" aria-label="Chọn phòng chiếu"></div>
       </aside>
+    </section>
+
+    <!-- 1A. LỊCH HẸN CỦA BẠN (HẸN XEM CÙNG BẠN BÈ) -->
+    <section id="lobby-watch-party-section" class="cv-wp-section space-y-4" aria-label="Lịch hẹn xem phim cùng bạn bè">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <span class="cv-wp-accent-bar" aria-hidden="true"></span>
+          <div>
+            <h2 class="cv-serif text-xl sm:text-2xl font-bold text-white leading-tight">Lịch hẹn của bạn</h2>
+            <p class="text-[11px] sm:text-xs" style="color:#A1A1AA;">Múi giờ Asia/Ho_Chi_Minh • Phòng riêng mở đúng giờ hẹn &amp; chọn ghế khi vào phòng</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="window.appActions.openCreateWatchPartyModal()"
+            class="cv-wp-cta-primary">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i>
+            <span>Tạo lịch hẹn</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="wp-upcoming-list" class="cv-wp-list-grid" aria-live="polite"></div>
+
+      <details id="wp-history-details" class="hidden rounded-xl p-3" style="background:rgba(11,11,15,0.68);border:1px solid rgba(255,255,255,0.08);">
+        <summary class="cursor-pointer min-h-[44px] flex items-center justify-between text-xs font-bold text-slate-300 select-none">
+          <span><i class="fa-solid fa-clock-rotate-left mr-1.5" style="color:#F5C518;"></i>Lịch sử buổi hẹn đã kết thúc / đã hủy (<span id="wp-history-count">0</span>)</span>
+          <span class="text-[11px] text-slate-400">Bấm để mở rộng</span>
+        </summary>
+        <div id="wp-history-list" class="cv-wp-list-grid pt-3"></div>
+      </details>
+
+      <div class="text-[11px] flex flex-wrap items-center justify-between gap-2 pt-1" style="color:#A1A1AA;">
+        <span id="wp-policy-footnote">Quy tắc giờ đóng cố định: Giờ bắt đầu + Thời lượng phim + 10 phút đệm ổn định (không đổi khi tua/tạm dừng)</span>
+        <span class="text-[10px]">Ghế được chọn ngay khi vào phòng</span>
+      </div>
     </section>
 
     <!-- 1B. BẢNG XẾP HẠNG TOP 10 TUẦN NÀY (DƯỚI BANNER, TRƯỚC XEM TIẾP) -->
@@ -6296,16 +6622,26 @@
           <img src="assets/web-logo.png" alt="CineVerse Lotte" class="w-7 h-7 rounded-lg object-cover border border-amber-400/50" />
           <span class="hidden xl:inline text-xs font-black tracking-wide text-white">CINEVERSE <span class="text-rose-500">LOTTE</span></span>
         </div>
-        <button type="button" onclick="window.appActions.leaveRoom()"
+        <button type="button" id="btn-room-leave" onclick="window.appActions.leaveRoom()"
           class="cv-smooth-btn liquid-glass-pill px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shrink-0">
           <i class="fa-solid fa-arrow-left"></i>
-          <span class="hidden sm:inline">Sảnh chờ</span>
+          <span id="room-leave-btn-label" class="hidden sm:inline">Sảnh chờ</span>
         </button>
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-1.5">
             <span id="room-header-number" class="px-2.5 py-0.5 rounded-full bg-rose-600 text-white font-black text-[11px]">Phòng 01</span>
             <span id="room-header-seat-badge" class="px-2.5 py-0.5 rounded-full font-black text-[11px]" style="background:#F5C518;color:#0B0B0F;">Ghế --</span>
             <span id="room-header-status" class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/35 font-bold text-[11px]">Đang chiếu</span>
+            <span id="wp-room-closing-pill" class="hidden px-2.5 py-0.5 rounded-full font-bold text-[11px] items-center gap-1" style="background:rgba(245,197,24,0.14);border:1px solid rgba(245,197,24,0.45);color:#FDE68A;">
+              <i class="fa-regular fa-clock" aria-hidden="true"></i>
+              <span id="wp-room-closing-text">Tự đóng --:--</span>
+            </span>
+            <button type="button" id="btn-wp-end-for-all" onclick="window.appActions.confirmEndWatchPartyForGroup()"
+              class="hidden px-2.5 py-0.5 rounded-full font-extrabold text-[11px] cursor-pointer transition"
+              style="background:rgba(229,9,20,0.24);border:1px solid rgba(229,9,20,0.65);color:#FECDD3;"
+              title="Kết thúc ngay buổi hẹn và đóng phòng cho toàn bộ nhóm">
+              <i class="fa-solid fa-power-off mr-1" aria-hidden="true"></i>Kết thúc cho cả nhóm
+            </button>
             <span id="stream-header-broadcaster-pill" class="hidden px-2.5 py-0.5 rounded-full font-bold text-[11px] items-center gap-1.5 border border-white/15 bg-white/5 text-slate-200">
               <span class="w-2 h-2 rounded-full bg-slate-400"></span>
               <span>Chưa có ai chia sẻ</span>
@@ -7824,6 +8160,132 @@
     </div>
   </div>
 
+  <!-- MODAL TẠO / SỬA LỊCH HẸN XEM CÙNG BẠN BÈ -->
+  <div id="watch-party-create-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="wp-create-modal-title">
+    <div class="cv-wp-modal-sheet w-full max-w-xl rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 space-y-4 shadow-2xl"
+      style="background:linear-gradient(180deg, #161116 0%, #0B0B0F 100%);border:1px solid rgba(245,197,24,0.38);">
+      <div class="flex items-center justify-between gap-3 pb-2 border-b border-white/10">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <img src="assets/web-logo.png" alt="CineVerse Lotte" class="w-8 h-8 rounded-full border border-amber-400/50 object-cover shrink-0" />
+          <div class="min-w-0">
+            <h3 id="wp-create-modal-title" class="cv-serif text-lg sm:text-xl font-bold text-white truncate">Hẹn xem cùng bạn bè</h3>
+            <p class="text-[11px]" style="color:#A1A1AA;">Chọn phim, đặt giờ theo Asia/Ho_Chi_Minh &amp; gửi vé mời</p>
+          </div>
+        </div>
+        <button type="button" onclick="window.appActions.closeCreateWatchPartyModal()"
+          class="min-w-[44px] min-h-[44px] rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white flex items-center justify-center cursor-pointer"
+          aria-label="Đóng hộp thoại tạo lịch hẹn">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="space-y-1">
+          <label for="wp-form-movie" class="block font-bold text-slate-200">1. Phim chiếu trong buổi hẹn</label>
+          <select id="wp-form-movie" onchange="window.appActions.onWatchPartyMovieOrTimeChange()"
+            class="w-full min-h-[44px] px-3 py-2 rounded-xl bg-stone-950 border border-white/15 text-xs text-white font-semibold focus:outline-none focus:border-amber-400"></select>
+        </div>
+
+        <div id="wp-form-duration-row" class="hidden space-y-1 p-3 rounded-xl" style="background:rgba(245,197,24,0.08);border:1px solid rgba(245,197,24,0.35);">
+          <label for="wp-form-manual-duration" class="block font-bold text-amber-300">Thời lượng phim (phút) — Bắt buộc do danh mục chưa có thông số</label>
+          <input id="wp-form-manual-duration" type="number" min="5" max="600" placeholder="Ví dụ: 115"
+            oninput="window.appActions.onWatchPartyMovieOrTimeChange()"
+            class="w-full min-h-[44px] px-3 py-2 rounded-xl bg-stone-950 border border-amber-400/40 text-xs text-white font-bold focus:outline-none" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label for="wp-form-date" class="block font-bold text-slate-200">2. Ngày bắt đầu (GMT+7)</label>
+            <input id="wp-form-date" type="date" onchange="window.appActions.onWatchPartyMovieOrTimeChange()"
+              class="w-full min-h-[44px] px-3 py-2 rounded-xl bg-stone-950 border border-white/15 text-xs text-white font-bold focus:outline-none focus:border-amber-400" />
+          </div>
+          <div class="space-y-1">
+            <label for="wp-form-time" class="block font-bold text-slate-200">Giờ bắt đầu (GMT+7)</label>
+            <input id="wp-form-time" type="time" onchange="window.appActions.onWatchPartyMovieOrTimeChange()"
+              class="w-full min-h-[44px] px-3 py-2 rounded-xl bg-stone-950 border border-white/15 text-xs text-white font-bold focus:outline-none focus:border-amber-400" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label for="wp-form-room-type" class="block font-bold text-slate-200">3. Loại phòng hỗ trợ</label>
+            <select id="wp-form-room-type" onchange="window.appActions.onWatchPartyRoomTypeChange()"
+              class="w-full min-h-[44px] px-3 py-2 rounded-xl bg-stone-950 border border-white/15 text-xs text-white font-semibold focus:outline-none focus:border-amber-400">
+              <option value="private_cinema">Buổi xem riêng (Tối đa 48 ghế)</option>
+              <option value="sweetbox">Sweetbox (Tối đa 2 người)</option>
+              <option value="stream_party">Phòng Stream Nhóm (Tối đa 10 người)</option>
+            </select>
+          </div>
+          <div class="space-y-1">
+            <label for="wp-form-capacity" class="block font-bold text-slate-200">Số người tối đa (tính cả bạn)</label>
+            <input id="wp-form-capacity" type="number" min="2" max="48" value="8"
+              class="w-full min-h-[44px] px-3 py-2 rounded-xl bg-stone-950 border border-white/15 text-xs text-white font-bold focus:outline-none focus:border-amber-400" />
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label for="wp-form-visibility" class="block font-bold text-slate-200">4. Quyền tham gia bằng lời mời</label>
+          <select id="wp-form-visibility"
+            class="w-full min-h-[44px] px-3 py-2 rounded-xl bg-stone-950 border border-white/15 text-xs text-white font-semibold focus:outline-none focus:border-amber-400">
+            <option value="invite_approval" selected>Người có link gửi yêu cầu &amp; Chủ buổi hẹn duyệt (Mặc định)</option>
+            <option value="invite_direct">Người có link xác nhận Tham gia sẽ vào thẳng nếu còn chỗ</option>
+          </select>
+        </div>
+
+        <div id="wp-form-schedule-preview" class="p-3.5 rounded-2xl space-y-1.5"
+          style="background:rgba(44,13,19,0.55);border:1px solid rgba(245,197,24,0.35);">
+          <div class="flex flex-wrap items-center justify-between gap-2 text-amber-300 font-bold">
+            <span><i class="fa-regular fa-clock mr-1"></i>Dự kiến bắt đầu &amp; Tự đóng phòng</span>
+            <span id="wp-preview-duration-badge" class="px-2 py-0.5 rounded bg-black/40 text-[10px]">-- phút + 10 phút đệm</span>
+          </div>
+          <p id="wp-preview-time-text" class="text-xs text-white font-semibold leading-relaxed">
+            Vui lòng chọn phim và thời gian bắt đầu…
+          </p>
+          <p class="text-[11px]" style="color:#D4D4D8;">
+            • Chọn ghế khi vào phòng • Phòng tự động mở đúng giờ và tự đóng vào giờ kết thúc cố định (không dời giờ khi tạm dừng hoặc tua).
+          </p>
+        </div>
+
+        <p id="wp-create-error" class="hidden text-xs font-bold text-rose-400"></p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-2">
+        <button type="button" onclick="window.appActions.closeCreateWatchPartyModal()"
+          class="cv-wp-cta-secondary">
+          Hủy
+        </button>
+        <button type="button" id="wp-create-submit-btn" onclick="window.appActions.submitWatchPartyForm()"
+          class="cv-wp-cta-primary">
+          <i class="fa-solid fa-ticket" aria-hidden="true"></i>
+          <span id="wp-create-submit-label">Xác nhận &amp; Tạo vé mời</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CHI TIẾT VÉ MỜI / RSVP / DUYỆT THÀNH VIÊN -->
+  <div id="watch-party-invite-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="wp-invite-modal-title">
+    <div class="cv-wp-modal-sheet w-full max-w-2xl rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 space-y-4 shadow-2xl"
+      style="background:linear-gradient(180deg, #181014 0%, #0B0B0F 100%);border:1px solid rgba(245,197,24,0.42);">
+      <div class="flex items-center justify-between gap-3 pb-2 border-b border-white/10">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <img src="assets/web-logo.png" alt="CineVerse Lotte" class="w-8 h-8 rounded-full border border-amber-400/50 object-cover shrink-0" />
+          <div class="min-w-0">
+            <h3 id="wp-invite-modal-title" class="cv-serif text-lg sm:text-xl font-bold text-white truncate">Vé mời buổi xem phim</h3>
+            <p id="wp-invite-subtitle" class="text-[11px]" style="color:#A1A1AA;">Chọn ghế khi vào phòng • Múi giờ Asia/Ho_Chi_Minh</p>
+          </div>
+        </div>
+        <button type="button" onclick="window.appActions.closeWatchPartyInviteModal()"
+          class="min-w-[44px] min-h-[44px] rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white flex items-center justify-center cursor-pointer"
+          aria-label="Đóng vé mời">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <div id="wp-invite-modal-body" class="space-y-4 text-xs"></div>
+    </div>
+  </div>
+
   <!-- MODAL ĐỔI PHIM / DÁN LINK YOUTUBE HOẶC MP4 -->
   <div id="custom-video-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-stone-900 border border-white/15 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
@@ -9081,8 +9543,23 @@
         if (!raw) return null;
         const parsed = JSON.parse(raw);
         if (!parsed || typeof parsed !== "object") return null;
-        if (parsed.userName) state.userName = String(parsed.userName);
-        if (typeof parsed.hasCustomName === "boolean") state.hasCustomName = parsed.hasCustomName;
+        const memberSessionNow = loadMemberAccountSession();
+        const hasAuthenticatedMemberName = Boolean(
+          memberSessionNow?.email &&
+          memberSessionNow?.displayName &&
+          !isDefaultGuestName(memberSessionNow.displayName)
+        );
+        if (hasAuthenticatedMemberName) {
+          state.userName = String(memberSessionNow.displayName);
+          state.hasCustomName = true;
+        } else {
+          if (parsed.userName && !(state.hasCustomName && !isDefaultGuestName(state.userName) && isDefaultGuestName(parsed.userName))) {
+            state.userName = String(parsed.userName);
+          }
+          if (typeof parsed.hasCustomName === "boolean") {
+            state.hasCustomName = state.hasCustomName || parsed.hasCustomName;
+          }
+        }
         if (typeof parsed.dimmed === "boolean") state.dimmed = parsed.dimmed;
         if (typeof parsed.ambilightEnabled === "boolean") state.ambilightEnabled = parsed.ambilightEnabled;
         if (typeof parsed.sfxEnabled === "boolean") state.sfxEnabled = parsed.sfxEnabled;
@@ -9310,6 +9787,17 @@
       subtitleOffsetSec: 0,
       subtitleOffsetsByKey: (() => { try { return JSON.parse(localStorage.getItem("cineverse_sub_offsets_v1") || "{}"); } catch (e) { return {}; } })(),
       top10: { status: "idle", data: null, error: "", lastFetchedAt: 0 },
+      watchParties: {
+        status: "idle",
+        upcoming: [],
+        history: [],
+        config: { defaultBufferMinutes: 10, timezone: "Asia/Ho_Chi_Minh" },
+        serverOffsetMs: 0,
+        lastFetchedAt: 0
+      },
+      watchPartyRooms: {},
+      pendingWatchPartyToken: "",
+      pendingWatchPartyRoomId: "",
       roomsCustom: {},
       vaultVideos: [
         {
@@ -10302,6 +10790,31 @@
     }
 
     function getEffectiveRoom(roomId) {
+      if (String(roomId || "").startsWith("wp_")) {
+        const wpBase = (state.watchPartyRooms && state.watchPartyRooms[roomId]) || {
+          id: roomId,
+          roomId,
+          isWatchParty: true,
+          isPrivate: true,
+          number: "Phòng Hẹn Riêng",
+          movieTitle: "Buổi chiếu riêng",
+          status: "showing",
+          maxSeats: 48,
+          isCustomStartZero: true
+        };
+        const custom = state.roomsCustom[roomId] || {};
+        const merged = { ...wpBase, ...custom, isWatchParty: true, isPrivate: true };
+        merged.displayTitle = sanitizeMovieTitle(merged.movieTitle);
+        merged.poster = resolveMoviePoster(merged.movieTitle, merged.poster, merged.youtubeId);
+        const meta = resolveMovieMetadata(merged.movieTitle, wpBase);
+        merged.synopsis = merged.synopsis || meta.synopsis;
+        merged.cast = merged.cast || meta.cast;
+        merged.genre = merged.genre || meta.genre;
+        merged.duration = merged.duration || meta.duration;
+        merged.ageRating = merged.ageRating || meta.ageRating;
+        merged.year = merged.year || meta.year;
+        return merged;
+      }
       const base = DEFAULT_ROOMS.find(r => r.id === roomId) || DEFAULT_ROOMS[0];
       const adminCfg = (state.lobbyConfigRooms && state.lobbyConfigRooms[roomId]) || {};
       const custom = state.roomsCustom[roomId] || {};
@@ -11150,6 +11663,7 @@
 
     function renderLobby() {
       renderContinueWatchingStrip();
+      if (typeof renderLobbyWatchParties === "function") renderLobbyWatchParties();
       renderLobbyTop10Movies();
       if (typeof fetchWeeklyTop10 === "function" && state.top10?.status === "idle") {
         fetchWeeklyTop10(false);
@@ -11363,13 +11877,22 @@
 
     async function enterRoom(roomId, options = {}) {
       const bypassWebAuth = Boolean(options?.fromDiscord && state.hasCustomName && !isDefaultGuestName(state.userName));
+      const isWpRoom = String(roomId || "").startsWith("wp_");
       if (!bypassWebAuth && (!state.hasCustomName || isDefaultGuestName(state.userName) || !state.accountLoggedIn || !state.gmailVerified || !state.userEmail)) {
         pendingEnterRoomId = roomId;
+        if (isWpRoom) state.pendingWatchPartyRoomId = roomId;
         openNameModal(true);
         return;
       }
 
-      const room = getEffectiveRoom(roomId);
+      if (isWpRoom) {
+        const verifiedWp = await verifyAndLoadWatchPartyRoomForEntry(roomId);
+        if (!verifiedWp || !verifiedWp.ok) {
+          return;
+        }
+      }
+
+      let room = getEffectiveRoom(roomId);
 
       // Chặn vào phòng nếu đang Sắp chiếu / chưa tới giờ đếm ngược
       const waitMsg = getRoomWaitMessage(room);
@@ -11378,8 +11901,8 @@
         return;
       }
 
-      // Bắt buộc phải đặt vé & chọn ghế trước khi vào bất kỳ phòng nào
-      if (!options?.fromBooking && !hasValidTicketForRoom(roomId)) {
+      // Phòng công khai bắt buộc đặt vé; Phòng Hẹn Xem Chung cho phép Chọn ghế ngay khi vào phòng
+      if (!isWpRoom && !options?.fromBooking && !hasValidTicketForRoom(roomId)) {
         showToast(`🎟️ Vui lòng đặt vé & chọn ghế để vào ${room.number}!`, "info");
         openBookingModal(roomId);
         return;
@@ -11428,8 +11951,8 @@
         return;
       }
 
-      // Nếu chưa có người xem khác trong phòng -> đồng bộ xóa cache RTDB cũ nhưng GIỮ lại lịch sử chat cục bộ trong localStorage
-      if (otherRealCount === 0) {
+      // Chỉ xóa cache RTDB phòng công khai khi không còn ai; phòng Watch Party giữ đồng bộ do máy chủ quản lý
+      if (otherRealCount === 0 && !room.isWatchParty) {
         delete state.roomsCustom[roomId];
         if (rtdb && rtdbMod) {
           rtdbMod.remove(rtdbMod.ref(rtdb, `sync/${roomId}`)).catch(() => {});
@@ -11508,6 +12031,9 @@
       try { subscribeRoomChat(roomId); } catch (_) {}
       try { subscribeRoomSync(roomId); } catch (_) {}
       try { subscribeRoomVoice(roomId); } catch (_) {}
+      if (room.isWatchParty) {
+        try { subscribeWatchPartySeats(roomId); } catch (_) {}
+      }
       if (room.isDiscordRoom) {
         try { subscribeRoomLiveScreen(roomId); } catch (_) {}
         try { subscribeRoomLiveCam(roomId); } catch (_) {}
@@ -11530,7 +12056,7 @@
           delete state.seatsByRoom[oldRoomId][mySeat];
         }
         const remainingReal = Object.values(state.seatsByRoom[oldRoomId] || {}).some(s => s && s.isReal);
-        if (!remainingReal) {
+        if (!remainingReal && !String(oldRoomId).startsWith("wp_")) {
           state.chatByRoom[oldRoomId] = [];
           delete state.roomsCustom[oldRoomId];
           delete state.roomLocks[oldRoomId];
@@ -11541,6 +12067,15 @@
             rtdbMod.remove(rtdbMod.ref(rtdb, `room_locks/${oldRoomId}`)).catch(() => {});
           }
         }
+        if (typeof wpSeatUnsub === "function") {
+          try { wpSeatUnsub(); } catch (_) {}
+          wpSeatUnsub = null;
+        }
+        document.getElementById("wp-room-closing-pill")?.classList.add("hidden");
+        document.getElementById("wp-room-closing-pill")?.classList.remove("inline-flex");
+        document.getElementById("btn-wp-end-for-all")?.classList.add("hidden");
+        const leaveLblReset = document.getElementById("room-leave-btn-label");
+        if (leaveLblReset) leaveLblReset.textContent = "Sảnh chờ";
         clearMyChatTyping();
         clearMySeatFromRTDB();
         rtdbConfirmedMySeatByRoom[oldRoomId] = false;
@@ -11704,6 +12239,27 @@
         statusEl.className = "px-2.5 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold text-xs";
       }
 
+      const closingPill = document.getElementById("wp-room-closing-pill");
+      const endAllBtn = document.getElementById("btn-wp-end-for-all");
+      const leaveLbl = document.getElementById("room-leave-btn-label");
+      if (room.isWatchParty) {
+        if (leaveLbl) leaveLbl.textContent = "Rời phòng";
+        if (closingPill) {
+          closingPill.classList.remove("hidden");
+          closingPill.classList.add("inline-flex");
+        }
+        const isOrg = typeof isWatchPartyOrganizerForRoom === "function" && isWatchPartyOrganizerForRoom(room);
+        if (endAllBtn) endAllBtn.classList.toggle("hidden", !isOrg);
+        if (typeof updateWatchPartyRoomCountdownUI === "function") updateWatchPartyRoomCountdownUI();
+      } else {
+        if (leaveLbl) leaveLbl.textContent = "Sảnh chờ";
+        if (closingPill) {
+          closingPill.classList.add("hidden");
+          closingPill.classList.remove("inline-flex");
+        }
+        if (endAllBtn) endAllBtn.classList.add("hidden");
+      }
+
       // Đồng bộ nút trạng thái khóa PIN của phòng hiện tại (chỉ Admin/Host mới thấy 4 số PIN)
       const lockBtn = document.getElementById("btn-room-lock");
       const lockObj = state.roomLocks[state.currentRoomId];
@@ -11743,7 +12299,7 @@
       if (bookedTicket && bookedTicket.seatId && !validSeatsForRoom.includes(bookedTicket.seatId) && validSeatsForRoom.includes(seatId)) {
         bookedTicket.seatId = seatId;
         saveAppStateToStorage();
-      } else if (currentLockedSeat && currentLockedSeat !== seatId) {
+      } else if (currentLockedSeat && currentLockedSeat !== seatId && !roomObjForSeat.isWatchParty) {
         if (notify) {
           if (state.paymentMode !== "paid") {
             const remainMs = getFreeSeatChangeRemainingMs();
@@ -13030,7 +13586,9 @@
         seekContainer.classList.add("hidden");
         const savedHistYt = getWatchHistoryEntry(room);
         const hasOtherHostYt = Boolean(currentRoomHost && currentRoomHost.uid && currentRoomHost.uid !== state.uid);
-        const canResumeYt = Boolean(!hasOtherHostYt && savedHistYt && !savedHistYt.completed && savedHistYt.currentTime >= 5);
+        const wpStartPlaying = !room.isWatchParty || Boolean(latestRoomSyncState?.isPlaying);
+        state.ytPaused = !wpStartPlaying;
+        const canResumeYt = Boolean(!room.isWatchParty && !hasOtherHostYt && savedHistYt && !savedHistYt.completed && savedHistYt.currentTime >= 5);
         const startSec = canResumeYt
           ? Math.floor(savedHistYt.currentTime)
           : (room.isCustomStartZero ? 0 : Math.floor((Date.now() / 1000) % (room.durationSec || 600)));
@@ -13048,7 +13606,7 @@
               id="yt-active-iframe"
               class="w-full h-full border-0"
               referrerpolicy="strict-origin-when-cross-origin"
-              src="${host}/embed/${encodeURIComponent(room.youtubeId)}?autoplay=1&mute=0&start=${startSec}&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1${originParam}"
+              src="${host}/embed/${encodeURIComponent(room.youtubeId)}?autoplay=${wpStartPlaying ? 1 : 0}&mute=0&start=${startSec}&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1${originParam}"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowfullscreen>
             </iframe>
@@ -13094,6 +13652,12 @@
         const tryAutoPlayRoomVideo = () => {
           if (!videoEl || videoEl.classList.contains("hidden")) return;
           const playBtn = document.getElementById("btn-play-pause");
+          if (room.isWatchParty && !latestRoomSyncState?.isPlaying) {
+            try { videoEl.pause(); } catch (_) {}
+            if (playBtn) playBtn.innerHTML = `<i class="fa-solid fa-play"></i>`;
+            setScreenCurtainClosed(false);
+            return;
+          }
           videoEl.play().then(() => {
             if (playBtn) playBtn.innerHTML = `<i class="fa-solid fa-pause"></i>`;
             setScreenCurtainClosed(false);
@@ -15167,6 +15731,17 @@
     async function checkInviteUrlParams() {
       try {
         const params = new URLSearchParams(window.location.search);
+        const wpInviteToken = params.get("wp_invite");
+        const wpRoomParam = params.get("wp_room");
+        if (wpInviteToken && typeof handleWatchPartyInviteTokenFromUrl === "function") {
+          await handleWatchPartyInviteTokenFromUrl(wpInviteToken);
+          return;
+        }
+        if (wpRoomParam && String(wpRoomParam).startsWith("wp_")) {
+          try { window.history.replaceState({}, "", window.location.pathname); } catch (_) {}
+          enterRoom(wpRoomParam);
+          return;
+        }
         const roomParam = params.get("room");
         const seatParam = params.get("seat");
         const inviter = params.get("inviter");
@@ -16411,6 +16986,16 @@
       recordAuthenticatedVisitLogOnce();
       syncMyOnlinePresence();
       autoLocateMemberLocation(true);
+      if (typeof fetchWatchPartyList === "function") fetchWatchPartyList(true);
+      if (state.pendingWatchPartyToken && typeof openWatchPartyInviteByToken === "function") {
+        const tok = state.pendingWatchPartyToken;
+        state.pendingWatchPartyToken = "";
+        setTimeout(() => openWatchPartyInviteByToken(tok), 120);
+      } else if (state.pendingWatchPartyRoomId && !pendingEnterRoomId) {
+        const rWp = state.pendingWatchPartyRoomId;
+        state.pendingWatchPartyRoomId = "";
+        setTimeout(() => enterRoom(rWp), 120);
+      }
     }
 
     function openNameModal(requireForRoom = false) {
@@ -17096,17 +17681,39 @@
       }
       try {
         const seatRef = rtdbMod.ref(rtdb, targetPath);
-        myActiveSeatPath = targetPath;
-        myActiveSeatDisconnect = rtdbMod.onDisconnect(seatRef);
-        await myActiveSeatDisconnect.remove();
-        await rtdbMod.set(seatRef, {
+        const seatPayload = {
           uid: state.uid,
           userName: state.userName,
           snack: state.mySnack || "🍿🥤",
           isReal: true,
           updatedAt: Date.now()
-        });
-      } catch (e) {}
+        };
+        if (typeof rtdbMod.runTransaction === "function") {
+          const txRes = await rtdbMod.runTransaction(seatRef, (cur) => {
+            if (cur && cur.uid && cur.uid !== state.uid && cur.isReal) {
+              return; // Hủy ghi đè nếu người khác vừa chiếm trước
+            }
+            return seatPayload;
+          });
+          if (!txRes.committed) {
+            const snapVal = txRes.snapshot?.val?.() || {};
+            if (state.seatsByRoom[roomId]) {
+              state.seatsByRoom[roomId][seatId] = snapVal;
+            }
+            renderSeatingMap();
+            renderAudienceList();
+            showToast(`⚠️ Ghế ${seatId} vừa có ${snapVal.userName || "người khác"} chọn trước! Vui lòng chọn ghế trống khác.`, "warning");
+            myActiveSeatPath = null;
+            return false;
+          }
+        } else {
+          await rtdbMod.set(seatRef, seatPayload);
+        }
+        myActiveSeatPath = targetPath;
+        myActiveSeatDisconnect = rtdbMod.onDisconnect(seatRef);
+        await myActiveSeatDisconnect.remove();
+        return true;
+      } catch (e) { return false; }
     }
 
     function clearMySeatFromRTDB() {
@@ -17802,9 +18409,9 @@
       };
       rtdbMod.set(rtdbMod.ref(rtdb, `sync/${roomId}`), payload).catch(() => {});
 
-      // Đảm bảo Sảnh chính & Lịch chiếu (lobby_config/rooms/$roomId) luôn khớp với phim Chủ Trì đang phát
+      // Đảm bảo Sảnh chính & Lịch chiếu (lobby_config/rooms/$roomId) chỉ cập nhật cho phòng công khai
       const lobbyRoom = state.lobbyConfigRooms?.[roomId];
-      if (room.movieTitle && (!lobbyRoom || lobbyRoom.movieTitle !== room.movieTitle || (room.videoUrl && lobbyRoom.videoUrl !== room.videoUrl))) {
+      if (!room.isWatchParty && room.movieTitle && (!lobbyRoom || lobbyRoom.movieTitle !== room.movieTitle || (room.videoUrl && lobbyRoom.videoUrl !== room.videoUrl))) {
         syncHostMovieToLobbyAndSchedule(roomId, {
           movieTitle: room.movieTitle,
           youtubeId: room.youtubeId || "",
@@ -18053,6 +18660,12 @@
         const data = snap.val();
         if (!data) return;
         latestRoomSyncState = data;
+        if (data.roomClosed && String(roomId).startsWith("wp_")) {
+          if (typeof handleWatchPartyForceClosed === "function") {
+            handleWatchPartyForceClosed(roomId, data.closedReason || "Buổi chiếu đã kết thúc");
+          }
+          return;
+        }
         if (!currentRoomHost || !currentRoomHost.uid) return;
         applyRemoteVideoSync(roomId, data, false);
       }, () => {});
@@ -30900,6 +31513,1041 @@
       }
     });
 
+    // =========================================================
+    // HẸN XEM CÙNG BẠN BÈ (CLIENT LIFECYCLE, TICKETS & SYNC)
+    // =========================================================
+    let wpSeatUnsub = null;
+    let wpFetchInFlight = null;
+    let wpEditEventId = "";
+    let wpActiveInviteToken = "";
+    let wpActiveInviteEvent = null;
+    const wpNotifiedOpenIds = new Set();
+    const wpWarningsShown = new Set();
+    let wpForceClosedGuardRoomId = "";
+
+    function getWatchPartyServerNow() {
+      return Date.now() + Number(state.watchParties?.serverOffsetMs || 0);
+    }
+
+    function getWatchPartyAccountPayload() {
+      const email = String(state.userEmail || "").trim().toLowerCase();
+      return {
+        accountEmail: email,
+        accountKey: email.replace(/[.#$/\[\]\s]+/g, "_"),
+        uid: state.uid,
+        userName: state.userName || "Thành viên"
+      };
+    }
+
+    function isWatchPartyOrganizerForRoom(room) {
+      if (!room || !room.isWatchParty) return false;
+      const myEmailKey = String(state.userEmail || "").trim().toLowerCase().replace(/[.#$/\[\]\s]+/g, "_").replace(/^_+|_+$/g, "");
+      return Boolean(myEmailKey && room.organizerId && myEmailKey === room.organizerId);
+    }
+
+    function subscribeWatchPartySeats(roomId) {
+      if (typeof wpSeatUnsub === "function") {
+        try { wpSeatUnsub(); } catch (_) {}
+        wpSeatUnsub = null;
+      }
+      if (!rtdb || !rtdbMod || !roomId) return;
+      const seatRef = rtdbMod.ref(rtdb, `seats/${roomId}`);
+      wpSeatUnsub = rtdbMod.onValue(seatRef, (snap) => {
+        const rawRemote = snap.val() || {};
+        const remoteRoom = {};
+        const nowTs = Date.now();
+        Object.entries(rawRemote).forEach(([seatId, info]) => {
+          if (!info || !info.uid) return;
+          if (info.uid !== state.uid && info.updatedAt && (nowTs - info.updatedAt > 7200000)) return;
+          remoteRoom[seatId] = info;
+        });
+        state.seatsByRoom[roomId] = remoteRoom;
+        if (state.currentRoomId === roomId) {
+          renderSeatingMap();
+          renderAudienceList();
+          updateRoomHeaderUI();
+        }
+      });
+    }
+
+    function formatWpDateTimeVn(utcMs) {
+      const d = new Date(Number(utcMs) || Date.now());
+      try {
+        const dateStr = new Intl.DateTimeFormat("vi-VN", {
+          timeZone: "Asia/Ho_Chi_Minh",
+          weekday: "short",
+          day: "2-digit",
+          month: "2-digit"
+        }).format(d);
+        const timeStr = new Intl.DateTimeFormat("vi-VN", {
+          timeZone: "Asia/Ho_Chi_Minh",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false
+        }).format(d);
+        const vnNow = new Intl.DateTimeFormat("vi-VN", { timeZone: "Asia/Ho_Chi_Minh", day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(getWatchPartyServerNow()));
+        const vnTarget = new Intl.DateTimeFormat("vi-VN", { timeZone: "Asia/Ho_Chi_Minh", day: "2-digit", month: "2-digit", year: "numeric" }).format(d);
+        return {
+          dateLabel: vnNow === vnTarget ? `Hôm nay, ${vnTarget.slice(0, 5)}` : dateStr,
+          timeLabel: timeStr,
+          fullLabel: `${timeStr} • ${vnTarget}`
+        };
+      } catch (_) {
+        return { dateLabel: "Hôm nay", timeLabel: "--:--", fullLabel: "--:--" };
+      }
+    }
+
+    function getWpMovieCatalogList() {
+      const list = [];
+      const seen = new Set();
+      const pushMovie = (obj) => {
+        const title = sanitizeMovieTitle(obj.displayTitle || obj.movieTitle || obj.title || "");
+        if (!title) return;
+        const mId = getCanonicalMovieId(obj);
+        if (!mId || seen.has(mId)) return;
+        seen.add(mId);
+        const meta = typeof resolveCatalogMeta === "function" ? resolveCatalogMeta(title) : {};
+        let durSec = Number(obj.durationSec || 0);
+        if (!durSec && meta.duration) {
+          const hm = String(meta.duration).match(/(\d+)\s*h\s*(\d+)?/i);
+          const mm = String(meta.duration).match(/^(\d{1,3}):(\d{2})$/);
+          const pm = String(meta.duration).match(/(\d+)\s*(?:p|phút)/i);
+          if (hm) durSec = Number(hm[1]) * 3600 + Number(hm[2] || 0) * 60;
+          else if (mm) durSec = Number(mm[1]) * 60 + Number(mm[2]);
+          else if (pm) durSec = Number(pm[1]) * 60;
+        }
+        const yearMatch = String(obj.movieTitle || title).match(/\b(19\d{2}|20\d{2})\b/);
+        list.push({
+          movieId: mId,
+          movieTitle: title,
+          poster: resolveMoviePoster(title, obj.poster || "", obj.youtubeId || ""),
+          videoUrl: obj.youtubeId ? "" : (obj.videoUrl || ""),
+          youtubeId: obj.youtubeId || "",
+          genre: obj.genre || meta.genre || "Điện ảnh • Chiếu riêng",
+          ageRating: obj.ageRating || meta.ageRating || "T13+",
+          year: yearMatch ? yearMatch[1] : (meta.year || ""),
+          durationSec: durSec > 0 ? durSec : 0
+        });
+      };
+
+      DEFAULT_ROOMS.forEach((r) => {
+        const eff = getEffectiveRoom(r.id);
+        if (eff && !eff.isDiscordRoom && (eff.videoUrl || eff.youtubeId)) pushMovie(eff);
+      });
+      if (Array.isArray(state.vaultVideos)) {
+        state.vaultVideos.forEach((v) => {
+          if (v && (v.videoUrl || v.youtubeId)) pushMovie(v);
+        });
+      }
+      return list;
+    }
+
+    async function verifyAndLoadWatchPartyRoomForEntry(roomId) {
+      const workerBase = getTop10WorkerBaseUrl();
+      const acc = getWatchPartyAccountPayload();
+      if (!acc.accountEmail) {
+        pendingEnterRoomId = roomId;
+        state.pendingWatchPartyRoomId = roomId;
+        openNameModal(true);
+        return { ok: false };
+      }
+      try {
+        const res = await fetch(`${workerBase}/api/watch-party/enter`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...acc, roomId })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (data?.serverNow) {
+          state.watchParties.serverOffsetMs = Number(data.serverNow) - Date.now();
+        }
+        if (!res.ok || !data.ok || !data.room) {
+          const errCode = data?.error || "";
+          if (errCode === "NOT_APPROVED_FOR_WATCH_PARTY") {
+            showToast("⛔ Chỉ thành viên được Chủ buổi hẹn duyệt mới có thể vào phòng riêng này.", "error");
+          } else if (errCode === "EVENT_ENDED") {
+            showToast("🎬 Buổi chiếu đã kết thúc. Link phòng không còn hiệu lực.", "info");
+            if (data?.event) {
+              wpActiveInviteEvent = data.event;
+              renderWatchPartyInviteModal();
+              document.getElementById("watch-party-invite-modal")?.classList.remove("hidden");
+            }
+          } else if (errCode === "NOT_STARTED_YET") {
+            const st = formatWpDateTimeVn(data.startsAt);
+            showToast(`⏳ Chưa đến giờ hẹn (${st.timeLabel} • ${st.dateLabel}). Phòng sẽ tự mở đúng giờ!`, "warning");
+          } else {
+            showToast(`❌ Không thể vào phòng (${errCode || res.status}).`, "error");
+          }
+          fetchWatchPartyList(true);
+          return { ok: false };
+        }
+        state.watchPartyRooms[roomId] = data.room;
+        if (data.event) {
+          const idx = (state.watchParties.upcoming || []).findIndex(e => e.eventId === data.event.eventId);
+          if (idx >= 0) state.watchParties.upcoming[idx] = data.event;
+          else state.watchParties.upcoming.unshift(data.event);
+          renderLobbyWatchParties();
+        }
+        return { ok: true, room: data.room, event: data.event };
+      } catch (err) {
+        showToast("⚠️ Lỗi kết nối máy chủ khi xác thực quyền vào phòng riêng.", "error");
+        return { ok: false };
+      }
+    }
+
+    async function fetchWatchPartyList(force = false) {
+      const now = Date.now();
+      if (!force && wpFetchInFlight) return wpFetchInFlight;
+      if (!force && state.watchParties.status === "ready" && (now - (state.watchParties.lastFetchedAt || 0) < 20000)) {
+        return state.watchParties;
+      }
+
+      const acc = getWatchPartyAccountPayload();
+      if (!acc.accountEmail || !state.accountLoggedIn) {
+        state.watchParties = {
+          ...state.watchParties,
+          status: "ready",
+          upcoming: [],
+          history: [],
+          lastFetchedAt: now
+        };
+        renderLobbyWatchParties();
+        return state.watchParties;
+      }
+
+      const workerBase = getTop10WorkerBaseUrl();
+      wpFetchInFlight = (async () => {
+        try {
+          const res = await fetch(`${workerBase}/api/watch-party/list?accountEmail=${encodeURIComponent(acc.accountEmail)}&t=${now}`, {
+            cache: "no-store"
+          });
+          if (!res.ok) throw new Error(`HTTP_${res.status}`);
+          const data = await res.json();
+          if (data?.serverNow) {
+            state.watchParties.serverOffsetMs = Number(data.serverNow) - Date.now();
+          }
+          const prevUpcoming = state.watchParties.upcoming || [];
+          const nextUpcoming = Array.isArray(data.upcoming) ? data.upcoming : [];
+
+          nextUpcoming.forEach((ev) => {
+            const was = prevUpcoming.find(x => x.eventId === ev.eventId);
+            if (ev.status === "open" && was && was.status !== "open" && !wpNotifiedOpenIds.has(ev.eventId)) {
+              wpNotifiedOpenIds.add(ev.eventId);
+              showToast(`🎉 Đến giờ hẹn! Phòng riêng "${ev.movieTitle}" đã sẵn sàng — bấm Vào phòng ngay!`, "success");
+            }
+          });
+
+          state.watchParties = {
+            status: "ready",
+            upcoming: nextUpcoming,
+            history: Array.isArray(data.history) ? data.history : [],
+            config: data.config || state.watchParties.config,
+            serverOffsetMs: state.watchParties.serverOffsetMs,
+            lastFetchedAt: Date.now()
+          };
+          renderLobbyWatchParties();
+          if (wpActiveInviteEvent) {
+            const refreshed = [...nextUpcoming, ...state.watchParties.history].find(e => e.eventId === wpActiveInviteEvent.eventId);
+            if (refreshed) {
+              wpActiveInviteEvent = refreshed;
+              renderWatchPartyInviteModal();
+            }
+          }
+          return state.watchParties;
+        } catch (_) {
+          if (state.watchParties.status === "idle") {
+            state.watchParties.status = "ready";
+            renderLobbyWatchParties();
+          }
+          return null;
+        } finally {
+          wpFetchInFlight = null;
+        }
+      })();
+      return wpFetchInFlight;
+    }
+
+    function getWatchPartyStatusDisplay(ev) {
+      const st = String(ev?.status || "scheduled");
+      if (st === "open") {
+        return { badge: "Phòng đã mở", color: "#34D399", bg: "rgba(16,185,129,0.16)", border: "rgba(16,185,129,0.45)", ctaLabel: ev.canEnterRoom ? "Vào phòng" : "Xem lời mời", ctaClass: "cv-wp-cta-primary" };
+      }
+      if (st === "creating") {
+        return { badge: "Đang tạo phòng", color: "#FCD34D", bg: "rgba(245,158,11,0.16)", border: "rgba(245,158,11,0.45)", ctaLabel: "Đang chuẩn bị phòng", ctaClass: "cv-wp-cta-secondary" };
+      }
+      if (st === "create_failed") {
+        return { badge: "Tạo phòng thất bại", color: "#FDA4AF", bg: "rgba(229,9,20,0.2)", border: "rgba(229,9,20,0.5)", ctaLabel: "Thử lại tạo phòng", ctaClass: "cv-wp-cta-primary" };
+      }
+      if (st === "ended") {
+        return { badge: "Đã kết thúc", color: "#A1A1AA", bg: "rgba(255,255,255,0.06)", border: "rgba(255,255,255,0.14)", ctaLabel: "Xem lại thông tin", ctaClass: "cv-wp-cta-secondary" };
+      }
+      if (st === "cancelled") {
+        return { badge: "Đã hủy", color: "#FDA4AF", bg: "rgba(229,9,20,0.14)", border: "rgba(229,9,20,0.35)", ctaLabel: "Đã hủy lịch", ctaClass: "cv-wp-cta-secondary" };
+      }
+      return { badge: "Chưa đến giờ", color: "#F5C518", bg: "rgba(245,197,24,0.14)", border: "rgba(245,197,24,0.4)", ctaLabel: "Xem lời mời", ctaClass: "cv-wp-cta-primary" };
+    }
+
+    function renderWatchPartyTicketCardHtml(ev) {
+      const sInfo = getWpStatusDisplayTime(ev);
+      const stUi = getWatchPartyStatusDisplay(ev);
+      const approved = Array.isArray(ev.approvedMembers) ? ev.approvedMembers : [];
+      const avatarsHtml = approved.slice(0, 4).map((m) => {
+        const initial = String(m.name || "K").trim().charAt(0).toUpperCase();
+        return `<span class="cv-wp-avatar-dot" title="${escapeHTML(m.name)}">${escapeHTML(initial)}</span>`;
+      }).join("");
+      const moreCount = approved.length > 4 ? `<span class="text-[10px] font-bold ml-1.5 text-amber-300">+${approved.length - 4}</span>` : "";
+
+      const primaryOnclick = ev.status === "open" && ev.canEnterRoom
+        ? `window.appActions.enterWatchPartyRoom('${escapeHTML(ev.eventId)}')`
+        : ev.status === "create_failed"
+        ? `window.appActions.retryWatchPartyRoomCreation('${escapeHTML(ev.eventId)}')`
+        : `window.appActions.openWatchPartyInviteModal('${escapeHTML(ev.eventId)}')`;
+
+      return `
+        <article class="cv-wp-ticket" data-wp-event-id="${escapeHTML(ev.eventId)}" aria-label="Vé hẹn: ${escapeHTML(ev.movieTitle)}">
+          <div class="cv-wp-ticket-main">
+            <div class="cv-wp-poster-wrap">
+              <img src="${escapeHTML(ev.poster || "assets/web-logo.png")}" alt="${escapeHTML(ev.movieTitle)}" loading="lazy"
+                onerror="this.onerror=null;this.src='assets/web-logo.png';"
+                class="w-full h-full object-cover" />
+              <div class="cv-wp-poster-fade"></div>
+              <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold"
+                style="background:rgba(11,11,15,0.82);border:1px solid rgba(255,255,255,0.16);color:#F4F4F5;">
+                <img src="assets/web-logo.png" alt="" class="w-3.5 h-3.5 rounded-full object-cover" />
+                <span>Chọn ghế khi vào phòng</span>
+              </div>
+            </div>
+
+            <div class="cv-wp-body">
+              <div class="space-y-1.5">
+                <div class="cv-wp-eyebrow">
+                  <span>${escapeHTML(ev.roomTypeLabel || "Buổi xem riêng")}</span>
+                </div>
+                <h3 class="cv-wp-title">${escapeHTML(ev.movieTitle)}</h3>
+              </div>
+
+              <div class="cv-top10-meta-line text-xs" style="color:#E4E4E7;">
+                <span><i class="fa-regular fa-calendar mr-1 text-amber-300" aria-hidden="true"></i>${escapeHTML(sInfo.startDate)}</span>
+                <span class="opacity-40" aria-hidden="true">|</span>
+                <span class="font-bold text-white"><i class="fa-regular fa-clock mr-1 text-amber-300" aria-hidden="true"></i>${escapeHTML(sInfo.startTime)}</span>
+                <span class="opacity-40" aria-hidden="true">•</span>
+                <span class="text-[11px]" style="color:#A1A1AA;">Đóng phòng ${escapeHTML(sInfo.endTime)}</span>
+              </div>
+
+              <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                <div class="flex items-center gap-2 min-w-0">
+                  <div class="cv-wp-avatars">${avatarsHtml}${moreCount}</div>
+                  <span class="text-[11px] truncate" style="color:#D4D4D8;">
+                    Tổ chức: <strong class="text-white">${escapeHTML(ev.organizerName)}</strong> • ${ev.approvedCount}/${ev.capacity} người
+                  </span>
+                </div>
+                <span class="px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold shrink-0"
+                  style="background:${stUi.bg};border:1px solid ${stUi.border};color:${stUi.color};">
+                  ${escapeHTML(stUi.badge)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="cv-wp-divider" aria-hidden="true"></div>
+
+          <div class="cv-wp-stub">
+            <div class="text-center space-y-1">
+              <div class="text-[9.5px] uppercase tracking-[0.2em]" style="color:#D4D4D8;">Mã lời mời</div>
+              <div class="text-base sm:text-lg font-extrabold tracking-widest text-white font-mono">${escapeHTML(ev.inviteCode || "CV-INV")}</div>
+              <div class="cv-wp-barcode" aria-hidden="true"></div>
+            </div>
+
+            ${ev.isOrganizer && !ev.inviteRevoked && ev.status !== "ended" && ev.status !== "cancelled"
+              ? `<button type="button" onclick="window.appActions.copyWatchPartyInviteLink('${escapeHTML(ev.eventId)}', '${escapeHTML(ev.inviteToken || "")}')"
+                  class="cv-wp-cta-secondary w-full">
+                  <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                  <span>Sao chép link</span>
+                </button>`
+              : `<button type="button" onclick="window.appActions.openWatchPartyInviteModal('${escapeHTML(ev.eventId)}')"
+                  class="cv-wp-cta-secondary w-full">
+                  <i class="fa-solid fa-ticket" aria-hidden="true"></i>
+                  <span>Chi tiết buổi hẹn</span>
+                </button>`}
+
+            <button type="button" onclick="${primaryOnclick}"
+              ${ev.status === "cancelled" ? "disabled" : ""}
+              class="${stUi.ctaClass} w-full ${ev.status === "cancelled" ? "opacity-50 cursor-not-allowed" : ""}">
+              <span>${escapeHTML(stUi.ctaLabel)}</span>
+            </button>
+          </div>
+        </article>
+      `;
+    }
+
+    function getWpStatusDisplayTime(ev) {
+      const s = formatWpDateTimeVn(ev?.startsAt);
+      const e = formatWpDateTimeVn(ev?.endsAt);
+      return { startDate: s.dateLabel, startTime: s.timeLabel, endTime: e.timeLabel, startFull: s.fullLabel, endFull: e.fullLabel };
+    }
+
+    function renderLobbyWatchParties() {
+      const upEl = document.getElementById("wp-upcoming-list");
+      const histWrap = document.getElementById("wp-history-details");
+      const histEl = document.getElementById("wp-history-list");
+      const histCntEl = document.getElementById("wp-history-count");
+      if (!upEl) return;
+
+      const upcoming = Array.isArray(state.watchParties?.upcoming) ? state.watchParties.upcoming : [];
+      const history = Array.isArray(state.watchParties?.history) ? state.watchParties.history : [];
+
+      if (upcoming.length === 0) {
+        upEl.innerHTML = `
+          <div class="cv-wp-ticket p-5 sm:p-6 flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5 min-w-0">
+              <img src="assets/web-logo.png" alt="CineVerse Lotte" class="w-12 h-12 rounded-2xl object-cover border border-amber-400/45 shrink-0" />
+              <div class="space-y-1 min-w-0">
+                <h3 class="cv-serif text-lg sm:text-xl font-bold text-white">Chưa có buổi hẹn xem phim nào</h3>
+                <p class="text-xs leading-relaxed" style="color:#D4D4D8;">
+                  Đặt lịch chọn phim trước, gửi vé mời riêng cho bạn bè — đúng giờ hệ thống tự mở phòng riêng cho nhóm.
+                </p>
+              </div>
+            </div>
+            <button type="button" onclick="window.appActions.openCreateWatchPartyModal()"
+              class="cv-wp-cta-primary shrink-0">
+              <i class="fa-solid fa-calendar-plus" aria-hidden="true"></i>
+              <span>Tạo buổi xem đầu tiên</span>
+            </button>
+          </div>
+        `;
+      } else {
+        upEl.innerHTML = upcoming.map(renderWatchPartyTicketCardHtml).join("");
+      }
+
+      if (histWrap && histEl) {
+        histWrap.classList.toggle("hidden", history.length === 0);
+        if (histCntEl) histCntEl.textContent = String(history.length);
+        histEl.innerHTML = history.map(renderWatchPartyTicketCardHtml).join("");
+      }
+    }
+
+    function setWatchPartyCreateError(msg = "") {
+      const el = document.getElementById("wp-create-error");
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.toggle("hidden", !msg);
+    }
+
+    function openCreateWatchPartyForHero() {
+      const base = DEFAULT_ROOMS[state.heroIndex] || DEFAULT_ROOMS[0];
+      const eff = getEffectiveRoom(base.id);
+      openCreateWatchPartyModal("", getCanonicalMovieId(eff));
+    }
+
+    function openCreateWatchPartyModal(editEventId = "", preselectMovieId = "") {
+      if (!state.accountLoggedIn || !state.gmailVerified || !state.userEmail) {
+        showToast("🔐 Vui lòng đăng nhập Gmail trước khi tạo lịch hẹn xem cùng bạn bè!", "warning");
+        openNameModal(false);
+        return;
+      }
+      setWatchPartyCreateError("");
+      wpEditEventId = String(editEventId || "");
+      const movies = getWpMovieCatalogList();
+      const movieSel = document.getElementById("wp-form-movie");
+      const dateInput = document.getElementById("wp-form-date");
+      const timeInput = document.getElementById("wp-form-time");
+      const roomTypeSel = document.getElementById("wp-form-room-type");
+      const capInput = document.getElementById("wp-form-capacity");
+      const visSel = document.getElementById("wp-form-visibility");
+      const titleEl = document.getElementById("wp-create-modal-title");
+      const submitLbl = document.getElementById("wp-create-submit-label");
+
+      if (movieSel) {
+        movieSel.innerHTML = movies.map((m) =>
+          `<option value="${escapeHTML(m.movieId)}" data-dur="${m.durationSec}">${escapeHTML(m.movieTitle)}${m.durationSec > 0 ? ` (${Math.round(m.durationSec / 60)} phút)` : " (Chưa rõ thời lượng)"}</option>`
+        ).join("");
+      }
+
+      const editEv = wpEditEventId
+        ? (state.watchParties.upcoming || []).find(e => e.eventId === wpEditEventId)
+        : null;
+
+      if (editEv) {
+        if (titleEl) titleEl.textContent = "Chỉnh sửa lịch hẹn";
+        if (submitLbl) submitLbl.textContent = "Lưu thay đổi lịch hẹn";
+        if (movieSel) movieSel.value = editEv.movieId;
+        const vnParts = new Intl.DateTimeFormat("sv-SE", {
+          timeZone: "Asia/Ho_Chi_Minh",
+          year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false
+        }).format(new Date(editEv.startsAt)).split(" ");
+        if (dateInput) dateInput.value = vnParts[0] || "";
+        if (timeInput) timeInput.value = (vnParts[1] || "").slice(0, 5);
+        if (roomTypeSel) roomTypeSel.value = editEv.roomType || "private_cinema";
+        if (capInput) capInput.value = String(editEv.capacity || 8);
+        if (visSel) visSel.value = editEv.visibility || "invite_approval";
+      } else {
+        if (titleEl) titleEl.textContent = "Hẹn xem cùng bạn bè";
+        if (submitLbl) submitLbl.textContent = "Xác nhận & Tạo vé mời";
+        if (movieSel && preselectMovieId) movieSel.value = preselectMovieId;
+        const defaultStart = new Date(getWatchPartyServerNow() + 15 * 60000);
+        const vnParts = new Intl.DateTimeFormat("sv-SE", {
+          timeZone: "Asia/Ho_Chi_Minh",
+          year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false
+        }).format(defaultStart).split(" ");
+        if (dateInput) dateInput.value = vnParts[0] || "";
+        if (timeInput) timeInput.value = (vnParts[1] || "").slice(0, 5);
+        if (roomTypeSel) roomTypeSel.value = "private_cinema";
+        if (capInput) capInput.value = "8";
+        if (visSel) visSel.value = "invite_approval";
+      }
+
+      onWatchPartyRoomTypeChange();
+      onWatchPartyMovieOrTimeChange();
+      document.getElementById("watch-party-create-modal")?.classList.remove("hidden");
+    }
+
+    function closeCreateWatchPartyModal() {
+      document.getElementById("watch-party-create-modal")?.classList.add("hidden");
+      wpEditEventId = "";
+    }
+
+    function onWatchPartyRoomTypeChange() {
+      const rt = document.getElementById("wp-form-room-type")?.value || "private_cinema";
+      const capInput = document.getElementById("wp-form-capacity");
+      if (!capInput) return;
+      const limits = {
+        private_cinema: { min: 2, max: 48, def: 8 },
+        sweetbox: { min: 2, max: 2, def: 2 },
+        stream_party: { min: 2, max: 10, def: 6 }
+      }[rt] || { min: 2, max: 48, def: 8 };
+      capInput.min = String(limits.min);
+      capInput.max = String(limits.max);
+      const cur = Number(capInput.value || limits.def);
+      if (rt === "sweetbox" || cur < limits.min || cur > limits.max) {
+        capInput.value = String(limits.def);
+      }
+      capInput.disabled = rt === "sweetbox";
+    }
+
+    function getWatchPartyFormTimes() {
+      const movies = getWpMovieCatalogList();
+      const selMovieId = document.getElementById("wp-form-movie")?.value || "";
+      const movieObj = movies.find(m => m.movieId === selMovieId) || movies[0] || null;
+      const durRow = document.getElementById("wp-form-duration-row");
+      const manualInput = document.getElementById("wp-form-manual-duration");
+      const hasVerifiedDur = Boolean(movieObj && movieObj.durationSec > 0);
+      if (durRow) durRow.classList.toggle("hidden", hasVerifiedDur);
+
+      const durationSec = hasVerifiedDur
+        ? movieObj.durationSec
+        : Math.max(0, Math.round(Number(manualInput?.value || 0) * 60));
+
+      const dateVal = document.getElementById("wp-form-date")?.value || "";
+      const timeVal = document.getElementById("wp-form-time")?.value || "";
+      let startsAt = 0;
+      if (dateVal && timeVal) {
+        startsAt = Date.parse(`${dateVal}T${timeVal}:00+07:00`);
+      }
+      const bufMin = Number(state.watchParties?.config?.defaultBufferMinutes ?? 10);
+      const endsAt = startsAt > 0 && durationSec > 0 ? startsAt + durationSec * 1000 + bufMin * 60000 : 0;
+      return { movieObj, durationSec, hasVerifiedDur, startsAt, endsAt, bufMin };
+    }
+
+    function onWatchPartyMovieOrTimeChange() {
+      const { movieObj, durationSec, startsAt, endsAt, bufMin } = getWatchPartyFormTimes();
+      const durBadge = document.getElementById("wp-preview-duration-badge");
+      const txtEl = document.getElementById("wp-preview-time-text");
+      if (durBadge) {
+        durBadge.textContent = durationSec > 0
+          ? `${Math.round(durationSec / 60)} phút + ${bufMin} phút đệm`
+          : `Nhập thời lượng + ${bufMin} phút đệm`;
+      }
+      if (txtEl) {
+        if (!startsAt || !endsAt || !movieObj) {
+          txtEl.textContent = "Vui lòng chọn đầy đủ ngày giờ bắt đầu và thời lượng hợp lệ.";
+        } else {
+          const st = formatWpDateTimeVn(startsAt);
+          const en = formatWpDateTimeVn(endsAt);
+          txtEl.innerHTML = `Mở phòng lúc <strong class="text-amber-300">${escapeHTML(st.timeLabel)} (${escapeHTML(st.dateLabel)})</strong> • Tự đóng cố định lúc <strong class="text-rose-300">${escapeHTML(en.timeLabel)} (${escapeHTML(en.dateLabel)})</strong> <span class="text-[10px] text-slate-400">(Asia/Ho_Chi_Minh)</span>`;
+        }
+      }
+    }
+
+    async function submitWatchPartyForm() {
+      setWatchPartyCreateError("");
+      const acc = getWatchPartyAccountPayload();
+      if (!acc.accountEmail) {
+        openNameModal(false);
+        return;
+      }
+      const { movieObj, durationSec, startsAt } = getWatchPartyFormTimes();
+      if (!movieObj) {
+        setWatchPartyCreateError("Vui lòng chọn một bộ phim trong danh mục!");
+        return;
+      }
+      if (!Number.isFinite(durationSec) || durationSec < 60) {
+        setWatchPartyCreateError("Vui lòng nhập thời lượng phim hợp lệ (tối thiểu 1 phút) trước khi tạo lịch!");
+        return;
+      }
+      if (!Number.isFinite(startsAt) || startsAt < getWatchPartyServerNow() - 15000) {
+        setWatchPartyCreateError("Giờ bắt đầu phải ở hiện tại hoặc tương lai (theo GMT+7)!");
+        return;
+      }
+
+      const roomType = document.getElementById("wp-form-room-type")?.value || "private_cinema";
+      const capacity = Number(document.getElementById("wp-form-capacity")?.value || 8);
+      const visibility = document.getElementById("wp-form-visibility")?.value || "invite_approval";
+
+      const btn = document.getElementById("wp-create-submit-btn");
+      if (btn) btn.disabled = true;
+
+      try {
+        const endpoint = wpEditEventId ? "/api/watch-party/update" : "/api/watch-party/create";
+        const body = {
+          ...acc,
+          ...(wpEditEventId ? { eventId: wpEditEventId, action: "edit" } : {}),
+          movieId: movieObj.movieId,
+          movieTitle: movieObj.movieTitle,
+          poster: movieObj.poster,
+          videoUrl: movieObj.videoUrl,
+          youtubeId: movieObj.youtubeId,
+          genre: movieObj.genre,
+          ageRating: movieObj.ageRating,
+          year: movieObj.year,
+          durationSec,
+          startsAt,
+          roomType,
+          capacity,
+          visibility
+        };
+        const res = await fetch(`${getTop10WorkerBaseUrl()}${endpoint}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok || !data.event) {
+          throw new Error(data?.error || `HTTP_${res.status}`);
+        }
+        closeCreateWatchPartyModal();
+        await fetchWatchPartyList(true);
+        showToast(wpEditEventId ? "✅ Đã cập nhật lịch hẹn & thông báo cho nhóm!" : "🎉 Đã tạo vé mời buổi xem! Bạn có thể sao chép link gửi bạn bè.", "success");
+        wpActiveInviteEvent = data.event;
+        renderWatchPartyInviteModal();
+        document.getElementById("watch-party-invite-modal")?.classList.remove("hidden");
+      } catch (err) {
+        setWatchPartyCreateError(`❌ Không lưu được lịch hẹn: ${err.message}`);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    function openWatchPartyInviteModal(eventId) {
+      const ev = [...(state.watchParties.upcoming || []), ...(state.watchParties.history || [])].find(e => e.eventId === eventId);
+      if (!ev) return;
+      wpActiveInviteEvent = ev;
+      renderWatchPartyInviteModal();
+      document.getElementById("watch-party-invite-modal")?.classList.remove("hidden");
+      fetchWatchPartyList(true);
+    }
+
+    async function openWatchPartyInviteByToken(token) {
+      wpActiveInviteToken = String(token || "").trim();
+      const acc = getWatchPartyAccountPayload();
+      try {
+        const q = new URLSearchParams({ token: wpActiveInviteToken });
+        if (acc.accountEmail) q.set("accountEmail", acc.accountEmail);
+        const res = await fetch(`${getTop10WorkerBaseUrl()}/api/watch-party/invite?${q.toString()}`, { cache: "no-store" });
+        const data = await res.json().catch(() => ({}));
+        if (data?.serverNow) state.watchParties.serverOffsetMs = Number(data.serverNow) - Date.now();
+        if (!res.ok || !data.ok || !data.event) {
+          showToast(data?.error === "INVITE_REVOKED" ? "⛔ Link lời mời này đã bị thu hồi!" : "❌ Không tìm thấy vé mời hợp lệ.", "error");
+          return;
+        }
+        wpActiveInviteEvent = data.event;
+        renderWatchPartyInviteModal();
+        document.getElementById("watch-party-invite-modal")?.classList.remove("hidden");
+      } catch (_) {
+        showToast("⚠️ Không tải được thông tin vé mời.", "error");
+      }
+    }
+
+    async function handleWatchPartyInviteTokenFromUrl(token) {
+      try { window.history.replaceState({}, "", window.location.pathname); } catch (_) {}
+      await openWatchPartyInviteByToken(token);
+    }
+
+    function closeWatchPartyInviteModal() {
+      document.getElementById("watch-party-invite-modal")?.classList.add("hidden");
+      wpActiveInviteEvent = null;
+    }
+
+    async function copyWatchPartyInviteLink(eventId, token) {
+      const ev = [...(state.watchParties.upcoming || []), ...(state.watchParties.history || [])].find(e => e.eventId === eventId) || wpActiveInviteEvent;
+      const finalTok = token || ev?.inviteToken || "";
+      if (!finalTok) {
+        showToast("⚠️ Link lời mời đã bị thu hồi hoặc không khả dụng.", "warning");
+        return;
+      }
+      const shareUrl = `${window.location.origin}${window.location.pathname}?wp_invite=${encodeURIComponent(finalTok)}`;
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+      } catch (_) {
+        const inp = document.createElement("textarea");
+        inp.value = shareUrl;
+        document.body.appendChild(inp);
+        inp.select();
+        document.execCommand("copy");
+        document.body.removeChild(inp);
+      }
+      showToast(`🔗 Đã sao chép link vé mời (${ev?.inviteCode || "CineVerse"})!`, "success");
+    }
+
+    function renderWatchPartyInviteModal() {
+      const bodyEl = document.getElementById("wp-invite-modal-body");
+      const ev = wpActiveInviteEvent;
+      if (!bodyEl || !ev) return;
+
+      const sInfo = getWpStatusDisplayTime(ev);
+      const stUi = getWatchPartyStatusDisplay(ev);
+      const isAuthed = Boolean(state.accountLoggedIn && state.gmailVerified && state.userEmail);
+      const myRsvp = ev.myMember?.rsvp || "";
+      const myApv = ev.myMember?.approvalStatus || "";
+      const tokParam = ev.inviteToken || wpActiveInviteToken || "";
+
+      const approvedHtml = (ev.approvedMembers || []).map(m => `
+        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1.5" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#F4F4F5;">
+          ${m.isOrganizer ? '<i class="fa-solid fa-crown text-amber-400 text-[10px]"></i>' : '<i class="fa-solid fa-check text-emerald-400 text-[10px]"></i>'}
+          <span>${escapeHTML(m.name)}</span>
+        </span>
+      `).join("");
+
+      const pendingHtml = ev.isOrganizer && (ev.pendingRequests || []).length > 0 ? `
+        <div class="p-3 rounded-2xl space-y-2" style="background:rgba(245,197,24,0.08);border:1px solid rgba(245,197,24,0.32);">
+          <div class="font-bold text-amber-300"><i class="fa-solid fa-user-clock mr-1.5"></i>Chờ bạn duyệt (${ev.pendingRequests.length})</div>
+          <div class="space-y-2">
+            ${ev.pendingRequests.map(p => `
+              <div class="flex flex-wrap items-center justify-between gap-2 p-2 rounded-xl bg-black/45 border border-white/10">
+                <div>
+                  <span class="font-bold text-white">${escapeHTML(p.name)}</span>
+                  <span class="ml-2 text-[10.5px] text-amber-200">${p.rsvp === "going" ? "Xin tham gia" : "Có thể tham gia"}</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" onclick="window.appActions.approveWatchPartyMember('${escapeHTML(ev.eventId)}', '${escapeHTML(p.accountKey)}', 'approve')"
+                    class="min-h-[44px] px-3 rounded-xl font-extrabold text-xs cursor-pointer" style="background:#F5C518;color:#0B0B0F;">Chấp thuận</button>
+                  <button type="button" onclick="window.appActions.approveWatchPartyMember('${escapeHTML(ev.eventId)}', '${escapeHTML(p.accountKey)}', 'reject')"
+                    class="min-h-[44px] px-3 rounded-xl font-bold text-xs cursor-pointer bg-white/10 text-slate-200">Từ chối</button>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      ` : "";
+
+      let actionSectionHtml = "";
+      if (ev.status === "ended" || ev.status === "cancelled") {
+        actionSectionHtml = `
+          <div class="p-3.5 rounded-2xl text-center space-y-1" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);">
+            <p class="font-bold text-white">${ev.status === "cancelled" ? "Buổi hẹn đã bị hủy bởi người tổ chức" : "Buổi chiếu đã kết thúc"}</p>
+            <p class="text-[11px]" style="color:#A1A1AA;">Phòng riêng và tài nguyên media đã được đóng theo đúng lịch.</p>
+          </div>
+        `;
+      } else if (!isAuthed) {
+        actionSectionHtml = `
+          <div class="p-3.5 rounded-2xl space-y-2.5 text-center" style="background:rgba(245,197,24,0.09);border:1px solid rgba(245,197,24,0.35);">
+            <p class="font-bold text-white">Đăng nhập tài khoản CineVerse để phản hồi lời mời</p>
+            <p class="text-[11px]" style="color:#D4D4D8;">Sau khi đăng nhập Gmail, hệ thống sẽ đưa bạn quay lại đúng tấm vé mời này.</p>
+            <button type="button" onclick="window.appActions.loginForWatchPartyInvite('${escapeHTML(tokParam)}')"
+              class="cv-wp-cta-primary mx-auto">
+              <i class="fa-solid fa-right-to-bracket"></i>
+              <span>Đăng nhập để Tham gia</span>
+            </button>
+          </div>
+        `;
+      } else if (!ev.isOrganizer) {
+        actionSectionHtml = `
+          <div class="space-y-2.5">
+            ${myRsvp ? `
+              <div class="p-2.5 rounded-xl text-center font-bold" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#F4F4F5;">
+                Trạng thái của bạn: ${myApv === "approved" ? '<span class="text-emerald-300">Đã được chấp thuận vào phòng</span>' : myApv === "rejected" ? '<span class="text-rose-300">Chưa được chấp thuận / Đã từ chối</span>' : '<span class="text-amber-300">Đã gửi yêu cầu — Đang chờ chủ buổi hẹn duyệt</span>'}
+              </div>
+            ` : ""}
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button type="button" onclick="window.appActions.submitWatchPartyRsvp('${escapeHTML(ev.eventId)}', '${escapeHTML(tokParam)}', 'going')"
+                class="cv-wp-cta-primary">Tham gia</button>
+              <button type="button" onclick="window.appActions.submitWatchPartyRsvp('${escapeHTML(ev.eventId)}', '${escapeHTML(tokParam)}', 'maybe')"
+                class="cv-wp-cta-secondary">Có thể tham gia</button>
+              <button type="button" onclick="window.appActions.submitWatchPartyRsvp('${escapeHTML(ev.eventId)}', '${escapeHTML(tokParam)}', 'declined')"
+                class="cv-wp-cta-secondary">Từ chối</button>
+            </div>
+            ${ev.status === "open" && ev.canEnterRoom ? `
+              <button type="button" onclick="window.appActions.closeWatchPartyInviteModal(); window.appActions.enterWatchPartyRoom('${escapeHTML(ev.eventId)}')"
+                class="cv-wp-cta-primary w-full">
+                <i class="fa-solid fa-door-open"></i>
+                <span>Vào phòng ngay (Chọn ghế khi vào phòng)</span>
+              </button>
+            ` : ""}
+          </div>
+        `;
+      } else {
+        const beforeStart = getWatchPartyServerNow() < Number(ev.startsAt || 0) && ev.status === "scheduled";
+        actionSectionHtml = `
+          <div class="space-y-2.5">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button type="button" onclick="window.appActions.copyWatchPartyInviteLink('${escapeHTML(ev.eventId)}', '${escapeHTML(ev.inviteToken || "")}')"
+                class="cv-wp-cta-secondary"><i class="fa-regular fa-copy"></i><span>Sao chép link</span></button>
+              <button type="button" onclick="window.appActions.manageWatchPartyLink('${escapeHTML(ev.eventId)}', 'regenerate_link')"
+                class="cv-wp-cta-secondary"><i class="fa-solid fa-rotate"></i><span>Tạo lại link</span></button>
+              <button type="button" onclick="window.appActions.manageWatchPartyLink('${escapeHTML(ev.eventId)}', 'revoke_link')"
+                class="cv-wp-cta-secondary"><i class="fa-solid fa-ban text-rose-400"></i><span>Thu hồi link</span></button>
+            </div>
+            ${beforeStart ? `
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="window.appActions.closeWatchPartyInviteModal(); window.appActions.openCreateWatchPartyModal('${escapeHTML(ev.eventId)}')"
+                  class="cv-wp-cta-secondary"><i class="fa-solid fa-pen"></i><span>Đổi giờ / Đổi phim</span></button>
+                <button type="button" onclick="window.appActions.cancelWatchPartySchedule('${escapeHTML(ev.eventId)}')"
+                  class="cv-wp-cta-secondary"><i class="fa-solid fa-trash text-rose-400"></i><span>Hủy lịch</span></button>
+              </div>
+            ` : ""}
+            ${ev.status === "open" && ev.canEnterRoom ? `
+              <button type="button" onclick="window.appActions.closeWatchPartyInviteModal(); window.appActions.enterWatchPartyRoom('${escapeHTML(ev.eventId)}')"
+                class="cv-wp-cta-primary w-full"><i class="fa-solid fa-door-open"></i><span>Vào phòng chiếu riêng</span></button>
+            ` : ev.status === "create_failed" ? `
+              <button type="button" onclick="window.appActions.retryWatchPartyRoomCreation('${escapeHTML(ev.eventId)}')"
+                class="cv-wp-cta-primary w-full"><i class="fa-solid fa-rotate-right"></i><span>Thử lại tạo phòng (${escapeHTML(ev.lastError || "Lỗi tạm thời")})</span></button>
+            ` : ""}
+          </div>
+        `;
+      }
+
+      bodyEl.innerHTML = `
+        <div class="cv-wp-ticket p-4 sm:p-5 flex-col gap-3">
+          <div class="flex flex-col sm:flex-row gap-4">
+            <img src="${escapeHTML(ev.poster || "assets/web-logo.png")}" alt="${escapeHTML(ev.movieTitle)}"
+              onerror="this.onerror=null;this.src='assets/web-logo.png';"
+              class="w-full sm:w-36 h-40 sm:h-48 rounded-xl object-cover border border-amber-400/35 shrink-0" />
+            <div class="flex-1 min-w-0 space-y-2">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-300">${escapeHTML(ev.roomTypeLabel)} • ${escapeHTML(ev.inviteCode)}</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold" style="background:${stUi.bg};border:1px solid ${stUi.border};color:${stUi.color};">${escapeHTML(stUi.badge)}</span>
+              </div>
+              <h4 class="cv-serif italic text-xl sm:text-2xl font-bold text-white leading-tight">${escapeHTML(ev.movieTitle)}</h4>
+              <div class="space-y-1 text-xs" style="color:#E4E4E7;">
+                <div><i class="fa-regular fa-calendar mr-1.5 text-amber-300"></i>Bắt đầu: <strong class="text-white">${escapeHTML(sInfo.startFull)}</strong></div>
+                <div><i class="fa-regular fa-clock mr-1.5 text-rose-400"></i>Tự đóng cố định: <strong class="text-white">${escapeHTML(sInfo.endFull)}</strong></div>
+                <div><i class="fa-solid fa-crown mr-1.5 text-amber-300"></i>Người tổ chức: <strong class="text-white">${escapeHTML(ev.organizerName)}</strong> • Đã duyệt <strong class="text-white">${ev.approvedCount}/${ev.capacity}</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <div class="font-bold text-slate-300">Thành viên đã xác nhận (${(ev.approvedMembers || []).length}/${ev.capacity})</div>
+          <div class="flex flex-wrap gap-1.5">${approvedHtml}</div>
+        </div>
+
+        ${pendingHtml}
+        ${actionSectionHtml}
+      `;
+    }
+
+    function loginForWatchPartyInvite(token) {
+      state.pendingWatchPartyToken = String(token || "");
+      closeWatchPartyInviteModal();
+      openNameModal(false);
+    }
+
+    async function submitWatchPartyRsvp(eventId, token, rsvp) {
+      const acc = getWatchPartyAccountPayload();
+      if (!acc.accountEmail) {
+        loginForWatchPartyInvite(token);
+        return;
+      }
+      try {
+        const res = await fetch(`${getTop10WorkerBaseUrl()}/api/watch-party/rsvp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...acc, eventId, token, rsvp })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+          throw new Error(data?.error === "ROOM_CAPACITY_FULL" ? "Phòng hẹn đã đủ sức chứa tối đa!" : (data?.error || "Không gửi được phản hồi"));
+        }
+        wpActiveInviteEvent = data.event;
+        renderWatchPartyInviteModal();
+        fetchWatchPartyList(true);
+        showToast(rsvp === "declined" ? "Đã cập nhật trạng thái Từ chối." : "✅ Đã gửi phản hồi lời mời!", "success");
+      } catch (err) {
+        showToast(`❌ ${err.message}`, "error");
+      }
+    }
+
+    async function approveWatchPartyMember(eventId, targetAccountKey, decision) {
+      const acc = getWatchPartyAccountPayload();
+      try {
+        const res = await fetch(`${getTop10WorkerBaseUrl()}/api/watch-party/approve`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...acc, eventId, targetAccountKey, decision })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+          throw new Error(data?.error === "ROOM_CAPACITY_FULL" ? "Phòng đã đạt sức chứa tối đa!" : (data?.error || "Thao tác thất bại"));
+        }
+        wpActiveInviteEvent = data.event;
+        renderWatchPartyInviteModal();
+        fetchWatchPartyList(true);
+        showToast(decision === "approve" ? "✅ Đã duyệt thành viên vào buổi hẹn!" : "Đã từ chối yêu cầu tham gia.", "info");
+      } catch (err) {
+        showToast(`❌ ${err.message}`, "error");
+      }
+    }
+
+    async function manageWatchPartyLink(eventId, action) {
+      const acc = getWatchPartyAccountPayload();
+      try {
+        const res = await fetch(`${getTop10WorkerBaseUrl()}/api/watch-party/update`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...acc, eventId, action })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) throw new Error(data?.error || "Lỗi cập nhật link");
+        wpActiveInviteEvent = data.event;
+        renderWatchPartyInviteModal();
+        fetchWatchPartyList(true);
+        showToast(action === "revoke_link" ? "🔒 Đã thu hồi link mời hiện tại." : "🔗 Đã tạo lại mã & link mời mới!", "success");
+      } catch (err) {
+        showToast(`❌ ${err.message}`, "error");
+      }
+    }
+
+    async function cancelWatchPartySchedule(eventId) {
+      if (!window.confirm("Bạn chắc chắn muốn hủy lịch hẹn xem phim này? Quyền vào phòng của mọi người sẽ bị thu hồi.")) return;
+      const acc = getWatchPartyAccountPayload();
+      try {
+        const res = await fetch(`${getTop10WorkerBaseUrl()}/api/watch-party/update`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...acc, eventId, action: "cancel" })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) throw new Error(data?.error || "Không thể hủy lịch");
+        closeWatchPartyInviteModal();
+        await fetchWatchPartyList(true);
+        showToast("🗓️ Đã hủy lịch hẹn xem phim.", "info");
+      } catch (err) {
+        showToast(`❌ ${err.message}`, "error");
+      }
+    }
+
+    async function retryWatchPartyRoomCreation(eventId) {
+      const acc = getWatchPartyAccountPayload();
+      try {
+        const res = await fetch(`${getTop10WorkerBaseUrl()}/api/watch-party/retry-room`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...acc, eventId })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (data?.event) {
+          wpActiveInviteEvent = data.event;
+          renderWatchPartyInviteModal();
+        }
+        await fetchWatchPartyList(true);
+        if (data?.ok) showToast("✅ Khởi tạo lại phòng riêng thành công!", "success");
+        else showToast(`⚠️ Thử lại thất bại: ${data?.error || "Lỗi máy chủ"}`, "error");
+      } catch (_) {
+        showToast("⚠️ Không thể kết nối máy chủ thử lại.", "error");
+      }
+    }
+
+    function enterWatchPartyRoom(eventId) {
+      enterRoom(`wp_${eventId}`);
+    }
+
+    async function confirmEndWatchPartyForGroup() {
+      const roomId = state.currentRoomId;
+      if (!roomId || !String(roomId).startsWith("wp_")) return;
+      if (!window.confirm("Kết thúc buổi chiếu cho CẢ NHÓM ngay bây giờ? Tất cả thành viên sẽ được đưa về sảnh và phòng sẽ đóng vĩnh viễn.")) return;
+      const acc = getWatchPartyAccountPayload();
+      try {
+        await fetch(`${getTop10WorkerBaseUrl()}/api/watch-party/end-group`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...acc, roomId })
+        });
+        handleWatchPartyForceClosed(roomId, "Buổi chiếu đã kết thúc");
+      } catch (_) {
+        showToast("⚠️ Không gửi được lệnh kết thúc tới máy chủ.", "error");
+      }
+    }
+
+    function handleWatchPartyForceClosed(roomId, reason = "Buổi chiếu đã kết thúc") {
+      if (!roomId || state.currentRoomId !== roomId) return;
+      if (wpForceClosedGuardRoomId === roomId) return;
+      wpForceClosedGuardRoomId = roomId;
+      try {
+        if (typeof cleanupRoomVoice === "function") cleanupRoomVoice(roomId);
+        if (typeof cleanupRoomLiveScreen === "function") cleanupRoomLiveScreen(roomId);
+        if (typeof cleanupRoomLiveCam === "function") cleanupRoomLiveCam(roomId);
+      } catch (_) {}
+      leaveRoom();
+      fetchWatchPartyList(true);
+      showToast(`🎬 ${reason}`, "info");
+      setTimeout(() => { wpForceClosedGuardRoomId = ""; }, 2000);
+    }
+
+    function updateWatchPartyRoomCountdownUI() {
+      if (!state.currentRoomId || !String(state.currentRoomId).startsWith("wp_")) return;
+      const room = getEffectiveRoom(state.currentRoomId);
+      const endsAt = Number(room.endsAt || 0);
+      if (!endsAt) return;
+      const now = getWatchPartyServerNow();
+      const remainMs = endsAt - now;
+      const pillTxt = document.getElementById("wp-room-closing-text");
+      const endTimeFmt = formatWpDateTimeVn(endsAt).timeLabel;
+
+      if (remainMs <= 0) {
+        if (pillTxt) pillTxt.textContent = `Đã hết giờ (${endTimeFmt})`;
+        fetch(`${getTop10WorkerBaseUrl()}/api/watch-party/reconcile`).catch(() => {});
+        handleWatchPartyForceClosed(room.id, "Buổi chiếu đã kết thúc");
+        return;
+      }
+
+      const remainMin = Math.floor(remainMs / 60000);
+      const remainSec = Math.floor((remainMs % 60000) / 1000);
+      if (pillTxt) {
+        pillTxt.textContent = remainMin >= 60
+          ? `Tự đóng ${endTimeFmt}`
+          : `Đóng ${endTimeFmt} • ${String(remainMin).padStart(2, "0")}:${String(remainSec).padStart(2, "0")}`;
+      }
+
+      const evKey = room.eventId || room.id;
+      if (remainMs <= 10 * 60000 && remainMs > 9 * 60000 && !wpWarningsShown.has(`${evKey}:10m`)) {
+        wpWarningsShown.add(`${evKey}:10m`);
+        showToast("⏳ Phòng riêng sẽ tự động đóng sau 10 phút nữa.", "warning");
+      } else if (remainMs <= 5 * 60000 && remainMs > 4 * 60000 && !wpWarningsShown.has(`${evKey}:5m`)) {
+        wpWarningsShown.add(`${evKey}:5m`);
+        showToast("⏳ Cảnh báo: Còn 5 phút trước khi phòng tự đóng.", "warning");
+      } else if (remainMs <= 60000 && !wpWarningsShown.has(`${evKey}:1m`)) {
+        wpWarningsShown.add(`${evKey}:1m`);
+        showToast("⚠️ Chỉ còn 1 phút! Buổi chiếu sắp tự động kết thúc.", "error");
+      }
+    }
+
+    setInterval(() => {
+      if (state.currentRoomId && String(state.currentRoomId).startsWith("wp_")) {
+        updateWatchPartyRoomCountdownUI();
+        return;
+      }
+      if (!state.currentRoomId && Array.isArray(state.watchParties?.upcoming)) {
+        const now = getWatchPartyServerNow();
+        const due = state.watchParties.upcoming.find(ev =>
+          (ev.status === "scheduled" && now >= Number(ev.startsAt || 0) && now < Number(ev.endsAt || 0)) ||
+          (ev.status === "open" && now >= Number(ev.endsAt || 0))
+        );
+        if (due) {
+          fetchWatchPartyList(true);
+        }
+      }
+    }, 1000);
+
     function setActiveNavTab(tabKey = "home") {
       document.querySelectorAll("[data-nav-tab]").forEach((el) => {
         const isMatch = el.getAttribute("data-nav-tab") === tabKey;
@@ -30941,7 +32589,13 @@
         window.scrollTo({ top: 0, behavior: scrollBehavior });
         return;
       }
-      const targetId = tabKey === "top10" ? "lobby-top10-section" : tabKey === "special" ? "lobby-special-section" : "";
+      const targetId = tabKey === "watchparty"
+        ? "lobby-watch-party-section"
+        : tabKey === "top10"
+        ? "lobby-top10-section"
+        : tabKey === "special"
+        ? "lobby-special-section"
+        : "";
       const el = targetId ? document.getElementById(targetId) : null;
       if (el) {
         const y = Math.max(0, el.getBoundingClientRect().top + window.scrollY - headerH - 14);
@@ -31022,6 +32676,25 @@
       toggleDimmedChatOverlay,
       toggleScreenFitMode,
       refreshWeeklyTop10,
+      openCreateWatchPartyModal,
+      openCreateWatchPartyForHero,
+      closeCreateWatchPartyModal,
+      onWatchPartyMovieOrTimeChange,
+      onWatchPartyRoomTypeChange,
+      submitWatchPartyForm,
+      openWatchPartyInviteModal,
+      openWatchPartyInviteByToken,
+      closeWatchPartyInviteModal,
+      copyWatchPartyInviteLink,
+      loginForWatchPartyInvite,
+      submitWatchPartyRsvp,
+      approveWatchPartyMember,
+      manageWatchPartyLink,
+      cancelWatchPartySchedule,
+      retryWatchPartyRoomCreation,
+      enterWatchPartyRoom,
+      confirmEndWatchPartyForGroup,
+      fetchWatchPartyList,
       openTop10PrimaryAction,
       openTop10MovieDetail,
       toggleTop10FormulaInfo,
@@ -31835,6 +33508,7 @@
     if (window.__onCineverseSplashDone) { window.__onCineverseSplashDone(initAmbientTunaBackground); } else { initAmbientTunaBackground(); }
     prefetchLobbyConfigRoomsOnBoot();
     if (typeof fetchWeeklyTop10 === "function") fetchWeeklyTop10(false);
+    if (typeof fetchWatchPartyList === "function") fetchWatchPartyList(false);
     initFirebase();
 
     // RoPhim UI: Header chuyển nền khi cuộn + Nút lên đầu trang
@@ -31848,12 +33522,15 @@
 
         if (!state.currentRoomId && !document.body.classList.contains("hanoi-finder-open")) {
           const headerH = nav ? nav.getBoundingClientRect().height : 64;
+          const wpEl = document.getElementById("lobby-watch-party-section");
           const top10El = document.getElementById("lobby-top10-section");
           const specEl = document.getElementById("lobby-special-section");
+          const wpTop = wpEl ? wpEl.getBoundingClientRect().top : Infinity;
           const specTop = specEl ? specEl.getBoundingClientRect().top : Infinity;
           const top10Top = top10El ? top10El.getBoundingClientRect().top : Infinity;
           if (specTop <= headerH + 140) setActiveNavTab("special");
           else if (top10Top <= headerH + 140) setActiveNavTab("top10");
+          else if (wpTop <= headerH + 140) setActiveNavTab("watchparty");
           else setActiveNavTab("home");
         }
       }

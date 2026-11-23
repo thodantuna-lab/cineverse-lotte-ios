@@ -9,3 +9,6 @@ mode = "smart"
 [[r2_buckets]]
 binding = "MY_BUCKET"
 bucket_name = "chuthuathoichien"
+
+[triggers]
+crons = ["* * * * *"]

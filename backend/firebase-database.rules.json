@@ -14,6 +14,10 @@
       "weekly_top10_v1": {
         ".read": true,
         ".write": true
+      },
+      "watch_parties_v1": {
+        ".read": true,
+        ".write": true
       }
     },
     "site_lock_admin": {
