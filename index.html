@@ -3887,17 +3887,95 @@
       opacity: 0.72;
     }
     #booking-seat-scroll-wrap {
-      overflow-x: auto;
+      overflow-x: hidden;
       max-width: 100%;
       -webkit-overflow-scrolling: touch;
-      padding-bottom: 8px;
+      padding-bottom: 6px;
+    }
+    #booking-seat-scroll-wrap.is-zoom-scroll {
+      overflow-x: auto;
     }
     #booking-seat-grid {
-      min-width: 380px;
-    }
-    #booking-seat-grid.is-compact-grid {
       min-width: 0;
       width: 100%;
+    }
+    #booking-seat-grid.is-zoomed-grid {
+      min-width: 472px;
+      width: max-content;
+    }
+    .cv-booking-seat-row {
+      display: grid;
+      grid-template-columns: 14px repeat(4, minmax(0, 1fr)) 8px repeat(4, minmax(0, 1fr)) 14px;
+      gap: 3px;
+      align-items: center;
+    }
+    #booking-seat-grid.is-zoomed-grid .cv-booking-seat-row {
+      grid-template-columns: 20px repeat(4, minmax(46px, 1fr)) 14px repeat(4, minmax(46px, 1fr)) 20px;
+      gap: 5px;
+    }
+    #booking-seat-grid .booking-mini-seat {
+      min-width: 0;
+      width: 100%;
+      padding: 2px 1px;
+      min-height: 36px;
+      font-size: 9px;
+      border-radius: 7px;
+      flex-direction: column;
+      gap: 1px;
+      line-height: 1.05;
+    }
+    #booking-seat-grid.is-zoomed-grid .booking-mini-seat {
+      min-width: 46px;
+      min-height: 46px;
+      padding: 4px 2px;
+      font-size: 11px;
+      border-radius: 9px;
+      gap: 2px;
+    }
+    @media (min-width: 640px) {
+      .cv-booking-seat-row {
+        grid-template-columns: 18px repeat(4, minmax(0, 1fr)) 14px repeat(4, minmax(0, 1fr)) 18px;
+        gap: 5px;
+      }
+      #booking-seat-grid .booking-mini-seat {
+        min-height: 38px;
+        font-size: 10.5px;
+        flex-direction: row;
+        gap: 3px;
+      }
+    }
+    body.booking-modal-open #toast-container {
+      top: calc(64px + env(safe-area-inset-top)) !important;
+      bottom: auto !important;
+      left: 50% !important;
+      right: auto !important;
+      transform: translateX(-50%);
+      width: min(92vw, 420px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .cv-seat-zoom-btn {
+      flex: 1 1 0%;
+      min-height: 44px;
+      padding: 0 10px;
+      border-radius: 10px;
+      font-size: 11.5px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      background: #0B0B0F;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #D4D4D8;
+      transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
+    }
+    .cv-seat-zoom-btn.is-active {
+      background: rgba(245, 197, 24, 0.16);
+      border-color: rgba(245, 197, 24, 0.7);
+      color: #F5C518;
     }
     #booking-scroll-body {
       flex: 1 1 auto;
@@ -3947,6 +4025,9 @@
       }
     }
     @media (min-width: 1024px) {
+      #booking-seat-zoom-bar {
+        display: none !important;
+      }
       #booking-modal-panel {
         max-height: 92dvh;
       }
@@ -8824,17 +8905,63 @@
             </div>
           </div>
 
-          <!-- Góc nhìn ghế đang chọn (đặt ngay trên sơ đồ ghế, có thể thu gọn) -->
-          <div id="booking-pov-preview" class="cv-booking-card rounded-2xl p-3 sm:p-4 border border-white/10 space-y-2" style="background:#0B0B0F;">
+          <!-- 2. Sơ đồ chọn ghế trực quan (đặt ngay dưới thông tin phim, vừa khít chiều ngang + hỗ trợ Phóng to >=44px) -->
+          <div class="cv-booking-card p-2.5 sm:p-4 space-y-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider" style="color:#F5C518;">Sơ Đồ Ghế Ngồi</span>
+              <span id="booking-seat-mode-hint" class="text-[10px]" style="color:#A1A1AA;">Toàn cảnh vừa màn hình • Bật Phóng to để chạm ≥44px</span>
+            </div>
+
+            <!-- Thanh chuyển chế độ Toàn cảnh / Phóng to (>=44px touch target) -->
+            <div id="booking-seat-zoom-bar" class="flex items-center gap-2 lg:hidden">
+              <button type="button" id="btn-seat-mode-overview" onclick="window.appActions.setBookingSeatZoomMode('overview')"
+                class="cv-seat-zoom-btn is-active" aria-pressed="true">
+                <i class="fa-solid fa-table-cells" aria-hidden="true"></i>
+                <span>Toàn cảnh sơ đồ</span>
+              </button>
+              <button type="button" id="btn-seat-mode-zoom" onclick="window.appActions.setBookingSeatZoomMode('zoom')"
+                class="cv-seat-zoom-btn" aria-pressed="false">
+                <i class="fa-solid fa-magnifying-glass-plus" aria-hidden="true"></i>
+                <span>Phóng to (≥44px)</span>
+              </button>
+            </div>
+
+            <!-- Màn hình cong IMAX mô phỏng -->
+            <div class="w-4/5 mx-auto h-5 rounded-t-[50%] border-t-2 flex items-center justify-center"
+              style="border-color:rgba(245,197,24,0.75);background:linear-gradient(180deg, rgba(245,197,24,0.16) 0%, transparent 100%);">
+              <span class="text-[9px] font-black uppercase tracking-[0.25em]" style="color:#F5C518;">MÀN HÌNH IMAX</span>
+            </div>
+
+            <!-- Lưới ghế (mặc định vừa chiều ngang, khi Phóng to hỗ trợ cuộn ngang >=44px) -->
+            <div id="booking-seat-scroll-wrap">
+              <div id="booking-seat-grid" class="space-y-1.5 sm:space-y-2"></div>
+            </div>
+
+            <!-- Chú giải trạng thái & hạng ghế ngay dưới sơ đồ (ký hiệu nhất quán với ghế) -->
+            <div id="booking-seat-legend" class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 pt-2 border-t border-white/10 text-[10.5px] sm:text-[11px] font-semibold" style="color:#E4E4E7;">
+              <span class="flex items-center gap-1.5"><span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold" style="background:#1D1D27;border:1.5px solid rgba(255,255,255,0.32);">□</span><span data-legend-tier="standard">Trống (A–C)</span></span>
+              <span class="flex items-center gap-1.5"><span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold" style="background:rgba(245,197,24,0.16);border:1.5px solid rgba(245,197,24,0.65);color:#FDE68A;">★</span><span data-legend-tier="vip">VIP (D–E)</span></span>
+              <span class="flex items-center gap-1.5"><span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold" style="background:rgba(229,9,20,0.18);border:1.5px solid rgba(229,9,20,0.68);color:#FECDD3;">♥</span><span data-legend-tier="sweetbox">Sweetbox (F)</span></span>
+              <span class="flex items-center gap-1.5"><span class="w-5 h-5 rounded flex items-center justify-center text-[11px] font-black" style="background:#F5C518;color:#0B0B0F;border:2px solid #FFFFFF;">✓</span><span>Đang chọn</span></span>
+              <span class="flex items-center gap-1.5"><span class="w-5 h-5 rounded flex items-center justify-center text-[11px] font-black" style="background:#121218;color:#A1A1AA;border:1.5px dashed rgba(229,9,20,0.68);">✕</span><span>Đã có người</span></span>
+            </div>
+          </div>
+
+          <!-- Góc nhìn ghế đang chọn (thu gọn vào mục "Xem góc nhìn từ ghế", mặc định đóng trên mobile & desktop thấp) -->
+          <div id="booking-pov-preview" class="cv-booking-card rounded-2xl p-2.5 sm:p-3.5 border border-white/10 space-y-2" style="background:#0B0B0F;">
             <button type="button" id="btn-toggle-booking-pov" onclick="window.appActions.toggleBookingPovCollapse()"
-              class="w-full flex items-center justify-between gap-2 text-left cursor-pointer">
-              <span class="text-[11px] font-extrabold uppercase tracking-wider" style="color:#F5C518;">Xem trước góc nhìn ghế</span>
+              aria-expanded="false"
+              class="w-full min-h-[44px] flex items-center justify-between gap-2 text-left cursor-pointer px-1">
+              <span class="text-[11px] font-extrabold uppercase tracking-wider flex items-center gap-2" style="color:#F5C518;">
+                <i class="fa-regular fa-eye" aria-hidden="true"></i>
+                <span>Xem góc nhìn từ ghế</span>
+              </span>
               <span class="flex items-center gap-1.5">
                 <span id="booking-pov-seat-chip" class="px-2 py-0.5 rounded-md text-[10px] font-black" style="background:#F5C518;color:#0B0B0F;">Ghế F4</span>
-                <i id="booking-pov-chevron" class="fa-solid fa-chevron-up text-[10px]" style="color:#A1A1AA;"></i>
+                <i id="booking-pov-chevron" class="fa-solid fa-chevron-down text-[10px] transition-transform" style="color:#A1A1AA;"></i>
               </span>
             </button>
-            <div id="booking-pov-collapsible" class="space-y-2 pt-1">
+            <div id="booking-pov-collapsible" class="hidden space-y-2 pt-1">
               <div class="cv-pov-stage" style="height:102px;">
                 <div id="booking-pov-screen" class="cv-pov-screen">
                   <img id="booking-pov-poster" src="" alt="Mô phỏng góc nhìn từ ghế đang chọn" />
@@ -8846,34 +8973,6 @@
               <p id="booking-pov-desc" class="text-[10px] leading-snug" style="color:#A1A1AA;">
                 Mô phỏng góc nhìn theo vùng ghế: Hàng F (Toàn cảnh) • Góc giữa màn hình.
               </p>
-            </div>
-          </div>
-
-          <!-- 2. Sơ đồ chọn ghế trực quan (cuộn ngang mượt trên màn hình nhỏ) -->
-          <div class="cv-booking-card p-3 sm:p-4 space-y-3">
-            <div class="flex items-center justify-between gap-2">
-              <span class="text-[11px] font-extrabold uppercase tracking-wider" style="color:#F5C518;">Sơ Đồ Ghế Ngồi</span>
-              <span class="text-[10px] sm:hidden" style="color:#A1A1AA;">Vuốt ngang sơ đồ • Chạm ghế để chọn/bỏ</span>
-            </div>
-
-            <!-- Màn hình cong IMAX mô phỏng -->
-            <div class="w-4/5 mx-auto h-5 rounded-t-[50%] border-t-2 flex items-center justify-center"
-              style="border-color:rgba(245,197,24,0.75);background:linear-gradient(180deg, rgba(245,197,24,0.16) 0%, transparent 100%);">
-              <span class="text-[9px] font-black uppercase tracking-[0.25em]" style="color:#F5C518;">MÀN HÌNH IMAX</span>
-            </div>
-
-            <!-- Lưới ghế (cuộn ngang an toàn trong vùng sơ đồ) -->
-            <div id="booking-seat-scroll-wrap">
-              <div id="booking-seat-grid" class="space-y-2"></div>
-            </div>
-
-            <!-- Chú giải trạng thái & hạng ghế ngay dưới sơ đồ (ký hiệu nhất quán với ghế) -->
-            <div id="booking-seat-legend" class="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3 pt-2.5 border-t border-white/10 text-[11px] font-semibold" style="color:#E4E4E7;">
-              <span class="flex items-center gap-1.5"><span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold" style="background:#1D1D27;border:1.5px solid rgba(255,255,255,0.32);">□</span><span data-legend-tier="standard">Trống (A–C)</span></span>
-              <span class="flex items-center gap-1.5"><span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold" style="background:rgba(245,197,24,0.16);border:1.5px solid rgba(245,197,24,0.65);color:#FDE68A;">★</span><span data-legend-tier="vip">VIP (D–E)</span></span>
-              <span class="flex items-center gap-1.5"><span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold" style="background:rgba(229,9,20,0.18);border:1.5px solid rgba(229,9,20,0.68);color:#FECDD3;">♥</span><span data-legend-tier="sweetbox">Sweetbox (F)</span></span>
-              <span class="flex items-center gap-1.5"><span class="w-5 h-5 rounded flex items-center justify-center text-[11px] font-black" style="background:#F5C518;color:#0B0B0F;border:2px solid #FFFFFF;">✓</span><span>Đang chọn</span></span>
-              <span class="flex items-center gap-1.5"><span class="w-5 h-5 rounded flex items-center justify-center text-[11px] font-black" style="background:#121218;color:#A1A1AA;border:1.5px dashed rgba(229,9,20,0.68);">✕</span><span>Đã có người</span></span>
             </div>
           </div>
         </div>
@@ -24396,6 +24495,15 @@
         candidateSeat = freeSeats.length ? freeSeats[0] : "";
       }
       state.bookingDraft.seatId = candidateSeat;
+      setBookingSeatZoomMode("overview", { silent: true });
+
+      const povCol = document.getElementById("booking-pov-collapsible");
+      const povChev = document.getElementById("booking-pov-chevron");
+      const povBtn = document.getElementById("btn-toggle-booking-pov");
+      const shouldCollapsePov = window.innerWidth < 1024 || window.innerHeight <= 820;
+      if (povCol) povCol.classList.toggle("hidden", shouldCollapsePov);
+      if (povBtn) povBtn.setAttribute("aria-expanded", shouldCollapsePov ? "false" : "true");
+      if (povChev) povChev.style.transform = shouldCollapsePov ? "rotate(0deg)" : "rotate(180deg)";
 
       const nameInput = document.getElementById("booking-user-name");
       if (nameInput) nameInput.value = state.userName;
@@ -24521,12 +24629,48 @@
       }
     }
 
+    let bookingSeatZoomMode = "overview";
+
+    function setBookingSeatZoomMode(mode = "overview", opts = {}) {
+      bookingSeatZoomMode = mode === "zoom" ? "zoom" : "overview";
+      const isZoom = bookingSeatZoomMode === "zoom";
+      const scrollWrap = document.getElementById("booking-seat-scroll-wrap");
+      const seatGrid = document.getElementById("booking-seat-grid");
+      const btnOver = document.getElementById("btn-seat-mode-overview");
+      const btnZoom = document.getElementById("btn-seat-mode-zoom");
+      const hintEl = document.getElementById("booking-seat-mode-hint");
+
+      if (scrollWrap) scrollWrap.classList.toggle("is-zoom-scroll", isZoom);
+      if (seatGrid) seatGrid.classList.toggle("is-zoomed-grid", isZoom);
+      if (btnOver) {
+        btnOver.classList.toggle("is-active", !isZoom);
+        btnOver.setAttribute("aria-pressed", !isZoom ? "true" : "false");
+      }
+      if (btnZoom) {
+        btnZoom.classList.toggle("is-active", isZoom);
+        btnZoom.setAttribute("aria-pressed", isZoom ? "true" : "false");
+      }
+      if (hintEl) {
+        hintEl.textContent = isZoom
+          ? "Đang phóng to (ghế ≥44px) • Vuốt ngang sơ đồ để chọn"
+          : "Toàn cảnh vừa màn hình • Bật Phóng to để chạm ≥44px";
+      }
+      if (isZoom && !opts.silent && seatGrid) {
+        requestAnimationFrame(() => {
+          const selBtn = seatGrid.querySelector("button.seat-selected") || seatGrid.querySelector("button[data-seat-id]");
+          selBtn?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+        });
+      }
+    }
+
     function toggleBookingPovCollapse() {
       const col = document.getElementById("booking-pov-collapsible");
       const chev = document.getElementById("booking-pov-chevron");
+      const btn = document.getElementById("btn-toggle-booking-pov");
       if (!col) return;
       const isHidden = col.classList.contains("hidden");
       col.classList.toggle("hidden", !isHidden);
+      if (btn) btn.setAttribute("aria-expanded", isHidden ? "true" : "false");
       if (chev) chev.style.transform = isHidden ? "rotate(180deg)" : "rotate(0deg)";
     }
 
@@ -24752,15 +24896,18 @@
           `;
         };
 
-        seatGrid.classList.toggle("is-compact-grid", Boolean(room && (room.isCoupleRoom || room.isDiscordRoom)));
+        const isCompactRoom = Boolean(room && (room.isCoupleRoom || room.isDiscordRoom));
+        seatGrid.classList.toggle("is-compact-grid", isCompactRoom);
+        const zoomBar = document.getElementById("booking-seat-zoom-bar");
+        if (zoomBar) zoomBar.classList.toggle("hidden", isCompactRoom);
 
         if (room && room.isCoupleRoom) {
           seatGrid.innerHTML = `
             <div class="py-4 px-2 space-y-3 text-center">
               <p class="text-[11px] font-bold text-pink-300">💕 Phòng Sweetbox Đôi VIP (Tổng cộng 2 ghế)</p>
               <div class="flex items-center justify-center gap-4 max-w-xs mx-auto">
-                ${makeSeatBtn("F4", false, true, "flex-1 h-12 text-xs")}
-                ${makeSeatBtn("F5", false, true, "flex-1 h-12 text-xs")}
+                ${makeSeatBtn("F4", false, true, "flex-1 min-h-[46px] text-xs")}
+                ${makeSeatBtn("F5", false, true, "flex-1 min-h-[46px] text-xs")}
               </div>
             </div>
           `;
@@ -24772,7 +24919,7 @@
                 <div class="flex items-center gap-2 max-w-md mx-auto">
                   <span class="w-5 text-center text-[10px] font-black ${row === "F" ? "text-amber-400" : "text-rose-400"}">${row}</span>
                   <div class="flex-1 flex items-center gap-1.5">
-                    ${[2, 3, 4, 5, 6].map(col => makeSeatBtn(`${row}${col}`, row === "E", row === "F")).join("")}
+                    ${[2, 3, 4, 5, 6].map(col => makeSeatBtn(`${row}${col}`, row === "E", row === "F", "flex-1 min-h-[44px]")).join("")}
                   </div>
                   <span class="w-5 text-center text-[10px] font-black ${row === "F" ? "text-amber-400" : "text-rose-400"}">${row}</span>
                 </div>
@@ -24785,12 +24932,12 @@
             const isCouple = row === "F";
             const renderSide = (cols) => cols.map(col => makeSeatBtn(`${row}${col}`, isVIP, isCouple)).join("");
             return `
-              <div class="flex items-center gap-2">
-                <span class="w-5 text-center text-[10px] font-black ${isCouple ? 'text-amber-400' : isVIP ? 'text-rose-400' : 'text-slate-500'}">${row}</span>
-                <div class="flex-1 flex items-center gap-1">${renderSide([1, 2, 3, 4])}</div>
-                <div class="w-4 text-center text-[8px] font-mono text-emerald-400/70">||</div>
-                <div class="flex-1 flex items-center gap-1">${renderSide([5, 6, 7, 8])}</div>
-                <span class="w-5 text-center text-[10px] font-black ${isCouple ? 'text-amber-400' : isVIP ? 'text-rose-400' : 'text-slate-500'}">${row}</span>
+              <div class="cv-booking-seat-row">
+                <span class="text-center text-[10px] font-black ${isCouple ? 'text-amber-400' : isVIP ? 'text-rose-400' : 'text-slate-500'}">${row}</span>
+                ${renderSide([1, 2, 3, 4])}
+                <div class="text-center text-[8px] font-mono text-emerald-400/60" aria-hidden="true"></div>
+                ${renderSide([5, 6, 7, 8])}
+                <span class="text-center text-[10px] font-black ${isCouple ? 'text-amber-400' : isVIP ? 'text-rose-400' : 'text-slate-500'}">${row}</span>
               </div>
             `;
           }).join("");
@@ -24893,9 +25040,10 @@
       const confirmBtn = document.getElementById("booking-confirm-btn");
       const btnTextEl = document.getElementById("booking-confirm-btn-text");
       if (confirmBtn) {
-        const shouldDisable = isRoomFull || !hasSeat;
+        const shouldDisable = isRoomFull;
         confirmBtn.disabled = shouldDisable;
-        confirmBtn.setAttribute("aria-disabled", shouldDisable ? "true" : "false");
+        confirmBtn.setAttribute("aria-disabled", (shouldDisable || !hasSeat) ? "true" : "false");
+        confirmBtn.style.opacity = (!hasSeat && !isRoomFull) ? "0.75" : "";
       }
       if (btnTextEl) {
         if (isRoomFull) {
@@ -33298,6 +33446,7 @@
       toggleCinemaSFX,
       playCinemaBellSFX,
       openBookingModal,
+      setBookingSeatZoomMode,
       closeBookingModal,
       openBookingModalForHero,
       enterHeroRoomNow,
