@@ -13409,17 +13409,78 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           videoEl.style.transition = "opacity 0.45s ease";
           videoEl.muted = Boolean(state.heroMuted);
           videoEl.preload = "metadata";
+
+          const computeTrailerHighlightWindow = (totalDur) => {
+            const explicitStart = Number(room.trailerStartSec);
+            const explicitEnd = Number(room.trailerEndSec);
+            if (Number.isFinite(explicitStart) && explicitStart >= 0 && (!Number.isFinite(totalDur) || explicitStart < totalDur - 6)) {
+              const end = (Number.isFinite(explicitEnd) && explicitEnd > explicitStart + 5)
+                ? explicitEnd
+                : explicitStart + 28;
+              return { start: explicitStart, end: Number.isFinite(totalDur) ? Math.min(end, Math.max(explicitStart + 6, totalDur - 2)) : end };
+            }
+            const tTitle = String(room.movieTitle || room.displayTitle || "").toLowerCase();
+            // Mốc cảnh cao trào chọn lọc cho từng phim (tự động kẹp theo thời lượng thực tế)
+            let ratio = 0.32;
+            if (/cá mập|meg/i.test(tTitle)) ratio = 0.29;
+            else if (/phù thủy|doctor strange/i.test(tTitle)) ratio = 0.36;
+            else if (/transformers/i.test(tTitle)) ratio = 0.42;
+            else if (/shang-chi/i.test(tTitle)) ratio = 0.27;
+            else if (/sát thủ thợ máy|mechanic/i.test(tTitle)) ratio = 0.34;
+            else if (/mưu cầu hạnh phúc|pursuit/i.test(tTitle)) ratio = 0.48;
+            else if (/vùng đất quỷ dữ|resident evil/i.test(tTitle)) ratio = 0.31;
+            else if (/avengers|endgame/i.test(tTitle)) ratio = 0.62;
+            else if (/dark knight|kỵ sĩ bóng đêm/i.test(tTitle)) ratio = 0.38;
+            else if (/john wick/i.test(tTitle)) ratio = 0.44;
+
+            if (!Number.isFinite(totalDur) || totalDur <= 0) {
+              return { start: 0, end: 28 };
+            }
+            if (totalDur < 180) {
+              const s = totalDur > 35 ? 6 : 0;
+              return { start: s, end: Math.min(totalDur - 1, s + 26) };
+            }
+            const start = Math.max(45, Math.min(totalDur - 32, Math.floor(totalDur * ratio)));
+            return { start, end: Math.min(totalDur - 2, start + 28) };
+          };
+
+          let clipWin = computeTrailerHighlightWindow(videoEl.duration);
+          let clipSeekApplied = false;
+
+          const applyInitialHighlightSeek = () => {
+            if (clipSeekApplied) return;
+            const dur = Number(videoEl.duration);
+            if (!Number.isFinite(dur) || dur <= 0) return;
+            clipWin = computeTrailerHighlightWindow(dur);
+            clipSeekApplied = true;
+            if (clipWin.start > 0 && Math.abs((videoEl.currentTime || 0) - clipWin.start) > 2) {
+              try { videoEl.currentTime = clipWin.start; } catch (_) {}
+            }
+          };
+
           if (isNewSrc) {
             videoEl.style.opacity = "0";
             videoEl.setAttribute("data-src", previewSrc);
             videoEl.src = previewSrc;
-            try { videoEl.currentTime = 0; } catch (_) {}
+          } else {
+            applyInitialHighlightSeek();
           }
+
+          videoEl.onloadedmetadata = () => {
+            applyInitialHighlightSeek();
+          };
           videoEl.ontimeupdate = () => {
-            if (videoEl.currentTime >= 25) videoEl.currentTime = 0;
+            if (!clipSeekApplied && Number.isFinite(videoEl.duration) && videoEl.duration > 0) {
+              applyInitialHighlightSeek();
+              return;
+            }
+            if (videoEl.currentTime >= clipWin.end || videoEl.currentTime < Math.max(0, clipWin.start - 2)) {
+              try { videoEl.currentTime = clipWin.start; } catch (_) {}
+            }
           };
           videoEl.oncanplay = () => {
             if (!state.heroTrailerPlaying || state.heroTrailerRoomId !== room.id || state.currentRoomId) return;
+            applyInitialHighlightSeek();
             videoEl.classList.remove("hidden");
             videoEl.style.opacity = "0.9";
             if (muteBtn) {
