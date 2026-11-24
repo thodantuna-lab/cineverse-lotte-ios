@@ -5602,22 +5602,22 @@
       color: #6ee7b7;
     }
     .hn-budget-summary-box {
-      background: rgba(10, 10, 14, 0.72);
+      background: linear-gradient(155deg, rgba(255, 255, 255, 0.04) 0%, rgba(10, 10, 14, 0.72) 100%);
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 14px;
-      padding: 10px 12px;
+      padding: 8px 12px;
       min-width: 260px;
     }
     .hn-budget-total-highlight-row {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      margin-top: 6px;
-      padding: 7px 10px;
+      gap: 10px;
+      margin-top: 0;
+      padding: 5px 10px;
       border-radius: 10px;
-      background: linear-gradient(135deg, rgba(245, 197, 24, 0.14) 0%, rgba(180, 125, 25, 0.08) 100%);
-      border: 1px solid rgba(234, 179, 8, 0.35);
+      background: linear-gradient(135deg, rgba(245, 197, 24, 0.16) 0%, rgba(180, 125, 25, 0.08) 100%);
+      border: 1px solid rgba(234, 179, 8, 0.38);
     }
     @media (min-width: 1024px) {
       .hn-budget-main-row {
@@ -5797,7 +5797,7 @@
         padding: 0.42rem 0.72rem;
       }
       .hn-budget-summary-box {
-        width: 356px;
+        width: 455px;
       }
     }
     .hn-filter-dist-wrap .cv-select-trigger,
@@ -7310,6 +7310,36 @@
         font-size: 19px;
       }
     }
+    /* Live room board */
+    @media (min-width: 1024px) {
+      .cv-rooms-panel {
+        position: relative;
+        overflow: hidden;
+        background: radial-gradient(ellipse at 90% 0%, rgba(125, 29, 45, .2), transparent 48%), linear-gradient(165deg, #191318, #0d0c10 70%);
+        border-left: 1px solid rgba(221, 182, 103, .22);
+      }
+      .cv-rooms-panel > div:first-child { padding: 3px 2px 8px; border-bottom: 1px solid rgba(221, 182, 103, .18); }
+      .cv-rooms-panel h2 { letter-spacing: .01em; }
+      #desktop-room-search { min-height: 42px; background: rgba(5, 5, 8, .65) !important; border-color: rgba(255, 255, 255, .14) !important; transition: border-color .2s, box-shadow .2s; }
+      #desktop-room-search:focus { border-color: rgba(245, 197, 100, .7) !important; box-shadow: 0 0 0 3px rgba(245, 197, 100, .1); }
+      #desktop-rooms-list { gap: 8px; padding: 2px 3px 3px; }
+      #desktop-rooms-list .cv-room-row {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, .09);
+        background: linear-gradient(105deg, rgba(255,255,255,.055), rgba(255,255,255,.015));
+        box-shadow: inset 0 1px rgba(255,255,255,.035);
+        transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease;
+      }
+      #desktop-rooms-list .cv-room-row:hover { transform: translateX(3px); border-color: rgba(226, 183, 106, .45); background: linear-gradient(105deg, rgba(108, 31, 45, .34), rgba(255,255,255,.035)); }
+      #desktop-rooms-list .cv-room-row.is-active { border-color: rgba(232, 186, 81, .72); background: linear-gradient(105deg, rgba(123, 49, 31, .38), rgba(32, 24, 24, .88) 70%); box-shadow: inset 3px 0 #e8bd59, inset 0 1px rgba(255, 226, 164, .12), 0 5px 22px rgba(0,0,0,.25); }
+      #desktop-rooms-list .cv-room-row-num { font-family: Georgia, serif; font-weight: 700; color: #a89991; }
+      #desktop-rooms-list .cv-room-row.is-active .cv-room-row-num { color: #f0ca75; }
+      #desktop-rooms-list .cv-room-row-thumb { border: 1px solid rgba(255,255,255,.17); box-shadow: 0 5px 14px rgba(0,0,0,.4); }
+      #desktop-rooms-list .cv-room-marker { display: grid; place-items: center; width: 25px; height: 25px; flex-shrink: 0; border-radius: 50%; background: rgba(255,255,255,.04); }
+      #desktop-rooms-list .is-active .cv-room-marker { background: rgba(235,188,88,.15); }
+    }
+    @media (prefers-reduced-motion: reduce) { #desktop-rooms-list .cv-room-row, #desktop-rooms-list .cv-room-row-thumb img { transition: none; } }
 </style>
 <style id='cv-theater-art-deco'>
 body:not(.stream-room-active) #room-view {
@@ -8454,29 +8484,40 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         </div>
       </div>
 
-      <!-- 4. Thanh "Dự trù chi phí (rạp đã chọn)" minh bạch & đồng bộ -->
-      <div class="hn-budget-dock p-3 sm:px-4 sm:py-3.5 space-y-3">
+      <!-- 4. Thanh "Dự trù chi phí (rạp đã chọn)" gọn gàng & tinh tế -->
+      <div class="hn-budget-dock px-3.5 py-2.5 sm:px-4 sm:py-2.5 space-y-2">
         <!-- Thanh tóm tắt chính -->
         <div class="hn-budget-main-row">
-          <!-- Trái: Rạp đang chọn + Bộ chọn nhu cầu + Nút Nguồn giá & điều kiện -->
-          <div class="min-w-0 flex-1 flex flex-col justify-between gap-2.5">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div class="flex items-start gap-2.5 min-w-0">
-                <span class="w-8 h-8 rounded-xl bg-amber-400/15 border border-amber-400/40 text-amber-300 flex items-center justify-center shrink-0 mt-0.5">
-                  <i class="fa-solid fa-ticket text-xs"></i>
+          <!-- Trái: Rạp đang chọn + Bộ chọn nhu cầu + Nguồn giá -->
+          <div class="min-w-0 flex-1 flex flex-col justify-center gap-2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="w-7 h-7 rounded-lg bg-amber-400/15 border border-amber-400/35 text-amber-300 flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-ticket text-[11px]"></i>
                 </span>
-                <div class="min-w-0">
-                  <div class="flex flex-wrap items-center gap-1.5">
-                    <span class="text-xs sm:text-sm font-black text-white leading-tight" id="hn-budget-bar-title">Dự trù chi phí (rạp đã chọn)</span>
-                    <span class="hn-selected-pill">Đang chọn</span>
-                  </div>
-                  <div class="flex items-center gap-1.5 mt-1 min-w-0">
-                    <span id="hn-budget-selected-brand-mark" class="shrink-0"></span>
-                    <strong id="hn-budget-selected-cinema-name" class="text-xs sm:text-sm font-extrabold text-amber-200 truncate">Lotte Cinema Tây Hồ</strong>
-                  </div>
-                  <p id="hn-budget-selected-cinema-address" class="text-[10px] text-slate-400 truncate max-w-full sm:max-w-md mt-0.5">--</p>
-                  <span class="text-[10px] text-amber-300/90 hn-budget-mobile-only-sub block mt-0.5" id="hn-budget-bar-mobile-sub">2 người • 2D • Ghế VIP</span>
+                <div class="flex flex-wrap items-center gap-1.5 min-w-0">
+                  <span class="text-xs font-extrabold text-white" id="hn-budget-bar-title">Dự trù:</span>
+                  <span id="hn-budget-selected-brand-mark" class="shrink-0"></span>
+                  <strong id="hn-budget-selected-cinema-name" class="text-xs sm:text-[13px] font-extrabold text-amber-200 truncate">Lotte Cinema Tây Hồ</strong>
+                  <span class="hn-selected-pill">Đang chọn</span>
                 </div>
+                <p id="hn-budget-selected-cinema-address" class="hidden">--</p>
+                <span class="text-[10px] text-amber-300/90 hn-budget-mobile-only-sub block" id="hn-budget-bar-mobile-sub">2 người • 2D • Ghế VIP</span>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-1.5">
+                <button type="button" id="hn-btn-price-source-cond" onclick="window.appActions.toggleHanoiSourceCondDrawer()"
+                  aria-expanded="false" aria-controls="hn-price-source-panel"
+                  class="hn-source-cond-btn">
+                  <i class="fa-solid fa-link text-amber-300 text-[10px]"></i>
+                  <span>Nguồn giá</span>
+                  <i id="hn-source-cond-chevron" class="fa-solid fa-chevron-down text-[9px] text-slate-400 transition-transform duration-200"></i>
+                </button>
+                <span id="hn-reference-price-badge" class="hn-ref-badge hn-ref-badge--ref">
+                  <i class="fa-solid fa-circle-info text-[10px]"></i>
+                  <span>Giá tham khảo</span>
+                </span>
+                <span id="hn-price-checked-inline" class="hidden">--</span>
               </div>
             </div>
 
@@ -8485,7 +8526,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               <div class="flex items-center gap-1">
                 <select id="hn-budget-people" onchange="window.appActions.onBudgetPeoplePresetChange(this.value)"
                   aria-label="Số người đi xem"
-                  class="hn-field-box px-2.5 py-1.5 text-xs font-bold cursor-pointer">
+                  class="hn-field-box px-2.5 py-1 text-xs font-bold cursor-pointer">
                   <option value="1">1 người</option>
                   <option value="2" selected>2 người</option>
                   <option value="3">3 người</option>
@@ -8498,12 +8539,12 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 </select>
                 <input id="hn-budget-people-custom" type="number" min="1" max="100" value="2"
                   oninput="window.appActions.onHanoiBudgetControlChange()"
-                  class="hidden w-14 px-2 py-1.5 rounded-xl bg-black/70 border border-amber-400/60 text-white text-xs font-black text-center" />
+                  class="hidden w-14 px-2 py-1 rounded-xl bg-black/70 border border-amber-400/60 text-white text-xs font-black text-center" />
               </div>
 
               <select id="hn-budget-format" onchange="window.appActions.onHanoiBudgetControlChange()"
                 aria-label="Định dạng phòng chiếu"
-                class="hn-field-box px-2.5 py-1.5 text-xs font-bold cursor-pointer">
+                class="hn-field-box px-2.5 py-1 text-xs font-bold cursor-pointer">
                 <option value="2d" selected>2D</option>
                 <option value="3d">3D</option>
                 <option value="imax">IMAX</option>
@@ -8514,7 +8555,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
               <select id="hn-budget-seat-tier-quick" onchange="document.getElementById('hn-budget-seat-tier').value=this.value; window.appActions.onHanoiBudgetControlChange();"
                 aria-label="Hạng ghế nhanh"
-                class="hn-field-box px-2.5 py-1.5 text-xs font-bold cursor-pointer">
+                class="hn-field-box px-2.5 py-1 text-xs font-bold cursor-pointer">
                 <option value="standard">Ghế thường</option>
                 <option value="vip" selected>Ghế VIP</option>
                 <option value="sweetbox">Ghế đôi Sweetbox</option>
@@ -8522,7 +8563,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
               <select id="hn-budget-daytype-quick" onchange="document.getElementById('hn-budget-daytype').value=this.value; window.appActions.onHanoiBudgetControlChange();"
                 aria-label="Ngày xem nhanh"
-                class="hn-field-box px-2.5 py-1.5 text-xs font-bold cursor-pointer">
+                class="hn-field-box px-2.5 py-1 text-xs font-bold cursor-pointer">
                 <option value="auto" selected>Hôm nay</option>
                 <option value="mon_tue_thu">Thứ 2, 3, 5</option>
                 <option value="wed_happy">Thứ Tư Vui Vẻ</option>
@@ -8532,7 +8573,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
               <select id="hn-budget-combo" onchange="window.appActions.onHanoiBudgetControlChange()"
                 aria-label="Gói vé và bắp nước"
-                class="hn-field-box px-2.5 py-1.5 text-xs font-bold cursor-pointer">
+                class="hn-field-box px-2.5 py-1 text-xs font-bold cursor-pointer">
                 <option value="shared" selected>Vé + bắp nước (Chung)</option>
                 <option value="individual">Vé + bắp nước (Riêng)</option>
                 <option value="popcorn_only">Vé + bắp lớn</option>
@@ -8540,63 +8581,44 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 <option value="none">Chỉ tiền vé</option>
               </select>
             </div>
-
-            <!-- Chân dưới bên trái: Nguồn giá & điều kiện + Nhãn Giá tham khảo -->
-            <div class="flex flex-wrap items-center gap-2 pt-0.5">
-              <button type="button" id="hn-btn-price-source-cond" onclick="window.appActions.toggleHanoiSourceCondDrawer()"
-                aria-expanded="false" aria-controls="hn-price-source-panel"
-                class="hn-source-cond-btn">
-                <i class="fa-solid fa-link text-amber-300 text-[10px]"></i>
-                <span>Nguồn giá &amp; điều kiện</span>
-                <i id="hn-source-cond-chevron" class="fa-solid fa-chevron-down text-[9px] text-slate-400 transition-transform duration-200"></i>
-              </button>
-              <span id="hn-reference-price-badge" class="hn-ref-badge hn-ref-badge--ref">
-                <i class="fa-solid fa-circle-info text-[10px]"></i>
-                <span>Giá tham khảo</span>
-              </span>
-              <span id="hn-price-checked-inline" class="text-[10px] text-slate-400 font-medium hidden sm:inline">Kiểm tra: --</span>
-            </div>
           </div>
 
-          <!-- Phải: Bảng kê từng khoản + Nhãn rõ "Tiền vé đã biết" vs "Tổng ngân sách" + Nút thao tác -->
-          <div class="hn-budget-summary-box shrink-0 flex flex-col justify-between gap-2.5 lg:w-[360px]">
-            <div id="hn-budget-line-items" class="space-y-1 text-xs">
-              <div id="hn-line-tickets-row" class="flex items-center justify-between gap-3">
-                <span id="hn-line-tickets-label" class="text-slate-300">2 vé:</span>
+          <!-- Phải: Bảng kê gọn 2 tầng + Nút thao tác -->
+          <div class="hn-budget-summary-box shrink-0 flex flex-col justify-center gap-1.5 lg:w-[455px]">
+            <div id="hn-budget-line-items" class="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 text-[11px]">
+              <div id="hn-line-tickets-row" class="flex items-center gap-1 shrink-0">
+                <span id="hn-line-tickets-label" class="text-slate-400">2 vé:</span>
                 <strong id="hn-line-tickets-value" class="font-bold text-white">--</strong>
               </div>
-              <div id="hn-line-concession-row" class="flex items-center justify-between gap-3">
-                <span id="hn-line-concession-label" class="text-slate-300">Bắp nước:</span>
-                <strong id="hn-line-concession-value" class="font-bold text-amber-300">Chưa có giá</strong>
+              <div id="hn-line-concession-row" class="flex items-center gap-1 min-w-0 flex-1 justify-end">
+                <span id="hn-line-concession-label" class="text-slate-400 shrink-0">Bắp:</span>
+                <strong id="hn-line-concession-value" class="font-bold text-amber-300 truncate">Chưa có giá</strong>
               </div>
-              <div id="hn-line-parking-row" class="hidden flex items-center justify-between gap-3">
-                <span id="hn-line-parking-label" class="text-slate-300">Gửi xe ô tô:</span>
+              <div id="hn-line-parking-row" class="hidden flex items-center gap-1">
+                <span id="hn-line-parking-label" class="text-slate-400">Xe:</span>
                 <strong id="hn-line-parking-value" class="font-bold text-amber-300">Chưa có giá</strong>
               </div>
             </div>
 
-            <div id="hn-budget-result-banner" class="hn-budget-total-highlight-row">
-              <span id="hn-budget-known-label" class="text-xs font-extrabold text-amber-200">Tiền vé đã biết</span>
-              <strong id="hn-budget-total-highlight" class="text-base sm:text-xl font-black text-amber-300 tracking-tight">--</strong>
-            </div>
-
-            <p id="hn-budget-missing-warning" class="text-[10px] text-amber-300/95 font-semibold leading-snug flex items-start gap-1.5">
-              <i class="fa-solid fa-circle-info shrink-0 mt-0.5"></i>
-              <span>Chưa đủ dữ liệu để tính tổng chuyến đi</span>
-            </p>
-            <span id="hn-budget-per-person-pill" class="text-[10px] text-slate-400 font-semibold block">--</span>
-
-            <div class="flex items-center gap-1.5 pt-1 border-t border-white/10">
+            <div class="flex items-center gap-2">
+              <div id="hn-budget-result-banner" class="hn-budget-total-highlight-row flex-1 min-w-0">
+                <span id="hn-budget-known-label" class="text-[11px] font-extrabold text-amber-200 whitespace-nowrap truncate">Tổng</span>
+                <strong id="hn-budget-total-highlight" class="text-sm sm:text-base font-black text-amber-300 tracking-tight whitespace-nowrap shrink-0">--</strong>
+              </div>
               <button type="button" id="hn-budget-details-btn" onclick="window.appActions.toggleHanoiBudgetDetails()"
-                class="hn-gold-outline-btn flex-1 px-3 py-2 rounded-xl text-[11px] font-extrabold flex items-center justify-center gap-1.5">
-                <span>Dự trù &amp; Tùy chọn</span>
-                <i id="hn-budget-details-chevron" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+                class="hn-gold-outline-btn px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold flex items-center justify-center gap-1 shrink-0" title="Dự trù & Tùy chọn">
+                <span>Tùy chọn</span>
+                <i id="hn-budget-details-chevron" class="fa-solid fa-chevron-down text-[9px] transition-transform duration-200"></i>
               </button>
               <button type="button" id="hn-showtimes-toggle-btn" onclick="window.appActions.toggleHanoiShowtimesPanel()"
-                class="px-3 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600/35 border border-rose-500/45 text-rose-200 text-[11px] font-extrabold flex items-center justify-center gap-1.5 cursor-pointer transition">
+                class="px-2.5 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/35 border border-rose-500/45 text-rose-200 text-[11px] font-extrabold flex items-center justify-center gap-1 cursor-pointer transition shrink-0">
                 <i class="fa-solid fa-clock text-[10px]"></i>
                 <span>Lịch chiếu</span>
               </button>
+            </div>
+            <div class="flex items-center justify-between gap-2 text-[10px] text-slate-400">
+              <span id="hn-budget-per-person-pill" class="truncate">--</span>
+              <span id="hn-budget-missing-warning" class="hidden text-amber-300 font-semibold truncate"></span>
             </div>
           </div>
         </div>
