@@ -497,8 +497,8 @@
       text-align: left;
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 11px 12px;
+      gap: 10px;
+      padding: 9px 10px;
       border-radius: 12px;
       background: transparent;
       border: 1px solid transparent;
@@ -516,15 +516,40 @@
       border-left: 3px solid #F5C518;
     }
     .cv-room-row-num {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 800;
-      min-width: 30px;
+      min-width: 26px;
       color: #A1A1AA;
       font-variant-numeric: tabular-nums;
       flex-shrink: 0;
     }
     .cv-room-row.is-active .cv-room-row-num {
       color: #F5C518;
+    }
+    .cv-room-row-thumb {
+      position: relative;
+      width: 72px;
+      height: 44px;
+      border-radius: 8px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #0B0B0F;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.42);
+    }
+    .cv-room-row-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 25%;
+      display: block;
+      transition: transform 0.22s ease;
+    }
+    .cv-room-row:hover .cv-room-row-thumb img {
+      transform: scale(1.06);
+    }
+    .cv-room-row.is-active .cv-room-row-thumb {
+      border-color: rgba(245, 197, 24, 0.65);
     }
     /* Bottom sheet chọn 6 phòng trên Mobile */
     .cv-sheet-backdrop {
@@ -13606,6 +13631,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             ? "Đang cập nhật"
             : (isFull ? `Hết ghế (${occupied}/${maxCap})` : `${occupied}/${maxCap} ghế`);
           const title = room.displayTitle || sanitizeMovieTitle(room.movieTitle);
+          const thumbSrc = getOptimizedPosterUrl(
+            room.poster || resolveMoviePoster(room.movieTitle, "", room.youtubeId),
+            "w342"
+          );
           const actionCall = isMobileSheet
             ? `window.appActions.selectHeroRoomById('${room.id}', { closeSheet: true })`
             : `window.appActions.selectHeroRoomById('${room.id}', { preserveFocusId: '${room.id}' })`;
@@ -13618,6 +13647,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               onclick="${actionCall}"
               class="cv-room-row ${isCur ? "is-active" : ""}">
               <span class="cv-room-row-num">${shortNum}</span>
+              <span class="cv-room-row-thumb" aria-hidden="true">
+                <img src="${escapeHTML(thumbSrc)}" alt="" width="72" height="44" loading="lazy" decoding="async"
+                  onerror="this.onerror=null;this.src='assets/web-logo.png';this.style.objectFit='contain';" />
+              </span>
               <span class="min-w-0 flex-1 space-y-0.5">
                 <span class="block text-xs sm:text-[13px] font-bold text-white leading-snug break-words">${escapeHTML(title)}</span>
                 <span class="flex items-center gap-2 text-[11px]" style="color:${isFull ? '#FCA5A5' : '#A1A1AA'};">
