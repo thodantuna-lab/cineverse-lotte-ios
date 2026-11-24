@@ -15388,11 +15388,12 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
 
     // =========================================================================
-    // MÔ HÌNH RẠP 3D WEBGL TÍCH HỢP ĐẶT VÉ (CÓ RÈM MỞ/ĐÓNG & TỰ ĐỘNG DEMO POV GHẾ)
+    // MÔ HÌNH RẠP 3D WEBGL PBR CHUẨN STUDIO TÍCH HỢP ĐẶT VÉ (60FPS)
+    // Ghế công thái học bo tròn • Phản chiếu gương mặt sân khấu • Rèm rủ vật lý
     // =========================================================================
     (function initCineVerseBooking3D() {
       let gl = null, hctx = null, glCanvas = null, hudCanvas = null;
-      let progRoom = null, progScreen = null, progBeam = null;
+      let progRoom = null, progScreen = null, progBeam = null, idxType = 0;
       let gpuBase = null, gpuLeftWall = null, gpuRightWall = null, gpuRearWall = null, gpuCeiling = null;
       let chairGPU = null, curtainGPU = null, scrBuffers = null, beamBuffers = null, scrTex = null;
 
@@ -15413,7 +15414,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           if (isCouple) {
             const pairIdx = Math.floor((col - 1) / 2);
             const pairCenter = pairIdx < 2 ? (-5.25 + pairIdx * 2.55) : (2.70 + (pairIdx - 2) * 2.55);
-            x = pairCenter + (col % 2 === 1 ? -0.53 : 0.53);
+            x = pairCenter + (col % 2 === 1 ? -0.52 : 0.52);
           } else {
             x = col <= 4 ? (-6.35 + (col - 1) * 1.48) : (1.90 + (col - 5) * 1.48);
           }
@@ -15426,7 +15427,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         }
       });
 
-      const DUST_COUNT = 70;
+      const DUST_COUNT = 75;
       const dustSeeds = Array.from({ length: DUST_COUNT }, () => ({
         t: Math.random(),
         u: (Math.random() - 0.5) * 2,
@@ -15440,27 +15441,27 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         initialized: false,
         running: false,
         rafId: 0,
-        W: 640, H: 260, dpr: 1,
-        mode: "pov",           // "pov" | "orbit"
+        W: 640, H: 228, dpr: 1,
+        mode: "pov",
         mySeatId: "F4",
         hoveredSeatId: null,
-        occupied: {},          // { D3: "Khách", ... }
+        occupied: {},
         isCoupleOnly: false,
         curtainOpen: 0.08,
         curtainTarget: 1.0,
         lastCurtainBuilt: -1,
         lightsLevel: 0.08,
         lightsTarget: 0.0,
-        movieTitle: "CineVerse Lotte • IMAX 3D",
+        movieTitle: "CINEVERSE LOTTE • IMAX LASER",
         posterUrl: "",
         posterImg: null,
         posterReady: false,
-        lightL: [0.08, 0.56, 0.78],
-        lightC: [0.18, 0.80, 0.96],
-        lightR: [0.08, 0.48, 0.70],
+        lightL: [0.08, 0.54, 0.78],
+        lightC: [0.18, 0.78, 0.96],
+        lightR: [0.08, 0.46, 0.70],
         beamCol: [0.24, 0.80, 0.98],
-        yaw: -0.56, pitch: 0.45, dist: 21.0,
-        tYaw: -0.56, tPitch: 0.45, tDist: 21.0,
+        yaw: -0.56, pitch: 0.44, dist: 21.0,
+        tYaw: -0.56, tPitch: 0.44, tDist: 21.0,
         povYaw: 0, povPitch: 0,
         tPovYaw: 0, tPovPitch: 0,
         camPos: [0, 5.2, 6.8],
@@ -15468,11 +15469,78 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       };
 
       function createMB() {
-        return { pos: [], norm: [], col: [], mat: [], idx: [], vCount: 0 };
+        return { pos: [], norm: [], col: [], mat: [], ao: [], idx: [], vCount: 0 };
+      }
+      function spow(x, p) {
+        return Math.sign(x) * Math.pow(Math.abs(x), p);
       }
 
-      function addSoftBox(mb, cx, cy, cz, hx, hy, hz, rgb, mat, tiltX = 0, bevel = 0.24) {
-        const c = Math.cos(tiltX), s = Math.sin(tiltX);
+      // Sinh khối nệm bo tròn công thái học (Superellipsoid)
+      function addRoundedCushion(mb, cx, cy, cz, rx, ry, rz, roundness, segU, segV, rgb, mat, aoBot = 0.35, aoTop = 1.0, tiltX = 0) {
+        const cxT = Math.cos(tiltX), sxT = Math.sin(tiltX);
+        const base = mb.vCount;
+        for (let iv = 0; iv <= segV; iv++) {
+          const v = (iv / segV - 0.5) * Math.PI;
+          const cv = Math.cos(v), sv = Math.sin(v);
+          const aoVal = aoBot + (aoTop - aoBot) * (iv / segV);
+          for (let iu = 0; iu <= segU; iu++) {
+            const u = (iu / segU) * Math.PI * 2.0;
+            const cu = Math.cos(u), su = Math.sin(u);
+            const lx = rx * spow(cv, roundness) * spow(cu, roundness);
+            const ly = ry * spow(sv, roundness);
+            const lz = rz * spow(cv, roundness) * spow(su, roundness);
+            const nx0 = spow(cv, 2 - roundness) * spow(cu, 2 - roundness) / (rx || 1);
+            const ny0 = spow(sv, 2 - roundness) / (ry || 1);
+            const nz0 = spow(cv, 2 - roundness) * spow(su, 2 - roundness) / (rz || 1);
+            const wy = ly * cxT - lz * sxT, wz = ly * sxT + lz * cxT;
+            const wny = ny0 * cxT - nz0 * sxT, wnz = ny0 * sxT + nz0 * cxT;
+            const nl = Math.hypot(nx0, wny, wnz) || 1;
+            mb.pos.push(cx + lx, cy + wy, cz + wz);
+            mb.norm.push(nx0 / nl, wny / nl, wnz / nl);
+            mb.col.push(rgb[0], rgb[1], rgb[2]);
+            mb.mat.push(mat);
+            mb.ao.push(aoVal);
+          }
+        }
+        const stride = segU + 1;
+        for (let iv = 0; iv < segV; iv++) {
+          for (let iu = 0; iu < segU; iu++) {
+            const a = base + iv * stride + iu, b = a + 1, c = a + stride, d = c + 1;
+            mb.idx.push(a, c, b, b, c, d);
+          }
+        }
+        mb.vCount += (segV + 1) * stride;
+      }
+
+      // Sinh khối trụ tròn (khay để cốc, đèn tường pha lê, cột đồng, đĩa bóng đổ tiếp xúc)
+      function addCylinder(mb, cx, cy, cz, rTop, rBot, h, segs, rgb, mat, aoBot = 0.4, aoTop = 1.0, capTop = true) {
+        const base = mb.vCount, hh = h * 0.5;
+        for (let i = 0; i <= segs; i++) {
+          const a = (i / segs) * Math.PI * 2, ca = Math.cos(a), sa = Math.sin(a);
+          mb.pos.push(cx + ca * rBot, cy - hh, cz + sa * rBot);
+          mb.norm.push(ca, 0.08, sa); mb.col.push(rgb[0], rgb[1], rgb[2]); mb.mat.push(mat); mb.ao.push(aoBot);
+          mb.pos.push(cx + ca * rTop, cy + hh, cz + sa * rTop);
+          mb.norm.push(ca, 0.08, sa); mb.col.push(rgb[0], rgb[1], rgb[2]); mb.mat.push(mat); mb.ao.push(aoTop);
+        }
+        for (let i = 0; i < segs; i++) {
+          const b = base + i * 2;
+          mb.idx.push(b, b + 2, b + 1, b + 1, b + 2, b + 3);
+        }
+        mb.vCount += (segs + 1) * 2;
+        if (capTop && rTop > 0.002) {
+          const cIdx = mb.vCount;
+          mb.pos.push(cx, cy + hh, cz); mb.norm.push(0, 1, 0); mb.col.push(rgb[0], rgb[1], rgb[2]); mb.mat.push(mat); mb.ao.push(aoTop);
+          for (let i = 0; i <= segs; i++) {
+            const a = (i / segs) * Math.PI * 2;
+            mb.pos.push(cx + Math.cos(a) * rTop, cy + hh, cz + Math.sin(a) * rTop);
+            mb.norm.push(0, 1, 0); mb.col.push(rgb[0], rgb[1], rgb[2]); mb.mat.push(mat); mb.ao.push(aoTop);
+          }
+          for (let i = 0; i < segs; i++) mb.idx.push(cIdx, cIdx + 2 + i, cIdx + 1 + i);
+          mb.vCount += segs + 2;
+        }
+      }
+
+      function addArchBox(mb, cx, cy, cz, hx, hy, hz, rgb, mat, aoBot = 0.52, aoTop = 0.98, bevel = 0.08) {
         const faces = [
           { v: [[-hx,-hy,-hz],[hx,-hy,-hz],[hx,hy,-hz],[-hx,hy,-hz]], n: [0,0,-1] },
           { v: [[hx,-hy,hz],[-hx,-hy,hz],[-hx,hy,hz],[hx,hy,hz]], n: [0,0,1] },
@@ -15482,57 +15550,50 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           { v: [[hx,-hy,-hz],[hx,-hy,hz],[hx,hy,hz],[hx,hy,-hz]], n: [1,0,0] }
         ];
         for (const f of faces) {
-          const base = mb.vCount;
+          const b = mb.vCount;
           for (let i = 0; i < 4; i++) {
             const lv = f.v[i];
-            const wx = cx + lv[0];
-            const wy = cy + (lv[1] * c - lv[2] * s);
-            const wz = cz + (lv[1] * s + lv[2] * c);
-            const nx0 = f.n[0] + Math.sign(lv[0]) * bevel;
-            const ny0 = f.n[1] + Math.sign(lv[1]) * bevel;
-            const nz0 = f.n[2] + Math.sign(lv[2]) * bevel;
-            const ry = ny0 * c - nz0 * s, rz = ny0 * s + nz0 * c;
-            const l = Math.hypot(nx0, ry, rz) || 1;
-            mb.pos.push(wx, wy, wz);
-            mb.norm.push(nx0 / l, ry / l, rz / l);
+            const nx = f.n[0] + Math.sign(lv[0]) * bevel;
+            const ny = f.n[1] + Math.sign(lv[1]) * bevel;
+            const nz = f.n[2] + Math.sign(lv[2]) * bevel;
+            const nl = Math.hypot(nx, ny, nz) || 1;
+            mb.pos.push(cx + lv[0], cy + lv[1], cz + lv[2]);
+            mb.norm.push(nx / nl, ny / nl, nz / nl);
             mb.col.push(rgb[0], rgb[1], rgb[2]);
             mb.mat.push(mat);
+            mb.ao.push(lv[1] < 0 ? aoBot : aoTop);
           }
-          mb.idx.push(base, base + 1, base + 2, base, base + 2, base + 3);
+          mb.idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
           mb.vCount += 4;
         }
       }
 
+      function makeIdxArray(arr) {
+        return idxType === gl.UNSIGNED_INT ? new Uint32Array(arr) : new Uint16Array(arr);
+      }
+
       function uploadMB(mb, usage = gl.STATIC_DRAW) {
-        const bPos = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, bPos);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.pos), usage);
-        const bNorm = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, bNorm);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.norm), usage);
-        const bCol = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, bCol);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.col), usage);
-        const bMat = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, bMat);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.mat), usage);
-        const bIdx = gl.createBuffer();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, bIdx);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(mb.idx), usage);
-        return { bPos, bNorm, bCol, bMat, bIdx, count: mb.idx.length };
+        const mk = (arr, T, target) => {
+          const b = gl.createBuffer(); gl.bindBuffer(target, b); gl.bufferData(target, T, usage); return b;
+        };
+        return {
+          bPos: mk(mb.pos, new Float32Array(mb.pos), gl.ARRAY_BUFFER),
+          bNorm: mk(mb.norm, new Float32Array(mb.norm), gl.ARRAY_BUFFER),
+          bCol: mk(mb.col, new Float32Array(mb.col), gl.ARRAY_BUFFER),
+          bMat: mk(mb.mat, new Float32Array(mb.mat), gl.ARRAY_BUFFER),
+          bAO: mk(mb.ao, new Float32Array(mb.ao), gl.ARRAY_BUFFER),
+          bIdx: mk(mb.idx, makeIdxArray(mb.idx), gl.ELEMENT_ARRAY_BUFFER),
+          count: mb.idx.length
+        };
       }
 
       function updateDynamicGPU(gpu, mb) {
-        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bPos);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.pos), gl.DYNAMIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bNorm);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.norm), gl.DYNAMIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bCol);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.col), gl.DYNAMIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bMat);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.mat), gl.DYNAMIC_DRAW);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gpu.bIdx);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(mb.idx), gl.DYNAMIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bPos); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.pos), gl.DYNAMIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bNorm); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.norm), gl.DYNAMIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bCol); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.col), gl.DYNAMIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bMat); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.mat), gl.DYNAMIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bAO); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.ao), gl.DYNAMIC_DRAW);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gpu.bIdx); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, makeIdxArray(mb.idx), gl.DYNAMIC_DRAW);
         gpu.count = mb.idx.length;
       }
 
@@ -15541,57 +15602,79 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         st.lastCurtainBuilt = openVal;
         const mb = createMB();
 
-        // Diềm nhung Valance phía trên đỉnh màn chiếu + chỉ viền vàng kim
-        addSoftBox(mb, 0, 6.76, -9.86, 6.62, 0.22, 0.14, [0.48, 0.06, 0.13], 4, 0, 0.15);
-        addSoftBox(mb, 0, 6.53, -9.82, 6.60, 0.028, 0.08, [0.92, 0.72, 0.26], 2, 0, 0.2);
+        // Diềm nhung lượn sóng hoàng gia (Scalloped Royal Valance) + viền tua đồng vàng
+        const VSEGS = 32;
+        for (let i = 0; i < VSEGS; i++) {
+          const u0 = i / VSEGS, u1 = (i + 1) / VSEGS;
+          const x0 = -6.58 + u0 * 13.16, x1 = -6.58 + u1 * 13.16;
+          const z0 = -9.80 - Math.cos((u0 - 0.5) * Math.PI) * 0.68 + Math.sin(i * 1.8) * 0.04;
+          const z1 = -9.80 - Math.cos((u1 - 0.5) * Math.PI) * 0.68 + Math.sin((i + 1) * 1.8) * 0.04;
+          const yb0 = 6.46 - Math.abs(Math.sin(u0 * Math.PI * 5.0)) * 0.22;
+          const yb1 = 6.46 - Math.abs(Math.sin(u1 * Math.PI * 5.0)) * 0.22;
+          const b = mb.vCount;
+          mb.pos.push(x0, yb0, z0, x1, yb1, z1, x1, 6.96, z1, x0, 6.96, z0);
+          for (let k = 0; k < 4; k++) { mb.norm.push(0, 0.08, 1); mb.col.push(0.46, 0.05, 0.11); mb.mat.push(4); mb.ao.push(k < 2 ? 0.65 : 0.95); }
+          mb.idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
+          mb.vCount += 4;
 
-        // Hai cánh rèm nhung đỏ xếp ly 3D chạy dọc theo độ cong màn chiếu
-        const SEGS = 18;
-        const yBot = 1.15, yFringe = 1.29, yTop = 6.62;
+          const bf = mb.vCount;
+          mb.pos.push(x0, yb0 - 0.045, z0 + 0.01, x1, yb1 - 0.045, z1 + 0.01, x1, yb1, z1 + 0.01, x0, yb0, z0 + 0.01);
+          for (let k = 0; k < 4; k++) { mb.norm.push(0, 0.1, 1); mb.col.push(0.92, 0.72, 0.26); mb.mat.push(2); mb.ao.push(0.95); }
+          mb.idx.push(bf, bf + 1, bf + 2, bf, bf + 2, bf + 3);
+          mb.vCount += 4;
+        }
+
+        // Hai cánh rèm nhung xếp ly có độ rủ trọng lực & bóng rãnh (Fold AO)
+        const CSEGS = 28, CROWS = 6;
         [-1, 1].forEach((side) => {
           const xOuter = side * 6.52;
-          // Khi openVal = 0: hai mép rèm khép sát nhau ở giữa (x = 0.02); khi openVal = 1: thu gọn sang 2 bên (x = +-5.72)
-          const xInner = side * (0.015 + openVal * 5.70);
-          const amp = 0.065 + openVal * 0.115;
-
-          for (let i = 0; i < SEGS; i++) {
-            const s0 = i / SEGS, s1 = (i + 1) / SEGS;
-            const x0 = xOuter + (xInner - xOuter) * s0;
-            const x1 = xOuter + (xInner - xOuter) * s1;
-            const u0 = (x0 + 6.3) / 12.6, u1 = (x1 + 6.3) / 12.6;
-            const curve0 = -9.90 - Math.cos((Math.max(0, Math.min(1, u0)) - 0.5) * Math.PI) * 0.70;
-            const curve1 = -9.90 - Math.cos((Math.max(0, Math.min(1, u1)) - 0.5) * Math.PI) * 0.70;
-            const z0 = curve0 + Math.sin(i * 2.15) * amp;
-            const z1 = curve1 + Math.sin((i + 1) * 2.15) * amp;
-
-            const dx = x1 - x0, dz = z1 - z0;
-            let nx = -dz, nz = dx;
-            if (nz < 0) { nx = -nx; nz = -nz; }
-            const nl = Math.hypot(nx, nz) || 1;
-            nx /= nl; nz /= nl;
-
-            // Thân rèm nhung đỏ (hai mặt trước/sau để nhìn từ trong rạp hay từ sân khấu đều đẹp)
-            const shade = 0.88 + 0.12 * Math.cos(i * 2.15);
-            const velvet = [0.50 * shade, 0.06 * shade, 0.13 * shade];
-            const goldFringe = [0.92 * shade, 0.72 * shade, 0.25 * shade];
-
-            const pushDoubleQuad = (yb, yt, col, mat) => {
-              // Mặt trước (+z hướng về khán giả)
-              let b = mb.vCount;
-              mb.pos.push(x0, yb, z0, x1, yb, z1, x1, yt, z1, x0, yt, z0);
-              for (let k = 0; k < 4; k++) { mb.norm.push(nx, 0.04, nz); mb.col.push(col[0], col[1], col[2]); mb.mat.push(mat); }
-              mb.idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
-              mb.vCount += 4;
-              // Mặt sau (-z hướng về màn chiếu)
-              b = mb.vCount;
-              mb.pos.push(x1, yb, z1 - 0.03, x0, yb, z0 - 0.03, x0, yt, z0 - 0.03, x1, yt, z1 - 0.03);
-              for (let k = 0; k < 4; k++) { mb.norm.push(-nx, 0.04, -nz); mb.col.push(col[0]*0.8, col[1]*0.8, col[2]*0.8); mb.mat.push(mat); }
-              mb.idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
-              mb.vCount += 4;
-            };
-
-            pushDoubleQuad(yFringe, yTop, velvet, 4);
-            pushDoubleQuad(yBot, yFringe, goldFringe, 2);
+          const xInnerBase = side * (0.01 + openVal * 5.68);
+          const gridX = [], gridY = [], gridZ = [], gridNX = [], gridNZ = [], gridAO = [];
+          for (let r = 0; r <= CROWS; r++) {
+            const v = r / CROWS;
+            const y = 1.15 + v * 5.50;
+            const catenary = Math.sin(v * Math.PI) * openVal * 0.22 * side;
+            const xInner = xInnerBase + catenary;
+            const amp = (0.055 + openVal * 0.095) * (1.25 - 0.45 * v);
+            for (let i = 0; i <= CSEGS; i++) {
+              const s = i / CSEGS;
+              const x = xOuter + (xInner - xOuter) * s;
+              const uScreen = Math.max(0, Math.min(1, (x + 6.35) / 12.7));
+              const baseZ = -9.90 - Math.cos((uScreen - 0.5) * Math.PI) * 0.70;
+              const wave = Math.sin(s * Math.PI * 9.0);
+              const z = baseZ + wave * amp;
+              const dWave = Math.cos(s * Math.PI * 9.0) * 1.4;
+              let nx = -dWave * side, nz = 1.0;
+              const nl = Math.hypot(nx, nz) || 1;
+              gridX.push(x); gridY.push(y); gridZ.push(z);
+              gridNX.push(nx / nl); gridNZ.push(nz / nl);
+              gridAO.push(0.32 + 0.68 * (wave * 0.5 + 0.5));
+            }
+          }
+          const stride = CSEGS + 1;
+          for (let face = 0; face < 2; face++) {
+            const base = mb.vCount, zOff = face === 0 ? 0 : -0.025, nSign = face === 0 ? 1 : -1;
+            for (let k = 0; k < gridX.length; k++) {
+              mb.pos.push(gridX[k], gridY[k], gridZ[k] + zOff);
+              mb.norm.push(gridNX[k] * nSign, 0.03, gridNZ[k] * nSign);
+              mb.col.push(0.46, 0.05, 0.11); mb.mat.push(4); mb.ao.push(gridAO[k]);
+            }
+            for (let r = 0; r < CROWS; r++) {
+              for (let i = 0; i < CSEGS; i++) {
+                const a = base + r * stride + i, b = a + 1, c = a + stride, d = c + 1;
+                if (face === 0) mb.idx.push(a, b, d, a, d, c);
+                else mb.idx.push(a, d, b, a, c, d);
+              }
+            }
+            mb.vCount += gridX.length;
+          }
+          // Viền gấu rèm thêu chỉ vàng kim 6cm sắc nét
+          for (let i = 0; i < CSEGS; i++) {
+            const b = mb.vCount;
+            mb.pos.push(gridX[i], 1.15, gridZ[i] + 0.01, gridX[i+1], 1.15, gridZ[i+1] + 0.01, gridX[i+1], 1.21, gridZ[i+1] + 0.01, gridX[i], 1.21, gridZ[i] + 0.01);
+            for (let k = 0; k < 4; k++) { mb.norm.push(0, 0.1, 1); mb.col.push(0.92, 0.72, 0.26); mb.mat.push(2); mb.ao.push(0.95); }
+            mb.idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
+            mb.vCount += 4;
           }
         });
 
@@ -15607,58 +15690,76 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           const isHover = s.id === st.hoveredSeatId;
           const occName = st.occupied[s.id];
 
-          let fabric, trimCol, headMat = 1;
+          let mainCol, bolsterCol, headCol, trimMat = 1;
           if (isMine) {
-            fabric = [0.96, 0.75, 0.14];
-            trimCol = [1.0, 0.92, 0.55];
-            headMat = 2;
+            mainCol = [0.92, 0.68, 0.12]; bolsterCol = [0.78, 0.54, 0.08]; headCol = [1.0, 0.88, 0.44]; trimMat = 2;
           } else if (isHover) {
-            fabric = [0.88, 0.64, 0.18];
-            trimCol = [1.0, 0.88, 0.45];
-            headMat = 2;
+            mainCol = [0.82, 0.58, 0.16]; bolsterCol = [0.68, 0.46, 0.12]; headCol = [0.98, 0.84, 0.40]; trimMat = 2;
           } else if (s.isCouple) {
-            fabric = [0.58, 0.10, 0.25];
-            trimCol = [0.88, 0.68, 0.26];
-            headMat = 2;
+            mainCol = [0.48, 0.07, 0.19]; bolsterCol = [0.36, 0.05, 0.14]; headCol = [0.62, 0.12, 0.26]; trimMat = 2;
           } else if (s.isVIP) {
-            fabric = [0.48, 0.08, 0.16];
-            trimCol = [0.72, 0.36, 0.44];
-            headMat = 1;
+            mainCol = [0.42, 0.06, 0.12]; bolsterCol = [0.30, 0.04, 0.09]; headCol = [0.52, 0.09, 0.16]; trimMat = 2;
           } else {
-            fabric = [0.24, 0.20, 0.30];
-            trimCol = [0.32, 0.28, 0.40];
-            headMat = 1;
+            mainCol = [0.18, 0.16, 0.23]; bolsterCol = [0.13, 0.11, 0.17]; headCol = [0.23, 0.20, 0.29]; trimMat = 1;
           }
 
-          const hw = s.isCouple ? 0.53 : 0.45;
+          const hw = s.isCouple ? 0.52 : 0.43;
           if (!s.isCouple || s.pairSide === "L") {
-            const pedX = s.isCouple ? s.x + 0.53 : s.x;
-            addSoftBox(mb, pedX, s.y + 0.11, s.z + 0.04, s.isCouple ? 0.65 : 0.18, 0.11, 0.18, [0.08, 0.08, 0.10], 0, 0, 0.1);
+            const px = s.isCouple ? s.x + 0.52 : s.x;
+            addCylinder(mb, px, s.y + 0.018, s.z + 0.04, s.isCouple ? 0.62 : 0.34, s.isCouple ? 0.62 : 0.34, 0.012, 10, [0.02, 0.015, 0.025], 0, 0.08, 0.12, true);
+            addCylinder(mb, px, s.y + 0.13, s.z + 0.05, 0.09, 0.13, 0.22, 8, [0.06, 0.06, 0.08], 0, 0.15, 0.55, false);
           }
-          addSoftBox(mb, s.x, s.y + 0.28, s.z - 0.02, hw, 0.10, 0.40, fabric, 1, 0.06, 0.38);
-          const backH = s.isCouple ? 0.38 : s.isVIP ? 0.36 : 0.33;
-          addSoftBox(mb, s.x, s.y + 0.35 + backH, s.z + 0.29, hw * 0.96, backH, 0.095, fabric, 1, -0.19, 0.40);
-          const headY = s.y + 0.35 + backH * 2.0 + 0.08;
-          addSoftBox(mb, s.x, headY, s.z + 0.38, hw * 0.78, 0.095, 0.085, trimCol, headMat, -0.10, 0.45);
 
-          const armCol = [0.12, 0.10, 0.14];
+          // Đệm ngồi bo tròn + gờ đỡ đùi phía trước
+          addRoundedCushion(mb, s.x, s.y + 0.27, s.z + 0.01, hw, 0.105, 0.38, 0.52, 8, 5, mainCol, 1, 0.18, 0.95, 0.06);
+          addRoundedCushion(mb, s.x, s.y + 0.29, s.z - 0.31, hw * 0.95, 0.075, 0.10, 0.62, 8, 4, bolsterCol, 1, 0.30, 0.98, 0.0);
+
+          // Lưng ghế ngả 3 múi công thái học + đệm ôm hai bên sườn
+          const backH = s.isCouple ? 0.37 : s.isVIP ? 0.35 : 0.32;
+          const backY = s.y + 0.35 + backH;
+          addRoundedCushion(mb, s.x, backY, s.z + 0.29, hw * 0.74, backH, 0.095, 0.56, 8, 5, mainCol, 1, 0.22, 0.96, -0.19);
           if (!s.isCouple || s.pairSide === "L") {
-            addSoftBox(mb, s.x - hw - 0.05, s.y + 0.44, s.z + 0.04, 0.052, 0.055, 0.35, armCol, 0, 0, 0.28);
-            addSoftBox(mb, s.x - hw - 0.05, s.y + 0.26, s.z + 0.14, 0.042, 0.13, 0.08, [0.08, 0.08, 0.10], 0, 0, 0.1);
+            addRoundedCushion(mb, s.x - hw * 0.80, backY, s.z + 0.26, 0.10, backH * 0.94, 0.115, 0.60, 6, 4, bolsterCol, 1, 0.24, 0.95, -0.19);
           }
           if (!s.isCouple || s.pairSide === "R") {
-            addSoftBox(mb, s.x + hw + 0.05, s.y + 0.44, s.z + 0.04, 0.052, 0.055, 0.35, armCol, 0, 0, 0.28);
-            addSoftBox(mb, s.x + hw + 0.05, s.y + 0.26, s.z + 0.14, 0.042, 0.13, 0.08, [0.08, 0.08, 0.10], 0, 0, 0.1);
-            if (occName || isMine) {
-              addSoftBox(mb, s.x + hw + 0.05, s.y + 0.54, s.z - 0.23, 0.042, 0.065, 0.042, isMine ? [0.95, 0.22, 0.28] : [0.88, 0.88, 0.92], 0, 0, 0.38);
-            }
+            addRoundedCushion(mb, s.x + hw * 0.80, backY, s.z + 0.26, 0.10, backH * 0.94, 0.115, 0.60, 6, 4, bolsterCol, 1, 0.24, 0.95, -0.19);
           }
 
+          // Gối tựa đầu VIP + nẹp đồng Champagne
+          const headY = s.y + 0.36 + backH * 2.0 + 0.075;
+          addRoundedCushion(mb, s.x, headY, s.z + 0.38, hw * 0.76, 0.095, 0.088, 0.58, 8, 5, headCol, 1, 0.45, 1.0, -0.10);
+          if (s.isVIP || s.isCouple || isMine) {
+            addArchBox(mb, s.x, headY - 0.085, s.z + 0.32, hw * 0.52, 0.012, 0.06, [0.90, 0.70, 0.28], trimMat, 0.8, 1.0, 0.2);
+          }
+
+          // Khung vách riêng tư bọc nhung viền đồng cho ghế đôi Sweetbox Hàng F
+          if (s.isCouple && s.pairSide === "L") {
+            addArchBox(mb, s.x + 0.52, s.y + 0.62, s.z + 0.47, 1.08, 0.54, 0.035, [0.22, 0.04, 0.09], 1, 0.25, 0.88, 0.15);
+            addArchBox(mb, s.x + 0.52, s.y + 1.17, s.z + 0.47, 1.08, 0.018, 0.042, [0.90, 0.70, 0.28], 2, 0.8, 1.0, 0.2);
+          }
+
+          // Tay vịn bọc da + khay để cốc tròn viền kim loại & ly nước
+          const armCol = [0.09, 0.08, 0.11];
+          const buildArm = (ax, withDrink) => {
+            addRoundedCushion(mb, ax, s.y + 0.44, s.z + 0.06, 0.058, 0.048, 0.32, 0.50, 6, 4, armCol, 1, 0.35, 0.92, 0);
+            addArchBox(mb, ax, s.y + 0.26, s.z + 0.14, 0.04, 0.14, 0.10, [0.06, 0.06, 0.08], 0, 0.18, 0.7, 0.08);
+            const czCup = s.z - 0.23;
+            addCylinder(mb, ax, s.y + 0.455, czCup, 0.054, 0.050, 0.07, 10, [0.76, 0.62, 0.34], 2, 0.5, 1.0, false);
+            addCylinder(mb, ax, s.y + 0.465, czCup, 0.044, 0.044, 0.01, 10, [0.02, 0.02, 0.03], 0, 0.1, 0.15, true);
+            if (withDrink) {
+              addCylinder(mb, ax, s.y + 0.53, czCup, 0.042, 0.034, 0.14, 10, [0.85, 0.12, 0.18], 1, 0.4, 0.98, true);
+              addCylinder(mb, ax, s.y + 0.602, czCup, 0.045, 0.045, 0.014, 10, [0.94, 0.94, 0.96], 0, 0.8, 1.0, true);
+            }
+          };
+          if (!s.isCouple || s.pairSide === "L") buildArm(s.x - hw - 0.055, false);
+          if (!s.isCouple || s.pairSide === "R") buildArm(s.x + hw + 0.055, Boolean(occName || isMine));
+
           if (occName || (isMine && st.mode !== "pov")) {
-            const shirt = isMine ? [0.88, 0.68, 0.16] : [0.18, 0.20, 0.28];
-            const headC = isMine ? [0.98, 0.84, 0.44] : [0.74, 0.66, 0.62];
-            addSoftBox(mb, s.x, s.y + 0.68, s.z + 0.16, 0.25, 0.24, 0.13, shirt, 1, -0.16, 0.44);
-            addSoftBox(mb, s.x, s.y + 1.09, s.z + 0.22, 0.145, 0.165, 0.145, headC, 1, 0, 0.48);
+            const coat = isMine ? [0.84, 0.62, 0.14] : [0.12, 0.13, 0.19];
+            const hair = isMine ? [0.96, 0.80, 0.36] : [0.09, 0.08, 0.10];
+            addRoundedCushion(mb, s.x, s.y + 0.66, s.z + 0.15, 0.24, 0.24, 0.13, 0.68, 8, 5, coat, 1, 0.25, 0.92, -0.16);
+            addCylinder(mb, s.x, s.y + 0.93, s.z + 0.20, 0.06, 0.07, 0.10, 8, [0.55, 0.45, 0.42], 1, 0.3, 0.7, false);
+            addRoundedCushion(mb, s.x, s.y + 1.08, s.z + 0.21, 0.125, 0.155, 0.135, 0.82, 10, 6, hair, 1, 0.35, 0.96, 0.04);
           }
         }
         updateDynamicGPU(chairGPU, mb);
@@ -15669,11 +15770,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           const sampleZone = (x0, w) => {
             const d = sctx.getImageData(x0, 48, w, 160).data;
             let r = 0, g = 0, b = 0, n = 0;
-            for (let i = 0; i < d.length; i += 16) {
-              r += d[i]; g += d[i + 1]; b += d[i + 2]; n++;
-            }
-            if (!n) return [0.18, 0.68, 0.88];
-            const boost = 1.35 / 255;
+            for (let i = 0; i < d.length; i += 16) { r += d[i]; g += d[i + 1]; b += d[i + 2]; n++; }
+            if (!n) return [0.16, 0.72, 0.90];
+            const boost = 1.38 / 255;
             return [
               Math.min(1, Math.max(0.08, r / n * boost)),
               Math.min(1, Math.max(0.08, g / n * boost)),
@@ -15689,10 +15788,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             Math.min(1, st.lightC[2] * 1.1 + 0.08)
           ];
         } catch (_) {
-          st.lightL = [0.14, 0.56, 0.78];
-          st.lightC = [0.24, 0.75, 0.94];
-          st.lightR = [0.14, 0.48, 0.72];
-          st.beamCol = [0.30, 0.78, 0.96];
+          st.lightL = [0.12, 0.56, 0.78]; st.lightC = [0.22, 0.78, 0.96]; st.lightR = [0.12, 0.48, 0.72]; st.beamCol = [0.28, 0.80, 0.98];
         }
       }
 
@@ -15708,68 +15804,51 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           st.posterImg = img;
           st.posterReady = true;
           sctx.clearRect(0, 0, 512, 256);
-          const ir = img.width / (img.height || 1);
-          const cr = 512 / 256;
+          const ir = img.width / (img.height || 1), cr = 512 / 256;
           let dw = 512, dh = 256, dx = 0, dy = 0;
           if (ir > cr) { dh = 256; dw = 256 * ir; dx = (512 - dw) * 0.5; }
-          else { dw = 512; dh = 512 / (ir || 1); dy = (256 - dh) * 0.35; }
+          else { dw = 512; dh = 512 / (ir || 1); dy = (256 - dh) * 0.34; }
           sctx.drawImage(img, dx, dy, dw, dh);
           extractPaletteFromScreen();
         };
-        img.onerror = () => {
-          if (st.posterUrl !== clean) return;
-          st.posterReady = false;
-        };
+        img.onerror = () => { if (st.posterUrl === clean) st.posterReady = false; };
         img.src = clean;
       }
 
       function drawScreenCanvas(t) {
         const w = 512, h = 256;
         if (st.posterReady && st.posterImg) {
-          const img = st.posterImg;
-          const ir = img.width / (img.height || 1);
-          const cr = w / h;
-          const zoom = 1.03 + 0.025 * Math.sin(t * 0.45);
+          const img = st.posterImg, ir = img.width / (img.height || 1), cr = w / h;
+          const zoom = 1.03 + 0.022 * Math.sin(t * 0.45);
           let dw = w, dh = h;
           if (ir > cr) { dh = h * zoom; dw = dh * ir; }
           else { dw = w * zoom; dh = dw / (ir || 1); }
-          const dx = (w - dw) * 0.5;
-          const dy = (h - dh) * 0.32;
-          sctx.drawImage(img, dx, dy, dw, dh);
-
-          // Ánh đèn máy chiếu lung linh nhẹ trên màn chiếu IMAX
+          sctx.drawImage(img, (w - dw) * 0.5, (h - dh) * 0.32, dw, dh);
           const g = sctx.createRadialGradient(w * (0.5 + 0.12 * Math.sin(t * 0.8)), h * 0.35, 10, w * 0.5, h * 0.5, w * 0.65);
-          g.addColorStop(0, "rgba(255,255,255,0.10)");
-          g.addColorStop(1, "rgba(0,0,0,0.28)");
-          sctx.fillStyle = g;
-          sctx.fillRect(0, 0, w, h);
+          g.addColorStop(0, "rgba(255,255,255,0.09)");
+          g.addColorStop(1, "rgba(0,0,0,0.26)");
+          sctx.fillStyle = g; sctx.fillRect(0, 0, w, h);
         } else {
           const g = sctx.createLinearGradient(0, 0, 0, h);
-          g.addColorStop(0, "#0e5a84");
-          g.addColorStop(0.5, "#0284c7");
-          g.addColorStop(1, "#020617");
-          sctx.fillStyle = g;
-          sctx.fillRect(0, 0, w, h);
-          sctx.save();
-          sctx.globalCompositeOperation = "screen";
-          for (let i = 0; i < 6; i++) {
-            const x = w * (0.15 + i * 0.14) + Math.sin(t * 0.7 + i) * 16;
-            const rg = sctx.createLinearGradient(x, 0, x + 36, h);
-            rg.addColorStop(0, "rgba(165, 243, 252, 0.32)");
-            rg.addColorStop(1, "rgba(14, 165, 233, 0)");
-            sctx.fillStyle = rg;
-            sctx.beginPath();
-            sctx.moveTo(x - 14, 0); sctx.lineTo(x + 22, 0); sctx.lineTo(x + 85, h); sctx.lineTo(x - 45, h);
+          g.addColorStop(0, "#15809e"); g.addColorStop(0.45, "#0369a1"); g.addColorStop(1, "#020c18");
+          sctx.fillStyle = g; sctx.fillRect(0, 0, w, h);
+          sctx.save(); sctx.globalCompositeOperation = "screen";
+          for (let i = 0; i < 7; i++) {
+            const x = w * (0.14 + i * 0.12) + Math.sin(t * 0.6 + i) * 15;
+            const rg = sctx.createLinearGradient(x, 0, x + 40, h);
+            rg.addColorStop(0, "rgba(186, 250, 255, 0.32)"); rg.addColorStop(1, "rgba(2, 132, 199, 0)");
+            sctx.fillStyle = rg; sctx.beginPath();
+            sctx.moveTo(x - 14, 0); sctx.lineTo(x + 20, 0); sctx.lineTo(x + 85, h); sctx.lineTo(x - 45, h);
             sctx.closePath(); sctx.fill();
           }
           sctx.restore();
         }
-        sctx.fillStyle = "rgba(0,0,0,0.45)";
-        sctx.fillRect(0, h - 26, w, 26);
+        sctx.fillStyle = "rgba(0,0,0,0.46)";
+        sctx.fillRect(0, h - 24, w, 24);
         sctx.fillStyle = "rgba(255,255,255,0.88)";
-        sctx.font = "700 11px system-ui, sans-serif";
+        sctx.font = "700 10.5px system-ui, sans-serif";
         sctx.textAlign = "center";
-        sctx.fillText(st.movieTitle, w * 0.5, h - 9);
+        sctx.fillText(st.movieTitle, w * 0.5, h - 8);
       }
 
       function ensureInit() {
@@ -15777,107 +15856,169 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         glCanvas = document.getElementById("booking-3d-gl");
         hudCanvas = document.getElementById("booking-3d-hud");
         if (!glCanvas || !hudCanvas) return false;
-        gl = glCanvas.getContext("webgl", { antialias: true, alpha: false, premultipliedAlpha: false });
+        gl = glCanvas.getContext("webgl2", { antialias: true, alpha: false, premultipliedAlpha: false }) ||
+             glCanvas.getContext("webgl", { antialias: true, alpha: false, premultipliedAlpha: false });
         hctx = hudCanvas.getContext("2d");
         if (!gl || !hctx) return false;
 
+        const isWL2 = (typeof WebGL2RenderingContext !== "undefined") && (gl instanceof WebGL2RenderingContext);
+        const uintExt = isWL2 ? true : Boolean(gl.getExtension("OES_element_index_uint"));
+        idxType = uintExt ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
+
         const compile = (vsSrc, fsSrc) => {
-          const vs = gl.createShader(gl.VERTEX_SHADER);
-          gl.shaderSource(vs, vsSrc); gl.compileShader(vs);
-          const fs = gl.createShader(gl.FRAGMENT_SHADER);
-          gl.shaderSource(fs, fsSrc); gl.compileShader(fs);
-          const p = gl.createProgram();
-          gl.attachShader(p, vs); gl.attachShader(p, fs); gl.linkProgram(p);
+          const vs = gl.createShader(gl.VERTEX_SHADER); gl.shaderSource(vs, vsSrc); gl.compileShader(vs);
+          const fs = gl.createShader(gl.FRAGMENT_SHADER); gl.shaderSource(fs, fsSrc); gl.compileShader(fs);
+          const p = gl.createProgram(); gl.attachShader(p, vs); gl.attachShader(p, fs); gl.linkProgram(p);
           return p;
         };
 
         progRoom = compile(`
           attribute vec3 aPos, aNorm, aCol;
-          attribute float aMat;
+          attribute float aMat, aAO;
           uniform mat4 uProj, uView;
           varying vec3 vWorldPos, vNorm, vCol;
-          varying float vMat;
+          varying float vMat, vAO;
           void main() {
-            vWorldPos = aPos; vNorm = aNorm; vCol = aCol; vMat = aMat;
+            vWorldPos = aPos; vNorm = aNorm; vCol = aCol; vMat = aMat; vAO = aAO;
             gl_Position = uProj * uView * vec4(aPos, 1.0);
           }
         `, `
           precision highp float;
           varying vec3 vWorldPos, vNorm, vCol;
-          varying float vMat;
+          varying float vMat, vAO;
           uniform vec3 uCamPos, uScreenColL, uScreenColC, uScreenColR;
           uniform float uLights, uTime, uCurtainOpen;
+          uniform sampler2D uScreenTex;
+
+          float hash21(vec2 p) {
+            p = fract(p * vec2(123.34, 456.21));
+            p += dot(p, p + 45.32);
+            return fract(p.x * p.y);
+          }
+
           void main() {
             vec3 N = normalize(vNorm);
             vec3 V = normalize(uCamPos - vWorldPos);
-            if (vMat > 3.5 && vMat < 4.5) {
-              float pleat = cos(vWorldPos.z * 9.5 + vWorldPos.x * 6.5);
-              N = normalize(N + vec3(pleat * 0.18, 0.0, pleat * 0.42));
-            }
+            float ao = clamp(vAO, 0.05, 1.0);
+            vec3 baseAlbedo = vCol;
+
             if (vMat > 2.5 && vMat < 3.5) {
               gl_FragColor = vec4(vCol, 1.0);
               return;
             }
-            vec3 scrPosL = vec3(-4.6, 3.9, -10.2);
-            vec3 scrPosC = vec3( 0.0, 3.9, -10.6);
-            vec3 scrPosR = vec3( 4.6, 3.9, -10.2);
+            if (vMat > 5.5 && vMat < 6.5) {
+              float slat = vWorldPos.z * 26.0;
+              float g = sin(slat);
+              N = normalize(N + vec3(0.0, 0.0, cos(slat) * 0.38));
+              ao *= (0.72 + 0.28 * smoothstep(-0.8, 0.6, g));
+              baseAlbedo *= (0.86 + 0.18 * smoothstep(-0.5, 0.8, g));
+            }
+            if (vMat > 3.5 && vMat < 4.5) {
+              float m = sin(vWorldPos.x * 22.0 + vWorldPos.z * 18.0);
+              N = normalize(N + vec3(m * 0.12, 0.0, m * 0.16));
+            }
+            if (vMat > 6.5 && vMat < 7.5) {
+              baseAlbedo *= (0.90 + 0.18 * hash21(floor(vWorldPos.xz * 95.0)));
+            }
+
+            float scrGate = 0.10 + 0.90 * uCurtainOpen;
+            vec3 scrPosL = vec3(-4.5, 3.9, -10.2);
+            vec3 scrPosC = vec3( 0.0, 3.9, -10.65);
+            vec3 scrPosR = vec3( 4.5, 3.9, -10.2);
             vec3 dL = scrPosL - vWorldPos, dC = scrPosC - vWorldPos, dR = scrPosR - vWorldPos;
-            float attL = 1.0 / (1.0 + 0.020 * dot(dL, dL));
-            float attC = 1.0 / (1.0 + 0.017 * dot(dC, dC));
-            float attR = 1.0 / (1.0 + 0.020 * dot(dR, dR));
-            float nlL = max(dot(N, normalize(dL)), 0.0);
-            float nlC = max(dot(N, normalize(dC)), 0.0);
-            float nlR = max(dot(N, normalize(dR)), 0.0);
-            float scrGate = 0.14 + 0.86 * uCurtainOpen;
+            float attL = 1.0 / (1.0 + 0.019 * dot(dL, dL));
+            float attC = 1.0 / (1.0 + 0.015 * dot(dC, dC));
+            float attR = 1.0 / (1.0 + 0.019 * dot(dR, dR));
             vec3 screenIrr = (
-              uScreenColL * (nlL * 0.72 + 0.28) * attL +
-              uScreenColC * (nlC * 0.88 + 0.32) * attC +
-              uScreenColR * (nlR * 0.72 + 0.28) * attR
-            ) * 1.38 * scrGate;
+              uScreenColL * (max(dot(N, normalize(dL)), 0.0) * 0.78 + 0.22) * attL +
+              uScreenColC * (max(dot(N, normalize(dC)), 0.0) * 0.92 + 0.26) * attC +
+              uScreenColR * (max(dot(N, normalize(dR)), 0.0) * 0.78 + 0.22) * attR
+            ) * 1.45 * scrGate;
 
             vec3 sconceLight = vec3(0.0);
-            float sconceStr = mix(0.45, 1.45, uLights);
+            float sconcePower = mix(0.52, 1.55, uLights);
+            bool isSideWall = abs(vWorldPos.x) > 8.65;
             for (int i = 0; i < 3; i++) {
-              float sz = -6.0 + float(i) * 5.0;
+              float sz = -5.8 + float(i) * 5.0;
               for (int s = 0; s < 2; s++) {
-                vec3 lp = vec3((s == 0) ? -8.85 : 8.85, 4.85, sz);
-                vec3 ld = lp - vWorldPos;
-                float att = 1.0 / (1.0 + 0.12 * dot(ld, ld));
-                sconceLight += vec3(1.0, 0.78, 0.42) * (max(dot(N, normalize(ld)), 0.0) * 0.8 + 0.25) * att * sconceStr;
+                float sx = (s == 0) ? -8.82 : 8.82;
+                vec3 lp = vec3(sx, 4.85, sz);
+                vec3 toLight = lp - vWorldPos;
+                float att = 1.0 / (1.0 + 0.14 * dot(toLight, toLight));
+                sconceLight += vec3(1.0, 0.76, 0.38) * (max(dot(N, normalize(toLight)), 0.0) * 0.75 + 0.25) * att * sconcePower;
+                if (isSideWall && sign(vWorldPos.x) == sign(sx)) {
+                  float dz = abs(vWorldPos.z - sz), dy = abs(vWorldPos.y - 4.85);
+                  float fan = smoothstep(dy * 0.58 + 0.14, dy * 0.12 + 0.03, dz) * exp(-dy * 0.58);
+                  sconceLight += vec3(1.0, 0.80, 0.44) * fan * mix(0.85, 1.65, uLights);
+                }
               }
             }
-            vec3 skyFill = mix(vec3(0.11, 0.10, 0.15), vec3(0.76, 0.67, 0.56), uLights) * (max(N.y, 0.0) * 0.7 + 0.3);
-            float aisleProx = exp(-abs(vWorldPos.x) * 1.1) * exp(-max(0.0, vWorldPos.y - 4.8) * 0.8);
-            vec3 aisleGlow = vec3(0.98, 0.76, 0.20) * aisleProx * 0.24;
-            vec3 color = vCol * (vec3(0.07, 0.06, 0.09) + skyFill + screenIrr + sconceLight + aisleGlow);
+
+            float centerAisle = exp(-abs(vWorldPos.x) * 1.25) * exp(-max(0.0, vWorldPos.y - 5.2) * 0.9);
+            vec3 stepGlow = vec3(1.0, 0.78, 0.24) * centerAisle * 0.28;
+            vec3 houseLight = mix(vec3(0.065, 0.06, 0.095), vec3(0.78, 0.68, 0.56), uLights) * (max(N.y, 0.0) * 0.65 + 0.35);
+
+            bool isMetal = (vMat > 1.5 && vMat < 2.5);
+            vec3 envLight = vec3(0.045, 0.04, 0.065) + houseLight + screenIrr + sconceLight + stepGlow;
+            vec3 color = isMetal
+              ? baseAlbedo * (vec3(0.22, 0.18, 0.12) + sconceLight * 0.55 + houseLight * 0.65 + length(screenIrr) * 0.22) * ao
+              : baseAlbedo * envLight * ao;
+
+            vec3 Hscr = normalize(normalize(dC) + V);
+            float ndh = max(dot(N, Hscr), 0.0);
+            float ndv = max(dot(N, V), 0.0);
+            float fresnel = pow(1.0 - ndv, 4.0);
 
             if ((vMat > 0.5 && vMat < 1.5) || (vMat > 3.5 && vMat < 4.5)) {
-              float rim = pow(1.0 - max(dot(N, V), 0.0), 2.8);
-              vec3 sheen = mix(vCol * 2.1 + vec3(0.09), uScreenColC * 0.75 + vCol, 0.35 * scrGate);
-              color += sheen * rim * (0.34 + 0.24 * uLights);
+              float velvetRim = pow(1.0 - ndv, 2.7);
+              vec3 clothSheen = mix(baseAlbedo * 2.2 + vec3(0.07), uScreenColC * 0.85 + baseAlbedo, 0.42 * scrGate);
+              color += (clothSheen * velvetRim * (0.30 + 0.22 * uLights) + uScreenColC * pow(ndh, 18.0) * 0.18 * scrGate) * ao;
             }
-            if (vMat > 1.5 && vMat < 2.5) {
-              vec3 H1 = normalize(normalize(scrPosC - vWorldPos) + V);
-              vec3 H2 = normalize(vec3(0.2, 0.9, 0.4) + V);
-              float spec = pow(max(dot(N, H1), 0.0), 26.0) * 0.8 + pow(max(dot(N, H2), 0.0), 20.0) * (0.45 + 0.6 * uLights);
-              color += vCol * spec;
+            if (isMetal) {
+              vec3 Hup = normalize(vec3(0.15, 0.92, 0.35) + V);
+              color += baseAlbedo * (pow(ndh, 36.0) * 0.95 * scrGate + pow(max(dot(N, Hup), 0.0), 26.0) * (0.65 + 0.85 * uLights) + fresnel * 0.32);
             }
+            if (vMat > 4.5 && vMat < 5.5 && N.y > 0.7) {
+              vec3 R = reflect(-V, vec3(0.0, 1.0, 0.0));
+              if (R.z < -0.05) {
+                float tHit = (-10.30 - vWorldPos.z) / R.z;
+                vec3 hit = vWorldPos + R * tHit;
+                float u = (hit.x + 6.35) / 12.7, v = 1.0 - (hit.y - 1.18) / 5.55;
+                if (u > 0.0 && u < 1.0 && v > 0.0 && v < 1.0) {
+                  vec3 r1 = texture2D(uScreenTex, vec2(clamp(u - 0.016, 0.01, 0.99), clamp(v, 0.01, 0.99))).rgb;
+                  vec3 r2 = texture2D(uScreenTex, vec2(clamp(u, 0.01, 0.99), clamp(v, 0.01, 0.99))).rgb;
+                  vec3 r3 = texture2D(uScreenTex, vec2(clamp(u + 0.016, 0.01, 0.99), clamp(v, 0.01, 0.99))).rgb;
+                  vec3 refl = (r1 + r2 * 2.0 + r3) * 0.25;
+                  float edgeMask = smoothstep(0.0, 0.06, u) * smoothstep(1.0, 0.94, u) * smoothstep(0.0, 0.08, v) * smoothstep(1.0, 0.82, v);
+                  float distFade = exp(-max(0.0, vWorldPos.z - (-9.8)) * 0.42);
+                  color += refl * edgeMask * distFade * (0.28 + 0.46 * fresnel) * scrGate;
+                }
+              }
+            }
+
+            float distCam = length(uCamPos - vWorldPos);
+            color = mix(color, (vec3(0.016, 0.015, 0.024) + uScreenColC * 0.025 * scrGate), clamp((distCam - 14.0) * 0.014, 0.0, 0.22));
             color = (color * (2.51 * color + 0.03)) / (color * (2.43 * color + 0.59) + 0.14);
-            gl_FragColor = vec4(clamp(color, 0.0, 1.0), 1.0);
+            color = pow(clamp(color, 0.0, 1.0), vec3(0.95));
+            float filmGrain = (hash21(gl_FragCoord.xy + fract(uTime)) - 0.5) * 0.013;
+            gl_FragColor = vec4(clamp(color + filmGrain, 0.0, 1.0), 1.0);
           }
         `);
 
         progScreen = compile(`
           attribute vec3 aPos; attribute vec2 aUV;
-          uniform mat4 uProj, uView; varying vec2 vUV;
-          void main() { vUV = aUV; gl_Position = uProj * uView * vec4(aPos, 1.0); }
+          uniform mat4 uProj, uView; varying vec2 vUV; varying vec3 vWPos;
+          void main() { vUV = aUV; vWPos = aPos; gl_Position = uProj * uView * vec4(aPos, 1.0); }
         `, `
-          precision mediump float; varying vec2 vUV; uniform sampler2D uTex;
+          precision highp float; varying vec2 vUV; varying vec3 vWPos;
+          uniform sampler2D uTex; uniform vec3 uCamPos;
           void main() {
             vec3 c = texture2D(uTex, vUV).rgb;
-            float vig = smoothstep(0.0, 0.035, vUV.x) * smoothstep(1.0, 0.965, vUV.x) *
-                        smoothstep(0.0, 0.045, vUV.y) * smoothstep(1.0, 0.955, vUV.y);
-            gl_FragColor = vec4(c * (0.90 + 0.15 * vig), 1.0);
+            vec3 V = normalize(uCamPos - vWPos);
+            float gain = 0.88 + 0.18 * pow(max(V.z, 0.0), 1.5);
+            float vig = smoothstep(0.0, 0.025, vUV.x) * smoothstep(1.0, 0.975, vUV.x) *
+                        smoothstep(0.0, 0.035, vUV.y) * smoothstep(1.0, 0.965, vUV.y);
+            gl_FragColor = vec4(c * gain * (0.86 + 0.16 * vig), 1.0);
           }
         `);
 
@@ -15887,7 +16028,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           void main() {
             vAlpha = aAlpha; vWPos = aPos;
             gl_Position = uProj * uView * vec4(aPos, 1.0);
-            gl_PointSize = clamp(48.0 / gl_Position.w, 1.8, 5.5);
+            gl_PointSize = clamp(46.0 / gl_Position.w, 1.6, 5.2);
           }
         `, `
           precision mediump float; varying float vAlpha; varying vec3 vWPos;
@@ -15897,72 +16038,102 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             if (uIsPoint > 0.5) {
               float r = length(gl_PointCoord - vec2(0.5));
               if (r > 0.5) discard;
-              mask = smoothstep(0.5, 0.05, r);
+              mask = smoothstep(0.5, 0.04, r);
             }
-            float streak = 0.85 + 0.15 * sin(vWPos.x * 3.8 + uTime * 1.9);
-            gl_FragColor = vec4(uBeamCol * streak, vAlpha * mask);
+            float ray = 0.80 + 0.20 * sin(vWPos.x * 4.4 + uTime * 1.6) * cos(vWPos.y * 5.0 - uTime * 1.1);
+            gl_FragColor = vec4(uBeamCol * ray, vAlpha * mask);
           }
         `);
 
-        // Build Static Auditorium Geometry
+        // Build Auditorium Architecture
         const mbBase = createMB(), mbL = createMB(), mbR = createMB(), mbRear = createMB(), mbCeil = createMB();
-        addSoftBox(mbBase, 0, -0.12, -0.4, 9.4, 0.12, 11.2, [0.08, 0.07, 0.10], 0, 0, 0.04);
-        addSoftBox(mbBase, -9.22, 0.22, -0.4, 0.14, 0.34, 11.1, [0.14, 0.10, 0.13], 0, 0, 0.08);
-        addSoftBox(mbBase,  9.22, 0.22, -0.4, 0.14, 0.34, 11.1, [0.14, 0.10, 0.13], 0, 0, 0.08);
-        addSoftBox(mbBase, 0, 0.26, -9.75, 8.85, 0.26, 1.35, [0.10, 0.08, 0.11], 0, 0, 0.08);
-        addSoftBox(mbBase, 0, 0.53, -8.42, 8.80, 0.025, 0.04, [0.90, 0.70, 0.26], 2, 0, 0.15);
-        addSoftBox(mbBase, 0, 4.15, -11.35, 9.35, 4.25, 0.16, [0.08, 0.06, 0.09], 0, 0, 0.02);
+        addArchBox(mbBase, 0, -0.14, -0.4, 9.4, 0.14, 11.2, [0.05, 0.05, 0.07], 0, 0.3, 0.6, 0.02);
+        addArchBox(mbBase, -9.22, 0.20, -0.4, 0.14, 0.34, 11.1, [0.10, 0.08, 0.11], 0, 0.35, 0.85, 0.06);
+        addArchBox(mbBase,  9.22, 0.20, -0.4, 0.14, 0.34, 11.1, [0.10, 0.08, 0.11], 0, 0.35, 0.85, 0.06);
+
+        // Sàn sân khấu đen bóng phản chiếu gương (mat = 5) + chỉ đồng vàng
+        addArchBox(mbBase, 0, 0.24, -9.55, 8.95, 0.24, 1.65, [0.035, 0.032, 0.045], 5, 0.25, 0.96, 0.04);
+        addArchBox(mbBase, 0, 0.49, -7.91, 8.90, 0.022, 0.035, [0.88, 0.68, 0.28], 2, 0.7, 1.0, 0.15);
+        addArchBox(mbBase, 0, 0.10, -7.89, 8.60, 0.018, 0.02, [1.0, 0.76, 0.32], 3, 1.0, 1.0, 0.0);
+
+        addArchBox(mbBase, 0, 4.2, -11.35, 9.35, 4.3, 0.16, [0.03, 0.028, 0.04], 0, 0.2, 0.5, 0.02);
+        addArchBox(mbBase, 0, 0.92, -10.35, 6.65, 0.26, 0.35, [0.02, 0.02, 0.025], 1, 0.2, 0.45, 0.05);
+        addArchBox(mbBase, 0, 6.95, -10.35, 6.65, 0.25, 0.35, [0.02, 0.02, 0.025], 1, 0.2, 0.45, 0.05);
+
         [-1, 1].forEach((side) => {
-          addSoftBox(mbBase, side * 7.65, 4.05, -10.15, 1.25, 3.75, 0.24, [0.46, 0.07, 0.14], 4, 0, 0.15);
-          addSoftBox(mbBase, side * 6.56, 3.95, -10.02, 0.07, 3.55, 0.12, [0.90, 0.70, 0.28], 2, 0, 0.22);
+          for (let p = 0; p < 6; p++) {
+            addCylinder(mbBase, side * (6.62 + p * 0.42), 4.05, -10.08 + (p % 2) * 0.12, 0.24, 0.26, 7.2, 10, [0.38, 0.05, 0.10], 4, 0.30, 0.90, false);
+          }
+          addCylinder(mbBase, side * 6.46, 4.0, -9.98, 0.055, 0.055, 7.1, 12, [0.88, 0.68, 0.28], 2, 0.5, 1.0, true);
         });
+
         for (let sx = -4.8; sx <= 4.81; sx += 2.4) {
-          addSoftBox(mbBase, sx, 0.76, -10.22, 0.50, 0.22, 0.26, [0.07, 0.07, 0.09], 0, 0, 0.14);
+          addArchBox(mbBase, sx, 0.72, -10.05, 0.48, 0.22, 0.26, [0.04, 0.04, 0.05], 0, 0.18, 0.82, 0.12);
+          addRoundedCushion(mbBase, sx - 0.21, 0.72, -9.79, 0.13, 0.13, 0.03, 0.6, 8, 5, [0.09, 0.09, 0.11], 2, 0.4, 0.9);
+          addRoundedCushion(mbBase, sx + 0.21, 0.72, -9.79, 0.13, 0.13, 0.03, 0.6, 8, 5, [0.09, 0.09, 0.11], 2, 0.4, 0.9);
         }
+
         ROWS_3D.forEach((row, rIdx) => {
           const z0 = -5.15 + rIdx * 2.25;
           const yTop = 0.34 + rIdx * 0.76;
           const yPrev = rIdx === 0 ? 0.0 : (0.34 + (rIdx - 1) * 0.76);
           const hHalf = (yTop - yPrev) * 0.5;
-          addSoftBox(mbBase, 0, yPrev + hHalf, z0 + 1.125, 8.95, hHalf, 1.125, [0.11, 0.09, 0.13], 0, 0, 0.04);
-          addSoftBox(mbBase, -5.0, yTop + 0.012, z0 + 1.12, 3.80, 0.014, 1.08, [0.19, 0.08, 0.12], 1, 0, 0.03);
-          addSoftBox(mbBase,  5.0, yTop + 0.012, z0 + 1.12, 3.80, 0.014, 1.08, [0.19, 0.08, 0.12], 1, 0, 0.03);
+          addArchBox(mbBase, 0, yPrev + hHalf, z0 + 1.125, 8.95, hHalf, 1.125, [0.07, 0.06, 0.09], 0, 0.22, 0.78, 0.03);
+          addArchBox(mbBase, -5.0, yTop + 0.012, z0 + 1.12, 3.82, 0.014, 1.09, [0.13, 0.07, 0.10], 7, 0.55, 0.92, 0.02);
+          addArchBox(mbBase,  5.0, yTop + 0.012, z0 + 1.12, 3.82, 0.014, 1.09, [0.13, 0.07, 0.10], 7, 0.55, 0.92, 0.02);
+
           const stepMidY = (yPrev + yTop) * 0.5;
-          addSoftBox(mbBase, 0, (yPrev + stepMidY) * 0.5, z0 - 0.18, 1.12, (stepMidY - yPrev) * 0.5, 0.22, [0.16, 0.10, 0.14], 0, 0, 0.06);
-          addSoftBox(mbBase, 0, yTop + 0.016, z0 + 1.12, 1.10, 0.016, 1.10, [0.38, 0.09, 0.15], 1, 0, 0.03);
-          addSoftBox(mbBase, -0.96, yTop + 0.038, z0 + 0.06, 0.08, 0.020, 0.035, [1.0, 0.84, 0.26], 3, 0, 0.1);
-          addSoftBox(mbBase,  0.96, yTop + 0.038, z0 + 0.06, 0.08, 0.020, 0.035, [1.0, 0.84, 0.26], 3, 0, 0.1);
-          addSoftBox(mbBase, -0.96, stepMidY + 0.025, z0 - 0.35, 0.07, 0.016, 0.03, [1.0, 0.78, 0.22], 3, 0, 0.1);
-          addSoftBox(mbBase,  0.96, stepMidY + 0.025, z0 - 0.35, 0.07, 0.016, 0.03, [1.0, 0.78, 0.22], 3, 0, 0.1);
+          addArchBox(mbBase, 0, (yPrev + stepMidY) * 0.5, z0 - 0.18, 1.12, (stepMidY - yPrev) * 0.5, 0.22, [0.11, 0.07, 0.10], 7, 0.35, 0.85, 0.05);
+          addArchBox(mbBase, 0, yTop + 0.015, z0 + 1.12, 1.10, 0.015, 1.10, [0.30, 0.06, 0.10], 7, 0.55, 0.95, 0.02);
+
+          addArchBox(mbBase, -0.92, yTop + 0.034, z0 + 0.04, 0.11, 0.014, 0.022, [1.0, 0.82, 0.30], 3, 1, 1, 0.05);
+          addArchBox(mbBase,  0.92, yTop + 0.034, z0 + 0.04, 0.11, 0.014, 0.022, [1.0, 0.82, 0.30], 3, 1, 1, 0.05);
+          addArchBox(mbBase, -0.92, stepMidY + 0.022, z0 - 0.36, 0.09, 0.012, 0.020, [1.0, 0.76, 0.24], 3, 1, 1, 0.05);
+          addArchBox(mbBase,  0.92, stepMidY + 0.022, z0 - 0.36, 0.09, 0.012, 0.020, [1.0, 0.76, 0.24], 3, 1, 1, 0.05);
+
+          [-1.12, 1.12].forEach((bx) => {
+            addCylinder(mbBase, bx, yTop + 0.24, z0 + 0.14, 0.022, 0.022, 0.46, 8, [0.14, 0.12, 0.16], 0, 0.3, 0.9, true);
+            addCylinder(mbBase, bx, yTop + 0.48, z0 + 0.14, 0.026, 0.026, 0.03, 8, [0.86, 0.68, 0.28], 2, 0.8, 1.0, true);
+          });
         });
-        addSoftBox(mbBase, 0, 2.2, 9.15, 9.0, 2.2, 0.80, [0.12, 0.09, 0.13], 0, 0, 0.04);
-        addSoftBox(mbBase, 0, 6.65, 9.68, 1.12, 0.52, 0.28, [0.14, 0.11, 0.16], 0, 0, 0.12);
-        addSoftBox(mbBase, 0, 6.65, 9.42, 0.98, 0.40, 0.05, [0.85, 0.66, 0.26], 2, 0, 0.15);
-        addSoftBox(mbBase, 0, 6.65, 9.38, 0.82, 0.28, 0.04, [0.88, 0.95, 1.0], 3, 0, 0.1);
+
+        addArchBox(mbBase, 0, 2.2, 9.15, 9.0, 2.2, 0.80, [0.09, 0.07, 0.11], 7, 0.3, 0.85, 0.03);
+        addArchBox(mbBase, 0, 6.65, 9.68, 1.18, 0.54, 0.30, [0.08, 0.07, 0.10], 0, 0.4, 0.9, 0.10);
+        addArchBox(mbBase, 0, 6.65, 9.38, 0.96, 0.38, 0.04, [0.85, 0.66, 0.26], 2, 0.7, 1.0, 0.15);
+        addArchBox(mbBase, 0, 6.65, 9.34, 0.80, 0.26, 0.03, [0.90, 0.96, 1.0], 3, 1.0, 1.0, 0.05);
 
         const buildWall = (mb, side) => {
-          addSoftBox(mb, side * 9.15, 4.35, -0.4, 0.12, 4.35, 10.4, [0.40, 0.07, 0.13], 4, 0, 0.05);
-          [-8.4, -3.4, 1.6, 6.6].forEach((pz) => {
-            addSoftBox(mb, side * 8.98, 4.35, pz, 0.16, 4.35, 0.26, [0.13, 0.10, 0.14], 0, 0, 0.12);
-            addSoftBox(mb, side * 8.83, 4.35, pz, 0.035, 4.0, 0.06, [0.88, 0.68, 0.28], 2, 0, 0.2);
+          addArchBox(mb, side * 9.15, 4.35, -0.4, 0.12, 4.35, 10.4, [0.26, 0.06, 0.10], 6, 0.22, 0.88, 0.03);
+          addArchBox(mb, side * 8.99, 1.45, -0.4, 0.04, 0.035, 10.2, [0.82, 0.64, 0.26], 2, 0.6, 1.0, 0.15);
+          [-8.3, -3.3, 1.7, 6.7].forEach((pz) => {
+            addArchBox(mb, side * 8.96, 4.35, pz, 0.16, 4.35, 0.28, [0.08, 0.07, 0.10], 0, 0.25, 0.90, 0.10);
+            addCylinder(mb, side * 8.80, 4.35, pz, 0.032, 0.032, 7.9, 10, [0.88, 0.68, 0.28], 2, 0.4, 1.0, false);
           });
-          [-6.0, -1.0, 4.0].forEach((sz) => {
-            addSoftBox(mb, side * 8.90, 4.85, sz, 0.08, 0.34, 0.14, [0.90, 0.70, 0.28], 2, 0, 0.2);
-            addSoftBox(mb, side * 8.82, 4.92, sz, 0.06, 0.22, 0.10, [1.0, 0.88, 0.58], 3, 0, 0.2);
-            addSoftBox(mb, side * 8.84, 6.45, sz + 2.1, 0.18, 0.28, 0.22, [0.09, 0.09, 0.12], 0, 0, 0.15);
+          [-5.8, -0.8, 4.2].forEach((sz) => {
+            const sx = side * 8.84;
+            addArchBox(mb, side * 8.96, 4.85, sz, 0.04, 0.42, 0.16, [0.12, 0.10, 0.14], 0, 0.4, 0.9, 0.1);
+            addCylinder(mb, sx, 4.85, sz, 0.075, 0.075, 0.56, 12, [1.0, 0.88, 0.60], 3, 1.0, 1.0, true);
+            addCylinder(mb, sx, 5.14, sz, 0.088, 0.088, 0.045, 12, [0.90, 0.70, 0.28], 2, 0.8, 1.0, true);
+            addCylinder(mb, sx, 4.85, sz, 0.086, 0.086, 0.030, 12, [0.90, 0.70, 0.28], 2, 0.8, 1.0, true);
+            addCylinder(mb, sx, 4.56, sz, 0.088, 0.088, 0.045, 12, [0.90, 0.70, 0.28], 2, 0.8, 1.0, true);
+            addRoundedCushion(mb, side * 8.80, 6.55, sz + 2.1, 0.15, 0.28, 0.22, 0.45, 8, 5, [0.06, 0.06, 0.08], 0, 0.35, 0.85, 0.18 * side);
           });
           if (side === 1) {
-            addSoftBox(mb, 8.94, 1.25, -7.8, 0.08, 1.05, 0.55, [0.08, 0.07, 0.10], 0, 0, 0.05);
-            addSoftBox(mb, 8.88, 2.52, -7.8, 0.05, 0.14, 0.34, [0.20, 0.95, 0.55], 3, 0, 0.1);
+            addArchBox(mb, 8.94, 1.22, -7.8, 0.07, 1.05, 0.56, [0.05, 0.05, 0.07], 0, 0.25, 0.8, 0.04);
+            addArchBox(mb, 8.87, 2.48, -7.8, 0.04, 0.13, 0.32, [0.16, 0.95, 0.52], 3, 1, 1, 0.05);
           }
         };
         buildWall(mbL, -1); buildWall(mbR, 1);
-        addSoftBox(mbRear, 0, 4.6, 9.98, 9.3, 4.6, 0.16, [0.13, 0.09, 0.13], 0, 0, 0.03);
-        addSoftBox(mbCeil, 0, 8.65, -0.4, 9.4, 0.14, 11.0, [0.07, 0.06, 0.09], 0, 0, 0.02);
-        for (let cz = -8.0; cz <= 8.1; cz += 4.0) {
-          addSoftBox(mbCeil, 0, 8.42, cz, 9.1, 0.12, 0.22, [0.12, 0.10, 0.15], 0, 0, 0.08);
-          addSoftBox(mbCeil, 0, 8.29, cz, 8.9, 0.02, 0.04, [0.82, 0.64, 0.26], 2, 0, 0.15);
+
+        addArchBox(mbRear, 0, 4.6, 9.98, 9.3, 4.6, 0.16, [0.10, 0.07, 0.10], 6, 0.25, 0.85, 0.03);
+        addArchBox(mbCeil, 0, 8.70, -0.4, 9.4, 0.14, 11.0, [0.04, 0.04, 0.06], 0, 0.35, 0.6, 0.02);
+        for (let cz = -8.2; cz <= 8.3; cz += 4.1) {
+          addArchBox(mbCeil, 0, 8.44, cz, 9.1, 0.14, 0.26, [0.09, 0.08, 0.12], 0, 0.45, 0.85, 0.08);
+          addArchBox(mbCeil, 0, 8.29, cz, 8.9, 0.018, 0.04, [0.85, 0.66, 0.26], 2, 0.8, 1.0, 0.15);
         }
+        [-7.8, 7.8].forEach((cx) => {
+          addArchBox(mbCeil, cx, 8.38, -0.4, 0.18, 0.12, 10.2, [0.09, 0.08, 0.12], 0, 0.45, 0.85, 0.06);
+        });
 
         gpuBase = uploadMB(mbBase);
         gpuLeftWall = uploadMB(mbL);
@@ -15970,22 +16141,21 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         gpuRearWall = uploadMB(mbRear);
         gpuCeiling = uploadMB(mbCeil);
 
-        chairGPU = { bPos: gl.createBuffer(), bNorm: gl.createBuffer(), bCol: gl.createBuffer(), bMat: gl.createBuffer(), bIdx: gl.createBuffer(), count: 0 };
-        curtainGPU = { bPos: gl.createBuffer(), bNorm: gl.createBuffer(), bCol: gl.createBuffer(), bMat: gl.createBuffer(), bIdx: gl.createBuffer(), count: 0 };
+        chairGPU = uploadMB(createMB(), gl.DYNAMIC_DRAW);
+        curtainGPU = uploadMB(createMB(), gl.DYNAMIC_DRAW);
 
-        // Curved Screen Mesh
         const scrVerts = [], scrUVs = [], scrIdx = [];
-        for (let i = 0; i <= 24; i++) {
-          const u = i / 24;
+        for (let i = 0; i <= 32; i++) {
+          const u = i / 32;
           const x = -6.3 + u * 12.6;
           const z = -10.12 - Math.cos((u - 0.5) * Math.PI) * 0.74;
-          scrVerts.push(x, 1.15, z, x, 6.75, z);
+          scrVerts.push(x, 1.18, z, x, 6.72, z);
           scrUVs.push(u, 1.0, u, 0.0);
-          if (i < 24) { const b = i * 2; scrIdx.push(b, b + 1, b + 3, b, b + 3, b + 2); }
+          if (i < 32) { const b = i * 2; scrIdx.push(b, b + 1, b + 3, b, b + 3, b + 2); }
         }
         const sBPos = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, sBPos); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(scrVerts), gl.STATIC_DRAW);
         const sBUV = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, sBUV); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(scrUVs), gl.STATIC_DRAW);
-        const sBIdx = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sBIdx); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(scrIdx), gl.STATIC_DRAW);
+        const sBIdx = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sBIdx); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, makeIdxArray(scrIdx), gl.STATIC_DRAW);
         scrBuffers = { bPos: sBPos, bUV: sBUV, bIdx: sBIdx, count: scrIdx.length };
 
         scrTex = gl.createTexture();
@@ -15996,17 +16166,17 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
         const beamPos = [
-           0.0, 6.65, 9.35, -6.2, 6.70, -10.12,  6.2, 6.70, -10.12,
-           0.0, 6.65, 9.35, -6.2, 1.20, -10.12,  6.2, 1.20, -10.12,
-           0.0, 6.65, 9.35, -6.2, 6.70, -10.12, -6.2, 1.20, -10.12,
-           0.0, 6.65, 9.35,  6.2, 6.70, -10.12,  6.2, 1.20, -10.12,
-           0.0, 6.65, 9.35, -4.0, 4.10, -10.45,  4.0, 4.10, -10.45
+           0.0, 6.65, 9.32, -6.2, 6.70, -10.12,  6.2, 6.70, -10.12,
+           0.0, 6.65, 9.32, -6.2, 1.20, -10.12,  6.2, 1.20, -10.12,
+           0.0, 6.65, 9.32, -6.2, 6.70, -10.12, -6.2, 1.20, -10.12,
+           0.0, 6.65, 9.32,  6.2, 6.70, -10.12,  6.2, 1.20, -10.12,
+           0.0, 6.65, 9.32, -4.0, 4.10, -10.45,  4.0, 4.10, -10.45
         ];
-        const beamAlpha = [0.13,0.01,0.01, 0.09,0.008,0.008, 0.11,0.01,0.01, 0.11,0.01,0.01, 0.16,0.016,0.016];
+        const beamAlpha = [0.12,0.01,0.01, 0.08,0.006,0.006, 0.10,0.008,0.008, 0.10,0.008,0.008, 0.15,0.014,0.014];
         const bBPos = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, bBPos); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(beamPos), gl.STATIC_DRAW);
         const bBAlpha = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, bBAlpha); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(beamAlpha), gl.STATIC_DRAW);
         const dBPos = gl.createBuffer();
-        const dBAlpha = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, dBAlpha); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(DUST_COUNT).fill(0.45), gl.STATIC_DRAW);
+        const dBAlpha = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, dBAlpha); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(DUST_COUNT).fill(0.42), gl.STATIC_DRAW);
         beamBuffers = { bPos: bBPos, bAlpha: bBAlpha, dPos: dBPos, dAlpha: dBAlpha };
 
         bindEvents();
@@ -16021,8 +16191,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         const rect = glCanvas.getBoundingClientRect();
         if (rect.width < 20 || rect.height < 20) return;
         st.dpr = Math.min(window.devicePixelRatio || 1, 2);
-        st.W = rect.width;
-        st.H = rect.height;
+        st.W = rect.width; st.H = rect.height;
         const pw = Math.round(st.W * st.dpr), ph = Math.round(st.H * st.dpr);
         if (glCanvas.width !== pw || glCanvas.height !== ph) {
           glCanvas.width = pw; glCanvas.height = ph;
@@ -16044,7 +16213,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         glCanvas.addEventListener("pointermove", (e) => {
           const rect = glCanvas.getBoundingClientRect();
           const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-
           if (dragging) {
             const dx = e.clientX - lastX, dy = e.clientY - lastY;
             dragDist += Math.abs(dx) + Math.abs(dy);
@@ -16059,13 +16227,11 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             tooltip?.classList.add("hidden");
             return;
           }
-
           if (st.mode !== "orbit") {
             tooltip?.classList.add("hidden");
             glCanvas.style.cursor = "grab";
             return;
           }
-
           let best = null, bestW = 1e9;
           for (const s of seats3D) {
             if ((st.isCoupleOnly && s.row !== "F") || !s.hit2D) continue;
@@ -16109,9 +16275,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
       function mat4Perspective(fovy, aspect, near, far) {
         const f = 1.0 / Math.tan(fovy * 0.5), nf = 1 / (near - far);
-        return new Float32Array([f / aspect,0,0,0, 0,f,0,0, 0,0,(far+near)*nf,-1, 0,0,(2*far*near)*nf,0]);
+        return new Float32Array([f/aspect,0,0,0, 0,f,0,0, 0,0,(far+near)*nf,-1, 0,0,(2*far*near)*nf,0]);
       }
-
       function mat4LookAt(eye, center, up) {
         let zx = eye[0]-center[0], zy = eye[1]-center[1], zz = eye[2]-center[2];
         let l = Math.hypot(zx,zy,zz) || 1; zx/=l; zy/=l; zz/=l;
@@ -16123,7 +16288,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           -(xx*eye[0]+xy*eye[1]+xz*eye[2]), -(yx*eye[0]+yy*eye[1]+yz*eye[2]), -(zx*eye[0]+zy*eye[1]+zz*eye[2]), 1
         ]);
       }
-
       function projectHUD(pt, mView, mProj) {
         const x = pt[0], y = pt[1], z = pt[2];
         const vx = mView[0]*x + mView[4]*y + mView[8]*z + mView[12];
@@ -16139,16 +16303,18 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
       function drawGPU(gpu) {
         if (!gpu || !gpu.count) return;
-        const locPos = gl.getAttribLocation(progRoom, "aPos");
-        const locNorm = gl.getAttribLocation(progRoom, "aNorm");
-        const locCol = gl.getAttribLocation(progRoom, "aCol");
-        const locMat = gl.getAttribLocation(progRoom, "aMat");
-        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bPos); gl.enableVertexAttribArray(locPos); gl.vertexAttribPointer(locPos, 3, gl.FLOAT, false, 0, 0);
-        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bNorm); gl.enableVertexAttribArray(locNorm); gl.vertexAttribPointer(locNorm, 3, gl.FLOAT, false, 0, 0);
-        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bCol); gl.enableVertexAttribArray(locCol); gl.vertexAttribPointer(locCol, 3, gl.FLOAT, false, 0, 0);
-        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bMat); gl.enableVertexAttribArray(locMat); gl.vertexAttribPointer(locMat, 1, gl.FLOAT, false, 0, 0);
+        const lp = gl.getAttribLocation(progRoom, "aPos");
+        const ln = gl.getAttribLocation(progRoom, "aNorm");
+        const lc = gl.getAttribLocation(progRoom, "aCol");
+        const lm = gl.getAttribLocation(progRoom, "aMat");
+        const la = gl.getAttribLocation(progRoom, "aAO");
+        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bPos); gl.enableVertexAttribArray(lp); gl.vertexAttribPointer(lp, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bNorm); gl.enableVertexAttribArray(ln); gl.vertexAttribPointer(ln, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bCol); gl.enableVertexAttribArray(lc); gl.vertexAttribPointer(lc, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bMat); gl.enableVertexAttribArray(lm); gl.vertexAttribPointer(lm, 1, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bAO); gl.enableVertexAttribArray(la); gl.vertexAttribPointer(la, 1, gl.FLOAT, false, 0, 0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gpu.bIdx);
-        gl.drawElements(gl.TRIANGLES, gpu.count, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLES, gpu.count, idxType, 0);
       }
 
       function renderLoop(nowMs) {
@@ -16161,12 +16327,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         resize();
         const t = nowMs * 0.001;
         st.lightsLevel += (st.lightsTarget - st.lightsLevel) * 0.09;
-        st.curtainOpen += (st.curtainTarget - st.curtainOpen) * 0.065;
-        if (Math.abs(st.curtainOpen - st.lastCurtainBuilt) > 0.0025) {
+        st.curtainOpen += (st.curtainTarget - st.curtainOpen) * 0.06;
+        if (Math.abs(st.curtainOpen - st.lastCurtainBuilt) > 0.002) {
           rebuildCurtainMesh(st.curtainOpen);
         }
 
         drawScreenCanvas(t);
+        gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, scrTex);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, scrOff);
 
@@ -16175,9 +16342,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         if (st.mode === "pov") {
           st.povYaw += (st.tPovYaw - st.povYaw) * 0.14;
           st.povPitch += (st.tPovPitch - st.povPitch) * 0.14;
-          const ex = mySeat.x, ey = mySeat.y + 1.28, ez = mySeat.z + 0.12;
-          // Hướng nhìn tự nhiên từ vị trí ghế (A1..F8) hội tụ thẳng vào tâm màn chiếu cong IMAX
-          const scrAimX = mySeat.x * 0.14, scrAimY = 3.85, scrAimZ = -10.35;
+          const ex = mySeat.x, ey = mySeat.y + 1.24, ez = mySeat.z + 0.10;
+          const scrAimX = mySeat.x * 0.14, scrAimY = 3.88, scrAimZ = -10.35;
           const baseYaw = Math.atan2(scrAimX - ex, -(scrAimZ - ez));
           const basePitch = Math.atan2(scrAimY - ey, Math.hypot(scrAimX - ex, scrAimZ - ez));
           const finalYaw = baseYaw + st.povYaw;
@@ -16206,11 +16372,11 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           st.camLook[i] += (desLook[i] - st.camLook[i]) * 0.14;
         }
 
-        const fov = st.mode === "pov" ? 0.96 : 0.76;
-        const mProj = mat4Perspective(fov, st.W / Math.max(1, st.H), 0.25, 70.0);
+        const fov = st.mode === "pov" ? 0.94 : 0.75;
+        const mProj = mat4Perspective(fov, st.W / Math.max(1, st.H), 0.22, 70.0);
         const mView = mat4LookAt(st.camPos, st.camLook, [0, 1, 0]);
 
-        gl.clearColor(0.024, 0.020, 0.035, 1.0);
+        gl.clearColor(0.016, 0.014, 0.022, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.enable(gl.DEPTH_TEST);
         gl.disable(gl.BLEND);
@@ -16225,6 +16391,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         gl.uniform1f(gl.getUniformLocation(progRoom, "uLights"), st.lightsLevel);
         gl.uniform1f(gl.getUniformLocation(progRoom, "uTime"), t);
         gl.uniform1f(gl.getUniformLocation(progRoom, "uCurtainOpen"), st.curtainOpen);
+        gl.uniform1i(gl.getUniformLocation(progRoom, "uScreenTex"), 0);
 
         drawGPU(gpuBase);
         drawGPU(chairGPU);
@@ -16236,26 +16403,21 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         if (isInside || st.camPos[2] <  7.5) drawGPU(gpuRearWall);
         if (isInside || st.camPos[1] <  7.6) drawGPU(gpuCeiling);
 
-        // Curved IMAX Screen
         gl.useProgram(progScreen);
         gl.uniformMatrix4fv(gl.getUniformLocation(progScreen, "uProj"), false, mProj);
         gl.uniformMatrix4fv(gl.getUniformLocation(progScreen, "uView"), false, mView);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, scrTex);
+        gl.uniform3fv(gl.getUniformLocation(progScreen, "uCamPos"), st.camPos);
         gl.uniform1i(gl.getUniformLocation(progScreen, "uTex"), 0);
         const sLocPos = gl.getAttribLocation(progScreen, "aPos");
         const sLocUV = gl.getAttribLocation(progScreen, "aUV");
         gl.bindBuffer(gl.ARRAY_BUFFER, scrBuffers.bPos); gl.enableVertexAttribArray(sLocPos); gl.vertexAttribPointer(sLocPos, 3, gl.FLOAT, false, 0, 0);
         gl.bindBuffer(gl.ARRAY_BUFFER, scrBuffers.bUV); gl.enableVertexAttribArray(sLocUV); gl.vertexAttribPointer(sLocUV, 2, gl.FLOAT, false, 0, 0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, scrBuffers.bIdx);
-        gl.drawElements(gl.TRIANGLES, scrBuffers.count, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLES, scrBuffers.count, idxType, 0);
 
-        // Volumetric Beam + Bokeh Dust
         const beamVis = Math.max(0.0, (1.0 - st.lightsLevel * 0.80) * (0.20 + 0.80 * st.curtainOpen));
         if (beamVis > 0.02) {
-          gl.enable(gl.BLEND);
-          gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-          gl.depthMask(false);
+          gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE); gl.depthMask(false);
           gl.useProgram(progBeam);
           gl.uniformMatrix4fv(gl.getUniformLocation(progBeam, "uProj"), false, mProj);
           gl.uniformMatrix4fv(gl.getUniformLocation(progBeam, "uView"), false, mView);
@@ -16271,24 +16433,17 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
           gl.uniform1f(gl.getUniformLocation(progBeam, "uIsPoint"), 1.0);
           for (let i = 0; i < DUST_COUNT; i++) {
-            const d = dustSeeds[i];
-            const prog = (d.t + t * 0.02 * d.sp) % 1.0;
-            const z = 9.2 - prog * 19.0;
+            const d = dustSeeds[i], prog = (d.t + t * 0.02 * d.sp) % 1.0;
             dustFloatArr[i*3]   = d.u * (0.28 + prog * 5.4) + Math.sin(t * 0.8 + d.ph) * 0.16;
             dustFloatArr[i*3+1] = (6.65 - prog * 2.65) + d.v * (0.16 + prog * 2.2) + Math.cos(t * 0.7 + d.ph) * 0.12;
-            dustFloatArr[i*3+2] = z;
+            dustFloatArr[i*3+2] = 9.2 - prog * 19.0;
           }
-          gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.dPos);
-          gl.bufferData(gl.ARRAY_BUFFER, dustFloatArr, gl.DYNAMIC_DRAW);
-          gl.vertexAttribPointer(bLocPos, 3, gl.FLOAT, false, 0, 0);
-          gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.dAlpha);
-          gl.vertexAttribPointer(bLocAlpha, 1, gl.FLOAT, false, 0, 0);
+          gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.dPos); gl.bufferData(gl.ARRAY_BUFFER, dustFloatArr, gl.DYNAMIC_DRAW); gl.vertexAttribPointer(bLocPos, 3, gl.FLOAT, false, 0, 0);
+          gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.dAlpha); gl.vertexAttribPointer(bLocAlpha, 1, gl.FLOAT, false, 0, 0);
           gl.drawArrays(gl.POINTS, 0, DUST_COUNT);
-          gl.depthMask(true);
-          gl.disable(gl.BLEND);
+          gl.depthMask(true); gl.disable(gl.BLEND);
         }
 
-        // HUD Overlay (Row labels & Seat marker in Orbit mode)
         hctx.clearRect(0, 0, st.W, st.H);
         if (st.mode === "orbit") {
           for (const s of seats3D) {
@@ -16312,8 +16467,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             const bw = hctx.measureText(lbl).width + 14;
             hctx.fillStyle = "rgba(245,197,24,0.96)";
             hctx.beginPath(); hctx.roundRect(mp.x - bw*0.5, mp.y - 22, bw, 19, 6); hctx.fill();
-            hctx.fillStyle = "#110d04";
-            hctx.textBaseline = "middle";
+            hctx.fillStyle = "#110d04"; hctx.textBaseline = "middle";
             hctx.fillText(lbl, mp.x, mp.y - 12.5);
           }
         }
@@ -16399,7 +16553,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           const seatChanged = st.mySeatId !== nextSeat;
           st.mySeatId = nextSeat;
           if (seatChanged && seatId) {
-            // Khi khách chọn bất kỳ ghế nào -> tự động bay vào góc nhìn POV của đúng ghế đó & mở rèm nếu đang đóng!
             st.mode = "pov";
             st.tPovYaw = 0;
             st.tPovPitch = 0;
