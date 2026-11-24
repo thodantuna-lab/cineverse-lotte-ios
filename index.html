@@ -2518,6 +2518,36 @@
       padding: 6px 14px !important;
       font-size: 11.5px !important;
     }
+    /* Cinema styling for the watch party form */
+    #watch-party-create-modal { background: rgba(3, 2, 4, .88); }
+    .cv-wp-create-sheet {
+      max-width: 820px !important;
+      padding: clamp(16px, 2.2vw, 24px) !important;
+      border-radius: 22px !important;
+      background:
+        radial-gradient(ellipse 90% 48% at 12% 0%, rgba(138, 24, 44, .42), transparent 58%),
+        linear-gradient(165deg, #1b0f16 0%, #0c090e 68%) !important;
+      border: 1px solid rgba(219, 174, 74, .42) !important;
+      box-shadow: 0 28px 90px #000, inset 0 1px rgba(255,255,255,.10) !important;
+    }
+    .cv-wp-create-sheet > div:first-child { padding-bottom: 12px; border-color: rgba(245,197,24,.22); }
+    .cv-wp-create-sheet h3 { font-size: clamp(22px, 2.6vw, 28px); line-height: 1.18; letter-spacing: -0.01em; }
+    .cv-wp-create-sheet > div:first-child p { font-size: 12px; margin-top: 4px; }
+    .cv-wp-create-sheet .cv-wp-create-body { gap: 11px; font-size: 12.5px; }
+    .cv-wp-create-sheet label { color: #e5dfdf; font-size: 12.5px; margin-bottom: 4px; }
+    .cv-wp-create-sheet input, .cv-wp-create-sheet select, .cv-wp-create-sheet .cv-select-trigger {
+      min-height: 40px !important; padding: 8px 12px !important; font-size: 13px !important;
+      background: rgba(16, 12, 17, 0.92); border-color: rgba(255,255,255,.16); color: #f8f5f3; color-scheme: dark;
+    }
+    .cv-wp-create-sheet input:focus-visible, .cv-wp-create-sheet select:focus-visible, .cv-wp-create-sheet .cv-select-trigger:focus-visible { outline: 2px solid #f5c518; outline-offset: 2px; }
+    #wp-form-movie-card { padding: 11px 14px; gap: 14px; background: linear-gradient(110deg, rgba(114, 20, 38, .48), rgba(10, 8, 12, .85)) !important; border-color: rgba(245,197,24,.28) !important; }
+    #wp-form-movie-poster { width: 46px; height: 64px; }
+    #wp-form-movie-title { font-size: 15.5px; white-space: normal; }
+    #wp-form-movie-meta { font-size: 11.5px; white-space: normal; }
+    #wp-form-schedule-preview { padding: 12px 14px; background: rgba(83,18,29,.36) !important; border-color: rgba(245,197,24,.28) !important; }
+    #wp-form-schedule-preview p { line-height: 1.48; }
+    .cv-wp-create-sheet .cv-wp-cta-primary, .cv-wp-create-sheet .cv-wp-cta-secondary { min-height: 42px !important; padding: 9px 18px !important; font-size: 13px !important; }
+    @media (max-width: 639px) { .cv-wp-create-sheet { border-radius: 22px 22px 0 0 !important; max-height: 92dvh; } .cv-wp-create-sheet .cv-wp-create-body { gap: 10px; } }
     .cv-wp-invite-sheet {
       width: 100%;
       max-width: 740px;
@@ -7785,7 +7815,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       </button>
       <button type="button" data-nav-tab="watchparty" onclick="window.appActions.navGoToSection('watchparty'); window.appActions.toggleMobileNavMenu(false);"
         class="cv-nav-mobile-item">
-        <span>Hẹn xem cùng (Lịch hẹn)</span>
+        <span>Đặt Suất Chiếu Riêng</span>
         <i class="fa-solid fa-calendar-check text-xs text-amber-400" aria-hidden="true"></i>
       </button>
       <button type="button" data-nav-tab="top10" onclick="window.appActions.navGoToSection('top10'); window.appActions.toggleMobileNavMenu(false);"
@@ -7951,7 +7981,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             <button type="button" id="btn-hero-watch-party" onclick="window.appActions.openCreateWatchPartyForHero()" style="touch-action: manipulation;min-height:52px;border-radius:999px;padding:0 18px;"
               class="cv-wp-cta-secondary">
               <i class="fa-solid fa-user-group" style="color:#F5C518;" aria-hidden="true"></i>
-              <span>Hẹn xem cùng</span>
+              <span>Đặt Suất Riêng</span>
             </button>
 
             <button type="button" id="btn-hero-book-seat" onclick="window.appActions.openBookingModalForHero()" style="touch-action: manipulation;"
@@ -10381,14 +10411,12 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
   <!-- MODAL TẠO / SỬA LỊCH HẸN XEM CÙNG BẠN BÈ -->
   <div id="watch-party-create-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="wp-create-modal-title">
-    <div class="cv-wp-modal-sheet cv-wp-create-sheet w-full rounded-t-3xl sm:rounded-2xl space-y-2.5 shadow-2xl"
-      style="background:linear-gradient(180deg, #161116 0%, #0B0B0F 100%);border:1px solid rgba(245,197,24,0.38);">
+    <div class="cv-wp-modal-sheet cv-wp-create-sheet w-full rounded-t-3xl sm:rounded-2xl space-y-2.5 shadow-2xl">
       <div class="flex items-center justify-between gap-2 pb-2 border-b border-white/10">
-        <div class="flex items-center gap-2 min-w-0">
-          <img src="assets/web-logo.png" alt="CineVerse Lotte" class="w-7 h-7 rounded-full border border-amber-400/50 object-cover shrink-0" />
+        <div class="flex items-center gap-3 min-w-0">
+          <img src="assets/web-logo.png" alt="CineVerse Lotte" class="w-11 h-11 sm:w-12 sm:h-12 rounded-full border-0 object-cover shrink-0 bg-black" />
           <div class="min-w-0">
-            <h3 id="wp-create-modal-title" class="cv-serif text-base sm:text-lg font-bold text-white truncate">Hẹn xem cùng bạn bè</h3>
-            <p class="text-[10.5px]" style="color:#A1A1AA;">Chọn phim, đặt giờ theo Asia/Ho_Chi_Minh &amp; gửi vé mời</p>
+            <h3 id="wp-create-modal-title" class="cv-serif text-base sm:text-lg font-bold text-white truncate">Đặt Suất Chiếu Riêng</h3>
           </div>
         </div>
         <button type="button" onclick="window.appActions.closeCreateWatchPartyModal()"
@@ -35875,7 +35903,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       document.getElementById("detail-modal-match").textContent = "Đề xuất ngẫu nhiên từ Kho phim";
       document.getElementById("detail-modal-rating").textContent = "T13+";
       document.getElementById("detail-modal-title").textContent = item.title;
-      document.getElementById("detail-modal-synopsis").textContent = `Bộ phim "${item.title}" hiện có sẵn trong Kho Phim CineVerse. Bạn có thể chọn ghế vào phòng để yêu cầu chiếu hoặc tạo lịch Hẹn xem cùng bạn bè.`;
+      document.getElementById("detail-modal-synopsis").textContent = `Bộ phim "${item.title}" hiện có sẵn trong Kho Phim CineVerse. Bạn có thể chọn ghế vào phòng để yêu cầu chiếu hoặc Đặt Suất Chiếu Riêng.`;
       document.getElementById("detail-modal-cast").textContent = "Nguồn: Kho Phim Cloudflare R2 / CineVerse";
       document.getElementById("detail-modal-genre").textContent = `${item.genre}${item.duration ? ` • ${item.duration}` : ""}`;
 
@@ -35886,7 +35914,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       if (ctaBtn) {
         ctaBtn.innerHTML = hasR1Ticket
           ? `<i class="fa-solid fa-paper-plane"></i> Yêu cầu chiếu tại ${escapeHTML(r1.number)}`
-          : `<i class="fa-solid fa-calendar-plus"></i> Hẹn xem cùng phim này`;
+          : `<i class="fa-solid fa-calendar-plus"></i> Đặt suất chiếu riêng phim này`;
       }
       activeDetailModalAction = () => {
         if (hasR1Ticket) {
@@ -36131,7 +36159,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 <button type="button" class="cv-dhp-btn-primary"
                   onclick="window.appActions.triggerDiscoverPopupPrimary('${escapeHTML(encId)}')">
                   <i class="fa-solid ${hasR1Ticket ? "fa-paper-plane" : "fa-calendar-plus"} text-[11px]"></i>
-                  <span>${hasR1Ticket ? "Yêu cầu chiếu" : "Hẹn xem cùng"}</span>
+                  <span>${hasR1Ticket ? "Yêu cầu chiếu" : "Đặt Suất Riêng"}</span>
                 </button>
                 <button type="button" class="cv-dhp-btn-secondary"
                   onclick="window.appActions.hideDiscoverHoverPopup(true); window.appActions.openDiscoverVaultMovie('${escapeHTML(encId)}')">
@@ -37247,7 +37275,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         if (capInput) capInput.value = String(editEv.capacity || 8);
         if (visSel) visSel.value = editEv.visibility || "invite_approval";
       } else if (shouldRestoreDraft && savedDraft) {
-        if (titleEl) titleEl.textContent = opts.confirmStep ? "Xác nhận lịch hẹn" : "Hẹn xem cùng bạn bè";
+        if (titleEl) titleEl.textContent = opts.confirmStep ? "Xác nhận suất chiếu riêng" : "Đặt Suất Chiếu Riêng";
         if (movieSel && movies.some(m => m.movieId === savedDraft.movieId)) {
           movieSel.value = savedDraft.movieId;
         }
@@ -37260,7 +37288,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         if (opts.confirmStep) confirmBanner?.classList.remove("hidden");
         else restoredBanner?.classList.remove("hidden");
       } else {
-        if (titleEl) titleEl.textContent = "Hẹn xem cùng bạn bè";
+        if (titleEl) titleEl.textContent = "Đặt Suất Chiếu Riêng";
         if (movieSel && preselectMovieId && movies.some(m => m.movieId === preselectMovieId)) {
           movieSel.value = preselectMovieId;
         }
