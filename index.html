@@ -16425,8 +16425,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                   // Video rộng hơn màn (vd 2.39:1) -> letterbox trên/dưới đen tuyền chuẩn rạp
                   uv.y = (vUV.y - 0.5) / ratio + 0.5;
                 } else {
-                  // Màn rộng hơn video (vd 16:9 trên màn 2.28:1) -> phủ vừa khít chiều cao hoặc mở rộng nhẹ
-                  float softFit = mix(1.0, ratio, 0.65);
+                  // Màn rộng hơn video -> mở rộng gần tối đa chiều ngang màn cong IMAX cho hình ảnh lớn, đã mắt
+                  float softFit = mix(1.0, ratio, 0.20);
                   uv.x = (vUV.x - 0.5) * softFit + 0.5;
                 }
               }
@@ -16493,9 +16493,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           const scrVerts = [], scrUVs = [], scrIdx = [];
           for (let i = 0; i <= 32; i++) {
             const u = i / 32;
-            const x = -6.3 + u * 12.6;
+            const x = -6.48 + u * 12.96;
             const z = -10.12 - Math.cos((u - 0.5) * Math.PI) * 0.74;
-            scrVerts.push(x, 1.18, z, x, 6.72, z);
+            scrVerts.push(x, 1.08, z, x, 6.86, z);
             scrUVs.push(u, 1.0, u, 0.0);
             if (i < 32) { const b = i * 2; scrIdx.push(b, b + 1, b + 3, b, b + 3, b + 2); }
           }
@@ -16683,7 +16683,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             // Chế độ Góc tập trung (Zoom): lướt mượt tới gần màn chiếu, giữ lệch nhẹ theo ghế đang ngồi để không mỏi mắt khi xem lâu
             st.povYaw += (st.tPovYaw - st.povYaw) * 0.12;
             st.povPitch += (st.tPovPitch - st.povPitch) * 0.12;
-            const fx = mySeat.x * 0.15, fy = 3.92, fz = -3.15;
+            const fx = mySeat.x * 0.15, fy = 3.95, fz = -3.65;
             const yaw = st.povYaw * 0.35, pitch = st.povPitch * 0.35;
             desPos = [fx, fy, fz];
             desLook = [
@@ -16691,7 +16691,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               fy + Math.sin(pitch) * 7.2,
               fz - Math.cos(yaw) * Math.cos(pitch) * 7.2
             ];
-            targetFov = 0.68; // ~39 deg Zoom sắc nét toàn màn chiếu
+            targetFov = 0.58; // ~33 deg Zoom lớn sắc nét toàn màn chiếu
           } else if (st.mode === "seat") {
             // Góc ngồi thực tế từng ghế (A1..F8): độ cao mắt, độ nghiêng cổ & tiêu cự FOV biến thiên vật lý theo hàng ghế!
             st.povYaw += (st.tPovYaw - st.povYaw) * 0.14;
@@ -16711,8 +16711,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               ey + Math.sin(finalPitch) * 8.0,
               ez - Math.cos(finalYaw) * Math.cos(finalPitch) * 8.0
             ];
-            const rowFovTable = [1.06, 0.99, 0.95, 0.91, 0.88, 0.85]; // A -> F
-            targetFov = rowFovTable[mySeat.rIdx] || 0.92;
+            const rowFovTable = [0.86, 0.80, 0.76, 0.72, 0.69, 0.66]; // A -> F (Màn hình IMAX lớn, rõ nét hơn)
+            targetFov = rowFovTable[mySeat.rIdx] || 0.74;
           } else {
             st.yaw += (st.tYaw - st.yaw) * 0.12;
             st.pitch += (st.tPitch - st.pitch) * 0.12;
@@ -16865,7 +16865,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           gl.uniformMatrix4fv(gl.getUniformLocation(progScreen, "uView"), false, mView);
           gl.uniform1i(gl.getUniformLocation(progScreen, "uTex"), 0);
           gl.uniform1f(gl.getUniformLocation(progScreen, "uSrcAspect"), activeAspect);
-          gl.uniform1f(gl.getUniformLocation(progScreen, "uScreenAspect"), 12.6 / 5.54);
+          gl.uniform1f(gl.getUniformLocation(progScreen, "uScreenAspect"), 12.96 / 5.78);
           const sLocPos = gl.getAttribLocation(progScreen, "aPos");
           const sLocUV = gl.getAttribLocation(progScreen, "aUV");
           gl.bindBuffer(gl.ARRAY_BUFFER, scrBuffers.bPos); gl.enableVertexAttribArray(sLocPos); gl.vertexAttribPointer(sLocPos, 3, gl.FLOAT, false, 0, 0);
