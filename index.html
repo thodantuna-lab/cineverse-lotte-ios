@@ -8004,6 +8004,159 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       font-weight: 800;
       box-shadow: 0 3px 12px rgba(245, 197, 24, 0.38);
     }
+
+    /* ===================================================================== */
+    /* CHẾ ĐỘ CHIẾU PHIM TRỰC TIẾP TRÊN RẠP 3D KHI TẮT ĐÈN (60FPS VIDEOTEXTURE) */
+    /* ===================================================================== */
+    #room-3d-stage-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 8;
+      opacity: 0;
+      pointer-events: none;
+      background: #040307;
+      transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-view {
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+    }
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #theater-center-auditorium {
+      padding: 0 !important;
+      background: #040307 !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+      overflow: hidden;
+    }
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #cinema-auditorium-stage {
+      min-height: calc(100dvh - 18px) !important;
+      height: calc(100dvh - 18px) !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border-radius: 20px !important;
+      background: #040307 !important;
+    }
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-3d-stage-layer {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    /* Ẩn mượt sơ đồ ghế 2D A–F khi đang ở Rạp 3D Tắt đèn */
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active):not(.seats-picker-lit) #stream-seats-collapsible,
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #cinema-stadium-caption,
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #auditorium-bottom-dock {
+      opacity: 0 !important;
+      max-height: 0 !important;
+      min-height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      pointer-events: none !important;
+      border: 0 !important;
+      transition: opacity 360ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    /* Giữ nguyên duy nhất thẻ <video> giải mã phần cứng 60fps cho VideoTexture nhưng ẩn khung phẳng 2D; giữ nổi Phụ đề CC (#lyrics-overlay) */
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #stream-stage-workspace,
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #screen-stage-box,
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) .lotte-screen-frame,
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #cinema-screen {
+      position: absolute !important;
+      inset: 0 !important;
+      width: 100% !important;
+      max-width: none !important;
+      height: 100% !important;
+      aspect-ratio: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      transform: none !important;
+      perspective: none !important;
+      filter: none !important;
+      pointer-events: none !important;
+      z-index: 62 !important;
+    }
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #html5-video-player,
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #screen-velvet-curtain,
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) .imax-screen-sheen {
+      opacity: 0.001 !important;
+      pointer-events: none !important;
+    }
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-player-loading-overlay,
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-player-error-overlay,
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #upcoming-overlay {
+      pointer-events: auto !important;
+    }
+    /* Phụ đề CC HTML Overlay nổi sắc nét ở cạnh dưới màn hình 3D */
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #lyrics-overlay {
+      position: fixed !important;
+      left: 16px !important;
+      right: 16px !important;
+      z-index: 62 !important;
+      bottom: 92px !important;
+      transition: bottom 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    body.theater-dimmed.cv-3d-screening-active.cv-3d-hud-hidden:not(.stream-room-active) #lyrics-overlay {
+      bottom: 28px !important;
+    }
+    /* Thanh điều khiển nổi trên Canvas 3D & tự động ẩn mượt sau 3 giây không di chuột */
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-top-header {
+      position: fixed !important;
+      top: 12px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      width: min(96vw, 1480px) !important;
+      z-index: 65 !important;
+      opacity: 0.94 !important;
+      transition: opacity 340ms cubic-bezier(0.22, 1, 0.36, 1), transform 340ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+    }
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-controls-dock-wrap {
+      position: fixed !important;
+      bottom: 14px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      width: min(95vw, 1080px) !important;
+      z-index: 65 !important;
+      transition: opacity 340ms cubic-bezier(0.22, 1, 0.36, 1), transform 340ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+    }
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #cinema-control-bar {
+      opacity: 0.96 !important;
+      background: rgba(11, 10, 16, 0.78) !important;
+      backdrop-filter: blur(16px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.16) !important;
+    }
+    #room-3d-floating-hud {
+      position: fixed;
+      top: 68px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(96vw, 1480px);
+      z-index: 64;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 340ms cubic-bezier(0.22, 1, 0.36, 1), transform 340ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-3d-floating-hud {
+      opacity: 1;
+    }
+    body.theater-dimmed.cv-3d-screening-active.cv-3d-hud-hidden:not(.stream-room-active) #room-top-header {
+      opacity: 0 !important;
+      transform: translate(-50%, -12px) !important;
+      pointer-events: none !important;
+    }
+    body.theater-dimmed.cv-3d-screening-active.cv-3d-hud-hidden:not(.stream-room-active) #room-controls-dock-wrap {
+      opacity: 0 !important;
+      transform: translate(-50%, 14px) !important;
+      pointer-events: none !important;
+    }
+    body.theater-dimmed.cv-3d-screening-active.cv-3d-hud-hidden:not(.stream-room-active) #room-3d-floating-hud {
+      opacity: 0 !important;
+      transform: translate(-50%, -10px) !important;
+      pointer-events: none !important;
+    }
+    body.theater-dimmed.cv-3d-screening-active.cv-3d-hud-hidden:not(.stream-room-active) #room-3d-gl {
+      cursor: none !important;
+    }
 </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-rose-500 selection:text-white">
@@ -9440,6 +9593,41 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             <div class="ceiling-spot"></div>
           </div>
 
+          <!-- LỚP MÔ HÌNH RẠP 3D TRỰC TIẾP KHI TẮT ĐÈN (VIDEOTEXTURE 60FPS • ĐỒNG BỘ 100% ÂM THANH, SUB & MIC) -->
+          <div id="room-3d-stage-layer" class="select-none">
+            <canvas id="room-3d-gl" style="touch-action:none;" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+            <canvas id="room-3d-hud" class="pointer-events-none absolute inset-0 w-full h-full block"></canvas>
+
+            <!-- Thanh nổi chọn nhanh Góc ngồi ghế / Góc tập trung (Zoom) / Toàn cảnh 3D / Rèm / Bật đèn -->
+            <div id="room-3d-floating-hud" class="flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+              <div class="cv-b3d-hud-pill p-1 flex flex-wrap items-center gap-1 pointer-events-auto">
+                <button type="button" id="r3d-btn-seat" onclick="window.cvRoomCinema3D?.setCameraView('seat')" class="cv-b3d-btn is-active" title="Ngồi đúng vị trí ghế của bạn • Kéo chuột để ngoảnh đầu 360°">
+                  🪑 Góc ngồi rạp (<span id="r3d-seat-lbl">D5</span>)
+                </button>
+                <button type="button" id="r3d-btn-focus" onclick="window.cvRoomCinema3D?.setCameraView('focus')" class="cv-b3d-btn" title="Camera lướt mượt lại gần màn chiếu 3D để xem phim lâu không mỏi mắt">
+                  🔍 Góc tập trung (Zoom)
+                </button>
+                <button type="button" id="r3d-btn-orbit" onclick="window.cvRoomCinema3D?.setCameraView('orbit')" class="cv-b3d-btn" title="Xem toàn bộ 48 ghế & khách trong phòng • Click ghế trống để đổi chỗ">
+                  🏛️ Toàn cảnh 3D
+                </button>
+              </div>
+
+              <div class="cv-b3d-hud-pill p-1 flex items-center gap-1 pointer-events-auto">
+                <button type="button" id="r3d-btn-change-seat" onclick="window.appActions.openSeat2DModal()" class="cv-b3d-btn" title="Đổi sang ghế khác để trải nghiệm góc nhìn 3D mới">
+                  💺 Đổi ghế
+                </button>
+                <button type="button" id="r3d-btn-curtain" onclick="window.cvRoomCinema3D?.toggleCurtain()" class="cv-b3d-btn" title="Đóng hoặc mở rèm nhung sân khấu 3D">
+                  🎭 <span id="r3d-curtain-lbl">Đóng rèm</span>
+                </button>
+                <button type="button" id="r3d-btn-lights-on" onclick="window.appActions.toggleDimLights()" class="cv-b3d-btn" style="background:rgba(245,197,24,0.18);color:#FDE68A;border:1px solid rgba(245,197,24,0.4);" title="Bật lại đèn rạp & trở về giao diện 2D">
+                  💡 Bật đèn
+                </button>
+              </div>
+            </div>
+
+            <div id="r3d-seat-tooltip" class="hidden pointer-events-none absolute z-50 px-2.5 py-1 rounded-xl cv-b3d-hud-pill text-[11px] text-white"></div>
+          </div>
+
           <!-- Vùng Sân khấu Chính (Cinema dùng #screen-stage-box | Stream tự chuyển Grid Camera <-> Màn hình chia sẻ + Dải camera cạnh) -->
           <div id="stream-stage-workspace" data-stream-mode="grid" data-stream-layout="auto">
             <!-- KHUNG MÀN HÌNH CONG LÒNG CHẢO IMAX 70MM "THE ODYSSEY" (hoặc khung chia sẻ màn hình trong Phòng Stream) -->
@@ -9495,8 +9683,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                     <span>Thu nhỏ</span>
                   </button>
 
-                  <!-- 1. Trình phát Video HTML5 (.mp4 / file từ máy) -->
-                  <video id="html5-video-player" class="w-full h-full object-contain bg-black hidden" autoplay playsinline></video>
+                  <!-- 1. Trình phát Video HTML5 (.mp4 / file từ máy) - crossorigin="anonymous" cho WebGL VideoTexture -->
+                  <video id="html5-video-player" crossorigin="anonymous" class="w-full h-full object-contain bg-black hidden" autoplay playsinline></video>
 
                   <!-- 2. Trình phát YouTube IFrame -->
                   <div id="youtube-wrapper" class="w-full h-full hidden"></div>
@@ -9792,6 +9980,16 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
                   <!-- Tiện ích phụ gọn nhẹ ở mép phải trên Desktop (không phá vỡ bố cục 7 nút chính) -->
                   <div class="cv-bar-extras-right">
+                    <button type="button" id="btn-bar-3d-view-toggle" onclick="window.cvRoomCinema3D?.cycleCameraView()"
+                      class="hidden px-2 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/45 text-amber-200 text-[10px] font-extrabold transition cursor-pointer"
+                      title="Chuyển nhanh Góc ngồi rạp ↔ Góc tập trung (Zoom) trong Rạp 3D">
+                      <i class="fa-solid fa-eye mr-1"></i><span id="bar-3d-view-label">Góc ghế</span>
+                    </button>
+                    <button type="button" id="btn-bar-lights-on" onclick="window.appActions.toggleDimLights()"
+                      class="hidden px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-amber-300 text-[10px] font-extrabold transition cursor-pointer"
+                      title="Bật đèn rạp (Quay về chế độ 2D)">
+                      <i class="fa-solid fa-lightbulb mr-1"></i>Bật đèn
+                    </button>
                     <button type="button" id="btn-sync-live" onclick="window.appActions.syncLiveTime()"
                       class="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-emerald-300 text-[10px] font-extrabold transition cursor-pointer opacity-75 hover:opacity-100"
                       title="Đồng bộ thời gian chiếu với phòng">
@@ -15316,7 +15514,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         cleanupRoomLiveScreen(oldRoomId);
         cleanupRoomLiveCam(oldRoomId);
       }
-      document.body.classList.remove("stream-room-active", "stream-mobile-sheet-chat", "stream-keyboard-open");
+      window.toggleLights3D?.(false);
+      document.body.classList.remove("stream-room-active", "stream-mobile-sheet-chat", "stream-keyboard-open", "cv-3d-screening-active", "cv-3d-hud-hidden");
       if (typeof toggleStreamSettingsMenu === "function") toggleStreamSettingsMenu(false);
       if (typeof dismissStreamPermissionBanner === "function") dismissStreamPermissionBanner();
       document.getElementById("sidebar-tab-members")?.classList.add("hidden");
@@ -15388,20 +15587,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
 
     // =========================================================================
-    // MÔ HÌNH RẠP 3D WEBGL PBR CHUẨN STUDIO TÍCH HỢP ĐẶT VÉ (60FPS)
-    // Ghế công thái học bo tròn • Phản chiếu gương mặt sân khấu • Rèm rủ vật lý
+    // HỆ THỐNG RẠP 3D WEBGL PBR DÙNG CHUNG (ĐẶT VÉ + CHIẾU PHIM VIDEOTEXTURE KHI TẮT ĐÈN)
+    // Chuẩn 60fps • Tối ưu 50 người/phòng (O(1) bufferSubData) • Tái sử dụng duy nhất 1 <video>
     // =========================================================================
-    (function initCineVerseBooking3D() {
-      let gl = null, hctx = null, glCanvas = null, hudCanvas = null;
-      let progRoom = null, progScreen = null, progBeam = null, idxType = 0;
-      let gpuBase = null, gpuLeftWall = null, gpuRightWall = null, gpuRearWall = null, gpuCeiling = null;
-      let chairGPU = null, curtainGPU = null, scrBuffers = null, beamBuffers = null, scrTex = null;
-
-      const scrOff = document.createElement("canvas");
-      scrOff.width = 512;
-      scrOff.height = 256;
-      const sctx = scrOff.getContext("2d", { willReadFrequently: true });
-
+    (function initCineVerseUnified3DEngine() {
       const ROWS_3D = ["A", "B", "C", "D", "E", "F"];
       const seats3D = [];
       ROWS_3D.forEach((row, rIdx) => {
@@ -15422,51 +15611,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             id: `${row}${col}`,
             row, col, rIdx, isVIP, isCouple,
             pairSide: isCouple ? (col % 2 === 1 ? "L" : "R") : null,
-            x, y, z, hit2D: null
+            x, y, z
           });
         }
       });
-
-      const DUST_COUNT = 75;
-      const dustSeeds = Array.from({ length: DUST_COUNT }, () => ({
-        t: Math.random(),
-        u: (Math.random() - 0.5) * 2,
-        v: (Math.random() - 0.5) * 2,
-        sp: 0.14 + Math.random() * 0.28,
-        ph: Math.random() * 6.28
-      }));
-      const dustFloatArr = new Float32Array(DUST_COUNT * 3);
-
-      const st = {
-        initialized: false,
-        running: false,
-        rafId: 0,
-        W: 640, H: 228, dpr: 1,
-        mode: "pov",
-        mySeatId: "F4",
-        hoveredSeatId: null,
-        occupied: {},
-        isCoupleOnly: false,
-        curtainOpen: 0.08,
-        curtainTarget: 1.0,
-        lastCurtainBuilt: -1,
-        lightsLevel: 0.08,
-        lightsTarget: 0.0,
-        movieTitle: "CINEVERSE LOTTE • IMAX LASER",
-        posterUrl: "",
-        posterImg: null,
-        posterReady: false,
-        lightL: [0.08, 0.54, 0.78],
-        lightC: [0.18, 0.78, 0.96],
-        lightR: [0.08, 0.46, 0.70],
-        beamCol: [0.24, 0.80, 0.98],
-        yaw: -0.56, pitch: 0.44, dist: 21.0,
-        tYaw: -0.56, tPitch: 0.44, tDist: 21.0,
-        povYaw: 0, povPitch: 0,
-        tPovYaw: 0, tPovPitch: 0,
-        camPos: [0, 5.2, 6.8],
-        camLook: [0, 3.8, -10.4]
-      };
 
       function createMB() {
         return { pos: [], norm: [], col: [], mat: [], ao: [], idx: [], vCount: 0 };
@@ -15475,7 +15623,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         return Math.sign(x) * Math.pow(Math.abs(x), p);
       }
 
-      // Sinh khối nệm bo tròn công thái học (Superellipsoid)
       function addRoundedCushion(mb, cx, cy, cz, rx, ry, rz, roundness, segU, segV, rgb, mat, aoBot = 0.35, aoTop = 1.0, tiltX = 0) {
         const cxT = Math.cos(tiltX), sxT = Math.sin(tiltX);
         const base = mb.vCount;
@@ -15512,7 +15659,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         mb.vCount += (segV + 1) * stride;
       }
 
-      // Sinh khối trụ tròn (khay để cốc, đèn tường pha lê, cột đồng, đĩa bóng đổ tiếp xúc)
       function addCylinder(mb, cx, cy, cz, rTop, rBot, h, segs, rgb, mat, aoBot = 0.4, aoTop = 1.0, capTop = true) {
         const base = mb.vCount, hh = h * 0.5;
         for (let i = 0; i <= segs; i++) {
@@ -15568,490 +15714,20 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         }
       }
 
-      function makeIdxArray(arr) {
-        return idxType === gl.UNSIGNED_INT ? new Uint32Array(arr) : new Uint16Array(arr);
-      }
-
-      function uploadMB(mb, usage = gl.STATIC_DRAW) {
-        const mk = (arr, T, target) => {
-          const b = gl.createBuffer(); gl.bindBuffer(target, b); gl.bufferData(target, T, usage); return b;
-        };
-        return {
-          bPos: mk(mb.pos, new Float32Array(mb.pos), gl.ARRAY_BUFFER),
-          bNorm: mk(mb.norm, new Float32Array(mb.norm), gl.ARRAY_BUFFER),
-          bCol: mk(mb.col, new Float32Array(mb.col), gl.ARRAY_BUFFER),
-          bMat: mk(mb.mat, new Float32Array(mb.mat), gl.ARRAY_BUFFER),
-          bAO: mk(mb.ao, new Float32Array(mb.ao), gl.ARRAY_BUFFER),
-          bIdx: mk(mb.idx, makeIdxArray(mb.idx), gl.ELEMENT_ARRAY_BUFFER),
-          count: mb.idx.length
-        };
-      }
-
-      function updateDynamicGPU(gpu, mb) {
-        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bPos); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.pos), gl.DYNAMIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bNorm); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.norm), gl.DYNAMIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bCol); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.col), gl.DYNAMIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bMat); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.mat), gl.DYNAMIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bAO); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.ao), gl.DYNAMIC_DRAW);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gpu.bIdx); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, makeIdxArray(mb.idx), gl.DYNAMIC_DRAW);
-        gpu.count = mb.idx.length;
-      }
-
-      function rebuildCurtainMesh(openVal) {
-        if (!gl || !curtainGPU) return;
-        st.lastCurtainBuilt = openVal;
-        const mb = createMB();
-
-        // Diềm nhung lượn sóng hoàng gia (Scalloped Royal Valance) + viền tua đồng vàng
-        const VSEGS = 32;
-        for (let i = 0; i < VSEGS; i++) {
-          const u0 = i / VSEGS, u1 = (i + 1) / VSEGS;
-          const x0 = -6.58 + u0 * 13.16, x1 = -6.58 + u1 * 13.16;
-          const z0 = -9.80 - Math.cos((u0 - 0.5) * Math.PI) * 0.68 + Math.sin(i * 1.8) * 0.04;
-          const z1 = -9.80 - Math.cos((u1 - 0.5) * Math.PI) * 0.68 + Math.sin((i + 1) * 1.8) * 0.04;
-          const yb0 = 6.46 - Math.abs(Math.sin(u0 * Math.PI * 5.0)) * 0.22;
-          const yb1 = 6.46 - Math.abs(Math.sin(u1 * Math.PI * 5.0)) * 0.22;
-          const b = mb.vCount;
-          mb.pos.push(x0, yb0, z0, x1, yb1, z1, x1, 6.96, z1, x0, 6.96, z0);
-          for (let k = 0; k < 4; k++) { mb.norm.push(0, 0.08, 1); mb.col.push(0.46, 0.05, 0.11); mb.mat.push(4); mb.ao.push(k < 2 ? 0.65 : 0.95); }
-          mb.idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
-          mb.vCount += 4;
-
-          const bf = mb.vCount;
-          mb.pos.push(x0, yb0 - 0.045, z0 + 0.01, x1, yb1 - 0.045, z1 + 0.01, x1, yb1, z1 + 0.01, x0, yb0, z0 + 0.01);
-          for (let k = 0; k < 4; k++) { mb.norm.push(0, 0.1, 1); mb.col.push(0.92, 0.72, 0.26); mb.mat.push(2); mb.ao.push(0.95); }
-          mb.idx.push(bf, bf + 1, bf + 2, bf, bf + 2, bf + 3);
-          mb.vCount += 4;
-        }
-
-        // Hai cánh rèm nhung xếp ly có độ rủ trọng lực & bóng rãnh (Fold AO)
-        const CSEGS = 28, CROWS = 6;
-        [-1, 1].forEach((side) => {
-          const xOuter = side * 6.52;
-          const xInnerBase = side * (0.01 + openVal * 5.68);
-          const gridX = [], gridY = [], gridZ = [], gridNX = [], gridNZ = [], gridAO = [];
-          for (let r = 0; r <= CROWS; r++) {
-            const v = r / CROWS;
-            const y = 1.15 + v * 5.50;
-            const catenary = Math.sin(v * Math.PI) * openVal * 0.22 * side;
-            const xInner = xInnerBase + catenary;
-            const amp = (0.055 + openVal * 0.095) * (1.25 - 0.45 * v);
-            for (let i = 0; i <= CSEGS; i++) {
-              const s = i / CSEGS;
-              const x = xOuter + (xInner - xOuter) * s;
-              const uScreen = Math.max(0, Math.min(1, (x + 6.35) / 12.7));
-              const baseZ = -9.90 - Math.cos((uScreen - 0.5) * Math.PI) * 0.70;
-              const wave = Math.sin(s * Math.PI * 9.0);
-              const z = baseZ + wave * amp;
-              const dWave = Math.cos(s * Math.PI * 9.0) * 1.4;
-              let nx = -dWave * side, nz = 1.0;
-              const nl = Math.hypot(nx, nz) || 1;
-              gridX.push(x); gridY.push(y); gridZ.push(z);
-              gridNX.push(nx / nl); gridNZ.push(nz / nl);
-              gridAO.push(0.32 + 0.68 * (wave * 0.5 + 0.5));
-            }
-          }
-          const stride = CSEGS + 1;
-          for (let face = 0; face < 2; face++) {
-            const base = mb.vCount, zOff = face === 0 ? 0 : -0.025, nSign = face === 0 ? 1 : -1;
-            for (let k = 0; k < gridX.length; k++) {
-              mb.pos.push(gridX[k], gridY[k], gridZ[k] + zOff);
-              mb.norm.push(gridNX[k] * nSign, 0.03, gridNZ[k] * nSign);
-              mb.col.push(0.46, 0.05, 0.11); mb.mat.push(4); mb.ao.push(gridAO[k]);
-            }
-            for (let r = 0; r < CROWS; r++) {
-              for (let i = 0; i < CSEGS; i++) {
-                const a = base + r * stride + i, b = a + 1, c = a + stride, d = c + 1;
-                if (face === 0) mb.idx.push(a, b, d, a, d, c);
-                else mb.idx.push(a, d, b, a, c, d);
-              }
-            }
-            mb.vCount += gridX.length;
-          }
-          // Viền gấu rèm thêu chỉ vàng kim 6cm sắc nét
-          for (let i = 0; i < CSEGS; i++) {
-            const b = mb.vCount;
-            mb.pos.push(gridX[i], 1.15, gridZ[i] + 0.01, gridX[i+1], 1.15, gridZ[i+1] + 0.01, gridX[i+1], 1.21, gridZ[i+1] + 0.01, gridX[i], 1.21, gridZ[i] + 0.01);
-            for (let k = 0; k < 4; k++) { mb.norm.push(0, 0.1, 1); mb.col.push(0.92, 0.72, 0.26); mb.mat.push(2); mb.ao.push(0.95); }
-            mb.idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
-            mb.vCount += 4;
-          }
-        });
-
-        updateDynamicGPU(curtainGPU, mb);
-      }
-
-      function rebuildChairsMesh() {
-        if (!gl || !chairGPU) return;
-        const mb = createMB();
-        for (const s of seats3D) {
-          if (st.isCoupleOnly && s.row !== "F") continue;
-          const isMine = s.id === st.mySeatId;
-          const isHover = s.id === st.hoveredSeatId;
-          const occName = st.occupied[s.id];
-
-          let mainCol, bolsterCol, headCol, trimMat = 1;
-          if (isMine) {
-            mainCol = [0.92, 0.68, 0.12]; bolsterCol = [0.78, 0.54, 0.08]; headCol = [1.0, 0.88, 0.44]; trimMat = 2;
-          } else if (isHover) {
-            mainCol = [0.82, 0.58, 0.16]; bolsterCol = [0.68, 0.46, 0.12]; headCol = [0.98, 0.84, 0.40]; trimMat = 2;
-          } else if (s.isCouple) {
-            mainCol = [0.48, 0.07, 0.19]; bolsterCol = [0.36, 0.05, 0.14]; headCol = [0.62, 0.12, 0.26]; trimMat = 2;
-          } else if (s.isVIP) {
-            mainCol = [0.42, 0.06, 0.12]; bolsterCol = [0.30, 0.04, 0.09]; headCol = [0.52, 0.09, 0.16]; trimMat = 2;
-          } else {
-            mainCol = [0.18, 0.16, 0.23]; bolsterCol = [0.13, 0.11, 0.17]; headCol = [0.23, 0.20, 0.29]; trimMat = 1;
-          }
-
-          const hw = s.isCouple ? 0.52 : 0.43;
-          if (!s.isCouple || s.pairSide === "L") {
-            const px = s.isCouple ? s.x + 0.52 : s.x;
-            addCylinder(mb, px, s.y + 0.018, s.z + 0.04, s.isCouple ? 0.62 : 0.34, s.isCouple ? 0.62 : 0.34, 0.012, 10, [0.02, 0.015, 0.025], 0, 0.08, 0.12, true);
-            addCylinder(mb, px, s.y + 0.13, s.z + 0.05, 0.09, 0.13, 0.22, 8, [0.06, 0.06, 0.08], 0, 0.15, 0.55, false);
-          }
-
-          // Đệm ngồi bo tròn + gờ đỡ đùi phía trước
-          addRoundedCushion(mb, s.x, s.y + 0.27, s.z + 0.01, hw, 0.105, 0.38, 0.52, 8, 5, mainCol, 1, 0.18, 0.95, 0.06);
-          addRoundedCushion(mb, s.x, s.y + 0.29, s.z - 0.31, hw * 0.95, 0.075, 0.10, 0.62, 8, 4, bolsterCol, 1, 0.30, 0.98, 0.0);
-
-          // Lưng ghế ngả 3 múi công thái học + đệm ôm hai bên sườn
-          const backH = s.isCouple ? 0.37 : s.isVIP ? 0.35 : 0.32;
-          const backY = s.y + 0.35 + backH;
-          addRoundedCushion(mb, s.x, backY, s.z + 0.29, hw * 0.74, backH, 0.095, 0.56, 8, 5, mainCol, 1, 0.22, 0.96, -0.19);
-          if (!s.isCouple || s.pairSide === "L") {
-            addRoundedCushion(mb, s.x - hw * 0.80, backY, s.z + 0.26, 0.10, backH * 0.94, 0.115, 0.60, 6, 4, bolsterCol, 1, 0.24, 0.95, -0.19);
-          }
-          if (!s.isCouple || s.pairSide === "R") {
-            addRoundedCushion(mb, s.x + hw * 0.80, backY, s.z + 0.26, 0.10, backH * 0.94, 0.115, 0.60, 6, 4, bolsterCol, 1, 0.24, 0.95, -0.19);
-          }
-
-          // Gối tựa đầu VIP + nẹp đồng Champagne
-          const headY = s.y + 0.36 + backH * 2.0 + 0.075;
-          addRoundedCushion(mb, s.x, headY, s.z + 0.38, hw * 0.76, 0.095, 0.088, 0.58, 8, 5, headCol, 1, 0.45, 1.0, -0.10);
-          if (s.isVIP || s.isCouple || isMine) {
-            addArchBox(mb, s.x, headY - 0.085, s.z + 0.32, hw * 0.52, 0.012, 0.06, [0.90, 0.70, 0.28], trimMat, 0.8, 1.0, 0.2);
-          }
-
-          // Khung vách riêng tư bọc nhung viền đồng cho ghế đôi Sweetbox Hàng F
-          if (s.isCouple && s.pairSide === "L") {
-            addArchBox(mb, s.x + 0.52, s.y + 0.62, s.z + 0.47, 1.08, 0.54, 0.035, [0.22, 0.04, 0.09], 1, 0.25, 0.88, 0.15);
-            addArchBox(mb, s.x + 0.52, s.y + 1.17, s.z + 0.47, 1.08, 0.018, 0.042, [0.90, 0.70, 0.28], 2, 0.8, 1.0, 0.2);
-          }
-
-          // Tay vịn bọc da + khay để cốc tròn viền kim loại & ly nước
-          const armCol = [0.09, 0.08, 0.11];
-          const buildArm = (ax, withDrink) => {
-            addRoundedCushion(mb, ax, s.y + 0.44, s.z + 0.06, 0.058, 0.048, 0.32, 0.50, 6, 4, armCol, 1, 0.35, 0.92, 0);
-            addArchBox(mb, ax, s.y + 0.26, s.z + 0.14, 0.04, 0.14, 0.10, [0.06, 0.06, 0.08], 0, 0.18, 0.7, 0.08);
-            const czCup = s.z - 0.23;
-            addCylinder(mb, ax, s.y + 0.455, czCup, 0.054, 0.050, 0.07, 10, [0.76, 0.62, 0.34], 2, 0.5, 1.0, false);
-            addCylinder(mb, ax, s.y + 0.465, czCup, 0.044, 0.044, 0.01, 10, [0.02, 0.02, 0.03], 0, 0.1, 0.15, true);
-            if (withDrink) {
-              addCylinder(mb, ax, s.y + 0.53, czCup, 0.042, 0.034, 0.14, 10, [0.85, 0.12, 0.18], 1, 0.4, 0.98, true);
-              addCylinder(mb, ax, s.y + 0.602, czCup, 0.045, 0.045, 0.014, 10, [0.94, 0.94, 0.96], 0, 0.8, 1.0, true);
-            }
-          };
-          if (!s.isCouple || s.pairSide === "L") buildArm(s.x - hw - 0.055, false);
-          if (!s.isCouple || s.pairSide === "R") buildArm(s.x + hw + 0.055, Boolean(occName || isMine));
-
-          if (occName || (isMine && st.mode !== "pov")) {
-            const coat = isMine ? [0.84, 0.62, 0.14] : [0.12, 0.13, 0.19];
-            const hair = isMine ? [0.96, 0.80, 0.36] : [0.09, 0.08, 0.10];
-            addRoundedCushion(mb, s.x, s.y + 0.66, s.z + 0.15, 0.24, 0.24, 0.13, 0.68, 8, 5, coat, 1, 0.25, 0.92, -0.16);
-            addCylinder(mb, s.x, s.y + 0.93, s.z + 0.20, 0.06, 0.07, 0.10, 8, [0.55, 0.45, 0.42], 1, 0.3, 0.7, false);
-            addRoundedCushion(mb, s.x, s.y + 1.08, s.z + 0.21, 0.125, 0.155, 0.135, 0.82, 10, 6, hair, 1, 0.35, 0.96, 0.04);
-          }
-        }
-        updateDynamicGPU(chairGPU, mb);
-      }
-
-      function extractPaletteFromScreen() {
-        try {
-          const sampleZone = (x0, w) => {
-            const d = sctx.getImageData(x0, 48, w, 160).data;
-            let r = 0, g = 0, b = 0, n = 0;
-            for (let i = 0; i < d.length; i += 16) { r += d[i]; g += d[i + 1]; b += d[i + 2]; n++; }
-            if (!n) return [0.16, 0.72, 0.90];
-            const boost = 1.38 / 255;
-            return [
-              Math.min(1, Math.max(0.08, r / n * boost)),
-              Math.min(1, Math.max(0.08, g / n * boost)),
-              Math.min(1, Math.max(0.08, b / n * boost))
-            ];
-          };
-          st.lightL = sampleZone(16, 140);
-          st.lightC = sampleZone(186, 140);
-          st.lightR = sampleZone(356, 140);
-          st.beamCol = [
-            Math.min(1, st.lightC[0] * 1.1 + 0.08),
-            Math.min(1, st.lightC[1] * 1.1 + 0.08),
-            Math.min(1, st.lightC[2] * 1.1 + 0.08)
-          ];
-        } catch (_) {
-          st.lightL = [0.12, 0.56, 0.78]; st.lightC = [0.22, 0.78, 0.96]; st.lightR = [0.12, 0.48, 0.72]; st.beamCol = [0.28, 0.80, 0.98];
-        }
-      }
-
-      function loadRoomPoster(url) {
-        const clean = url ? (typeof getOptimizedPosterUrl === "function" ? getOptimizedPosterUrl(url, "w780") : url) : "";
-        if (!clean || clean === st.posterUrl) return;
-        st.posterUrl = clean;
-        st.posterReady = false;
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.onload = () => {
-          if (st.posterUrl !== clean) return;
-          st.posterImg = img;
-          st.posterReady = true;
-          sctx.clearRect(0, 0, 512, 256);
-          const ir = img.width / (img.height || 1), cr = 512 / 256;
-          let dw = 512, dh = 256, dx = 0, dy = 0;
-          if (ir > cr) { dh = 256; dw = 256 * ir; dx = (512 - dw) * 0.5; }
-          else { dw = 512; dh = 512 / (ir || 1); dy = (256 - dh) * 0.34; }
-          sctx.drawImage(img, dx, dy, dw, dh);
-          extractPaletteFromScreen();
-        };
-        img.onerror = () => { if (st.posterUrl === clean) st.posterReady = false; };
-        img.src = clean;
-      }
-
-      function drawScreenCanvas(t) {
-        const w = 512, h = 256;
-        if (st.posterReady && st.posterImg) {
-          const img = st.posterImg, ir = img.width / (img.height || 1), cr = w / h;
-          const zoom = 1.03 + 0.022 * Math.sin(t * 0.45);
-          let dw = w, dh = h;
-          if (ir > cr) { dh = h * zoom; dw = dh * ir; }
-          else { dw = w * zoom; dh = dw / (ir || 1); }
-          sctx.drawImage(img, (w - dw) * 0.5, (h - dh) * 0.32, dw, dh);
-          const g = sctx.createRadialGradient(w * (0.5 + 0.12 * Math.sin(t * 0.8)), h * 0.35, 10, w * 0.5, h * 0.5, w * 0.65);
-          g.addColorStop(0, "rgba(255,255,255,0.09)");
-          g.addColorStop(1, "rgba(0,0,0,0.26)");
-          sctx.fillStyle = g; sctx.fillRect(0, 0, w, h);
-        } else {
-          const g = sctx.createLinearGradient(0, 0, 0, h);
-          g.addColorStop(0, "#15809e"); g.addColorStop(0.45, "#0369a1"); g.addColorStop(1, "#020c18");
-          sctx.fillStyle = g; sctx.fillRect(0, 0, w, h);
-          sctx.save(); sctx.globalCompositeOperation = "screen";
-          for (let i = 0; i < 7; i++) {
-            const x = w * (0.14 + i * 0.12) + Math.sin(t * 0.6 + i) * 15;
-            const rg = sctx.createLinearGradient(x, 0, x + 40, h);
-            rg.addColorStop(0, "rgba(186, 250, 255, 0.32)"); rg.addColorStop(1, "rgba(2, 132, 199, 0)");
-            sctx.fillStyle = rg; sctx.beginPath();
-            sctx.moveTo(x - 14, 0); sctx.lineTo(x + 20, 0); sctx.lineTo(x + 85, h); sctx.lineTo(x - 45, h);
-            sctx.closePath(); sctx.fill();
-          }
-          sctx.restore();
-        }
-        sctx.fillStyle = "rgba(0,0,0,0.46)";
-        sctx.fillRect(0, h - 24, w, 24);
-        sctx.fillStyle = "rgba(255,255,255,0.88)";
-        sctx.font = "700 10.5px system-ui, sans-serif";
-        sctx.textAlign = "center";
-        sctx.fillText(st.movieTitle, w * 0.5, h - 8);
-      }
-
-      function ensureInit() {
-        if (st.initialized) return true;
-        glCanvas = document.getElementById("booking-3d-gl");
-        hudCanvas = document.getElementById("booking-3d-hud");
-        if (!glCanvas || !hudCanvas) return false;
-        gl = glCanvas.getContext("webgl2", { antialias: true, alpha: false, premultipliedAlpha: false }) ||
-             glCanvas.getContext("webgl", { antialias: true, alpha: false, premultipliedAlpha: false });
-        hctx = hudCanvas.getContext("2d");
-        if (!gl || !hctx) return false;
-
-        const isWL2 = (typeof WebGL2RenderingContext !== "undefined") && (gl instanceof WebGL2RenderingContext);
-        const uintExt = isWL2 ? true : Boolean(gl.getExtension("OES_element_index_uint"));
-        idxType = uintExt ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
-
-        const compile = (vsSrc, fsSrc) => {
-          const vs = gl.createShader(gl.VERTEX_SHADER); gl.shaderSource(vs, vsSrc); gl.compileShader(vs);
-          const fs = gl.createShader(gl.FRAGMENT_SHADER); gl.shaderSource(fs, fsSrc); gl.compileShader(fs);
-          const p = gl.createProgram(); gl.attachShader(p, vs); gl.attachShader(p, fs); gl.linkProgram(p);
-          return p;
-        };
-
-        progRoom = compile(`
-          attribute vec3 aPos, aNorm, aCol;
-          attribute float aMat, aAO;
-          uniform mat4 uProj, uView;
-          varying vec3 vWorldPos, vNorm, vCol;
-          varying float vMat, vAO;
-          void main() {
-            vWorldPos = aPos; vNorm = aNorm; vCol = aCol; vMat = aMat; vAO = aAO;
-            gl_Position = uProj * uView * vec4(aPos, 1.0);
-          }
-        `, `
-          precision highp float;
-          varying vec3 vWorldPos, vNorm, vCol;
-          varying float vMat, vAO;
-          uniform vec3 uCamPos, uScreenColL, uScreenColC, uScreenColR;
-          uniform float uLights, uTime, uCurtainOpen;
-          uniform sampler2D uScreenTex;
-
-          float hash21(vec2 p) {
-            p = fract(p * vec2(123.34, 456.21));
-            p += dot(p, p + 45.32);
-            return fract(p.x * p.y);
-          }
-
-          void main() {
-            vec3 N = normalize(vNorm);
-            vec3 V = normalize(uCamPos - vWorldPos);
-            float ao = clamp(vAO, 0.05, 1.0);
-            vec3 baseAlbedo = vCol;
-
-            if (vMat > 2.5 && vMat < 3.5) {
-              gl_FragColor = vec4(vCol, 1.0);
-              return;
-            }
-            if (vMat > 5.5 && vMat < 6.5) {
-              float slat = vWorldPos.z * 26.0;
-              float g = sin(slat);
-              N = normalize(N + vec3(0.0, 0.0, cos(slat) * 0.38));
-              ao *= (0.72 + 0.28 * smoothstep(-0.8, 0.6, g));
-              baseAlbedo *= (0.86 + 0.18 * smoothstep(-0.5, 0.8, g));
-            }
-            if (vMat > 3.5 && vMat < 4.5) {
-              float m = sin(vWorldPos.x * 22.0 + vWorldPos.z * 18.0);
-              N = normalize(N + vec3(m * 0.12, 0.0, m * 0.16));
-            }
-            if (vMat > 6.5 && vMat < 7.5) {
-              baseAlbedo *= (0.90 + 0.18 * hash21(floor(vWorldPos.xz * 95.0)));
-            }
-
-            float scrGate = 0.10 + 0.90 * uCurtainOpen;
-            vec3 scrPosL = vec3(-4.5, 3.9, -10.2);
-            vec3 scrPosC = vec3( 0.0, 3.9, -10.65);
-            vec3 scrPosR = vec3( 4.5, 3.9, -10.2);
-            vec3 dL = scrPosL - vWorldPos, dC = scrPosC - vWorldPos, dR = scrPosR - vWorldPos;
-            float attL = 1.0 / (1.0 + 0.019 * dot(dL, dL));
-            float attC = 1.0 / (1.0 + 0.015 * dot(dC, dC));
-            float attR = 1.0 / (1.0 + 0.019 * dot(dR, dR));
-            vec3 screenIrr = (
-              uScreenColL * (max(dot(N, normalize(dL)), 0.0) * 0.78 + 0.22) * attL +
-              uScreenColC * (max(dot(N, normalize(dC)), 0.0) * 0.92 + 0.26) * attC +
-              uScreenColR * (max(dot(N, normalize(dR)), 0.0) * 0.78 + 0.22) * attR
-            ) * 1.45 * scrGate;
-
-            vec3 sconceLight = vec3(0.0);
-            float sconcePower = mix(0.52, 1.55, uLights);
-            bool isSideWall = abs(vWorldPos.x) > 8.65;
-            for (int i = 0; i < 3; i++) {
-              float sz = -5.8 + float(i) * 5.0;
-              for (int s = 0; s < 2; s++) {
-                float sx = (s == 0) ? -8.82 : 8.82;
-                vec3 lp = vec3(sx, 4.85, sz);
-                vec3 toLight = lp - vWorldPos;
-                float att = 1.0 / (1.0 + 0.14 * dot(toLight, toLight));
-                sconceLight += vec3(1.0, 0.76, 0.38) * (max(dot(N, normalize(toLight)), 0.0) * 0.75 + 0.25) * att * sconcePower;
-                if (isSideWall && sign(vWorldPos.x) == sign(sx)) {
-                  float dz = abs(vWorldPos.z - sz), dy = abs(vWorldPos.y - 4.85);
-                  float fan = smoothstep(dy * 0.58 + 0.14, dy * 0.12 + 0.03, dz) * exp(-dy * 0.58);
-                  sconceLight += vec3(1.0, 0.80, 0.44) * fan * mix(0.85, 1.65, uLights);
-                }
-              }
-            }
-
-            float centerAisle = exp(-abs(vWorldPos.x) * 1.25) * exp(-max(0.0, vWorldPos.y - 5.2) * 0.9);
-            vec3 stepGlow = vec3(1.0, 0.78, 0.24) * centerAisle * 0.28;
-            vec3 houseLight = mix(vec3(0.065, 0.06, 0.095), vec3(0.78, 0.68, 0.56), uLights) * (max(N.y, 0.0) * 0.65 + 0.35);
-
-            bool isMetal = (vMat > 1.5 && vMat < 2.5);
-            vec3 envLight = vec3(0.045, 0.04, 0.065) + houseLight + screenIrr + sconceLight + stepGlow;
-            vec3 color = isMetal
-              ? baseAlbedo * (vec3(0.22, 0.18, 0.12) + sconceLight * 0.55 + houseLight * 0.65 + length(screenIrr) * 0.22) * ao
-              : baseAlbedo * envLight * ao;
-
-            vec3 Hscr = normalize(normalize(dC) + V);
-            float ndh = max(dot(N, Hscr), 0.0);
-            float ndv = max(dot(N, V), 0.0);
-            float fresnel = pow(1.0 - ndv, 4.0);
-
-            if ((vMat > 0.5 && vMat < 1.5) || (vMat > 3.5 && vMat < 4.5)) {
-              float velvetRim = pow(1.0 - ndv, 2.7);
-              vec3 clothSheen = mix(baseAlbedo * 2.2 + vec3(0.07), uScreenColC * 0.85 + baseAlbedo, 0.42 * scrGate);
-              color += (clothSheen * velvetRim * (0.30 + 0.22 * uLights) + uScreenColC * pow(ndh, 18.0) * 0.18 * scrGate) * ao;
-            }
-            if (isMetal) {
-              vec3 Hup = normalize(vec3(0.15, 0.92, 0.35) + V);
-              color += baseAlbedo * (pow(ndh, 36.0) * 0.95 * scrGate + pow(max(dot(N, Hup), 0.0), 26.0) * (0.65 + 0.85 * uLights) + fresnel * 0.32);
-            }
-            if (vMat > 4.5 && vMat < 5.5 && N.y > 0.7) {
-              vec3 R = reflect(-V, vec3(0.0, 1.0, 0.0));
-              if (R.z < -0.05) {
-                float tHit = (-10.30 - vWorldPos.z) / R.z;
-                vec3 hit = vWorldPos + R * tHit;
-                float u = (hit.x + 6.35) / 12.7, v = 1.0 - (hit.y - 1.18) / 5.55;
-                if (u > 0.0 && u < 1.0 && v > 0.0 && v < 1.0) {
-                  vec3 r1 = texture2D(uScreenTex, vec2(clamp(u - 0.016, 0.01, 0.99), clamp(v, 0.01, 0.99))).rgb;
-                  vec3 r2 = texture2D(uScreenTex, vec2(clamp(u, 0.01, 0.99), clamp(v, 0.01, 0.99))).rgb;
-                  vec3 r3 = texture2D(uScreenTex, vec2(clamp(u + 0.016, 0.01, 0.99), clamp(v, 0.01, 0.99))).rgb;
-                  vec3 refl = (r1 + r2 * 2.0 + r3) * 0.25;
-                  float edgeMask = smoothstep(0.0, 0.06, u) * smoothstep(1.0, 0.94, u) * smoothstep(0.0, 0.08, v) * smoothstep(1.0, 0.82, v);
-                  float distFade = exp(-max(0.0, vWorldPos.z - (-9.8)) * 0.42);
-                  color += refl * edgeMask * distFade * (0.28 + 0.46 * fresnel) * scrGate;
-                }
-              }
-            }
-
-            float distCam = length(uCamPos - vWorldPos);
-            color = mix(color, (vec3(0.016, 0.015, 0.024) + uScreenColC * 0.025 * scrGate), clamp((distCam - 14.0) * 0.014, 0.0, 0.22));
-            color = (color * (2.51 * color + 0.03)) / (color * (2.43 * color + 0.59) + 0.14);
-            color = pow(clamp(color, 0.0, 1.0), vec3(0.95));
-            float filmGrain = (hash21(gl_FragCoord.xy + fract(uTime)) - 0.5) * 0.013;
-            gl_FragColor = vec4(clamp(color + filmGrain, 0.0, 1.0), 1.0);
-          }
-        `);
-
-        progScreen = compile(`
-          attribute vec3 aPos; attribute vec2 aUV;
-          uniform mat4 uProj, uView; varying vec2 vUV; varying vec3 vWPos;
-          void main() { vUV = aUV; vWPos = aPos; gl_Position = uProj * uView * vec4(aPos, 1.0); }
-        `, `
-          precision highp float; varying vec2 vUV; varying vec3 vWPos;
-          uniform sampler2D uTex; uniform vec3 uCamPos;
-          void main() {
-            vec3 c = texture2D(uTex, vUV).rgb;
-            vec3 V = normalize(uCamPos - vWPos);
-            float gain = 0.88 + 0.18 * pow(max(V.z, 0.0), 1.5);
-            float vig = smoothstep(0.0, 0.025, vUV.x) * smoothstep(1.0, 0.975, vUV.x) *
-                        smoothstep(0.0, 0.035, vUV.y) * smoothstep(1.0, 0.965, vUV.y);
-            gl_FragColor = vec4(c * gain * (0.86 + 0.16 * vig), 1.0);
-          }
-        `);
-
-        progBeam = compile(`
-          attribute vec3 aPos; attribute float aAlpha;
-          uniform mat4 uProj, uView; varying float vAlpha; varying vec3 vWPos;
-          void main() {
-            vAlpha = aAlpha; vWPos = aPos;
-            gl_Position = uProj * uView * vec4(aPos, 1.0);
-            gl_PointSize = clamp(46.0 / gl_Position.w, 1.6, 5.2);
-          }
-        `, `
-          precision mediump float; varying float vAlpha; varying vec3 vWPos;
-          uniform vec3 uBeamCol; uniform float uTime, uIsPoint;
-          void main() {
-            float mask = 1.0;
-            if (uIsPoint > 0.5) {
-              float r = length(gl_PointCoord - vec2(0.5));
-              if (r > 0.5) discard;
-              mask = smoothstep(0.5, 0.04, r);
-            }
-            float ray = 0.80 + 0.20 * sin(vWPos.x * 4.4 + uTime * 1.6) * cos(vWPos.y * 5.0 - uTime * 1.1);
-            gl_FragColor = vec4(uBeamCol * ray, vAlpha * mask);
-          }
-        `);
-
-        // Build Auditorium Architecture
+      // =======================================================================
+      // BỘ NHỚ ĐỆM HÌNH HỌC TĨNH DÙNG CHUNG (KHỞI TẠO 1 LẦN TRONG LÚC RẢNH)
+      // Giúp mở giao diện Đặt vé & Tắt đèn 3D đạt 0ms độ trễ, đổi màu ghế O(1)!
+      // =======================================================================
+      let sharedCache = null;
+      function getSharedCinemaCache() {
+        if (sharedCache) return sharedCache;
         const mbBase = createMB(), mbL = createMB(), mbR = createMB(), mbRear = createMB(), mbCeil = createMB();
+
         addArchBox(mbBase, 0, -0.14, -0.4, 9.4, 0.14, 11.2, [0.05, 0.05, 0.07], 0, 0.3, 0.6, 0.02);
         addArchBox(mbBase, -9.22, 0.20, -0.4, 0.14, 0.34, 11.1, [0.10, 0.08, 0.11], 0, 0.35, 0.85, 0.06);
         addArchBox(mbBase,  9.22, 0.20, -0.4, 0.14, 0.34, 11.1, [0.10, 0.08, 0.11], 0, 0.35, 0.85, 0.06);
 
-        // Sàn sân khấu đen bóng phản chiếu gương (mat = 5) + chỉ đồng vàng
+        // Sàn sân khấu sơn mài đen bóng (mat = 5) phản chiếu màn chiếu theo thời gian thực
         addArchBox(mbBase, 0, 0.24, -9.55, 8.95, 0.24, 1.65, [0.035, 0.032, 0.045], 5, 0.25, 0.96, 0.04);
         addArchBox(mbBase, 0, 0.49, -7.91, 8.90, 0.022, 0.035, [0.88, 0.68, 0.28], 2, 0.7, 1.0, 0.15);
         addArchBox(mbBase, 0, 0.10, -7.89, 8.60, 0.018, 0.02, [1.0, 0.76, 0.32], 3, 1.0, 1.0, 0.0);
@@ -16135,348 +15811,1232 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           addArchBox(mbCeil, cx, 8.38, -0.4, 0.18, 0.12, 10.2, [0.09, 0.08, 0.12], 0, 0.45, 0.85, 0.06);
         });
 
-        gpuBase = uploadMB(mbBase);
-        gpuLeftWall = uploadMB(mbL);
-        gpuRightWall = uploadMB(mbR);
-        gpuRearWall = uploadMB(mbRear);
-        gpuCeiling = uploadMB(mbCeil);
+        // Pre-bake ALL 48 Sculpted Empty Chairs ONCE + record exact cushion vertex color offsets per seat!
+        const mbChairs = createMB();
+        const seatSlices = {}; // { A1: { cStart, cLen, rowFIdxStart } }
+        let rowFIndexStart = 0;
 
-        chairGPU = uploadMB(createMB(), gl.DYNAMIC_DRAW);
-        curtainGPU = uploadMB(createMB(), gl.DYNAMIC_DRAW);
+        for (const s of seats3D) {
+          if (s.row === "F" && s.col === 1) rowFIndexStart = mbChairs.idx.length;
 
-        const scrVerts = [], scrUVs = [], scrIdx = [];
-        for (let i = 0; i <= 32; i++) {
-          const u = i / 32;
-          const x = -6.3 + u * 12.6;
-          const z = -10.12 - Math.cos((u - 0.5) * Math.PI) * 0.74;
-          scrVerts.push(x, 1.18, z, x, 6.72, z);
-          scrUVs.push(u, 1.0, u, 0.0);
-          if (i < 32) { const b = i * 2; scrIdx.push(b, b + 1, b + 3, b, b + 3, b + 2); }
-        }
-        const sBPos = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, sBPos); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(scrVerts), gl.STATIC_DRAW);
-        const sBUV = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, sBUV); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(scrUVs), gl.STATIC_DRAW);
-        const sBIdx = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sBIdx); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, makeIdxArray(scrIdx), gl.STATIC_DRAW);
-        scrBuffers = { bPos: sBPos, bUV: sBUV, bIdx: sBIdx, count: scrIdx.length };
-
-        scrTex = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, scrTex);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-        const beamPos = [
-           0.0, 6.65, 9.32, -6.2, 6.70, -10.12,  6.2, 6.70, -10.12,
-           0.0, 6.65, 9.32, -6.2, 1.20, -10.12,  6.2, 1.20, -10.12,
-           0.0, 6.65, 9.32, -6.2, 6.70, -10.12, -6.2, 1.20, -10.12,
-           0.0, 6.65, 9.32,  6.2, 6.70, -10.12,  6.2, 1.20, -10.12,
-           0.0, 6.65, 9.32, -4.0, 4.10, -10.45,  4.0, 4.10, -10.45
-        ];
-        const beamAlpha = [0.12,0.01,0.01, 0.08,0.006,0.006, 0.10,0.008,0.008, 0.10,0.008,0.008, 0.15,0.014,0.014];
-        const bBPos = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, bBPos); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(beamPos), gl.STATIC_DRAW);
-        const bBAlpha = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, bBAlpha); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(beamAlpha), gl.STATIC_DRAW);
-        const dBPos = gl.createBuffer();
-        const dBAlpha = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, dBAlpha); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(DUST_COUNT).fill(0.42), gl.STATIC_DRAW);
-        beamBuffers = { bPos: bBPos, bAlpha: bBAlpha, dPos: dBPos, dAlpha: dBAlpha };
-
-        bindEvents();
-        rebuildChairsMesh();
-        rebuildCurtainMesh(st.curtainOpen);
-        st.initialized = true;
-        return true;
-      }
-
-      function resize() {
-        if (!glCanvas || !gl) return;
-        const rect = glCanvas.getBoundingClientRect();
-        if (rect.width < 20 || rect.height < 20) return;
-        st.dpr = Math.min(window.devicePixelRatio || 1, 2);
-        st.W = rect.width; st.H = rect.height;
-        const pw = Math.round(st.W * st.dpr), ph = Math.round(st.H * st.dpr);
-        if (glCanvas.width !== pw || glCanvas.height !== ph) {
-          glCanvas.width = pw; glCanvas.height = ph;
-          hudCanvas.width = pw; hudCanvas.height = ph;
-          gl.viewport(0, 0, pw, ph);
-          hctx.setTransform(st.dpr, 0, 0, st.dpr, 0, 0);
-        }
-      }
-
-      function bindEvents() {
-        const tooltip = document.getElementById("b3d-seat-tooltip");
-        let dragging = false, dragDist = 0, lastX = 0, lastY = 0;
-
-        glCanvas.addEventListener("pointerdown", (e) => {
-          dragging = true; dragDist = 0; lastX = e.clientX; lastY = e.clientY;
-          try { glCanvas.setPointerCapture(e.pointerId); } catch (_) {}
-        });
-
-        glCanvas.addEventListener("pointermove", (e) => {
-          const rect = glCanvas.getBoundingClientRect();
-          const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-          if (dragging) {
-            const dx = e.clientX - lastX, dy = e.clientY - lastY;
-            dragDist += Math.abs(dx) + Math.abs(dy);
-            lastX = e.clientX; lastY = e.clientY;
-            if (st.mode === "pov") {
-              st.tPovYaw = Math.max(-2.6, Math.min(2.6, st.tPovYaw - dx * 0.006));
-              st.tPovPitch = Math.max(-0.55, Math.min(0.65, st.tPovPitch + dy * 0.005));
-            } else {
-              st.tYaw -= dx * 0.007;
-              st.tPitch = Math.max(0.12, Math.min(1.16, st.tPitch + dy * 0.006));
-            }
-            tooltip?.classList.add("hidden");
-            return;
-          }
-          if (st.mode !== "orbit") {
-            tooltip?.classList.add("hidden");
-            glCanvas.style.cursor = "grab";
-            return;
-          }
-          let best = null, bestW = 1e9;
-          for (const s of seats3D) {
-            if ((st.isCoupleOnly && s.row !== "F") || !s.hit2D) continue;
-            const d = Math.hypot(mx - s.hit2D.x, my - s.hit2D.y);
-            if (d < s.hit2D.r && s.hit2D.w < bestW) { best = s; bestW = s.hit2D.w; }
-          }
-          const nextHover = best ? best.id : null;
-          if (nextHover !== st.hoveredSeatId) {
-            st.hoveredSeatId = nextHover;
-            rebuildChairsMesh();
-          }
-          if (best && tooltip) {
-            glCanvas.style.cursor = "pointer";
-            const occ = st.occupied[best.id];
-            const tier = best.isCouple ? "Sweetbox Đôi" : best.isVIP ? "Ghế VIP" : "Ghế Thường";
-            tooltip.innerHTML = `<span class="font-bold text-amber-300">${best.id} • ${tier}</span> — ${occ ? `Đã có ${escapeHTML(occ)}` : "Click để chọn & xem POV"}`;
-            tooltip.style.left = `${Math.min(st.W - 190, Math.max(8, mx + 12))}px`;
-            tooltip.style.top = `${Math.max(42, my - 34)}px`;
-            tooltip.classList.remove("hidden");
+          let mainCol, bolsterCol, headCol, trimMat = 1;
+          if (s.isCouple) {
+            mainCol = [0.48, 0.07, 0.19]; bolsterCol = [0.36, 0.05, 0.14]; headCol = [0.62, 0.12, 0.26]; trimMat = 2;
+          } else if (s.isVIP) {
+            mainCol = [0.42, 0.06, 0.12]; bolsterCol = [0.30, 0.04, 0.09]; headCol = [0.52, 0.09, 0.16]; trimMat = 2;
           } else {
-            glCanvas.style.cursor = "grab";
-            tooltip?.classList.add("hidden");
+            mainCol = [0.18, 0.16, 0.23]; bolsterCol = [0.13, 0.11, 0.17]; headCol = [0.23, 0.20, 0.29]; trimMat = 1;
           }
-        });
 
-        glCanvas.addEventListener("pointerup", () => {
-          if (dragging && dragDist < 6 && st.mode === "orbit" && st.hoveredSeatId && !st.occupied[st.hoveredSeatId]) {
-            window.appActions?.selectBookingSeat?.(st.hoveredSeatId);
+          const hw = s.isCouple ? 0.52 : 0.43;
+          if (!s.isCouple || s.pairSide === "L") {
+            const px = s.isCouple ? s.x + 0.52 : s.x;
+            addCylinder(mbChairs, px, s.y + 0.018, s.z + 0.04, s.isCouple ? 0.62 : 0.34, s.isCouple ? 0.62 : 0.34, 0.012, 10, [0.02, 0.015, 0.025], 0, 0.08, 0.12, true);
+            addCylinder(mbChairs, px, s.y + 0.13, s.z + 0.05, 0.09, 0.13, 0.22, 8, [0.06, 0.06, 0.08], 0, 0.15, 0.55, false);
           }
-          dragging = false;
-        });
 
-        glCanvas.addEventListener("wheel", (e) => {
-          if (st.mode !== "orbit") return;
-          e.preventDefault();
-          st.tDist = Math.max(10.5, Math.min(27.5, st.tDist + e.deltaY * 0.013));
-        }, { passive: false });
+          // Ghi lại vùng mảng màu của đệm ghế + lưng ghế + gối đầu để đổi màu O(1) bằng bufferSubData!
+          const cushionFloatStart = mbChairs.col.length;
+          addRoundedCushion(mbChairs, s.x, s.y + 0.27, s.z + 0.01, hw, 0.105, 0.38, 0.52, 8, 5, mainCol, 1, 0.18, 0.95, 0.06);
+          addRoundedCushion(mbChairs, s.x, s.y + 0.29, s.z - 0.31, hw * 0.95, 0.075, 0.10, 0.62, 8, 4, bolsterCol, 1, 0.30, 0.98, 0.0);
 
-        window.addEventListener("resize", resize);
-      }
-
-      function mat4Perspective(fovy, aspect, near, far) {
-        const f = 1.0 / Math.tan(fovy * 0.5), nf = 1 / (near - far);
-        return new Float32Array([f/aspect,0,0,0, 0,f,0,0, 0,0,(far+near)*nf,-1, 0,0,(2*far*near)*nf,0]);
-      }
-      function mat4LookAt(eye, center, up) {
-        let zx = eye[0]-center[0], zy = eye[1]-center[1], zz = eye[2]-center[2];
-        let l = Math.hypot(zx,zy,zz) || 1; zx/=l; zy/=l; zz/=l;
-        let xx = up[1]*zz - up[2]*zy, xy = up[2]*zx - up[0]*zz, xz = up[0]*zy - up[1]*zx;
-        l = Math.hypot(xx,xy,xz) || 1; xx/=l; xy/=l; xz/=l;
-        const yx = zy*xz - zz*xy, yy = zz*xx - zx*xz, yz = zx*xy - zy*xx;
-        return new Float32Array([
-          xx,yx,zx,0, xy,yy,zy,0, xz,yz,zz,0,
-          -(xx*eye[0]+xy*eye[1]+xz*eye[2]), -(yx*eye[0]+yy*eye[1]+yz*eye[2]), -(zx*eye[0]+zy*eye[1]+zz*eye[2]), 1
-        ]);
-      }
-      function projectHUD(pt, mView, mProj) {
-        const x = pt[0], y = pt[1], z = pt[2];
-        const vx = mView[0]*x + mView[4]*y + mView[8]*z + mView[12];
-        const vy = mView[1]*x + mView[5]*y + mView[9]*z + mView[13];
-        const vz = mView[2]*x + mView[6]*y + mView[10]*z + mView[14];
-        const vw = mView[3]*x + mView[7]*y + mView[11]*z + mView[15];
-        const cx = mProj[0]*vx + mProj[4]*vy + mProj[8]*vz + mProj[12]*vw;
-        const cy = mProj[1]*vx + mProj[5]*vy + mProj[9]*vz + mProj[13]*vw;
-        const cw = mProj[3]*vx + mProj[7]*vy + mProj[11]*vz + mProj[15]*vw;
-        if (cw <= 0.2) return null;
-        return { x: (cx / cw * 0.5 + 0.5) * st.W, y: (0.5 - cy / cw * 0.5) * st.H, w: cw };
-      }
-
-      function drawGPU(gpu) {
-        if (!gpu || !gpu.count) return;
-        const lp = gl.getAttribLocation(progRoom, "aPos");
-        const ln = gl.getAttribLocation(progRoom, "aNorm");
-        const lc = gl.getAttribLocation(progRoom, "aCol");
-        const lm = gl.getAttribLocation(progRoom, "aMat");
-        const la = gl.getAttribLocation(progRoom, "aAO");
-        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bPos); gl.enableVertexAttribArray(lp); gl.vertexAttribPointer(lp, 3, gl.FLOAT, false, 0, 0);
-        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bNorm); gl.enableVertexAttribArray(ln); gl.vertexAttribPointer(ln, 3, gl.FLOAT, false, 0, 0);
-        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bCol); gl.enableVertexAttribArray(lc); gl.vertexAttribPointer(lc, 3, gl.FLOAT, false, 0, 0);
-        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bMat); gl.enableVertexAttribArray(lm); gl.vertexAttribPointer(lm, 1, gl.FLOAT, false, 0, 0);
-        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bAO); gl.enableVertexAttribArray(la); gl.vertexAttribPointer(la, 1, gl.FLOAT, false, 0, 0);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gpu.bIdx);
-        gl.drawElements(gl.TRIANGLES, gpu.count, idxType, 0);
-      }
-
-      function renderLoop(nowMs) {
-        if (!st.running) { st.rafId = 0; return; }
-        const modalEl = document.getElementById("booking-modal");
-        const colEl = document.getElementById("booking-pov-collapsible");
-        if (!modalEl || modalEl.classList.contains("hidden") || !colEl || colEl.classList.contains("hidden")) {
-          st.running = false; st.rafId = 0; return;
-        }
-        resize();
-        const t = nowMs * 0.001;
-        st.lightsLevel += (st.lightsTarget - st.lightsLevel) * 0.09;
-        st.curtainOpen += (st.curtainTarget - st.curtainOpen) * 0.06;
-        if (Math.abs(st.curtainOpen - st.lastCurtainBuilt) > 0.002) {
-          rebuildCurtainMesh(st.curtainOpen);
-        }
-
-        drawScreenCanvas(t);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, scrTex);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, scrOff);
-
-        const mySeat = seats3D.find(s => s.id === st.mySeatId) || seats3D[43];
-        let desPos, desLook;
-        if (st.mode === "pov") {
-          st.povYaw += (st.tPovYaw - st.povYaw) * 0.14;
-          st.povPitch += (st.tPovPitch - st.povPitch) * 0.14;
-          const ex = mySeat.x, ey = mySeat.y + 1.24, ez = mySeat.z + 0.10;
-          const scrAimX = mySeat.x * 0.14, scrAimY = 3.88, scrAimZ = -10.35;
-          const baseYaw = Math.atan2(scrAimX - ex, -(scrAimZ - ez));
-          const basePitch = Math.atan2(scrAimY - ey, Math.hypot(scrAimX - ex, scrAimZ - ez));
-          const finalYaw = baseYaw + st.povYaw;
-          const finalPitch = Math.max(-0.65, Math.min(0.75, basePitch + st.povPitch));
-          desPos = [ex, ey, ez];
-          desLook = [
-            ex + Math.sin(finalYaw) * Math.cos(finalPitch) * 8.0,
-            ey + Math.sin(finalPitch) * 8.0,
-            ez - Math.cos(finalYaw) * Math.cos(finalPitch) * 8.0
-          ];
-        } else {
-          st.yaw += (st.tYaw - st.yaw) * 0.12;
-          st.pitch += (st.tPitch - st.pitch) * 0.12;
-          st.dist += (st.tDist - st.dist) * 0.12;
-          const target = [0.0, 2.35, -1.2];
-          desPos = [
-            target[0] + Math.sin(st.yaw) * Math.cos(st.pitch) * st.dist,
-            target[1] + Math.sin(st.pitch) * st.dist,
-            target[2] + Math.cos(st.yaw) * Math.cos(st.pitch) * st.dist
-          ];
-          desLook = target;
-        }
-
-        for (let i = 0; i < 3; i++) {
-          st.camPos[i] += (desPos[i] - st.camPos[i]) * 0.14;
-          st.camLook[i] += (desLook[i] - st.camLook[i]) * 0.14;
-        }
-
-        const fov = st.mode === "pov" ? 0.94 : 0.75;
-        const mProj = mat4Perspective(fov, st.W / Math.max(1, st.H), 0.22, 70.0);
-        const mView = mat4LookAt(st.camPos, st.camLook, [0, 1, 0]);
-
-        gl.clearColor(0.016, 0.014, 0.022, 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.enable(gl.DEPTH_TEST);
-        gl.disable(gl.BLEND);
-
-        gl.useProgram(progRoom);
-        gl.uniformMatrix4fv(gl.getUniformLocation(progRoom, "uProj"), false, mProj);
-        gl.uniformMatrix4fv(gl.getUniformLocation(progRoom, "uView"), false, mView);
-        gl.uniform3fv(gl.getUniformLocation(progRoom, "uCamPos"), st.camPos);
-        gl.uniform3fv(gl.getUniformLocation(progRoom, "uScreenColL"), st.lightL);
-        gl.uniform3fv(gl.getUniformLocation(progRoom, "uScreenColC"), st.lightC);
-        gl.uniform3fv(gl.getUniformLocation(progRoom, "uScreenColR"), st.lightR);
-        gl.uniform1f(gl.getUniformLocation(progRoom, "uLights"), st.lightsLevel);
-        gl.uniform1f(gl.getUniformLocation(progRoom, "uTime"), t);
-        gl.uniform1f(gl.getUniformLocation(progRoom, "uCurtainOpen"), st.curtainOpen);
-        gl.uniform1i(gl.getUniformLocation(progRoom, "uScreenTex"), 0);
-
-        drawGPU(gpuBase);
-        drawGPU(chairGPU);
-        drawGPU(curtainGPU);
-
-        const isInside = st.mode !== "orbit";
-        if (isInside || st.camPos[0] > -6.5) drawGPU(gpuLeftWall);
-        if (isInside || st.camPos[0] <  6.5) drawGPU(gpuRightWall);
-        if (isInside || st.camPos[2] <  7.5) drawGPU(gpuRearWall);
-        if (isInside || st.camPos[1] <  7.6) drawGPU(gpuCeiling);
-
-        gl.useProgram(progScreen);
-        gl.uniformMatrix4fv(gl.getUniformLocation(progScreen, "uProj"), false, mProj);
-        gl.uniformMatrix4fv(gl.getUniformLocation(progScreen, "uView"), false, mView);
-        gl.uniform3fv(gl.getUniformLocation(progScreen, "uCamPos"), st.camPos);
-        gl.uniform1i(gl.getUniformLocation(progScreen, "uTex"), 0);
-        const sLocPos = gl.getAttribLocation(progScreen, "aPos");
-        const sLocUV = gl.getAttribLocation(progScreen, "aUV");
-        gl.bindBuffer(gl.ARRAY_BUFFER, scrBuffers.bPos); gl.enableVertexAttribArray(sLocPos); gl.vertexAttribPointer(sLocPos, 3, gl.FLOAT, false, 0, 0);
-        gl.bindBuffer(gl.ARRAY_BUFFER, scrBuffers.bUV); gl.enableVertexAttribArray(sLocUV); gl.vertexAttribPointer(sLocUV, 2, gl.FLOAT, false, 0, 0);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, scrBuffers.bIdx);
-        gl.drawElements(gl.TRIANGLES, scrBuffers.count, idxType, 0);
-
-        const beamVis = Math.max(0.0, (1.0 - st.lightsLevel * 0.80) * (0.20 + 0.80 * st.curtainOpen));
-        if (beamVis > 0.02) {
-          gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE); gl.depthMask(false);
-          gl.useProgram(progBeam);
-          gl.uniformMatrix4fv(gl.getUniformLocation(progBeam, "uProj"), false, mProj);
-          gl.uniformMatrix4fv(gl.getUniformLocation(progBeam, "uView"), false, mView);
-          gl.uniform3f(gl.getUniformLocation(progBeam, "uBeamCol"), st.beamCol[0]*beamVis, st.beamCol[1]*beamVis, st.beamCol[2]*beamVis);
-          gl.uniform1f(gl.getUniformLocation(progBeam, "uTime"), t);
-
-          const bLocPos = gl.getAttribLocation(progBeam, "aPos");
-          const bLocAlpha = gl.getAttribLocation(progBeam, "aAlpha");
-          gl.uniform1f(gl.getUniformLocation(progBeam, "uIsPoint"), 0.0);
-          gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.bPos); gl.enableVertexAttribArray(bLocPos); gl.vertexAttribPointer(bLocPos, 3, gl.FLOAT, false, 0, 0);
-          gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.bAlpha); gl.enableVertexAttribArray(bLocAlpha); gl.vertexAttribPointer(bLocAlpha, 1, gl.FLOAT, false, 0, 0);
-          gl.drawArrays(gl.TRIANGLES, 0, 15);
-
-          gl.uniform1f(gl.getUniformLocation(progBeam, "uIsPoint"), 1.0);
-          for (let i = 0; i < DUST_COUNT; i++) {
-            const d = dustSeeds[i], prog = (d.t + t * 0.02 * d.sp) % 1.0;
-            dustFloatArr[i*3]   = d.u * (0.28 + prog * 5.4) + Math.sin(t * 0.8 + d.ph) * 0.16;
-            dustFloatArr[i*3+1] = (6.65 - prog * 2.65) + d.v * (0.16 + prog * 2.2) + Math.cos(t * 0.7 + d.ph) * 0.12;
-            dustFloatArr[i*3+2] = 9.2 - prog * 19.0;
+          const backH = s.isCouple ? 0.37 : s.isVIP ? 0.35 : 0.32;
+          const backY = s.y + 0.35 + backH;
+          addRoundedCushion(mbChairs, s.x, backY, s.z + 0.29, hw * 0.74, backH, 0.095, 0.56, 8, 5, mainCol, 1, 0.22, 0.96, -0.19);
+          if (!s.isCouple || s.pairSide === "L") {
+            addRoundedCushion(mbChairs, s.x - hw * 0.80, backY, s.z + 0.26, 0.10, backH * 0.94, 0.115, 0.60, 6, 4, bolsterCol, 1, 0.24, 0.95, -0.19);
           }
-          gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.dPos); gl.bufferData(gl.ARRAY_BUFFER, dustFloatArr, gl.DYNAMIC_DRAW); gl.vertexAttribPointer(bLocPos, 3, gl.FLOAT, false, 0, 0);
-          gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.dAlpha); gl.vertexAttribPointer(bLocAlpha, 1, gl.FLOAT, false, 0, 0);
-          gl.drawArrays(gl.POINTS, 0, DUST_COUNT);
-          gl.depthMask(true); gl.disable(gl.BLEND);
+          if (!s.isCouple || s.pairSide === "R") {
+            addRoundedCushion(mbChairs, s.x + hw * 0.80, backY, s.z + 0.26, 0.10, backH * 0.94, 0.115, 0.60, 6, 4, bolsterCol, 1, 0.24, 0.95, -0.19);
+          }
+          const headY = s.y + 0.36 + backH * 2.0 + 0.075;
+          addRoundedCushion(mbChairs, s.x, headY, s.z + 0.38, hw * 0.76, 0.095, 0.088, 0.58, 8, 5, headCol, 1, 0.45, 1.0, -0.10);
+          const cushionFloatEnd = mbChairs.col.length;
+
+          seatSlices[s.id] = { start: cushionFloatStart, len: cushionFloatEnd - cushionFloatStart };
+
+          if (s.isVIP || s.isCouple) {
+            addArchBox(mbChairs, s.x, headY - 0.085, s.z + 0.32, hw * 0.52, 0.012, 0.06, [0.90, 0.70, 0.28], trimMat, 0.8, 1.0, 0.2);
+          }
+          if (s.isCouple && s.pairSide === "L") {
+            addArchBox(mbChairs, s.x + 0.52, s.y + 0.62, s.z + 0.47, 1.08, 0.54, 0.035, [0.22, 0.04, 0.09], 1, 0.25, 0.88, 0.15);
+            addArchBox(mbChairs, s.x + 0.52, s.y + 1.17, s.z + 0.47, 1.08, 0.018, 0.042, [0.90, 0.70, 0.28], 2, 0.8, 1.0, 0.2);
+          }
+
+          // Tay vịn bọc da + khay để cốc tròn viền kim loại (hiển thị ngay cả trong tầm nhìn ngoại vi của ghế đang ngồi!)
+          const armCol = [0.09, 0.08, 0.11];
+          const buildArm = (ax, withCup) => {
+            addRoundedCushion(mbChairs, ax, s.y + 0.44, s.z + 0.06, 0.058, 0.048, 0.32, 0.50, 6, 4, armCol, 1, 0.35, 0.92, 0);
+            addArchBox(mbChairs, ax, s.y + 0.26, s.z + 0.14, 0.04, 0.14, 0.10, [0.06, 0.06, 0.08], 0, 0.18, 0.7, 0.08);
+            const czCup = s.z - 0.23;
+            addCylinder(mbChairs, ax, s.y + 0.455, czCup, 0.054, 0.050, 0.07, 10, [0.76, 0.62, 0.34], 2, 0.5, 1.0, false);
+            addCylinder(mbChairs, ax, s.y + 0.465, czCup, 0.044, 0.044, 0.01, 10, [0.02, 0.02, 0.03], 0, 0.1, 0.15, true);
+            if (withCup) {
+              addCylinder(mbChairs, ax, s.y + 0.53, czCup, 0.041, 0.033, 0.13, 10, [0.82, 0.12, 0.18], 1, 0.4, 0.98, true);
+              addCylinder(mbChairs, ax, s.y + 0.598, czCup, 0.044, 0.044, 0.012, 10, [0.94, 0.94, 0.96], 0, 0.8, 1.0, true);
+            }
+          };
+          if (!s.isCouple || s.pairSide === "L") buildArm(s.x - hw - 0.055, false);
+          if (!s.isCouple || s.pairSide === "R") buildArm(s.x + hw + 0.055, true);
         }
 
-        hctx.clearRect(0, 0, st.W, st.H);
-        if (st.mode === "orbit") {
+        // Pre-bake 1 Compact Avatar Template (cho phép nhân bản 50 khán giả tức thì dưới 0.15ms!)
+        const mbAvatar = createMB();
+        addRoundedCushion(mbAvatar, 0, 0.66, 0.15, 0.24, 0.24, 0.13, 0.68, 7, 4, [0.13, 0.14, 0.20], 1, 0.25, 0.92, -0.16);
+        addCylinder(mbAvatar, 0, 0.93, 0.20, 0.06, 0.07, 0.10, 6, [0.55, 0.45, 0.42], 1, 0.3, 0.7, false);
+        addRoundedCushion(mbAvatar, 0, 1.08, 0.21, 0.125, 0.155, 0.135, 0.82, 8, 5, [0.09, 0.08, 0.10], 1, 0.35, 0.96, 0.04);
+
+        sharedCache = {
+          mbBase: { pos: new Float32Array(mbBase.pos), norm: new Float32Array(mbBase.norm), col: new Float32Array(mbBase.col), mat: new Float32Array(mbBase.mat), ao: new Float32Array(mbBase.ao), idx: mbBase.idx },
+          mbL:    { pos: new Float32Array(mbL.pos),    norm: new Float32Array(mbL.norm),    col: new Float32Array(mbL.col),    mat: new Float32Array(mbL.mat),    ao: new Float32Array(mbL.ao),    idx: mbL.idx },
+          mbR:    { pos: new Float32Array(mbR.pos),    norm: new Float32Array(mbR.norm),    col: new Float32Array(mbR.col),    mat: new Float32Array(mbR.mat),    ao: new Float32Array(mbR.ao),    idx: mbR.idx },
+          mbRear: { pos: new Float32Array(mbRear.pos), norm: new Float32Array(mbRear.norm), col: new Float32Array(mbRear.col), mat: new Float32Array(mbRear.mat), ao: new Float32Array(mbRear.ao), idx: mbRear.idx },
+          mbCeil: { pos: new Float32Array(mbCeil.pos), norm: new Float32Array(mbCeil.norm), col: new Float32Array(mbCeil.col), mat: new Float32Array(mbCeil.mat), ao: new Float32Array(mbCeil.ao), idx: mbCeil.idx },
+          chairs: {
+            pos: new Float32Array(mbChairs.pos),
+            norm: new Float32Array(mbChairs.norm),
+            baseCol: new Float32Array(mbChairs.col),
+            mat: new Float32Array(mbChairs.mat),
+            ao: new Float32Array(mbChairs.ao),
+            idxAll: mbChairs.idx,
+            idxCoupleOnly: mbChairs.idx.slice(rowFIndexStart),
+            seatSlices
+          },
+          avatarTpl: mbAvatar
+        };
+        return sharedCache;
+      }
+
+      // Khởi tạo sẵn cache hình học 3D trong thời gian trình duyệt rảnh để mở Đặt vé & Tắt đèn mượt tức thì!
+      if (typeof requestIdleCallback === "function") {
+        requestIdleCallback(() => { try { getSharedCinemaCache(); } catch (_) {} }, { timeout: 1800 });
+      } else {
+        setTimeout(() => { try { getSharedCinemaCache(); } catch (_) {} }, 900);
+      }
+
+      // =======================================================================
+      // NHÀ MÁY TẠO INSTANCE RENDERER 3D (DÙNG CHO CẢ ĐẶT VÉ & RẠP TẮT ĐÈN VIDEOTEXTURE)
+      // =======================================================================
+      function createCinema3DInstance(cfg) {
+        let gl = null, hctx = null, glCanvas = null, hudCanvas = null, idxType = 0;
+        let progRoom = null, progScreen = null, progBeam = null;
+        let gpuBase = null, gpuL = null, gpuR = null, gpuRear = null, gpuCeil = null;
+        let chairGPU = null, chairWorkingCol = null, avatarGPU = null, curtainGPU = null;
+        let scrBuffers = null, beamBuffers = null;
+
+        // Tái sử dụng duy nhất 1 VideoTexture & 1 PosterTexture (không tạo lại gây rò rỉ bộ nhớ!)
+        let videoTexture = null, posterTexture = null;
+        const posterOff = document.createElement("canvas");
+        posterOff.width = 512; posterOff.height = 256;
+        const pctx = posterOff.getContext("2d", { willReadFrequently: true });
+
+        // Canvas siêu nhỏ 16x9 để đo màu thực tế của khung hình phim đang phát (4Hz, 0% tốn FPS)
+        const probeOff = document.createElement("canvas");
+        probeOff.width = 16; probeOff.height = 9;
+        const probeCtx = probeOff.getContext("2d", { willReadFrequently: true });
+
+        const DUST_COUNT = 72;
+        const dustSeeds = Array.from({ length: DUST_COUNT }, () => ({
+          t: Math.random(), u: (Math.random() - 0.5) * 2, v: (Math.random() - 0.5) * 2, sp: 0.14 + Math.random() * 0.28, ph: Math.random() * 6.28
+        }));
+        const dustFloatArr = new Float32Array(DUST_COUNT * 3);
+
+        const st = {
+          initialized: false,
+          running: false,
+          rafId: 0,
+          W: 640, H: 360, dpr: 1,
+          mode: "seat", // "seat" (POV ghế) | "focus" (Zoom tập trung) | "orbit" (Toàn cảnh 3D)
+          mySeatId: "D5",
+          hoveredSeatId: null,
+          highlightedIds: [],
+          occupied: {},
+          avatarSig: "",
+          isCoupleOnly: false,
+          curtainOpen: 1.0,
+          curtainTarget: 1.0,
+          lastCurtainBuilt: -1,
+          lightsLevel: 0.04,
+          lightsTarget: 0.0,
+          movieTitle: "CINEVERSE LOTTE • IMAX LASER",
+          posterUrl: "",
+          posterImg: null,
+          posterReady: false,
+          lightL: [0.08, 0.52, 0.76],
+          lightC: [0.18, 0.76, 0.94],
+          lightR: [0.08, 0.46, 0.70],
+          targetLightL: [0.08, 0.52, 0.76],
+          targetLightC: [0.18, 0.76, 0.94],
+          targetLightR: [0.08, 0.46, 0.70],
+          beamCol: [0.24, 0.78, 0.96],
+          lastVideoProbeMs: 0,
+          videoAspect: 16 / 9,
+          videoCorsWarned: false,
+          yaw: -0.56, pitch: 0.44, dist: 21.0,
+          tYaw: -0.56, tPitch: 0.44, tDist: 21.0,
+          povYaw: 0, povPitch: 0,
+          tPovYaw: 0, tPovPitch: 0,
+          camPos: [0, 4.2, 2.5],
+          camLook: [0, 3.88, -10.35],
+          curFov: 0.92
+        };
+
+        function makeIdx(arr) {
+          return idxType === gl.UNSIGNED_INT ? new Uint32Array(arr) : new Uint16Array(arr);
+        }
+
+        function uploadTypedStatic(src) {
+          const mk = (typed, target, usage = gl.STATIC_DRAW) => {
+            const b = gl.createBuffer(); gl.bindBuffer(target, b); gl.bufferData(target, typed, usage); return b;
+          };
+          return {
+            bPos: mk(src.pos, gl.ARRAY_BUFFER),
+            bNorm: mk(src.norm, gl.ARRAY_BUFFER),
+            bCol: mk(src.col, gl.ARRAY_BUFFER),
+            bMat: mk(src.mat, gl.ARRAY_BUFFER),
+            bAO: mk(src.ao, gl.ARRAY_BUFFER),
+            bIdx: mk(makeIdx(src.idx), gl.ELEMENT_ARRAY_BUFFER),
+            count: src.idx.length
+          };
+        }
+
+        // O(1) Cập nhật màu ghế đang chọn / đang hover bằng gl.bufferSubData (chỉ ~0.015ms!)
+        function syncChairHighlightsO1() {
+          if (!gl || !chairGPU || !chairWorkingCol) return;
+          const cache = getSharedCinemaCache();
+          const slices = cache.chairs.seatSlices;
+
+          // Khôi phục ghế cũ về màu gốc từ template
+          for (const oldId of st.highlightedIds) {
+            const sl = slices[oldId];
+            if (!sl) continue;
+            const orig = cache.chairs.baseCol.subarray(sl.start, sl.start + sl.len);
+            chairWorkingCol.set(orig, sl.start);
+            gl.bindBuffer(gl.ARRAY_BUFFER, chairGPU.bCol);
+            gl.bufferSubData(gl.ARRAY_BUFFER, sl.start * 4, orig);
+          }
+          st.highlightedIds = [];
+
+          const applyTint = (sid, rgb) => {
+            const sl = slices[sid];
+            if (!sl) return;
+            for (let i = sl.start; i < sl.start + sl.len; i += 3) {
+              chairWorkingCol[i] = rgb[0];
+              chairWorkingCol[i + 1] = rgb[1];
+              chairWorkingCol[i + 2] = rgb[2];
+            }
+            gl.bindBuffer(gl.ARRAY_BUFFER, chairGPU.bCol);
+            gl.bufferSubData(gl.ARRAY_BUFFER, sl.start * 4, chairWorkingCol.subarray(sl.start, sl.start + sl.len));
+            st.highlightedIds.push(sid);
+          };
+
+          if (st.hoveredSeatId && st.hoveredSeatId !== st.mySeatId) {
+            applyTint(st.hoveredSeatId, [0.84, 0.60, 0.16]);
+          }
+          if (st.mySeatId) {
+            applyTint(st.mySeatId, [0.94, 0.70, 0.13]);
+          }
+        }
+
+        // Gom lô tối đa 50 Avatar khán giả trong phòng bằng mảng cấp phát sẵn (< 0.15ms!)
+        function syncAvatarsBatch() {
+          if (!gl || !avatarGPU) return;
+          const showMineAvatar = (st.mode === "orbit");
+          const entries = [];
           for (const s of seats3D) {
-            const hp = projectHUD([s.x, s.y + 0.55, s.z + 0.10], mView, mProj);
-            s.hit2D = hp ? { x: hp.x, y: hp.y, w: hp.w, r: Math.max(8, 195 / hp.w) } : null;
+            if (st.isCoupleOnly && s.row !== "F") continue;
+            const isMine = s.id === st.mySeatId;
+            const hasOcc = Boolean(st.occupied[s.id]);
+            if (hasOcc || (isMine && showMineAvatar)) {
+              entries.push({ seat: s, isMine });
+            }
           }
-          hctx.font = "700 10px ui-monospace, monospace";
-          hctx.textAlign = "center";
-          ROWS_3D.forEach((row, rIdx) => {
-            if (st.isCoupleOnly && row !== "F") return;
-            const p = projectHUD([0, 0.42 + rIdx * 0.76, -4.15 + rIdx * 2.25], mView, mProj);
-            if (p && p.w < 30) {
-              hctx.fillStyle = row === "F" ? "#fde047" : (row === "D" || row === "E") ? "#fda4af" : "rgba(255,255,255,0.68)";
-              hctx.fillText(row, p.x, p.y);
+          const sig = entries.map(e => e.seat.id + (e.isMine ? "*" : "")).join(",") + "|" + st.isCoupleOnly;
+          if (sig === st.avatarSig) return;
+          st.avatarSig = sig;
+
+          if (!entries.length) {
+            avatarGPU.count = 0;
+            return;
+          }
+          const tpl = getSharedCinemaCache().avatarTpl;
+          const vPer = tpl.vCount;
+          const iPer = tpl.idx.length;
+          const n = entries.length;
+          const pos = new Float32Array(n * vPer * 3);
+          const norm = new Float32Array(n * vPer * 3);
+          const col = new Float32Array(n * vPer * 3);
+          const mat = new Float32Array(n * vPer);
+          const ao = new Float32Array(n * vPer);
+          const idxArr = idxType === gl.UNSIGNED_INT ? new Uint32Array(n * iPer) : new Uint16Array(n * iPer);
+
+          for (let eIdx = 0; eIdx < n; eIdx++) {
+            const { seat, isMine } = entries[eIdx];
+            const vOff = eIdx * vPer;
+            for (let v = 0; v < vPer; v++) {
+              const p3 = (vOff + v) * 3, t3 = v * 3;
+              pos[p3]     = tpl.pos[t3]     + seat.x;
+              pos[p3 + 1] = tpl.pos[t3 + 1] + seat.y;
+              pos[p3 + 2] = tpl.pos[t3 + 2] + seat.z;
+              norm[p3]     = tpl.norm[t3];
+              norm[p3 + 1] = tpl.norm[t3 + 1];
+              norm[p3 + 2] = tpl.norm[t3 + 2];
+              if (isMine) {
+                col[p3] = 0.88; col[p3 + 1] = 0.66; col[p3 + 2] = 0.16;
+              } else {
+                col[p3] = tpl.col[t3]; col[p3 + 1] = tpl.col[t3 + 1]; col[p3 + 2] = tpl.col[t3 + 2];
+              }
+              mat[vOff + v] = tpl.mat[v];
+              ao[vOff + v] = tpl.ao[v];
+            }
+            const iOff = eIdx * iPer;
+            for (let k = 0; k < iPer; k++) idxArr[iOff + k] = tpl.idx[k] + vOff;
+          }
+
+          gl.bindBuffer(gl.ARRAY_BUFFER, avatarGPU.bPos); gl.bufferData(gl.ARRAY_BUFFER, pos, gl.DYNAMIC_DRAW);
+          gl.bindBuffer(gl.ARRAY_BUFFER, avatarGPU.bNorm); gl.bufferData(gl.ARRAY_BUFFER, norm, gl.DYNAMIC_DRAW);
+          gl.bindBuffer(gl.ARRAY_BUFFER, avatarGPU.bCol); gl.bufferData(gl.ARRAY_BUFFER, col, gl.DYNAMIC_DRAW);
+          gl.bindBuffer(gl.ARRAY_BUFFER, avatarGPU.bMat); gl.bufferData(gl.ARRAY_BUFFER, mat, gl.DYNAMIC_DRAW);
+          gl.bindBuffer(gl.ARRAY_BUFFER, avatarGPU.bAO); gl.bufferData(gl.ARRAY_BUFFER, ao, gl.DYNAMIC_DRAW);
+          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, avatarGPU.bIdx); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxArr, gl.DYNAMIC_DRAW);
+          avatarGPU.count = n * iPer;
+        }
+
+        function rebuildCurtainMesh(openVal) {
+          if (!gl || !curtainGPU) return;
+          st.lastCurtainBuilt = openVal;
+          const mb = createMB();
+          const VSEGS = 28;
+          for (let i = 0; i < VSEGS; i++) {
+            const u0 = i / VSEGS, u1 = (i + 1) / VSEGS;
+            const x0 = -6.58 + u0 * 13.16, x1 = -6.58 + u1 * 13.16;
+            const z0 = -9.80 - Math.cos((u0 - 0.5) * Math.PI) * 0.68 + Math.sin(i * 1.8) * 0.04;
+            const z1 = -9.80 - Math.cos((u1 - 0.5) * Math.PI) * 0.68 + Math.sin((i + 1) * 1.8) * 0.04;
+            const yb0 = 6.46 - Math.abs(Math.sin(u0 * Math.PI * 5.0)) * 0.22;
+            const yb1 = 6.46 - Math.abs(Math.sin(u1 * Math.PI * 5.0)) * 0.22;
+            const b = mb.vCount;
+            mb.pos.push(x0, yb0, z0, x1, yb1, z1, x1, 6.96, z1, x0, 6.96, z0);
+            for (let k = 0; k < 4; k++) { mb.norm.push(0, 0.08, 1); mb.col.push(0.46, 0.05, 0.11); mb.mat.push(4); mb.ao.push(k < 2 ? 0.65 : 0.95); }
+            mb.idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
+            mb.vCount += 4;
+
+            const bf = mb.vCount;
+            mb.pos.push(x0, yb0 - 0.045, z0 + 0.01, x1, yb1 - 0.045, z1 + 0.01, x1, yb1, z1 + 0.01, x0, yb0, z0 + 0.01);
+            for (let k = 0; k < 4; k++) { mb.norm.push(0, 0.1, 1); mb.col.push(0.92, 0.72, 0.26); mb.mat.push(2); mb.ao.push(0.95); }
+            mb.idx.push(bf, bf + 1, bf + 2, bf, bf + 2, bf + 3);
+            mb.vCount += 4;
+          }
+
+          const CSEGS = 24, CROWS = 5;
+          [-1, 1].forEach((side) => {
+            const xOuter = side * 6.52;
+            const xInnerBase = side * (0.01 + openVal * 5.68);
+            const gridX = [], gridY = [], gridZ = [], gridNX = [], gridNZ = [], gridAO = [];
+            for (let r = 0; r <= CROWS; r++) {
+              const v = r / CROWS;
+              const y = 1.15 + v * 5.50;
+              const catenary = Math.sin(v * Math.PI) * openVal * 0.22 * side;
+              const xInner = xInnerBase + catenary;
+              const amp = (0.055 + openVal * 0.095) * (1.25 - 0.45 * v);
+              for (let i = 0; i <= CSEGS; i++) {
+                const s = i / CSEGS;
+                const x = xOuter + (xInner - xOuter) * s;
+                const uScreen = Math.max(0, Math.min(1, (x + 6.35) / 12.7));
+                const baseZ = -9.90 - Math.cos((uScreen - 0.5) * Math.PI) * 0.70;
+                const wave = Math.sin(s * Math.PI * 9.0);
+                const z = baseZ + wave * amp;
+                const dWave = Math.cos(s * Math.PI * 9.0) * 1.4;
+                let nx = -dWave * side, nz = 1.0;
+                const nl = Math.hypot(nx, nz) || 1;
+                gridX.push(x); gridY.push(y); gridZ.push(z);
+                gridNX.push(nx / nl); gridNZ.push(nz / nl);
+                gridAO.push(0.32 + 0.68 * (wave * 0.5 + 0.5));
+              }
+            }
+            const stride = CSEGS + 1;
+            for (let face = 0; face < 2; face++) {
+              const base = mb.vCount, zOff = face === 0 ? 0 : -0.025, nSign = face === 0 ? 1 : -1;
+              for (let k = 0; k < gridX.length; k++) {
+                mb.pos.push(gridX[k], gridY[k], gridZ[k] + zOff);
+                mb.norm.push(gridNX[k] * nSign, 0.03, gridNZ[k] * nSign);
+                mb.col.push(0.46, 0.05, 0.11); mb.mat.push(4); mb.ao.push(gridAO[k]);
+              }
+              for (let r = 0; r < CROWS; r++) {
+                for (let i = 0; i < CSEGS; i++) {
+                  const a = base + r * stride + i, b = a + 1, c = a + stride, d = c + 1;
+                  if (face === 0) mb.idx.push(a, b, d, a, d, c);
+                  else mb.idx.push(a, d, b, a, c, d);
+                }
+              }
+              mb.vCount += gridX.length;
+            }
+            for (let i = 0; i < CSEGS; i++) {
+              const b = mb.vCount;
+              mb.pos.push(gridX[i], 1.15, gridZ[i] + 0.01, gridX[i+1], 1.15, gridZ[i+1] + 0.01, gridX[i+1], 1.21, gridZ[i+1] + 0.01, gridX[i], 1.21, gridZ[i] + 0.01);
+              for (let k = 0; k < 4; k++) { mb.norm.push(0, 0.1, 1); mb.col.push(0.92, 0.72, 0.26); mb.mat.push(2); mb.ao.push(0.95); }
+              mb.idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
+              mb.vCount += 4;
             }
           });
-          const mp = projectHUD([mySeat.x, mySeat.y + 1.48, mySeat.z + 0.2], mView, mProj);
-          if (mp) {
-            const lbl = `Ghế ${mySeat.id}`;
-            hctx.font = "700 10.5px system-ui, sans-serif";
-            const bw = hctx.measureText(lbl).width + 14;
-            hctx.fillStyle = "rgba(245,197,24,0.96)";
-            hctx.beginPath(); hctx.roundRect(mp.x - bw*0.5, mp.y - 22, bw, 19, 6); hctx.fill();
-            hctx.fillStyle = "#110d04"; hctx.textBaseline = "middle";
-            hctx.fillText(lbl, mp.x, mp.y - 12.5);
+
+          gl.bindBuffer(gl.ARRAY_BUFFER, curtainGPU.bPos); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.pos), gl.DYNAMIC_DRAW);
+          gl.bindBuffer(gl.ARRAY_BUFFER, curtainGPU.bNorm); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.norm), gl.DYNAMIC_DRAW);
+          gl.bindBuffer(gl.ARRAY_BUFFER, curtainGPU.bCol); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.col), gl.DYNAMIC_DRAW);
+          gl.bindBuffer(gl.ARRAY_BUFFER, curtainGPU.bMat); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.mat), gl.DYNAMIC_DRAW);
+          gl.bindBuffer(gl.ARRAY_BUFFER, curtainGPU.bAO); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.ao), gl.DYNAMIC_DRAW);
+          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, curtainGPU.bIdx); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, makeIdx(mb.idx), gl.DYNAMIC_DRAW);
+          curtainGPU.count = mb.idx.length;
+        }
+
+        // Khởi tạo 1 lần duy nhất VideoTexture chuẩn LinearFilter + SRGB (toneMapped: false)
+        function initOrGetVideoTexture() {
+          if (videoTexture) return videoTexture;
+          videoTexture = gl.createTexture();
+          gl.bindTexture(gl.TEXTURE_2D, videoTexture);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          // Khởi tạo pixel đen 1x1 an toàn trước khi có frame đầu tiên
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 255]));
+          return videoTexture;
+        }
+
+        function extractPosterPalette() {
+          try {
+            const sample = (x0, w) => {
+              const d = pctx.getImageData(x0, 48, w, 160).data;
+              let r = 0, g = 0, b = 0, n = 0;
+              for (let i = 0; i < d.length; i += 16) { r += d[i]; g += d[i + 1]; b += d[i + 2]; n++; }
+              if (!n) return [0.16, 0.72, 0.90];
+              const k = 1.35 / 255;
+              return [Math.min(1, Math.max(0.08, r / n * k)), Math.min(1, Math.max(0.08, g / n * k)), Math.min(1, Math.max(0.08, b / n * k))];
+            };
+            st.targetLightL = sample(16, 140);
+            st.targetLightC = sample(186, 140);
+            st.targetLightR = sample(356, 140);
+          } catch (_) {}
+        }
+
+        function loadPoster(url) {
+          const clean = url ? (typeof getOptimizedPosterUrl === "function" ? getOptimizedPosterUrl(url, "w780") : url) : "";
+          if (!clean || clean === st.posterUrl) return;
+          st.posterUrl = clean;
+          st.posterReady = false;
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => {
+            if (st.posterUrl !== clean) return;
+            st.posterImg = img;
+            st.posterReady = true;
+            pctx.clearRect(0, 0, 512, 256);
+            const ir = img.width / (img.height || 1), cr = 512 / 256;
+            let dw = 512, dh = 256, dx = 0, dy = 0;
+            if (ir > cr) { dh = 256; dw = 256 * ir; dx = (512 - dw) * 0.5; }
+            else { dw = 512; dh = 512 / (ir || 1); dy = (256 - dh) * 0.34; }
+            pctx.drawImage(img, dx, dy, dw, dh);
+            extractPosterPalette();
+          };
+          img.onerror = () => { if (st.posterUrl === clean) st.posterReady = false; };
+          img.src = clean;
+        }
+
+        function drawStaticPosterCanvas(t, statusLabel = "") {
+          const w = 512, h = 256;
+          if (st.posterReady && st.posterImg) {
+            const img = st.posterImg, ir = img.width / (img.height || 1), cr = w / h;
+            const zoom = 1.02 + 0.018 * Math.sin(t * 0.45);
+            let dw = w, dh = h;
+            if (ir > cr) { dh = h * zoom; dw = dh * ir; }
+            else { dw = w * zoom; dh = dw / (ir || 1); }
+            pctx.drawImage(img, (w - dw) * 0.5, (h - dh) * 0.32, dw, dh);
+            const g = pctx.createRadialGradient(w * 0.5, h * 0.35, 10, w * 0.5, h * 0.5, w * 0.65);
+            g.addColorStop(0, "rgba(255,255,255,0.08)");
+            g.addColorStop(1, "rgba(0,0,0,0.32)");
+            pctx.fillStyle = g; pctx.fillRect(0, 0, w, h);
+          } else {
+            const g = pctx.createLinearGradient(0, 0, 0, h);
+            g.addColorStop(0, "#15809e"); g.addColorStop(0.45, "#0369a1"); g.addColorStop(1, "#020c18");
+            pctx.fillStyle = g; pctx.fillRect(0, 0, w, h);
+          }
+          pctx.fillStyle = "rgba(0,0,0,0.52)";
+          pctx.fillRect(0, h - 26, w, 26);
+          pctx.fillStyle = statusLabel ? "#FDE047" : "rgba(255,255,255,0.88)";
+          pctx.font = "700 11px system-ui, sans-serif";
+          pctx.textAlign = "center";
+          pctx.fillText(statusLabel ? `⏸ ${statusLabel} • ${st.movieTitle}` : st.movieTitle, w * 0.5, h - 9);
+        }
+
+        // Cập nhật màu ánh sáng hắt từ khung hình <video> đang chiếu (PointLight / RectAreaLight động 4Hz)
+        function sampleLiveVideoLight(videoEl, nowMs) {
+          if (nowMs - st.lastVideoProbeMs < 240) return;
+          st.lastVideoProbeMs = nowMs;
+          try {
+            probeCtx.drawImage(videoEl, 0, 0, 16, 9);
+            const d = probeCtx.getImageData(0, 1, 16, 7).data;
+            const zone = (x0, x1) => {
+              let r = 0, g = 0, b = 0, n = 0;
+              for (let y = 0; y < 7; y++) {
+                for (let x = x0; x < x1; x++) {
+                  const idx = (y * 16 + x) * 4;
+                  r += d[idx]; g += d[idx + 1]; b += d[idx + 2]; n++;
+                }
+              }
+              const k = 1.42 / 255;
+              return [
+                Math.min(1, Math.max(0.06, (r / n) * k)),
+                Math.min(1, Math.max(0.06, (g / n) * k)),
+                Math.min(1, Math.max(0.06, (b / n) * k))
+              ];
+            };
+            st.targetLightL = zone(0, 5);
+            st.targetLightC = zone(5, 11);
+            st.targetLightR = zone(11, 16);
+          } catch (_) {}
+        }
+
+        function ensureInit() {
+          if (st.initialized) return true;
+          glCanvas = document.getElementById(cfg.glCanvasId);
+          hudCanvas = document.getElementById(cfg.hudCanvasId);
+          if (!glCanvas || !hudCanvas) return false;
+          gl = glCanvas.getContext("webgl2", { antialias: true, alpha: false, premultipliedAlpha: false }) ||
+               glCanvas.getContext("webgl", { antialias: true, alpha: false, premultipliedAlpha: false });
+          hctx = hudCanvas.getContext("2d");
+          if (!gl || !hctx) return false;
+
+          const isWL2 = (typeof WebGL2RenderingContext !== "undefined") && (gl instanceof WebGL2RenderingContext);
+          const uintExt = isWL2 ? true : Boolean(gl.getExtension("OES_element_index_uint"));
+          idxType = uintExt ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
+
+          const compile = (vsSrc, fsSrc) => {
+            const vs = gl.createShader(gl.VERTEX_SHADER); gl.shaderSource(vs, vsSrc); gl.compileShader(vs);
+            const fs = gl.createShader(gl.FRAGMENT_SHADER); gl.shaderSource(fs, fsSrc); gl.compileShader(fs);
+            const p = gl.createProgram(); gl.attachShader(p, vs); gl.attachShader(p, fs); gl.linkProgram(p);
+            return p;
+          };
+
+          progRoom = compile(`
+            attribute vec3 aPos, aNorm, aCol;
+            attribute float aMat, aAO;
+            uniform mat4 uProj, uView;
+            varying vec3 vWorldPos, vNorm, vCol;
+            varying float vMat, vAO;
+            void main() {
+              vWorldPos = aPos; vNorm = aNorm; vCol = aCol; vMat = aMat; vAO = aAO;
+              gl_Position = uProj * uView * vec4(aPos, 1.0);
+            }
+          `, `
+            precision highp float;
+            varying vec3 vWorldPos, vNorm, vCol;
+            varying float vMat, vAO;
+            uniform vec3 uCamPos, uScreenColL, uScreenColC, uScreenColR;
+            uniform float uLights, uTime, uCurtainOpen;
+            uniform sampler2D uScreenTex;
+
+            float hash21(vec2 p) {
+              p = fract(p * vec2(123.34, 456.21));
+              p += dot(p, p + 45.32);
+              return fract(p.x * p.y);
+            }
+
+            void main() {
+              vec3 N = normalize(vNorm);
+              vec3 V = normalize(uCamPos - vWorldPos);
+              float ao = clamp(vAO, 0.05, 1.0);
+              vec3 baseAlbedo = vCol;
+
+              if (vMat > 2.5 && vMat < 3.5) {
+                gl_FragColor = vec4(vCol, 1.0);
+                return;
+              }
+              if (vMat > 5.5 && vMat < 6.5) {
+                float slat = vWorldPos.z * 26.0;
+                float g = sin(slat);
+                N = normalize(N + vec3(0.0, 0.0, cos(slat) * 0.38));
+                ao *= (0.72 + 0.28 * smoothstep(-0.8, 0.6, g));
+                baseAlbedo *= (0.86 + 0.18 * smoothstep(-0.5, 0.8, g));
+              }
+              if (vMat > 3.5 && vMat < 4.5) {
+                float m = sin(vWorldPos.x * 22.0 + vWorldPos.z * 18.0);
+                N = normalize(N + vec3(m * 0.12, 0.0, m * 0.16));
+              }
+              if (vMat > 6.5 && vMat < 7.5) {
+                baseAlbedo *= (0.90 + 0.18 * hash21(floor(vWorldPos.xz * 95.0)));
+              }
+
+              float scrGate = 0.10 + 0.90 * uCurtainOpen;
+              vec3 scrPosL = vec3(-4.5, 3.9, -10.2);
+              vec3 scrPosC = vec3( 0.0, 3.9, -10.65);
+              vec3 scrPosR = vec3( 4.5, 3.9, -10.2);
+              vec3 dL = scrPosL - vWorldPos, dC = scrPosC - vWorldPos, dR = scrPosR - vWorldPos;
+              float attL = 1.0 / (1.0 + 0.019 * dot(dL, dL));
+              float attC = 1.0 / (1.0 + 0.015 * dot(dC, dC));
+              float attR = 1.0 / (1.0 + 0.019 * dot(dR, dR));
+              vec3 screenIrr = (
+                uScreenColL * (max(dot(N, normalize(dL)), 0.0) * 0.78 + 0.22) * attL +
+                uScreenColC * (max(dot(N, normalize(dC)), 0.0) * 0.92 + 0.26) * attC +
+                uScreenColR * (max(dot(N, normalize(dR)), 0.0) * 0.78 + 0.22) * attR
+              ) * 1.48 * scrGate;
+
+              vec3 sconceLight = vec3(0.0);
+              float sconcePower = mix(0.45, 1.55, uLights);
+              bool isSideWall = abs(vWorldPos.x) > 8.65;
+              for (int i = 0; i < 3; i++) {
+                float sz = -5.8 + float(i) * 5.0;
+                for (int s = 0; s < 2; s++) {
+                  float sx = (s == 0) ? -8.82 : 8.82;
+                  vec3 lp = vec3(sx, 4.85, sz);
+                  vec3 toLight = lp - vWorldPos;
+                  float att = 1.0 / (1.0 + 0.14 * dot(toLight, toLight));
+                  sconceLight += vec3(1.0, 0.76, 0.38) * (max(dot(N, normalize(toLight)), 0.0) * 0.75 + 0.25) * att * sconcePower;
+                  if (isSideWall && sign(vWorldPos.x) == sign(sx)) {
+                    float dz = abs(vWorldPos.z - sz), dy = abs(vWorldPos.y - 4.85);
+                    float fan = smoothstep(dy * 0.58 + 0.14, dy * 0.12 + 0.03, dz) * exp(-dy * 0.58);
+                    sconceLight += vec3(1.0, 0.80, 0.44) * fan * mix(0.75, 1.65, uLights);
+                  }
+                }
+              }
+
+              float centerAisle = exp(-abs(vWorldPos.x) * 1.25) * exp(-max(0.0, vWorldPos.y - 5.2) * 0.9);
+              vec3 stepGlow = vec3(1.0, 0.78, 0.24) * centerAisle * 0.26;
+              vec3 houseLight = mix(vec3(0.055, 0.05, 0.085), vec3(0.78, 0.68, 0.56), uLights) * (max(N.y, 0.0) * 0.65 + 0.35);
+
+              bool isMetal = (vMat > 1.5 && vMat < 2.5);
+              vec3 envLight = vec3(0.04, 0.036, 0.058) + houseLight + screenIrr + sconceLight + stepGlow;
+              vec3 color = isMetal
+                ? baseAlbedo * (vec3(0.22, 0.18, 0.12) + sconceLight * 0.55 + houseLight * 0.65 + length(screenIrr) * 0.22) * ao
+                : baseAlbedo * envLight * ao;
+
+              vec3 Hscr = normalize(normalize(dC) + V);
+              float ndh = max(dot(N, Hscr), 0.0);
+              float ndv = max(dot(N, V), 0.0);
+              float fresnel = pow(1.0 - ndv, 4.0);
+
+              if ((vMat > 0.5 && vMat < 1.5) || (vMat > 3.5 && vMat < 4.5)) {
+                float velvetRim = pow(1.0 - ndv, 2.7);
+                vec3 clothSheen = mix(baseAlbedo * 2.2 + vec3(0.07), uScreenColC * 0.85 + baseAlbedo, 0.42 * scrGate);
+                color += (clothSheen * velvetRim * (0.28 + 0.22 * uLights) + uScreenColC * pow(ndh, 18.0) * 0.18 * scrGate) * ao;
+              }
+              if (isMetal) {
+                vec3 Hup = normalize(vec3(0.15, 0.92, 0.35) + V);
+                color += baseAlbedo * (pow(ndh, 36.0) * 0.95 * scrGate + pow(max(dot(N, Hup), 0.0), 26.0) * (0.65 + 0.85 * uLights) + fresnel * 0.32);
+              }
+              if (vMat > 4.5 && vMat < 5.5 && N.y > 0.7) {
+                vec3 R = reflect(-V, vec3(0.0, 1.0, 0.0));
+                if (R.z < -0.05) {
+                  float tHit = (-10.30 - vWorldPos.z) / R.z;
+                  vec3 hit = vWorldPos + R * tHit;
+                  float u = (hit.x + 6.35) / 12.7, v = 1.0 - (hit.y - 1.18) / 5.55;
+                  if (u > 0.0 && u < 1.0 && v > 0.0 && v < 1.0) {
+                    vec3 r1 = texture2D(uScreenTex, vec2(clamp(u - 0.015, 0.01, 0.99), clamp(v, 0.01, 0.99))).rgb;
+                    vec3 r2 = texture2D(uScreenTex, vec2(clamp(u, 0.01, 0.99), clamp(v, 0.01, 0.99))).rgb;
+                    vec3 r3 = texture2D(uScreenTex, vec2(clamp(u + 0.015, 0.01, 0.99), clamp(v, 0.01, 0.99))).rgb;
+                    vec3 refl = (r1 + r2 * 2.0 + r3) * 0.25;
+                    float edgeMask = smoothstep(0.0, 0.06, u) * smoothstep(1.0, 0.94, u) * smoothstep(0.0, 0.08, v) * smoothstep(1.0, 0.82, v);
+                    float distFade = exp(-max(0.0, vWorldPos.z - (-9.8)) * 0.42);
+                    color += refl * edgeMask * distFade * (0.28 + 0.46 * fresnel) * scrGate;
+                  }
+                }
+              }
+
+              float distCam = length(uCamPos - vWorldPos);
+              color = mix(color, (vec3(0.014, 0.013, 0.020) + uScreenColC * 0.022 * scrGate), clamp((distCam - 14.0) * 0.014, 0.0, 0.20));
+              color = (color * (2.51 * color + 0.03)) / (color * (2.43 * color + 0.59) + 0.14);
+              color = pow(clamp(color, 0.0, 1.0), vec3(0.95));
+              float filmGrain = (hash21(gl_FragCoord.xy + fract(uTime)) - 0.5) * 0.012;
+              gl_FragColor = vec4(clamp(color + filmGrain, 0.0, 1.0), 1.0);
+            }
+          `);
+
+          // Vật liệu màn chiếu tương đương MeshBasicMaterial({ map: videoTexture, toneMapped: false }) + tự căn tỷ lệ khung hình!
+          progScreen = compile(`
+            attribute vec3 aPos; attribute vec2 aUV;
+            uniform mat4 uProj, uView; varying vec2 vUV;
+            void main() { vUV = aUV; gl_Position = uProj * uView * vec4(aPos, 1.0); }
+          `, `
+            precision highp float;
+            varying vec2 vUV;
+            uniform sampler2D uTex;
+            uniform float uSrcAspect;
+            uniform float uScreenAspect;
+            void main() {
+              vec2 uv = vUV;
+              // Tự động giữ chuẩn tỷ lệ khung hình video (16:9 / 2.39:1) không bị méo trên màn chiếu cong!
+              if (uSrcAspect > 0.1) {
+                float ratio = uScreenAspect / uSrcAspect;
+                if (ratio < 1.0) {
+                  // Video rộng hơn màn (vd 2.39:1) -> letterbox trên/dưới đen tuyền chuẩn rạp
+                  uv.y = (vUV.y - 0.5) / ratio + 0.5;
+                } else {
+                  // Màn rộng hơn video (vd 16:9 trên màn 2.28:1) -> phủ vừa khít chiều cao hoặc mở rộng nhẹ
+                  float softFit = mix(1.0, ratio, 0.65);
+                  uv.x = (vUV.x - 0.5) * softFit + 0.5;
+                }
+              }
+              if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
+                gl_FragColor = vec4(0.01, 0.01, 0.014, 1.0);
+                return;
+              }
+              // toneMapped: false -> Giữ nguyên 100% độ sáng & dải màu gốc SRGB của luồng phim!
+              vec3 c = texture2D(uTex, uv).rgb;
+              gl_FragColor = vec4(c, 1.0);
+            }
+          `);
+
+          progBeam = compile(`
+            attribute vec3 aPos; attribute float aAlpha;
+            uniform mat4 uProj, uView; varying float vAlpha; varying vec3 vWPos;
+            void main() {
+              vAlpha = aAlpha; vWPos = aPos;
+              gl_Position = uProj * uView * vec4(aPos, 1.0);
+              gl_PointSize = clamp(44.0 / gl_Position.w, 1.6, 5.0);
+            }
+          `, `
+            precision mediump float; varying float vAlpha; varying vec3 vWPos;
+            uniform vec3 uBeamCol; uniform float uTime, uIsPoint;
+            void main() {
+              float mask = 1.0;
+              if (uIsPoint > 0.5) {
+                float r = length(gl_PointCoord - vec2(0.5));
+                if (r > 0.5) discard;
+                mask = smoothstep(0.5, 0.04, r);
+              }
+              float ray = 0.82 + 0.18 * sin(vWPos.x * 4.4 + uTime * 1.6);
+              gl_FragColor = vec4(uBeamCol * ray, vAlpha * mask);
+            }
+          `);
+
+          const cache = getSharedCinemaCache();
+          gpuBase = uploadTypedStatic(cache.mbBase);
+          gpuL = uploadTypedStatic(cache.mbL);
+          gpuR = uploadTypedStatic(cache.mbR);
+          gpuRear = uploadTypedStatic(cache.mbRear);
+          gpuCeil = uploadTypedStatic(cache.mbCeil);
+
+          // Upload 48 ghế tĩnh 1 lần duy nhất; bCol dùng DYNAMIC_DRAW cho bufferSubData O(1)!
+          chairWorkingCol = new Float32Array(cache.chairs.baseCol);
+          const mkB = (typed, target, usage = gl.STATIC_DRAW) => {
+            const b = gl.createBuffer(); gl.bindBuffer(target, b); gl.bufferData(target, typed, usage); return b;
+          };
+          chairGPU = {
+            bPos: mkB(cache.chairs.pos, gl.ARRAY_BUFFER),
+            bNorm: mkB(cache.chairs.norm, gl.ARRAY_BUFFER),
+            bCol: mkB(chairWorkingCol, gl.ARRAY_BUFFER, gl.DYNAMIC_DRAW),
+            bMat: mkB(cache.chairs.mat, gl.ARRAY_BUFFER),
+            bAO: mkB(cache.chairs.ao, gl.ARRAY_BUFFER),
+            bIdxAll: mkB(makeIdx(cache.chairs.idxAll), gl.ELEMENT_ARRAY_BUFFER),
+            bIdxCouple: mkB(makeIdx(cache.chairs.idxCoupleOnly), gl.ELEMENT_ARRAY_BUFFER),
+            countAll: cache.chairs.idxAll.length,
+            countCouple: cache.chairs.idxCoupleOnly.length
+          };
+
+          avatarGPU = { bPos: gl.createBuffer(), bNorm: gl.createBuffer(), bCol: gl.createBuffer(), bMat: gl.createBuffer(), bAO: gl.createBuffer(), bIdx: gl.createBuffer(), count: 0 };
+          curtainGPU = { bPos: gl.createBuffer(), bNorm: gl.createBuffer(), bCol: gl.createBuffer(), bMat: gl.createBuffer(), bAO: gl.createBuffer(), bIdx: gl.createBuffer(), count: 0 };
+
+          const scrVerts = [], scrUVs = [], scrIdx = [];
+          for (let i = 0; i <= 32; i++) {
+            const u = i / 32;
+            const x = -6.3 + u * 12.6;
+            const z = -10.12 - Math.cos((u - 0.5) * Math.PI) * 0.74;
+            scrVerts.push(x, 1.18, z, x, 6.72, z);
+            scrUVs.push(u, 1.0, u, 0.0);
+            if (i < 32) { const b = i * 2; scrIdx.push(b, b + 1, b + 3, b, b + 3, b + 2); }
+          }
+          scrBuffers = {
+            bPos: mkB(new Float32Array(scrVerts), gl.ARRAY_BUFFER),
+            bUV: mkB(new Float32Array(scrUVs), gl.ARRAY_BUFFER),
+            bIdx: mkB(makeIdx(scrIdx), gl.ELEMENT_ARRAY_BUFFER),
+            count: scrIdx.length
+          };
+
+          posterTexture = gl.createTexture();
+          gl.bindTexture(gl.TEXTURE_2D, posterTexture);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          initOrGetVideoTexture();
+
+          const beamPos = [
+             0.0, 6.65, 9.32, -6.2, 6.70, -10.12,  6.2, 6.70, -10.12,
+             0.0, 6.65, 9.32, -6.2, 1.20, -10.12,  6.2, 1.20, -10.12,
+             0.0, 6.65, 9.32, -6.2, 6.70, -10.12, -6.2, 1.20, -10.12,
+             0.0, 6.65, 9.32,  6.2, 6.70, -10.12,  6.2, 1.20, -10.12,
+             0.0, 6.65, 9.32, -4.0, 4.10, -10.45,  4.0, 4.10, -10.45
+          ];
+          const beamAlpha = [0.11,0.008,0.008, 0.07,0.005,0.005, 0.09,0.007,0.007, 0.09,0.007,0.007, 0.14,0.012,0.012];
+          beamBuffers = {
+            bPos: mkB(new Float32Array(beamPos), gl.ARRAY_BUFFER),
+            bAlpha: mkB(new Float32Array(beamAlpha), gl.ARRAY_BUFFER),
+            dPos: gl.createBuffer(),
+            dAlpha: mkB(new Float32Array(DUST_COUNT).fill(0.40), gl.ARRAY_BUFFER)
+          };
+
+          bindCanvasEvents();
+          syncChairHighlightsO1();
+          syncAvatarsBatch();
+          rebuildCurtainMesh(st.curtainOpen);
+          st.initialized = true;
+          return true;
+        }
+
+        // Giới hạn độ phân giải đúng chuẩn: Math.min(window.devicePixelRatio, 1.5) để giữ cứng 60fps!
+        function resize() {
+          if (!glCanvas || !gl) return;
+          const rect = glCanvas.getBoundingClientRect();
+          if (rect.width < 20 || rect.height < 20) return;
+          st.dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+          st.W = rect.width; st.H = rect.height;
+          const pw = Math.round(st.W * st.dpr), ph = Math.round(st.H * st.dpr);
+          if (glCanvas.width !== pw || glCanvas.height !== ph) {
+            glCanvas.width = pw; glCanvas.height = ph;
+            hudCanvas.width = pw; hudCanvas.height = ph;
+            gl.viewport(0, 0, pw, ph);
+            hctx.setTransform(st.dpr, 0, 0, st.dpr, 0, 0);
           }
         }
 
-        st.rafId = requestAnimationFrame(renderLoop);
+        function bindCanvasEvents() {
+          const tooltip = document.getElementById(cfg.tooltipId);
+          let dragging = false, dragDist = 0, lastX = 0, lastY = 0;
+
+          glCanvas.addEventListener("pointerdown", (e) => {
+            dragging = true; dragDist = 0; lastX = e.clientX; lastY = e.clientY;
+            try { glCanvas.setPointerCapture(e.pointerId); } catch (_) {}
+          });
+
+          glCanvas.addEventListener("pointermove", (e) => {
+            const rect = glCanvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+            if (dragging) {
+              const dx = e.clientX - lastX, dy = e.clientY - lastY;
+              dragDist += Math.abs(dx) + Math.abs(dy);
+              lastX = e.clientX; lastY = e.clientY;
+              if (st.mode === "seat" || st.mode === "focus") {
+                st.tPovYaw = Math.max(-2.65, Math.min(2.65, st.tPovYaw - dx * 0.0055));
+                st.tPovPitch = Math.max(-0.58, Math.min(0.68, st.tPovPitch + dy * 0.0048));
+              } else {
+                st.tYaw -= dx * 0.007;
+                st.tPitch = Math.max(0.12, Math.min(1.16, st.tPitch + dy * 0.006));
+              }
+              tooltip?.classList.add("hidden");
+              return;
+            }
+            if (st.mode !== "orbit") {
+              tooltip?.classList.add("hidden");
+              glCanvas.style.cursor = "grab";
+              return;
+            }
+            let best = null, bestW = 1e9;
+            for (const s of seats3D) {
+              if ((st.isCoupleOnly && s.row !== "F") || !s._hit) continue;
+              const d = Math.hypot(mx - s._hit.x, my - s._hit.y);
+              if (d < s._hit.r && s._hit.w < bestW) { best = s; bestW = s._hit.w; }
+            }
+            const nextHover = best ? best.id : null;
+            if (nextHover !== st.hoveredSeatId) {
+              st.hoveredSeatId = nextHover;
+              syncChairHighlightsO1();
+            }
+            if (best && tooltip) {
+              glCanvas.style.cursor = "pointer";
+              const occ = st.occupied[best.id];
+              const tier = best.isCouple ? "Sweetbox Đôi" : best.isVIP ? "Ghế VIP" : "Ghế Thường";
+              tooltip.innerHTML = `<span class="font-bold text-amber-300">${best.id} • ${tier}</span> — ${occ ? `Đã có ${escapeHTML(occ)}` : "Click để chuyển sang ghế này"}`;
+              tooltip.style.left = `${Math.min(st.W - 200, Math.max(8, mx + 12))}px`;
+              tooltip.style.top = `${Math.max(46, my - 34)}px`;
+              tooltip.classList.remove("hidden");
+            } else {
+              glCanvas.style.cursor = "grab";
+              tooltip?.classList.add("hidden");
+            }
+          });
+
+          glCanvas.addEventListener("pointerup", () => {
+            if (dragging && dragDist < 6 && st.mode === "orbit" && st.hoveredSeatId && !st.occupied[st.hoveredSeatId]) {
+              cfg.onPickSeat?.(st.hoveredSeatId);
+            }
+            dragging = false;
+          });
+
+          // Nháy đúp chuột khi đang ngồi ghế để đưa hướng mắt mượt về chính diện màn chiếu
+          glCanvas.addEventListener("dblclick", () => {
+            st.tPovYaw = 0; st.tPovPitch = 0;
+          });
+
+          glCanvas.addEventListener("wheel", (e) => {
+            if (st.mode === "orbit") {
+              e.preventDefault();
+              st.tDist = Math.max(10.5, Math.min(27.5, st.tDist + e.deltaY * 0.013));
+            }
+          }, { passive: false });
+
+          window.addEventListener("resize", resize);
+        }
+
+        function mat4Perspective(fovy, aspect, near, far) {
+          const f = 1.0 / Math.tan(fovy * 0.5), nf = 1 / (near - far);
+          return new Float32Array([f/aspect,0,0,0, 0,f,0,0, 0,0,(far+near)*nf,-1, 0,0,(2*far*near)*nf,0]);
+        }
+        function mat4LookAt(eye, center, up) {
+          let zx = eye[0]-center[0], zy = eye[1]-center[1], zz = eye[2]-center[2];
+          let l = Math.hypot(zx,zy,zz) || 1; zx/=l; zy/=l; zz/=l;
+          let xx = up[1]*zz - up[2]*zy, xy = up[2]*zx - up[0]*zz, xz = up[0]*zy - up[1]*zx;
+          l = Math.hypot(xx,xy,xz) || 1; xx/=l; xy/=l; xz/=l;
+          const yx = zy*xz - zz*xy, yy = zz*xx - zx*xz, yz = zx*xy - zy*xx;
+          return new Float32Array([
+            xx,yx,zx,0, xy,yy,zy,0, xz,yz,zz,0,
+            -(xx*eye[0]+xy*eye[1]+xz*eye[2]), -(yx*eye[0]+yy*eye[1]+yz*eye[2]), -(zx*eye[0]+zy*eye[1]+zz*eye[2]), 1
+          ]);
+        }
+        function projectHUD(pt, mView, mProj) {
+          const x = pt[0], y = pt[1], z = pt[2];
+          const vx = mView[0]*x + mView[4]*y + mView[8]*z + mView[12];
+          const vy = mView[1]*x + mView[5]*y + mView[9]*z + mView[13];
+          const vz = mView[2]*x + mView[6]*y + mView[10]*z + mView[14];
+          const vw = mView[3]*x + mView[7]*y + mView[11]*z + mView[15];
+          const cx = mProj[0]*vx + mProj[4]*vy + mProj[8]*vz + mProj[12]*vw;
+          const cy = mProj[1]*vx + mProj[5]*vy + mProj[9]*vz + mProj[13]*vw;
+          const cw = mProj[3]*vx + mProj[7]*vy + mProj[11]*vz + mProj[15]*vw;
+          if (cw <= 0.2) return null;
+          return { x: (cx / cw * 0.5 + 0.5) * st.W, y: (0.5 - cy / cw * 0.5) * st.H, w: cw };
+        }
+
+        function drawMesh(gpu, customIdxBuf = null, customCount = null) {
+          const cnt = customCount !== null ? customCount : gpu?.count;
+          if (!gpu || !cnt) return;
+          const lp = gl.getAttribLocation(progRoom, "aPos");
+          const ln = gl.getAttribLocation(progRoom, "aNorm");
+          const lc = gl.getAttribLocation(progRoom, "aCol");
+          const lm = gl.getAttribLocation(progRoom, "aMat");
+          const la = gl.getAttribLocation(progRoom, "aAO");
+          gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bPos); gl.enableVertexAttribArray(lp); gl.vertexAttribPointer(lp, 3, gl.FLOAT, false, 0, 0);
+          gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bNorm); gl.enableVertexAttribArray(ln); gl.vertexAttribPointer(ln, 3, gl.FLOAT, false, 0, 0);
+          gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bCol); gl.enableVertexAttribArray(lc); gl.vertexAttribPointer(lc, 3, gl.FLOAT, false, 0, 0);
+          gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bMat); gl.enableVertexAttribArray(lm); gl.vertexAttribPointer(lm, 1, gl.FLOAT, false, 0, 0);
+          gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bAO); gl.enableVertexAttribArray(la); gl.vertexAttribPointer(la, 1, gl.FLOAT, false, 0, 0);
+          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, customIdxBuf || gpu.bIdx);
+          gl.drawElements(gl.TRIANGLES, cnt, idxType, 0);
+        }
+
+        // Hiệu ứng Lerp mượt mà cho Camera theo từng ghế A1..F8 & Chế độ Tập trung (Zoom)
+        function lerpCamera3D(mySeat) {
+          let desPos, desLook, targetFov;
+          if (st.mode === "focus") {
+            // Chế độ Góc tập trung (Zoom): lướt mượt tới gần màn chiếu, giữ lệch nhẹ theo ghế đang ngồi để không mỏi mắt khi xem lâu
+            st.povYaw += (st.tPovYaw - st.povYaw) * 0.12;
+            st.povPitch += (st.tPovPitch - st.povPitch) * 0.12;
+            const fx = mySeat.x * 0.15, fy = 3.92, fz = -3.15;
+            const yaw = st.povYaw * 0.35, pitch = st.povPitch * 0.35;
+            desPos = [fx, fy, fz];
+            desLook = [
+              fx + Math.sin(yaw) * Math.cos(pitch) * 7.2,
+              fy + Math.sin(pitch) * 7.2,
+              fz - Math.cos(yaw) * Math.cos(pitch) * 7.2
+            ];
+            targetFov = 0.68; // ~39 deg Zoom sắc nét toàn màn chiếu
+          } else if (st.mode === "seat") {
+            // Góc ngồi thực tế từng ghế (A1..F8): độ cao mắt, độ nghiêng cổ & tiêu cự FOV biến thiên vật lý theo hàng ghế!
+            st.povYaw += (st.tPovYaw - st.povYaw) * 0.14;
+            st.povPitch += (st.tPovPitch - st.povPitch) * 0.14;
+            const ex = mySeat.x, ey = mySeat.y + 1.23, ez = mySeat.z + 0.09;
+            // Hàng A ngước cao + góc rộng cận màn; Hàng D-E cân bằng chuẩn THX; Hàng F toàn cảnh trên cao
+            const scrAimX = mySeat.x * 0.16;
+            const scrAimY = 3.88 + (2 - mySeat.rIdx) * 0.05;
+            const scrAimZ = -10.35;
+            const baseYaw = Math.atan2(scrAimX - ex, -(scrAimZ - ez));
+            const basePitch = Math.atan2(scrAimY - ey, Math.hypot(scrAimX - ex, scrAimZ - ez));
+            const finalYaw = baseYaw + st.povYaw;
+            const finalPitch = Math.max(-0.65, Math.min(0.75, basePitch + st.povPitch));
+            desPos = [ex, ey, ez];
+            desLook = [
+              ex + Math.sin(finalYaw) * Math.cos(finalPitch) * 8.0,
+              ey + Math.sin(finalPitch) * 8.0,
+              ez - Math.cos(finalYaw) * Math.cos(finalPitch) * 8.0
+            ];
+            const rowFovTable = [1.06, 0.99, 0.95, 0.91, 0.88, 0.85]; // A -> F
+            targetFov = rowFovTable[mySeat.rIdx] || 0.92;
+          } else {
+            st.yaw += (st.tYaw - st.yaw) * 0.12;
+            st.pitch += (st.tPitch - st.pitch) * 0.12;
+            st.dist += (st.tDist - st.dist) * 0.12;
+            const target = [0.0, 2.35, -1.2];
+            desPos = [
+              target[0] + Math.sin(st.yaw) * Math.cos(st.pitch) * st.dist,
+              target[1] + Math.sin(st.pitch) * st.dist,
+              target[2] + Math.cos(st.yaw) * Math.cos(st.pitch) * st.dist
+            ];
+            desLook = target;
+            targetFov = 0.75;
+          }
+
+          for (let i = 0; i < 3; i++) {
+            st.camPos[i] += (desPos[i] - st.camPos[i]) * 0.11;
+            st.camLook[i] += (desLook[i] - st.camLook[i]) * 0.11;
+          }
+          st.curFov += (targetFov - st.curFov) * 0.11;
+        }
+
+        function renderBubble2D(x, y, text, isMine) {
+          hctx.save();
+          hctx.font = "600 11px system-ui, -apple-system, sans-serif";
+          const clean = text.length > 42 ? text.slice(0, 40) + "…" : text;
+          const bw = hctx.measureText(clean).width + 16, bh = 22;
+          const bx = x - bw * 0.5, by = y - bh - 6;
+          hctx.fillStyle = isMine ? "rgba(245, 197, 24, 0.95)" : "rgba(16, 14, 22, 0.90)";
+          hctx.strokeStyle = isMine ? "#fef9c3" : "rgba(255,255,255,0.22)";
+          hctx.lineWidth = 1;
+          hctx.beginPath(); hctx.roundRect(bx, by, bw, bh, 8); hctx.fill(); hctx.stroke();
+          hctx.fillStyle = isMine ? "#110d04" : "#f8fafc";
+          hctx.textAlign = "center"; hctx.textBaseline = "middle";
+          hctx.fillText(clean, x, by + bh * 0.5);
+          hctx.restore();
+        }
+
+        function renderLoop(nowMs) {
+          if (!st.running) { st.rafId = 0; return; }
+          if (!cfg.isVisible()) {
+            st.running = false; st.rafId = 0; return;
+          }
+          resize();
+          const t = nowMs * 0.001;
+          st.lightsLevel += (st.lightsTarget - st.lightsLevel) * 0.09;
+
+          // Kiểm tra trạng thái <video> duy nhất để tự động chọn VideoTexture hoặc PosterTexture tĩnh!
+          let activeTex = posterTexture;
+          let activeAspect = 0.0; // 0.0 = poster đã tự căn sẵn trên canvas 512x256
+          if (cfg.useLiveVideo) {
+            const videoEl = document.getElementById("html5-video-player");
+            const hostPausedCurtain = document.getElementById("screen-velvet-curtain")?.classList.contains("curtain-closed");
+            const isUpcoming = !document.getElementById("upcoming-overlay")?.classList.contains("hidden");
+            const canUseVideo = Boolean(
+              videoEl &&
+              !videoEl.classList.contains("hidden") &&
+              !videoEl.dataset.corsBlocked &&
+              videoEl.readyState >= 2 &&
+              !hostPausedCurtain &&
+              !isUpcoming &&
+              !(videoEl.paused && videoEl.currentTime < 0.08)
+            );
+
+            if (canUseVideo) {
+              const vTex = initOrGetVideoTexture();
+              gl.activeTexture(gl.TEXTURE0);
+              gl.bindTexture(gl.TEXTURE_2D, vTex);
+              try {
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, videoEl);
+                activeTex = vTex;
+                activeAspect = (videoEl.videoWidth && videoEl.videoHeight) ? (videoEl.videoWidth / videoEl.videoHeight) : (16 / 9);
+                if (!videoEl.paused) sampleLiveVideoLight(videoEl, nowMs);
+              } catch (corsErr) {
+                if (!st.videoCorsWarned) {
+                  st.videoCorsWarned = true;
+                  console.warn("[CineVerse 3D] Lỗi CORS SecurityError khi đọc VideoTexture từ <video>:", corsErr);
+                }
+                videoEl.dataset.corsBlocked = "1";
+              }
+            }
+
+            if (activeTex === posterTexture) {
+              const statusTxt = hostPausedCurtain ? "TẠM DỪNG CHIẾU" : (isUpcoming ? "SUẤT CHIẾU SẮP BẮT ĐẦU" : "");
+              drawStaticPosterCanvas(t, statusTxt);
+              gl.activeTexture(gl.TEXTURE0);
+              gl.bindTexture(gl.TEXTURE_2D, posterTexture);
+              gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, posterOff);
+            }
+          } else {
+            drawStaticPosterCanvas(t, "");
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, posterTexture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, posterOff);
+          }
+
+          // Nội suy mượt ánh sáng hắt từ màn chiếu (PointLight / RectAreaLight động)
+          for (let i = 0; i < 3; i++) {
+            st.lightL[i] += (st.targetLightL[i] - st.lightL[i]) * 0.08;
+            st.lightC[i] += (st.targetLightC[i] - st.lightC[i]) * 0.08;
+            st.lightR[i] += (st.targetLightR[i] - st.lightR[i]) * 0.08;
+            st.beamCol[i] = Math.min(1.0, st.lightC[i] * 1.12 + 0.06);
+          }
+
+          st.curtainOpen += (st.curtainTarget - st.curtainOpen) * 0.065;
+          if (Math.abs(st.curtainOpen - st.lastCurtainBuilt) > 0.0025) {
+            rebuildCurtainMesh(st.curtainOpen);
+          }
+
+          const mySeat = seats3D.find(s => s.id === st.mySeatId) || seats3D[28];
+          lerpCamera3D(mySeat);
+
+          const mProj = mat4Perspective(st.curFov, st.W / Math.max(1, st.H), 0.20, 70.0);
+          const mView = mat4LookAt(st.camPos, st.camLook, [0, 1, 0]);
+
+          gl.clearColor(0.014, 0.012, 0.020, 1.0);
+          gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+          gl.enable(gl.DEPTH_TEST);
+          gl.disable(gl.BLEND);
+
+          gl.useProgram(progRoom);
+          gl.uniformMatrix4fv(gl.getUniformLocation(progRoom, "uProj"), false, mProj);
+          gl.uniformMatrix4fv(gl.getUniformLocation(progRoom, "uView"), false, mView);
+          gl.uniform3fv(gl.getUniformLocation(progRoom, "uCamPos"), st.camPos);
+          gl.uniform3fv(gl.getUniformLocation(progRoom, "uScreenColL"), st.lightL);
+          gl.uniform3fv(gl.getUniformLocation(progRoom, "uScreenColC"), st.lightC);
+          gl.uniform3fv(gl.getUniformLocation(progRoom, "uScreenColR"), st.lightR);
+          gl.uniform1f(gl.getUniformLocation(progRoom, "uLights"), st.lightsLevel);
+          gl.uniform1f(gl.getUniformLocation(progRoom, "uTime"), t);
+          gl.uniform1f(gl.getUniformLocation(progRoom, "uCurtainOpen"), st.curtainOpen);
+          gl.uniform1i(gl.getUniformLocation(progRoom, "uScreenTex"), 0);
+
+          gl.activeTexture(gl.TEXTURE0);
+          gl.bindTexture(gl.TEXTURE_2D, activeTex);
+
+          drawMesh(gpuBase);
+          if (st.isCoupleOnly) drawMesh(chairGPU, chairGPU.bIdxCouple, chairGPU.countCouple);
+          else drawMesh(chairGPU, chairGPU.bIdxAll, chairGPU.countAll);
+          drawMesh(avatarGPU);
+          drawMesh(curtainGPU);
+
+          const isInside = st.mode !== "orbit";
+          if (isInside || st.camPos[0] > -6.5) drawMesh(gpuL);
+          if (isInside || st.camPos[0] <  6.5) drawMesh(gpuR);
+          if (isInside || st.camPos[2] <  7.5) drawMesh(gpuRear);
+          if (isInside || st.camPos[1] <  7.6) drawMesh(gpuCeil);
+
+          // Vẽ Màn chiếu 3D (MeshBasicMaterial unlit toneMapped: false)
+          gl.useProgram(progScreen);
+          gl.uniformMatrix4fv(gl.getUniformLocation(progScreen, "uProj"), false, mProj);
+          gl.uniformMatrix4fv(gl.getUniformLocation(progScreen, "uView"), false, mView);
+          gl.uniform1i(gl.getUniformLocation(progScreen, "uTex"), 0);
+          gl.uniform1f(gl.getUniformLocation(progScreen, "uSrcAspect"), activeAspect);
+          gl.uniform1f(gl.getUniformLocation(progScreen, "uScreenAspect"), 12.6 / 5.54);
+          const sLocPos = gl.getAttribLocation(progScreen, "aPos");
+          const sLocUV = gl.getAttribLocation(progScreen, "aUV");
+          gl.bindBuffer(gl.ARRAY_BUFFER, scrBuffers.bPos); gl.enableVertexAttribArray(sLocPos); gl.vertexAttribPointer(sLocPos, 3, gl.FLOAT, false, 0, 0);
+          gl.bindBuffer(gl.ARRAY_BUFFER, scrBuffers.bUV); gl.enableVertexAttribArray(sLocUV); gl.vertexAttribPointer(sLocUV, 2, gl.FLOAT, false, 0, 0);
+          gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, scrBuffers.bIdx);
+          gl.drawElements(gl.TRIANGLES, scrBuffers.count, idxType, 0);
+
+          // Tia máy chiếu Volumetric + hạt bụi bokeh
+          const beamVis = Math.max(0.0, (1.0 - st.lightsLevel * 0.80) * (0.20 + 0.80 * st.curtainOpen));
+          if (beamVis > 0.02 && st.mode !== "focus") {
+            gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE); gl.depthMask(false);
+            gl.useProgram(progBeam);
+            gl.uniformMatrix4fv(gl.getUniformLocation(progBeam, "uProj"), false, mProj);
+            gl.uniformMatrix4fv(gl.getUniformLocation(progBeam, "uView"), false, mView);
+            gl.uniform3f(gl.getUniformLocation(progBeam, "uBeamCol"), st.beamCol[0]*beamVis, st.beamCol[1]*beamVis, st.beamCol[2]*beamVis);
+            gl.uniform1f(gl.getUniformLocation(progBeam, "uTime"), t);
+
+            const bLocPos = gl.getAttribLocation(progBeam, "aPos");
+            const bLocAlpha = gl.getAttribLocation(progBeam, "aAlpha");
+            gl.uniform1f(gl.getUniformLocation(progBeam, "uIsPoint"), 0.0);
+            gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.bPos); gl.enableVertexAttribArray(bLocPos); gl.vertexAttribPointer(bLocPos, 3, gl.FLOAT, false, 0, 0);
+            gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.bAlpha); gl.enableVertexAttribArray(bLocAlpha); gl.vertexAttribPointer(bLocAlpha, 1, gl.FLOAT, false, 0, 0);
+            gl.drawArrays(gl.TRIANGLES, 0, 15);
+
+            gl.uniform1f(gl.getUniformLocation(progBeam, "uIsPoint"), 1.0);
+            for (let i = 0; i < DUST_COUNT; i++) {
+              const d = dustSeeds[i], prog = (d.t + t * 0.02 * d.sp) % 1.0;
+              dustFloatArr[i*3]   = d.u * (0.28 + prog * 5.4) + Math.sin(t * 0.8 + d.ph) * 0.16;
+              dustFloatArr[i*3+1] = (6.65 - prog * 2.65) + d.v * (0.16 + prog * 2.2) + Math.cos(t * 0.7 + d.ph) * 0.12;
+              dustFloatArr[i*3+2] = 9.2 - prog * 19.0;
+            }
+            gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.dPos); gl.bufferData(gl.ARRAY_BUFFER, dustFloatArr, gl.DYNAMIC_DRAW); gl.vertexAttribPointer(bLocPos, 3, gl.FLOAT, false, 0, 0);
+            gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.dAlpha); gl.vertexAttribPointer(bLocAlpha, 1, gl.FLOAT, false, 0, 0);
+            gl.drawArrays(gl.POINTS, 0, DUST_COUNT);
+            gl.depthMask(true); gl.disable(gl.BLEND);
+          }
+
+          // Lớp HUD 2D sắc nét: Nhãn ghế & Bong bóng chat nổi 3D thời gian thực!
+          hctx.clearRect(0, 0, st.W, st.H);
+          if (st.mode === "orbit") {
+            for (const s of seats3D) {
+              const hp = projectHUD([s.x, s.y + 0.55, s.z + 0.10], mView, mProj);
+              s._hit = hp ? { x: hp.x, y: hp.y, w: hp.w, r: Math.max(8, 195 / hp.w) } : null;
+            }
+            hctx.font = "700 10px ui-monospace, monospace"; hctx.textAlign = "center";
+            ROWS_3D.forEach((row, rIdx) => {
+              if (st.isCoupleOnly && row !== "F") return;
+              const p = projectHUD([0, 0.42 + rIdx * 0.76, -4.15 + rIdx * 2.25], mView, mProj);
+              if (p && p.w < 30) {
+                hctx.fillStyle = row === "F" ? "#fde047" : (row === "D" || row === "E") ? "#fda4af" : "rgba(255,255,255,0.68)";
+                hctx.fillText(row, p.x, p.y);
+              }
+            });
+            const mp = projectHUD([mySeat.x, mySeat.y + 1.48, mySeat.z + 0.2], mView, mProj);
+            if (mp) renderBubble2D(mp.x, mp.y, `Ghế ${mySeat.id} (Bạn)`, true);
+          }
+
+          // Hiển thị bong bóng chat 3D trên ghế của khán giả khác trong phòng (nếu có)
+          if (cfg.useLiveVideo && st.mode !== "focus" && state.currentRoomId && state.seatBubbles) {
+            const nowEpoch = Date.now();
+            const prefix = state.currentRoomId + "_";
+            for (const [bKey, bVal] of Object.entries(state.seatBubbles)) {
+              if (!bKey.startsWith(prefix) || !bVal || bVal.expiresAt <= nowEpoch) continue;
+              const sid = bKey.slice(prefix.length);
+              if (sid === st.mySeatId && st.mode === "seat") continue;
+              const sObj = seats3D.find(x => x.id === sid);
+              if (!sObj) continue;
+              const bp = projectHUD([sObj.x, sObj.y + 1.50, sObj.z + 0.2], mView, mProj);
+              if (bp && bp.w < 26) renderBubble2D(bp.x, bp.y, `${sid}: ${bVal.text}`, Boolean(bVal.isMine));
+            }
+          }
+
+          st.rafId = requestAnimationFrame(renderLoop);
+        }
+
+        return {
+          st,
+          ensureInit,
+          resize,
+          loadPoster,
+          syncChairHighlightsO1,
+          syncAvatarsBatch,
+          rebuildCurtainMesh,
+          start(openCurtainAnim = false) {
+            if (!ensureInit()) return;
+            if (openCurtainAnim) {
+              st.curtainOpen = 0.08;
+              st.curtainTarget = 1.0;
+              rebuildCurtainMesh(st.curtainOpen);
+            }
+            resize();
+            if (!st.running) {
+              st.running = true;
+              st.rafId = requestAnimationFrame(renderLoop);
+            }
+          },
+          stop() {
+            st.running = false;
+            if (st.rafId) {
+              cancelAnimationFrame(st.rafId);
+              st.rafId = 0;
+            }
+          }
+        };
       }
 
-      function syncHudButtons() {
-        document.getElementById("b3d-btn-pov")?.classList.toggle("is-active", st.mode === "pov");
+      // =======================================================================
+      // 1. INSTANCE CHO HỘP THOẠI ĐẶT VÉ (window.cvBooking3D)
+      // =======================================================================
+      const bookingInst = createCinema3DInstance({
+        glCanvasId: "booking-3d-gl",
+        hudCanvasId: "booking-3d-hud",
+        tooltipId: "b3d-seat-tooltip",
+        useLiveVideo: false,
+        isVisible() {
+          const m = document.getElementById("booking-modal");
+          const c = document.getElementById("booking-pov-collapsible");
+          return Boolean(m && !m.classList.contains("hidden") && c && !c.classList.contains("hidden"));
+        },
+        onPickSeat(seatId) {
+          window.appActions?.selectBookingSeat?.(seatId);
+        }
+      });
+
+      function syncBookingHud() {
+        const st = bookingInst.st;
+        document.getElementById("b3d-btn-pov")?.classList.toggle("is-active", st.mode === "seat");
         document.getElementById("b3d-btn-orbit")?.classList.toggle("is-active", st.mode === "orbit");
         const povLbl = document.getElementById("b3d-pov-lbl");
         if (povLbl) povLbl.textContent = st.mySeatId || "F4";
@@ -16486,85 +17046,246 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         if (curtLbl) curtLbl.textContent = isClosing ? "Mở rèm" : "Đóng rèm";
         curtBtn?.classList.toggle("is-active", isClosing);
         const lightLbl = document.getElementById("b3d-lights-lbl");
-        const lightBtn = document.getElementById("b3d-lights-lbl")?.parentElement;
+        const lightBtn = lightLbl?.parentElement;
         const isLit = st.lightsTarget > 0.5;
         if (lightLbl) lightLbl.textContent = isLit ? "Tắt đèn" : "Đèn rạp";
         lightBtn?.classList.toggle("is-active", isLit);
         const hint = document.getElementById("b3d-hint-lbl");
         if (hint) {
-          hint.textContent = st.mode === "pov"
-            ? `Đang ngồi ghế ${st.mySeatId} • Kéo để ngoảnh đầu nhìn quanh rạp 360°`
+          hint.textContent = st.mode === "seat"
+            ? `Đang ngồi ghế ${st.mySeatId} • Kéo để ngoảnh đầu 360° (Nháy đúp về giữa màn)`
             : "Toàn cảnh 3D • Kéo xoay 360° • Cuộn zoom • Click ghế bất kỳ để chọn";
         }
       }
 
       window.cvBooking3D = {
         start(openCurtainAnim = false) {
-          if (!ensureInit()) return;
-          if (openCurtainAnim) {
-            st.curtainOpen = 0.06;
-            st.curtainTarget = 1.0;
-            rebuildCurtainMesh(st.curtainOpen);
-          }
-          syncHudButtons();
-          resize();
-          if (!st.running) {
-            st.running = true;
-            st.rafId = requestAnimationFrame(renderLoop);
-          }
+          bookingInst.start(openCurtainAnim);
+          syncBookingHud();
         },
-        stop() {
-          st.running = false;
-          if (st.rafId) { cancelAnimationFrame(st.rafId); st.rafId = 0; }
-        },
+        stop() { bookingInst.stop(); },
         setMode(mode) {
-          st.mode = mode === "orbit" ? "orbit" : "pov";
-          if (st.mode === "pov") { st.tPovYaw = 0; st.tPovPitch = 0; }
-          if (st.initialized) rebuildChairsMesh();
-          syncHudButtons();
+          bookingInst.st.mode = mode === "orbit" ? "orbit" : "seat";
+          if (bookingInst.st.mode === "seat") { bookingInst.st.tPovYaw = 0; bookingInst.st.tPovPitch = 0; }
+          if (bookingInst.st.initialized) bookingInst.syncAvatarsBatch();
+          syncBookingHud();
           this.start(false);
         },
         toggleCurtain() {
-          st.curtainTarget = st.curtainTarget > 0.5 ? 0.0 : 1.0;
-          syncHudButtons();
+          bookingInst.st.curtainTarget = bookingInst.st.curtainTarget > 0.5 ? 0.0 : 1.0;
+          syncBookingHud();
           this.start(false);
         },
         toggleLights() {
-          st.lightsTarget = st.lightsTarget > 0.5 ? 0.0 : 1.0;
-          syncHudButtons();
+          bookingInst.st.lightsTarget = bookingInst.st.lightsTarget > 0.5 ? 0.0 : 1.0;
+          syncBookingHud();
           this.start(false);
         },
         syncBooking(room, seatId) {
-          if (!ensureInit()) return;
+          if (!bookingInst.ensureInit()) return;
+          const st = bookingInst.st;
           const roomId = room?.id || state.bookingDraft?.roomId || "room-1";
           const rawSeats = state.seatsByRoom?.[roomId] || {};
           const occ = {};
           Object.entries(rawSeats).forEach(([sid, info]) => {
-            if (info && info.uid && info.uid !== state.uid) {
-              occ[sid] = info.userName || "Khách";
-            }
+            if (info && info.uid && info.uid !== state.uid) occ[sid] = info.userName || "Khách";
           });
           st.occupied = occ;
           st.isCoupleOnly = Boolean(room?.isCoupleRoom);
           st.movieTitle = (room?.displayTitle || sanitizeMovieTitle(room?.movieTitle || "CineVerse Lotte")).toUpperCase();
-          loadRoomPoster(room?.poster || "");
+          bookingInst.loadPoster(room?.poster || "");
 
           const nextSeat = seatId || (st.isCoupleOnly ? "F4" : "B4");
-          const seatChanged = st.mySeatId !== nextSeat;
-          st.mySeatId = nextSeat;
-          if (seatChanged && seatId) {
-            st.mode = "pov";
-            st.tPovYaw = 0;
-            st.tPovPitch = 0;
+          if (st.mySeatId !== nextSeat && seatId) {
+            st.mode = "seat";
+            st.tPovYaw = 0; st.tPovPitch = 0;
             if (st.curtainTarget < 0.5) st.curtainTarget = 1.0;
           }
-          rebuildChairsMesh();
-          syncHudButtons();
-          const modalEl = document.getElementById("booking-modal");
-          const colEl = document.getElementById("booking-pov-collapsible");
-          if (modalEl && !modalEl.classList.contains("hidden") && colEl && !colEl.classList.contains("hidden")) {
-            this.start(false);
+          st.mySeatId = nextSeat;
+          bookingInst.syncChairHighlightsO1();
+          bookingInst.syncAvatarsBatch();
+          syncBookingHud();
+          const m = document.getElementById("booking-modal");
+          const c = document.getElementById("booking-pov-collapsible");
+          if (m && !m.classList.contains("hidden") && c && !c.classList.contains("hidden")) {
+            bookingInst.start(false);
           }
+        }
+      };
+
+      // =======================================================================
+      // 2. INSTANCE CHIẾU PHIM TRỰC TIẾP TRONG PHÒNG KHI TẮT ĐÈN (window.cvRoomCinema3D)
+      // =======================================================================
+      const roomInst = createCinema3DInstance({
+        glCanvasId: "room-3d-gl",
+        hudCanvasId: "room-3d-hud",
+        tooltipId: "r3d-seat-tooltip",
+        useLiveVideo: true,
+        isVisible() {
+          return document.body.classList.contains("cv-3d-screening-active") &&
+                 document.body.classList.contains("theater-dimmed") &&
+                 !document.getElementById("room-view")?.classList.contains("hidden");
+        },
+        onPickSeat(seatId) {
+          if (!state.currentRoomId) return;
+          if (typeof assignSeat === "function") {
+            assignSeat(state.currentRoomId, seatId, true);
+          }
+          window.cvRoomCinema3D?.setCameraView("seat");
+        }
+      });
+
+      function syncRoom3DHud() {
+        const st = roomInst.st;
+        document.getElementById("r3d-btn-seat")?.classList.toggle("is-active", st.mode === "seat");
+        document.getElementById("r3d-btn-focus")?.classList.toggle("is-active", st.mode === "focus");
+        document.getElementById("r3d-btn-orbit")?.classList.toggle("is-active", st.mode === "orbit");
+        const seatLbl = document.getElementById("r3d-seat-lbl");
+        if (seatLbl) seatLbl.textContent = st.mySeatId || "D5";
+        const barLbl = document.getElementById("bar-3d-view-label");
+        if (barLbl) {
+          barLbl.textContent = st.mode === "focus" ? "Góc tập trung" : (st.mode === "orbit" ? "Toàn cảnh 3D" : `Ghế ${st.mySeatId}`);
+        }
+        const curtLbl = document.getElementById("r3d-curtain-lbl");
+        const curtBtn = document.getElementById("r3d-btn-curtain");
+        const isClosing = st.curtainTarget < 0.5;
+        if (curtLbl) curtLbl.textContent = isClosing ? "Mở rèm" : "Đóng rèm";
+        curtBtn?.classList.toggle("is-active", isClosing);
+      }
+
+      window.cvRoomCinema3D = {
+        start() {
+          this.syncRoomState();
+          roomInst.start(false);
+          syncRoom3DHud();
+        },
+        stop() {
+          roomInst.stop();
+        },
+        setCameraView(viewMode) {
+          const valid = (viewMode === "focus" || viewMode === "orbit") ? viewMode : "seat";
+          roomInst.st.mode = valid;
+          roomInst.st.tPovYaw = 0;
+          roomInst.st.tPovPitch = 0;
+          if (roomInst.st.initialized) roomInst.syncAvatarsBatch();
+          syncRoom3DHud();
+          resetDimmedHudAutoHide();
+        },
+        cycleCameraView() {
+          const next = roomInst.st.mode === "seat" ? "focus" : "seat";
+          this.setCameraView(next);
+        },
+        toggleCurtain() {
+          roomInst.st.curtainTarget = roomInst.st.curtainTarget > 0.5 ? 0.0 : 1.0;
+          syncRoom3DHud();
+          resetDimmedHudAutoHide();
+        },
+        syncRoomState() {
+          const roomId = state.currentRoomId;
+          if (!roomId) return;
+          const room = typeof getEffectiveRoom === "function" ? getEffectiveRoom(roomId) : null;
+          if (!room || isStreamRoom(room)) return;
+          if (!roomInst.ensureInit()) return;
+
+          const st = roomInst.st;
+          const rawSeats = state.seatsByRoom?.[roomId] || {};
+          const occ = {};
+          Object.entries(rawSeats).forEach(([sid, info]) => {
+            if (info && info.uid && info.uid !== state.uid) occ[sid] = info.userName || "Khách";
+          });
+          st.occupied = occ;
+          st.isCoupleOnly = Boolean(room.isCoupleRoom);
+          st.movieTitle = (room.displayTitle || sanitizeMovieTitle(room.movieTitle || "CineVerse Lotte")).toUpperCase();
+          roomInst.loadPoster(room.poster || "");
+
+          const mySeat = getMySeatInRoom(roomId) || state.bookedTicketsByRoom?.[roomId]?.seatId || (st.isCoupleOnly ? "F4" : "D5");
+          if (st.mySeatId !== mySeat) {
+            st.mySeatId = mySeat;
+            st.tPovYaw = 0;
+            st.tPovPitch = 0;
+          }
+          roomInst.syncChairHighlightsO1();
+          roomInst.syncAvatarsBatch();
+          syncRoom3DHud();
+        }
+      };
+
+      // =======================================================================
+      // 3. TỰ ĐỘNG ẨN HUD SAU 3 GIÂY KHÔNG DI CHUỘT & HÀM toggleLights3D()
+      // =======================================================================
+      let hudIdleTimer = 0;
+      let hudListenersBound = false;
+
+      function isHoveringInteractiveHud() {
+        const bar = document.getElementById("cinema-control-bar");
+        const top = document.getElementById("room-top-header");
+        const subPanel = document.getElementById("subtitle-settings-panel");
+        const floatHud = document.getElementById("room-3d-floating-hud");
+        return Boolean(
+          (bar && bar.matches(":hover")) ||
+          (top && top.matches(":hover")) ||
+          (floatHud && floatHud.querySelector(":hover")) ||
+          (subPanel && !subPanel.classList.contains("hidden")) ||
+          document.body.classList.contains("dimmed-chat-open") ||
+          document.body.classList.contains("movie-drawer-open")
+        );
+      }
+
+      function resetDimmedHudAutoHide() {
+        document.body.classList.remove("cv-3d-hud-hidden");
+        if (hudIdleTimer) clearTimeout(hudIdleTimer);
+        if (!document.body.classList.contains("cv-3d-screening-active")) return;
+        hudIdleTimer = setTimeout(() => {
+          if (!document.body.classList.contains("cv-3d-screening-active")) return;
+          if (isHoveringInteractiveHud()) {
+            resetDimmedHudAutoHide();
+            return;
+          }
+          document.body.classList.add("cv-3d-hud-hidden");
+        }, 3000);
+      }
+
+      function bindHudAutoHideListeners() {
+        if (hudListenersBound) return;
+        hudListenersBound = true;
+        ["pointermove", "pointerdown", "keydown", "touchstart"].forEach((evName) => {
+          window.addEventListener(evName, () => {
+            if (document.body.classList.contains("cv-3d-screening-active")) {
+              resetDimmedHudAutoHide();
+            }
+          }, { passive: true });
+        });
+      }
+
+      window.toggleLights3D = function toggleLights3D(enable3D) {
+        const roomView = document.getElementById("room-view");
+        const ytWrapper = document.getElementById("youtube-wrapper");
+        const videoEl = document.getElementById("html5-video-player");
+        const roomId = state.currentRoomId;
+        const room = roomId && typeof getEffectiveRoom === "function" ? getEffectiveRoom(roomId) : null;
+
+        const canActivate3D = Boolean(
+          enable3D &&
+          roomView && !roomView.classList.contains("hidden") &&
+          room && !isStreamRoom(room) &&
+          (!ytWrapper || ytWrapper.classList.contains("hidden")) &&
+          !(videoEl && videoEl.dataset.corsBlocked === "1")
+        );
+
+        const btnViewBar = document.getElementById("btn-bar-3d-view-toggle");
+        const btnLightsBar = document.getElementById("btn-bar-lights-on");
+        btnViewBar?.classList.toggle("hidden", !canActivate3D);
+        btnLightsBar?.classList.toggle("hidden", !canActivate3D);
+
+        if (canActivate3D) {
+          bindHudAutoHideListeners();
+          document.body.classList.add("cv-3d-screening-active");
+          window.cvRoomCinema3D.start();
+          resetDimmedHudAutoHide();
+        } else {
+          if (hudIdleTimer) { clearTimeout(hudIdleTimer); hudIdleTimer = 0; }
+          document.body.classList.remove("cv-3d-screening-active", "cv-3d-hud-hidden");
+          window.cvRoomCinema3D.stop();
         }
       };
     })();
@@ -16901,13 +17622,39 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       });
     }
 
-    function renderSeatingMap() {
+    let __seatMapRafPending = false;
+    function renderSeatingMap(fromRaf = false) {
       const container = document.getElementById("seating-map");
       if (!container) return;
 
+      // Đồng bộ tức thì dữ liệu 48 ghế & tối đa 50 khán giả vào mô hình Rạp 3D (O(1) bufferSubData)
+      window.cvRoomCinema3D?.syncRoomState?.();
+
       const roomId = state.currentRoomId || "room-1";
       const roomSeats = state.seatsByRoom[roomId] || {};
+      const occCount = Object.keys(roomSeats).length;
+
+      // Tối ưu 50 người/phòng: Gộp các cập nhật liên tiếp từ Firebase RTDB vào 1 nhịp khung hình duy nhất
+      if (!fromRaf && occCount >= 8) {
+        if (!__seatMapRafPending) {
+          __seatMapRafPending = true;
+          requestAnimationFrame(() => {
+            __seatMapRafPending = false;
+            renderSeatingMap(true);
+          });
+        }
+        return;
+      }
+
       const mySeat = getMySeatInRoom(roomId);
+      // Khi đang ở chế độ Rạp 3D Tắt đèn (sơ đồ 2D đang ẩn), bỏ qua tạo lại 48 nút DOM 2D để giữ cứng 60fps
+      if (document.body.classList.contains("cv-3d-screening-active") && !document.body.classList.contains("seats-picker-lit")) {
+        const badgeFast = document.getElementById("my-seat-badge");
+        if (badgeFast) badgeFast.textContent = mySeat ? `${mySeat} (${state.userName})` : "Chưa chọn";
+        const dockFast = document.getElementById("bottom-dock-seat-label");
+        if (dockFast) dockFast.textContent = mySeat || "--";
+        return;
+      }
       if (state.pendingRoomSeatChange) {
         const pendingOcc = roomSeats[state.pendingRoomSeatChange];
         if (pendingOcc && pendingOcc.uid !== state.uid) {
@@ -18170,6 +18917,31 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           });
         };
 
+        // Xử lý CORS an toàn cho WebGL VideoTexture (tự động dự phòng nếu nguồn ngoài thiếu Access-Control-Allow-Origin)
+        videoEl.dataset.corsBlocked = "";
+        videoEl.dataset.corsRetried = "";
+        if (/^https?:\/\//i.test(room.videoUrl)) {
+          videoEl.crossOrigin = "anonymous";
+        } else {
+          videoEl.removeAttribute("crossorigin");
+        }
+        videoEl.onerror = () => {
+          if (videoEl.crossOrigin === "anonymous" && !videoEl.dataset.corsRetried && /^https?:\/\//i.test(room.videoUrl)) {
+            console.warn("[CineVerse 3D] Nguồn video chưa bật CORS cho WebGL VideoTexture — tự động chuyển về phát trực tiếp an toàn:", room.videoUrl);
+            videoEl.dataset.corsRetried = "1";
+            videoEl.dataset.corsBlocked = "1";
+            const savedT = videoEl.currentTime || 0;
+            videoEl.removeAttribute("crossorigin");
+            videoEl.src = room.videoUrl;
+            try { videoEl.load(); } catch (_) {}
+            videoEl.addEventListener("loadedmetadata", () => {
+              if (savedT > 0.5) { try { videoEl.currentTime = savedT; } catch (_) {} }
+              tryAutoPlayRoomVideo();
+            }, { once: true });
+            window.toggleLights3D?.(false);
+          }
+        };
+
         const isHlsUrl = /\.m3u8(\?|$)/i.test(room.videoUrl);
         if (isHlsUrl) {
           Promise.resolve(window.ensureHlsLibraryLoaded ? window.ensureHlsLibraryLoaded() : window.Hls).then((HlsLib) => {
@@ -18201,6 +18973,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           videoEl.src = room.videoUrl;
           try { videoEl.load(); } catch (_) {}
         }
+        requestAnimationFrame(() => window.toggleLights3D?.(state.dimmed));
 
         let didInitialSeek = false;
         videoEl.onloadedmetadata = () => {
@@ -19954,12 +20727,14 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           btn.focus({preventScroll: true});
         }
       }
+      window.toggleLights3D?.(state.dimmed);
       if (!silent) {
         playSeatClickSFX();
+        const in3DScreening = document.body.classList.contains("cv-3d-screening-active");
         showToast(
           state.dimmed
-            ? "🌑 Đã tắt đèn rạp! Khán phòng mở rộng toàn chiều ngang."
-            : "💡 Đã bật lại đèn rạp và khôi phục bố cục bảng điều khiển!",
+            ? (in3DScreening ? "🌑 Đã tắt đèn! Đang chiếu phim trực tiếp trên màn chiếu Rạp 3D." : "🌑 Đã tắt đèn rạp! Tận hưởng bộ phim nhé.")
+            : "💡 Đã bật lại đèn rạp và trở về bố cục 2D!",
           "info"
         );
       }
@@ -29878,8 +30653,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       document.getElementById("owner-chat-drawer")?.classList.add("hidden");
       document.body.classList.add("booking-modal-open");
       modalEl?.classList.remove("hidden");
-      window.cvBooking3D?.syncBooking(room, state.bookingDraft.seatId);
-      window.cvBooking3D?.start(true);
       bindBookingDialogKeyboard();
       requestAnimationFrame(() => {
         const scrollBody = document.getElementById("booking-scroll-body");
@@ -29888,6 +30661,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         const panel = document.getElementById("booking-modal-panel");
         if (closeBtn) closeBtn.focus({ preventScroll: true });
         else panel?.focus({ preventScroll: true });
+        requestAnimationFrame(() => {
+          window.cvBooking3D?.syncBooking(room, state.bookingDraft.seatId);
+          window.cvBooking3D?.start(true);
+        });
       });
       playSeatClickSFX();
     }
