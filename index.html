@@ -505,15 +505,18 @@
       border-left: 3px solid transparent;
       color: #FFFFFF;
       cursor: pointer;
-      transition: background-color 0.18s ease, border-color 0.18s ease;
+      transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease;
     }
     .cv-room-row:hover {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.09);
+      transform: translateX(3px);
     }
     .cv-room-row.is-active {
-      background: #1E1E28;
+      background: linear-gradient(90deg, rgba(245, 197, 24, 0.14) 0%, #1E1E28 52%, rgba(22, 20, 29, 0.96) 100%);
       border-color: rgba(245, 197, 24, 0.55);
       border-left: 3px solid #F5C518;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 8px 22px rgba(0, 0, 0, 0.42);
     }
     .cv-room-row-num {
       font-size: 18px;
@@ -673,18 +676,24 @@
     .cv-special-card {
       position: relative;
       min-height: 180px;
-      border-radius: 18px;
+      border-radius: 20px;
       overflow: hidden;
-      background: #16161D;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: #141219;
+      border: 1px solid rgba(255, 255, 255, 0.14);
       display: flex;
       align-items: stretch;
-      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
-      transition: border-color 0.2s ease, transform 0.2s ease;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        0 18px 44px rgba(0, 0, 0, 0.65);
+      transition: border-color 0.26s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
     }
     .cv-special-card:hover {
-      border-color: rgba(245, 197, 24, 0.48);
-      transform: translateY(-2px);
+      border-color: rgba(245, 197, 24, 0.55);
+      transform: translateY(-3px);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 24px 56px rgba(0, 0, 0, 0.8),
+        0 0 36px rgba(136, 19, 39, 0.22);
     }
     .cv-special-card-bg {
       position: absolute;
@@ -693,12 +702,20 @@
       height: 100%;
       object-fit: cover;
       object-position: right center;
-      opacity: 0.68;
+      opacity: 0.72;
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+    }
+    .cv-special-card:hover .cv-special-card-bg {
+      transform: scale(1.04);
+      opacity: 0.82;
     }
     .cv-special-card-scrim {
       position: absolute;
       inset: 0;
-      background: linear-gradient(90deg, #0B0B0F 0%, rgba(11, 11, 15, 0.92) 44%, rgba(11, 11, 15, 0.32) 78%, rgba(11, 11, 15, 0.14) 100%);
+      background:
+        linear-gradient(108deg, rgba(8, 7, 11, 0.98) 0%, rgba(15, 11, 16, 0.90) 44%, rgba(28, 13, 21, 0.36) 78%, rgba(11, 11, 15, 0.16) 100%);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
     }
     .cv-special-card-content {
       position: relative;
@@ -812,7 +829,7 @@
         max-height: 54px !important;
       }
       body:not(.stream-room-active) #cinema-screen {
-        max-height: min(42vh, 390px) !important;
+        max-height: none !important;
       }
       #seating-map {
         gap: 4px !important;
@@ -851,14 +868,26 @@
     .cv-top10-shell {
       position: relative;
       scroll-margin-top: 78px;
-      border-radius: 20px;
+      border-radius: 22px;
       background:
-        radial-gradient(ellipse 85% 65% at 18% 10%, rgba(229, 9, 20, 0.14) 0%, rgba(16, 16, 22, 0.96) 56%),
+        radial-gradient(ellipse 85% 65% at 18% 10%, rgba(229, 9, 20, 0.16) 0%, rgba(16, 15, 22, 0.96) 56%),
         #0B0B0F;
-      border: 1px solid rgba(255, 255, 255, 0.11);
-      padding: 20px 22px;
-      box-shadow: 0 20px 56px rgba(0, 0, 0, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      padding: 22px 24px;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        0 22px 60px rgba(0, 0, 0, 0.78);
       overflow: hidden;
+    }
+    .cv-top10-shell::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 8%;
+      right: 8%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(245, 197, 24, 0.48) 35%, rgba(225, 29, 72, 0.55) 65%, transparent 100%);
+      pointer-events: none;
     }
     .cv-top10-heading {
       font-size: clamp(24px, 2.5vw, 34px);
@@ -1841,14 +1870,33 @@
     .cv-wp-section {
       position: relative;
       scroll-margin-top: 78px;
-      border-radius: 20px;
+      border-radius: 22px;
       background:
-        radial-gradient(ellipse 78% 72% at 88% 15%, rgba(128, 22, 38, 0.22) 0%, rgba(16, 11, 14, 0.96) 58%),
+        radial-gradient(ellipse 84% 85% at 88% 15%, rgba(136, 19, 39, 0.28) 0%, rgba(16, 11, 15, 0.96) 58%),
+        radial-gradient(ellipse 65% 75% at 12% 90%, rgba(245, 197, 24, 0.08) 0%, transparent 60%),
         #0B0B0F;
-      border: 1px solid rgba(255, 255, 255, 0.10);
-      padding: 20px 22px;
-      box-shadow: 0 20px 56px rgba(0, 0, 0, 0.72);
+      border: 1px solid rgba(245, 197, 24, 0.24);
+      padding: 20px 24px;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        0 22px 58px rgba(0, 0, 0, 0.76);
+      overflow: hidden;
     }
+    .cv-wp-section::before,
+    .cv-wp-section::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #070609;
+      border: 1px solid rgba(245, 197, 24, 0.24);
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+    .cv-wp-section::before { left: -9px; }
+    .cv-wp-section::after { right: -9px; }
     @media (max-width: 639px) {
       .cv-wp-section {
         padding: 14px 12px;
@@ -6619,12 +6667,12 @@
     #discord-live-video {
       filter: none !important;
     }
-    body.screen-fit-cover #html5-video-player,
-    body.screen-fit-cover #discord-live-video {
+    body:not(.screen-fit-contain):not(.stream-room-active):not(.mobile-cinema-fullscreen) #html5-video-player {
       object-fit: cover !important;
-      object-position: center bottom !important;
+      object-position: center center !important;
     }
-    body:not(.screen-fit-cover):not(.stream-room-active):not(.mobile-cinema-fullscreen) #html5-video-player {
+    body.screen-fit-contain:not(.stream-room-active):not(.mobile-cinema-fullscreen) #html5-video-player,
+    body.stream-room-active #discord-live-video {
       object-fit: contain !important;
       object-position: center center !important;
     }
@@ -7015,12 +7063,21 @@
     }
     body:has(#lobby-view:not(.hidden)) .ambient-mist-layer { display: none; }
     #lobby-view { padding-inline: clamp(10px, 4vw, 76px) !important; }
-    #lobby-view > section + section { margin-top: 16px; }
+    #lobby-view > section + section { margin-top: 24px; }
     .cv-cinema-hero { background: transparent; border: 0; box-shadow: none; overflow: visible; }
     .cv-stage-left, .cv-rooms-panel, .cv-mobile-room-bar {
-      border: 1px solid #534036; border-radius: 16px; min-width: 0;
+      border: 1px solid rgba(245, 197, 24, 0.22);
+      border-radius: 20px;
+      min-width: 0;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        0 26px 68px rgba(0, 0, 0, 0.84),
+        0 0 85px -24px rgba(136, 19, 39, 0.45);
     }
-    .cv-stage-left { background: #120e10; }
+    .cv-stage-left {
+      background: #100c0f;
+      overflow: hidden;
+    }
     .cv-stage-auditorium {
       position: relative; inset: auto; width: 100%; min-height: 0; aspect-ratio: 1.43;
       padding: 0; justify-content: flex-start; isolation: isolate;
@@ -7067,8 +7124,21 @@
       .cv-cinema-hero { grid-template-columns: minmax(0,1.95fr) minmax(300px,1fr); gap: 16px; }
       .cv-stage-left { justify-content: flex-start; min-height: 0; }
       .cv-stage-auditorium { aspect-ratio: 2.23; }
-      .cv-stage-info { flex: 1; justify-content: center; padding: 20px 24px; }
-      .cv-rooms-panel { max-height: none; padding: 20px; background: #151215; }
+      .cv-stage-info {
+        flex: 1;
+        justify-content: center;
+        padding: 20px 26px;
+        background:
+          linear-gradient(125deg, rgba(38, 15, 22, 0.94) 0%, rgba(14, 12, 16, 0.97) 58%, #0c0a0e 100%);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .cv-rooms-panel {
+        max-height: none;
+        padding: 20px;
+        background: linear-gradient(180deg, rgba(24, 18, 22, 0.92) 0%, rgba(12, 11, 16, 0.96) 100%);
+        backdrop-filter: blur(24px) saturate(165%);
+        -webkit-backdrop-filter: blur(24px) saturate(165%);
+      }
       #desktop-rooms-list { min-height: 0 !important; display: flex; flex-direction: column; justify-content: space-evenly; }
       .cv-room-row { min-height: 58px; }
     }
