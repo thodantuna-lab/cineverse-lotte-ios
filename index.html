@@ -17465,11 +17465,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
     function startUpcomingMovieNow() {
       if (!state.currentRoomId) return;
+      const prevTitle = (getEffectiveRoom(state.currentRoomId)?.movieTitle || "").trim();
       state.roomsCustom[state.currentRoomId] = {
         ...(state.roomsCustom[state.currentRoomId] || {}),
         status: "showing"
       };
       const room = getEffectiveRoom(state.currentRoomId);
+      clearRoomChatForNewMovie(state.currentRoomId, { syncRemote: false });
       updateRoomHeaderUI();
       setupRoomVideoPlayer(room);
       showToast(`🎬 Bắt đầu trình chiếu "${room.movieTitle}"!`, "success");
@@ -17486,6 +17488,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       const cleanName = file.name.replace(/\.[^/.]+$/, "");
       const isHaAnhTuan = cleanName.toLowerCase().includes("tháng tư") || cleanName.toLowerCase().includes("ha anh tuan") || cleanName.toLowerCase().includes("hà anh tuấn");
 
+      const prevTitle = (getEffectiveRoom(state.currentRoomId)?.movieTitle || "").trim();
       state.roomsCustom[state.currentRoomId] = {
         status: "showing",
         movieTitle: cleanName,
@@ -17499,6 +17502,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       saveUploadedFileToVault(file, false);
 
       const room = getEffectiveRoom(state.currentRoomId);
+      clearRoomChatForNewMovie(state.currentRoomId, { syncRemote: false });
       updateRoomHeaderUI();
       setupRoomVideoPlayer(room);
       showToast(`🎬 Đang chiếu file "${cleanName}" & đã tự lưu vào Kho Phim Riêng!`, "success");
@@ -17977,6 +17981,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           }
         }, 650);
 
+        clearRoomChatForNewMovie(roomId, { syncRemote: true });
         pushMessageToRoom(`👑 Chủ Trì ${state.userName || "Host"} đã đổi phim sang: "${item.title}"`);
         try { logMemberActivity?.("host_switch_movie", `Chủ Trì đổi phim sang "${item.title}" tại ${curRoom?.number || roomId}`, { movieTitle: item.title, roomId }); } catch (_) {}
         showToast(`👑 Đã đổi phim sang "${item.title}" & cập nhật ra Sảnh! (Lần đổi tiếp theo sau 30 phút)`, "success");
@@ -21082,6 +21087,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         finalTitle = "Video Trực Tuyến (.mp4)";
       }
 
+      const prevTitle = (getEffectiveRoom(state.currentRoomId)?.movieTitle || "").trim();
       state.roomsCustom[state.currentRoomId] = {
         status: "showing",
         movieTitle: finalTitle,
@@ -21098,6 +21104,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       if (quickInput) quickInput.value = cleanUrl;
 
       const room = getEffectiveRoom(state.currentRoomId);
+      if (finalTitle && finalTitle !== prevTitle) {
+        clearRoomChatForNewMovie(state.currentRoomId, { syncRemote: isIAmHost() });
+      }
       state.triviaIndex = 0;
       state.triviaAnsweredCurrent = false;
       updateRoomHeaderUI();
@@ -21244,6 +21253,21 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       if (myActiveSeatPath) {
         try { rtdbMod.remove(rtdbMod.ref(rtdb, myActiveSeatPath)); } catch (e) {}
         myActiveSeatPath = null;
+      }
+    }
+
+    // Tự động dọn sạch chat cũ của phòng khi chuyển sang phim mới (tránh lẫn tin nhắn/đề xuất phim trước)
+    function clearRoomChatForNewMovie(roomId, { syncRemote = false } = {}) {
+      if (!roomId) return;
+      state.chatByRoom[roomId] = [];
+      if (state.currentRoomId === roomId) {
+        roomTypingMap = {};
+        if (typeof renderChatTypingIndicator === "function") renderChatTypingIndicator();
+        if (typeof renderChatMessages === "function") renderChatMessages();
+      }
+      saveAppStateToStorage?.();
+      if (syncRemote && rtdb && rtdbMod) {
+        rtdbMod.remove(rtdbMod.ref(rtdb, `chat/${roomId}`)).catch(() => {});
       }
     }
 
@@ -21984,6 +22008,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             hasLyrics: (data.movieTitle || "").toLowerCase().includes("tháng tư")
           };
           updateRoomHeaderUI();
+          clearRoomChatForNewMovie(roomId, { syncRemote: false });
           renderHeroBillboard();
           renderLobby();
           if (state.currentRoomId === roomId) {
@@ -27922,6 +27947,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             if (!activeRoomAlreadyMatched && (activeRoomMovieSwitched || (prevActiveTitle && newTitle !== prevActiveTitle) || (prevActiveUrl && newUrl !== prevActiveUrl))) {
               delete state.roomsCustom[state.currentRoomId];
               const freshRoom = getEffectiveRoom(state.currentRoomId);
+              clearRoomChatForNewMovie(state.currentRoomId, { syncRemote: false });
               state.triviaIndex = 0;
               state.triviaAnsweredCurrent = false;
               updateRoomHeaderUI();
@@ -31045,6 +31071,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           isCustomStartZero: true,
           updatedAt: Date.now()
         };
+        if (movieChanged) clearRoomChatForNewMovie(baseRoom.id, { syncRemote: true });
       });
 
       state.lobbyConfigRooms = payload;
