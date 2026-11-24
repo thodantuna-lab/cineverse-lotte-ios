@@ -2176,6 +2176,32 @@
       overflow-y: auto;
       padding-bottom: max(1rem, env(safe-area-inset-bottom));
     }
+    .cv-wp-create-sheet {
+      width: 100%;
+      max-width: 450px !important;
+      padding: 14px 16px !important;
+      border-radius: 20px !important;
+    }
+    .cv-wp-create-sheet .cv-wp-create-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 11.5px;
+    }
+    .cv-wp-create-sheet input,
+    .cv-wp-create-sheet select,
+    .cv-wp-create-sheet .cv-select-trigger {
+      min-height: 36px !important;
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+      font-size: 11.5px !important;
+    }
+    .cv-wp-create-sheet .cv-wp-cta-primary,
+    .cv-wp-create-sheet .cv-wp-cta-secondary {
+      min-height: 36px !important;
+      padding: 7px 14px !important;
+      font-size: 12px !important;
+    }
     .cv-wp-invite-sheet {
       width: 100%;
       max-width: 740px;
@@ -9769,42 +9795,42 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
   <!-- MODAL TẠO / SỬA LỊCH HẸN XEM CÙNG BẠN BÈ -->
   <div id="watch-party-create-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="wp-create-modal-title">
-    <div class="cv-wp-modal-sheet w-full max-w-xl rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 space-y-4 shadow-2xl"
+    <div class="cv-wp-modal-sheet cv-wp-create-sheet w-full rounded-t-3xl sm:rounded-2xl space-y-2.5 shadow-2xl"
       style="background:linear-gradient(180deg, #161116 0%, #0B0B0F 100%);border:1px solid rgba(245,197,24,0.38);">
-      <div class="flex items-center justify-between gap-3 pb-2 border-b border-white/10">
-        <div class="flex items-center gap-2.5 min-w-0">
-          <img src="assets/web-logo.png" alt="CineVerse Lotte" class="w-8 h-8 rounded-full border border-amber-400/50 object-cover shrink-0" />
+      <div class="flex items-center justify-between gap-2 pb-2 border-b border-white/10">
+        <div class="flex items-center gap-2 min-w-0">
+          <img src="assets/web-logo.png" alt="CineVerse Lotte" class="w-7 h-7 rounded-full border border-amber-400/50 object-cover shrink-0" />
           <div class="min-w-0">
-            <h3 id="wp-create-modal-title" class="cv-serif text-lg sm:text-xl font-bold text-white truncate">Hẹn xem cùng bạn bè</h3>
-            <p class="text-[11px]" style="color:#A1A1AA;">Chọn phim, đặt giờ theo Asia/Ho_Chi_Minh &amp; gửi vé mời</p>
+            <h3 id="wp-create-modal-title" class="cv-serif text-base sm:text-lg font-bold text-white truncate">Hẹn xem cùng bạn bè</h3>
+            <p class="text-[10.5px]" style="color:#A1A1AA;">Chọn phim, đặt giờ theo Asia/Ho_Chi_Minh &amp; gửi vé mời</p>
           </div>
         </div>
         <button type="button" onclick="window.appActions.closeCreateWatchPartyModal()"
-          class="min-w-[44px] min-h-[44px] rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white flex items-center justify-center cursor-pointer"
+          class="min-w-[34px] min-h-[34px] rounded-full bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white flex items-center justify-center cursor-pointer"
           aria-label="Đóng hộp thoại tạo lịch hẹn">
-          <i class="fa-solid fa-xmark text-base"></i>
+          <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
 
-      <div class="space-y-3 text-xs">
-        <div id="wp-draft-restored-banner" class="hidden px-3 py-2 rounded-xl flex items-center justify-between gap-2 text-[11px]"
+      <div class="cv-wp-create-body">
+        <div id="wp-draft-restored-banner" class="hidden px-2.5 py-1.5 rounded-xl flex items-center justify-between gap-2 text-[10.5px]"
           style="background:rgba(245,197,24,0.10);border:1px solid rgba(245,197,24,0.36);color:#FDE68A;">
           <span><i class="fa-solid fa-bookmark mr-1.5"></i>Đã giữ lại bản nháp lịch hẹn của bạn.</span>
           <button type="button" onclick="window.appActions.resetWatchPartyDraft()" class="underline font-bold text-amber-300 hover:text-amber-200 cursor-pointer shrink-0">Đặt lại</button>
         </div>
-        <div id="wp-confirm-ready-banner" class="hidden px-3 py-2.5 rounded-xl text-[11.5px] font-bold"
+        <div id="wp-confirm-ready-banner" class="hidden px-2.5 py-2 rounded-xl text-[11px] font-bold"
           style="background:rgba(16,185,129,0.14);border:1px solid rgba(16,185,129,0.45);color:#6EE7B7;">
           <i class="fa-solid fa-circle-check mr-1.5"></i>Đã đăng nhập thành công — Kiểm tra lại lịch đã điền và bấm <strong>Xác nhận &amp; Tạo vé mời</strong> để lưu.
         </div>
 
-        <div id="wp-form-movie-card" class="flex items-center gap-3 p-2.5 rounded-2xl bg-black/45 border border-white/10">
+        <div id="wp-form-movie-card" class="flex items-center gap-2.5 p-2 rounded-xl bg-black/45 border border-white/10">
           <img id="wp-form-movie-poster" src="assets/web-logo.png" alt="Poster phim"
             onerror="this.onerror=null;this.src='assets/web-logo.png';"
-            class="w-12 h-16 rounded-xl object-cover border border-white/15 shrink-0" />
-          <div class="min-w-0 flex-1 space-y-1">
-            <span class="text-[10px] uppercase tracking-wider font-extrabold text-amber-300 block">Phim đã chọn</span>
-            <h4 id="wp-form-movie-title" class="text-sm font-black text-white truncate">--</h4>
-            <p id="wp-form-movie-meta" class="text-[11px] text-slate-300 truncate">--</p>
+            class="w-10 h-14 rounded-lg object-cover border border-white/15 shrink-0" />
+          <div class="min-w-0 flex-1 space-y-0.5">
+            <span class="text-[9.5px] uppercase tracking-wider font-extrabold text-amber-300 block">Phim đã chọn</span>
+            <h4 id="wp-form-movie-title" class="text-xs sm:text-[13px] font-black text-white truncate">--</h4>
+            <p id="wp-form-movie-meta" class="text-[10.5px] text-slate-300 truncate">--</p>
           </div>
         </div>
 
@@ -9861,16 +9887,16 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           </select>
         </div>
 
-        <div id="wp-form-schedule-preview" class="p-3.5 rounded-2xl space-y-1.5"
+        <div id="wp-form-schedule-preview" class="p-2.5 rounded-xl space-y-1"
           style="background:rgba(44,13,19,0.55);border:1px solid rgba(245,197,24,0.35);">
-          <div class="flex flex-wrap items-center justify-between gap-2 text-amber-300 font-bold">
+          <div class="flex flex-wrap items-center justify-between gap-1.5 text-amber-300 font-bold text-[11px]">
             <span><i class="fa-regular fa-clock mr-1"></i>Dự kiến bắt đầu &amp; Tự đóng phòng</span>
-            <span id="wp-preview-duration-badge" class="px-2 py-0.5 rounded bg-black/40 text-[10px]">-- phút + 10 phút đệm</span>
+            <span id="wp-preview-duration-badge" class="px-1.5 py-0.5 rounded bg-black/40 text-[9.5px]">-- phút + 10 phút đệm</span>
           </div>
-          <p id="wp-preview-time-text" class="text-xs text-white font-semibold leading-relaxed">
+          <p id="wp-preview-time-text" class="text-[11px] text-white font-semibold leading-snug">
             Vui lòng chọn phim và thời gian bắt đầu…
           </p>
-          <p class="text-[11px]" style="color:#D4D4D8;">
+          <p class="text-[10px] leading-snug" style="color:#D4D4D8;">
             • Chọn ghế khi vào phòng • Đúng giờ vé phim tự động chiếu (không tua; vào muộn xem tiếp đoạn đang chiếu) và tự đóng vào giờ kết thúc cố định.
           </p>
         </div>
@@ -9878,7 +9904,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         <p id="wp-create-error" class="hidden text-xs font-bold text-rose-400"></p>
       </div>
 
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-2">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-1">
         <button type="button" onclick="window.appActions.closeCreateWatchPartyModal()"
           class="cv-wp-cta-secondary">
           Hủy
