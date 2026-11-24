@@ -1972,13 +1972,32 @@
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
-      transform: scale(0.86) translateY(8px);
+      transform: scale(0.82) translateY(14px);
       transform-origin: center center;
+      will-change: transform, opacity;
       transition:
-        opacity 200ms cubic-bezier(0.22, 1, 0.36, 1),
-        transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
-        visibility 200ms ease;
+        opacity 260ms cubic-bezier(0.16, 1, 0.3, 1),
+        transform 380ms cubic-bezier(0.16, 1, 0.3, 1),
+        left 260ms cubic-bezier(0.22, 1, 0.36, 1),
+        top 260ms cubic-bezier(0.22, 1, 0.36, 1),
+        width 260ms cubic-bezier(0.22, 1, 0.36, 1),
+        height 260ms cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 260ms ease;
       font-family: "Be Vietnam Pro", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    @keyframes cvDhpContentReveal {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes cvDhpHeroZoom {
+      0% { transform: scale(1.08); opacity: 0.72; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    #cv-discover-hover-popup.is-open .cv-dhp-hero img {
+      animation: cvDhpHeroZoom 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    #cv-discover-hover-popup.is-open .cv-dhp-body {
+      animation: cvDhpContentReveal 360ms cubic-bezier(0.16, 1, 0.3, 1) 45ms both;
     }
     #cv-discover-hover-popup::before {
       content: "";
@@ -2868,22 +2887,27 @@
       margin: 4px auto 0 !important;
       z-index: 35;
     }
-    /* Khung phim rạp: phủ kín 2 bên màn cong, cắt dải đen phía trên, chừa vừa đủ khoảng phụ đề phía dưới */
+    /* Khung phim rạp: mặc định 16:9 và phủ kín khung hình (Cover) không còn viền đen 2 bên */
     body:not(.stream-room-active):not(.mobile-cinema-fullscreen) #cinema-screen {
-      aspect-ratio: 19 / 9 !important;
+      aspect-ratio: 16 / 9 !important;
     }
     body[data-screen-ratio="18-9"]:not(.stream-room-active):not(.mobile-cinema-fullscreen) #cinema-screen {
       aspect-ratio: 18 / 9 !important;
     }
-    body[data-screen-ratio="17-9"]:not(.stream-room-active):not(.mobile-cinema-fullscreen) #cinema-screen,
-    body.theater-dimmed:not(.stream-room-active):not(.mobile-cinema-fullscreen):not([data-screen-ratio="18-9"]):not([data-screen-ratio="19-9"]) #cinema-screen {
+    body[data-screen-ratio="19-9"]:not(.stream-room-active):not(.mobile-cinema-fullscreen) #cinema-screen {
+      aspect-ratio: 19 / 9 !important;
+    }
+    body[data-screen-ratio="17-9"]:not(.stream-room-active):not(.mobile-cinema-fullscreen) #cinema-screen {
       aspect-ratio: 17 / 9 !important;
     }
     body:not(.stream-room-active):not(.mobile-cinema-fullscreen) #html5-video-player {
-      object-fit: contain !important;
+      object-fit: cover !important;
       object-position: center center !important;
       width: 100% !important;
       height: 100% !important;
+    }
+    body.screen-fit-contain:not(.stream-room-active):not(.mobile-cinema-fullscreen) #html5-video-player {
+      object-fit: contain !important;
     }
     body:not(.stream-room-active) .imax-curve-arch-top,
     body:not(.stream-room-active) .imax-curve-arch-bottom {
@@ -6826,7 +6850,7 @@
       background-position: center center, center center;
       background-repeat: no-repeat, no-repeat;
       margin: -12px -12px 0;
-      padding: 26px 14px 24px;
+      padding: 16px 12px 18px;
       border-radius: 22px 22px 0 0;
       overflow: hidden;
       transition: filter 0.45s ease, padding 0.35s ease;
@@ -6834,7 +6858,7 @@
     @media (min-width: 640px) {
       body:not(.stream-room-active) #cinema-auditorium-stage {
         margin: -20px -20px 0;
-        padding: 34px 22px 30px;
+        padding: 20px 16px 22px;
       }
     }
     body.theater-dimmed:not(.stream-room-active) #cinema-auditorium-stage {
@@ -6842,7 +6866,7 @@
         linear-gradient(180deg, rgba(0, 0, 0, 0.34) 0%, rgba(0, 0, 0, 0.18) 20%, rgba(0, 0, 0, 0.22) 82%, rgba(2, 2, 3, 0.92) 100%),
         url("assets/cinema-auditorium-bg.jpg");
       margin: -4px -4px 0;
-      padding: 24px 16px 20px;
+      padding: 16px 12px 16px;
     }
     /* Ẩn các chi tiết giả lập cũ (đèn trần 4 bóng, loa tường, biển EXIT, bình cứu hỏa, khung cong xanh) */
     body:not(.stream-room-active) #cinema-auditorium-stage .ceiling-canopy,
@@ -6858,30 +6882,30 @@
     body:not(.stream-room-active) #cinema-auditorium-stage .stage-floor {
       display: none !important;
     }
-    /* Khung màn hình tối giản nằm gọn trong khoảng đen trung tâm của nền rạp */
+    /* Khung màn hình mở rộng phủ tối đa khoảng đen trung tâm, vẫn giữ 2 bên rèm đỏ & đèn rọi */
     body:not(.stream-room-active):not(.mobile-cinema-fullscreen) #screen-stage-box {
-      width: 76%;
+      width: 84%;
       perspective: none;
       transform-style: flat;
     }
     @media (max-width: 639px) {
       body:not(.stream-room-active):not(.mobile-cinema-fullscreen) #screen-stage-box {
-        width: 88% !important;
+        width: 94% !important;
       }
       body:not(.stream-room-active) #cinema-auditorium-stage {
         background-size: 100% 100%, cover;
         background-position: center center, center center;
-        padding: 18px 10px 18px;
+        padding: 12px 8px 14px;
       }
     }
     body.theater-dimmed:not(.stream-room-active):not(.mobile-cinema-fullscreen) #screen-stage-box {
-      width: 82% !important;
-      max-width: calc(var(--dim-screen-height) * var(--dim-screen-ratio, calc(17 / 9)) + 12px);
+      width: 88% !important;
+      max-width: calc(var(--dim-screen-height) * var(--dim-screen-ratio, calc(16 / 9)) + 12px);
       margin: 0 auto !important;
     }
     body:not(.stream-room-active) .lotte-screen-frame {
       background: #020204 !important;
-      padding: 4px !important;
+      padding: 3px !important;
       border-radius: 12px !important;
       border: 1px solid rgba(255, 224, 185, 0.10) !important;
       box-shadow:
@@ -6889,18 +6913,35 @@
         0 0 36px rgba(0, 0, 0, 0.92) !important;
       transform: none !important;
     }
+    /* Thanh điều khiển gọn gàng nằm ngoài sân khấu, ngay phía trên thanh Ghế của bạn */
+    body:not(.stream-room-active) #room-controls-dock-wrap {
+      margin-top: 6px;
+    }
     body:not(.stream-room-active) #cinema-control-bar.cv-cinema-bar {
-      width: 86%;
-      margin: 14px auto 0;
-      background: rgba(9, 9, 13, 0.88) !important;
+      width: 100%;
+      margin: 0;
+      border-radius: 14px !important;
+      background: rgba(11, 11, 16, 0.94) !important;
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.09) !important;
     }
-    @media (max-width: 639px) {
-      body:not(.stream-room-active) #cinema-control-bar.cv-cinema-bar {
-        width: 100%;
-      }
+    body:not(.stream-room-active) #cinema-control-bar .cv-seek-strip {
+      padding: 5px 12px 4px;
+      border-radius: 13px 13px 0 0;
+    }
+    body:not(.stream-room-active) #cinema-control-bar .cv-icon-bar-row {
+      padding: 5px 10px;
+      border-radius: 0 0 13px 13px;
+    }
+    body:not(.stream-room-active) #cinema-control-bar .cv-bar-play-btn {
+      width: 34px;
+      height: 34px;
+      font-size: 13px;
+    }
+    body:not(.stream-room-active) #cinema-control-bar .cv-bar-icon-btn {
+      width: 30px;
+      height: 30px;
     }
     #btn-dim-lights,#floating-lights-on-btn { min-height: 44px; }
     @media (prefers-reduced-motion:reduce) {
@@ -7053,45 +7094,45 @@ body:not(.stream-room-active) #room-view #btn-play-pause {
   box-shadow: 0 2px 8px #0008;
 }
 body:not(.stream-room-active) #room-view #theater-left-movie-list .movie-list-card {
-  background: transparent;
-  border-bottom: 1px solid #383033;
-  border-radius: 4px;
+  background: #0b0a0e;
+  border-radius: 12px;
+  overflow: hidden;
 }
 body:not(.stream-room-active) #room-view .movie-list-card > div:first-child {
-  display: grid;
-  grid-template-columns: 52px minmax(0,1fr);
-  grid-template-rows: auto auto;
-  align-content: center;
-  gap: 4px 9px;
-  padding: 8px;
-  aspect-ratio: auto;
-  min-height: 90px;
-  background: transparent;
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  min-height: 112px;
+  padding: 0;
+  background: #09080c;
+  overflow: hidden;
 }
 body:not(.stream-room-active) #room-view .movie-list-card > div:first-child > img {
-  grid-area: 1 / 1 / 3 / 2;
-  height: 74px;
-  border-radius: 5px;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
 }
 body:not(.stream-room-active) #room-view .movie-list-card .bottom-0 {
-  grid-area: 1 / 2;
-  position: static;
-  align-self: end;
-  padding: 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  padding: 6px 10px;
+  background: linear-gradient(180deg, rgba(12, 11, 16, 0.36) 0%, rgba(10, 10, 14, 0.78) 100%);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
 }
-body:not(.stream-room-active) #room-view .movie-list-card .bottom-0 p {font-size: 13px; line-height: 1.35;}
-body:not(.stream-room-active) #room-view .movie-list-card > div:first-child > span.right-2 {
-  grid-area: 2 / 2;
-  position: static;
-  justify-self: start;
-  align-self: start;
+body:not(.stream-room-active) #room-view .movie-list-card .bottom-0 p {
+  font-size: 11.5px;
+  line-height: 1.3;
+  font-weight: 800;
 }
-body:not(.stream-room-active) #room-view .movie-list-card > div:first-child > span.left-2 {
-  top: auto;
-  bottom: 8px;
-  max-width: 52px;
-}
-body:not(.stream-room-active) #room-view .movie-list-card .bg-gradient-to-t {opacity: 0;}
 body:not(.stream-room-active) #room-view #chat-messages [data-msg-id] > div:last-child {
   color: #f8eeeb;
   background: #282327;
@@ -8822,8 +8863,14 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             </div>
           </div>
 
-            <!-- Thanh điều khiển Video + Điều khiển Phòng Stream -->
-            <div class="relative z-30 mt-2">
+          <!-- Sàn sân khấu uốn cong phía trước màn hình IMAX -->
+          <div class="stage-floor flex items-center justify-center">
+            <span class="text-[9px] uppercase tracking-[0.28em] text-sky-300/75 font-black select-none">MÀN HÌNH CONG IMAX 70MM LASER • THE ODYSSEY CURVED SCREEN</span>
+          </div>
+        </div>
+
+        <!-- Thanh điều khiển Video + Điều khiển Phòng Stream (nằm ngoài sân khấu, ngay phía trên thanh Ghế của bạn) -->
+        <div id="room-controls-dock-wrap" class="relative z-30">
               <div id="cinema-control-bar" class="dimmable-ui cv-cinema-bar flex flex-col shadow-2xl text-xs">
                 <!-- Hàng 1: Thanh tiến trình tua toàn chiều ngang tông đỏ CineVerse -->
                 <div id="mp4-seek-container" class="cv-seek-strip w-full flex items-center gap-3">
@@ -8922,13 +8969,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                     </button>
                     <button type="button" id="btn-screen-fit-toggle" onclick="window.appActions.toggleScreenFitMode()"
                       class="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-sky-300 text-[10px] font-extrabold transition cursor-pointer opacity-80 hover:opacity-100"
-                      title="Chuyển chế độ khung hình: Lấp đầy (Cover giữ phần dưới) hoặc Toàn khung (Contain)">
-                      <span id="screen-fit-label">Contain</span>
+                      title="Chuyển chế độ khung hình: Phủ kín (Cover) hoặc Toàn khung (Contain)">
+                      <span id="screen-fit-label">Cover</span>
                     </button>
                     <button type="button" id="btn-screen-ratio-toggle" onclick="window.appActions.toggleDimmedScreenRatio()"
                       class="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-amber-300 text-[10px] font-extrabold transition cursor-pointer opacity-75 hover:opacity-100"
-                      title="Chuyển tỷ lệ màn hình cong (19:9 / 18:9)">
-                      <span id="screen-ratio-label">19:9</span>
+                      title="Chuyển tỷ lệ màn hình (16:9 / 18:9 / 19:9)">
+                      <span id="screen-ratio-label">16:9</span>
                     </button>
                     <button type="button" id="voice-diag-badge" onclick="window.appActions.resumePendingVoiceAudio && window.appActions.resumePendingVoiceAudio()"
                       class="hidden px-2 py-1 rounded-lg bg-stone-900/90 border border-white/15 text-[10px] font-mono text-slate-300 cursor-pointer"
@@ -9277,12 +9324,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 </div>
               </div>
             </div>
-
-          <!-- Sàn sân khấu uốn cong phía trước màn hình IMAX -->
-          <div class="stage-floor flex items-center justify-center">
-            <span class="text-[9px] uppercase tracking-[0.28em] text-sky-300/75 font-black select-none">MÀN HÌNH CONG IMAX 70MM LASER • THE ODYSSEY CURVED SCREEN</span>
-          </div>
-        </div>
 
         <!-- KHU VỰC SƠ ĐỒ GHẾ NGỒI 48 GHẾ CỐ ĐỊNH (6 HÀNG A->F, MỖI HÀNG 8 GHẾ) -->
         <div id="stream-seats-collapsible" class="relative z-10 pt-1 space-y-2.5">
@@ -17599,22 +17640,22 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           const canInstant = amHost || freeSeriesMode;
 
           return `
-            <div class="border-b border-white/10 ${isActiveSeries ? "ring-2 ring-inset ring-amber-400/90" : ""}">
+            <div class="rounded-xl overflow-hidden border border-white/10 mb-2 ${isActiveSeries ? "ring-2 ring-amber-400/90" : ""}">
               <button type="button"
                 onclick="window.appActions.toggleSeriesExpand('${escapeHTML(entry.normKey)}')"
                 class="no-holo movie-list-card w-full text-left overflow-hidden cursor-pointer group relative block">
                 <div class="relative aspect-[16/10] w-full bg-black overflow-hidden">
                   <img src="${escapeHTML(entry.poster)}" alt="${escapeHTML(entry.title)}" loading="lazy"
                     onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80';"
-                    class="w-full h-full object-cover group-hover:scale-110 transition duration-500 ease-out" />
-                  <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/15"></div>
-                  <span class="absolute top-1.5 left-2 px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 text-[9px] font-black shadow">
+                    class="w-full h-full object-cover group-hover:scale-105 transition duration-500 ease-out" />
+                  <span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-amber-400/95 text-slate-950 text-[9px] font-black shadow">
                     📚 ${partsLabel}
                   </span>
-                  <span class="absolute top-1.5 right-2 px-1.5 py-0.5 rounded text-[9px] font-black ${isActiveSeries ? "bg-emerald-500 text-slate-950 shadow-md" : "bg-black/75 text-white border border-white/20"}">
+                  <span class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-[9px] font-black backdrop-blur-md ${isActiveSeries ? "bg-emerald-500/90 text-slate-950 shadow-md" : "bg-black/45 text-white border border-white/20"}">
                     ${isActiveSeries ? `Đang chiếu T${activeEp.episode}` : (isExpanded ? "Thu gọn ▲" : "Chọn tập ▼")}
                   </span>
-                  <div class="absolute bottom-0 inset-x-0 px-2.5 pb-2 pt-5">
+                  <div class="absolute bottom-0 inset-x-0 px-2.5 py-1.5 backdrop-blur-md border-t border-white/15"
+                    style="background:linear-gradient(180deg, rgba(12,11,16,0.34) 0%, rgba(10,10,14,0.72) 100%);">
                     <p class="text-[11px] font-extrabold leading-snug line-clamp-2 drop-shadow ${isActiveSeries ? "text-amber-300" : "text-white group-hover:text-amber-200"}">
                       ${escapeHTML(sanitizeMovieTitle(entry.title))}
                     </p>
@@ -17674,25 +17715,25 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         return `
           <button type="button"
             onclick="window.appActions.selectMovieFromTheaterList('${item.id}')"
-            class="no-holo movie-list-card w-full text-left overflow-hidden cursor-pointer group relative block border-b border-white/10 ${isActive ? "ring-2 ring-inset ring-amber-400/90" : ""}">
+            class="no-holo movie-list-card w-full text-left rounded-xl overflow-hidden cursor-pointer group relative block border border-white/10 mb-2 ${isActive ? "ring-2 ring-amber-400/90" : ""}">
             <div class="relative aspect-[16/10] w-full bg-black overflow-hidden">
               <img src="${escapeHTML(posterUrl)}" alt="${escapeHTML(item.title)}" loading="lazy"
                 onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=800&q=80';"
-                class="w-full h-full object-cover group-hover:scale-110 transition duration-500 ease-out" />
-              <div class="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-black/10"></div>
-              <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200 bg-black/45">
+                class="w-full h-full object-cover group-hover:scale-105 transition duration-500 ease-out" />
+              <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200 bg-black/35 backdrop-blur-[2px]">
                 <span class="px-2.5 py-1 rounded-full ${canInstant ? "bg-emerald-500 text-slate-950" : "bg-amber-400 text-slate-950"} font-black text-[10px] flex items-center gap-1 shadow-lg scale-90 group-hover:scale-100 transition duration-200">
                   <i class="fa-solid ${canInstant ? "fa-play" : "fa-paper-plane"} text-[10px]"></i>
                   <span>${canInstant ? "Đổi phim ngay" : "Yêu cầu chiếu"}</span>
                 </span>
               </div>
-              <span class="absolute top-1.5 left-2 px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-sm text-[9px] font-black text-amber-300">
+              <span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-black/50 backdrop-blur-md border border-white/15 text-[9px] font-black text-amber-300">
                 ${hasResume ? `⏪ ${formatTime(hist.currentTime)}` : escapeHTML(item.duration || "HD")}
               </span>
-              <span class="absolute top-1.5 right-2 px-1.5 py-0.5 rounded text-[9px] font-black ${isActive ? "bg-emerald-500 text-slate-950 shadow-md" : "bg-black/70 backdrop-blur-sm text-sky-300"}">
+              <span class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-[9px] font-black backdrop-blur-md ${isActive ? "bg-emerald-500/90 text-slate-950 shadow-md" : "bg-black/50 border border-white/15 text-sky-300"}">
                 ${isActive ? "Đang chiếu" : sourceTag}
               </span>
-              <div class="absolute bottom-0 inset-x-0 px-2.5 pb-2 pt-5">
+              <div class="absolute bottom-0 inset-x-0 px-2.5 py-1.5 backdrop-blur-md border-t border-white/15"
+                style="background:linear-gradient(180deg, rgba(12,11,16,0.34) 0%, rgba(10,10,14,0.72) 100%);">
                 <p class="text-[11px] font-extrabold leading-snug line-clamp-2 drop-shadow ${isActive ? "text-amber-300" : "text-white group-hover:text-amber-200"}">
                   ${escapeHTML(sanitizeMovieTitle(item.title))}
                 </p>
@@ -17793,7 +17834,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       state.povZoom = mode;
       const box = document.getElementById("screen-stage-box");
       if (!box) return;
-      const widths = { rowF: "76%", rowD: "82%", front: "88%" };
+      const widths = { rowF: "84%", rowD: "90%", front: "96%" };
       if (widths[mode]) {
         box.style.width = widths[mode];
         box.style.setProperty("--seat-view-width", widths[mode]);
@@ -34710,13 +34751,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
 
     function toggleScreenFitMode() {
-      const isCover = document.body.classList.toggle("screen-fit-cover");
+      const isContain = document.body.classList.toggle("screen-fit-contain");
       const lbl = document.getElementById("screen-fit-label");
-      if (lbl) lbl.textContent = isCover ? "Cover" : "Contain";
+      if (lbl) lbl.textContent = isContain ? "Contain" : "Cover";
       showToast(
-        isCover
-          ? "🎬 Chế độ Cover: Phủ kín màn cong, ưu tiên giữ phần phụ đề phía dưới."
-          : "🖼️ Chế độ Contain: Hiển thị đầy đủ 100% nội dung khung hình phim không bị cắt.",
+        isContain
+          ? "🖼️ Chế độ Contain: Hiển thị đầy đủ 100% nội dung khung hình phim không bị cắt."
+          : "🎬 Chế độ Cover: Phủ kín toàn bộ màn chiếu không còn viền đen 2 bên.",
         "info"
       );
     }
