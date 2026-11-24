@@ -36161,62 +36161,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         }
       }
 
-      // 1. Trạng thái Đang tải
-      const toolbarEl = document.getElementById("top10-toolbar");
-      const footerEl = document.getElementById("lobby-top10-footer");
-      if (state.top10.status === "loading" || state.top10.status === "idle") {
-        if (toolbarEl) toolbarEl.style.display = "";
-        if (footerEl) footerEl.style.display = "";
-        body.innerHTML = '<p role="status" class="py-2 text-sm text-slate-300">Đang tải bảng xếp hạng…</p>';
-        if (footerEl) footerEl.style.display = "none";
-        if (footerNoteEl) footerNoteEl.textContent = "Đang tải dữ liệu xếp hạng thực tế từ máy chủ CineVerse…";
-        return;
-      }
-
-      // 2. Trạng thái Lỗi tải
-      if (state.top10.status === "error" && !data) {
-        if (toolbarEl) toolbarEl.style.display = "";
-        if (footerEl) footerEl.style.display = "";
-        body.innerHTML = `
-          <div class="rounded-2xl p-6 sm:p-8 text-center space-y-3" style="background:rgba(20,20,28,0.86);border:1px solid rgba(229,9,20,0.35);">
-            <div class="w-11 h-11 mx-auto rounded-full flex items-center justify-center" style="background:rgba(229,9,20,0.16);color:#FDA4AF;">
-              <i class="fa-solid fa-triangle-exclamation text-lg" aria-hidden="true"></i>
-            </div>
-            <div class="space-y-1">
-              <h3 class="text-sm sm:text-base font-extrabold text-white">Không tải được Top 10 tuần này</h3>
-              <p class="text-xs max-w-md mx-auto" style="color:#A1A1AA;">${escapeHTML(state.top10.error || "Kết nối máy chủ xếp hạng gián đoạn. Vui lòng thử lại.")}</p>
-            </div>
-            <button type="button" onclick="window.appActions.refreshWeeklyTop10()"
-              class="cv-top10-cta-primary mx-auto">
-              <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
-              <span>Thử lại</span>
-            </button>
-          </div>
-        `;
-        if (footerNoteEl) footerNoteEl.textContent = "Tải bảng xếp hạng thất bại • Bấm Thử lại để đồng bộ lại.";
-        return;
-      }
-
-      // Lọc chỉ giữ phim thực sự có dữ liệu và mở được trong CineVerse
-      const rawItems = Array.isArray(data?.items) ? data.items : [];
-      const resolvedItems = [];
-      const nextLookup = {};
-      rawItems.slice(0, 10).forEach((raw, index) => {
-        const res = resolveOpenableTop10Item(raw);
-        if (!res) return;
-        res.displayRank = Number(raw.rank) > 0 ? Number(raw.rank) : index + 1;
-        res.rankChanged = lastShownRanks.has(res.movieId) && lastShownRanks.get(res.movieId) !== res.displayRank;
-        resolvedItems.push(res);
-        nextLookup[res.movieId] = res;
-      });
-      lastShownRanks.clear();
-      resolvedItems.forEach(item => lastShownRanks.set(item.movieId, item.displayRank));
-      window.__resolvedTop10ItemsById = nextLookup;
-
-      // 3. Trạng thái Chưa có lượt xem hợp lệ trong tuần -> Gọn + nút "Cách tính" + mục "Khám phá phim" (ngẫu nhiên 10 phim từ Kho Phim, loại trừ phim đang chiếu ở các phòng)
-      if (resolvedItems.length === 0) {
-        if (toolbarEl) toolbarEl.style.display = "none";
-        if (footerEl) footerEl.style.display = "none";
+      const buildDiscoverSectionHtml = (withTopDivider = false) => {
         const discoverMovies = pickRandomDiscoverVaultMovies(10, false);
         const discoverLookup = {};
         discoverMovies.forEach((m) => { discoverLookup[m.id] = m; });
@@ -36245,24 +36190,91 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         `;
         }).join("");
 
+        return discoverCardsHtml ? `
+          <div id="lobby-discover-movies" class="${withTopDivider ? "mt-6 pt-5 border-t border-white/10" : ""}">
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <h3 class="cv-serif text-lg sm:text-xl font-bold text-white">Khám phá phim <span class="text-xs font-sans font-normal text-slate-400">(${discoverMovies.length} phim ngẫu nhiên từ Kho phim)</span></h3>
+              <button type="button" onclick="window.appActions.reshuffleDiscoverMovies()" class="cv-top10-info-btn text-[11px] inline-flex items-center gap-1.5" title="Đổi 10 phim gợi ý ngẫu nhiên khác từ Kho phim">
+                <i class="fa-solid fa-shuffle text-[10px]"></i>
+                <span>Đổi gợi ý</span>
+              </button>
+            </div>
+            <div class="cv-discover-grid">${discoverCardsHtml}</div>
+          </div>` : `
+          <div id="lobby-discover-movies" class="${withTopDivider ? "mt-5 pt-4 border-t border-white/10 " : ""}text-xs text-slate-400 py-2">Đang tải danh sách phim từ Kho phim...</div>`;
+      };
+
+      // 1. Trạng thái Đang tải
+      const toolbarEl = document.getElementById("top10-toolbar");
+      const footerEl = document.getElementById("lobby-top10-footer");
+      if (state.top10.status === "loading" || state.top10.status === "idle") {
+        if (toolbarEl) toolbarEl.style.display = "";
+        if (footerEl) footerEl.style.display = "none";
+        body.innerHTML = `
+          <div class="space-y-4">
+            <p role="status" class="py-1 text-sm text-slate-300">Đang tải bảng xếp hạng…</p>
+            ${buildDiscoverSectionHtml(false)}
+          </div>
+        `;
+        if (footerNoteEl) footerNoteEl.textContent = "Đang tải dữ liệu xếp hạng thực tế từ máy chủ CineVerse…";
+        return;
+      }
+
+      // 2. Trạng thái Lỗi tải
+      if (state.top10.status === "error" && !data) {
+        if (toolbarEl) toolbarEl.style.display = "";
+        if (footerEl) footerEl.style.display = "";
+        body.innerHTML = `
+          <div class="space-y-4">
+            <div class="rounded-2xl p-5 sm:p-6 text-center space-y-3" style="background:rgba(20,20,28,0.86);border:1px solid rgba(229,9,20,0.35);">
+              <div class="w-11 h-11 mx-auto rounded-full flex items-center justify-center" style="background:rgba(229,9,20,0.16);color:#FDA4AF;">
+                <i class="fa-solid fa-triangle-exclamation text-lg" aria-hidden="true"></i>
+              </div>
+              <div class="space-y-1">
+                <h3 class="text-sm sm:text-base font-extrabold text-white">Không tải được Top 10 tuần này</h3>
+                <p class="text-xs max-w-md mx-auto" style="color:#A1A1AA;">${escapeHTML(state.top10.error || "Kết nối máy chủ xếp hạng gián đoạn. Vui lòng thử lại.")}</p>
+              </div>
+              <button type="button" onclick="window.appActions.refreshWeeklyTop10()"
+                class="cv-top10-cta-primary mx-auto">
+                <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+                <span>Thử lại</span>
+              </button>
+            </div>
+            ${buildDiscoverSectionHtml(true)}
+          </div>
+        `;
+        if (footerNoteEl) footerNoteEl.textContent = "Tải bảng xếp hạng thất bại • Bấm Thử lại để đồng bộ lại.";
+        return;
+      }
+
+      // Lọc chỉ giữ phim thực sự có dữ liệu và mở được trong CineVerse
+      const rawItems = Array.isArray(data?.items) ? data.items : [];
+      const resolvedItems = [];
+      const nextLookup = {};
+      rawItems.slice(0, 10).forEach((raw, index) => {
+        const res = resolveOpenableTop10Item(raw);
+        if (!res) return;
+        res.displayRank = Number(raw.rank) > 0 ? Number(raw.rank) : index + 1;
+        res.rankChanged = lastShownRanks.has(res.movieId) && lastShownRanks.get(res.movieId) !== res.displayRank;
+        resolvedItems.push(res);
+        nextLookup[res.movieId] = res;
+      });
+      lastShownRanks.clear();
+      resolvedItems.forEach(item => lastShownRanks.set(item.movieId, item.displayRank));
+      window.__resolvedTop10ItemsById = nextLookup;
+
+      // 3. Trạng thái Chưa có lượt xem hợp lệ trong tuần -> Gọn + nút "Cách tính" + mục "Khám phá phim" (ngẫu nhiên 10 phim từ Kho Phim, loại trừ phim đang chiếu ở các phòng)
+      if (resolvedItems.length === 0) {
+        if (toolbarEl) toolbarEl.style.display = "none";
+        if (footerEl) footerEl.style.display = "none";
+
         body.innerHTML = `
           <div class="space-y-3">
             <div class="flex items-center justify-between gap-2">
               <span class="text-sm text-slate-300">${rawItems.length ? "Chưa có phim trong bảng xếp hạng đang mở tại rạp." : "Chưa có lượt xem đủ điều kiện."}</span>
               <button type="button" onclick="window.appActions.toggleTop10FormulaInfo()" class="cv-top10-info-btn">Cách tính</button>
             </div>
-            ${discoverCardsHtml ? `
-              <div id="lobby-discover-movies">
-                <div class="flex items-center justify-between gap-2 mb-2.5">
-                  <h3 class="cv-serif text-lg font-bold text-white">Khám phá phim <span class="text-xs font-sans font-normal text-slate-400">(${discoverMovies.length} phim ngẫu nhiên từ Kho phim)</span></h3>
-                  <button type="button" onclick="window.appActions.reshuffleDiscoverMovies()" class="cv-top10-info-btn text-[11px] inline-flex items-center gap-1.5" title="Đổi 10 phim gợi ý ngẫu nhiên khác từ Kho phim">
-                    <i class="fa-solid fa-shuffle text-[10px]"></i>
-                    <span>Đổi gợi ý</span>
-                  </button>
-                </div>
-                <div class="cv-discover-grid">${discoverCardsHtml}</div>
-              </div>` : `
-              <div id="lobby-discover-movies" class="text-xs text-slate-400 py-2">Đang tải danh sách phim từ Kho phim...</div>`}
+            ${buildDiscoverSectionHtml(false)}
           </div>
         `;
         return;
@@ -36389,6 +36401,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           ${featuredHtml}
           ${rightColumnsHtml}
         </div>
+        ${buildDiscoverSectionHtml(true)}
       `;
 
       if (footerNoteEl) {
