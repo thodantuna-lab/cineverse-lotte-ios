@@ -13200,6 +13200,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       const adminCfg = (state.lobbyConfigRooms && state.lobbyConfigRooms[roomId]) || {};
       const custom = state.roomsCustom[roomId] || {};
       const merged = { ...base, ...adminCfg, ...custom };
+      const movieChangedFromBase = (
+        (merged.videoUrl && base.videoUrl && merged.videoUrl !== base.videoUrl) ||
+        (merged.movieTitle && base.movieTitle && merged.movieTitle !== base.movieTitle)
+      );
+      if (movieChangedFromBase && !custom.previewVideoUrl && !adminCfg.previewVideoUrl) {
+        merged.previewVideoUrl = merged.videoUrl || "";
+      }
       if (merged.status === "upcoming" && Number(merged.scheduledAt) > 0 && Date.now() >= Number(merged.scheduledAt)) {
         merged.status = "showing";
       }
@@ -13372,7 +13379,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       const trailerIcon = document.getElementById("hero-trailer-icon");
       const trailerLabel = document.getElementById("hero-trailer-label");
       const muteBtn = document.getElementById("btn-hero-mute");
-      const previewSrc = room.previewVideoUrl || room.videoUrl || "";
+      const previewSrc = room.videoUrl || room.previewVideoUrl || "";
       const shouldPlayTrailer = Boolean(state.heroTrailerPlaying && state.heroTrailerRoomId === room.id && previewSrc && !state.currentRoomId && !document.hidden);
 
       if (trailerBtn) {
@@ -13798,7 +13805,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         state.heroTrailerPlaying = false;
         state.heroTrailerRoomId = "";
       } else {
-        const previewSrc = room.previewVideoUrl || room.videoUrl || "";
+        const previewSrc = room.videoUrl || room.previewVideoUrl || "";
         if (!previewSrc) {
           showToast("⚠️ Phim này chưa có video trailer.", "warning");
           return;
