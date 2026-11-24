@@ -8098,16 +8098,24 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     body.theater-dimmed.cv-3d-screening-active.cv-3d-hud-hidden:not(.stream-room-active) #lyrics-overlay {
       bottom: 28px !important;
     }
-    /* Thanh điều khiển nổi trên Canvas 3D & tự động ẩn mượt sau 3 giây không di chuột */
+    /* Thanh trên cùng (#room-top-header) tự động ẩn hoàn toàn khi Tắt đèn, chỉ hiện khi rê chuột lên mép/góc trên */
     body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-top-header {
       position: fixed !important;
       top: 12px !important;
       left: 50% !important;
-      transform: translateX(-50%) !important;
+      transform: translate(-50%, -14px) !important;
       width: min(96vw, 1480px) !important;
       z-index: 65 !important;
-      opacity: 0.94 !important;
-      transition: opacity 340ms cubic-bezier(0.22, 1, 0.36, 1), transform 340ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transition: opacity 280ms cubic-bezier(0.22, 1, 0.36, 1), transform 280ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+    }
+    body.theater-dimmed.cv-3d-screening-active.cv-3d-top-hover:not(.stream-room-active) #room-top-header,
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-top-header:hover,
+    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-top-header:focus-within {
+      opacity: 0.96 !important;
+      transform: translate(-50%, 0) !important;
+      pointer-events: auto !important;
     }
     body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-controls-dock-wrap {
       position: fixed !important;
@@ -8127,17 +8135,20 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
     #room-3d-floating-hud {
       position: fixed;
-      top: 68px;
+      top: 14px;
       left: 50%;
       transform: translateX(-50%);
       width: min(96vw, 1480px);
       z-index: 64;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 340ms cubic-bezier(0.22, 1, 0.36, 1), transform 340ms cubic-bezier(0.22, 1, 0.36, 1);
+      transition: top 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 340ms cubic-bezier(0.22, 1, 0.36, 1), transform 340ms cubic-bezier(0.22, 1, 0.36, 1);
     }
     body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-3d-floating-hud {
       opacity: 1;
+    }
+    body.theater-dimmed.cv-3d-screening-active.cv-3d-top-hover:not(.stream-room-active) #room-3d-floating-hud {
+      top: 68px;
     }
     body.theater-dimmed.cv-3d-screening-active.cv-3d-hud-hidden:not(.stream-room-active) #room-top-header {
       opacity: 0 !important;
@@ -17568,16 +17579,44 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       // 3. TỰ ĐỘNG ẨN HUD SAU 3 GIÂY & HÀM toggleLights3D()
       // =======================================================================
       let hudIdleTimer = 0;
+      let topHoverHideTimer = 0;
       let hudListenersBound = false;
+
+      function isTopHeaderActive() {
+        const top = document.getElementById("room-top-header");
+        if (!top) return false;
+        if (top.matches(":hover")) return true;
+        return Boolean(top.querySelector(".floating-dropdown-panel:not(.hidden)"));
+      }
+
+      function updateTopEdgeHoverState(clientY) {
+        if (!document.body.classList.contains("cv-3d-screening-active")) {
+          document.body.classList.remove("cv-3d-top-hover");
+          return;
+        }
+        const nearTop = typeof clientY === "number" && clientY <= 78;
+        if (nearTop || isTopHeaderActive()) {
+          if (topHoverHideTimer) { clearTimeout(topHoverHideTimer); topHoverHideTimer = 0; }
+          document.body.classList.add("cv-3d-top-hover");
+        } else if (typeof clientY === "number" && clientY > 108) {
+          if (!topHoverHideTimer && document.body.classList.contains("cv-3d-top-hover")) {
+            topHoverHideTimer = setTimeout(() => {
+              topHoverHideTimer = 0;
+              if (!isTopHeaderActive()) {
+                document.body.classList.remove("cv-3d-top-hover");
+              }
+            }, 320);
+          }
+        }
+      }
 
       function isHoveringInteractiveHud() {
         const bar = document.getElementById("cinema-control-bar");
-        const top = document.getElementById("room-top-header");
         const subPanel = document.getElementById("subtitle-settings-panel");
         const floatHud = document.getElementById("room-3d-floating-hud");
         return Boolean(
           (bar && bar.matches(":hover")) ||
-          (top && top.matches(":hover")) ||
+          isTopHeaderActive() ||
           (floatHud && floatHud.querySelector(":hover")) ||
           (subPanel && !subPanel.classList.contains("hidden")) ||
           document.body.classList.contains("dimmed-chat-open") ||
@@ -17596,6 +17635,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             return;
           }
           document.body.classList.add("cv-3d-hud-hidden");
+          document.body.classList.remove("cv-3d-top-hover");
         }, 3000);
       }
 
@@ -17603,10 +17643,14 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         if (hudListenersBound) return;
         hudListenersBound = true;
         ["pointermove", "pointerdown", "keydown", "touchstart"].forEach((evName) => {
-          window.addEventListener(evName, () => {
-            if (document.body.classList.contains("cv-3d-screening-active")) {
-              resetDimmedHudAutoHide();
+          window.addEventListener(evName, (ev) => {
+            if (!document.body.classList.contains("cv-3d-screening-active")) return;
+            if (evName === "pointermove" || evName === "pointerdown") {
+              updateTopEdgeHoverState(ev.clientY);
+            } else if (evName === "touchstart" && ev.touches?.[0]) {
+              updateTopEdgeHoverState(ev.touches[0].clientY);
             }
+            resetDimmedHudAutoHide();
           }, { passive: true });
         });
       }
@@ -17634,11 +17678,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         if (canActivate3D) {
           bindHudAutoHideListeners();
           document.body.classList.add("cv-3d-screening-active");
+          document.body.classList.remove("cv-3d-top-hover");
           window.cvRoomCinema3D.start();
           resetDimmedHudAutoHide();
         } else {
           if (hudIdleTimer) { clearTimeout(hudIdleTimer); hudIdleTimer = 0; }
-          document.body.classList.remove("cv-3d-screening-active", "cv-3d-hud-hidden");
+          if (topHoverHideTimer) { clearTimeout(topHoverHideTimer); topHoverHideTimer = 0; }
+          document.body.classList.remove("cv-3d-screening-active", "cv-3d-hud-hidden", "cv-3d-top-hover");
           window.cvRoomCinema3D.stop();
         }
       };
