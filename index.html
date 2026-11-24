@@ -848,9 +848,9 @@
       }
     }
 
-    body.in-room-active #owner-chat-fab,
-    body.in-room-active #owner-chat-drawer {
-      display: none !important;
+    /* Cho phép mở nút & khung Nhắn chủ rạp ngay trong phòng chiếu để lấy key / hỗ trợ */
+    body.in-room-active #owner-chat-widget {
+      z-index: 120 !important;
     }
     @media (min-width: 1200px) {
       #room-top-header .cv-room-hdr-actions {
@@ -6554,7 +6554,7 @@
       transform: translateX(-14px);
     }
 
-    /* Layout 3 cột Desktop >= 1200px (Trái 224px | Giữa 1fr | Phải 304px) */
+    /* Layout 3 cột Desktop >= 1200px (Mở rộng khung Danh sách phim & Chat/Vote khi chưa tắt đèn) */
     .cv-room-workspace {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
@@ -6564,14 +6564,14 @@
     }
     @media (min-width: 1200px) {
       .cv-room-workspace {
-        grid-template-columns: 224px minmax(0, 1fr) 304px;
+        grid-template-columns: 268px minmax(0, 1fr) 356px;
         gap: 14px;
       }
       #theater-left-movies-aside {
         grid-column: 1 !important;
         order: 1 !important;
         width: 100%;
-        height: min(700px, calc(100dvh - 82px)) !important;
+        height: min(720px, calc(100dvh - 96px)) !important;
       }
       #theater-center-auditorium {
         grid-column: 2 !important;
@@ -6583,7 +6583,13 @@
         width: 100%;
       }
       #theater-right-sidebar-col .theater-sidebar-card {
-        height: min(700px, calc(100dvh - 82px)) !important;
+        height: min(720px, calc(100dvh - 96px)) !important;
+      }
+    }
+    @media (min-width: 1600px) {
+      .cv-room-workspace {
+        grid-template-columns: 296px minmax(0, 1fr) 392px;
+        gap: 16px;
       }
     }
 
@@ -6903,33 +6909,43 @@
         inset 0 0 80px rgba(0, 0, 0, 0.94),
         0 24px 64px rgba(0, 0, 0, 0.92) !important;
     }
-    body:not(.stream-room-active) #cinema-auditorium-stage {
+    /* Khi CHƯA tắt đèn: Ẩn background rèm sau màn hình để nhường diện tích cho Danh sách phim & Khung Chat/Vote */
+    body:not(.stream-room-active):not(.theater-dimmed) #cinema-auditorium-stage {
+      position: relative;
+      background-color: transparent !important;
+      background-image: none !important;
+      margin: 0 !important;
+      padding: 0 0 8px 0 !important;
+      border-radius: 16px !important;
+      overflow: hidden;
+      transition: filter 0.45s ease, padding 0.35s ease;
+    }
+    body:not(.stream-room-active):not(.theater-dimmed):not(.mobile-cinema-fullscreen) #screen-stage-box {
+      width: 100% !important;
+      max-width: 100% !important;
+      perspective: none;
+      transform-style: flat;
+    }
+    /* Khi TẮT ĐÈN (theater-dimmed): Hiện trọn vẹn không gian rạp & rèm đỏ phía sau màn chiếu */
+    body.theater-dimmed:not(.stream-room-active) #cinema-auditorium-stage {
       position: relative;
       background-color: #020203;
       background-image:
-        linear-gradient(180deg, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0) 14%, rgba(0, 0, 0, 0) 82%, rgba(3, 2, 3, 0.82) 96%, #030203 100%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.14) 20%, rgba(0, 0, 0, 0.18) 82%, rgba(2, 2, 3, 0.92) 100%),
         url("assets/cinema-auditorium-bg.jpg");
       background-size: 100% 100%, 100% 100%;
       background-position: center center, center center;
       background-repeat: no-repeat, no-repeat;
-      margin: -12px -12px 0;
-      padding: 16px 12px 18px;
+      margin: -4px -4px 0;
+      padding: 20px 16px 20px;
       border-radius: 22px 22px 0 0;
       overflow: hidden;
       transition: filter 0.45s ease, padding 0.35s ease;
     }
-    @media (min-width: 640px) {
-      body:not(.stream-room-active) #cinema-auditorium-stage {
-        margin: -20px -20px 0;
-        padding: 20px 16px 22px;
-      }
-    }
-    body.theater-dimmed:not(.stream-room-active) #cinema-auditorium-stage {
-      background-image:
-        linear-gradient(180deg, rgba(0, 0, 0, 0.34) 0%, rgba(0, 0, 0, 0.18) 20%, rgba(0, 0, 0, 0.22) 82%, rgba(2, 2, 3, 0.92) 100%),
-        url("assets/cinema-auditorium-bg.jpg");
-      margin: -4px -4px 0;
-      padding: 16px 12px 16px;
+    body.theater-dimmed:not(.stream-room-active):not(.mobile-cinema-fullscreen) #screen-stage-box {
+      width: 86%;
+      perspective: none;
+      transform-style: flat;
     }
     /* Ẩn các chi tiết giả lập cũ (đèn trần 4 bóng, loa tường, biển EXIT, bình cứu hỏa, khung cong xanh) */
     body:not(.stream-room-active) #cinema-auditorium-stage .ceiling-canopy,
@@ -6945,17 +6961,11 @@
     body:not(.stream-room-active) #cinema-auditorium-stage .stage-floor {
       display: none !important;
     }
-    /* Khung màn hình mở rộng phủ tối đa khoảng đen trung tâm, vẫn giữ 2 bên rèm đỏ & đèn rọi */
-    body:not(.stream-room-active):not(.mobile-cinema-fullscreen) #screen-stage-box {
-      width: 84%;
-      perspective: none;
-      transform-style: flat;
-    }
     @media (max-width: 639px) {
-      body:not(.stream-room-active):not(.mobile-cinema-fullscreen) #screen-stage-box {
+      body.theater-dimmed:not(.stream-room-active):not(.mobile-cinema-fullscreen) #screen-stage-box {
         width: 94% !important;
       }
-      body:not(.stream-room-active) #cinema-auditorium-stage {
+      body.theater-dimmed:not(.stream-room-active) #cinema-auditorium-stage {
         background-size: 100% 100%, cover;
         background-position: center center, center center;
         padding: 12px 8px 14px;
