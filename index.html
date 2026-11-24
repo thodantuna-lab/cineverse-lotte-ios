@@ -2082,8 +2082,8 @@
     }
     .cv-dhp-hero {
       position: relative;
-      flex: 0 0 48%;
-      min-height: 0;
+      flex: 1 1 auto;
+      min-height: 48%;
       overflow: hidden;
       background: transparent;
     }
@@ -2093,13 +2093,13 @@
       object-fit: cover;
       object-position: center 22%;
       display: block;
-      mask-image: linear-gradient(180deg, #000000 62%, rgba(0, 0, 0, 0.72) 82%, transparent 100%);
-      -webkit-mask-image: linear-gradient(180deg, #000000 62%, rgba(0, 0, 0, 0.72) 82%, transparent 100%);
+      mask-image: linear-gradient(180deg, #000000 70%, rgba(0, 0, 0, 0.78) 88%, transparent 100%);
+      -webkit-mask-image: linear-gradient(180deg, #000000 70%, rgba(0, 0, 0, 0.78) 88%, transparent 100%);
     }
     .cv-dhp-hero-fade {
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, rgba(8, 8, 12, 0.36) 0%, rgba(8, 8, 12, 0) 30%, rgba(12, 10, 18, 0.18) 100%);
+      background: linear-gradient(180deg, rgba(8, 8, 12, 0.34) 0%, rgba(8, 8, 12, 0) 28%, rgba(12, 10, 18, 0.24) 100%);
       pointer-events: none;
     }
     .cv-dhp-badges {
@@ -2117,13 +2117,13 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 4px 10px;
+      padding: 5px 11px;
       border-radius: 999px;
-      font-size: 10.5px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.02em;
       color: #F8FAFC;
-      background: rgba(18, 16, 24, 0.48);
+      background: rgba(18, 16, 24, 0.52);
       backdrop-filter: blur(14px) saturate(160%);
       -webkit-backdrop-filter: blur(14px) saturate(160%);
       border: 1px solid rgba(255, 255, 255, 0.24);
@@ -2132,17 +2132,17 @@
     .cv-dhp-body {
       position: relative;
       z-index: 3;
-      flex: 1 1 auto;
-      min-height: 0;
+      flex: 0 0 auto;
+      margin-top: -18px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 12px 16px 15px;
+      justify-content: flex-end;
+      gap: 11px;
+      padding: 6px 18px 16px;
     }
     .cv-dhp-title {
       font-family: "Be Vietnam Pro", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-      font-size: clamp(16px, 1.35vw, 20px);
+      font-size: clamp(19px, 1.65vw, 24px);
       font-weight: 800;
       line-height: 1.2;
       letter-spacing: -0.02em;
@@ -2151,50 +2151,50 @@
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.72);
     }
     .cv-dhp-meta {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 7px;
-      font-size: 11.5px;
+      gap: 8px;
+      font-size: 13.5px;
       font-weight: 600;
-      color: rgba(226, 232, 240, 0.88);
+      color: rgba(226, 232, 240, 0.92);
     }
     .cv-dhp-match {
       color: #4ADE80;
       font-weight: 800;
     }
     .cv-dhp-age {
-      padding: 1px 6px;
-      border-radius: 5px;
-      font-size: 10px;
+      padding: 1.5px 7px;
+      border-radius: 6px;
+      font-size: 11.5px;
       font-weight: 800;
       color: #FDE68A;
-      background: rgba(245, 197, 24, 0.14);
-      border: 1px solid rgba(245, 197, 24, 0.42);
+      background: rgba(245, 197, 24, 0.16);
+      border: 1px solid rgba(245, 197, 24, 0.45);
     }
     .cv-dhp-genres {
       display: flex;
       flex-wrap: wrap;
-      gap: 5px;
+      gap: 6px;
     }
     .cv-dhp-genre-chip {
-      padding: 3px 8px;
+      padding: 3.5px 10px;
       border-radius: 999px;
-      font-size: 10.5px;
+      font-size: 12px;
       font-weight: 600;
-      color: rgba(241, 245, 249, 0.92);
-      background: rgba(255, 255, 255, 0.10);
-      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: rgba(241, 245, 249, 0.94);
+      background: rgba(255, 255, 255, 0.11);
+      border: 1px solid rgba(255, 255, 255, 0.18);
     }
     .cv-dhp-synopsis {
-      font-size: 12px;
-      line-height: 1.52;
-      color: rgba(226, 232, 240, 0.86);
+      font-size: 13.5px;
+      line-height: 1.5;
+      color: rgba(226, 232, 240, 0.90);
       display: -webkit-box;
-      -webkit-line-clamp: 4;
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
@@ -2206,13 +2206,13 @@
     }
     .cv-dhp-btn-primary {
       flex: 1;
-      height: 36px;
-      padding: 0 14px;
+      height: 40px;
+      padding: 0 16px;
       border-radius: 999px;
       border: 1px solid rgba(255, 255, 255, 0.35);
       background: linear-gradient(180deg, #FDE047 0%, #F5C518 100%);
       color: #0B0B0F;
-      font-size: 12px;
+      font-size: 13.5px;
       font-weight: 800;
       display: inline-flex;
       align-items: center;
@@ -2227,13 +2227,13 @@
       transform: translateY(-1px);
     }
     .cv-dhp-btn-secondary {
-      height: 36px;
-      padding: 0 13px;
+      height: 40px;
+      padding: 0 14px;
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.12);
       border: 1px solid rgba(255, 255, 255, 0.24);
       color: #FFFFFF;
-      font-size: 12px;
+      font-size: 13.5px;
       font-weight: 700;
       display: inline-flex;
       align-items: center;
