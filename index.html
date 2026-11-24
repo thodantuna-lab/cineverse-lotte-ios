@@ -7958,6 +7958,52 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         transform: none !important;
       }
     }
+
+    /* KHUNG MÔ HÌNH RẠP 3D WEBGL TRÊN SƠ ĐỒ GHẾ ĐẶT VÉ */
+    .cv-booking-3d-viewport {
+      position: relative;
+      width: 100%;
+      height: 192px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #050408;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 14px 32px rgba(0, 0, 0, 0.72);
+    }
+    @media (min-width: 640px) {
+      .cv-booking-3d-viewport { height: 214px; }
+    }
+    @media (min-width: 1280px) {
+      .cv-booking-3d-viewport { height: 228px; }
+    }
+    .cv-b3d-hud-pill {
+      background: rgba(11, 10, 16, 0.76);
+      backdrop-filter: blur(12px) saturate(170%);
+      -webkit-backdrop-filter: blur(12px) saturate(170%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-top-color: rgba(255, 255, 255, 0.22);
+      border-radius: 9999px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+    }
+    .cv-b3d-btn {
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.88);
+      cursor: pointer;
+      transition: all 200ms var(--cv-ease-cinema);
+      white-space: nowrap;
+    }
+    .cv-b3d-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .cv-b3d-btn.is-active {
+      background: linear-gradient(135deg, #F5C518 0%, #EAB308 100%);
+      color: #110D04;
+      font-weight: 800;
+      box-shadow: 0 3px 12px rgba(245, 197, 24, 0.38);
+    }
 </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-rose-500 selection:text-white">
@@ -11302,11 +11348,69 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             </div>
           </div>
 
-          <!-- 2. Sơ đồ chọn ghế trực quan (đặt ngay dưới thông tin phim, vừa khít chiều ngang + hỗ trợ Phóng to >=44px) -->
+          <!-- 1B. MÔ HÌNH RẠP 3D WEBGL TƯƠNG TÁC (ĐẶT TRÊN SƠ ĐỒ GHẾ • TỰ ĐỘNG DEMO GÓC NHÌN GHẾ & MỞ/ĐÓNG RÈM) -->
+          <div id="booking-pov-preview" class="cv-booking-card rounded-2xl p-2 sm:p-3 border border-white/10 space-y-1.5" style="background:#0B0B0F;">
+            <div class="flex items-center justify-between gap-2 px-0.5">
+              <button type="button" id="btn-toggle-booking-pov" onclick="window.appActions.toggleBookingPovCollapse()"
+                aria-expanded="true"
+                class="min-h-[30px] flex items-center gap-2 text-left cursor-pointer shrink-0">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider flex items-center gap-2" style="color:#F5C518;">
+                  <i class="fa-solid fa-cube" aria-hidden="true"></i>
+                  <span>Mô hình 3D góc nhìn từ ghế</span>
+                </span>
+                <span id="booking-pov-seat-chip" class="px-2 py-0.5 rounded-md text-[10px] font-black" style="background:#F5C518;color:#0B0B0F;">Ghế F4</span>
+                <i id="booking-pov-chevron" class="fa-solid fa-chevron-down text-[10px] transition-transform" style="color:#A1A1AA;transform:rotate(180deg);"></i>
+              </button>
+              <span id="booking-pov-desc" class="text-[10.5px] font-medium truncate max-w-full sm:max-w-[55%]" style="color:rgba(255,255,255,0.72);">
+                Chọn ghế bên dưới để tự động bay tới góc nhìn thực tế • Kéo để xoay 360°
+              </span>
+            </div>
+
+            <div id="booking-pov-collapsible" class="space-y-1.5">
+              <div id="booking-3d-viewport" class="cv-booking-3d-viewport select-none">
+                <canvas id="booking-3d-gl" style="touch-action:none;" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+                <canvas id="booking-3d-hud" class="pointer-events-none absolute inset-0 w-full h-full block"></canvas>
+
+                <!-- Cụm điều khiển nổi 3D: Góc nhìn ghế / Toàn cảnh 3D + Mở/Đóng Rèm + Đèn rạp -->
+                <div class="absolute top-2 left-2 right-2 flex flex-wrap items-center justify-between gap-1.5 pointer-events-none">
+                  <div class="cv-b3d-hud-pill p-0.5 flex items-center gap-0.5 pointer-events-auto">
+                    <button type="button" id="b3d-btn-pov" onclick="window.cvBooking3D?.setMode('pov')" class="cv-b3d-btn is-active">
+                      👁️ Góc nhìn <span id="b3d-pov-lbl">F4</span>
+                    </button>
+                    <button type="button" id="b3d-btn-orbit" onclick="window.cvBooking3D?.setMode('orbit')" class="cv-b3d-btn">
+                      Toàn cảnh 3D
+                    </button>
+                  </div>
+
+                  <div class="cv-b3d-hud-pill p-0.5 flex items-center gap-0.5 pointer-events-auto">
+                    <button type="button" id="b3d-btn-curtain" onclick="window.cvBooking3D?.toggleCurtain()" class="cv-b3d-btn" title="Mở hoặc đóng rèm nhung sân khấu">
+                      🎭 <span id="b3d-curtain-lbl">Đóng rèm</span>
+                    </button>
+                    <button type="button" id="b3d-btn-lights" onclick="window.cvBooking3D?.toggleLights()" class="cv-b3d-btn" title="Bật / Tắt đèn tường & đèn trần rạp">
+                      💡 <span id="b3d-lights-lbl">Đèn chiếu</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Tooltip khi rê chuột vào ghế trong chế độ Toàn cảnh 3D -->
+                <div id="b3d-seat-tooltip" class="hidden pointer-events-none absolute z-20 px-2.5 py-1 rounded-xl cv-b3d-hud-pill text-[11px] text-white"></div>
+
+                <!-- Nhãn hướng dẫn mảnh ở góc dưới trái -->
+                <div class="pointer-events-none absolute bottom-2 left-2.5 px-2.5 py-0.5 rounded-full bg-black/60 border border-white/10 text-[10.5px] text-white/80">
+                  <span id="b3d-hint-lbl">Kéo chuột trên khung 3D để ngoảnh đầu nhìn quanh rạp 360°</span>
+                </div>
+              </div>
+              <!-- Giữ phần tử ẩn tương thích ngược -->
+              <img id="booking-pov-poster" src="" alt="" class="hidden" aria-hidden="true" />
+              <div id="booking-pov-screen" class="hidden" aria-hidden="true"></div>
+            </div>
+          </div>
+
+          <!-- 2. Sơ đồ chọn ghế trực quan (nằm ngay dưới Mô hình Rạp 3D, vừa khít chiều ngang + hỗ trợ Phóng to >=44px) -->
           <div class="cv-booking-card p-2.5 sm:p-4 space-y-2.5">
             <div class="flex flex-wrap items-center justify-between gap-2">
               <span class="text-[11px] font-extrabold uppercase tracking-wider" style="color:#F5C518;">Sơ Đồ Ghế Ngồi</span>
-              <span id="booking-seat-mode-hint" class="text-[10px]" style="color:#A1A1AA;">Toàn cảnh vừa màn hình • Bật Phóng to để chạm ≥44px</span>
+              <span id="booking-seat-mode-hint" class="text-[10px]" style="color:#A1A1AA;">Chạm ghế bất kỳ để xem ngay góc nhìn 3D phía trên</span>
             </div>
 
             <!-- Thanh chuyển chế độ Toàn cảnh / Phóng to (>=44px touch target) -->
@@ -11341,35 +11445,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               <span class="flex items-center gap-1.5"><span class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold" style="background:rgba(229,9,20,0.18);border:1.5px solid rgba(229,9,20,0.68);color:#FECDD3;">♥</span><span data-legend-tier="sweetbox">Sweetbox (F)</span></span>
               <span class="flex items-center gap-1.5"><span class="w-5 h-5 rounded flex items-center justify-center text-[11px] font-black" style="background:#F5C518;color:#0B0B0F;border:2px solid #FFFFFF;">✓</span><span>Đang chọn</span></span>
               <span class="flex items-center gap-1.5"><span class="w-5 h-5 rounded flex items-center justify-center text-[11px] font-black" style="background:#121218;color:#A1A1AA;border:1.5px dashed rgba(229,9,20,0.68);">✕</span><span>Đã có người</span></span>
-            </div>
-          </div>
-
-          <!-- Góc nhìn ghế đang chọn (thu gọn vào mục "Xem góc nhìn từ ghế", mặc định đóng trên mobile & desktop thấp) -->
-          <div id="booking-pov-preview" class="cv-booking-card rounded-2xl p-2.5 sm:p-3.5 border border-white/10 space-y-2" style="background:#0B0B0F;">
-            <button type="button" id="btn-toggle-booking-pov" onclick="window.appActions.toggleBookingPovCollapse()"
-              aria-expanded="false"
-              class="w-full min-h-[44px] flex items-center justify-between gap-2 text-left cursor-pointer px-1">
-              <span class="text-[11px] font-extrabold uppercase tracking-wider flex items-center gap-2" style="color:#F5C518;">
-                <i class="fa-regular fa-eye" aria-hidden="true"></i>
-                <span>Xem góc nhìn từ ghế</span>
-              </span>
-              <span class="flex items-center gap-1.5">
-                <span id="booking-pov-seat-chip" class="px-2 py-0.5 rounded-md text-[10px] font-black" style="background:#F5C518;color:#0B0B0F;">Ghế F4</span>
-                <i id="booking-pov-chevron" class="fa-solid fa-chevron-down text-[10px] transition-transform" style="color:#A1A1AA;"></i>
-              </span>
-            </button>
-            <div id="booking-pov-collapsible" class="hidden space-y-2 pt-1">
-              <div class="cv-pov-stage" style="height:102px;">
-                <div id="booking-pov-screen" class="cv-pov-screen">
-                  <img id="booking-pov-poster" src="" alt="Mô phỏng góc nhìn từ ghế đang chọn" />
-                </div>
-                <div class="cv-pov-seats-silhouette" aria-hidden="true">
-                  <span></span><span></span><span></span><span></span><span></span>
-                </div>
-              </div>
-              <p id="booking-pov-desc" class="text-[10px] leading-snug" style="color:#A1A1AA;">
-                Mô phỏng góc nhìn theo vùng ghế: Hàng F (Toàn cảnh) • Góc giữa màn hình.
-              </p>
             </div>
           </div>
         </div>
@@ -15312,45 +15387,1061 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       return "rowF";
     }
 
+    // =========================================================================
+    // MÔ HÌNH RẠP 3D WEBGL TÍCH HỢP ĐẶT VÉ (CÓ RÈM MỞ/ĐÓNG & TỰ ĐỘNG DEMO POV GHẾ)
+    // =========================================================================
+    (function initCineVerseBooking3D() {
+      let gl = null, hctx = null, glCanvas = null, hudCanvas = null;
+      let progRoom = null, progScreen = null, progBeam = null;
+      let gpuBase = null, gpuLeftWall = null, gpuRightWall = null, gpuRearWall = null, gpuCeiling = null;
+      let chairGPU = null, curtainGPU = null, scrBuffers = null, beamBuffers = null, scrTex = null;
+
+      const scrOff = document.createElement("canvas");
+      scrOff.width = 512;
+      scrOff.height = 256;
+      const sctx = scrOff.getContext("2d", { willReadFrequently: true });
+
+      const ROWS_3D = ["A", "B", "C", "D", "E", "F"];
+      const seats3D = [];
+      ROWS_3D.forEach((row, rIdx) => {
+        const isVIP = row === "D" || row === "E";
+        const isCouple = row === "F";
+        const z = -4.15 + rIdx * 2.25;
+        const y = 0.35 + rIdx * 0.76;
+        for (let col = 1; col <= 8; col++) {
+          let x;
+          if (isCouple) {
+            const pairIdx = Math.floor((col - 1) / 2);
+            const pairCenter = pairIdx < 2 ? (-5.25 + pairIdx * 2.55) : (2.70 + (pairIdx - 2) * 2.55);
+            x = pairCenter + (col % 2 === 1 ? -0.53 : 0.53);
+          } else {
+            x = col <= 4 ? (-6.35 + (col - 1) * 1.48) : (1.90 + (col - 5) * 1.48);
+          }
+          seats3D.push({
+            id: `${row}${col}`,
+            row, col, rIdx, isVIP, isCouple,
+            pairSide: isCouple ? (col % 2 === 1 ? "L" : "R") : null,
+            x, y, z, hit2D: null
+          });
+        }
+      });
+
+      const DUST_COUNT = 70;
+      const dustSeeds = Array.from({ length: DUST_COUNT }, () => ({
+        t: Math.random(),
+        u: (Math.random() - 0.5) * 2,
+        v: (Math.random() - 0.5) * 2,
+        sp: 0.14 + Math.random() * 0.28,
+        ph: Math.random() * 6.28
+      }));
+      const dustFloatArr = new Float32Array(DUST_COUNT * 3);
+
+      const st = {
+        initialized: false,
+        running: false,
+        rafId: 0,
+        W: 640, H: 260, dpr: 1,
+        mode: "pov",           // "pov" | "orbit"
+        mySeatId: "F4",
+        hoveredSeatId: null,
+        occupied: {},          // { D3: "Khách", ... }
+        isCoupleOnly: false,
+        curtainOpen: 0.08,
+        curtainTarget: 1.0,
+        lastCurtainBuilt: -1,
+        lightsLevel: 0.08,
+        lightsTarget: 0.0,
+        movieTitle: "CineVerse Lotte • IMAX 3D",
+        posterUrl: "",
+        posterImg: null,
+        posterReady: false,
+        lightL: [0.08, 0.56, 0.78],
+        lightC: [0.18, 0.80, 0.96],
+        lightR: [0.08, 0.48, 0.70],
+        beamCol: [0.24, 0.80, 0.98],
+        yaw: -0.56, pitch: 0.45, dist: 21.0,
+        tYaw: -0.56, tPitch: 0.45, tDist: 21.0,
+        povYaw: 0, povPitch: 0,
+        tPovYaw: 0, tPovPitch: 0,
+        camPos: [0, 5.2, 6.8],
+        camLook: [0, 3.8, -10.4]
+      };
+
+      function createMB() {
+        return { pos: [], norm: [], col: [], mat: [], idx: [], vCount: 0 };
+      }
+
+      function addSoftBox(mb, cx, cy, cz, hx, hy, hz, rgb, mat, tiltX = 0, bevel = 0.24) {
+        const c = Math.cos(tiltX), s = Math.sin(tiltX);
+        const faces = [
+          { v: [[-hx,-hy,-hz],[hx,-hy,-hz],[hx,hy,-hz],[-hx,hy,-hz]], n: [0,0,-1] },
+          { v: [[hx,-hy,hz],[-hx,-hy,hz],[-hx,hy,hz],[hx,hy,hz]], n: [0,0,1] },
+          { v: [[-hx,hy,-hz],[hx,hy,-hz],[hx,hy,hz],[-hx,hy,hz]], n: [0,1,0] },
+          { v: [[-hx,-hy,hz],[hx,-hy,hz],[hx,-hy,-hz],[-hx,-hy,-hz]], n: [0,-1,0] },
+          { v: [[-hx,-hy,hz],[-hx,-hy,-hz],[-hx,hy,-hz],[-hx,hy,hz]], n: [-1,0,0] },
+          { v: [[hx,-hy,-hz],[hx,-hy,hz],[hx,hy,hz],[hx,hy,-hz]], n: [1,0,0] }
+        ];
+        for (const f of faces) {
+          const base = mb.vCount;
+          for (let i = 0; i < 4; i++) {
+            const lv = f.v[i];
+            const wx = cx + lv[0];
+            const wy = cy + (lv[1] * c - lv[2] * s);
+            const wz = cz + (lv[1] * s + lv[2] * c);
+            const nx0 = f.n[0] + Math.sign(lv[0]) * bevel;
+            const ny0 = f.n[1] + Math.sign(lv[1]) * bevel;
+            const nz0 = f.n[2] + Math.sign(lv[2]) * bevel;
+            const ry = ny0 * c - nz0 * s, rz = ny0 * s + nz0 * c;
+            const l = Math.hypot(nx0, ry, rz) || 1;
+            mb.pos.push(wx, wy, wz);
+            mb.norm.push(nx0 / l, ry / l, rz / l);
+            mb.col.push(rgb[0], rgb[1], rgb[2]);
+            mb.mat.push(mat);
+          }
+          mb.idx.push(base, base + 1, base + 2, base, base + 2, base + 3);
+          mb.vCount += 4;
+        }
+      }
+
+      function uploadMB(mb, usage = gl.STATIC_DRAW) {
+        const bPos = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, bPos);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.pos), usage);
+        const bNorm = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, bNorm);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.norm), usage);
+        const bCol = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, bCol);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.col), usage);
+        const bMat = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, bMat);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.mat), usage);
+        const bIdx = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, bIdx);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(mb.idx), usage);
+        return { bPos, bNorm, bCol, bMat, bIdx, count: mb.idx.length };
+      }
+
+      function updateDynamicGPU(gpu, mb) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bPos);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.pos), gl.DYNAMIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bNorm);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.norm), gl.DYNAMIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bCol);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.col), gl.DYNAMIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bMat);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mb.mat), gl.DYNAMIC_DRAW);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gpu.bIdx);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(mb.idx), gl.DYNAMIC_DRAW);
+        gpu.count = mb.idx.length;
+      }
+
+      function rebuildCurtainMesh(openVal) {
+        if (!gl || !curtainGPU) return;
+        st.lastCurtainBuilt = openVal;
+        const mb = createMB();
+
+        // Diềm nhung Valance phía trên đỉnh màn chiếu + chỉ viền vàng kim
+        addSoftBox(mb, 0, 6.76, -9.86, 6.62, 0.22, 0.14, [0.48, 0.06, 0.13], 4, 0, 0.15);
+        addSoftBox(mb, 0, 6.53, -9.82, 6.60, 0.028, 0.08, [0.92, 0.72, 0.26], 2, 0, 0.2);
+
+        // Hai cánh rèm nhung đỏ xếp ly 3D chạy dọc theo độ cong màn chiếu
+        const SEGS = 18;
+        const yBot = 1.15, yFringe = 1.29, yTop = 6.62;
+        [-1, 1].forEach((side) => {
+          const xOuter = side * 6.52;
+          // Khi openVal = 0: hai mép rèm khép sát nhau ở giữa (x = 0.02); khi openVal = 1: thu gọn sang 2 bên (x = +-5.72)
+          const xInner = side * (0.015 + openVal * 5.70);
+          const amp = 0.065 + openVal * 0.115;
+
+          for (let i = 0; i < SEGS; i++) {
+            const s0 = i / SEGS, s1 = (i + 1) / SEGS;
+            const x0 = xOuter + (xInner - xOuter) * s0;
+            const x1 = xOuter + (xInner - xOuter) * s1;
+            const u0 = (x0 + 6.3) / 12.6, u1 = (x1 + 6.3) / 12.6;
+            const curve0 = -9.90 - Math.cos((Math.max(0, Math.min(1, u0)) - 0.5) * Math.PI) * 0.70;
+            const curve1 = -9.90 - Math.cos((Math.max(0, Math.min(1, u1)) - 0.5) * Math.PI) * 0.70;
+            const z0 = curve0 + Math.sin(i * 2.15) * amp;
+            const z1 = curve1 + Math.sin((i + 1) * 2.15) * amp;
+
+            const dx = x1 - x0, dz = z1 - z0;
+            let nx = -dz, nz = dx;
+            if (nz < 0) { nx = -nx; nz = -nz; }
+            const nl = Math.hypot(nx, nz) || 1;
+            nx /= nl; nz /= nl;
+
+            // Thân rèm nhung đỏ (hai mặt trước/sau để nhìn từ trong rạp hay từ sân khấu đều đẹp)
+            const shade = 0.88 + 0.12 * Math.cos(i * 2.15);
+            const velvet = [0.50 * shade, 0.06 * shade, 0.13 * shade];
+            const goldFringe = [0.92 * shade, 0.72 * shade, 0.25 * shade];
+
+            const pushDoubleQuad = (yb, yt, col, mat) => {
+              // Mặt trước (+z hướng về khán giả)
+              let b = mb.vCount;
+              mb.pos.push(x0, yb, z0, x1, yb, z1, x1, yt, z1, x0, yt, z0);
+              for (let k = 0; k < 4; k++) { mb.norm.push(nx, 0.04, nz); mb.col.push(col[0], col[1], col[2]); mb.mat.push(mat); }
+              mb.idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
+              mb.vCount += 4;
+              // Mặt sau (-z hướng về màn chiếu)
+              b = mb.vCount;
+              mb.pos.push(x1, yb, z1 - 0.03, x0, yb, z0 - 0.03, x0, yt, z0 - 0.03, x1, yt, z1 - 0.03);
+              for (let k = 0; k < 4; k++) { mb.norm.push(-nx, 0.04, -nz); mb.col.push(col[0]*0.8, col[1]*0.8, col[2]*0.8); mb.mat.push(mat); }
+              mb.idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
+              mb.vCount += 4;
+            };
+
+            pushDoubleQuad(yFringe, yTop, velvet, 4);
+            pushDoubleQuad(yBot, yFringe, goldFringe, 2);
+          }
+        });
+
+        updateDynamicGPU(curtainGPU, mb);
+      }
+
+      function rebuildChairsMesh() {
+        if (!gl || !chairGPU) return;
+        const mb = createMB();
+        for (const s of seats3D) {
+          if (st.isCoupleOnly && s.row !== "F") continue;
+          const isMine = s.id === st.mySeatId;
+          const isHover = s.id === st.hoveredSeatId;
+          const occName = st.occupied[s.id];
+
+          let fabric, trimCol, headMat = 1;
+          if (isMine) {
+            fabric = [0.96, 0.75, 0.14];
+            trimCol = [1.0, 0.92, 0.55];
+            headMat = 2;
+          } else if (isHover) {
+            fabric = [0.88, 0.64, 0.18];
+            trimCol = [1.0, 0.88, 0.45];
+            headMat = 2;
+          } else if (s.isCouple) {
+            fabric = [0.58, 0.10, 0.25];
+            trimCol = [0.88, 0.68, 0.26];
+            headMat = 2;
+          } else if (s.isVIP) {
+            fabric = [0.48, 0.08, 0.16];
+            trimCol = [0.72, 0.36, 0.44];
+            headMat = 1;
+          } else {
+            fabric = [0.24, 0.20, 0.30];
+            trimCol = [0.32, 0.28, 0.40];
+            headMat = 1;
+          }
+
+          const hw = s.isCouple ? 0.53 : 0.45;
+          if (!s.isCouple || s.pairSide === "L") {
+            const pedX = s.isCouple ? s.x + 0.53 : s.x;
+            addSoftBox(mb, pedX, s.y + 0.11, s.z + 0.04, s.isCouple ? 0.65 : 0.18, 0.11, 0.18, [0.08, 0.08, 0.10], 0, 0, 0.1);
+          }
+          addSoftBox(mb, s.x, s.y + 0.28, s.z - 0.02, hw, 0.10, 0.40, fabric, 1, 0.06, 0.38);
+          const backH = s.isCouple ? 0.38 : s.isVIP ? 0.36 : 0.33;
+          addSoftBox(mb, s.x, s.y + 0.35 + backH, s.z + 0.29, hw * 0.96, backH, 0.095, fabric, 1, -0.19, 0.40);
+          const headY = s.y + 0.35 + backH * 2.0 + 0.08;
+          addSoftBox(mb, s.x, headY, s.z + 0.38, hw * 0.78, 0.095, 0.085, trimCol, headMat, -0.10, 0.45);
+
+          const armCol = [0.12, 0.10, 0.14];
+          if (!s.isCouple || s.pairSide === "L") {
+            addSoftBox(mb, s.x - hw - 0.05, s.y + 0.44, s.z + 0.04, 0.052, 0.055, 0.35, armCol, 0, 0, 0.28);
+            addSoftBox(mb, s.x - hw - 0.05, s.y + 0.26, s.z + 0.14, 0.042, 0.13, 0.08, [0.08, 0.08, 0.10], 0, 0, 0.1);
+          }
+          if (!s.isCouple || s.pairSide === "R") {
+            addSoftBox(mb, s.x + hw + 0.05, s.y + 0.44, s.z + 0.04, 0.052, 0.055, 0.35, armCol, 0, 0, 0.28);
+            addSoftBox(mb, s.x + hw + 0.05, s.y + 0.26, s.z + 0.14, 0.042, 0.13, 0.08, [0.08, 0.08, 0.10], 0, 0, 0.1);
+            if (occName || isMine) {
+              addSoftBox(mb, s.x + hw + 0.05, s.y + 0.54, s.z - 0.23, 0.042, 0.065, 0.042, isMine ? [0.95, 0.22, 0.28] : [0.88, 0.88, 0.92], 0, 0, 0.38);
+            }
+          }
+
+          if (occName || (isMine && st.mode !== "pov")) {
+            const shirt = isMine ? [0.88, 0.68, 0.16] : [0.18, 0.20, 0.28];
+            const headC = isMine ? [0.98, 0.84, 0.44] : [0.74, 0.66, 0.62];
+            addSoftBox(mb, s.x, s.y + 0.68, s.z + 0.16, 0.25, 0.24, 0.13, shirt, 1, -0.16, 0.44);
+            addSoftBox(mb, s.x, s.y + 1.09, s.z + 0.22, 0.145, 0.165, 0.145, headC, 1, 0, 0.48);
+          }
+        }
+        updateDynamicGPU(chairGPU, mb);
+      }
+
+      function extractPaletteFromScreen() {
+        try {
+          const sampleZone = (x0, w) => {
+            const d = sctx.getImageData(x0, 48, w, 160).data;
+            let r = 0, g = 0, b = 0, n = 0;
+            for (let i = 0; i < d.length; i += 16) {
+              r += d[i]; g += d[i + 1]; b += d[i + 2]; n++;
+            }
+            if (!n) return [0.18, 0.68, 0.88];
+            const boost = 1.35 / 255;
+            return [
+              Math.min(1, Math.max(0.08, r / n * boost)),
+              Math.min(1, Math.max(0.08, g / n * boost)),
+              Math.min(1, Math.max(0.08, b / n * boost))
+            ];
+          };
+          st.lightL = sampleZone(16, 140);
+          st.lightC = sampleZone(186, 140);
+          st.lightR = sampleZone(356, 140);
+          st.beamCol = [
+            Math.min(1, st.lightC[0] * 1.1 + 0.08),
+            Math.min(1, st.lightC[1] * 1.1 + 0.08),
+            Math.min(1, st.lightC[2] * 1.1 + 0.08)
+          ];
+        } catch (_) {
+          st.lightL = [0.14, 0.56, 0.78];
+          st.lightC = [0.24, 0.75, 0.94];
+          st.lightR = [0.14, 0.48, 0.72];
+          st.beamCol = [0.30, 0.78, 0.96];
+        }
+      }
+
+      function loadRoomPoster(url) {
+        const clean = url ? (typeof getOptimizedPosterUrl === "function" ? getOptimizedPosterUrl(url, "w780") : url) : "";
+        if (!clean || clean === st.posterUrl) return;
+        st.posterUrl = clean;
+        st.posterReady = false;
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          if (st.posterUrl !== clean) return;
+          st.posterImg = img;
+          st.posterReady = true;
+          sctx.clearRect(0, 0, 512, 256);
+          const ir = img.width / (img.height || 1);
+          const cr = 512 / 256;
+          let dw = 512, dh = 256, dx = 0, dy = 0;
+          if (ir > cr) { dh = 256; dw = 256 * ir; dx = (512 - dw) * 0.5; }
+          else { dw = 512; dh = 512 / (ir || 1); dy = (256 - dh) * 0.35; }
+          sctx.drawImage(img, dx, dy, dw, dh);
+          extractPaletteFromScreen();
+        };
+        img.onerror = () => {
+          if (st.posterUrl !== clean) return;
+          st.posterReady = false;
+        };
+        img.src = clean;
+      }
+
+      function drawScreenCanvas(t) {
+        const w = 512, h = 256;
+        if (st.posterReady && st.posterImg) {
+          const img = st.posterImg;
+          const ir = img.width / (img.height || 1);
+          const cr = w / h;
+          const zoom = 1.03 + 0.025 * Math.sin(t * 0.45);
+          let dw = w, dh = h;
+          if (ir > cr) { dh = h * zoom; dw = dh * ir; }
+          else { dw = w * zoom; dh = dw / (ir || 1); }
+          const dx = (w - dw) * 0.5;
+          const dy = (h - dh) * 0.32;
+          sctx.drawImage(img, dx, dy, dw, dh);
+
+          // Ánh đèn máy chiếu lung linh nhẹ trên màn chiếu IMAX
+          const g = sctx.createRadialGradient(w * (0.5 + 0.12 * Math.sin(t * 0.8)), h * 0.35, 10, w * 0.5, h * 0.5, w * 0.65);
+          g.addColorStop(0, "rgba(255,255,255,0.10)");
+          g.addColorStop(1, "rgba(0,0,0,0.28)");
+          sctx.fillStyle = g;
+          sctx.fillRect(0, 0, w, h);
+        } else {
+          const g = sctx.createLinearGradient(0, 0, 0, h);
+          g.addColorStop(0, "#0e5a84");
+          g.addColorStop(0.5, "#0284c7");
+          g.addColorStop(1, "#020617");
+          sctx.fillStyle = g;
+          sctx.fillRect(0, 0, w, h);
+          sctx.save();
+          sctx.globalCompositeOperation = "screen";
+          for (let i = 0; i < 6; i++) {
+            const x = w * (0.15 + i * 0.14) + Math.sin(t * 0.7 + i) * 16;
+            const rg = sctx.createLinearGradient(x, 0, x + 36, h);
+            rg.addColorStop(0, "rgba(165, 243, 252, 0.32)");
+            rg.addColorStop(1, "rgba(14, 165, 233, 0)");
+            sctx.fillStyle = rg;
+            sctx.beginPath();
+            sctx.moveTo(x - 14, 0); sctx.lineTo(x + 22, 0); sctx.lineTo(x + 85, h); sctx.lineTo(x - 45, h);
+            sctx.closePath(); sctx.fill();
+          }
+          sctx.restore();
+        }
+        sctx.fillStyle = "rgba(0,0,0,0.45)";
+        sctx.fillRect(0, h - 26, w, 26);
+        sctx.fillStyle = "rgba(255,255,255,0.88)";
+        sctx.font = "700 11px system-ui, sans-serif";
+        sctx.textAlign = "center";
+        sctx.fillText(st.movieTitle, w * 0.5, h - 9);
+      }
+
+      function ensureInit() {
+        if (st.initialized) return true;
+        glCanvas = document.getElementById("booking-3d-gl");
+        hudCanvas = document.getElementById("booking-3d-hud");
+        if (!glCanvas || !hudCanvas) return false;
+        gl = glCanvas.getContext("webgl", { antialias: true, alpha: false, premultipliedAlpha: false });
+        hctx = hudCanvas.getContext("2d");
+        if (!gl || !hctx) return false;
+
+        const compile = (vsSrc, fsSrc) => {
+          const vs = gl.createShader(gl.VERTEX_SHADER);
+          gl.shaderSource(vs, vsSrc); gl.compileShader(vs);
+          const fs = gl.createShader(gl.FRAGMENT_SHADER);
+          gl.shaderSource(fs, fsSrc); gl.compileShader(fs);
+          const p = gl.createProgram();
+          gl.attachShader(p, vs); gl.attachShader(p, fs); gl.linkProgram(p);
+          return p;
+        };
+
+        progRoom = compile(`
+          attribute vec3 aPos, aNorm, aCol;
+          attribute float aMat;
+          uniform mat4 uProj, uView;
+          varying vec3 vWorldPos, vNorm, vCol;
+          varying float vMat;
+          void main() {
+            vWorldPos = aPos; vNorm = aNorm; vCol = aCol; vMat = aMat;
+            gl_Position = uProj * uView * vec4(aPos, 1.0);
+          }
+        `, `
+          precision highp float;
+          varying vec3 vWorldPos, vNorm, vCol;
+          varying float vMat;
+          uniform vec3 uCamPos, uScreenColL, uScreenColC, uScreenColR;
+          uniform float uLights, uTime, uCurtainOpen;
+          void main() {
+            vec3 N = normalize(vNorm);
+            vec3 V = normalize(uCamPos - vWorldPos);
+            if (vMat > 3.5 && vMat < 4.5) {
+              float pleat = cos(vWorldPos.z * 9.5 + vWorldPos.x * 6.5);
+              N = normalize(N + vec3(pleat * 0.18, 0.0, pleat * 0.42));
+            }
+            if (vMat > 2.5 && vMat < 3.5) {
+              gl_FragColor = vec4(vCol, 1.0);
+              return;
+            }
+            vec3 scrPosL = vec3(-4.6, 3.9, -10.2);
+            vec3 scrPosC = vec3( 0.0, 3.9, -10.6);
+            vec3 scrPosR = vec3( 4.6, 3.9, -10.2);
+            vec3 dL = scrPosL - vWorldPos, dC = scrPosC - vWorldPos, dR = scrPosR - vWorldPos;
+            float attL = 1.0 / (1.0 + 0.020 * dot(dL, dL));
+            float attC = 1.0 / (1.0 + 0.017 * dot(dC, dC));
+            float attR = 1.0 / (1.0 + 0.020 * dot(dR, dR));
+            float nlL = max(dot(N, normalize(dL)), 0.0);
+            float nlC = max(dot(N, normalize(dC)), 0.0);
+            float nlR = max(dot(N, normalize(dR)), 0.0);
+            float scrGate = 0.14 + 0.86 * uCurtainOpen;
+            vec3 screenIrr = (
+              uScreenColL * (nlL * 0.72 + 0.28) * attL +
+              uScreenColC * (nlC * 0.88 + 0.32) * attC +
+              uScreenColR * (nlR * 0.72 + 0.28) * attR
+            ) * 1.38 * scrGate;
+
+            vec3 sconceLight = vec3(0.0);
+            float sconceStr = mix(0.45, 1.45, uLights);
+            for (int i = 0; i < 3; i++) {
+              float sz = -6.0 + float(i) * 5.0;
+              for (int s = 0; s < 2; s++) {
+                vec3 lp = vec3((s == 0) ? -8.85 : 8.85, 4.85, sz);
+                vec3 ld = lp - vWorldPos;
+                float att = 1.0 / (1.0 + 0.12 * dot(ld, ld));
+                sconceLight += vec3(1.0, 0.78, 0.42) * (max(dot(N, normalize(ld)), 0.0) * 0.8 + 0.25) * att * sconceStr;
+              }
+            }
+            vec3 skyFill = mix(vec3(0.11, 0.10, 0.15), vec3(0.76, 0.67, 0.56), uLights) * (max(N.y, 0.0) * 0.7 + 0.3);
+            float aisleProx = exp(-abs(vWorldPos.x) * 1.1) * exp(-max(0.0, vWorldPos.y - 4.8) * 0.8);
+            vec3 aisleGlow = vec3(0.98, 0.76, 0.20) * aisleProx * 0.24;
+            vec3 color = vCol * (vec3(0.07, 0.06, 0.09) + skyFill + screenIrr + sconceLight + aisleGlow);
+
+            if ((vMat > 0.5 && vMat < 1.5) || (vMat > 3.5 && vMat < 4.5)) {
+              float rim = pow(1.0 - max(dot(N, V), 0.0), 2.8);
+              vec3 sheen = mix(vCol * 2.1 + vec3(0.09), uScreenColC * 0.75 + vCol, 0.35 * scrGate);
+              color += sheen * rim * (0.34 + 0.24 * uLights);
+            }
+            if (vMat > 1.5 && vMat < 2.5) {
+              vec3 H1 = normalize(normalize(scrPosC - vWorldPos) + V);
+              vec3 H2 = normalize(vec3(0.2, 0.9, 0.4) + V);
+              float spec = pow(max(dot(N, H1), 0.0), 26.0) * 0.8 + pow(max(dot(N, H2), 0.0), 20.0) * (0.45 + 0.6 * uLights);
+              color += vCol * spec;
+            }
+            color = (color * (2.51 * color + 0.03)) / (color * (2.43 * color + 0.59) + 0.14);
+            gl_FragColor = vec4(clamp(color, 0.0, 1.0), 1.0);
+          }
+        `);
+
+        progScreen = compile(`
+          attribute vec3 aPos; attribute vec2 aUV;
+          uniform mat4 uProj, uView; varying vec2 vUV;
+          void main() { vUV = aUV; gl_Position = uProj * uView * vec4(aPos, 1.0); }
+        `, `
+          precision mediump float; varying vec2 vUV; uniform sampler2D uTex;
+          void main() {
+            vec3 c = texture2D(uTex, vUV).rgb;
+            float vig = smoothstep(0.0, 0.035, vUV.x) * smoothstep(1.0, 0.965, vUV.x) *
+                        smoothstep(0.0, 0.045, vUV.y) * smoothstep(1.0, 0.955, vUV.y);
+            gl_FragColor = vec4(c * (0.90 + 0.15 * vig), 1.0);
+          }
+        `);
+
+        progBeam = compile(`
+          attribute vec3 aPos; attribute float aAlpha;
+          uniform mat4 uProj, uView; varying float vAlpha; varying vec3 vWPos;
+          void main() {
+            vAlpha = aAlpha; vWPos = aPos;
+            gl_Position = uProj * uView * vec4(aPos, 1.0);
+            gl_PointSize = clamp(48.0 / gl_Position.w, 1.8, 5.5);
+          }
+        `, `
+          precision mediump float; varying float vAlpha; varying vec3 vWPos;
+          uniform vec3 uBeamCol; uniform float uTime, uIsPoint;
+          void main() {
+            float mask = 1.0;
+            if (uIsPoint > 0.5) {
+              float r = length(gl_PointCoord - vec2(0.5));
+              if (r > 0.5) discard;
+              mask = smoothstep(0.5, 0.05, r);
+            }
+            float streak = 0.85 + 0.15 * sin(vWPos.x * 3.8 + uTime * 1.9);
+            gl_FragColor = vec4(uBeamCol * streak, vAlpha * mask);
+          }
+        `);
+
+        // Build Static Auditorium Geometry
+        const mbBase = createMB(), mbL = createMB(), mbR = createMB(), mbRear = createMB(), mbCeil = createMB();
+        addSoftBox(mbBase, 0, -0.12, -0.4, 9.4, 0.12, 11.2, [0.08, 0.07, 0.10], 0, 0, 0.04);
+        addSoftBox(mbBase, -9.22, 0.22, -0.4, 0.14, 0.34, 11.1, [0.14, 0.10, 0.13], 0, 0, 0.08);
+        addSoftBox(mbBase,  9.22, 0.22, -0.4, 0.14, 0.34, 11.1, [0.14, 0.10, 0.13], 0, 0, 0.08);
+        addSoftBox(mbBase, 0, 0.26, -9.75, 8.85, 0.26, 1.35, [0.10, 0.08, 0.11], 0, 0, 0.08);
+        addSoftBox(mbBase, 0, 0.53, -8.42, 8.80, 0.025, 0.04, [0.90, 0.70, 0.26], 2, 0, 0.15);
+        addSoftBox(mbBase, 0, 4.15, -11.35, 9.35, 4.25, 0.16, [0.08, 0.06, 0.09], 0, 0, 0.02);
+        [-1, 1].forEach((side) => {
+          addSoftBox(mbBase, side * 7.65, 4.05, -10.15, 1.25, 3.75, 0.24, [0.46, 0.07, 0.14], 4, 0, 0.15);
+          addSoftBox(mbBase, side * 6.56, 3.95, -10.02, 0.07, 3.55, 0.12, [0.90, 0.70, 0.28], 2, 0, 0.22);
+        });
+        for (let sx = -4.8; sx <= 4.81; sx += 2.4) {
+          addSoftBox(mbBase, sx, 0.76, -10.22, 0.50, 0.22, 0.26, [0.07, 0.07, 0.09], 0, 0, 0.14);
+        }
+        ROWS_3D.forEach((row, rIdx) => {
+          const z0 = -5.15 + rIdx * 2.25;
+          const yTop = 0.34 + rIdx * 0.76;
+          const yPrev = rIdx === 0 ? 0.0 : (0.34 + (rIdx - 1) * 0.76);
+          const hHalf = (yTop - yPrev) * 0.5;
+          addSoftBox(mbBase, 0, yPrev + hHalf, z0 + 1.125, 8.95, hHalf, 1.125, [0.11, 0.09, 0.13], 0, 0, 0.04);
+          addSoftBox(mbBase, -5.0, yTop + 0.012, z0 + 1.12, 3.80, 0.014, 1.08, [0.19, 0.08, 0.12], 1, 0, 0.03);
+          addSoftBox(mbBase,  5.0, yTop + 0.012, z0 + 1.12, 3.80, 0.014, 1.08, [0.19, 0.08, 0.12], 1, 0, 0.03);
+          const stepMidY = (yPrev + yTop) * 0.5;
+          addSoftBox(mbBase, 0, (yPrev + stepMidY) * 0.5, z0 - 0.18, 1.12, (stepMidY - yPrev) * 0.5, 0.22, [0.16, 0.10, 0.14], 0, 0, 0.06);
+          addSoftBox(mbBase, 0, yTop + 0.016, z0 + 1.12, 1.10, 0.016, 1.10, [0.38, 0.09, 0.15], 1, 0, 0.03);
+          addSoftBox(mbBase, -0.96, yTop + 0.038, z0 + 0.06, 0.08, 0.020, 0.035, [1.0, 0.84, 0.26], 3, 0, 0.1);
+          addSoftBox(mbBase,  0.96, yTop + 0.038, z0 + 0.06, 0.08, 0.020, 0.035, [1.0, 0.84, 0.26], 3, 0, 0.1);
+          addSoftBox(mbBase, -0.96, stepMidY + 0.025, z0 - 0.35, 0.07, 0.016, 0.03, [1.0, 0.78, 0.22], 3, 0, 0.1);
+          addSoftBox(mbBase,  0.96, stepMidY + 0.025, z0 - 0.35, 0.07, 0.016, 0.03, [1.0, 0.78, 0.22], 3, 0, 0.1);
+        });
+        addSoftBox(mbBase, 0, 2.2, 9.15, 9.0, 2.2, 0.80, [0.12, 0.09, 0.13], 0, 0, 0.04);
+        addSoftBox(mbBase, 0, 6.65, 9.68, 1.12, 0.52, 0.28, [0.14, 0.11, 0.16], 0, 0, 0.12);
+        addSoftBox(mbBase, 0, 6.65, 9.42, 0.98, 0.40, 0.05, [0.85, 0.66, 0.26], 2, 0, 0.15);
+        addSoftBox(mbBase, 0, 6.65, 9.38, 0.82, 0.28, 0.04, [0.88, 0.95, 1.0], 3, 0, 0.1);
+
+        const buildWall = (mb, side) => {
+          addSoftBox(mb, side * 9.15, 4.35, -0.4, 0.12, 4.35, 10.4, [0.40, 0.07, 0.13], 4, 0, 0.05);
+          [-8.4, -3.4, 1.6, 6.6].forEach((pz) => {
+            addSoftBox(mb, side * 8.98, 4.35, pz, 0.16, 4.35, 0.26, [0.13, 0.10, 0.14], 0, 0, 0.12);
+            addSoftBox(mb, side * 8.83, 4.35, pz, 0.035, 4.0, 0.06, [0.88, 0.68, 0.28], 2, 0, 0.2);
+          });
+          [-6.0, -1.0, 4.0].forEach((sz) => {
+            addSoftBox(mb, side * 8.90, 4.85, sz, 0.08, 0.34, 0.14, [0.90, 0.70, 0.28], 2, 0, 0.2);
+            addSoftBox(mb, side * 8.82, 4.92, sz, 0.06, 0.22, 0.10, [1.0, 0.88, 0.58], 3, 0, 0.2);
+            addSoftBox(mb, side * 8.84, 6.45, sz + 2.1, 0.18, 0.28, 0.22, [0.09, 0.09, 0.12], 0, 0, 0.15);
+          });
+          if (side === 1) {
+            addSoftBox(mb, 8.94, 1.25, -7.8, 0.08, 1.05, 0.55, [0.08, 0.07, 0.10], 0, 0, 0.05);
+            addSoftBox(mb, 8.88, 2.52, -7.8, 0.05, 0.14, 0.34, [0.20, 0.95, 0.55], 3, 0, 0.1);
+          }
+        };
+        buildWall(mbL, -1); buildWall(mbR, 1);
+        addSoftBox(mbRear, 0, 4.6, 9.98, 9.3, 4.6, 0.16, [0.13, 0.09, 0.13], 0, 0, 0.03);
+        addSoftBox(mbCeil, 0, 8.65, -0.4, 9.4, 0.14, 11.0, [0.07, 0.06, 0.09], 0, 0, 0.02);
+        for (let cz = -8.0; cz <= 8.1; cz += 4.0) {
+          addSoftBox(mbCeil, 0, 8.42, cz, 9.1, 0.12, 0.22, [0.12, 0.10, 0.15], 0, 0, 0.08);
+          addSoftBox(mbCeil, 0, 8.29, cz, 8.9, 0.02, 0.04, [0.82, 0.64, 0.26], 2, 0, 0.15);
+        }
+
+        gpuBase = uploadMB(mbBase);
+        gpuLeftWall = uploadMB(mbL);
+        gpuRightWall = uploadMB(mbR);
+        gpuRearWall = uploadMB(mbRear);
+        gpuCeiling = uploadMB(mbCeil);
+
+        chairGPU = { bPos: gl.createBuffer(), bNorm: gl.createBuffer(), bCol: gl.createBuffer(), bMat: gl.createBuffer(), bIdx: gl.createBuffer(), count: 0 };
+        curtainGPU = { bPos: gl.createBuffer(), bNorm: gl.createBuffer(), bCol: gl.createBuffer(), bMat: gl.createBuffer(), bIdx: gl.createBuffer(), count: 0 };
+
+        // Curved Screen Mesh
+        const scrVerts = [], scrUVs = [], scrIdx = [];
+        for (let i = 0; i <= 24; i++) {
+          const u = i / 24;
+          const x = -6.3 + u * 12.6;
+          const z = -10.12 - Math.cos((u - 0.5) * Math.PI) * 0.74;
+          scrVerts.push(x, 1.15, z, x, 6.75, z);
+          scrUVs.push(u, 1.0, u, 0.0);
+          if (i < 24) { const b = i * 2; scrIdx.push(b, b + 1, b + 3, b, b + 3, b + 2); }
+        }
+        const sBPos = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, sBPos); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(scrVerts), gl.STATIC_DRAW);
+        const sBUV = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, sBUV); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(scrUVs), gl.STATIC_DRAW);
+        const sBIdx = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sBIdx); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(scrIdx), gl.STATIC_DRAW);
+        scrBuffers = { bPos: sBPos, bUV: sBUV, bIdx: sBIdx, count: scrIdx.length };
+
+        scrTex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, scrTex);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+        const beamPos = [
+           0.0, 6.65, 9.35, -6.2, 6.70, -10.12,  6.2, 6.70, -10.12,
+           0.0, 6.65, 9.35, -6.2, 1.20, -10.12,  6.2, 1.20, -10.12,
+           0.0, 6.65, 9.35, -6.2, 6.70, -10.12, -6.2, 1.20, -10.12,
+           0.0, 6.65, 9.35,  6.2, 6.70, -10.12,  6.2, 1.20, -10.12,
+           0.0, 6.65, 9.35, -4.0, 4.10, -10.45,  4.0, 4.10, -10.45
+        ];
+        const beamAlpha = [0.13,0.01,0.01, 0.09,0.008,0.008, 0.11,0.01,0.01, 0.11,0.01,0.01, 0.16,0.016,0.016];
+        const bBPos = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, bBPos); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(beamPos), gl.STATIC_DRAW);
+        const bBAlpha = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, bBAlpha); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(beamAlpha), gl.STATIC_DRAW);
+        const dBPos = gl.createBuffer();
+        const dBAlpha = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, dBAlpha); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(DUST_COUNT).fill(0.45), gl.STATIC_DRAW);
+        beamBuffers = { bPos: bBPos, bAlpha: bBAlpha, dPos: dBPos, dAlpha: dBAlpha };
+
+        bindEvents();
+        rebuildChairsMesh();
+        rebuildCurtainMesh(st.curtainOpen);
+        st.initialized = true;
+        return true;
+      }
+
+      function resize() {
+        if (!glCanvas || !gl) return;
+        const rect = glCanvas.getBoundingClientRect();
+        if (rect.width < 20 || rect.height < 20) return;
+        st.dpr = Math.min(window.devicePixelRatio || 1, 2);
+        st.W = rect.width;
+        st.H = rect.height;
+        const pw = Math.round(st.W * st.dpr), ph = Math.round(st.H * st.dpr);
+        if (glCanvas.width !== pw || glCanvas.height !== ph) {
+          glCanvas.width = pw; glCanvas.height = ph;
+          hudCanvas.width = pw; hudCanvas.height = ph;
+          gl.viewport(0, 0, pw, ph);
+          hctx.setTransform(st.dpr, 0, 0, st.dpr, 0, 0);
+        }
+      }
+
+      function bindEvents() {
+        const tooltip = document.getElementById("b3d-seat-tooltip");
+        let dragging = false, dragDist = 0, lastX = 0, lastY = 0;
+
+        glCanvas.addEventListener("pointerdown", (e) => {
+          dragging = true; dragDist = 0; lastX = e.clientX; lastY = e.clientY;
+          try { glCanvas.setPointerCapture(e.pointerId); } catch (_) {}
+        });
+
+        glCanvas.addEventListener("pointermove", (e) => {
+          const rect = glCanvas.getBoundingClientRect();
+          const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+
+          if (dragging) {
+            const dx = e.clientX - lastX, dy = e.clientY - lastY;
+            dragDist += Math.abs(dx) + Math.abs(dy);
+            lastX = e.clientX; lastY = e.clientY;
+            if (st.mode === "pov") {
+              st.tPovYaw = Math.max(-2.6, Math.min(2.6, st.tPovYaw - dx * 0.006));
+              st.tPovPitch = Math.max(-0.55, Math.min(0.65, st.tPovPitch + dy * 0.005));
+            } else {
+              st.tYaw -= dx * 0.007;
+              st.tPitch = Math.max(0.12, Math.min(1.16, st.tPitch + dy * 0.006));
+            }
+            tooltip?.classList.add("hidden");
+            return;
+          }
+
+          if (st.mode !== "orbit") {
+            tooltip?.classList.add("hidden");
+            glCanvas.style.cursor = "grab";
+            return;
+          }
+
+          let best = null, bestW = 1e9;
+          for (const s of seats3D) {
+            if ((st.isCoupleOnly && s.row !== "F") || !s.hit2D) continue;
+            const d = Math.hypot(mx - s.hit2D.x, my - s.hit2D.y);
+            if (d < s.hit2D.r && s.hit2D.w < bestW) { best = s; bestW = s.hit2D.w; }
+          }
+          const nextHover = best ? best.id : null;
+          if (nextHover !== st.hoveredSeatId) {
+            st.hoveredSeatId = nextHover;
+            rebuildChairsMesh();
+          }
+          if (best && tooltip) {
+            glCanvas.style.cursor = "pointer";
+            const occ = st.occupied[best.id];
+            const tier = best.isCouple ? "Sweetbox Đôi" : best.isVIP ? "Ghế VIP" : "Ghế Thường";
+            tooltip.innerHTML = `<span class="font-bold text-amber-300">${best.id} • ${tier}</span> — ${occ ? `Đã có ${escapeHTML(occ)}` : "Click để chọn & xem POV"}`;
+            tooltip.style.left = `${Math.min(st.W - 190, Math.max(8, mx + 12))}px`;
+            tooltip.style.top = `${Math.max(42, my - 34)}px`;
+            tooltip.classList.remove("hidden");
+          } else {
+            glCanvas.style.cursor = "grab";
+            tooltip?.classList.add("hidden");
+          }
+        });
+
+        glCanvas.addEventListener("pointerup", () => {
+          if (dragging && dragDist < 6 && st.mode === "orbit" && st.hoveredSeatId && !st.occupied[st.hoveredSeatId]) {
+            window.appActions?.selectBookingSeat?.(st.hoveredSeatId);
+          }
+          dragging = false;
+        });
+
+        glCanvas.addEventListener("wheel", (e) => {
+          if (st.mode !== "orbit") return;
+          e.preventDefault();
+          st.tDist = Math.max(10.5, Math.min(27.5, st.tDist + e.deltaY * 0.013));
+        }, { passive: false });
+
+        window.addEventListener("resize", resize);
+      }
+
+      function mat4Perspective(fovy, aspect, near, far) {
+        const f = 1.0 / Math.tan(fovy * 0.5), nf = 1 / (near - far);
+        return new Float32Array([f / aspect,0,0,0, 0,f,0,0, 0,0,(far+near)*nf,-1, 0,0,(2*far*near)*nf,0]);
+      }
+
+      function mat4LookAt(eye, center, up) {
+        let zx = eye[0]-center[0], zy = eye[1]-center[1], zz = eye[2]-center[2];
+        let l = Math.hypot(zx,zy,zz) || 1; zx/=l; zy/=l; zz/=l;
+        let xx = up[1]*zz - up[2]*zy, xy = up[2]*zx - up[0]*zz, xz = up[0]*zy - up[1]*zx;
+        l = Math.hypot(xx,xy,xz) || 1; xx/=l; xy/=l; xz/=l;
+        const yx = zy*xz - zz*xy, yy = zz*xx - zx*xz, yz = zx*xy - zy*xx;
+        return new Float32Array([
+          xx,yx,zx,0, xy,yy,zy,0, xz,yz,zz,0,
+          -(xx*eye[0]+xy*eye[1]+xz*eye[2]), -(yx*eye[0]+yy*eye[1]+yz*eye[2]), -(zx*eye[0]+zy*eye[1]+zz*eye[2]), 1
+        ]);
+      }
+
+      function projectHUD(pt, mView, mProj) {
+        const x = pt[0], y = pt[1], z = pt[2];
+        const vx = mView[0]*x + mView[4]*y + mView[8]*z + mView[12];
+        const vy = mView[1]*x + mView[5]*y + mView[9]*z + mView[13];
+        const vz = mView[2]*x + mView[6]*y + mView[10]*z + mView[14];
+        const vw = mView[3]*x + mView[7]*y + mView[11]*z + mView[15];
+        const cx = mProj[0]*vx + mProj[4]*vy + mProj[8]*vz + mProj[12]*vw;
+        const cy = mProj[1]*vx + mProj[5]*vy + mProj[9]*vz + mProj[13]*vw;
+        const cw = mProj[3]*vx + mProj[7]*vy + mProj[11]*vz + mProj[15]*vw;
+        if (cw <= 0.2) return null;
+        return { x: (cx / cw * 0.5 + 0.5) * st.W, y: (0.5 - cy / cw * 0.5) * st.H, w: cw };
+      }
+
+      function drawGPU(gpu) {
+        if (!gpu || !gpu.count) return;
+        const locPos = gl.getAttribLocation(progRoom, "aPos");
+        const locNorm = gl.getAttribLocation(progRoom, "aNorm");
+        const locCol = gl.getAttribLocation(progRoom, "aCol");
+        const locMat = gl.getAttribLocation(progRoom, "aMat");
+        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bPos); gl.enableVertexAttribArray(locPos); gl.vertexAttribPointer(locPos, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bNorm); gl.enableVertexAttribArray(locNorm); gl.vertexAttribPointer(locNorm, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bCol); gl.enableVertexAttribArray(locCol); gl.vertexAttribPointer(locCol, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gpu.bMat); gl.enableVertexAttribArray(locMat); gl.vertexAttribPointer(locMat, 1, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gpu.bIdx);
+        gl.drawElements(gl.TRIANGLES, gpu.count, gl.UNSIGNED_SHORT, 0);
+      }
+
+      function renderLoop(nowMs) {
+        if (!st.running) { st.rafId = 0; return; }
+        const modalEl = document.getElementById("booking-modal");
+        const colEl = document.getElementById("booking-pov-collapsible");
+        if (!modalEl || modalEl.classList.contains("hidden") || !colEl || colEl.classList.contains("hidden")) {
+          st.running = false; st.rafId = 0; return;
+        }
+        resize();
+        const t = nowMs * 0.001;
+        st.lightsLevel += (st.lightsTarget - st.lightsLevel) * 0.09;
+        st.curtainOpen += (st.curtainTarget - st.curtainOpen) * 0.065;
+        if (Math.abs(st.curtainOpen - st.lastCurtainBuilt) > 0.0025) {
+          rebuildCurtainMesh(st.curtainOpen);
+        }
+
+        drawScreenCanvas(t);
+        gl.bindTexture(gl.TEXTURE_2D, scrTex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, scrOff);
+
+        const mySeat = seats3D.find(s => s.id === st.mySeatId) || seats3D[43];
+        let desPos, desLook;
+        if (st.mode === "pov") {
+          st.povYaw += (st.tPovYaw - st.povYaw) * 0.14;
+          st.povPitch += (st.tPovPitch - st.povPitch) * 0.14;
+          const ex = mySeat.x, ey = mySeat.y + 1.28, ez = mySeat.z + 0.12;
+          // Hướng nhìn tự nhiên từ vị trí ghế (A1..F8) hội tụ thẳng vào tâm màn chiếu cong IMAX
+          const scrAimX = mySeat.x * 0.14, scrAimY = 3.85, scrAimZ = -10.35;
+          const baseYaw = Math.atan2(scrAimX - ex, -(scrAimZ - ez));
+          const basePitch = Math.atan2(scrAimY - ey, Math.hypot(scrAimX - ex, scrAimZ - ez));
+          const finalYaw = baseYaw + st.povYaw;
+          const finalPitch = Math.max(-0.65, Math.min(0.75, basePitch + st.povPitch));
+          desPos = [ex, ey, ez];
+          desLook = [
+            ex + Math.sin(finalYaw) * Math.cos(finalPitch) * 8.0,
+            ey + Math.sin(finalPitch) * 8.0,
+            ez - Math.cos(finalYaw) * Math.cos(finalPitch) * 8.0
+          ];
+        } else {
+          st.yaw += (st.tYaw - st.yaw) * 0.12;
+          st.pitch += (st.tPitch - st.pitch) * 0.12;
+          st.dist += (st.tDist - st.dist) * 0.12;
+          const target = [0.0, 2.35, -1.2];
+          desPos = [
+            target[0] + Math.sin(st.yaw) * Math.cos(st.pitch) * st.dist,
+            target[1] + Math.sin(st.pitch) * st.dist,
+            target[2] + Math.cos(st.yaw) * Math.cos(st.pitch) * st.dist
+          ];
+          desLook = target;
+        }
+
+        for (let i = 0; i < 3; i++) {
+          st.camPos[i] += (desPos[i] - st.camPos[i]) * 0.14;
+          st.camLook[i] += (desLook[i] - st.camLook[i]) * 0.14;
+        }
+
+        const fov = st.mode === "pov" ? 0.96 : 0.76;
+        const mProj = mat4Perspective(fov, st.W / Math.max(1, st.H), 0.25, 70.0);
+        const mView = mat4LookAt(st.camPos, st.camLook, [0, 1, 0]);
+
+        gl.clearColor(0.024, 0.020, 0.035, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.enable(gl.DEPTH_TEST);
+        gl.disable(gl.BLEND);
+
+        gl.useProgram(progRoom);
+        gl.uniformMatrix4fv(gl.getUniformLocation(progRoom, "uProj"), false, mProj);
+        gl.uniformMatrix4fv(gl.getUniformLocation(progRoom, "uView"), false, mView);
+        gl.uniform3fv(gl.getUniformLocation(progRoom, "uCamPos"), st.camPos);
+        gl.uniform3fv(gl.getUniformLocation(progRoom, "uScreenColL"), st.lightL);
+        gl.uniform3fv(gl.getUniformLocation(progRoom, "uScreenColC"), st.lightC);
+        gl.uniform3fv(gl.getUniformLocation(progRoom, "uScreenColR"), st.lightR);
+        gl.uniform1f(gl.getUniformLocation(progRoom, "uLights"), st.lightsLevel);
+        gl.uniform1f(gl.getUniformLocation(progRoom, "uTime"), t);
+        gl.uniform1f(gl.getUniformLocation(progRoom, "uCurtainOpen"), st.curtainOpen);
+
+        drawGPU(gpuBase);
+        drawGPU(chairGPU);
+        drawGPU(curtainGPU);
+
+        const isInside = st.mode !== "orbit";
+        if (isInside || st.camPos[0] > -6.5) drawGPU(gpuLeftWall);
+        if (isInside || st.camPos[0] <  6.5) drawGPU(gpuRightWall);
+        if (isInside || st.camPos[2] <  7.5) drawGPU(gpuRearWall);
+        if (isInside || st.camPos[1] <  7.6) drawGPU(gpuCeiling);
+
+        // Curved IMAX Screen
+        gl.useProgram(progScreen);
+        gl.uniformMatrix4fv(gl.getUniformLocation(progScreen, "uProj"), false, mProj);
+        gl.uniformMatrix4fv(gl.getUniformLocation(progScreen, "uView"), false, mView);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, scrTex);
+        gl.uniform1i(gl.getUniformLocation(progScreen, "uTex"), 0);
+        const sLocPos = gl.getAttribLocation(progScreen, "aPos");
+        const sLocUV = gl.getAttribLocation(progScreen, "aUV");
+        gl.bindBuffer(gl.ARRAY_BUFFER, scrBuffers.bPos); gl.enableVertexAttribArray(sLocPos); gl.vertexAttribPointer(sLocPos, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, scrBuffers.bUV); gl.enableVertexAttribArray(sLocUV); gl.vertexAttribPointer(sLocUV, 2, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, scrBuffers.bIdx);
+        gl.drawElements(gl.TRIANGLES, scrBuffers.count, gl.UNSIGNED_SHORT, 0);
+
+        // Volumetric Beam + Bokeh Dust
+        const beamVis = Math.max(0.0, (1.0 - st.lightsLevel * 0.80) * (0.20 + 0.80 * st.curtainOpen));
+        if (beamVis > 0.02) {
+          gl.enable(gl.BLEND);
+          gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+          gl.depthMask(false);
+          gl.useProgram(progBeam);
+          gl.uniformMatrix4fv(gl.getUniformLocation(progBeam, "uProj"), false, mProj);
+          gl.uniformMatrix4fv(gl.getUniformLocation(progBeam, "uView"), false, mView);
+          gl.uniform3f(gl.getUniformLocation(progBeam, "uBeamCol"), st.beamCol[0]*beamVis, st.beamCol[1]*beamVis, st.beamCol[2]*beamVis);
+          gl.uniform1f(gl.getUniformLocation(progBeam, "uTime"), t);
+
+          const bLocPos = gl.getAttribLocation(progBeam, "aPos");
+          const bLocAlpha = gl.getAttribLocation(progBeam, "aAlpha");
+          gl.uniform1f(gl.getUniformLocation(progBeam, "uIsPoint"), 0.0);
+          gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.bPos); gl.enableVertexAttribArray(bLocPos); gl.vertexAttribPointer(bLocPos, 3, gl.FLOAT, false, 0, 0);
+          gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.bAlpha); gl.enableVertexAttribArray(bLocAlpha); gl.vertexAttribPointer(bLocAlpha, 1, gl.FLOAT, false, 0, 0);
+          gl.drawArrays(gl.TRIANGLES, 0, 15);
+
+          gl.uniform1f(gl.getUniformLocation(progBeam, "uIsPoint"), 1.0);
+          for (let i = 0; i < DUST_COUNT; i++) {
+            const d = dustSeeds[i];
+            const prog = (d.t + t * 0.02 * d.sp) % 1.0;
+            const z = 9.2 - prog * 19.0;
+            dustFloatArr[i*3]   = d.u * (0.28 + prog * 5.4) + Math.sin(t * 0.8 + d.ph) * 0.16;
+            dustFloatArr[i*3+1] = (6.65 - prog * 2.65) + d.v * (0.16 + prog * 2.2) + Math.cos(t * 0.7 + d.ph) * 0.12;
+            dustFloatArr[i*3+2] = z;
+          }
+          gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.dPos);
+          gl.bufferData(gl.ARRAY_BUFFER, dustFloatArr, gl.DYNAMIC_DRAW);
+          gl.vertexAttribPointer(bLocPos, 3, gl.FLOAT, false, 0, 0);
+          gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.dAlpha);
+          gl.vertexAttribPointer(bLocAlpha, 1, gl.FLOAT, false, 0, 0);
+          gl.drawArrays(gl.POINTS, 0, DUST_COUNT);
+          gl.depthMask(true);
+          gl.disable(gl.BLEND);
+        }
+
+        // HUD Overlay (Row labels & Seat marker in Orbit mode)
+        hctx.clearRect(0, 0, st.W, st.H);
+        if (st.mode === "orbit") {
+          for (const s of seats3D) {
+            const hp = projectHUD([s.x, s.y + 0.55, s.z + 0.10], mView, mProj);
+            s.hit2D = hp ? { x: hp.x, y: hp.y, w: hp.w, r: Math.max(8, 195 / hp.w) } : null;
+          }
+          hctx.font = "700 10px ui-monospace, monospace";
+          hctx.textAlign = "center";
+          ROWS_3D.forEach((row, rIdx) => {
+            if (st.isCoupleOnly && row !== "F") return;
+            const p = projectHUD([0, 0.42 + rIdx * 0.76, -4.15 + rIdx * 2.25], mView, mProj);
+            if (p && p.w < 30) {
+              hctx.fillStyle = row === "F" ? "#fde047" : (row === "D" || row === "E") ? "#fda4af" : "rgba(255,255,255,0.68)";
+              hctx.fillText(row, p.x, p.y);
+            }
+          });
+          const mp = projectHUD([mySeat.x, mySeat.y + 1.48, mySeat.z + 0.2], mView, mProj);
+          if (mp) {
+            const lbl = `Ghế ${mySeat.id}`;
+            hctx.font = "700 10.5px system-ui, sans-serif";
+            const bw = hctx.measureText(lbl).width + 14;
+            hctx.fillStyle = "rgba(245,197,24,0.96)";
+            hctx.beginPath(); hctx.roundRect(mp.x - bw*0.5, mp.y - 22, bw, 19, 6); hctx.fill();
+            hctx.fillStyle = "#110d04";
+            hctx.textBaseline = "middle";
+            hctx.fillText(lbl, mp.x, mp.y - 12.5);
+          }
+        }
+
+        st.rafId = requestAnimationFrame(renderLoop);
+      }
+
+      function syncHudButtons() {
+        document.getElementById("b3d-btn-pov")?.classList.toggle("is-active", st.mode === "pov");
+        document.getElementById("b3d-btn-orbit")?.classList.toggle("is-active", st.mode === "orbit");
+        const povLbl = document.getElementById("b3d-pov-lbl");
+        if (povLbl) povLbl.textContent = st.mySeatId || "F4";
+        const curtLbl = document.getElementById("b3d-curtain-lbl");
+        const curtBtn = document.getElementById("b3d-btn-curtain");
+        const isClosing = st.curtainTarget < 0.5;
+        if (curtLbl) curtLbl.textContent = isClosing ? "Mở rèm" : "Đóng rèm";
+        curtBtn?.classList.toggle("is-active", isClosing);
+        const lightLbl = document.getElementById("b3d-lights-lbl");
+        const lightBtn = document.getElementById("b3d-lights-lbl")?.parentElement;
+        const isLit = st.lightsTarget > 0.5;
+        if (lightLbl) lightLbl.textContent = isLit ? "Tắt đèn" : "Đèn rạp";
+        lightBtn?.classList.toggle("is-active", isLit);
+        const hint = document.getElementById("b3d-hint-lbl");
+        if (hint) {
+          hint.textContent = st.mode === "pov"
+            ? `Đang ngồi ghế ${st.mySeatId} • Kéo để ngoảnh đầu nhìn quanh rạp 360°`
+            : "Toàn cảnh 3D • Kéo xoay 360° • Cuộn zoom • Click ghế bất kỳ để chọn";
+        }
+      }
+
+      window.cvBooking3D = {
+        start(openCurtainAnim = false) {
+          if (!ensureInit()) return;
+          if (openCurtainAnim) {
+            st.curtainOpen = 0.06;
+            st.curtainTarget = 1.0;
+            rebuildCurtainMesh(st.curtainOpen);
+          }
+          syncHudButtons();
+          resize();
+          if (!st.running) {
+            st.running = true;
+            st.rafId = requestAnimationFrame(renderLoop);
+          }
+        },
+        stop() {
+          st.running = false;
+          if (st.rafId) { cancelAnimationFrame(st.rafId); st.rafId = 0; }
+        },
+        setMode(mode) {
+          st.mode = mode === "orbit" ? "orbit" : "pov";
+          if (st.mode === "pov") { st.tPovYaw = 0; st.tPovPitch = 0; }
+          if (st.initialized) rebuildChairsMesh();
+          syncHudButtons();
+          this.start(false);
+        },
+        toggleCurtain() {
+          st.curtainTarget = st.curtainTarget > 0.5 ? 0.0 : 1.0;
+          syncHudButtons();
+          this.start(false);
+        },
+        toggleLights() {
+          st.lightsTarget = st.lightsTarget > 0.5 ? 0.0 : 1.0;
+          syncHudButtons();
+          this.start(false);
+        },
+        syncBooking(room, seatId) {
+          if (!ensureInit()) return;
+          const roomId = room?.id || state.bookingDraft?.roomId || "room-1";
+          const rawSeats = state.seatsByRoom?.[roomId] || {};
+          const occ = {};
+          Object.entries(rawSeats).forEach(([sid, info]) => {
+            if (info && info.uid && info.uid !== state.uid) {
+              occ[sid] = info.userName || "Khách";
+            }
+          });
+          st.occupied = occ;
+          st.isCoupleOnly = Boolean(room?.isCoupleRoom);
+          st.movieTitle = (room?.displayTitle || sanitizeMovieTitle(room?.movieTitle || "CineVerse Lotte")).toUpperCase();
+          loadRoomPoster(room?.poster || "");
+
+          const nextSeat = seatId || (st.isCoupleOnly ? "F4" : "B4");
+          const seatChanged = st.mySeatId !== nextSeat;
+          st.mySeatId = nextSeat;
+          if (seatChanged && seatId) {
+            // Khi khách chọn bất kỳ ghế nào -> tự động bay vào góc nhìn POV của đúng ghế đó & mở rèm nếu đang đóng!
+            st.mode = "pov";
+            st.tPovYaw = 0;
+            st.tPovPitch = 0;
+            if (st.curtainTarget < 0.5) st.curtainTarget = 1.0;
+          }
+          rebuildChairsMesh();
+          syncHudButtons();
+          const modalEl = document.getElementById("booking-modal");
+          const colEl = document.getElementById("booking-pov-collapsible");
+          if (modalEl && !modalEl.classList.contains("hidden") && colEl && !colEl.classList.contains("hidden")) {
+            this.start(false);
+          }
+        }
+      };
+    })();
+
     function updateBookingSeatPovPreview(room, seatId) {
-      const posterEl = document.getElementById("booking-pov-poster");
-      const screenEl = document.getElementById("booking-pov-screen");
       const chipEl = document.getElementById("booking-pov-seat-chip");
       const descEl = document.getElementById("booking-pov-desc");
-      if (posterEl && room?.poster && posterEl.getAttribute("src") !== room.poster) posterEl.src = room.poster;
       if (!seatId) {
         if (chipEl) {
           chipEl.textContent = "Chưa chọn ghế";
           chipEl.style.background = "rgba(229,9,20,0.2)";
           chipEl.style.color = "#FECACA";
         }
-        if (screenEl) {
-          screenEl.style.width = "64%";
-          screenEl.style.transform = "rotateX(0deg) rotateY(0deg)";
-        }
-        if (descEl) descEl.textContent = "Chạm một ghế trống trên sơ đồ để xem trước góc nhìn theo vùng ghế.";
+        if (descEl) descEl.textContent = "Chạm một ghế trống bên dưới để mô hình 3D tự động bay vào góc nhìn từ ghế đó.";
+        window.cvBooking3D?.syncBooking(room, "");
         return;
       }
-      const row = String(seatId).charAt(0).toUpperCase();
       const col = parseInt(String(seatId).slice(1), 10) || 4;
       const zone = mapSeatIdToPovZone(seatId);
-      const widthMap = { front: "86%", rowD: "74%", rowF: "62%" };
-      const rotXMap = { front: 4, rowD: 1, rowF: -2 };
-      const rotY = col <= 3 ? 8 : (col >= 6 ? -8 : 0);
       const angleText = col <= 3 ? "Góc lệch trái" : (col >= 6 ? "Góc lệch phải" : "Góc chính giữa");
-      const zoneText = zone === "front" ? "Hàng A–C (Cận màn)" : (zone === "rowD" ? "Hàng D–E (VIP Giữa)" : "Hàng F (Toàn cảnh)");
+      const zoneText = zone === "front" ? "Hàng A–C (Cận màn)" : (zone === "rowD" ? "Hàng D–E (VIP Giữa)" : "Hàng F (Sweetbox Toàn cảnh)");
       if (chipEl) {
         chipEl.textContent = `Ghế ${seatId}`;
         chipEl.style.background = "#F5C518";
         chipEl.style.color = "#0B0B0F";
       }
-      if (screenEl) {
-        screenEl.style.width = widthMap[zone];
-        screenEl.style.transform = `rotateX(${rotXMap[zone]}deg) rotateY(${rotY}deg)`;
-      }
       if (descEl) {
-        descEl.textContent = `Mô phỏng góc nhìn theo vùng ghế (${seatId}): ${zoneText} • ${angleText}. Khi vào rạp sẽ mở đúng vùng góc nhìn này.`;
+        descEl.textContent = `${zoneText} • ${angleText} • Đang mô phỏng trực tiếp tầm mắt ghế ${seatId}`;
       }
+      window.cvBooking3D?.syncBooking(room, seatId);
     }
 
     function toggleRoomFocusMode(forceState = null) {
@@ -28621,10 +29712,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       const povCol = document.getElementById("booking-pov-collapsible");
       const povChev = document.getElementById("booking-pov-chevron");
       const povBtn = document.getElementById("btn-toggle-booking-pov");
-      const shouldCollapsePov = window.innerWidth < 1024 || window.innerHeight <= 820;
-      if (povCol) povCol.classList.toggle("hidden", shouldCollapsePov);
-      if (povBtn) povBtn.setAttribute("aria-expanded", shouldCollapsePov ? "false" : "true");
-      if (povChev) povChev.style.transform = shouldCollapsePov ? "rotate(0deg)" : "rotate(180deg)";
+      if (povCol) povCol.classList.remove("hidden");
+      if (povBtn) povBtn.setAttribute("aria-expanded", "true");
+      if (povChev) povChev.style.transform = "rotate(180deg)";
 
       const nameInput = document.getElementById("booking-user-name");
       if (nameInput) nameInput.value = state.userName;
@@ -28635,6 +29725,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       document.getElementById("owner-chat-drawer")?.classList.add("hidden");
       document.body.classList.add("booking-modal-open");
       modalEl?.classList.remove("hidden");
+      window.cvBooking3D?.syncBooking(room, state.bookingDraft.seatId);
+      window.cvBooking3D?.start(true);
       bindBookingDialogKeyboard();
       requestAnimationFrame(() => {
         const scrollBody = document.getElementById("booking-scroll-body");
@@ -28648,6 +29740,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
 
     function closeBookingModal() {
+      window.cvBooking3D?.stop();
       backToBookingSummary();
       document.getElementById("owner-chat-drawer")?.classList.add("hidden");
       document.body.classList.remove("booking-modal-open");
@@ -28792,6 +29885,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       col.classList.toggle("hidden", !isHidden);
       if (btn) btn.setAttribute("aria-expanded", isHidden ? "true" : "false");
       if (chev) chev.style.transform = isHidden ? "rotate(180deg)" : "rotate(0deg)";
+      if (isHidden) window.cvBooking3D?.start(false);
+      else window.cvBooking3D?.stop();
     }
 
     function selectBookingShowtime(showtime) {
