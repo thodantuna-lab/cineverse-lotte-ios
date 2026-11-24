@@ -2008,7 +2008,7 @@
       border-radius: 14px;
       overflow: hidden;
       background: #120D10;
-      border: 1px solid rgba(245, 197, 24, 0.26);
+      border: 1px solid rgba(255, 255, 255, 0.10);
       aspect-ratio: 2 / 3;
       cursor: pointer;
       text-align: left;
@@ -2016,12 +2016,6 @@
       flex-direction: column;
       justify-content: flex-end;
       padding: 12px;
-      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
-    }
-    .cv-discover-card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(245, 197, 24, 0.68);
-      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.72);
     }
     /* ======================================================= */
     /* POPUP LIQUID GLASS (iOS STYLE) KHI TRỎ CHUỘT KHÁM PHÁ   */
@@ -2283,14 +2277,9 @@
       border-radius: 18px;
       background:
         radial-gradient(ellipse 85% 95% at 75% 40%, rgba(116, 22, 36, 0.42) 0%, rgba(44, 13, 19, 0.94) 55%, rgba(20, 9, 12, 0.98) 100%);
-      border: 1px solid rgba(245, 197, 24, 0.45);
-      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.72), inset 0 0 0 1px rgba(245, 197, 24, 0.08);
+      border: 1px solid rgba(245, 197, 24, 0.36);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.68), inset 0 1px 0 rgba(255, 255, 255, 0.08);
       overflow: hidden;
-      transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
-    }
-    .cv-wp-ticket:hover {
-      border-color: rgba(245, 197, 24, 0.78);
-      box-shadow: 0 20px 46px rgba(0, 0, 0, 0.85), 0 0 22px rgba(245, 197, 24, 0.14);
     }
     @media (min-width: 768px) {
       .cv-wp-ticket {
@@ -4352,45 +4341,10 @@
     /* ======================================================= */
     /* THẺ KÝ ỨC ĐIỆN ẢNH HOLOGRAPHIC NFT (MEMORY CAPSULE)     */
     /* ======================================================= */
-    @keyframes holoBorderShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+    /* Thẻ Ký Ức NFT: style chi tiết chuyển sang Hệ thống 4 Lớp (Layer 4 - Signature Delight) */
     .nft-holo-card {
       position: relative;
-      background:
-        linear-gradient(135deg, rgba(24, 20, 36, 0.96) 0%, rgba(12, 10, 18, 0.98) 55%, rgba(28, 17, 24, 0.96) 100%);
-      border: 1.5px solid rgba(251, 191, 36, 0.45);
-      box-shadow:
-        0 18px 40px rgba(0, 0, 0, 0.9),
-        0 0 28px rgba(244, 63, 94, 0.18),
-        inset 0 1px 2px rgba(255, 255, 255, 0.25);
-      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease;
       overflow: hidden;
-    }
-    .nft-holo-card:hover {
-      transform: translateY(-5px) scale(1.015);
-      border-color: #fde047;
-      box-shadow:
-        0 24px 50px rgba(0, 0, 0, 0.95),
-        0 0 36px rgba(245, 158, 11, 0.35),
-        0 0 20px rgba(56, 189, 248, 0.25);
-    }
-    .nft-holo-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(125deg,
-        transparent 0%,
-        rgba(56, 189, 248, 0.08) 25%,
-        rgba(244, 63, 94, 0.10) 45%,
-        rgba(251, 191, 36, 0.12) 65%,
-        transparent 100%);
-      background-size: 220% 220%;
-      animation: holoBorderShift 6s ease infinite;
-      pointer-events: none;
-      z-index: 1;
     }
 
     /* Ghế mini trong Modal Đặt Vé Trực Tuyến (Đồng bộ hệ màu Sảnh Chờ) */
@@ -7280,9 +7234,9 @@
         height: 100%;
         max-height: none;
         padding: 18px;
-        background: linear-gradient(180deg, rgba(24, 18, 22, 0.92) 0%, rgba(12, 11, 16, 0.96) 100%);
-        backdrop-filter: blur(24px) saturate(165%);
-        -webkit-backdrop-filter: blur(24px) saturate(165%);
+        background: linear-gradient(180deg, rgba(22, 17, 21, 0.96) 0%, rgba(11, 10, 15, 0.98) 100%);
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
       }
       #desktop-rooms-list {
         flex: 1 1 auto;
@@ -7667,6 +7621,299 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     margin-inline: 0;
   }
 }
+    /* ===================================================================== */
+    /* KIẾN TRÚC 4 LỚP HIỆU ỨNG ĐIỆN ẢNH (4-LAYER CINEMA EFFECT HIERARCHY)  */
+    /* Chuẩn 60fps • Tối giản sang trọng • Không Neon/Cyberpunk             */
+    /* ===================================================================== */
+    :root {
+      --cv-ease-cinema: cubic-bezier(0.22, 1, 0.36, 1);
+      --cv-dur-fast: 250ms;
+      --cv-dur-base: 300ms;
+      --cv-dur-smooth: 350ms;
+      --cv-text-secondary-safe: rgba(255, 255, 255, 0.68);
+      --cv-glass-specular-top: rgba(255, 255, 255, 0.14);
+      --cv-glass-dark-bg: rgba(14, 13, 18, 0.66);
+      --cv-glass-dark-scrolled: rgba(11, 10, 15, 0.78);
+      --cv-ceiling-rim-light: rgba(255, 248, 228, 0.34);
+      --cv-card-drop-shadow: 0 20px 44px -8px rgba(0, 0, 0, 0.86);
+    }
+
+    /* --------------------------------------------------------------------- */
+    /* LỚP 1: KHÔNG KHÍ RẠP CHIẾU (ATMOSPHERE / 35MM FILM GRAIN)             */
+    /* Phủ hạt nhiễu điện ảnh cực mịn lên nền tối toàn trang (0.025 opacity) */
+    /* --------------------------------------------------------------------- */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 9990;
+      pointer-events: none;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='cvNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23cvNoise)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 180px 180px;
+    }
+
+    /* --------------------------------------------------------------------- */
+    /* LỚP 2: KÍNH NỔI BẮT SÁNG (SPECULAR GLASSMORPHISM)                     */
+    /* Áp dụng cho: Header khi cuộn, Thanh chọn góc nhìn (A–C/D–E/F), Trailer */
+    /* --------------------------------------------------------------------- */
+    #ios-liquid-nav-bar {
+      background: rgba(14, 13, 19, 0.56) !important;
+      backdrop-filter: blur(16px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+      border-top: 1px solid var(--cv-glass-specular-top) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.09) !important;
+      transition:
+        background-color var(--cv-dur-base) var(--cv-ease-cinema),
+        border-color var(--cv-dur-base) var(--cv-ease-cinema),
+        box-shadow var(--cv-dur-base) var(--cv-ease-cinema);
+    }
+    #ios-liquid-nav-bar.rophim-scrolled {
+      background: var(--cv-glass-dark-scrolled) !important;
+      backdrop-filter: blur(16px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+      border-top: 1px solid var(--cv-glass-specular-top) !important;
+      border-bottom-color: rgba(255, 255, 255, 0.14) !important;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.72) !important;
+    }
+    .cv-stage-pov-switcher,
+    #btn-hero-play-trailer,
+    #btn-hero-mute {
+      background: var(--cv-glass-dark-bg) !important;
+      backdrop-filter: blur(16px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      border-top: 1px solid var(--cv-glass-specular-top) !important;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.52) !important;
+      transition:
+        transform var(--cv-dur-fast) var(--cv-ease-cinema),
+        background-color var(--cv-dur-fast) var(--cv-ease-cinema),
+        border-color var(--cv-dur-fast) var(--cv-ease-cinema);
+    }
+    #btn-hero-play-trailer:hover,
+    #btn-hero-mute:hover {
+      background: rgba(24, 22, 30, 0.82) !important;
+      border-top-color: rgba(255, 255, 255, 0.26) !important;
+      transform: translateY(-1px);
+    }
+
+    /* --------------------------------------------------------------------- */
+    /* LỚP 3: ÁNH SÁNG RẠP & TƯƠNG TÁC VẬT LÝ (AMBIENT GLOW & MICRO-MOTION)  */
+    /* --------------------------------------------------------------------- */
+    /* 3A. Quầng sáng Ambient Cinema Glow tỏa phía sau Hero Banner theo poster */
+    #netflix-billboard {
+      position: relative;
+      isolation: isolate;
+    }
+    .cv-hero-ambient-halo {
+      position: absolute;
+      inset: -4% 28% 2% -3%;
+      width: 72%;
+      height: 102%;
+      object-fit: cover;
+      z-index: -1;
+      pointer-events: none;
+      filter: blur(105px) saturate(135%);
+      opacity: 0.22;
+      transform: translateZ(0) scale(1.06);
+      transition: opacity var(--cv-dur-smooth) var(--cv-ease-cinema);
+    }
+    @media (max-width: 1023px) {
+      .cv-hero-ambient-halo {
+        inset: -3% -2% 18% -2%;
+        width: 104%;
+        height: 82%;
+        filter: blur(90px) saturate(130%);
+        opacity: 0.20;
+      }
+    }
+
+    /* 3B. Nút CTA chính (Chọn ghế · Phòng 01 / Vào phòng · Phòng 01): bóng tỏa ngắn đồng màu */
+    .cv-hero-btn-watch {
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        0 6px 18px -3px rgba(245, 197, 24, 0.34) !important;
+      transition:
+        transform var(--cv-dur-base) var(--cv-ease-cinema),
+        box-shadow var(--cv-dur-base) var(--cv-ease-cinema),
+        filter var(--cv-dur-base) var(--cv-ease-cinema) !important;
+    }
+    .cv-hero-btn-watch:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.48),
+        0 10px 24px -2px rgba(245, 197, 24, 0.50) !important;
+    }
+
+    /* 3C. Thẻ phim đồng bộ (Top 10, Khám phá phim, Xem tiếp, Lịch hẹn của bạn) */
+    /* Ràng buộc hiệu năng: Tuyệt đối KHÔNG dùng backdrop-filter trên danh sách thẻ */
+    .cv-discover-card,
+    .cv-top10-featured,
+    .cv-top10-row,
+    .cv-ticket-stub,
+    .cv-wp-ticket,
+    #desktop-rooms-list .cv-room-row {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+    .cv-discover-card,
+    .cv-top10-featured,
+    .cv-top10-row,
+    .cv-ticket-stub,
+    .cv-wp-ticket {
+      transition:
+        transform var(--cv-dur-base) var(--cv-ease-cinema),
+        box-shadow var(--cv-dur-base) var(--cv-ease-cinema),
+        border-color var(--cv-dur-base) var(--cv-ease-cinema) !important;
+    }
+    .cv-discover-card:hover,
+    .cv-top10-featured:hover,
+    .cv-top10-row:hover,
+    .cv-ticket-stub:hover,
+    .cv-wp-ticket:hover {
+      transform: translateY(-4px) !important;
+      border-top-color: var(--cv-ceiling-rim-light) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.24),
+        var(--cv-card-drop-shadow) !important;
+    }
+
+    /* Đảm bảo độ tương phản chữ phụ >= rgba(255, 255, 255, 0.65) trên toàn trang */
+    .cv-room-meta,
+    #desktop-rooms-list .cv-room-row span[style*="#A1A1AA"],
+    .cv-top10-meta-line,
+    .cv-ticket-body p,
+    .cv-discover-card div[style*="#D4D4D8"] {
+      color: var(--cv-text-secondary-safe) !important;
+    }
+
+    /* --------------------------------------------------------------------- */
+    /* LỚP 4: ĐIỂM NHẤN ĐẶC QUYỀN (SIGNATURE DELIGHT)                        */
+    /* --------------------------------------------------------------------- */
+    /* 4A. Thẻ Tủ Vé NFT — Holographic / Foil Shimmer + Nghiêng 3D theo chuột */
+    @keyframes cvHoloFoilSweep {
+      0% { background-position: -140% 0%; }
+      100% { background-position: 240% 0%; }
+    }
+    .nft-holo-card {
+      --holo-rx: 0deg;
+      --holo-ry: 0deg;
+      --holo-gx: 50%;
+      --holo-gy: 50%;
+      --holo-opacity: 0;
+      position: relative;
+      background:
+        linear-gradient(145deg, rgba(22, 18, 30, 0.96) 0%, rgba(11, 10, 16, 0.98) 55%, rgba(26, 15, 21, 0.96) 100%);
+      border: 1px solid rgba(245, 197, 24, 0.36);
+      border-top-color: rgba(255, 244, 204, 0.52);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        0 18px 42px rgba(0, 0, 0, 0.85);
+      transform: perspective(900px) rotateX(var(--holo-rx)) rotateY(var(--holo-ry));
+      transform-style: preserve-3d;
+      will-change: transform;
+      transition:
+        transform var(--cv-dur-fast) var(--cv-ease-cinema),
+        box-shadow var(--cv-dur-base) var(--cv-ease-cinema),
+        border-color var(--cv-dur-base) var(--cv-ease-cinema);
+      isolation: isolate;
+    }
+    .nft-holo-card.is-tilting {
+      transition: box-shadow var(--cv-dur-base) var(--cv-ease-cinema), border-color var(--cv-dur-base) var(--cv-ease-cinema);
+    }
+    .nft-holo-card:hover {
+      border-color: rgba(245, 197, 24, 0.68);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.34),
+        0 26px 56px rgba(0, 0, 0, 0.92),
+        0 0 28px -6px rgba(245, 197, 24, 0.24);
+    }
+    /* Vệt sáng Foil đa sắc tinh tế chạy ngang + điểm phản quang theo tọa độ chuột */
+    .nft-holo-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      z-index: 2;
+      background:
+        radial-gradient(circle 220px at var(--holo-gx) var(--holo-gy), rgba(255, 255, 255, 0.16), transparent 70%),
+        linear-gradient(
+          115deg,
+          transparent 20%,
+          rgba(255, 232, 163, 0.10) 38%,
+          rgba(244, 114, 182, 0.12) 48%,
+          rgba(125, 211, 252, 0.12) 56%,
+          rgba(253, 224, 71, 0.10) 64%,
+          transparent 80%
+        );
+      background-size: 100% 100%, 220% 100%;
+      opacity: calc(0.35 + var(--holo-opacity) * 0.65);
+      mix-blend-mode: screen;
+      animation: cvHoloFoilSweep 6.5s linear infinite;
+    }
+    .nft-holo-card > * {
+      position: relative;
+      z-index: 3;
+    }
+
+    /* 4B. Khu vực Không gian riêng tư: Sweetbox (viền hồng–tím mảnh) & Phòng Stream (nhịp thở) */
+    .cv-special-card {
+      transition:
+        transform var(--cv-dur-base) var(--cv-ease-cinema),
+        box-shadow var(--cv-dur-base) var(--cv-ease-cinema),
+        border-color var(--cv-dur-base) var(--cv-ease-cinema) !important;
+    }
+    .cv-special-card--sweetbox {
+      border: 1px solid transparent !important;
+      background:
+        linear-gradient(#0c090e, #0c090e) padding-box,
+        linear-gradient(135deg, rgba(244, 114, 182, 0.46) 0%, rgba(168, 85, 247, 0.42) 52%, rgba(244, 63, 94, 0.24) 100%) border-box !important;
+    }
+    .cv-special-card--sweetbox:hover {
+      transform: translateY(-4px);
+      background:
+        linear-gradient(#0c090e, #0c090e) padding-box,
+        linear-gradient(135deg, rgba(249, 168, 212, 0.78) 0%, rgba(192, 132, 252, 0.72) 52%, rgba(251, 113, 133, 0.50) 100%) border-box !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.24),
+        0 22px 48px -8px rgba(0, 0, 0, 0.88),
+        0 0 34px -8px rgba(192, 132, 252, 0.28) !important;
+    }
+    .cv-special-card--stream:hover {
+      transform: translateY(-4px);
+      border-top-color: var(--cv-ceiling-rim-light) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        var(--cv-card-drop-shadow) !important;
+    }
+    @keyframes cvStreamLivePulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.65), 0 0 8px rgba(56, 189, 248, 0.55);
+      }
+      50% {
+        transform: scale(1.22);
+        opacity: 0.85;
+        box-shadow: 0 0 0 5px rgba(52, 211, 153, 0), 0 0 12px rgba(56, 189, 248, 0.85);
+      }
+    }
+    .cv-stream-live-dot {
+      background: linear-gradient(135deg, #34D399 0%, #38BDF8 100%) !important;
+      animation: cvStreamLivePulse 2.2s var(--cv-ease-cinema) infinite;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .nft-holo-card::before,
+      .cv-stream-live-dot {
+        animation: none !important;
+      }
+      .nft-holo-card {
+        transform: none !important;
+      }
+    }
 </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-rose-500 selection:text-white">
@@ -7966,6 +8213,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
          onfocusout="window.appActions.handleHeroFocusOut(event)"
          class="cv-cinema-hero"
          aria-label="Khu màn chiếu rạp phim và chọn phòng">
+
+      <!-- LỚP 3A: Quầng sáng Ambient Cinema Glow phía sau Hero Banner theo tông màu poster đang chiếu -->
+      <img id="hero-cinema-ambient-halo"
+           src="https://image.tmdb.org/t/p/w300/ilXdDgVbJUXuBiH8AAvzdjVgAUF.jpg"
+           alt="" aria-hidden="true" decoding="async"
+           onerror="this.style.opacity='0';"
+           class="cv-hero-ambient-halo" />
 
       <!-- BÊN TRÁI: GÓC NHÌN HÀNG F + MÀN CHIẾU + THÔNG TIN PHIM -->
       <div class="cv-stage-left">
@@ -13396,6 +13650,12 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         }
       }
       if (ambientEl && !ambientEl.classList.contains("hidden") && ambientEl.getAttribute("src") !== heroPosterSrc) ambientEl.src = heroPosterSrc;
+      const haloEl = document.getElementById("hero-cinema-ambient-halo");
+      const haloSrc = getOptimizedPosterUrl(room.poster, "w342");
+      if (haloEl && haloSrc && haloEl.getAttribute("src") !== haloSrc) {
+        haloEl.style.opacity = "0.22";
+        haloEl.src = haloSrc;
+      }
       // Phản chiếu màu nhẹ lên hàng ghế theo phòng đang chọn (an toàn CORS)
       if (billboardEl) {
         const glowPalette = [
@@ -14510,15 +14770,17 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           const clickHandler = (isStreamCard || hasTk)
             ? `window.appActions.enterRoom('${r.id}')`
             : `window.appActions.openBookingModal('${r.id}')`;
+          const specialVariantCls = isStreamCard ? "cv-special-card--stream" : "cv-special-card--sweetbox";
+          const liveDotCls = (!isFull && isStreamCard) ? "cv-stream-live-dot" : "";
           return `
-            <article class="cv-special-card">
+            <article class="cv-special-card ${specialVariantCls}">
               <img src="${escapeHTML(getOptimizedPosterUrl(item.img, "w500"))}" alt="${escapeHTML(item.title)}" width="600" height="340" class="cv-special-card-bg" loading="lazy" decoding="async" />
               <div class="cv-special-card-scrim" aria-hidden="true"></div>
               <div class="cv-special-card-content">
                 <div class="space-y-1.5">
                   <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold"
                     style="background:rgba(11,11,15,0.78);border:1px solid ${isFull ? '#E50914' : 'rgba(255,255,255,0.18)'};color:${isFull ? '#FCA5A5' : '#E4E4E7'};">
-                    <span class="w-1.5 h-1.5 rounded-full" style="background:${isFull ? '#E50914' : '#22C55E'};"></span>
+                    <span class="w-2 h-2 rounded-full ${liveDotCls}" style="background:${isFull ? '#E50914' : '#22C55E'};"></span>
                     <span>${escapeHTML(statusTxt)}</span>
                   </span>
                   <h3 class="cv-serif text-2xl sm:text-3xl font-bold text-white">${escapeHTML(item.title)}</h3>
@@ -29590,9 +29852,63 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       document.getElementById("memory-capsule-modal")?.classList.add("hidden");
     }
 
+    // LỚP 4A: Hiệu ứng nghiêng 3D + phản quang Holographic theo chuột cho Thẻ Vé NFT (Vanilla JS 60fps)
+    (function initNftHolographicTilt() {
+      if (window.__cvNftHoloBound) return;
+      window.__cvNftHoloBound = true;
+      const reducedMotion = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      let activeCard = null;
+      let rafId = 0;
+      let pendingEvent = null;
+
+      const applyTilt = () => {
+        rafId = 0;
+        if (!activeCard || !pendingEvent) return;
+        const rect = activeCard.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const px = Math.min(1, Math.max(0, (pendingEvent.clientX - rect.left) / rect.width));
+        const py = Math.min(1, Math.max(0, (pendingEvent.clientY - rect.top) / rect.height));
+        const rotateY = ((px - 0.5) * 11).toFixed(2);
+        const rotateX = ((0.5 - py) * 9).toFixed(2);
+        activeCard.classList.add("is-tilting");
+        activeCard.style.setProperty("--holo-rx", `${rotateX}deg`);
+        activeCard.style.setProperty("--holo-ry", `${rotateY}deg`);
+        activeCard.style.setProperty("--holo-gx", `${(px * 100).toFixed(1)}%`);
+        activeCard.style.setProperty("--holo-gy", `${(py * 100).toFixed(1)}%`);
+        activeCard.style.setProperty("--holo-opacity", "1");
+      };
+
+      const resetCard = (card) => {
+        if (!card) return;
+        card.classList.remove("is-tilting");
+        card.style.setProperty("--holo-rx", "0deg");
+        card.style.setProperty("--holo-ry", "0deg");
+        card.style.setProperty("--holo-gx", "50%");
+        card.style.setProperty("--holo-gy", "50%");
+        card.style.setProperty("--holo-opacity", "0");
+      };
+
+      document.addEventListener("pointermove", (e) => {
+        if (e.pointerType === "touch" || reducedMotion()) return;
+        const card = e.target && e.target.closest ? e.target.closest(".nft-holo-card") : null;
+        if (card !== activeCard) {
+          if (activeCard) resetCard(activeCard);
+          activeCard = card;
+        }
+        if (!activeCard) return;
+        pendingEvent = e;
+        if (!rafId) rafId = requestAnimationFrame(applyTilt);
+      }, { passive: true });
+
+      document.addEventListener("pointerleave", () => {
+        if (activeCard) resetCard(activeCard);
+        activeCard = null;
+      }, { passive: true });
+    })();
+
     function buildCapsuleCardHTML(c, isCompactLobby = false) {
       return `
-        <div class="nft-holo-card rounded-3xl p-4 flex flex-col justify-between space-y-3 text-left transition-all duration-300">
+        <div data-nft-holo-card class="nft-holo-card rounded-3xl p-4 flex flex-col justify-between space-y-3 text-left">
           <!-- Header thẻ NFT: Poster + Mã bảo mật độc bản -->
           <div class="flex items-start gap-3">
             <div class="relative w-16 h-20 rounded-2xl overflow-hidden bg-black shrink-0 border border-amber-400/40 shadow-lg">
