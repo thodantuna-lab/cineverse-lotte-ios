@@ -6521,6 +6521,103 @@
     #room-view :is(.wall-sconce,.wall-sconce-beam,.ceiling-spot,.ceiling-cove-led) { transition: opacity 450ms ease; }
     #room-view .led-dot { transition: opacity 450ms ease 100ms; }
     body.theater-dimmed #room-view .led-dot { opacity: .58; }
+
+    /* ======================================================= */
+    /* NỀN PHÒNG CHIẾU REALISTIC CINEMA AUDITORIUM (ẢNH 1)     */
+    /* ======================================================= */
+    body:not(.stream-room-active) #theater-center-auditorium.auditorium-wrapper {
+      background: #030203 !important;
+      border-color: rgba(160, 48, 48, 0.22) !important;
+      box-shadow:
+        inset 0 0 80px rgba(0, 0, 0, 0.94),
+        0 24px 64px rgba(0, 0, 0, 0.92) !important;
+    }
+    body:not(.stream-room-active) #cinema-auditorium-stage {
+      position: relative;
+      background-color: #020203;
+      background-image:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0) 14%, rgba(0, 0, 0, 0) 82%, rgba(3, 2, 3, 0.82) 96%, #030203 100%),
+        url("assets/cinema-auditorium-bg.jpg");
+      background-size: 100% 100%, 100% 100%;
+      background-position: center center, center center;
+      background-repeat: no-repeat, no-repeat;
+      margin: -12px -12px 0;
+      padding: 26px 14px 24px;
+      border-radius: 22px 22px 0 0;
+      overflow: hidden;
+      transition: filter 0.45s ease, padding 0.35s ease;
+    }
+    @media (min-width: 640px) {
+      body:not(.stream-room-active) #cinema-auditorium-stage {
+        margin: -20px -20px 0;
+        padding: 34px 22px 30px;
+      }
+    }
+    body.theater-dimmed:not(.stream-room-active) #cinema-auditorium-stage {
+      background-image:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.34) 0%, rgba(0, 0, 0, 0.18) 20%, rgba(0, 0, 0, 0.22) 82%, rgba(2, 2, 3, 0.92) 100%),
+        url("assets/cinema-auditorium-bg.jpg");
+      margin: -4px -4px 0;
+      padding: 24px 16px 20px;
+    }
+    /* Ẩn các chi tiết giả lập cũ (đèn trần 4 bóng, loa tường, biển EXIT, bình cứu hỏa, khung cong xanh) */
+    body:not(.stream-room-active) #cinema-auditorium-stage .ceiling-canopy,
+    body:not(.stream-room-active) #cinema-auditorium-stage .wall-left,
+    body:not(.stream-room-active) #cinema-auditorium-stage .wall-right,
+    body:not(.stream-room-active) #cinema-auditorium-stage .cinema-curtain-l,
+    body:not(.stream-room-active) #cinema-auditorium-stage .cinema-curtain-r,
+    body:not(.stream-room-active) #cinema-auditorium-stage .imax-projector-beam,
+    body:not(.stream-room-active) #cinema-auditorium-stage .imax-wing-l,
+    body:not(.stream-room-active) #cinema-auditorium-stage .imax-wing-r,
+    body:not(.stream-room-active) #cinema-auditorium-stage .imax-curve-arch-top,
+    body:not(.stream-room-active) #cinema-auditorium-stage .imax-curve-arch-bottom,
+    body:not(.stream-room-active) #cinema-auditorium-stage .stage-floor {
+      display: none !important;
+    }
+    /* Khung màn hình tối giản nằm gọn trong khoảng đen trung tâm của nền rạp */
+    body:not(.stream-room-active):not(.mobile-cinema-fullscreen) #screen-stage-box {
+      width: 76%;
+      perspective: none;
+      transform-style: flat;
+    }
+    @media (max-width: 639px) {
+      body:not(.stream-room-active):not(.mobile-cinema-fullscreen) #screen-stage-box {
+        width: 88% !important;
+      }
+      body:not(.stream-room-active) #cinema-auditorium-stage {
+        background-size: 100% 100%, cover;
+        background-position: center center, center center;
+        padding: 18px 10px 18px;
+      }
+    }
+    body.theater-dimmed:not(.stream-room-active):not(.mobile-cinema-fullscreen) #screen-stage-box {
+      width: 82% !important;
+      max-width: calc(var(--dim-screen-height) * var(--dim-screen-ratio, calc(17 / 9)) + 12px);
+      margin: 0 auto !important;
+    }
+    body:not(.stream-room-active) .lotte-screen-frame {
+      background: #020204 !important;
+      padding: 4px !important;
+      border-radius: 12px !important;
+      border: 1px solid rgba(255, 224, 185, 0.10) !important;
+      box-shadow:
+        0 26px 72px rgba(0, 0, 0, 0.98),
+        0 0 36px rgba(0, 0, 0, 0.92) !important;
+      transform: none !important;
+    }
+    body:not(.stream-room-active) #cinema-control-bar.cv-cinema-bar {
+      width: 86%;
+      margin: 14px auto 0;
+      background: rgba(9, 9, 13, 0.88) !important;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    }
+    @media (max-width: 639px) {
+      body:not(.stream-room-active) #cinema-control-bar.cv-cinema-bar {
+        width: 100%;
+      }
+    }
     #btn-dim-lights,#floating-lights-on-btn { min-height: 44px; }
     @media (prefers-reduced-motion:reduce) {
       #room-view, #room-view *, #room-view *::before, #room-view *::after { transition-duration: 0s !important; transition-delay: 0s !important; animation: none !important; }
@@ -8147,7 +8244,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       <div id="theater-center-auditorium" class="lg:col-span-7 order-1 lg:order-2 auditorium-wrapper rounded-3xl p-3 sm:p-5 space-y-2.5">
 
         <!-- KIẾN TRÚC RẠP PHIM NHÌN TỪ HÀNG F -->
-        <div class="relative z-20 pt-1 pb-1">
+        <div id="cinema-auditorium-stage" class="relative z-20 pt-1 pb-1">
           <!-- Luồng tia sáng máy chiếu IMAX Dual-Laser 70mm từ buồng chiếu phía sau -->
           <div class="imax-projector-beam"></div>
 
@@ -17404,7 +17501,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       state.povZoom = mode;
       const box = document.getElementById("screen-stage-box");
       if (!box) return;
-      const widths = { rowF: "82%", rowD: "90%", front: "98%" };
+      const widths = { rowF: "76%", rowD: "82%", front: "88%" };
       if (widths[mode]) {
         box.style.width = widths[mode];
         box.style.setProperty("--seat-view-width", widths[mode]);
@@ -18697,16 +18794,16 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         if (vidEl && !vidEl.classList.contains("hidden") && vidEl.paused) return;
         if (!frameEl || !frameEl.isConnected) frameEl = document.querySelector(".lotte-screen-frame");
         if (!canopyEl || !canopyEl.isConnected) canopyEl = document.querySelector(".ceiling-canopy");
-        if (!frameEl || !canopyEl) return;
+        if (!frameEl) return;
         if (!state.ambilightEnabled) {
-          frameEl.style.boxShadow = "0 22px 55px rgba(0,0,0,0.95), 0 12px 45px rgba(254,243,199,0.18)";
-          canopyEl.style.borderBottomColor = "#352c28";
+          frameEl.style.boxShadow = "0 26px 72px rgba(0,0,0,0.98), 0 0 36px rgba(0,0,0,0.92)";
+          if (canopyEl) canopyEl.style.borderBottomColor = "#352c28";
           return;
         }
         step = (step + 1) % palette.length;
         const glow = palette[step];
-        frameEl.style.boxShadow = `0 22px 60px rgba(0,0,0,0.95), 0 0 75px 14px ${glow}`;
-        canopyEl.style.borderBottomColor = glow;
+        frameEl.style.boxShadow = `0 24px 68px rgba(0,0,0,0.96), 0 0 60px 10px ${glow}`;
+        if (canopyEl) canopyEl.style.borderBottomColor = glow;
       }, 2200);
     }
 
