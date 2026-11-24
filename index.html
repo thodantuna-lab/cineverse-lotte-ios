@@ -1675,16 +1675,17 @@
       filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.95));
     }
     #ios-liquid-nav-bar {
-      background: linear-gradient(90deg, rgba(10, 8, 11, 0.96) 0%, rgba(16, 10, 14, 0.95) 68%, rgba(48, 12, 20, 0.92) 100%) !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: rgba(17, 21, 30, 0.88) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+      backdrop-filter: blur(28px) saturate(165%) !important;
+      -webkit-backdrop-filter: blur(28px) saturate(165%) !important;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65), inset 0 -1px 0 rgba(255, 255, 255, 0.06) !important;
       transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
     }
     #ios-liquid-nav-bar.rophim-scrolled {
-      background: linear-gradient(90deg, rgba(9, 8, 11, 0.98) 0%, rgba(15, 10, 14, 0.97) 68%, rgba(42, 10, 18, 0.95) 100%) !important;
-      border-bottom-color: rgba(245, 197, 24, 0.25) !important;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.78) !important;
+      background: rgba(13, 16, 24, 0.94) !important;
+      border-bottom-color: rgba(255, 255, 255, 0.18) !important;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.78) !important;
     }
     .cv-nav-inner {
       max-width: 1880px;
@@ -7231,8 +7232,8 @@ body:not(.stream-room-active) #room-view #room-top-header .cv-room-brand-logo {
   width: 40px !important;
   height: 40px !important;
   border-radius: 12px !important;
-  border: 1.5px solid rgba(245, 197, 24, 0.65) !important;
-  box-shadow: 0 4px 16px rgba(245, 197, 24, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
 }
 body:not(.stream-room-active) #room-view #room-top-header :is(#btn-room-leave, #btn-room-host, #btn-toggle-room-focus, #btn-toggle-movie-drawer, #dropdown-view-root > button) {
   min-height: 40px !important;
@@ -7626,7 +7627,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           class="cv-nav-brand relative z-10 flex items-center gap-2.5 sm:gap-3 cursor-pointer min-w-0 shrink-0"
           aria-label="CineVerse Lotte — Trang chủ">
           <img id="header-web-avatar" src="assets/web-logo.png" alt="CineVerse Lotte" width="44" height="44" fetchpriority="high" decoding="sync"
-            class="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover shadow-lg border border-amber-400/55 bg-black shrink-0" />
+            class="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover shadow-lg bg-black shrink-0 border-0" />
           <span class="cv-nav-brand-title truncate">CINEVERSE LOTTE</span>
         </a>
 
@@ -8629,7 +8630,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       <!-- Trái: Nút quay lại + Thông tin phòng đang chiếu -->
       <div class="flex items-center gap-2 min-w-0">
         <div class="flex items-center gap-1.5 shrink-0 pr-1.5 border-r border-white/10">
-          <img src="assets/web-logo.png" alt="CineVerse Lotte" width="40" height="40" fetchpriority="high" decoding="sync" class="cv-room-brand-logo w-10 h-10 rounded-xl object-cover border border-amber-400/60" />
+          <img src="assets/web-logo.png" alt="CineVerse Lotte" width="40" height="40" fetchpriority="high" decoding="sync" class="cv-room-brand-logo w-10 h-10 rounded-xl object-cover border-0" />
           <span class="hidden xl:inline text-xs font-black tracking-wide text-white">CINEVERSE <span class="text-rose-500">LOTTE</span></span>
         </div>
         <button type="button" id="btn-room-leave" onclick="window.appActions.leaveRoom()"
@@ -11265,7 +11266,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     <div id="owner-chat-drawer" class="hidden w-[330px] sm:w-[360px] max-w-[92vw] h-[430px] max-h-[70vh] rounded-3xl overflow-hidden flex flex-col border border-white/15 bg-[#11151E]/92 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.7)]">
       <div class="px-4 py-3 border-b border-white/10 bg-white/[0.03] flex items-center justify-between gap-2">
         <div class="flex items-center gap-2.5 min-w-0">
-          <img src="./assets/web-logo.png" alt="CineVerse Chủ Rạp" width="36" height="36" loading="lazy" decoding="async" class="w-9 h-9 rounded-full object-cover border border-white/25 bg-black shadow-md shrink-0" />
+          <img src="./assets/web-logo.png" alt="CineVerse Chủ Rạp" width="36" height="36" loading="lazy" decoding="async" class="w-9 h-9 rounded-full object-cover border-0 bg-black shadow-md shrink-0" />
           <div class="min-w-0">
             <div class="flex items-center gap-1.5">
               <span class="text-xs font-extrabold text-white truncate">Nhắn Cho Chủ Rạp</span>
@@ -33273,7 +33274,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       return { dayNum, isHoliday: false, label: `Hôm nay (${names[dayNum]})` };
     }
 
-    function resolveCinemaTicketQuote(cinemaOrBrand, dayType, seatTier, audience, format = "2d", channel = "online", sweetboxUnit = "per_ticket", people = 2) {
+    function resolveCinemaTicketQuoteDirect(cinemaOrBrand, dayType, seatTier, audience, format = "2d", channel = "online", sweetboxUnit = "per_ticket", people = 2) {
       const cinemaId = typeof cinemaOrBrand === "object" ? cinemaOrBrand.id : "";
       const branchMeta = cinemaId ? CINEVERSE_HANOI_DATA.branches?.[cinemaId] : null;
       const dayCtx = resolveDayContext(dayType);
@@ -33623,6 +33624,117 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       };
     }
 
+    function resolveCinemaTicketQuote(cinemaOrBrand, dayType, seatTier, audience, format = "2d", channel = "online", sweetboxUnit = "per_ticket", people = 2) {
+      const direct = resolveCinemaTicketQuoteDirect(cinemaOrBrand, dayType, seatTier, audience, format, channel, sweetboxUnit, people);
+      if (direct && direct.available) return direct;
+
+      const cinemaObj = typeof cinemaOrBrand === "object" ? cinemaOrBrand : null;
+      const cinemaId = cinemaObj?.id || "";
+      const brand = cinemaObj?.brand || (typeof cinemaOrBrand === "string" ? cinemaOrBrand : "");
+      const safePeople = Math.max(1, parseInt(people, 10) || 1);
+      const dayCtx = resolveDayContext(dayType);
+
+      // Bước 1: Tham chiếu & tính trung bình từ các rạp khác CÙNG THƯƠNG HIỆU tại Hà Nội đã có dữ liệu xác thực
+      if (brand && Array.isArray(HANOI_REAL_CINEMAS)) {
+        const siblings = HANOI_REAL_CINEMAS.filter(c => c.brand === brand && c.id !== cinemaId);
+        const siblingQuotes = [];
+        for (const sib of siblings) {
+          const sq = resolveCinemaTicketQuoteDirect(sib, dayType, seatTier, audience, format, channel, sweetboxUnit, safePeople);
+          if (sq && sq.available && Number.isFinite(sq.unitVnd) && sq.unitVnd > 0) {
+            siblingQuotes.push({ cinema: sib, quote: sq });
+          }
+        }
+        if (siblingQuotes.length > 0) {
+          const avgUnit = Math.round(
+            (siblingQuotes.reduce((s, x) => s + x.quote.unitVnd, 0) / siblingQuotes.length) / 1000
+          ) * 1000;
+          const avgBase = Math.round(
+            (siblingQuotes.reduce((s, x) => s + (x.quote.baseVnd || x.quote.unitVnd), 0) / siblingQuotes.length) / 1000
+          ) * 1000;
+          const avgFmtSur = Math.round(
+            (siblingQuotes.reduce((s, x) => s + (x.quote.formatSurchargeVnd || 0), 0) / siblingQuotes.length) / 1000
+          ) * 1000;
+          const avgSeatSur = Math.max(0, avgUnit - avgBase - avgFmtSur);
+          const refSample = siblingQuotes[0].quote;
+          const refNames = siblingQuotes.slice(0, 3).map(x => x.cinema.name.replace(new RegExp(`^${brand}\\s*`, "i"), "").trim() || x.cinema.district).join(", ");
+          return {
+            ...refSample,
+            available: true,
+            isReferenceFallback: true,
+            statusBadge: `Tham chiếu từ ${siblingQuotes.length} rạp ${brand}`,
+            unitVnd: avgUnit,
+            totalTicketVnd: avgUnit * safePeople,
+            baseVnd: avgBase,
+            formatSurchargeVnd: avgFmtSur,
+            seatSurchargeVnd: avgSeatSur,
+            seatSurchargeTotalVnd: avgSeatSur * safePeople,
+            channelNote: `Tính trung bình từ ${siblingQuotes.length} chi nhánh ${brand} tại Hà Nội (${refNames}${siblingQuotes.length > 3 ? "…" : ""})`,
+            originKind: "brandSiblingInference",
+            originStatus: `Tham chiếu từ ${siblingQuotes.length} rạp cùng thương hiệu ${brand} (${refNames}${siblingQuotes.length > 3 ? "…" : ""})`
+          };
+        }
+      }
+
+      // Bước 2: Dự phòng chuẩn hóa từ bảng giá chi nhánh/thương hiệu (HANOI_BRANCH_PRICE_OVERRIDES -> HANOI_CINEMA_PRICING)
+      const brandPricing = HANOI_CINEMA_PRICING[brand] || HANOI_CINEMA_PRICING["Lotte Cinema"];
+      const branchOverride = cinemaId ? HANOI_BRANCH_PRICE_OVERRIDES[cinemaId] : null;
+      const ticketsTbl = branchOverride?.tickets || brandPricing?.tickets;
+      if (ticketsTbl) {
+        let bucket = "weekday_day";
+        if (dayCtx.isHoliday || dayCtx.dayNum >= 5) bucket = "weekend";
+        else if (dayCtx.dayNum === 2) bucket = "happy_tue";
+        else {
+          const vnHour = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" })).getHours();
+          bucket = vnHour >= 17 ? "weekday_night" : "weekday_day";
+        }
+        const row = ticketsTbl[bucket] || ticketsTbl.weekday_day;
+        if (row) {
+          const isPreferential = audience === "u22" || audience === "child" || audience === "senior";
+          let baseVnd = row.standard || 75000;
+          let seatSur = 0;
+          if (isPreferential) {
+            baseVnd = audience === "u22" ? (row.u22 || row.standard) : (row.child || row.u22 || row.standard);
+            if (seatTier === "vip") seatSur = Math.max(0, (row.vip || row.standard) - row.standard);
+            else if (seatTier === "sweetbox") seatSur = Math.max(0, (row.sweetbox || row.standard) - row.standard);
+          } else {
+            const tierVnd = seatTier === "vip" ? (row.vip || row.standard) : (seatTier === "sweetbox" ? (row.sweetbox || row.standard) : row.standard);
+            seatSur = Math.max(0, tierVnd - baseVnd);
+          }
+          const fmtObj = (typeof HANOI_FORMAT_SURCHARGE !== "undefined" && HANOI_FORMAT_SURCHARGE[format]) ? HANOI_FORMAT_SURCHARGE[format] : null;
+          const fmtSur = fmtObj ? (Number(fmtObj.add) || 0) : (format === "3d" ? 20000 : 0);
+          const unitVnd = Math.round((baseVnd + seatSur + fmtSur) / 1000) * 1000;
+          return {
+            available: true,
+            isReferenceFallback: true,
+            statusBadge: `Bảng giá chuẩn ${brand || "hệ thống"}`,
+            unitVnd,
+            totalTicketVnd: unitVnd * safePeople,
+            baseVnd,
+            formatSurchargeVnd: fmtSur,
+            formatSurchargeNote: fmtSur ? `Phụ thu ${format.toUpperCase()} (+${formatVND(fmtSur)}/vé)` : "",
+            seatSurchargeVnd: seatSur,
+            seatSurchargeTotalVnd: seatSur * safePeople,
+            seatNote: seatTier === "vip" ? `Ghế VIP (+${formatVND(seatSur)}/vé)` : (seatTier === "sweetbox" ? `Ghế đôi Sweetbox (+${formatVND(seatSur)}/vé)` : "Ghế Thường (0đ)"),
+            holidaySurchargeVnd: 0,
+            unitLabel: "đồng/vé",
+            channel,
+            channelNote: `Áp dụng bảng giá tiêu chuẩn hệ thống ${brand || "rạp chiếu"} tại Hà Nội`,
+            matchedHeader: `Bảng giá chuẩn ${brand || "hệ thống"} (${format.toUpperCase()} • ${bucket})`,
+            dayLabel: dayCtx.label,
+            source: brandPricing?.officialUrl || null,
+            timestamps: direct.timestamps,
+            updatedAt: CINEVERSE_HANOI_DATA.snapshotReviewed,
+            updatedAtLabel: direct.updatedAtLabel || formatIsoVnTimestamp(CINEVERSE_HANOI_DATA.snapshotReviewed),
+            originKind: "brandBaselineTable",
+            originStatus: `Tính từ bảng giá chuẩn thương hiệu ${brand || "hệ thống"} tại Hà Nội`,
+            liveCheck: direct.liveCheck
+          };
+        }
+      }
+
+      return direct;
+    }
+
     function resolveCinemaConcessionQuote(cinemaOrBrand, comboMode, people = 1) {
       if (comboMode === "none") {
         return {
@@ -33637,57 +33749,83 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       }
       const safePeople = Math.max(1, parseInt(people, 10) || 1);
       const brand = typeof cinemaOrBrand === "object" ? cinemaOrBrand.brand : cinemaOrBrand;
-      if (brand === "CGV Cinemas") {
-        const c = CINEVERSE_HANOI_DATA.concessions?.cgv;
-        return {
-          required: true,
-          available: false,
-          totalVnd: null,
-          label: "Chưa có giá",
-          note: `${c?.scope || "Chưa có đơn giá combo theo chi nhánh"} (nâng cấp vị quầy: Caramel +${formatVND(c?.counterUpgradeVnd?.caramel || 9000)}, Cheese +${formatVND(c?.counterUpgradeVnd?.cheese || 15000)})`,
-          source: c?.source || null,
-          updatedAtLabel: formatIsoVnTimestamp(CINEVERSE_HANOI_DATA.snapshotReviewed)
-        };
-      }
       if (brand === "Lotte Cinema") {
         const l = CINEVERSE_HANOI_DATA.concessions?.lotte;
         const cinemaId = typeof cinemaOrBrand === "object" ? cinemaOrBrand.id : "";
-        const menu = cinemaId ? l?.branchMenus?.[cinemaId] : null;
-        if (Array.isArray(menu) && menu.length > 0) {
-          let item = null;
-          if (comboMode === "popcorn_only") {
-            item = menu.find(m => /popcorn/i.test(m.name)) || null;
-          } else {
-            item = menu.find(m => /combo|only online|cb\b/i.test(m.name)) || null;
-          }
-          if (item && Number.isFinite(item.vnd)) {
-            const qty = comboMode === "individual" ? safePeople : 1;
-            const totalVnd = item.vnd * qty;
-            return {
-              required: true,
-              available: true,
-              totalVnd,
-              unitVnd: item.vnd,
-              quantity: qty,
-              label: comboMode === "individual" ? `${item.name} × ${qty}` : item.name,
-              note: `Giá online Canteen Lotte (${item.name}: ${formatVND(item.vnd)}${qty > 1 ? ` × ${qty} = ${formatVND(totalVnd)}` : ""})`,
-              source: l?.source || null,
-              updatedAtLabel: formatIsoVnTimestamp(l?.fetchedAt || CINEVERSE_HANOI_DATA.snapshotReviewed)
-            };
-          }
+        const directMenu = cinemaId ? l?.branchMenus?.[cinemaId] : null;
+        const pickFromMenu = (menu) => {
+          if (!Array.isArray(menu) || !menu.length) return null;
+          return comboMode === "popcorn_only"
+            ? (menu.find(m => /popcorn/i.test(m.name)) || null)
+            : (menu.find(m => /combo|only online|cb\b/i.test(m.name)) || null);
+        };
+        const directItem = pickFromMenu(directMenu);
+        if (directItem && Number.isFinite(directItem.vnd)) {
+          const qty = comboMode === "individual" ? safePeople : 1;
+          const totalVnd = directItem.vnd * qty;
+          return {
+            required: true,
+            available: true,
+            totalVnd,
+            unitVnd: directItem.vnd,
+            quantity: qty,
+            label: comboMode === "individual" ? `${directItem.name} × ${qty}` : directItem.name,
+            note: `Giá online Canteen Lotte (${directItem.name}: ${formatVND(directItem.vnd)}${qty > 1 ? ` × ${qty} = ${formatVND(totalVnd)}` : ""})`,
+            source: l?.source || null,
+            updatedAtLabel: formatIsoVnTimestamp(l?.fetchedAt || CINEVERSE_HANOI_DATA.snapshotReviewed)
+          };
         }
+        // Tham chiếu trung bình từ các rạp Lotte Cinema khác tại Hà Nội đã có dữ liệu menu
+        const allMenus = l?.branchMenus ? Object.values(l.branchMenus) : [];
+        const sibItems = allMenus.map(pickFromMenu).filter(it => it && Number.isFinite(it.vnd));
+        if (sibItems.length > 0) {
+          const avgVnd = Math.round((sibItems.reduce((s, it) => s + it.vnd, 0) / sibItems.length) / 1000) * 1000;
+          const qty = comboMode === "individual" ? safePeople : 1;
+          const totalVnd = avgVnd * qty;
+          const baseName = sibItems[0].name;
+          return {
+            required: true,
+            available: true,
+            totalVnd,
+            unitVnd: avgVnd,
+            quantity: qty,
+            label: comboMode === "individual" ? `${baseName} × ${qty}` : baseName,
+            note: `Tham chiếu từ ${sibItems.length} rạp Lotte Cinema tại Hà Nội (${formatVND(avgVnd)}${qty > 1 ? ` × ${qty} = ${formatVND(totalVnd)}` : ""})`,
+            source: l?.source || null,
+            updatedAtLabel: formatIsoVnTimestamp(l?.fetchedAt || CINEVERSE_HANOI_DATA.snapshotReviewed)
+          };
+        }
+      }
+
+      // Dự phòng theo bảng giá chuẩn của đúng thương hiệu (CGV, Lotte, Beta...)
+      const brandCfg = HANOI_CINEMA_PRICING[brand];
+      if (brandCfg && brandCfg.combos) {
+        const c = brandCfg.combos;
+        let unitVnd = c.couple || c.solo || 85000;
+        let qty = 1;
+        let label = c.coupleLabel || "Combo Đôi (1 Bắp lớn + 2 Nước)";
+        if (comboMode === "popcorn_only") {
+          unitVnd = c.popcornOnly || 55000;
+          label = "Bắp rang lớn";
+        } else if (comboMode === "individual") {
+          unitVnd = c.solo || 79000;
+          qty = safePeople;
+          label = `${c.soloLabel || "Solo Combo"} × ${qty}`;
+        }
+        const totalVnd = unitVnd * qty;
         return {
           required: true,
-          available: false,
-          totalVnd: null,
-          label: "Chưa có giá",
-          note: comboMode === "popcorn_only"
-            ? "Chưa có đơn giá bắp lẻ trực tuyến cho chi nhánh này"
-            : (l?.requiresBranchSelection ? "Trang nguồn yêu cầu chọn đúng gói/chi nhánh (comboBaseVnd: null)" : "Chưa có đơn giá combo"),
-          source: l?.source || null,
-          updatedAtLabel: formatIsoVnTimestamp(l?.fetchedAt || CINEVERSE_HANOI_DATA.snapshotReviewed)
+          available: true,
+          totalVnd,
+          unitVnd,
+          quantity: qty,
+          label,
+          note: `Áp dụng bảng giá bắp nước tiêu chuẩn hệ thống ${brand} (${formatVND(unitVnd)}${qty > 1 ? ` × ${qty} = ${formatVND(totalVnd)}` : ""})`,
+          source: brandCfg.officialUrl || null,
+          updatedAtLabel: formatIsoVnTimestamp(CINEVERSE_HANOI_DATA.snapshotReviewed)
         };
       }
+
       return {
         required: true,
         available: false,
