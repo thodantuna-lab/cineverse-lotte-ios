@@ -1906,10 +1906,22 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
     }
+    @media (min-width: 640px) {
+      .cv-discover-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+    }
     @media (min-width: 768px) {
       .cv-discover-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 16px;
+        gap: 14px;
+      }
+    }
+    @media (min-width: 1024px) {
+      .cv-discover-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 14px;
       }
     }
     .cv-discover-card {
@@ -34916,6 +34928,149 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
 
     const lastShownRanks = new Map();
+    let __discoverRandomIdsCache = null;
+    let __discoverPoolSigCache = "";
+
+    function getDiscoverVaultMoviesPool() {
+      // Thu thập toàn bộ phim đang chiếu trong các phòng chiếu (room-1..room-7) để loại trừ
+      const activeRoomNormTitles = new Set();
+      const activeRoomUrls = new Set();
+      const activeRoomYtIds = new Set();
+      DEFAULT_ROOMS.forEach((baseRoom) => {
+        const eff = getEffectiveRoom(baseRoom.id);
+        if (!eff || eff.isDiscordRoom) return;
+        const rawNorm = normalizeSearchText(eff.movieTitle || "");
+        const cleanNorm = normalizeSearchText(sanitizeMovieTitle(eff.movieTitle || ""));
+        const dispNorm = normalizeSearchText(eff.displayTitle || "");
+        if (rawNorm) activeRoomNormTitles.add(rawNorm);
+        if (cleanNorm) activeRoomNormTitles.add(cleanNorm);
+        if (dispNorm) activeRoomNormTitles.add(dispNorm);
+        if (eff.videoUrl) activeRoomUrls.add(String(eff.videoUrl).trim());
+        if (eff.youtubeId) activeRoomYtIds.add(String(eff.youtubeId).trim());
+      });
+
+      const grouped = typeof groupVaultItemsForDisplay === "function"
+        ? groupVaultItemsForDisplay(state.vaultVideos || [])
+        : (state.vaultVideos || []).map((item) => ({ type: "single", item }));
+
+      const seenNormTitles = new Set();
+      const pool = [];
+
+      for (const entry of grouped) {
+        const isSeries = entry.type === "series";
+        const repItem = isSeries ? entry.episodes?.[0]?.item : entry.item;
+        if (!repItem) continue;
+
+        const rawTitle = isSeries ? entry.title : (repItem.title || "");
+        const cleanTitle = sanitizeMovieTitle(rawTitle) || rawTitle;
+        const normRaw = normalizeSearchText(rawTitle);
+        const normClean = normalizeSearchText(cleanTitle);
+        const url = String(repItem.videoUrl || "").trim();
+        const ytId = String(repItem.youtubeId || "").trim();
+
+        // Loại trừ phim đang chiếu ở các phòng chiếu
+        const isShowingInAnyRoom =
+          (normRaw && activeRoomNormTitles.has(normRaw)) ||
+          (normClean && activeRoomNormTitles.has(normClean)) ||
+          (url && activeRoomUrls.has(url)) ||
+          (ytId && activeRoomYtIds.has(ytId)) ||
+          (isSeries && (entry.episodes || []).some((ep) => {
+            const epUrl = String(ep.item?.videoUrl || "").trim();
+            const epYt = String(ep.item?.youtubeId || "").trim();
+            const epNorm = normalizeSearchText(sanitizeMovieTitle(ep.item?.title || ""));
+            return (epUrl && activeRoomUrls.has(epUrl)) || (epYt && activeRoomYtIds.has(epYt)) || (epNorm && activeRoomNormTitles.has(epNorm));
+          }));
+
+        if (isShowingInAnyRoom) continue;
+        const dedupeKey = normClean || normRaw || repItem.id;
+        if (seenNormTitles.has(dedupeKey)) continue;
+        seenNormTitles.add(dedupeKey);
+
+        const poster = resolveMoviePoster(rawTitle, isSeries ? (entry.poster || repItem.poster) : repItem.poster, ytId);
+        const epCount = isSeries ? (entry.episodes?.length || 0) : 0;
+        const subtitle = isSeries
+          ? `Phim bộ • ${epCount} tập`
+          : (repItem.genre ? String(repItem.genre).split("•")[0].trim() : (repItem.duration && repItem.duration !== "HD Live" ? `Kho phim • ${repItem.duration}` : "Kho phim CineVerse"));
+
+        pool.push({
+          id: repItem.id,
+          title: cleanTitle,
+          rawTitle,
+          poster: poster || "assets/web-logo.png",
+          subtitle,
+          duration: repItem.duration || "HD",
+          genre: isSeries ? `Phim bộ (${epCount} tập)` : (repItem.genre || "Kho phim CineVerse"),
+          vaultItem: repItem
+        });
+      }
+
+      return pool;
+    }
+
+    function pickRandomDiscoverVaultMovies(limit = 10, forceReshuffle = false) {
+      const pool = getDiscoverVaultMoviesPool();
+      if (!pool.length) return [];
+
+      const poolSig = pool.map((m) => m.id).sort().join("|");
+      if (!forceReshuffle && __discoverRandomIdsCache && __discoverPoolSigCache === poolSig) {
+        const byId = new Map(pool.map((m) => [m.id, m]));
+        const cached = __discoverRandomIdsCache.map((id) => byId.get(id)).filter(Boolean);
+        if (cached.length === Math.min(limit, pool.length)) return cached;
+      }
+
+      const shuffled = pool.slice();
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      const picked = shuffled.slice(0, limit);
+      __discoverRandomIdsCache = picked.map((m) => m.id);
+      __discoverPoolSigCache = poolSig;
+      return picked;
+    }
+
+    function reshuffleDiscoverMovies() {
+      pickRandomDiscoverVaultMovies(10, true);
+      renderLobbyTop10Movies();
+    }
+
+    function openDiscoverVaultMovie(encodedVaultId) {
+      let vaultId = "";
+      try { vaultId = decodeURIComponent(String(encodedVaultId || "")); } catch (_) { vaultId = String(encodedVaultId || ""); }
+      const item = window.__discoverVaultMoviesById?.[vaultId];
+      if (!item || !item.vaultItem) return;
+
+      document.getElementById("detail-modal-poster").src = item.poster || "assets/web-logo.png";
+      document.getElementById("detail-modal-room").textContent = "Khám phá • Kho Phim CineVerse";
+      document.getElementById("detail-modal-match").textContent = "Đề xuất ngẫu nhiên từ Kho phim";
+      document.getElementById("detail-modal-rating").textContent = "T13+";
+      document.getElementById("detail-modal-title").textContent = item.title;
+      document.getElementById("detail-modal-synopsis").textContent = `Bộ phim "${item.title}" hiện có sẵn trong Kho Phim CineVerse. Bạn có thể chọn ghế vào phòng để yêu cầu chiếu hoặc tạo lịch Hẹn xem cùng bạn bè.`;
+      document.getElementById("detail-modal-cast").textContent = "Nguồn: Kho Phim Cloudflare R2 / CineVerse";
+      document.getElementById("detail-modal-genre").textContent = `${item.genre}${item.duration ? ` • ${item.duration}` : ""}`;
+
+      const ctaBtn = document.getElementById("detail-modal-cta-btn");
+      const fallbackRoomId = "room-1";
+      const r1 = getEffectiveRoom(fallbackRoomId);
+      const hasR1Ticket = hasValidTicketForRoom(fallbackRoomId);
+      if (ctaBtn) {
+        ctaBtn.innerHTML = hasR1Ticket
+          ? `<i class="fa-solid fa-paper-plane"></i> Yêu cầu chiếu tại ${escapeHTML(r1.number)}`
+          : `<i class="fa-solid fa-calendar-plus"></i> Hẹn xem cùng phim này`;
+      }
+      activeDetailModalAction = () => {
+        if (hasR1Ticket) {
+          state.currentRoomId = fallbackRoomId;
+          requestMovieForCurrentRoom(item.vaultItem.id);
+          enterRoom(fallbackRoomId);
+        } else {
+          openCreateWatchPartyModal("", getCanonicalMovieId({ movieTitle: item.rawTitle, videoUrl: item.vaultItem.videoUrl, youtubeId: item.vaultItem.youtubeId }));
+        }
+      };
+
+      document.getElementById("hero-detail-modal")?.classList.remove("hidden");
+    }
+
     function renderLobbyTop10Movies() {
       const body = document.getElementById("lobby-top10-body");
       if (!body) return;
@@ -34997,28 +35152,30 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       resolvedItems.forEach(item => lastShownRanks.set(item.movieId, item.displayRank));
       window.__resolvedTop10ItemsById = nextLookup;
 
-      // 3. Trạng thái Chưa có lượt xem hợp lệ trong tuần -> Gọn + nút "Cách tính" + mục "Khám phá phim" (không gắn thứ hạng)
+      // 3. Trạng thái Chưa có lượt xem hợp lệ trong tuần -> Gọn + nút "Cách tính" + mục "Khám phá phim" (ngẫu nhiên 10 phim từ Kho Phim, loại trừ phim đang chiếu ở các phòng)
       if (resolvedItems.length === 0) {
         if (toolbarEl) toolbarEl.style.display = "none";
         if (footerEl) footerEl.style.display = "none";
-        const discoverRooms = DEFAULT_ROOMS
-          .map(r => getEffectiveRoom(r.id))
-          .filter(r => r && !r.isCoupleRoom && !r.isDiscordRoom && r.status !== "upcoming")
-          .slice(0, 4);
-        const discoverCardsHtml = discoverRooms.map((r) => {
-          const cardSrc = getOptimizedPosterUrl(r.poster || "assets/web-logo.png", "w342");
-          const cardSrcset = buildResponsivePosterSrcset(r.poster, "card");
+        const discoverMovies = pickRandomDiscoverVaultMovies(10, false);
+        const discoverLookup = {};
+        discoverMovies.forEach((m) => { discoverLookup[m.id] = m; });
+        window.__discoverVaultMoviesById = discoverLookup;
+
+        const discoverCardsHtml = discoverMovies.map((m) => {
+          const cardSrc = getOptimizedPosterUrl(m.poster || "assets/web-logo.png", "w342");
+          const cardSrcset = buildResponsivePosterSrcset(m.poster, "card");
+          const encId = encodeURIComponent(m.id);
           return `
-          <button type="button" onclick="window.appActions.openBookingModal('${escapeHTML(r.id)}')"
-            class="cv-discover-card" aria-label="Khám phá phim ${escapeHTML(r.movieTitle)}">
-            <img src="${escapeHTML(cardSrc)}" ${cardSrcset ? `srcset="${escapeHTML(cardSrcset)}" sizes="(max-width:640px) 46vw, 23vw"` : ""}
-              alt="${escapeHTML(r.movieTitle)}" width="342" height="513" loading="lazy" decoding="async"
+          <button type="button" onclick="window.appActions.openDiscoverVaultMovie('${escapeHTML(encId)}')"
+            class="cv-discover-card" aria-label="Khám phá phim ${escapeHTML(m.title)}">
+            <img src="${escapeHTML(cardSrc)}" ${cardSrcset ? `srcset="${escapeHTML(cardSrcset)}" sizes="(max-width:640px) 46vw, (max-width:1024px) 24vw, 19vw"` : ""}
+              alt="${escapeHTML(m.title)}" width="342" height="513" loading="lazy" decoding="async"
               onerror="this.onerror=null;this.src='assets/web-logo.png';this.removeAttribute('srcset');"
               style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />
             <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(11,11,15,0.06) 25%, rgba(14,8,10,0.92) 100%);pointer-events:none;"></div>
             <div class="relative z-10 space-y-1">
-              <div class="cv-serif italic text-base sm:text-lg font-bold text-white leading-tight line-clamp-2">${escapeHTML(r.movieTitle)}</div>
-              <div class="text-[11px] font-medium truncate" style="color:#D4D4D8;">${escapeHTML((r.genre || "Điện ảnh").split("•")[0].trim())}</div>
+              <div class="cv-serif italic text-sm sm:text-base font-bold text-white leading-tight line-clamp-2">${escapeHTML(m.title)}</div>
+              <div class="text-[11px] font-medium truncate" style="color:#D4D4D8;">${escapeHTML(m.subtitle)}</div>
             </div>
           </button>
         `;
@@ -35030,7 +35187,18 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               <span class="text-sm text-slate-300">${rawItems.length ? "Chưa có phim trong bảng xếp hạng đang mở tại rạp." : "Chưa có lượt xem đủ điều kiện."}</span>
               <button type="button" onclick="window.appActions.toggleTop10FormulaInfo()" class="cv-top10-info-btn">Cách tính</button>
             </div>
-            ${discoverCardsHtml ? `<div id="lobby-discover-movies"><h3 class="cv-serif text-lg font-bold mb-2">Khám phá phim</h3><div class="cv-discover-grid">${discoverCardsHtml}</div></div>` : ""}
+            ${discoverCardsHtml ? `
+              <div id="lobby-discover-movies">
+                <div class="flex items-center justify-between gap-2 mb-2.5">
+                  <h3 class="cv-serif text-lg font-bold text-white">Khám phá phim <span class="text-xs font-sans font-normal text-slate-400">(${discoverMovies.length} phim ngẫu nhiên từ Kho phim)</span></h3>
+                  <button type="button" onclick="window.appActions.reshuffleDiscoverMovies()" class="cv-top10-info-btn text-[11px] inline-flex items-center gap-1.5" title="Đổi 10 phim gợi ý ngẫu nhiên khác từ Kho phim">
+                    <i class="fa-solid fa-shuffle text-[10px]"></i>
+                    <span>Đổi gợi ý</span>
+                  </button>
+                </div>
+                <div class="cv-discover-grid">${discoverCardsHtml}</div>
+              </div>` : `
+              <div id="lobby-discover-movies" class="text-xs text-slate-400 py-2">Đang tải danh sách phim từ Kho phim...</div>`}
           </div>
         `;
         return;
@@ -36812,6 +36980,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       fetchWatchPartyList,
       openTop10PrimaryAction,
       openTop10MovieDetail,
+      openDiscoverVaultMovie,
+      reshuffleDiscoverMovies,
       toggleTop10FormulaInfo,
       triggerDetailModalCta,
       openSeat2DModal,
