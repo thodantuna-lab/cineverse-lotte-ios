@@ -7701,31 +7701,55 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     /* --------------------------------------------------------------------- */
     /* LỚP 3: ÁNH SÁNG RẠP & TƯƠNG TÁC VẬT LÝ (AMBIENT GLOW & MICRO-MOTION)  */
     /* --------------------------------------------------------------------- */
-    /* 3A. Quầng sáng Ambient Cinema Glow tỏa phía sau Hero Banner theo poster */
+    /* 3A. Quầng sáng Ambient Cinema Glow tỏa phía sau Hero Banner & hắt lên rèm rạp theo poster */
     #netflix-billboard {
       position: relative;
       isolation: isolate;
     }
     .cv-hero-ambient-halo {
       position: absolute;
-      inset: -4% 28% 2% -3%;
-      width: 72%;
-      height: 102%;
+      inset: -34px 24% -24px -38px;
+      width: 78%;
+      height: calc(100% + 58px);
       object-fit: cover;
       z-index: -1;
       pointer-events: none;
-      filter: blur(105px) saturate(135%);
-      opacity: 0.22;
+      filter: blur(110px) saturate(150%);
+      opacity: 0.24;
       transform: translateZ(0) scale(1.06);
       transition: opacity var(--cv-dur-smooth) var(--cv-ease-cinema);
     }
+    .cv-stage-ambient-glow {
+      position: absolute;
+      inset: 2% 10% 22%;
+      width: 80%;
+      height: 70%;
+      object-fit: cover;
+      z-index: 0;
+      pointer-events: none;
+      filter: blur(95px) saturate(155%);
+      opacity: 0.24;
+      mix-blend-mode: screen;
+      transform: translateZ(0);
+      transition: opacity var(--cv-dur-smooth) var(--cv-ease-cinema);
+    }
+    .cv-projection {
+      z-index: 1;
+    }
     @media (max-width: 1023px) {
       .cv-hero-ambient-halo {
-        inset: -3% -2% 18% -2%;
-        width: 104%;
+        inset: -24px -18px 18% -18px;
+        width: calc(100% + 36px);
         height: 82%;
-        filter: blur(90px) saturate(130%);
+        filter: blur(90px) saturate(135%);
         opacity: 0.20;
+      }
+      .cv-stage-ambient-glow {
+        inset: 4% 6% 24%;
+        width: 88%;
+        height: 64%;
+        filter: blur(80px) saturate(145%);
+        opacity: 0.22;
       }
     }
 
@@ -8226,6 +8250,11 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         <div class="cv-stage-auditorium" data-pov="rowF">
           <div class="cv-wall-sconce-l" aria-hidden="true"></div>
           <div class="cv-wall-sconce-r" aria-hidden="true"></div>
+          <img id="hero-stage-ambient-glow"
+               src="https://image.tmdb.org/t/p/w300/ilXdDgVbJUXuBiH8AAvzdjVgAUF.jpg"
+               alt="" aria-hidden="true" decoding="async"
+               onerror="this.style.opacity='0';"
+               class="cv-stage-ambient-glow" />
 
           <!-- Bề mặt màn chiếu: mặc định hiển thị Poster ưu tiên LCP, chỉ tải Trailer khi người dùng bấm -->
           <div class="cv-projection">
@@ -13651,10 +13680,17 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       }
       if (ambientEl && !ambientEl.classList.contains("hidden") && ambientEl.getAttribute("src") !== heroPosterSrc) ambientEl.src = heroPosterSrc;
       const haloEl = document.getElementById("hero-cinema-ambient-halo");
+      const stageGlowEl = document.getElementById("hero-stage-ambient-glow");
       const haloSrc = getOptimizedPosterUrl(room.poster, "w342");
-      if (haloEl && haloSrc && haloEl.getAttribute("src") !== haloSrc) {
-        haloEl.style.opacity = "0.22";
-        haloEl.src = haloSrc;
+      if (haloSrc) {
+        if (haloEl && haloEl.getAttribute("src") !== haloSrc) {
+          haloEl.style.opacity = "0.24";
+          haloEl.src = haloSrc;
+        }
+        if (stageGlowEl && stageGlowEl.getAttribute("src") !== haloSrc) {
+          stageGlowEl.style.opacity = "0.24";
+          stageGlowEl.src = haloSrc;
+        }
       }
       // Phản chiếu màu nhẹ lên hàng ghế theo phòng đang chọn (an toàn CORS)
       if (billboardEl) {
