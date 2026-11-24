@@ -1944,6 +1944,227 @@
       border-color: rgba(245, 197, 24, 0.68);
       box-shadow: 0 14px 30px rgba(0, 0, 0, 0.72);
     }
+    /* ======================================================= */
+    /* POPUP LIQUID GLASS (iOS STYLE) KHI TRỎ CHUỘT KHÁM PHÁ   */
+    /* ======================================================= */
+    #cv-discover-hover-popup {
+      position: fixed;
+      z-index: 90;
+      display: flex;
+      flex-direction: column;
+      border-radius: 24px;
+      overflow: hidden;
+      background: linear-gradient(
+        162deg,
+        rgba(46, 40, 52, 0.54) 0%,
+        rgba(20, 17, 25, 0.72) 48%,
+        rgba(10, 9, 15, 0.86) 100%
+      );
+      backdrop-filter: blur(34px) saturate(195%) brightness(1.06);
+      -webkit-backdrop-filter: blur(34px) saturate(195%) brightness(1.06);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      box-shadow:
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.44),
+        inset 1px 0 0 rgba(255, 255, 255, 0.16),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.10),
+        0 32px 84px rgba(0, 0, 0, 0.86),
+        0 8px 28px rgba(0, 0, 0, 0.56);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: scale(0.86) translateY(8px);
+      transform-origin: center center;
+      transition:
+        opacity 200ms cubic-bezier(0.22, 1, 0.36, 1),
+        transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 200ms ease;
+      font-family: "Be Vietnam Pro", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    #cv-discover-hover-popup::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background:
+        radial-gradient(ellipse 92% 42% at 20% 0%, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.05) 46%, transparent 74%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, transparent 34%, transparent 72%, rgba(245, 197, 24, 0.10) 100%);
+      pointer-events: none;
+      z-index: 4;
+    }
+    #cv-discover-hover-popup.is-open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: scale(1) translateY(0);
+    }
+    .cv-dhp-hero {
+      position: relative;
+      flex: 0 0 48%;
+      min-height: 0;
+      overflow: hidden;
+      background: transparent;
+    }
+    .cv-dhp-hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 22%;
+      display: block;
+      mask-image: linear-gradient(180deg, #000000 62%, rgba(0, 0, 0, 0.72) 82%, transparent 100%);
+      -webkit-mask-image: linear-gradient(180deg, #000000 62%, rgba(0, 0, 0, 0.72) 82%, transparent 100%);
+    }
+    .cv-dhp-hero-fade {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(8, 8, 12, 0.36) 0%, rgba(8, 8, 12, 0) 30%, rgba(12, 10, 18, 0.18) 100%);
+      pointer-events: none;
+    }
+    .cv-dhp-badges {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      z-index: 3;
+    }
+    .cv-dhp-glass-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #F8FAFC;
+      background: rgba(18, 16, 24, 0.48);
+      backdrop-filter: blur(14px) saturate(160%);
+      -webkit-backdrop-filter: blur(14px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+    .cv-dhp-body {
+      position: relative;
+      z-index: 3;
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 16px 15px;
+    }
+    .cv-dhp-title {
+      font-family: "Be Vietnam Pro", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: clamp(16px, 1.35vw, 20px);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      color: #FFFFFF;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
+    }
+    .cv-dhp-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 7px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: rgba(226, 232, 240, 0.88);
+    }
+    .cv-dhp-match {
+      color: #4ADE80;
+      font-weight: 800;
+    }
+    .cv-dhp-age {
+      padding: 1px 6px;
+      border-radius: 5px;
+      font-size: 10px;
+      font-weight: 800;
+      color: #FDE68A;
+      background: rgba(245, 197, 24, 0.14);
+      border: 1px solid rgba(245, 197, 24, 0.42);
+    }
+    .cv-dhp-genres {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .cv-dhp-genre-chip {
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: rgba(241, 245, 249, 0.92);
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+    .cv-dhp-synopsis {
+      font-size: 12px;
+      line-height: 1.52;
+      color: rgba(226, 232, 240, 0.86);
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .cv-dhp-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-top: 2px;
+    }
+    .cv-dhp-btn-primary {
+      flex: 1;
+      height: 36px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: linear-gradient(180deg, #FDE047 0%, #F5C518 100%);
+      color: #0B0B0F;
+      font-size: 12px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(245, 197, 24, 0.28);
+      transition: transform 150ms ease, filter 150ms ease;
+    }
+    .cv-dhp-btn-primary:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
+    .cv-dhp-btn-secondary {
+      height: 36px;
+      padding: 0 13px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: background-color 150ms ease, border-color 150ms ease;
+    }
+    .cv-dhp-btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.22);
+      border-color: rgba(255, 255, 255, 0.38);
+    }
     .cv-wp-ticket {
       position: relative;
       display: flex;
@@ -35071,6 +35292,226 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       document.getElementById("hero-detail-modal")?.classList.remove("hidden");
     }
 
+    const DISCOVER_MOVIE_RICH_META = [
+      { match: /godzilla.*kong/i, year: "2021", age: "T13+", matchScore: "98%", genres: ["Hành động", "Quái vật", "Viễn tưởng"], synopsis: "Hai Titan tối thượng Godzilla và Kong bước vào cuộc đối đầu kinh thiên động địa giữa lòng đại dương và Hong Kong, trong khi một âm mưu cơ khí đen tối âm thầm trỗi dậy." },
+      { match: /resident evil|vùng đất quỷ dữ/i, year: "2026", age: "T16+", matchScore: "96%", genres: ["Kinh dị", "Hành động", "Sinh tồn"], synopsis: "Thảm họa sinh học từ tập đoàn Umbrella biến thành phố Raccoon thành địa ngục sống. Nhóm người sống sót phải chiến đấu giành giật sự sống giữa bầy xác sống khát máu." },
+      { match: /chú thuật|jujutsu|tử diệt/i, year: "2026", age: "T16+", matchScore: "99%", genres: ["Anime", "Hành động", "Siêu nhiên"], synopsis: "Sau biến cố Shibuya, trò chơi sinh tử Tử Diệt Hồi Du bùng nổ khắp Nhật Bản. Itadori Yuji và các chú thuật sư phải đối đầu những kẻ địch cổ đại để giải phong ấn Gojo Satoru." },
+      { match: /avengers|endgame/i, year: "2019", age: "T13+", matchScore: "99%", genres: ["Siêu anh hùng", "Hành động", "Phiêu lưu"], synopsis: "Sau cú búng tay định mệnh của Thanos xóa sổ một nửa vũ trụ, các Avengers còn lại tập hợp lần cuối để đảo ngược thời gian và viết lại vận mệnh nhân loại." },
+      { match: /venom|tử thù|carnage/i, year: "2021", age: "T13+", matchScore: "95%", genres: ["Hành động", "Viễn tưởng", "Phản anh hùng"], synopsis: "Eddie Brock cố gắng hòa hợp với ký sinh trùng Venom thì tên sát nhân hàng loạt Cletus Kasady bất ngờ sở hữu symbiote đỏ khát máu Carnage và gieo rắc kinh hoàng." },
+      { match: /3 idiots|ba chàng ngốc/i, year: "2009", age: "P", matchScore: "99%", genres: ["Hài hước", "Tâm lý", "Truyền cảm hứng"], synopsis: "Hành trình tìm lại người bạn học thiên tài Rancho mở ra những ký ức dở khóc dở cười thời đại học, đặt ra câu hỏi sâu sắc về đam mê, áp lực điểm số và thành công." },
+      { match: /meg 2|vực sâu|the trench/i, year: "2023", age: "T13+", matchScore: "94%", genres: ["Hành động", "Phiêu lưu", "Quái vật"], synopsis: "Jonas Taylor dẫn đầu đoàn thám hiểm lặn xuống rãnh đại dương sâu nhất Trái Đất, đối mặt cùng lúc bầy cá mập Megalodon tiền sử và tổ chức khai thác ngầm tàn bạo." },
+      { match: /vệ binh dải ngân hà|guardians/i, year: "2023", age: "T13+", matchScore: "98%", genres: ["Siêu anh hùng", "Phiêu lưu", "Hài hước"], synopsis: "Nhóm Vệ Binh Dải Ngân Hà dấn thân vào nhiệm vụ sinh tử cuối cùng để bảo vệ tính mạng của Rocket và vén màn quá khứ đau thương về kẻ tạo ra cậu." },
+      { match: /cơn thịnh nộ|wrath of man/i, year: "2021", age: "T18+", matchScore: "96%", genres: ["Hành động", "Hình sự", "Giật gân"], synopsis: "Một người đàn ông bí ẩn xin vào làm nhân viên áp tải xe bọc thép tại Los Angeles, che giấu kế hoạch trả thù lạnh lùng nhắm vào băng cướp đã cướp đi con trai ông." },
+      { match: /đảo đầu lâu|skull island/i, year: "2017", age: "T13+", matchScore: "97%", genres: ["Phiêu lưu", "Hành động", "Quái vật"], synopsis: "Đoàn thám hiểm gồm các nhà khoa học và binh lính đặt chân lên hòn đảo chưa từng có trên bản đồ Thái Bình Dương — lãnh địa của chúa tể Kong và vô số sinh vật khổng lồ." },
+      { match: /gã hề ma quái|chú hề ma quái|it chapter/i, year: "2019", age: "T18+", matchScore: "95%", genres: ["Kinh dị", "Tâm lý", "Siêu nhiên"], synopsis: "27 năm sau nỗi ám ảnh tuổi thơ, nhóm Losers Club buộc phải trở lại thị trấn Derry khi tên hề ma quái Pennywise thức giấc và bắt đầu cuộc đi săn mới." },
+      { match: /cánh đồng ngô|clown in a cornfield/i, year: "2025", age: "T18+", matchScore: "93%", genres: ["Kinh dị", "Chém giết", "Giật gân"], synopsis: "Quinn chuyển đến thị trấn yên bình Kettle Springs để bắt đầu cuộc sống mới, nhưng linh vật chú hề Frendo bất ngờ trở thành ác mộng đẫm máu giữa những cánh đồng ngô." },
+      { match: /other mommy/i, year: "2026", age: "T16+", matchScore: "94%", genres: ["Kinh dị", "Tâm lý", "Bí ẩn"], synopsis: "Một thực thể kỳ bí ẩn nấp trong tủ quần áo bắt đầu thao túng gia đình nhỏ, buộc người mẹ phải đối diện nỗi sợ sâu thẳm nhất để cứu con mình." }
+    ];
+
+    function getDiscoverMovieRichMeta(item) {
+      const title = item?.title || "Phim điện ảnh";
+      const rawTitle = item?.rawTitle || title;
+      const hay = `${title} ${rawTitle}`;
+      const rich = DISCOVER_MOVIE_RICH_META.find((m) => m.match.test(hay));
+      const kb = (typeof MOVIE_KNOWLEDGE_BASE !== "undefined")
+        ? MOVIE_KNOWLEDGE_BASE.find((k) => k.match && k.match.test(hay))
+        : null;
+      const yearMatch = hay.match(/\b(19\d{2}|20\d{2})\b/);
+      const year = rich?.year || (yearMatch ? yearMatch[1] : "2025");
+      const age = rich?.age || "T13+";
+      const matchScore = rich?.matchScore || "96%";
+      const isSeries = /phim bộ/i.test(item?.genre || "");
+      const genres = rich?.genres || (isSeries ? ["Phim bộ", "Hành động", "Giả tưởng"] : ["Điện ảnh", "Chiếu rạp HD"]);
+      const synopsis = rich?.synopsis
+        || kb?.summary
+        || `Thưởng thức "${title}" với chất lượng hình ảnh sắc nét và âm thanh sống động trên CineVerse Lotte. Có thể tạo phòng Hẹn xem cùng bạn bè hoặc yêu cầu chiếu ngay tại rạp.`;
+      const durationLabel = isSeries
+        ? (item.subtitle || item.genre)
+        : (item.duration && item.duration !== "HD Live" ? item.duration : "Full HD");
+      return { year, age, matchScore, genres, synopsis, durationLabel, isSeries };
+    }
+
+    let __discoverHoverOpenTimer = null;
+    let __discoverHoverCloseTimer = null;
+    let __discoverHoverCurrentId = "";
+
+    function ensureDiscoverHoverPopupEl() {
+      let el = document.getElementById("cv-discover-hover-popup");
+      if (el) return el;
+      el = document.createElement("div");
+      el.id = "cv-discover-hover-popup";
+      el.setAttribute("role", "dialog");
+      el.setAttribute("aria-label", "Giới thiệu nhanh phim");
+      el.addEventListener("mouseenter", () => {
+        if (__discoverHoverCloseTimer) {
+          clearTimeout(__discoverHoverCloseTimer);
+          __discoverHoverCloseTimer = null;
+        }
+      });
+      el.addEventListener("mouseleave", () => {
+        onDiscoverCardHoverLeave();
+      });
+      document.body.appendChild(el);
+
+      if (!window.__discoverHoverGlobalBound) {
+        window.__discoverHoverGlobalBound = true;
+        window.addEventListener("scroll", () => hideDiscoverHoverPopup(true), { passive: true });
+        window.addEventListener("resize", () => hideDiscoverHoverPopup(true), { passive: true });
+        window.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") hideDiscoverHoverPopup(true);
+        });
+      }
+      return el;
+    }
+
+    function hideDiscoverHoverPopup(immediate = false) {
+      if (__discoverHoverOpenTimer) {
+        clearTimeout(__discoverHoverOpenTimer);
+        __discoverHoverOpenTimer = null;
+      }
+      if (__discoverHoverCloseTimer) {
+        clearTimeout(__discoverHoverCloseTimer);
+        __discoverHoverCloseTimer = null;
+      }
+      const el = document.getElementById("cv-discover-hover-popup");
+      if (!el) return;
+      if (immediate) {
+        el.classList.remove("is-open");
+        __discoverHoverCurrentId = "";
+      } else {
+        __discoverHoverCloseTimer = setTimeout(() => {
+          el.classList.remove("is-open");
+          __discoverHoverCurrentId = "";
+        }, 120);
+      }
+    }
+
+    function onDiscoverCardHoverLeave() {
+      hideDiscoverHoverPopup(false);
+    }
+
+    function onDiscoverCardHoverEnter(cardEl, encodedVaultId) {
+      if (!cardEl || !encodedVaultId) return;
+      if (window.matchMedia && !window.matchMedia("(hover: hover)").matches) return;
+      if (__discoverHoverCloseTimer) {
+        clearTimeout(__discoverHoverCloseTimer);
+        __discoverHoverCloseTimer = null;
+      }
+      if (__discoverHoverOpenTimer) {
+        clearTimeout(__discoverHoverOpenTimer);
+        __discoverHoverOpenTimer = null;
+      }
+
+      __discoverHoverOpenTimer = setTimeout(() => {
+        if (!cardEl.isConnected) return;
+        let vaultId = "";
+        try { vaultId = decodeURIComponent(String(encodedVaultId || "")); } catch (_) { vaultId = String(encodedVaultId || ""); }
+        const item = window.__discoverVaultMoviesById?.[vaultId];
+        if (!item) return;
+
+        const rect = cardEl.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+
+        // Kích thước đúng bằng 1.5 lần khung gốc, giữ nguyên dáng hình chữ nhật dọc
+        const aspect = rect.width / rect.height;
+        const maxW = Math.max(240, window.innerWidth - 32);
+        const maxH = Math.max(340, window.innerHeight - 32);
+        let targetW = Math.round(rect.width * 1.5);
+        let targetH = Math.round(rect.height * 1.5);
+        if (targetW > maxW) {
+          targetW = maxW;
+          targetH = Math.round(targetW / aspect);
+        }
+        if (targetH > maxH) {
+          targetH = maxH;
+          targetW = Math.round(targetH * aspect);
+        }
+
+        let left = Math.round(rect.left + (rect.width - targetW) / 2);
+        let top = Math.round(rect.top + (rect.height - targetH) / 2);
+        left = Math.max(16, Math.min(window.innerWidth - targetW - 16, left));
+        top = Math.max(16, Math.min(window.innerHeight - targetH - 16, top));
+
+        const meta = getDiscoverMovieRichMeta(item);
+        const posterUrl = getOptimizedPosterUrl(item.poster || "assets/web-logo.png", "w342");
+        const encId = encodeURIComponent(item.id);
+        const hasR1Ticket = hasValidTicketForRoom("room-1");
+
+        const popup = ensureDiscoverHoverPopupEl();
+        popup.style.width = `${targetW}px`;
+        popup.style.height = `${targetH}px`;
+        popup.style.left = `${left}px`;
+        popup.style.top = `${top}px`;
+
+        if (__discoverHoverCurrentId !== item.id) {
+          __discoverHoverCurrentId = item.id;
+          popup.innerHTML = `
+            <div class="cv-dhp-hero">
+              <img src="${escapeHTML(posterUrl)}" alt="${escapeHTML(item.title)}"
+                onerror="this.onerror=null;this.src='assets/web-logo.png';" />
+              <div class="cv-dhp-hero-fade"></div>
+              <div class="cv-dhp-badges">
+                <span class="cv-dhp-glass-pill">
+                  <i class="fa-solid fa-film text-amber-300 text-[9px]"></i>
+                  <span>${escapeHTML(meta.isSeries ? meta.durationLabel : "HD • Vietsub")}</span>
+                </span>
+                <span class="cv-dhp-glass-pill">${escapeHTML(meta.age)}</span>
+              </div>
+            </div>
+            <div class="cv-dhp-body">
+              <div class="space-y-2 min-h-0">
+                <h4 class="cv-dhp-title">${escapeHTML(item.title)}</h4>
+                <div class="cv-dhp-meta">
+                  <span class="cv-dhp-match">${escapeHTML(meta.matchScore)} Phù hợp</span>
+                  <span>•</span>
+                  <span>${escapeHTML(meta.year)}</span>
+                  <span>•</span>
+                  <span>${escapeHTML(meta.durationLabel)}</span>
+                  <span class="cv-dhp-age">${escapeHTML(meta.age)}</span>
+                </div>
+                <div class="cv-dhp-genres">
+                  ${meta.genres.slice(0, 3).map((g) => `<span class="cv-dhp-genre-chip">${escapeHTML(g)}</span>`).join("")}
+                </div>
+                <p class="cv-dhp-synopsis">${escapeHTML(meta.synopsis)}</p>
+              </div>
+              <div class="cv-dhp-actions">
+                <button type="button" class="cv-dhp-btn-primary"
+                  onclick="window.appActions.triggerDiscoverPopupPrimary('${escapeHTML(encId)}')">
+                  <i class="fa-solid ${hasR1Ticket ? "fa-paper-plane" : "fa-calendar-plus"} text-[11px]"></i>
+                  <span>${hasR1Ticket ? "Yêu cầu chiếu" : "Hẹn xem cùng"}</span>
+                </button>
+                <button type="button" class="cv-dhp-btn-secondary"
+                  onclick="window.appActions.hideDiscoverHoverPopup(true); window.appActions.openDiscoverVaultMovie('${escapeHTML(encId)}')">
+                  <i class="fa-solid fa-circle-info text-[11px]"></i>
+                  <span>Chi tiết</span>
+                </button>
+              </div>
+            </div>
+          `;
+        }
+        requestAnimationFrame(() => popup.classList.add("is-open"));
+      }, 140);
+    }
+
+    function triggerDiscoverPopupPrimary(encodedVaultId) {
+      hideDiscoverHoverPopup(true);
+      let vaultId = "";
+      try { vaultId = decodeURIComponent(String(encodedVaultId || "")); } catch (_) { vaultId = String(encodedVaultId || ""); }
+      const item = window.__discoverVaultMoviesById?.[vaultId];
+      if (!item || !item.vaultItem) return;
+      if (hasValidTicketForRoom("room-1")) {
+        state.currentRoomId = "room-1";
+        requestMovieForCurrentRoom(item.vaultItem.id);
+        enterRoom("room-1");
+      } else {
+        openCreateWatchPartyModal("", getCanonicalMovieId({
+          movieTitle: item.rawTitle,
+          videoUrl: item.vaultItem.videoUrl,
+          youtubeId: item.vaultItem.youtubeId
+        }));
+      }
+    }
+
     function renderLobbyTop10Movies() {
       const body = document.getElementById("lobby-top10-body");
       if (!body) return;
@@ -35166,7 +35607,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           const cardSrcset = buildResponsivePosterSrcset(m.poster, "card");
           const encId = encodeURIComponent(m.id);
           return `
-          <button type="button" onclick="window.appActions.openDiscoverVaultMovie('${escapeHTML(encId)}')"
+          <button type="button"
+            onclick="window.appActions.openDiscoverVaultMovie('${escapeHTML(encId)}')"
+            onmouseenter="window.appActions.onDiscoverCardHoverEnter(this, '${escapeHTML(encId)}')"
+            onmouseleave="window.appActions.onDiscoverCardHoverLeave()"
             class="cv-discover-card" aria-label="Khám phá phim ${escapeHTML(m.title)}">
             <img src="${escapeHTML(cardSrc)}" ${cardSrcset ? `srcset="${escapeHTML(cardSrcset)}" sizes="(max-width:640px) 46vw, (max-width:1024px) 24vw, 19vw"` : ""}
               alt="${escapeHTML(m.title)}" width="342" height="513" loading="lazy" decoding="async"
@@ -36982,6 +37426,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       openTop10MovieDetail,
       openDiscoverVaultMovie,
       reshuffleDiscoverMovies,
+      onDiscoverCardHoverEnter,
+      onDiscoverCardHoverLeave,
+      hideDiscoverHoverPopup,
+      triggerDiscoverPopupPrimary,
       toggleTop10FormulaInfo,
       triggerDetailModalCta,
       openSeat2DModal,
