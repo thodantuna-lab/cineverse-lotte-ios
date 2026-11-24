@@ -7309,6 +7309,7 @@
       }
       .cv-rooms-panel > div:first-child { padding: 3px 2px 8px; border-bottom: 1px solid rgba(221, 182, 103, .18); }
       .cv-rooms-panel h2 { letter-spacing: .01em; }
+      .left-3 { left: 0.75rem; }
       #desktop-room-search { min-height: 42px; background: rgba(5, 5, 8, .65) !important; border-color: rgba(255, 255, 255, .14) !important; transition: border-color .2s, box-shadow .2s; }
       #desktop-room-search:focus { border-color: rgba(245, 197, 100, .7) !important; box-shadow: 0 0 0 3px rgba(245, 197, 100, .1); }
       #desktop-rooms-list { gap: 8px; padding: 2px 3px 3px; }
@@ -8420,7 +8421,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         </div>
 
         <div class="relative">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs" style="color:#A1A1AA;" aria-hidden="true"></i>
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs" style="left:13px;color:#A1A1AA;pointer-events:none;" aria-hidden="true"></i>
           <input id="desktop-room-search" type="search" oninput="window.appActions.setSearchQuery(this.value)"
             placeholder="Tìm tên phim hoặc số phòng..."
             aria-label="Tìm tên phim hoặc số phòng"
