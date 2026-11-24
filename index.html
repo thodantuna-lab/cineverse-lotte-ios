@@ -13076,6 +13076,16 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                   renderHeroBillboard();
                   renderLobby();
                 }
+                const openPop = document.getElementById("cv-discover-hover-popup");
+                if (openPop && openPop.classList.contains("is-open") && __discoverHoverCurrentId) {
+                  const curItem = window.__discoverVaultMoviesById?.[__discoverHoverCurrentId];
+                  const curNorm = String(curItem?.rawTitle || curItem?.title || "")
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "d").toLowerCase().trim();
+                  if (curItem && curNorm === t) {
+                    const synEl = openPop.querySelector(".cv-dhp-synopsis");
+                    if (synEl) synEl.textContent = DYNAMIC_MOVIE_META_CACHE[t].synopsis;
+                  }
+                }
               } catch (_) {}
             }
           })
@@ -35904,7 +35914,23 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       { match: /đảo đầu lâu|skull island/i, year: "2017", age: "T13+", matchScore: "97%", genres: ["Phiêu lưu", "Hành động", "Quái vật"], synopsis: "Đoàn thám hiểm gồm các nhà khoa học và binh lính đặt chân lên hòn đảo chưa từng có trên bản đồ Thái Bình Dương — lãnh địa của chúa tể Kong và vô số sinh vật khổng lồ." },
       { match: /gã hề ma quái|chú hề ma quái|it chapter/i, year: "2019", age: "T18+", matchScore: "95%", genres: ["Kinh dị", "Tâm lý", "Siêu nhiên"], synopsis: "27 năm sau nỗi ám ảnh tuổi thơ, nhóm Losers Club buộc phải trở lại thị trấn Derry khi tên hề ma quái Pennywise thức giấc và bắt đầu cuộc đi săn mới." },
       { match: /cánh đồng ngô|clown in a cornfield/i, year: "2025", age: "T18+", matchScore: "93%", genres: ["Kinh dị", "Chém giết", "Giật gân"], synopsis: "Quinn chuyển đến thị trấn yên bình Kettle Springs để bắt đầu cuộc sống mới, nhưng linh vật chú hề Frendo bất ngờ trở thành ác mộng đẫm máu giữa những cánh đồng ngô." },
-      { match: /other mommy/i, year: "2026", age: "T16+", matchScore: "94%", genres: ["Kinh dị", "Tâm lý", "Bí ẩn"], synopsis: "Một thực thể kỳ bí ẩn nấp trong tủ quần áo bắt đầu thao túng gia đình nhỏ, buộc người mẹ phải đối diện nỗi sợ sâu thẳm nhất để cứu con mình." }
+      { match: /other mommy/i, year: "2026", age: "T16+", matchScore: "94%", genres: ["Kinh dị", "Tâm lý", "Bí ẩn"], synopsis: "Một thực thể kỳ bí ẩn nấp trong tủ quần áo bắt đầu thao túng gia đình nhỏ, buộc người mẹ phải đối diện nỗi sợ sâu thẳm nhất để cứu con mình." },
+      { match: /cuộc đua tử thần 4|đại loạn|beyond anarchy|death race 4/i, year: "2018", age: "T18+", matchScore: "95%", genres: ["Hành động", "Đua xe", "Kịch tính"], synopsis: "Đặc vụ Connor Gibson thâm nhập nhà tù biệt lập Sprawl để hạ gục tay đua huyền thoại Frankenstein trong giải đấu sinh tử không luật lệ Death Race." },
+      { match: /những kẻ bất bại 2|pantera|den of thieves 2/i, year: "2025", age: "T16+", matchScore: "96%", genres: ["Hành động", "Trộm cướp", "Hình sự"], synopsis: "Cảnh sát trưởng Big Nick lần theo dấu vết Donnie tới châu Âu, nơi băng trộm kim cương tinh nhuệ lên kế hoạch đột kích sàn giao dịch kim cương lớn nhất thế giới." },
+      { match: /võ sĩ giác đấu|gladiator/i, year: "2024", age: "T18+", matchScore: "97%", genres: ["Sử thi", "Hành động", "Chính kịch"], synopsis: "Lucius bị buộc phải bước vào đấu trường La Mã cổ đại để chiến đấu cho danh dự và tương lai đế chế khi quê hương rơi vào tay hai hoàng đế bạo tàn." },
+      { match: /sát thủ thợ máy 2|mechanic.*resurrection|tái xuất/i, year: "2016", age: "T18+", matchScore: "95%", genres: ["Hành động", "Sát thủ", "Giật gân"], synopsis: "Arthur Bishop buộc phải quay lại thế giới sát thủ để thực hiện 3 vụ ám sát bất khả thi dàn dựng như tai nạn, nhằm giải cứu người phụ nữ anh yêu." },
+      { match: /sát thủ thợ máy|the mechanic/i, year: "2011", age: "T18+", matchScore: "94%", genres: ["Hành động", "Tội phạm", "Kịch tính"], synopsis: "Sát thủ chuyên nghiệp Arthur Bishop nổi tiếng với những phi vụ không dấu vết phải đào tạo Steve — con trai người bạn quá cố — đầy bản năng nổi loạn." },
+      { match: /phù thủy tối thượng|doctor strange|đa vũ trụ/i, year: "2022", age: "T13+", matchScore: "97%", genres: ["Siêu anh hùng", "Kỳ ảo", "Phiêu lưu"], synopsis: "Doctor Strange mở cánh cổng đa vũ trụ và hợp lực cùng Wong, America Chavez đối đầu Scarlet Witch đang truy đuổi sức mạnh xuyên không gian." },
+      { match: /mưu cầu hạnh phúc|pursuit of happyness/i, year: "2006", age: "P", matchScore: "99%", genres: ["Tâm lý", "Tiểu sử", "Truyền cảm hứng"], synopsis: "Chris Gardner — người cha đơn thân phá sản — vừa chật vật mưu sinh cùng con trai nhỏ trên đường phố San Francisco, vừa kiên trì thực tập để đổi đời." },
+      { match: /không gia đình|remi|nobody's boy/i, year: "1977", age: "P", matchScore: "98%", genres: ["Anime", "Phiêu lưu", "Gia đình"], synopsis: "Cậu bé Rémi theo gánh xiếc rong của cụ Vitalis cùng chú chó Capi đi khắp nước Pháp, vượt qua bao gian khổ để tìm lại nguồn cội gia đình." },
+      { match: /tiên nghịch|renegade immortal/i, year: "2024", age: "T13+", matchScore: "98%", genres: ["Hoạt hình 3D", "Tiên hiệp", "Hành động"], synopsis: "Thiếu niên bình phàm Vương Lâm nghịch thiên cải mệnh trên con đường tu tiên khắc nghiệt, vượt qua sinh tử và ân oán để bước lên đỉnh cao đại đạo." },
+      { match: /wakanda|chiến binh báo đen/i, year: "2022", age: "T13+", matchScore: "96%", genres: ["Siêu anh hùng", "Hành động", "Phiêu lưu"], synopsis: "Sau sự ra đi của vua T'Challa, nữ hoàng Ramonda và Shuri phải bảo vệ Wakanda trước sức mạnh trỗi dậy từ vương quốc dưới đáy biển Talokan." },
+      { match: /john wick/i, year: "2023", age: "T18+", matchScore: "98%", genres: ["Hành động", "Sát thủ", "Hình sự"], synopsis: "John Wick tìm đường giành lại tự do trước Hội Tối Cao (High Table) bằng trận quyết đấu sinh tử với Hầu tước Vincent de Gramont tại Paris." },
+      { match: /dune|hành tinh cát/i, year: "2024", age: "T13+", matchScore: "98%", genres: ["Viễn tưởng", "Sử thi", "Phiêu lưu"], synopsis: "Paul Atreides liên minh cùng tộc người Fremen và Chani trên sa mạc Arrakis để báo thù những kẻ đã hủy diệt gia tộc mình." },
+      { match: /interstellar|hố đen tử thần/i, year: "2014", age: "T13+", matchScore: "99%", genres: ["Viễn tưởng", "Phiêu lưu", "Tâm lý"], synopsis: "Cựu phi công NASA Cooper dẫn đầu chuyến du hành xuyên hố sâu vũ trụ để tìm hành tinh mới cho nhân loại khi Trái Đất đứng bên bờ diệt vong." },
+      { match: /inception|kẻ đánh cắp giấc mơ/i, year: "2010", age: "T13+", matchScore: "99%", genres: ["Viễn tưởng", "Hành động", "Tâm lý"], synopsis: "Siêu trộm Dom Cobb thực hiện phi vụ ngược đời: không đánh cắp bí mật mà cấy một ý niệm vào sâu trong tiềm thức mục tiêu qua nhiều tầng giấc mơ." },
+      { match: /dark knight|kỵ sĩ bóng đêm/i, year: "2008", age: "T13+", matchScore: "99%", genres: ["Siêu anh hùng", "Hình sự", "Tâm lý"], synopsis: "Batman cùng ủy viên Gordon và công tố viên Harvey Dent đối đầu tên tội phạm thiên tài Joker đang đẩy thành phố Gotham vào hỗn loạn." },
+      { match: /spider-man|no way home|người nhện/i, year: "2021", age: "T13+", matchScore: "98%", genres: ["Siêu anh hùng", "Hành động", "Đa vũ trụ"], synopsis: "Khi danh tính bị lộ, Peter Parker nhờ Doctor Strange thi triển bùa quên lãng nhưng vô tình kéo ác nhân từ các đa vũ trụ khác vào thế giới của mình." }
     ];
 
     function getDiscoverMovieRichMeta(item) {
@@ -35912,21 +35938,31 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       const rawTitle = item?.rawTitle || title;
       const hay = `${title} ${rawTitle}`;
       const rich = DISCOVER_MOVIE_RICH_META.find((m) => m.match.test(hay));
+      const resolved = (typeof resolveMovieMetadata === "function")
+        ? resolveMovieMetadata(rawTitle || title, { genre: item?.genre || "", duration: item?.duration || "" })
+        : null;
       const kb = (typeof MOVIE_KNOWLEDGE_BASE !== "undefined")
         ? MOVIE_KNOWLEDGE_BASE.find((k) => k.match && k.match.test(hay))
         : null;
       const yearMatch = hay.match(/\b(19\d{2}|20\d{2})\b/);
-      const year = rich?.year || (yearMatch ? yearMatch[1] : "2025");
-      const age = rich?.age || "T13+";
+      const year = rich?.year || resolved?.year || (yearMatch ? yearMatch[1] : "2025");
+      const age = rich?.age || resolved?.ageRating || "T13+";
       const matchScore = rich?.matchScore || "96%";
       const isSeries = /phim bộ/i.test(item?.genre || "");
-      const genres = rich?.genres || (isSeries ? ["Phim bộ", "Hành động", "Giả tưởng"] : ["Điện ảnh", "Chiếu rạp HD"]);
+      const resolvedGenres = resolved?.genre
+        ? String(resolved.genre).split(/[•,|]/).map(s => s.trim()).filter(Boolean).slice(0, 3)
+        : null;
+      const genres = rich?.genres || (resolvedGenres && resolvedGenres.length ? resolvedGenres : null) || (isSeries ? ["Phim bộ", "Hành động", "Giả tưởng"] : ["Điện ảnh", "Chiếu rạp HD"]);
+      const resolvedSyn = (resolved?.synopsis && !/với chất lượng hình ảnh sắc nét|tuyển tập giải trí đặc sắc/i.test(resolved.synopsis))
+        ? resolved.synopsis
+        : "";
       const synopsis = rich?.synopsis
+        || resolvedSyn
         || kb?.summary
-        || `Thưởng thức "${title}" với chất lượng hình ảnh sắc nét và âm thanh sống động trên CineVerse Lotte. Có thể tạo phòng Hẹn xem cùng bạn bè hoặc yêu cầu chiếu ngay tại rạp.`;
+        || `Phim "${title}" (${year}) — đang tải tóm tắt chi tiết...`;
       const durationLabel = isSeries
         ? (item.subtitle || item.genre)
-        : (item.duration && item.duration !== "HD Live" ? item.duration : "Full HD");
+        : ((item.duration && item.duration !== "HD Live") ? item.duration : (resolved?.duration || "Full HD"));
       return { year, age, matchScore, genres, synopsis, durationLabel, isSeries };
     }
 
