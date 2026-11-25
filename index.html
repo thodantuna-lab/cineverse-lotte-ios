@@ -7,6 +7,15 @@
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>CineVerse Lotte — Rạp Chiếu Phim Trực Tuyến Góc Nhìn Hàng F</title>
   <link rel="icon" type="image/png" href="assets/web-logo.png" />
+  <script>
+    window.addEventListener("error", function(e) {
+      var t = e && e.target;
+      if (t && t.tagName === "IMG" && !t.dataset.cvImgFallback) {
+        t.dataset.cvImgFallback = "1";
+        t.src = "assets/web-logo.png";
+      }
+    }, true);
+  </script>
   <link rel="apple-touch-icon" href="assets/web-logo.png" />
   <link rel="preload" as="image" href="assets/web-logo.png" fetchpriority="high" />
   <link rel="preconnect" href="https://image.tmdb.org" crossorigin />
@@ -8086,25 +8095,25 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #upcoming-overlay {
       pointer-events: auto !important;
     }
-    /* Phụ đề CC HTML Overlay nổi sắc nét ở cạnh dưới màn hình 3D */
+    /* Phụ đề CC HTML Overlay nổi sắc nét ở cạnh dưới màn hình 3D (hỗ trợ Safe-Area iOS/Android) */
     body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #lyrics-overlay {
       position: fixed !important;
-      left: 16px !important;
-      right: 16px !important;
+      left: max(16px, env(safe-area-inset-left, 0px)) !important;
+      right: max(16px, env(safe-area-inset-right, 0px)) !important;
       z-index: 62 !important;
-      bottom: 92px !important;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 92px) !important;
       transition: bottom 320ms cubic-bezier(0.22, 1, 0.36, 1);
     }
     body.theater-dimmed.cv-3d-screening-active.cv-3d-hud-hidden:not(.stream-room-active) #lyrics-overlay {
-      bottom: 28px !important;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 26px) !important;
     }
-    /* Thanh trên cùng (#room-top-header) tự động ẩn hoàn toàn khi Tắt đèn, chỉ hiện khi rê chuột lên mép/góc trên */
+    /* Thanh trên cùng (#room-top-header) tự động ẩn khi Tắt đèn, chuẩn Safe-Area Dynamic Island iOS */
     body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-top-header {
       position: fixed !important;
-      top: 12px !important;
+      top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
       left: 50% !important;
       transform: translate(-50%, -14px) !important;
-      width: min(96vw, 1480px) !important;
+      width: min(calc(96vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)), 1480px) !important;
       z-index: 65 !important;
       opacity: 0 !important;
       pointer-events: none !important;
@@ -8119,10 +8128,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
     body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-controls-dock-wrap {
       position: fixed !important;
-      bottom: 14px !important;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
       left: 50% !important;
       transform: translateX(-50%) !important;
-      width: min(95vw, 1080px) !important;
+      width: min(calc(95vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)), 1080px) !important;
       z-index: 65 !important;
       transition: opacity 340ms cubic-bezier(0.22, 1, 0.36, 1), transform 340ms cubic-bezier(0.22, 1, 0.36, 1) !important;
     }
@@ -8135,10 +8144,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
     #room-3d-floating-hud {
       position: fixed;
-      top: 14px;
+      top: calc(env(safe-area-inset-top, 0px) + 12px);
       left: 50%;
       transform: translateX(-50%);
-      width: min(96vw, 1480px);
+      width: min(calc(96vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)), 1480px);
       z-index: 64;
       opacity: 0;
       pointer-events: none;
@@ -8148,7 +8157,19 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       opacity: 1;
     }
     body.theater-dimmed.cv-3d-screening-active.cv-3d-top-hover:not(.stream-room-active) #room-3d-floating-hud {
-      top: 68px;
+      top: calc(env(safe-area-inset-top, 0px) + 66px);
+    }
+    #r3d-btn-mobile-top {
+      display: none;
+    }
+    @media (hover: none), (pointer: coarse), (max-width: 768px) {
+      #r3d-btn-mobile-top { display: inline-flex; }
+    }
+    @media (max-width: 640px) {
+      #room-3d-floating-hud { gap: 4px; }
+      #room-3d-floating-hud .cv-b3d-hud-pill { max-width: 100%; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
+      #room-3d-floating-hud .cv-b3d-hud-pill::-webkit-scrollbar { display: none; }
+      #room-3d-floating-hud .cv-b3d-btn { padding: 4px 8px; font-size: 10px; flex-shrink: 0; }
     }
     body.theater-dimmed.cv-3d-screening-active.cv-3d-hud-hidden:not(.stream-room-active) #room-top-header {
       opacity: 0 !important;
@@ -8168,7 +8189,28 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     body.theater-dimmed.cv-3d-screening-active.cv-3d-hud-hidden:not(.stream-room-active) #room-3d-gl {
       cursor: none !important;
     }
-</style>
+
+    @media (max-width: 768px) { body:has(#room-view:not(.hidden)) #owner-chat-widget { display: none !important; } }
+    body.is-dimmed #owner-chat-widget,
+    body.is-dimmed #owner-chat-fab {
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    @media (max-width: 640px) {
+      #room-3d-floating-hud {
+        flex-wrap: nowrap !important;
+        justify-content: flex-start !important;
+        gap: 5px !important;
+        padding: 4px 8px !important;
+        background: rgba(12, 10, 16, 0.86);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 999px;
+      }
+      #room-3d-floating-hud .r3d-hud-group {
+        display: contents !important;
+      }
+    }
+  </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-rose-500 selection:text-white">
 
@@ -9568,6 +9610,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             <!-- Thanh nổi chọn nhanh Góc ngồi ghế / Góc tập trung (Zoom) / Toàn cảnh 3D / Rèm / Bật đèn -->
             <div id="room-3d-floating-hud" class="flex flex-wrap items-center justify-between gap-2 pointer-events-none">
               <div class="cv-b3d-hud-pill p-1 flex flex-wrap items-center gap-1 pointer-events-auto">
+                <button type="button" id="r3d-btn-mobile-top" onclick="window.cvRoomCinema3D?.toggleTopHeader()" class="cv-b3d-btn" title="Hiện thanh điều hướng phòng (Sảnh chờ / Thư viện / Chat)">
+                  ☰ Phòng
+                </button>
                 <button type="button" id="r3d-btn-seat" onclick="window.cvRoomCinema3D?.setCameraView('seat')" class="cv-b3d-btn is-active" title="Ngồi đúng vị trí ghế của bạn • Kéo chuột để ngoảnh đầu 360°">
                   🪑 Góc ngồi rạp (<span id="r3d-seat-lbl">D5</span>)
                 </button>
@@ -16278,6 +16323,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           st.posterUrl = clean;
           st.posterReady = false;
           st.posterDirty = true;
+          const isLocalOrCorsOk = !/^https?:\/\//i.test(clean) || /wsrv\.nl|r2\.dev|workers\.dev|localhost/i.test(clean);
+          const corsSrc = isLocalOrCorsOk
+            ? clean.replace(/^\.\/+/, "")
+            : `https://wsrv.nl/?url=${encodeURIComponent(clean)}&w=780&output=jpg`;
           const img = new Image();
           img.crossOrigin = "anonymous";
           img.onload = () => {
@@ -16289,9 +16338,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             wakeUp();
           };
           img.onerror = () => {
-            if (st.posterUrl === clean) { st.posterReady = false; st.posterDirty = true; }
+            if (st.posterUrl === clean) { st.posterReady = false; st.posterDirty = true; wakeUp(); }
           };
-          img.src = clean;
+          img.src = corsSrc;
         }
 
         // Chỉ vẽ & upload PosterTexture ĐÚNG 1 LẦN khi posterDirty = true (triệt tiêu 100% nghẽn CPU->GPU 60Hz!)
@@ -17084,7 +17133,11 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           const mySeat = seatById[st.mySeatId] || seats3D[28];
           const camDelta = lerpCamera3D(mySeat, t);
 
-          const mProj = mat4Perspective(st.curFov, st.W / Math.max(1, st.H), 0.20, 70.0);
+          const viewAspect = st.W / Math.max(1, st.H);
+          const effFov = viewAspect < 1.15
+            ? Math.min(1.68, 2.0 * Math.atan(Math.tan(st.curFov * 0.5) * (1.28 / Math.max(0.42, viewAspect))))
+            : st.curFov;
+          const mProj = mat4Perspective(effFov, viewAspect, 0.20, 70.0);
           const mView = mat4LookAt(st.camPos, st.camLook, [0, 1, 0]);
 
           gl.clearColor(0.014, 0.012, 0.020, 1.0);
@@ -17507,6 +17560,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           const next = roomInst.st.mode === "seat" ? "focus" : "seat";
           this.setCameraView(next);
         },
+        toggleTopHeader() {
+          document.body.classList.toggle("cv-3d-top-hover");
+          resetDimmedHudAutoHide();
+        },
         toggleNameplatesMode() {
           const cur = roomInst.st.nameplateMode;
           roomInst.st.nameplateMode = cur === "auto" ? "always" : (cur === "always" ? "off" : "auto");
@@ -17594,7 +17651,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           document.body.classList.remove("cv-3d-top-hover");
           return;
         }
-        const nearTop = typeof clientY === "number" && clientY <= 78;
+        const nearTop = typeof clientY === "number" && clientY <= 92;
         if (nearTop || isTopHeaderActive()) {
           if (topHoverHideTimer) { clearTimeout(topHoverHideTimer); topHoverHideTimer = 0; }
           document.body.classList.add("cv-3d-top-hover");

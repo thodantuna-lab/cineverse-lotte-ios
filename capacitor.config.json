@@ -3,6 +3,7 @@
   "appName": "CineVerse Lotte",
   "webDir": "www",
   "bundledWebRuntime": false,
+  "backgroundColor": "#0B0B0F",
   "server": {
     "url": "https://project-ca-nhan.thodantuna.workers.dev/",
     "cleartext": false,
@@ -14,7 +15,13 @@
     ]
   },
   "ios": {
-    "contentInset": "automatic",
-    "allowsLinkPreview": false
+    "contentInset": "never",
+    "allowsLinkPreview": false,
+    "preferredContentMode": "mobile",
+    "backgroundColor": "#0B0B0F"
+  },
+  "android": {
+    "backgroundColor": "#0B0B0F",
+    "allowMixedContent": true
   }
 }

@@ -1,10 +1,10 @@
 {
   "name": "cineverse-lotte",
   "version": "1.0.0",
-  "description": "CineVerse Lotte - Watch Party & Discord Live Stream iOS App",
+  "description": "CineVerse Lotte - Watch Party, 3D Cinema & Discord Live Stream iOS/Android App",
   "private": true,
   "scripts": {
-    "prepare:www": "node -e \"const fs=require('fs');fs.mkdirSync('www/assets',{recursive:true});fs.copyFileSync('index.html','www/index.html');fs.copyFileSync('assets/art-deco.webp','www/assets/art-deco.webp');if(fs.existsSync('assets/web-logo.png'))fs.copyFileSync('assets/web-logo.png','www/assets/web-logo.png');\"",
+    "prepare:www": "node -e \"const fs=require('fs');fs.mkdirSync('www',{recursive:true});fs.copyFileSync('index.html','www/index.html');if(fs.existsSync('_headers'))fs.copyFileSync('_headers','www/_headers');if(fs.existsSync('assets'))fs.cpSync('assets','www/assets',{recursive:true,force:true});\"",
     "cap:sync": "npm run prepare:www && npx cap sync ios"
   },
   "dependencies": {
