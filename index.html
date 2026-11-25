@@ -8108,23 +8108,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       bottom: calc(env(safe-area-inset-bottom, 0px) + 26px) !important;
     }
     /* Thanh trên cùng (#room-top-header) tự động ẩn khi Tắt đèn, chuẩn Safe-Area Dynamic Island iOS */
-    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-top-header {
-      position: fixed !important;
-      top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
-      left: 50% !important;
-      transform: translate(-50%, -14px) !important;
-      width: min(calc(96vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)), 1480px) !important;
-      z-index: 65 !important;
-      opacity: 0 !important;
-      pointer-events: none !important;
-      transition: opacity 280ms cubic-bezier(0.22, 1, 0.36, 1), transform 280ms cubic-bezier(0.22, 1, 0.36, 1) !important;
-    }
-    body.theater-dimmed.cv-3d-screening-active.cv-3d-top-hover:not(.stream-room-active) #room-top-header,
-    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-top-header:hover,
-    body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-top-header:focus-within {
-      opacity: 0.96 !important;
-      transform: translate(-50%, 0) !important;
-      pointer-events: auto !important;
+    body.theater-dimmed:not(.stream-room-active) #room-top-header {
+      display: none !important;
     }
     body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-controls-dock-wrap {
       position: fixed !important;
@@ -8156,15 +8141,11 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     body.theater-dimmed.cv-3d-screening-active:not(.stream-room-active) #room-3d-floating-hud {
       opacity: 1;
     }
-    body.theater-dimmed.cv-3d-screening-active.cv-3d-top-hover:not(.stream-room-active) #room-3d-floating-hud {
-      top: calc(env(safe-area-inset-top, 0px) + 66px);
-    }
+    
     #r3d-btn-mobile-top {
       display: none;
     }
-    @media (hover: none), (pointer: coarse), (max-width: 768px) {
-      #r3d-btn-mobile-top { display: inline-flex; }
-    }
+    
     @media (max-width: 640px) {
       #room-3d-floating-hud { gap: 4px; }
       #room-3d-floating-hud .cv-b3d-hud-pill { max-width: 100%; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
@@ -17646,11 +17627,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         return Boolean(top.querySelector(".floating-dropdown-panel:not(.hidden)"));
       }
 
-      function updateTopEdgeHoverState(clientY) {
-        if (!document.body.classList.contains("cv-3d-screening-active")) {
-          document.body.classList.remove("cv-3d-top-hover");
-          return;
-        }
+      function updateTopEdgeHoverState() {
+        document.body.classList.remove("cv-3d-top-hover");
+        return;
         const nearTop = typeof clientY === "number" && clientY <= 92;
         if (nearTop || isTopHeaderActive()) {
           if (topHoverHideTimer) { clearTimeout(topHoverHideTimer); topHoverHideTimer = 0; }
