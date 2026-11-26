@@ -15716,27 +15716,27 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
 
     // =========================================================================
-    // HỆ THỐNG RẠP 3D WEBGL PBR DÙNG CHUNG (ĐẶT VÉ 0MS STUTTER + CHIẾU PHIM VIDEOTEXTURE & KHÁN GIẢ SỐNG ĐỘNG)
-    // GPU Vertex Curtain (0ms CPU) • ResizeObserver • Poster Dirty Cache • Lifelike 3D Co-Viewers & Rim Optics
+    // HỆ THỐNG RẠP 3D WEBGL PBR THẾ HỆ MỚI — MÔ PHỎNG RẠP LOTTE/CGV ĐỜI THỰC 99%
+    // Kiến trúc Multiplex Đen Mờ • Bậc Thang LED Xanh/Đỏ & Đèn Rọi Thảm • Ghế Da Đen-Đỏ
+    // Nhân Vật 3D Giải Phẫu Chi Tiết (5 Kiểu Tóc, Kính Gọng Mảnh, Áo Choàng/Hoodie, Cơ Thể Góc Nhìn Thứ Nhất)
     // =========================================================================
     (function initCineVerseUnified3DEngine() {
       const ROWS_3D = ["A", "B", "C", "D", "E", "F"];
       const seats3D = [];
       const seatById = {};
+
+      // Bố cục chuẩn rạp Multiplex thực tế: 2 ghế cánh trái — [Lối đi bậc thang trái] — 4 ghế VIP trung tâm — [Lối đi bậc thang phải] — 2 ghế cánh phải
+      const STD_COL_X = [-5.44, -4.36, -1.62, -0.54, 0.54, 1.62, 4.36, 5.44];
+      const CPL_COL_X = [-5.42, -4.34, -1.62, -0.54, 0.54, 1.62, 4.34, 5.42];
+      const AISLE_X = [-3.02, 3.02];
+
       ROWS_3D.forEach((row, rIdx) => {
         const isVIP = row === "D" || row === "E";
         const isCouple = row === "F";
-        const z = -4.15 + rIdx * 2.25;
-        const y = 0.32 + rIdx * 0.56;
+        const z = -4.20 + rIdx * 1.94;
+        const y = 0.26 + rIdx * 0.49;
         for (let col = 1; col <= 8; col++) {
-          let x;
-          if (isCouple) {
-            const pairIdx = Math.floor((col - 1) / 2);
-            const pairCenter = pairIdx < 2 ? (-5.25 + pairIdx * 2.55) : (2.70 + (pairIdx - 2) * 2.55);
-            x = pairCenter + (col % 2 === 1 ? -0.52 : 0.52);
-          } else {
-            x = col <= 4 ? (-6.35 + (col - 1) * 1.48) : (1.90 + (col - 5) * 1.48);
-          }
+          const x = isCouple ? CPL_COL_X[col - 1] : STD_COL_X[col - 1];
           const sObj = {
             id: `${row}${col}`,
             row, col, rIdx, isVIP, isCouple,
@@ -15749,13 +15749,27 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       });
 
       const OUTFIT_PALETTE = [
-        [0.44, 0.10, 0.16], // Áo hoodie đỏ rượu vang
-        [0.14, 0.22, 0.36], // Áo khoác denim xanh đêm
-        [0.46, 0.40, 0.33], // Áo len kem yến mạch
-        [0.12, 0.28, 0.30], // Bomber xanh cổ vịt
-        [0.24, 0.28, 0.18], // Khoác olive trầm
-        [0.32, 0.16, 0.34], // Cardigan tím mận
-        [0.22, 0.22, 0.26]  // Áo khoác xám than
+        [0.82, 0.79, 0.75], // Áo khoác / khăn choàng kem sáng (bắt sáng màn chiếu cực chân thực)
+        [0.16, 0.21, 0.32], // Hoodie xanh navy trầm
+        [0.42, 0.11, 0.15], // Hoodie đỏ burgundy trầm
+        [0.22, 0.24, 0.27], // Bomber xám than chì
+        [0.68, 0.66, 0.64], // Cardigan xám sương mù
+        [0.18, 0.26, 0.22], // Áo khoác xanh rêu tối
+        [0.30, 0.22, 0.18]  // Áo nỉ nâu cà phê
+      ];
+
+      const SKIN_PALETTE = [
+        [0.84, 0.67, 0.57],
+        [0.80, 0.62, 0.52],
+        [0.87, 0.71, 0.62],
+        [0.75, 0.57, 0.47]
+      ];
+
+      const HAIR_PALETTE = [
+        [0.065, 0.058, 0.068], // Đen tuyền tự nhiên Á Đông
+        [0.115, 0.082, 0.068], // Nâu đen espresso
+        [0.185, 0.120, 0.082], // Nâu hạt dẻ trầm
+        [0.090, 0.085, 0.098]  // Đen khói
       ];
 
       function hashStr(str) {
@@ -15775,8 +15789,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         return Math.sign(x) * Math.pow(Math.abs(x), p);
       }
 
-      function addRoundedCushion(mb, cx, cy, cz, rx, ry, rz, roundness, segU, segV, rgb, mat, aoBot = 0.35, aoTop = 1.0, tiltX = 0) {
+      // Hàm dựng khối hữu cơ mềm mại có hỗ trợ xoay nghiêng đa trục (tiltX, tiltZ) cho giải phẫu người & ghế da
+      function addRoundedCushion(mb, cx, cy, cz, rx, ry, rz, roundness, segU, segV, rgb, mat, aoBot = 0.35, aoTop = 1.0, tiltX = 0, tiltZ = 0) {
         const cxT = Math.cos(tiltX), sxT = Math.sin(tiltX);
+        const czT = Math.cos(tiltZ), szT = Math.sin(tiltZ);
         const base = mb.vCount;
         for (let iv = 0; iv <= segV; iv++) {
           const v = (iv / segV - 0.5) * Math.PI;
@@ -15785,12 +15801,19 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           for (let iu = 0; iu <= segU; iu++) {
             const u = (iu / segU) * Math.PI * 2.0;
             const cu = Math.cos(u), su = Math.sin(u);
-            const lx = rx * spow(cv, roundness) * spow(cu, roundness);
-            const ly = ry * spow(sv, roundness);
-            const lz = rz * spow(cv, roundness) * spow(su, roundness);
-            const nx0 = spow(cv, 2 - roundness) * spow(cu, 2 - roundness) / (rx || 1);
-            const ny0 = spow(sv, 2 - roundness) / (ry || 1);
-            const nz0 = spow(cv, 2 - roundness) * spow(su, 2 - roundness) / (rz || 1);
+            let lx = rx * spow(cv, roundness) * spow(cu, roundness);
+            let ly = ry * spow(sv, roundness);
+            let lz = rz * spow(cv, roundness) * spow(su, roundness);
+            let nx0 = spow(cv, 2 - roundness) * spow(cu, 2 - roundness) / (rx || 1);
+            let ny0 = spow(sv, 2 - roundness) / (ry || 1);
+            let nz0 = spow(cv, 2 - roundness) * spow(su, 2 - roundness) / (rz || 1);
+
+            // Xoay quanh trục Z (vai/cánh tay) rồi quanh trục X (độ ngả lưng/đùi)
+            if (tiltZ !== 0) {
+              const tx = lx * czT - ly * szT, ty = lx * szT + ly * czT;
+              const tnx = nx0 * czT - ny0 * szT, tny = nx0 * szT + ny0 * czT;
+              lx = tx; ly = ty; nx0 = tnx; ny0 = tny;
+            }
             const wy = ly * cxT - lz * sxT, wz = ly * sxT + lz * cxT;
             const wny = ny0 * cxT - nz0 * sxT, wnz = ny0 * sxT + nz0 * cxT;
             const nl = Math.hypot(nx0, wny, wnz) || 1;
@@ -15811,14 +15834,56 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         mb.vCount += (segV + 1) * stride;
       }
 
-      function addCylinder(mb, cx, cy, cz, rTop, rBot, h, segs, rgb, mat, aoBot = 0.4, aoTop = 1.0, capTop = true) {
+      function addLimbCapsule(mb, x0, y0, z0, x1, y1, z1, r0, r1, segs, rgb, mat, ao0 = 0.45, ao1 = 0.95) {
+        const dx = x1 - x0, dy = y1 - y0, dz = z1 - z0;
+        const len = Math.hypot(dx, dy, dz) || 0.001;
+        const ux = dx / len, uy = dy / len, uz = dz / len;
+        let ax = 0, ay = 1, az = 0;
+        if (Math.abs(uy) > 0.92) { ax = 1; ay = 0; az = 0; }
+        let px = uy * az - uz * ay, py = uz * ax - ux * az, pz = ux * ay - uy * ax;
+        const pl = Math.hypot(px, py, pz) || 1; px /= pl; py /= pl; pz /= pl;
+        const qx = uy * pz - uz * py, qy = uz * px - ux * pz, qz = ux * py - uy * px;
+
+        const rings = 5;
+        const base = mb.vCount;
+        for (let ir = 0; ir <= rings; ir++) {
+          const t = ir / rings;
+          // Bo tròn nhẹ hai đầu khớp để nối liền khối tự nhiên
+          const capScale = (ir === 0 || ir === rings) ? 0.72 : (ir === 1 || ir === rings - 1 ? 0.96 : 1.0);
+          const rad = (r0 + (r1 - r0) * t) * capScale;
+          const cx = x0 + dx * t, cy = y0 + dy * t, cz = z0 + dz * t;
+          const ao = ao0 + (ao1 - ao0) * t;
+          for (let is = 0; is <= segs; is++) {
+            const a = (is / segs) * Math.PI * 2;
+            const ca = Math.cos(a), sa = Math.sin(a);
+            const nx = px * ca + qx * sa;
+            const ny = py * ca + qy * sa;
+            const nz = pz * ca + qz * sa;
+            mb.pos.push(cx + nx * rad, cy + ny * rad, cz + nz * rad);
+            mb.norm.push(nx, ny, nz);
+            mb.col.push(rgb[0], rgb[1], rgb[2]);
+            mb.mat.push(mat);
+            mb.ao.push(ao);
+          }
+        }
+        const stride = segs + 1;
+        for (let ir = 0; ir < rings; ir++) {
+          for (let is = 0; is < segs; is++) {
+            const a = base + ir * stride + is, b = a + 1, c = a + stride, d = c + 1;
+            mb.idx.push(a, c, b, b, c, d);
+          }
+        }
+        mb.vCount += (rings + 1) * stride;
+      }
+
+      function addCylinder(mb, cx, cy, cz, rTop, rBot, h, segs, rgb, mat, aoBot = 0.4, aoTop = 1.0, capTop = true, capBot = false) {
         const base = mb.vCount, hh = h * 0.5;
         for (let i = 0; i <= segs; i++) {
           const a = (i / segs) * Math.PI * 2, ca = Math.cos(a), sa = Math.sin(a);
           mb.pos.push(cx + ca * rBot, cy - hh, cz + sa * rBot);
-          mb.norm.push(ca, 0.08, sa); mb.col.push(rgb[0], rgb[1], rgb[2]); mb.mat.push(mat); mb.ao.push(aoBot);
+          mb.norm.push(ca, 0.06, sa); mb.col.push(rgb[0], rgb[1], rgb[2]); mb.mat.push(mat); mb.ao.push(aoBot);
           mb.pos.push(cx + ca * rTop, cy + hh, cz + sa * rTop);
-          mb.norm.push(ca, 0.08, sa); mb.col.push(rgb[0], rgb[1], rgb[2]); mb.mat.push(mat); mb.ao.push(aoTop);
+          mb.norm.push(ca, 0.06, sa); mb.col.push(rgb[0], rgb[1], rgb[2]); mb.mat.push(mat); mb.ao.push(aoTop);
         }
         for (let i = 0; i < segs; i++) {
           const b = base + i * 2;
@@ -15834,6 +15899,17 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             mb.norm.push(0, 1, 0); mb.col.push(rgb[0], rgb[1], rgb[2]); mb.mat.push(mat); mb.ao.push(aoTop);
           }
           for (let i = 0; i < segs; i++) mb.idx.push(cIdx, cIdx + 2 + i, cIdx + 1 + i);
+          mb.vCount += segs + 2;
+        }
+        if (capBot && rBot > 0.002) {
+          const cIdx = mb.vCount;
+          mb.pos.push(cx, cy - hh, cz); mb.norm.push(0, -1, 0); mb.col.push(rgb[0], rgb[1], rgb[2]); mb.mat.push(mat); mb.ao.push(aoBot);
+          for (let i = 0; i <= segs; i++) {
+            const a = (i / segs) * Math.PI * 2;
+            mb.pos.push(cx + Math.cos(a) * rBot, cy - hh, cz + Math.sin(a) * rBot);
+            mb.norm.push(0, -1, 0); mb.col.push(rgb[0], rgb[1], rgb[2]); mb.mat.push(mat); mb.ao.push(aoBot);
+          }
+          for (let i = 0; i < segs; i++) mb.idx.push(cIdx, cIdx + 1 + i, cIdx + 2 + i);
           mb.vCount += segs + 2;
         }
       }
@@ -15867,142 +15943,156 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       }
 
       // =======================================================================
-      // BỘ NHỚ ĐỆM HÌNH HỌC TĨNH DÙNG CHUNG (BAO GỒM CẢ RÈM GPU & AVATAR CHÂN THỰC)
+      // DỰNG HÌNH HỌC KIẾN TRÚC RẠP MULTIPLEX & BỘ MẪU NHÂN VẬT GIẢI PHẪU CHÂN THỰC
       // =======================================================================
       let sharedCache = null;
       function getSharedCinemaCache() {
         if (sharedCache) return sharedCache;
         const mbBase = createMB(), mbL = createMB(), mbR = createMB(), mbRear = createMB(), mbCeil = createMB();
 
-        addArchBox(mbBase, 0, -0.14, -0.4, 9.4, 0.14, 11.2, [0.05, 0.05, 0.07], 0, 0.3, 0.6, 0.02);
-        addArchBox(mbBase, -9.22, 0.20, -0.4, 0.14, 0.34, 11.1, [0.10, 0.08, 0.11], 0, 0.35, 0.85, 0.06);
-        addArchBox(mbBase,  9.22, 0.20, -0.4, 0.14, 0.34, 11.1, [0.10, 0.08, 0.11], 0, 0.35, 0.85, 0.06);
+        // 1. NỀN SÀN & SÂN KHẤU ĐEN MỜ TRƯỚC MÀN CHIẾU (Không viền vàng sân khấu kịch cũ)
+        addArchBox(mbBase, 0, -0.14, -0.8, 9.2, 0.14, 10.8, [0.018, 0.017, 0.022], 0, 0.25, 0.55, 0.02);
+        // Sàn đen mờ mịn sát chân màn chiếu có độ phản xạ grazing rất nhẹ (mat = 5)
+        addArchBox(mbBase, 0, 0.14, -9.25, 8.65, 0.14, 1.45, [0.016, 0.015, 0.020], 5, 0.22, 0.85, 0.03);
 
-        // Sàn sân khấu sơn mài đen bóng (mat = 5) phản chiếu màn chiếu theo thời gian thực
-        addArchBox(mbBase, 0, 0.24, -9.55, 8.95, 0.24, 1.65, [0.035, 0.032, 0.045], 5, 0.25, 0.96, 0.04);
-        addArchBox(mbBase, 0, 0.49, -7.91, 8.90, 0.022, 0.035, [0.88, 0.68, 0.28], 2, 0.7, 1.0, 0.15);
-        addArchBox(mbBase, 0, 0.10, -7.89, 8.60, 0.018, 0.02, [1.0, 0.76, 0.32], 3, 1.0, 1.0, 0.0);
+        // Vách tiêu âm đen tuyền bao quanh màn chiếu & hốc giấu rèm hai bên (Masking Proscenium)
+        addArchBox(mbBase, 0, 4.15, -11.05, 8.95, 4.25, 0.16, [0.012, 0.012, 0.015], 0, 0.15, 0.40, 0.02);
+        addArchBox(mbBase, 0, 0.72, -10.18, 6.72, 0.42, 0.28, [0.010, 0.010, 0.013], 1, 0.15, 0.35, 0.04);
+        addArchBox(mbBase, 0, 7.18, -10.18, 6.72, 0.34, 0.28, [0.010, 0.010, 0.013], 1, 0.15, 0.35, 0.04);
+        // Hai má tường đen che gọn rèm khi mở 100% (giống hệt rạp Lotte/CGV thực tế)
+        addArchBox(mbBase, -7.52, 4.05, -9.95, 0.98, 3.95, 0.36, [0.014, 0.014, 0.018], 0, 0.18, 0.48, 0.03);
+        addArchBox(mbBase,  7.52, 4.05, -9.95, 0.98, 3.95, 0.36, [0.014, 0.014, 0.018], 0, 0.18, 0.48, 0.03);
 
-        addArchBox(mbBase, 0, 4.2, -11.35, 9.35, 4.3, 0.16, [0.03, 0.028, 0.04], 0, 0.2, 0.5, 0.02);
-        addArchBox(mbBase, 0, 0.88, -10.35, 6.75, 0.24, 0.35, [0.02, 0.02, 0.025], 1, 0.2, 0.45, 0.05);
-        addArchBox(mbBase, 0, 7.05, -10.35, 6.75, 0.24, 0.35, [0.02, 0.02, 0.025], 1, 0.2, 0.45, 0.05);
+        // HỐC LỐI THOÁT HIỂM BÊN PHẢI MÀN CHIẾU + BIỂN ĐÈN "EXIT" XANH LÁ PHÁT SÁNG (Đúng 100% ảnh thực tế!)
+        addArchBox(mbBase, 7.38, 1.52, -9.52, 0.44, 1.32, 0.18, [0.008, 0.009, 0.011], 0, 0.10, 0.28, 0.02);
+        addArchBox(mbBase, 6.96, 1.52, -9.45, 0.06, 1.32, 0.24, [0.022, 0.024, 0.028], 0, 0.20, 0.55, 0.04);
+        // Hộp đèn EXIT xanh ngọc lục bảo (mat = 3.0 tự phát sáng trong bóng tối)
+        addArchBox(mbBase, 7.36, 3.04, -9.48, 0.21, 0.105, 0.035, [0.04, 0.16, 0.08], 0, 0.3, 0.6, 0.04);
+        addArchBox(mbBase, 7.36, 3.04, -9.44, 0.175, 0.078, 0.015, [0.06, 0.98, 0.44], 3.0, 1.0, 1.0, 0.02);
+        addArchBox(mbBase, 7.36, 3.04, -9.422, 0.09, 0.042, 0.008, [0.82, 1.0, 0.90], 3.0, 1.0, 1.0, 0.0);
 
-        [-1, 1].forEach((side) => {
-          for (let p = 0; p < 6; p++) {
-            addCylinder(mbBase, side * (6.68 + p * 0.42), 4.05, -10.08 + (p % 2) * 0.12, 0.24, 0.26, 7.2, 10, [0.38, 0.05, 0.10], 4, 0.30, 0.90, false);
-          }
-          addCylinder(mbBase, side * 6.54, 4.0, -9.98, 0.055, 0.055, 7.1, 12, [0.88, 0.68, 0.28], 2, 0.5, 1.0, true);
-        });
-
-        for (let sx = -4.8; sx <= 4.81; sx += 2.4) {
-          addArchBox(mbBase, sx, 0.70, -10.05, 0.48, 0.21, 0.26, [0.04, 0.04, 0.05], 0, 0.18, 0.82, 0.12);
-          addRoundedCushion(mbBase, sx - 0.21, 0.70, -9.79, 0.13, 0.13, 0.03, 0.6, 8, 5, [0.09, 0.09, 0.11], 2, 0.4, 0.9);
-          addRoundedCushion(mbBase, sx + 0.21, 0.70, -9.79, 0.13, 0.13, 0.03, 0.6, 8, 5, [0.09, 0.09, 0.11], 2, 0.4, 0.9);
-        }
-
+        // 2. BẬC THANG STADIUM 6 HÀNG + THẢM ĐỎ HOA VĂN LOTTE + LED BẬC XANH LÁ + CHẤM LED ĐỎ + ĐÈN RỌI TRÒN
         ROWS_3D.forEach((row, rIdx) => {
-          const z0 = -5.15 + rIdx * 2.25;
-          const yTop = 0.31 + rIdx * 0.56;
-          const yPrev = rIdx === 0 ? 0.0 : (0.31 + (rIdx - 1) * 0.56);
+          const z0 = -5.12 + rIdx * 1.94;
+          const yTop = 0.25 + rIdx * 0.49;
+          const yPrev = rIdx === 0 ? 0.0 : (0.25 + (rIdx - 1) * 0.49);
           const hHalf = (yTop - yPrev) * 0.5;
-          addArchBox(mbBase, 0, yPrev + hHalf, z0 + 1.125, 8.95, hHalf, 1.125, [0.07, 0.06, 0.09], 0, 0.22, 0.78, 0.03);
-          addArchBox(mbBase, -5.0, yTop + 0.012, z0 + 1.12, 3.82, 0.014, 1.09, [0.13, 0.07, 0.10], 7, 0.55, 0.92, 0.02);
-          addArchBox(mbBase,  5.0, yTop + 0.012, z0 + 1.12, 3.82, 0.014, 1.09, [0.13, 0.07, 0.10], 7, 0.55, 0.92, 0.02);
 
-          const stepMidY = (yPrev + yTop) * 0.5;
-          addArchBox(mbBase, 0, (yPrev + stepMidY) * 0.5, z0 - 0.18, 1.12, (stepMidY - yPrev) * 0.5, 0.22, [0.11, 0.07, 0.10], 7, 0.35, 0.85, 0.05);
-          addArchBox(mbBase, 0, yTop + 0.015, z0 + 1.12, 1.10, 0.015, 1.10, [0.30, 0.06, 0.10], 7, 0.55, 0.95, 0.02);
+          // Bệ sàn bê tông đen mờ dưới các dãy ghế
+          addArchBox(mbBase, 0, yPrev + hHalf, z0 + 0.97, 8.65, hHalf, 0.97, [0.022, 0.020, 0.026], 0, 0.20, 0.68, 0.02);
 
-          addArchBox(mbBase, -0.92, yTop + 0.034, z0 + 0.04, 0.11, 0.014, 0.022, [1.0, 0.82, 0.30], 3, 1, 1, 0.05);
-          addArchBox(mbBase,  0.92, yTop + 0.034, z0 + 0.04, 0.11, 0.014, 0.022, [1.0, 0.82, 0.30], 3, 1, 1, 0.05);
-          addArchBox(mbBase, -0.92, stepMidY + 0.022, z0 - 0.36, 0.09, 0.012, 0.020, [1.0, 0.76, 0.24], 3, 1, 1, 0.05);
-          addArchBox(mbBase,  0.92, stepMidY + 0.022, z0 - 0.36, 0.09, 0.012, 0.020, [1.0, 0.76, 0.24], 3, 1, 1, 0.05);
+          // Thảm nhung tối dưới chân ghế 3 khoang (Trái, Trung tâm, Phải)
+          addArchBox(mbBase, -4.95, yTop + 0.008, z0 + 0.97, 1.28, 0.008, 0.95, [0.045, 0.028, 0.035], 7.0, 0.40, 0.85, 0.01);
+          addArchBox(mbBase,  0.00, yTop + 0.008, z0 + 0.97, 2.35, 0.008, 0.95, [0.045, 0.028, 0.035], 7.0, 0.40, 0.85, 0.01);
+          addArchBox(mbBase,  4.95, yTop + 0.008, z0 + 0.97, 1.28, 0.008, 0.95, [0.045, 0.028, 0.035], 7.0, 0.40, 0.85, 0.01);
 
-          [-1.12, 1.12].forEach((bx) => {
-            addCylinder(mbBase, bx, yTop + 0.24, z0 + 0.14, 0.022, 0.022, 0.46, 8, [0.14, 0.12, 0.16], 0, 0.3, 0.9, true);
-            addCylinder(mbBase, bx, yTop + 0.48, z0 + 0.14, 0.026, 0.026, 0.03, 8, [0.86, 0.68, 0.28], 2, 0.8, 1.0, true);
+          // Hai lối đi bậc thang trải thảm đỏ rượu vang hoa văn Lotte (x = -3.02 và x = +3.02)
+          AISLE_X.forEach((ax) => {
+            const stepMidY = (yPrev + yTop) * 0.5;
+            // Bậc trung gian
+            addArchBox(mbBase, ax, (yPrev + stepMidY) * 0.5, z0 - 0.22, 0.66, Math.max(0.04, (stepMidY - yPrev) * 0.5), 0.24, [0.22, 0.038, 0.055], 7.0, 0.35, 0.88, 0.03);
+            // Mặt thảm đỏ bậc chính
+            addArchBox(mbBase, ax, yTop + 0.011, z0 + 0.97, 0.66, 0.011, 0.96, [0.28, 0.042, 0.062], 7.0, 0.50, 0.95, 0.02);
+
+            // Thanh nẹp mũi bậc nhôm đen mờ
+            addArchBox(mbBase, ax, yTop + 0.018, z0 + 0.02, 0.66, 0.009, 0.022, [0.05, 0.05, 0.06], 0, 0.4, 0.8, 0.02);
+
+            // Dải chấm micro-LED ĐỎ dọc mũi bậc thang (• • • • • • • — đúng chi tiết ảnh thực tế!)
+            for (let d = -3; d <= 3; d++) {
+              addArchBox(mbBase, ax + d * 0.082, yTop + 0.026, z0 + 0.022, 0.011, 0.005, 0.009, [0.98, 0.10, 0.08], 3.0, 1.0, 1.0, 0.0);
+            }
+            if (rIdx > 0) {
+              for (let d = -3; d <= 3; d++) {
+                addArchBox(mbBase, ax + d * 0.082, stepMidY + 0.016, z0 - 0.44, 0.009, 0.004, 0.008, [0.92, 0.09, 0.07], 3.0, 1.0, 1.0, 0.0);
+              }
+            }
+
+            // Đèn bảng số hàng ghế XANH LÁ NEON phát sáng ở hai mép bậc thang (giống hệt dải xanh lá trong cả 4 ảnh!)
+            const innerEdgeX = ax + (ax < 0 ? 0.56 : -0.56);
+            const outerEdgeX = ax + (ax < 0 ? -0.56 : 0.56);
+            addArchBox(mbBase, outerEdgeX, yTop + 0.028, z0 + 0.05, 0.065, 0.008, 0.026, [0.04, 1.0, 0.36], 3.0, 1.0, 1.0, 0.0);
+            addArchBox(mbBase, innerEdgeX, yTop + 0.028, z0 + 0.05, 0.052, 0.007, 0.022, [0.04, 0.96, 0.34], 3.0, 1.0, 1.0, 0.0);
+
+            // Đèn rọi sàn tròn trắng ấm (Recessed Floor Puck Spotlight) chiếu sáng mặt thảm đỏ ở hàng B, D, F
+            if (rIdx % 2 === 1) {
+              const puckX = ax + (ax < 0 ? 0.16 : -0.16);
+              const puckZ = z0 + 0.52;
+              addCylinder(mbBase, puckX, yTop + 0.023, puckZ, 0.068, 0.068, 0.005, 12, [0.18, 0.18, 0.22], 2.0, 0.7, 1.0, true);
+              addCylinder(mbBase, puckX, yTop + 0.026, puckZ, 0.048, 0.048, 0.005, 12, [1.0, 0.97, 0.90], 3.0, 1.0, 1.0, true);
+            }
           });
         });
 
-        addArchBox(mbBase, 0, 2.2, 9.15, 9.0, 2.2, 0.80, [0.09, 0.07, 0.11], 7, 0.3, 0.85, 0.03);
-        addArchBox(mbBase, 0, 6.65, 9.68, 1.18, 0.54, 0.30, [0.08, 0.07, 0.10], 0, 0.4, 0.9, 0.10);
-        addArchBox(mbBase, 0, 6.65, 9.38, 0.96, 0.38, 0.04, [0.85, 0.66, 0.26], 2, 0.7, 1.0, 0.15);
-        addArchBox(mbBase, 0, 6.65, 9.34, 0.80, 0.26, 0.03, [0.90, 0.96, 1.0], 3, 1.0, 1.0, 0.05);
+        // Tường hậu & ô kính máy chiếu phía cuối phòng
+        addArchBox(mbBase, 0, 2.1, 7.65, 8.8, 2.1, 0.65, [0.024, 0.022, 0.030], 7.0, 0.25, 0.75, 0.02);
+        addArchBox(mbRear, 0, 4.4, 8.28, 9.0, 4.4, 0.16, [0.022, 0.020, 0.026], 6.0, 0.22, 0.72, 0.02);
+        addArchBox(mbRear, 0, 6.35, 8.08, 0.72, 0.34, 0.16, [0.012, 0.012, 0.016], 0, 0.3, 0.8, 0.05);
+        addArchBox(mbRear, 0, 6.35, 7.91, 0.26, 0.16, 0.02, [0.85, 0.93, 1.0], 3.0, 1.0, 1.0, 0.02);
 
+        // 3. TƯỜNG TIÊU ÂM ĐEN MỜ HAI BÊN + DÀN LOA VÒM DOLBY SURROUND NGHIÊNG GÓC THỰC TẾ
         const buildWall = (mb, side) => {
-          addArchBox(mb, side * 9.15, 4.35, -0.4, 0.12, 4.35, 10.4, [0.26, 0.06, 0.10], 6, 0.22, 0.88, 0.03);
-          addArchBox(mb, side * 8.99, 1.45, -0.4, 0.04, 0.035, 10.2, [0.82, 0.64, 0.26], 2, 0.6, 1.0, 0.15);
-          [-8.3, -3.3, 1.7, 6.7].forEach((pz) => {
-            addArchBox(mb, side * 8.96, 4.35, pz, 0.16, 4.35, 0.28, [0.08, 0.07, 0.10], 0, 0.25, 0.90, 0.10);
-            addCylinder(mb, side * 8.80, 4.35, pz, 0.032, 0.032, 7.9, 10, [0.88, 0.68, 0.28], 2, 0.4, 1.0, false);
+          // Vách nỉ tiêu âm dọc màu than đen mờ (mat = 6)
+          addArchBox(mb, side * 8.68, 4.25, -1.2, 0.12, 4.25, 9.8, [0.026, 0.025, 0.032], 6.0, 0.20, 0.78, 0.02);
+          // Các gờ cột tiêu âm âm học đen sẫm (không dùng ống đồng vàng chói)
+          [-7.6, -3.4, 0.8, 5.0].forEach((pz) => {
+            addArchBox(mb, side * 8.52, 4.20, pz, 0.12, 4.15, 0.26, [0.018, 0.018, 0.023], 0, 0.22, 0.78, 0.06);
           });
-          [-5.8, -0.8, 4.2].forEach((sz) => {
-            const sx = side * 8.84;
-            addArchBox(mb, side * 8.96, 4.85, sz, 0.04, 0.42, 0.16, [0.12, 0.10, 0.14], 0, 0.4, 0.9, 0.1);
-            addCylinder(mb, sx, 4.85, sz, 0.075, 0.075, 0.56, 12, [1.0, 0.88, 0.60], 3, 1.0, 1.0, true);
-            addCylinder(mb, sx, 5.14, sz, 0.088, 0.088, 0.045, 12, [0.90, 0.70, 0.28], 2, 0.8, 1.0, true);
-            addCylinder(mb, sx, 4.85, sz, 0.086, 0.086, 0.030, 12, [0.90, 0.70, 0.28], 2, 0.8, 1.0, true);
-            addCylinder(mb, sx, 4.56, sz, 0.088, 0.088, 0.045, 12, [0.90, 0.70, 0.28], 2, 0.8, 1.0, true);
-            addRoundedCushion(mb, side * 8.80, 6.55, sz + 2.1, 0.15, 0.28, 0.22, 0.45, 8, 5, [0.06, 0.06, 0.08], 0, 0.35, 0.85, 0.18 * side);
+          // Hệ thống loa vòm Cinema Surround treo cao có giá đỡ kim loại sáng nhẹ (giống ảnh thực tế 1, 2, 4!)
+          [-6.0, -1.6, 2.8].forEach((sz) => {
+            const sx = side * 8.38;
+            // Giá đỡ treo loa ánh bạc mờ bắt sáng màn chiếu nhẹ nhàng
+            addArchBox(mb, side * 8.50, 5.42, sz, 0.06, 0.09, 0.08, [0.42, 0.44, 0.48], 2.0, 0.5, 0.95, 0.1);
+            // Thùng loa vòm đen mờ nghiêng xuống khán giả
+            addRoundedCushion(mb, sx, 5.32, sz, 0.13, 0.25, 0.19, 0.42, 8, 5, [0.028, 0.028, 0.035], 0, 0.30, 0.85, 0, 0.22 * side);
+            // Đèn tường kiến trúc (CHỈ SÁNG KHI BẬT ĐÈN PHÒNG uLights > 0, tắt 100% khi xem phim — mat = 3.2!)
+            addArchBox(mb, side * 8.52, 3.85, sz + 2.1, 0.035, 0.22, 0.09, [0.06, 0.06, 0.08], 0, 0.3, 0.8, 0.08);
+            addCylinder(mb, side * 8.44, 3.85, sz + 2.1, 0.042, 0.042, 0.34, 10, [1.0, 0.84, 0.52], 3.2, 1.0, 1.0, true);
           });
-          if (side === 1) {
-            addArchBox(mb, 8.94, 1.22, -7.8, 0.07, 1.05, 0.56, [0.05, 0.05, 0.07], 0, 0.25, 0.8, 0.04);
-            addArchBox(mb, 8.87, 2.48, -7.8, 0.04, 0.13, 0.32, [0.16, 0.95, 0.52], 3, 1, 1, 0.05);
-          }
         };
         buildWall(mbL, -1); buildWall(mbR, 1);
 
-        addArchBox(mbRear, 0, 4.6, 9.98, 9.3, 4.6, 0.16, [0.10, 0.07, 0.10], 6, 0.25, 0.85, 0.03);
-        addArchBox(mbCeil, 0, 8.70, -0.4, 9.4, 0.14, 11.0, [0.04, 0.04, 0.06], 0, 0.35, 0.6, 0.02);
-        for (let cz = -8.2; cz <= 8.3; cz += 4.1) {
-          addArchBox(mbCeil, 0, 8.44, cz, 9.1, 0.14, 0.26, [0.09, 0.08, 0.12], 0, 0.45, 0.85, 0.08);
-          addArchBox(mbCeil, 0, 8.29, cz, 8.9, 0.018, 0.04, [0.85, 0.66, 0.26], 2, 0.8, 1.0, 0.15);
-        }
-        [-7.8, 7.8].forEach((cx) => {
-          addArchBox(mbCeil, cx, 8.38, -0.4, 0.18, 0.12, 10.2, [0.09, 0.08, 0.12], 0, 0.45, 0.85, 0.06);
+        // 4. TRẦN TIÊU ÂM DỐC ĐEN MỜ + LƯỚI ĐÈN ÂM TRẦN TRÒN (DOWNLIGHT CANS) & MIỆNG GIÓ ĐIỀU HÒA TRÒN (Giống hệt ảnh 1, 2, 4!)
+        // Trần nghiêng nhẹ từ y=7.55 (sát màn chiếu) lên y=8.55 (cuối rạp) bắt ánh sáng hắt từ màn hình
+        addRoundedCushion(mbCeil, 0, 8.08, -1.2, 8.9, 0.12, 10.2, 0.22, 8, 4, [0.025, 0.024, 0.030], 0, 0.45, 0.88, -0.055);
+        const ceilZRows = [-7.4, -4.6, -1.8, 1.0, 3.8];
+        const ceilXCols = [-4.8, -1.65, 1.65, 4.8];
+        ceilZRows.forEach((cz, rzIdx) => {
+          const cy = 7.94 - (-1.2 - cz) * 0.055;
+          ceilXCols.forEach((cx, cxIdx) => {
+            // Vành kim loại xám đen âm trần bắt ánh sáng hắt từ màn hình phim cực chân thực!
+            addCylinder(mbCeil, cx, cy, cz, 0.165, 0.165, 0.024, 12, [0.14, 0.14, 0.17], 2.0, 0.55, 0.92, false, true);
+            // Hốc tối bên trong đèn âm trần
+            addCylinder(mbCeil, cx, cy + 0.004, cz, 0.115, 0.115, 0.028, 12, [0.012, 0.012, 0.016], 0, 0.15, 0.35, false, true);
+            // Lõi bóng đèn âm trần (mat = 3.2: tắt hẳn khi uLights = 0, sáng ấm khi bật đèn rạp!)
+            addCylinder(mbCeil, cx, cy + 0.008, cz, 0.065, 0.065, 0.030, 10, [1.0, 0.88, 0.64], 3.2, 1.0, 1.0, false, true);
+          });
+          // Miệng khuếch tán điều hòa tròn lớn ở trục giữa trần (giống chấm tròn to giữa trần trong ảnh 1 & 2!)
+          if (rzIdx === 1 || rzIdx === 3) {
+            addCylinder(mbCeil, 0.0, cy, cz, 0.28, 0.28, 0.026, 14, [0.13, 0.13, 0.16], 2.0, 0.55, 0.90, false, true);
+            addCylinder(mbCeil, 0.0, cy + 0.005, cz, 0.19, 0.19, 0.030, 14, [0.02, 0.02, 0.025], 0, 0.2, 0.4, false, true);
+            addCylinder(mbCeil, 0.0, cy - 0.002, cz, 0.09, 0.09, 0.024, 12, [0.11, 0.11, 0.14], 2.0, 0.5, 0.85, false, true);
+          }
         });
 
-        // Pre-bake RÈM NHUNG TĨNH TRÊN GPU (Vertex Shader tự biến hình đóng/mở với 0.000ms CPU!)
+        // 5. RÈM NHUNG TỰ ĐỘNG TRÊN GPU (Khi mở 100% tự thu gọn hoàn toàn vào sau hốc tường đen để khung màn chiếu sạch như rạp thật!)
         const mbCurtain = createMB();
-        const VSEGS = 28;
-        for (let i = 0; i < VSEGS; i++) {
-          const u0 = i / VSEGS, u1 = (i + 1) / VSEGS;
-          const x0 = -6.66 + u0 * 13.32, x1 = -6.66 + u1 * 13.32;
-          const z0 = -9.80 - Math.cos((u0 - 0.5) * Math.PI) * 0.68 + Math.sin(i * 1.8) * 0.04;
-          const z1 = -9.80 - Math.cos((u1 - 0.5) * Math.PI) * 0.68 + Math.sin((i + 1) * 1.8) * 0.04;
-          const yb0 = 6.62 - Math.abs(Math.sin(u0 * Math.PI * 5.0)) * 0.20;
-          const yb1 = 6.62 - Math.abs(Math.sin(u1 * Math.PI * 5.0)) * 0.20;
-          const b = mbCurtain.vCount;
-          mbCurtain.pos.push(x0, yb0, z0, x1, yb1, z1, x1, 7.10, z1, x0, 7.10, z0);
-          for (let k = 0; k < 4; k++) { mbCurtain.norm.push(0, 0.08, 1); mbCurtain.col.push(0.46, 0.05, 0.11); mbCurtain.mat.push(4.0); mbCurtain.ao.push(k < 2 ? 0.65 : 0.95); }
-          mbCurtain.idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
-          mbCurtain.vCount += 4;
-
-          const bf = mbCurtain.vCount;
-          mbCurtain.pos.push(x0, yb0 - 0.042, z0 + 0.01, x1, yb1 - 0.042, z1 + 0.01, x1, yb1, z1 + 0.01, x0, yb0, z0 + 0.01);
-          for (let k = 0; k < 4; k++) { mbCurtain.norm.push(0, 0.1, 1); mbCurtain.col.push(0.92, 0.72, 0.26); mbCurtain.mat.push(2.0); mbCurtain.ao.push(0.95); }
-          mbCurtain.idx.push(bf, bf + 1, bf + 2, bf, bf + 2, bf + 3);
-          mbCurtain.vCount += 4;
-        }
         const CSEGS = 24, CROWS = 5;
         [-1, 1].forEach((side) => {
           const matCloth = side < 0 ? 4.1 : 4.2;
-          const matGold = side < 0 ? 2.1 : 2.2;
           const stride = CSEGS + 1;
           for (let face = 0; face < 2; face++) {
             const base = mbCurtain.vCount, zOff = face === 0 ? 0.0 : -0.025, nSign = face === 0 ? 1.0 : -1.0;
             for (let r = 0; r <= CROWS; r++) {
               const v = r / CROWS;
-              const y = 1.06 + v * 5.76;
+              const y = 1.12 + v * 5.76;
               for (let i = 0; i <= CSEGS; i++) {
                 const s = i / CSEGS;
                 const wave = Math.sin(s * Math.PI * 9.0);
-                // aPos.x lưu trực tiếp tọa độ nếp gấp s [0..1], aPos.z lưu độ lệch mặt trước/sau!
                 mbCurtain.pos.push(s, y, zOff);
                 mbCurtain.norm.push(0, 0.03, nSign);
-                mbCurtain.col.push(0.46, 0.05, 0.11);
+                mbCurtain.col.push(0.38, 0.035, 0.065);
                 mbCurtain.mat.push(matCloth);
-                mbCurtain.ao.push(0.32 + 0.68 * (wave * 0.5 + 0.5));
+                mbCurtain.ao.push(0.28 + 0.72 * (wave * 0.5 + 0.5));
               }
             }
             for (let r = 0; r < CROWS; r++) {
@@ -16014,113 +16104,237 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             }
             mbCurtain.vCount += (CROWS + 1) * stride;
           }
-          for (let i = 0; i < CSEGS; i++) {
-            const s0 = i / CSEGS, s1 = (i + 1) / CSEGS;
-            const b = mbCurtain.vCount;
-            mbCurtain.pos.push(s0, 1.06, 0.01, s1, 1.06, 0.01, s1, 1.115, 0.01, s0, 1.115, 0.01);
-            for (let k = 0; k < 4; k++) { mbCurtain.norm.push(0, 0.1, 1); mbCurtain.col.push(0.92, 0.72, 0.26); mbCurtain.mat.push(matGold); mbCurtain.ao.push(0.95); }
-            mbCurtain.idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
-            mbCurtain.vCount += 4;
-          }
         });
 
-        // Pre-bake 48 Ghế Da Công Thái Học
+        // 6. GHẾ DA CÔNG THÁI HỌC 2 TÔNG MÀU LOTTE/CGV (Ốp lưng da/nhựa ĐEN MỜ + Tựa đầu & Đệm ĐỎ RƯỢU VANG bắt sáng viền!)
         const mbChairs = createMB();
         const seatSlices = {};
         let rowFIndexStart = 0;
 
         for (const s of seats3D) {
           if (s.row === "F" && s.col === 1) rowFIndexStart = mbChairs.idx.length;
-          let mainCol, bolsterCol, headCol, trimMat = 1;
+
+          // Tông màu thật như trong 4 bức ảnh: Thân ốp sau màu đen tuyền, đệm lòng & gối tựa đầu trên cùng màu đỏ thẫm sang trọng!
+          const shellBlack = [0.028, 0.026, 0.033];
+          let cushionRed, headCrimson;
           if (s.isCouple) {
-            mainCol = [0.48, 0.07, 0.19]; bolsterCol = [0.36, 0.05, 0.14]; headCol = [0.62, 0.12, 0.26]; trimMat = 2;
+            cushionRed  = [0.44, 0.045, 0.085];
+            headCrimson = [0.58, 0.055, 0.105];
           } else if (s.isVIP) {
-            mainCol = [0.42, 0.06, 0.12]; bolsterCol = [0.30, 0.04, 0.09]; headCol = [0.52, 0.09, 0.16]; trimMat = 2;
+            cushionRed  = [0.38, 0.040, 0.062];
+            headCrimson = [0.54, 0.050, 0.078];
           } else {
-            mainCol = [0.18, 0.16, 0.23]; bolsterCol = [0.13, 0.11, 0.17]; headCol = [0.23, 0.20, 0.29]; trimMat = 1;
+            cushionRed  = [0.28, 0.038, 0.055];
+            headCrimson = [0.46, 0.045, 0.070];
           }
 
-          const hw = s.isCouple ? 0.52 : 0.43;
+          const hw = s.isCouple ? 0.51 : 0.45;
+          // Chân đế thép đen mờ gắn sàn
           if (!s.isCouple || s.pairSide === "L") {
-            const px = s.isCouple ? s.x + 0.52 : s.x;
-            addCylinder(mbChairs, px, s.y + 0.018, s.z + 0.04, s.isCouple ? 0.62 : 0.34, s.isCouple ? 0.62 : 0.34, 0.012, 10, [0.02, 0.015, 0.025], 0, 0.08, 0.12, true);
-            addCylinder(mbChairs, px, s.y + 0.13, s.z + 0.05, 0.09, 0.13, 0.22, 8, [0.06, 0.06, 0.08], 0, 0.15, 0.55, false);
+            const px = s.isCouple ? s.x + 0.54 : s.x;
+            addCylinder(mbChairs, px, s.y + 0.12, s.z + 0.06, 0.075, 0.11, 0.22, 8, [0.025, 0.025, 0.032], 0, 0.15, 0.50, false);
           }
 
+          // Ốp lưng nhựa/da đen mờ phía sau ghế (không bị đổi màu vàng khi highlight ghế để giữ chuẩn chất liệu lưng ghế đen!)
+          const backH = s.isCouple ? 0.36 : 0.34;
+          const backY = s.y + 0.34 + backH;
+          addRoundedCushion(mbChairs, s.x, backY - 0.01, s.z + 0.335, hw * 0.92, backH * 1.02, 0.058, 0.52, 8, 5, shellBlack, 1.0, 0.16, 0.88, -0.17);
+
+          // Vùng đệm ghế & gối tựa đầu ĐỎ RƯỢU VANG (lưu slice để O(1) đổi màu khi chọn vé trên sơ đồ)
           const cushionFloatStart = mbChairs.col.length;
-          addRoundedCushion(mbChairs, s.x, s.y + 0.27, s.z + 0.01, hw, 0.105, 0.38, 0.52, 8, 5, mainCol, 1, 0.18, 0.95, 0.06);
-          addRoundedCushion(mbChairs, s.x, s.y + 0.29, s.z - 0.31, hw * 0.95, 0.075, 0.10, 0.62, 8, 4, bolsterCol, 1, 0.30, 0.98, 0.0);
-
-          const backH = s.isCouple ? 0.37 : s.isVIP ? 0.35 : 0.32;
-          const backY = s.y + 0.35 + backH;
-          addRoundedCushion(mbChairs, s.x, backY, s.z + 0.29, hw * 0.74, backH, 0.095, 0.56, 8, 5, mainCol, 1, 0.22, 0.96, -0.19);
+          // Đệm ngồi êm ái
+          addRoundedCushion(mbChairs, s.x, s.y + 0.26, s.z + 0.01, hw * 0.92, 0.095, 0.36, 0.54, 8, 5, cushionRed, 1.0, 0.18, 0.92, 0.06);
+          // Đệm lưng múi giữa
+          addRoundedCushion(mbChairs, s.x, backY, s.z + 0.275, hw * 0.76, backH * 0.92, 0.078, 0.56, 8, 5, cushionRed, 1.0, 0.22, 0.95, -0.17);
+          // Hai cánh ôm vai đỏ sẫm bên sườn ghế (lấp ánh sáng đỏ bên hông giống hệt ảnh 1, 2, 4!)
           if (!s.isCouple || s.pairSide === "L") {
-            addRoundedCushion(mbChairs, s.x - hw * 0.80, backY, s.z + 0.26, 0.10, backH * 0.94, 0.115, 0.60, 6, 4, bolsterCol, 1, 0.24, 0.95, -0.19);
+            addRoundedCushion(mbChairs, s.x - hw * 0.82, backY + 0.02, s.z + 0.24, 0.082, backH * 0.88, 0.105, 0.58, 6, 4, headCrimson, 1.0, 0.24, 0.95, -0.17);
           }
           if (!s.isCouple || s.pairSide === "R") {
-            addRoundedCushion(mbChairs, s.x + hw * 0.80, backY, s.z + 0.26, 0.10, backH * 0.94, 0.115, 0.60, 6, 4, bolsterCol, 1, 0.24, 0.95, -0.19);
+            addRoundedCushion(mbChairs, s.x + hw * 0.82, backY + 0.02, s.z + 0.24, 0.082, backH * 0.88, 0.105, 0.58, 6, 4, headCrimson, 1.0, 0.24, 0.95, -0.17);
           }
-          const headY = s.y + 0.36 + backH * 2.0 + 0.075;
-          addRoundedCushion(mbChairs, s.x, headY, s.z + 0.38, hw * 0.76, 0.095, 0.088, 0.58, 8, 5, headCol, 1, 0.45, 1.0, -0.10);
+          // Gối tựa đầu bo tròn trên đỉnh ghế màu ĐỎ RƯỢU VANG bắt viền ánh sáng màn chiếu (Iconic Lotte/CGV silhouette!)
+          const headY = s.y + 0.35 + backH * 2.0 + 0.055;
+          addRoundedCushion(mbChairs, s.x, headY, s.z + 0.355, hw * 0.88, 0.092, 0.086, 0.56, 10, 5, headCrimson, 1.0, 0.42, 1.0, -0.11);
           const cushionFloatEnd = mbChairs.col.length;
-
           seatSlices[s.id] = { start: cushionFloatStart, len: cushionFloatEnd - cushionFloatStart };
 
-          if (s.isVIP || s.isCouple) {
-            addArchBox(mbChairs, s.x, headY - 0.085, s.z + 0.32, hw * 0.52, 0.012, 0.06, [0.90, 0.70, 0.28], trimMat, 0.8, 1.0, 0.2);
-          }
-          if (s.isCouple && s.pairSide === "L") {
-            addArchBox(mbChairs, s.x + 0.52, s.y + 0.62, s.z + 0.47, 1.08, 0.54, 0.035, [0.22, 0.04, 0.09], 1, 0.25, 0.88, 0.15);
-            addArchBox(mbChairs, s.x + 0.52, s.y + 1.17, s.z + 0.47, 1.08, 0.018, 0.042, [0.90, 0.70, 0.28], 2, 0.8, 1.0, 0.2);
-          }
+          // Ốp đen bọc nửa sau dưới của gối tựa đầu để chỉ lộ viền đỏ phía trên như ảnh thật!
+          addRoundedCushion(mbChairs, s.x, headY - 0.035, s.z + 0.395, hw * 0.89, 0.068, 0.048, 0.52, 8, 4, shellBlack, 1.0, 0.20, 0.82, -0.11);
 
-          const armCol = [0.09, 0.08, 0.11];
+          // Tay vịn bọc da đen + Hộc để ly nước khép liền giữa các ghế
+          const armCol = [0.042, 0.040, 0.048];
           const buildArm = (ax, withCup) => {
-            addRoundedCushion(mbChairs, ax, s.y + 0.44, s.z + 0.06, 0.058, 0.048, 0.32, 0.50, 6, 4, armCol, 1, 0.35, 0.92, 0);
-            addArchBox(mbChairs, ax, s.y + 0.26, s.z + 0.14, 0.04, 0.14, 0.10, [0.06, 0.06, 0.08], 0, 0.18, 0.7, 0.08);
-            const czCup = s.z - 0.23;
-            addCylinder(mbChairs, ax, s.y + 0.455, czCup, 0.054, 0.050, 0.07, 10, [0.76, 0.62, 0.34], 2, 0.5, 1.0, false);
-            addCylinder(mbChairs, ax, s.y + 0.465, czCup, 0.044, 0.044, 0.01, 10, [0.02, 0.02, 0.03], 0, 0.1, 0.15, true);
+            addRoundedCushion(mbChairs, ax, s.y + 0.43, s.z + 0.06, 0.058, 0.044, 0.31, 0.48, 6, 4, armCol, 1.0, 0.30, 0.90, 0);
+            addArchBox(mbChairs, ax, s.y + 0.25, s.z + 0.14, 0.042, 0.14, 0.10, [0.025, 0.025, 0.032], 0, 0.15, 0.65, 0.06);
+            const czCup = s.z - 0.22;
+            addCylinder(mbChairs, ax, s.y + 0.445, czCup, 0.052, 0.048, 0.065, 10, [0.08, 0.08, 0.10], 2.0, 0.4, 0.92, false);
+            addCylinder(mbChairs, ax, s.y + 0.455, czCup, 0.043, 0.043, 0.01, 10, [0.012, 0.012, 0.016], 0, 0.1, 0.15, true);
             if (withCup) {
-              addCylinder(mbChairs, ax, s.y + 0.53, czCup, 0.041, 0.033, 0.13, 10, [0.82, 0.12, 0.18], 1, 0.4, 0.98, true);
-              addCylinder(mbChairs, ax, s.y + 0.598, czCup, 0.044, 0.044, 0.012, 10, [0.94, 0.94, 0.96], 0, 0.8, 1.0, true);
+              // Ly nước rạp chiếu phim có nắp trắng mờ & ống hút
+              addCylinder(mbChairs, ax, s.y + 0.515, czCup, 0.040, 0.032, 0.125, 10, [0.68, 0.09, 0.14], 1.0, 0.38, 0.96, true);
+              addCylinder(mbChairs, ax, s.y + 0.580, czCup, 0.043, 0.043, 0.012, 10, [0.85, 0.86, 0.88], 0, 0.75, 1.0, true);
+              addCylinder(mbChairs, ax, s.y + 0.615, czCup, 0.004, 0.004, 0.065, 6, [0.88, 0.18, 0.22], 1.0, 0.7, 1.0, true);
             }
           };
-          if (!s.isCouple || s.pairSide === "L") buildArm(s.x - hw - 0.055, false);
-          if (!s.isCouple || s.pairSide === "R") buildArm(s.x + hw + 0.055, true);
+
+          // Tránh vẽ trùng tay vịn giữa 2 ghế liền kề trong cùng một dãy
+          const hasLeftNeighbor = !s.isCouple && (s.col === 2 || s.col === 4 || s.col === 5 || s.col === 6 || s.col === 8);
+          if (!hasLeftNeighbor && (!s.isCouple || s.pairSide === "L")) {
+            buildArm(s.x - 0.54, false);
+          }
+          if (!s.isCouple || s.pairSide === "R") {
+            const rightAx = s.isCouple ? (s.x + 0.56) : (s.x + 0.54);
+            buildArm(rightAx, (s.col % 2 === 0));
+          }
         }
 
-        // Pre-bake KHÁN GIẢ 3D CHÂN THỰC (Thân trên + Vai + Cánh tay tựa ghế + Đầu xoay hướng màn hình + Tóc bắt sáng Rim + Hộp bắp rang!)
-        // aMat = 8.0 (Áo/Vai: đổi màu theo từng khách + nhịp thở GPU), aMat = 8.2 (Đầu/Tóc: xoay về giữa màn chiếu + bắt sáng Rim)
-        const mbAvBody = createMB();
-        // Thân áo & cổ áo hoodie tựa tự nhiên vào lưng ghế
-        addRoundedCushion(mbAvBody,  0.00, 0.63, 0.13, 0.225, 0.235, 0.125, 0.66, 8, 5, [1, 1, 1], 8.0, 0.32, 0.96, -0.17);
-        addRoundedCushion(mbAvBody,  0.00, 0.85, 0.21, 0.145, 0.055, 0.095, 0.62, 8, 4, [0.85, 0.85, 0.88], 8.0, 0.45, 0.98, -0.12);
-        // Hai bờ vai & bắp tay + cẳng tay đặt trên tay vịn ghế da
-        addRoundedCushion(mbAvBody, -0.22, 0.72, 0.14, 0.075, 0.115, 0.085, 0.68, 6, 4, [0.92, 0.92, 0.94], 8.0, 0.35, 0.95, -0.10);
-        addRoundedCushion(mbAvBody,  0.22, 0.72, 0.14, 0.075, 0.115, 0.085, 0.68, 6, 4, [0.92, 0.92, 0.94], 8.0, 0.35, 0.95, -0.10);
-        addRoundedCushion(mbAvBody, -0.25, 0.51, -0.02, 0.052, 0.046, 0.165, 0.58, 6, 4, [0.86, 0.86, 0.90], 8.0, 0.40, 0.94, 0.05);
-        addRoundedCushion(mbAvBody,  0.25, 0.51, -0.02, 0.052, 0.046, 0.165, 0.58, 6, 4, [0.86, 0.86, 0.90], 8.0, 0.40, 0.94, 0.05);
-        // Hai bàn tay nghỉ tự nhiên phía trước tay vịn
-        addRoundedCushion(mbAvBody, -0.24, 0.49, -0.17, 0.042, 0.032, 0.048, 0.72, 6, 4, [0.76, 0.60, 0.52], 1.0, 0.45, 0.92, 0.0);
-        addRoundedCushion(mbAvBody,  0.24, 0.49, -0.17, 0.042, 0.032, 0.048, 0.72, 6, 4, [0.76, 0.60, 0.52], 1.0, 0.45, 0.92, 0.0);
-        // Đùi ngồi trên đệm ghế
-        addRoundedCushion(mbAvBody, -0.10, 0.39, -0.08, 0.085, 0.068, 0.19, 0.60, 6, 4, [0.14, 0.15, 0.20], 1.0, 0.25, 0.85, 0.04);
-        addRoundedCushion(mbAvBody,  0.10, 0.39, -0.08, 0.085, 0.068, 0.19, 0.60, 6, 4, [0.14, 0.15, 0.20], 1.0, 0.25, 0.85, 0.04);
+        // =====================================================================
+        // 7. HỆ THỐNG CON NGƯỜI 3D GIẢI PHẪU CHI TIẾT CAO (CHUYÊN GIA CHARACTER ART)
+        // aMat = 8.0 (Trang phục vải dệt đổi màu theo từng khách), 8.2 (Tóc bất đẳng hướng bắt Rim-light), 8.3 (Da người Subsurface ấm)
+        // =====================================================================
+        function buildSeatedHumanBodyTpl(styleIdx) {
+          const mb = createMB();
+          const pantsCol = styleIdx === 1 ? [0.10, 0.12, 0.17] : [0.065, 0.065, 0.078];
+          const shoeCol  = styleIdx === 0 ? [0.76, 0.76, 0.78] : [0.12, 0.12, 0.15];
 
-        // Đầu + Cổ + Tóc 3D (Tâm xoay quanh cổ [0, 0.93, 0.19] để tự ngoảnh nhìn thẳng vào tâm màn chiếu!)
-        const mbAvHead = createMB();
-        addCylinder(mbAvHead, 0, 0.96, 0.19, 0.058, 0.068, 0.11, 7, [0.76, 0.60, 0.52], 8.2, 0.45, 0.92, false);
-        addRoundedCushion(mbAvHead, 0, 1.125, 0.18, 0.118, 0.145, 0.126, 0.80, 8, 5, [0.80, 0.64, 0.56], 8.2, 0.52, 0.98, 0.03);
-        // Mái tóc ôm đầu & gáy (bắt ánh sáng viền màn hình cực đẹp khi ngồi hàng sau nhìn lên!)
-        addRoundedCushion(mbAvHead, 0, 1.162, 0.208, 0.128, 0.138, 0.134, 0.82, 8, 5, [0.16, 0.13, 0.14], 8.2, 0.62, 1.0, 0.08);
-        addRoundedCushion(mbAvHead, -0.115, 1.065, 0.185, 0.022, 0.034, 0.024, 0.75, 5, 4, [0.72, 0.56, 0.48], 8.2, 0.45, 0.90, 0.0);
-        addRoundedCushion(mbAvHead,  0.115, 1.065, 0.185, 0.022, 0.034, 0.024, 0.75, 5, 4, [0.72, 0.56, 0.48], 8.2, 0.45, 0.90, 0.0);
+          // Hông, hai đùi, khớp gối gập tự nhiên, bắp chân & giày sneaker đặt trên sàn rạp
+          addRoundedCushion(mb, 0.0, 0.35, 0.08, 0.175, 0.085, 0.13, 0.65, 8, 4, pantsCol, 1.0, 0.20, 0.78, 0.05);
+          [-1, 1].forEach((side) => {
+            const spread = side * (styleIdx === 2 ? 0.095 : 0.108);
+            addLimbCapsule(mb, side * 0.095, 0.36, 0.06, spread, 0.38, -0.29, 0.076, 0.064, 8, pantsCol, 1.0, 0.28, 0.88);
+            addRoundedCushion(mb, spread, 0.375, -0.31, 0.062, 0.058, 0.062, 0.72, 7, 4, pantsCol, 1.0, 0.35, 0.92, 0);
+            addLimbCapsule(mb, spread, 0.36, -0.31, spread * 0.96, 0.08, -0.38, 0.056, 0.040, 8, pantsCol, 1.0, 0.22, 0.80);
+            addRoundedCushion(mb, spread * 0.96, 0.048, -0.43, 0.050, 0.036, 0.105, 0.62, 7, 4, shoeCol, 1.0, 0.20, 0.85, 0.04);
+          });
 
-        // Hộp Bắp Rang Bơ (hiển thị trên đùi/tay vịn cho khách có bắp nước hoặc chính bạn!)
+          // Lưng dưới, lồng ngực tựa ghế (-0.15 rad), cơ cầu vai (trapezius) nối mượt sang 2 vai (deltoids)
+          addRoundedCushion(mb, 0.0, 0.50, 0.10, 0.172, 0.135, 0.108, 0.64, 10, 5, [0.92, 0.92, 0.94], 8.0, 0.28, 0.90, -0.14);
+          addRoundedCushion(mb, 0.0, 0.68, 0.145, 0.198, 0.155, 0.116, 0.66, 10, 6, [1.0, 1.0, 1.0], 8.0, 0.34, 0.98, -0.16);
+          // Cầu vai nghiêng tự nhiên (khắc phục hoàn toàn kiểu vai vuông/rời rạc)
+          addRoundedCushion(mb, -0.125, 0.815, 0.175, 0.095, 0.052, 0.078, 0.70, 8, 4, [0.96, 0.96, 0.98], 8.0, 0.42, 0.98, -0.12, 0.24);
+          addRoundedCushion(mb,  0.125, 0.815, 0.175, 0.095, 0.052, 0.078, 0.70, 8, 4, [0.96, 0.96, 0.98], 8.0, 0.42, 0.98, -0.12, -0.24);
+
+          if (styleIdx === 0) {
+            // Kiểu 0: Áo choàng / Khăn lụa / Khoác hờ qua vai & đùi (Lấy cảm hứng trực tiếp từ vị khách bên trái trong Ảnh 2 & Ảnh 4!)
+            addRoundedCushion(mb, 0.0, 0.75, 0.155, 0.225, 0.115, 0.132, 0.62, 10, 5, [1.04, 1.02, 0.98], 8.0, 0.40, 1.0, -0.14);
+            addRoundedCushion(mb, -0.16, 0.64, 0.09, 0.088, 0.135, 0.125, 0.64, 8, 5, [0.98, 0.96, 0.93], 8.0, 0.36, 0.96, -0.05, 0.16);
+            addRoundedCushion(mb,  0.16, 0.64, 0.09, 0.088, 0.135, 0.125, 0.64, 8, 5, [0.98, 0.96, 0.93], 8.0, 0.36, 0.96, -0.05, -0.16);
+            // Nếp chăn/áo khoác mềm phủ nhẹ trên đùi
+            addRoundedCushion(mb, 0.0, 0.435, -0.14, 0.185, 0.048, 0.165, 0.58, 8, 4, [0.94, 0.92, 0.89], 8.0, 0.35, 0.94, 0.08);
+          } else if (styleIdx === 1) {
+            // Kiểu 1: Áo Hoodie rạp phim có mũ vải xếp nếp phía sau gáy cực chân thực
+            addRoundedCushion(mb, 0.0, 0.845, 0.235, 0.148, 0.068, 0.098, 0.64, 10, 5, [0.90, 0.90, 0.93], 8.0, 0.38, 0.98, 0.22);
+            addRoundedCushion(mb, 0.0, 0.825, 0.155, 0.118, 0.042, 0.085, 0.66, 8, 4, [0.82, 0.82, 0.86], 8.0, 0.35, 0.92, -0.10);
+          } else {
+            // Kiểu 2: Áo khoác Bomber cổ bẻ + áo thun cổ tròn bên trong
+            addRoundedCushion(mb, 0.0, 0.825, 0.165, 0.115, 0.042, 0.082, 0.65, 8, 4, [0.85, 0.85, 0.88], 8.0, 0.40, 0.95, -0.12);
+            addRoundedCushion(mb, 0.0, 0.795, 0.075, 0.072, 0.055, 0.035, 0.60, 6, 4, [0.88, 0.88, 0.90], 1.0, 0.40, 0.92, -0.15);
+          }
+
+          // Hai cánh tay giải phẫu (Khớp vai -> Bắp tay -> Khuỷu tay -> Cẳng tay -> Cổ tay -> Bàn tay)
+          // Tạo dáng bất đối xứng tự nhiên: tay trái đặt trên đùi/tay vịn, tay phải khoanh nhẹ hoặc nghỉ trên tay vịn
+          const armPoses = styleIdx === 0
+            ? [
+                { sh: [-0.205, 0.77, 0.16], el: [-0.245, 0.54, 0.10], wr: [-0.14, 0.47, -0.12], hd: [-0.10, 0.465, -0.17] },
+                { sh: [ 0.205, 0.77, 0.16], el: [ 0.255, 0.54, 0.10], wr: [ 0.16, 0.47, -0.11], hd: [ 0.11, 0.465, -0.16] }
+              ]
+            : [
+                { sh: [-0.205, 0.77, 0.16], el: [-0.275, 0.55, 0.11], wr: [-0.26, 0.485, -0.13], hd: [-0.245, 0.475, -0.195] },
+                { sh: [ 0.205, 0.77, 0.16], el: [ 0.270, 0.55, 0.11], wr: [ 0.18, 0.475, -0.11], hd: [ 0.135, 0.468, -0.165] }
+              ];
+
+          armPoses.forEach((ap) => {
+            addRoundedCushion(mb, ap.sh[0], ap.sh[1], ap.sh[2], 0.066, 0.072, 0.066, 0.72, 7, 4, [0.95, 0.95, 0.97], 8.0, 0.38, 0.96, 0);
+            addLimbCapsule(mb, ap.sh[0], ap.sh[1], ap.sh[2], ap.el[0], ap.el[1], ap.el[2], 0.058, 0.048, 8, [0.92, 0.92, 0.95], 8.0, 0.35, 0.92);
+            addLimbCapsule(mb, ap.el[0], ap.el[1], ap.el[2], ap.wr[0], ap.wr[1], ap.wr[2], 0.047, 0.038, 8, [0.89, 0.89, 0.93], 8.0, 0.38, 0.94);
+            // Bàn tay & ngón cái mang sắc thái da ấm (mat = 8.3)
+            addRoundedCushion(mb, ap.hd[0], ap.hd[1], ap.hd[2], 0.034, 0.022, 0.046, 0.70, 6, 4, [1.0, 1.0, 1.0], 8.3, 0.42, 0.94, 0.08);
+          });
+
+          return mb;
+        }
+
+        // 5 Mẫu Đầu + Khuôn Mặt Giải Phẫu + Mái Tóc & Phụ Kiện Kính/Tai Nghe Đa Dạng (Xoay quanh đốt sống cổ [0, 0.87, 0.175])
+        function buildHumanHeadVariantTpl(variantIdx) {
+          const mb = createMB();
+          // Cổ người hơi hướng nhẹ về phía trước (+0.08 rad) tự nhiên khi chăm chú xem phim
+          addLimbCapsule(mb, 0, 0.835, 0.185, 0, 0.945, 0.168, 0.056, 0.049, 8, [0.94, 0.94, 0.94], 8.3, 0.38, 0.88);
+
+          // Hộp sọ trên (Cranium) + Xương hàm/cằm thon gọn (Jaw/Chin) + Sống mũi + Chân mày + Đôi tai
+          addRoundedCushion(mb, 0, 1.055, 0.162, 0.094, 0.106, 0.104, 0.82, 10, 6, [1.0, 1.0, 1.0], 8.3, 0.48, 0.98, 0.04);
+          addRoundedCushion(mb, 0, 0.992, 0.132, 0.076, 0.068, 0.078, 0.76, 9, 5, [0.97, 0.97, 0.97], 8.3, 0.40, 0.94, 0.08);
+          // Sống mũi & gờ chân mày tạo khối ánh sáng chuẩn nhiếp ảnh chân dung khi nhìn nghiêng (như Ảnh 4!)
+          addRoundedCushion(mb, 0, 1.032, 0.056, 0.016, 0.028, 0.024, 0.72, 6, 4, [1.0, 1.0, 1.0], 8.3, 0.52, 0.98, -0.18);
+          addRoundedCushion(mb, 0, 1.064, 0.066, 0.058, 0.016, 0.022, 0.68, 7, 4, [0.96, 0.96, 0.96], 8.3, 0.48, 0.96, 0.05);
+          // Hai vành tai
+          addRoundedCushion(mb, -0.094, 1.032, 0.162, 0.015, 0.029, 0.020, 0.74, 6, 4, [0.94, 0.94, 0.94], 8.3, 0.42, 0.90, -0.08);
+          addRoundedCushion(mb,  0.094, 1.032, 0.162, 0.015, 0.029, 0.020, 0.74, 6, 4, [0.94, 0.94, 0.94], 8.3, 0.42, 0.90, -0.08);
+
+          // Mái tóc 3D nhiều lớp (mat = 8.2 nhận màu tóc riêng & phản xạ ánh sáng viền màn chiếu siêu mịn!)
+          if (variantIdx === 0) {
+            // Kiểu 0: Tóc nam Hàn Quốc tỉa layer phồng tự nhiên + gáy ôm gọn + KÍNH GỌNG KIM LOẠI MẢNH!
+            addRoundedCushion(mb, 0, 1.088, 0.172, 0.103, 0.098, 0.112, 0.80, 10, 6, [1, 1, 1], 8.2, 0.48, 1.0, 0.08);
+            addRoundedCushion(mb, 0, 1.112, 0.112, 0.092, 0.054, 0.068, 0.76, 8, 4, [1.04, 1.04, 1.04], 8.2, 0.55, 1.0, -0.16);
+            addRoundedCushion(mb, 0, 1.015, 0.238, 0.078, 0.062, 0.044, 0.74, 8, 4, [0.90, 0.90, 0.90], 8.2, 0.35, 0.88, 0.18);
+            // Gọng kính kim loại mảnh bắt tia phản chiếu màn hình khi ngồi cạnh (giống Ảnh 4!)
+            addArchBox(mb, -0.036, 1.048, 0.055, 0.022, 0.015, 0.004, [0.75, 0.78, 0.84], 2.0, 0.8, 1.0, 0.15);
+            addArchBox(mb,  0.036, 1.048, 0.055, 0.022, 0.015, 0.004, [0.75, 0.78, 0.84], 2.0, 0.8, 1.0, 0.15);
+            addArchBox(mb,  0.000, 1.050, 0.055, 0.014, 0.003, 0.004, [0.75, 0.78, 0.84], 2.0, 0.8, 1.0, 0.1);
+            addArchBox(mb, -0.076, 1.046, 0.108, 0.003, 0.003, 0.052, [0.70, 0.72, 0.78], 2.0, 0.7, 1.0, 0.1);
+            addArchBox(mb,  0.076, 1.046, 0.108, 0.003, 0.003, 0.052, [0.70, 0.72, 0.78], 2.0, 0.7, 1.0, 0.1);
+          } else if (variantIdx === 1) {
+            // Kiểu 1: Tóc nữ dài suôn mềm xõa qua vai & ôm má (rất dịu dàng khi nhìn từ ghế cạnh hoặc ghế sau)
+            addRoundedCushion(mb, 0, 1.092, 0.176, 0.105, 0.098, 0.114, 0.80, 10, 6, [1, 1, 1], 8.2, 0.48, 1.0, 0.06);
+            addRoundedCushion(mb, 0, 0.965, 0.236, 0.108, 0.135, 0.056, 0.70, 9, 5, [0.94, 0.94, 0.94], 8.2, 0.34, 0.94, 0.12);
+            addRoundedCushion(mb, -0.092, 0.985, 0.145, 0.032, 0.112, 0.062, 0.72, 7, 5, [0.96, 0.96, 0.96], 8.2, 0.38, 0.96, 0.05, 0.08);
+            addRoundedCushion(mb,  0.092, 0.985, 0.145, 0.032, 0.112, 0.062, 0.72, 7, 5, [0.96, 0.96, 0.96], 8.2, 0.38, 0.96, 0.05, -0.08);
+          } else if (variantIdx === 2) {
+            // Kiểu 2: Tóc búi cao (Messy Bun) thanh lịch + lọn tóc mai hai bên
+            addRoundedCushion(mb, 0, 1.084, 0.175, 0.101, 0.095, 0.110, 0.80, 10, 6, [1, 1, 1], 8.2, 0.46, 1.0, 0.08);
+            addRoundedCushion(mb, 0, 1.178, 0.228, 0.054, 0.052, 0.054, 0.78, 8, 5, [1.05, 1.05, 1.05], 8.2, 0.58, 1.0, 0.15);
+            addRoundedCushion(mb, -0.088, 1.028, 0.125, 0.020, 0.062, 0.034, 0.74, 6, 4, [0.96, 0.96, 0.96], 8.2, 0.42, 0.94, 0.06);
+            addRoundedCushion(mb,  0.088, 1.028, 0.125, 0.020, 0.062, 0.034, 0.74, 6, 4, [0.96, 0.96, 0.96], 8.2, 0.42, 0.94, 0.06);
+          } else if (variantIdx === 3) {
+            // Kiểu 3: Tóc Bob ngang cằm hiện đại + Tai nghe chụp tai (Headband) cá tính giống Ảnh 4!
+            addRoundedCushion(mb, 0, 1.088, 0.172, 0.106, 0.098, 0.112, 0.78, 10, 6, [1, 1, 1], 8.2, 0.48, 1.0, 0.06);
+            addRoundedCushion(mb, -0.090, 1.015, 0.155, 0.030, 0.085, 0.068, 0.70, 7, 4, [0.96, 0.96, 0.96], 8.2, 0.40, 0.95, 0.04);
+            addRoundedCushion(mb,  0.090, 1.015, 0.155, 0.030, 0.085, 0.068, 0.70, 7, 4, [0.96, 0.96, 0.96], 8.2, 0.40, 0.95, 0.04);
+            // Cặp chụp tai headphone tối màu ánh kim nhẹ
+            addRoundedCushion(mb, -0.106, 1.035, 0.162, 0.022, 0.042, 0.036, 0.65, 7, 4, [0.16, 0.17, 0.20], 2.0, 0.55, 0.98, 0);
+            addRoundedCushion(mb,  0.106, 1.035, 0.162, 0.022, 0.042, 0.036, 0.65, 7, 4, [0.16, 0.17, 0.20], 2.0, 0.55, 0.98, 0);
+          } else {
+            // Kiểu 4: Tóc uốn bồng tự nhiên rẽ ngôi mềm mại (bắt viền sáng đỉnh đầu như Ảnh 1!)
+            addRoundedCushion(mb, 0, 1.094, 0.174, 0.106, 0.102, 0.114, 0.82, 10, 6, [1, 1, 1], 8.2, 0.50, 1.0, 0.05);
+            addRoundedCushion(mb, -0.048, 1.115, 0.125, 0.062, 0.048, 0.072, 0.76, 8, 4, [1.04, 1.04, 1.04], 8.2, 0.55, 1.0, -0.12, 0.12);
+            addRoundedCushion(mb,  0.048, 1.115, 0.125, 0.062, 0.048, 0.072, 0.76, 8, 4, [1.04, 1.04, 1.04], 8.2, 0.55, 1.0, -0.12, -0.12);
+            addRoundedCushion(mb, 0, 1.008, 0.238, 0.082, 0.068, 0.048, 0.74, 8, 4, [0.92, 0.92, 0.92], 8.2, 0.36, 0.90, 0.16);
+          }
+          return mb;
+        }
+
+        // Cơ thể Góc Nhìn Thứ Nhất của CHÍNH BẠN (Không có đầu/cổ để không bao giờ che camera, thấy đầu gối, vạt áo khoác đắp đùi & hai tay trên tay vịn khi nhìn xuống như Ảnh 1, 2, 4!)
+        const mbSelfPov = createMB();
+        [-1, 1].forEach((side) => {
+          const sx = side * 0.115;
+          addLimbCapsule(mbSelfPov, side * 0.10, 0.35, 0.02, sx, 0.385, -0.30, 0.078, 0.066, 8, [0.09, 0.10, 0.13], 1.0, 0.28, 0.90);
+          addRoundedCushion(mbSelfPov, sx, 0.38, -0.32, 0.064, 0.060, 0.064, 0.72, 7, 4, [0.10, 0.11, 0.14], 1.0, 0.35, 0.94, 0);
+          addLimbCapsule(mbSelfPov, sx, 0.36, -0.32, sx * 0.96, 0.08, -0.39, 0.056, 0.042, 8, [0.08, 0.09, 0.12], 1.0, 0.22, 0.82);
+          addRoundedCushion(mbSelfPov, sx * 0.96, 0.048, -0.44, 0.052, 0.036, 0.108, 0.62, 7, 4, [0.18, 0.18, 0.22], 1.0, 0.22, 0.86, 0.04);
+          // Cẳng tay & bàn tay nghỉ tự nhiên trên tay vịn ghế
+          addLimbCapsule(mbSelfPov, side * 0.26, 0.51, -0.01, side * 0.23, 0.48, -0.18, 0.046, 0.037, 8, [0.22, 0.23, 0.27], 8.0, 0.38, 0.94);
+          addRoundedCushion(mbSelfPov, side * 0.22, 0.472, -0.22, 0.034, 0.022, 0.046, 0.70, 6, 4, [0.82, 0.65, 0.55], 8.3, 0.42, 0.94, 0.06);
+        });
+        // Nếp áo khoác mềm phủ nhẹ ngang đùi (giống hệt phần tiền cảnh dưới cùng trong Ảnh 1 & Ảnh 2!)
+        addRoundedCushion(mbSelfPov, 0.02, 0.428, -0.19, 0.175, 0.042, 0.135, 0.58, 8, 4, [0.24, 0.23, 0.26], 8.0, 0.34, 0.92, 0.10, -0.06);
+
+        // Hộp Bắp Rang Bơ đặt trên đùi/tay vịn
         const mbPopcorn = createMB();
-        addCylinder(mbPopcorn, 0.14, 0.50, -0.12, 0.068, 0.050, 0.15, 8, [0.86, 0.14, 0.18], 1.0, 0.45, 0.96, false);
-        addRoundedCushion(mbPopcorn, 0.14, 0.585, -0.12, 0.066, 0.036, 0.066, 0.76, 7, 4, [0.98, 0.84, 0.36], 1.0, 0.65, 1.0, 0.0);
+        addCylinder(mbPopcorn, 0.145, 0.495, -0.14, 0.064, 0.048, 0.145, 10, [0.78, 0.11, 0.15], 1.0, 0.42, 0.96, false);
+        addRoundedCushion(mbPopcorn, 0.145, 0.575, -0.14, 0.062, 0.032, 0.062, 0.76, 8, 4, [0.96, 0.82, 0.34], 1.0, 0.62, 1.0, 0.0);
+
+        const avBodyVariants = [0, 1, 2].map(buildSeatedHumanBodyTpl);
+        const avHeadVariants = [0, 1, 2, 3, 4].map(buildHumanHeadVariantTpl);
 
         sharedCache = {
           mbBase:    { pos: new Float32Array(mbBase.pos),    norm: new Float32Array(mbBase.norm),    col: new Float32Array(mbBase.col),    mat: new Float32Array(mbBase.mat),    ao: new Float32Array(mbBase.ao),    idx: mbBase.idx },
@@ -16139,11 +16353,49 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             idxCoupleOnly: mbChairs.idx.slice(rowFIndexStart),
             seatSlices
           },
-          avBodyTpl: mbAvBody,
-          avHeadTpl: mbAvHead,
+          avBodyVariants,
+          avHeadVariants,
+          selfPovTpl: mbSelfPov,
           popcornTpl: mbPopcorn
         };
         return sharedCache;
+      }
+
+      // Sinh vị trí khán giả rạp tự nhiên (không chặn ghế, không hiện bảng tên giả) khi xem một mình trong phòng chiếu tối
+      function computeAmbientCinemaPatrons(mySeatId, realOcc, isCoupleOnly) {
+        const me = seatById[mySeatId];
+        if (!me) return [];
+        const candidates = [];
+        if (isCoupleOnly) {
+          ["F2", "F6", "F7"].forEach((sid, idx) => {
+            if (sid !== mySeatId && !realOcc[sid]) {
+              candidates.push({ sid, uid: `amb_cpl_${idx}`, outfitIdx: idx });
+            }
+          });
+          return candidates;
+        }
+        // Chọn các vị trí có tính điện ảnh cao nhất giống ảnh thực tế:
+        // 1) Một khán giả ngồi lệch bên trái cùng hàng hoặc hàng trước gần lối đi (giống Ảnh 2 & 4!)
+        // 2) Một khán giả ngồi cách 2 hàng phía trước hơi lệch tâm để lộ chỏm tóc bắt sáng viền trên tựa ghế đỏ (giống Ảnh 1!)
+        // 3) Cặp khán giả ở cánh bên kia rạp tạo chiều sâu không gian sống động
+        const leftNeighborCol = me.col > 1 ? Math.max(1, me.col - 1) : 2;
+        const ahead1Row = ROWS_3D[Math.max(0, me.rIdx - 1)];
+        const ahead2Row = ROWS_3D[Math.max(0, me.rIdx - 2)];
+        const desired = [
+          me.rIdx >= 1 ? `${ahead1Row}${leftNeighborCol}` : "B2",
+          me.rIdx >= 2 ? `${ahead2Row}${me.col <= 4 ? 4 : 5}` : "A4",
+          me.col <= 4 ? `${ROWS_3D[Math.max(1, me.rIdx - 1)]}6` : `${ROWS_3D[Math.max(1, me.rIdx - 1)]}3`,
+          "C2",
+          "D7"
+        ];
+        const used = new Set([mySeatId, ...Object.keys(realOcc)]);
+        desired.forEach((sid, idx) => {
+          if (seatById[sid] && !used.has(sid)) {
+            used.add(sid);
+            candidates.push({ sid, uid: `amb_patron_${sid}`, outfitIdx: idx });
+          }
+        });
+        return candidates.slice(0, 4);
       }
 
       // =======================================================================
@@ -16159,7 +16411,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         let resizeObs = null;
 
         let videoTexture = null, posterTexture = null;
-        // Không gắn willReadFrequently lên posterOff để giữ tăng tốc phần cứng GPU 100%!
         const posterOff = document.createElement("canvas");
         posterOff.width = 512; posterOff.height = 256;
         const pctx = posterOff.getContext("2d");
@@ -16168,9 +16419,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         probeOff.width = 16; probeOff.height = 9;
         const probeCtx = probeOff.getContext("2d", { willReadFrequently: true });
 
-        const DUST_COUNT = 64;
+        const DUST_COUNT = 48;
         const dustSeeds = Array.from({ length: DUST_COUNT }, () => ({
-          t: Math.random(), u: (Math.random() - 0.5) * 2, v: (Math.random() - 0.5) * 2, sp: 0.14 + Math.random() * 0.28, ph: Math.random() * 6.28
+          t: Math.random(), u: (Math.random() - 0.5) * 2, v: (Math.random() - 0.5) * 2, sp: 0.12 + Math.random() * 0.24, ph: Math.random() * 6.28
         }));
         const dustFloatArr = new Float32Array(DUST_COUNT * 3);
 
@@ -16181,19 +16432,20 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           W: 640, H: 360, obsW: 0, obsH: 0, dpr: 1,
           dragging: false,
           mode: "seat", // "seat" | "focus" | "orbit"
-          nameplateMode: "auto", // "auto" (ẩn khi nhìn thẳng sau 3s, hiện khi ngoảnh đầu/nói/chat) | "always" | "off"
+          nameplateMode: "auto",
           nameplateAlpha: 0.9,
+          ambientPatronsEnabled: true,
           mySeatId: "D5",
           myHasSnack: false,
           hoveredSeatId: null,
           highlightedIds: [],
-          occupied: {}, // seatId -> { uid, name, snack, isHost }
-          floatingEmojis3D: [], // { seatId, emoji, bornMs, seed }
+          occupied: {},
+          floatingEmojis3D: [],
           avatarSig: "",
           isCoupleOnly: false,
           curtainOpen: 1.0,
           curtainTarget: 1.0,
-          lightsLevel: 0.04,
+          lightsLevel: 0.0,
           lightsTarget: 0.0,
           movieTitle: "CINEVERSE LOTTE • IMAX LASER",
           posterUrl: "",
@@ -16201,22 +16453,22 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           posterReady: false,
           posterDirty: true,
           lastPosterStatus: "__init__",
-          lightL: [0.08, 0.52, 0.76],
-          lightC: [0.18, 0.76, 0.94],
-          lightR: [0.08, 0.46, 0.70],
-          targetLightL: [0.08, 0.52, 0.76],
-          targetLightC: [0.18, 0.76, 0.94],
-          targetLightR: [0.08, 0.46, 0.70],
-          beamCol: [0.24, 0.78, 0.96],
+          lightL: [0.16, 0.42, 0.58],
+          lightC: [0.24, 0.56, 0.72],
+          lightR: [0.16, 0.38, 0.54],
+          targetLightL: [0.16, 0.42, 0.58],
+          targetLightC: [0.24, 0.56, 0.72],
+          targetLightR: [0.16, 0.38, 0.54],
+          beamCol: [0.22, 0.58, 0.76],
           lastVideoProbeMs: 0,
           videoCorsWarned: false,
-          yaw: -0.56, pitch: 0.44, dist: 21.0,
-          tYaw: -0.56, tPitch: 0.44, tDist: 21.0,
+          yaw: -0.54, pitch: 0.42, dist: 19.5,
+          tYaw: -0.54, tPitch: 0.42, tDist: 19.5,
           povYaw: 0, povPitch: 0,
           tPovYaw: 0, tPovPitch: 0,
-          camPos: [0, 4.2, 2.5],
-          camLook: [0, 3.88, -10.35],
-          curFov: 0.74
+          camPos: [0, 3.8, 2.0],
+          camLook: [0, 3.75, -10.15],
+          curFov: 0.76
         };
 
         function makeIdx(arr) {
@@ -16246,7 +16498,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           }
         }
 
-        // O(1) Cập nhật màu ghế đang chọn / đang hover bằng gl.bufferSubData (~0.015ms)
+        // O(1) Cập nhật màu ghế đang chọn (trong phòng chiếu tắt đèn thì giữ nguyên ghế da đỏ-đen thực tế, chỉ highlight khi ở Orbit hoặc hộp thoại Đặt vé!)
         function syncChairHighlightsO1() {
           if (!gl || !chairGPU || !chairWorkingCol) return;
           const cache = getSharedCinemaCache();
@@ -16278,17 +16530,17 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           if (st.hoveredSeatId && st.hoveredSeatId !== st.mySeatId) {
             applyTint(st.hoveredSeatId, [0.84, 0.60, 0.16]);
           }
-          if (st.mySeatId) {
-            applyTint(st.mySeatId, [0.94, 0.70, 0.13]);
+          if (st.mySeatId && (!cfg.useLiveVideo || st.mode === "orbit")) {
+            applyTint(st.mySeatId, [0.58, 0.40, 0.07]);
           }
           wakeUp();
         }
 
-        // Dựng lô tới 50 Khán giả 3D sống động (mỗi khách có màu trang phục riêng, đầu xoay hướng về màn chiếu & bắp rang bơ!)
+        // Dựng lô Khán giả 3D giải phẫu đa dạng + Cơ thể góc nhìn thứ nhất của chính người xem
         function syncAvatarsBatch() {
           if (!gl || !avatarGPU) return;
           const showMineFullBody = (st.mode === "orbit");
-          const showMinePopcornOnly = (!showMineFullBody && st.mode === "seat" && st.myHasSnack);
+          const showMineFirstPerson = (st.mode === "seat");
           const entries = [];
 
           for (const s of seats3D) {
@@ -16296,15 +16548,32 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             const isMine = s.id === st.mySeatId;
             const occ = st.occupied[s.id];
             if (occ && !isMine) {
-              entries.push({ seat: s, isMine: false, occ, body: true, pop: Boolean(occ.snack) });
+              entries.push({ seat: s, isMine: false, occ, kind: "full", pop: Boolean(occ.snack) });
             } else if (isMine && showMineFullBody) {
-              entries.push({ seat: s, isMine: true, occ: { uid: "me", name: "Bạn", isHost: false }, body: true, pop: st.myHasSnack });
-            } else if (isMine && showMinePopcornOnly) {
-              entries.push({ seat: s, isMine: true, occ: null, body: false, pop: true });
+              entries.push({ seat: s, isMine: true, occ: { uid: "me", name: "Bạn", isHost: false }, kind: "full", pop: st.myHasSnack });
+            } else if (isMine && showMineFirstPerson) {
+              entries.push({ seat: s, isMine: true, occ: null, kind: "selfPov", pop: st.myHasSnack });
             }
           }
 
-          const sig = entries.map(e => `${e.seat.id}:${e.body?1:0}:${e.pop?1:0}:${e.occ?.uid||""}:${e.occ?.isHost?1:0}`).join("|") + "#" + st.isCoupleOnly;
+          // Khi đang xem phim trực tiếp trong phòng 3D tắt đèn mà chưa có khách thật khác, thêm 3-4 khán giả cùng suất cực chân thực (không chặn ghế, không bảng tên giả)
+          if (cfg.useLiveVideo && st.ambientPatronsEnabled && Object.keys(st.occupied).length === 0) {
+            const ambList = computeAmbientCinemaPatrons(st.mySeatId, st.occupied, st.isCoupleOnly);
+            for (const amb of ambList) {
+              const sObj = seatById[amb.sid];
+              if (sObj) {
+                entries.push({
+                  seat: sObj,
+                  isMine: false,
+                  occ: { uid: amb.uid, name: "", isHost: false, forceStyle: amb.outfitIdx },
+                  kind: "full",
+                  pop: (amb.outfitIdx % 2 === 0)
+                });
+              }
+            }
+          }
+
+          const sig = entries.map(e => `${e.seat.id}:${e.kind}:${e.pop?1:0}:${e.occ?.uid||""}:${e.occ?.isHost?1:0}`).join("|") + "#" + st.isCoupleOnly + "#" + st.mode;
           if (sig === st.avatarSig) return;
           st.avatarSig = sig;
 
@@ -16315,12 +16584,29 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           }
 
           const cache = getSharedCinemaCache();
-          const bTpl = cache.avBodyTpl, hTpl = cache.avHeadTpl, pTpl = cache.popcornTpl;
+          const pTpl = cache.popcornTpl, selfTpl = cache.selfPovTpl;
           let totalV = 0, totalI = 0;
-          for (const e of entries) {
-            if (e.body) { totalV += bTpl.vCount + hTpl.vCount; totalI += bTpl.idx.length + hTpl.idx.length; }
-            if (e.pop)  { totalV += pTpl.vCount; totalI += pTpl.idx.length; }
-          }
+
+          const resolvedEntries = entries.map((e) => {
+            if (e.kind === "full") {
+              const h = hashStr(e.occ?.uid || e.occ?.name || e.seat.id);
+              const bIdx = typeof e.occ?.forceStyle === "number" ? (e.occ.forceStyle % cache.avBodyVariants.length) : (h % cache.avBodyVariants.length);
+              const hIdx = typeof e.occ?.forceStyle === "number" ? ((e.occ.forceStyle * 2) % cache.avHeadVariants.length) : ((h >>> 3) % cache.avHeadVariants.length);
+              const bTpl = cache.avBodyVariants[bIdx];
+              const hTpl = cache.avHeadVariants[hIdx];
+              totalV += bTpl.vCount + hTpl.vCount;
+              totalI += bTpl.idx.length + hTpl.idx.length;
+              if (e.pop) { totalV += pTpl.vCount; totalI += pTpl.idx.length; }
+              return { ...e, h, bTpl, hTpl };
+            }
+            if (e.kind === "selfPov") {
+              totalV += selfTpl.vCount;
+              totalI += selfTpl.idx.length;
+              if (e.pop) { totalV += pTpl.vCount; totalI += pTpl.idx.length; }
+              return { ...e, h: 0 };
+            }
+            return e;
+          });
 
           const pos = new Float32Array(totalV * 3);
           const norm = new Float32Array(totalV * 3);
@@ -16330,20 +16616,28 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           const idxArr = idxType === gl.UNSIGNED_INT ? new Uint32Array(totalI) : new Uint16Array(totalI);
 
           let vCursor = 0, iCursor = 0;
-          const appendPart = (tpl, seat, tintRGB, rotYaw, pivotY, pivotZ) => {
+          const appendPart = (tpl, seat, palette, rotYaw, rotPitch, pivotY, pivotZ, scaleH = 1.0, rigidLift = null) => {
             const cy = Math.cos(rotYaw), sy = Math.sin(rotYaw);
+            const cp = Math.cos(rotPitch), sp = Math.sin(rotPitch);
             for (let v = 0; v < tpl.vCount; v++) {
               const p3 = (vCursor + v) * 3, t3 = v * 3;
-              let lx = tpl.pos[t3], ly = tpl.pos[t3 + 1], lz = tpl.pos[t3 + 2];
+              let lx = tpl.pos[t3], lz = tpl.pos[t3 + 2];
+              let ly = rigidLift === null ? (0.35 + (tpl.pos[t3 + 1] - 0.35) * scaleH) : (tpl.pos[t3 + 1] + rigidLift);
               let nx = tpl.norm[t3], ny = tpl.norm[t3 + 1], nz = tpl.norm[t3 + 2];
-              if (rotYaw !== 0) {
-                const dz = lz - pivotZ;
-                const rx = lx * cy + dz * sy;
-                const rz = -lx * sy + dz * cy;
-                lx = rx; lz = pivotZ + rz;
-                const rnx = nx * cy + nz * sy;
-                const rnz = -nx * sy + nz * cy;
-                nx = rnx; nz = rnz;
+              if (rotPitch !== 0 || rotYaw !== 0) {
+                let dy = ly - (rigidLift === null ? (0.35 + (pivotY - 0.35) * scaleH) : (pivotY + rigidLift)), dz = lz - pivotZ;
+                if (rotPitch !== 0) {
+                  const py = dy * cp - dz * sp, pz = dy * sp + dz * cp;
+                  const pny = ny * cp - nz * sp, pnz = ny * sp + nz * cp;
+                  dy = py; dz = pz; ny = pny; nz = pnz;
+                }
+                if (rotYaw !== 0) {
+                  const rx = lx * cy + dz * sy, rz = -lx * sy + dz * cy;
+                  const rnx = nx * cy + nz * sy, rnz = -nx * sy + nz * cy;
+                  lx = rx; dz = rz; nx = rnx; nz = rnz;
+                }
+                ly = (rigidLift === null ? (0.35 + (pivotY - 0.35) * scaleH) : (pivotY + rigidLift)) + dy;
+                lz = pivotZ + dz;
               }
               pos[p3]     = lx + seat.x;
               pos[p3 + 1] = ly + seat.y;
@@ -16351,16 +16645,24 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               norm[p3]     = nx;
               norm[p3 + 1] = ny;
               norm[p3 + 2] = nz;
-              if (tintRGB && tpl.mat[v] > 7.8 && tpl.mat[v] < 8.1) {
-                col[p3]     = tpl.col[t3]     * tintRGB[0];
-                col[p3 + 1] = tpl.col[t3 + 1] * tintRGB[1];
-                col[p3 + 2] = tpl.col[t3 + 2] * tintRGB[2];
+
+              const mVal = tpl.mat[v];
+              let tint = null;
+              if (palette) {
+                if (mVal > 7.9 && mVal < 8.1) tint = palette.outfit;
+                else if (mVal > 8.15 && mVal < 8.25) tint = palette.hair;
+                else if (mVal > 8.25 && mVal < 8.4) tint = palette.skin;
+              }
+              if (tint) {
+                col[p3]     = Math.min(1.0, tpl.col[t3]     * tint[0]);
+                col[p3 + 1] = Math.min(1.0, tpl.col[t3 + 1] * tint[1]);
+                col[p3 + 2] = Math.min(1.0, tpl.col[t3 + 2] * tint[2]);
               } else {
                 col[p3]     = tpl.col[t3];
                 col[p3 + 1] = tpl.col[t3 + 1];
                 col[p3 + 2] = tpl.col[t3 + 2];
               }
-              mat[vCursor + v] = tpl.mat[v];
+              mat[vCursor + v] = mVal;
               ao[vCursor + v]  = tpl.ao[v];
             }
             for (let k = 0; k < tpl.idx.length; k++) {
@@ -16370,20 +16672,29 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             iCursor += tpl.idx.length;
           };
 
-          for (const e of entries) {
+          for (const e of resolvedEntries) {
             const s = e.seat;
-            if (e.body) {
-              const h = hashStr(e.occ?.uid || e.occ?.name || s.id);
+            if (e.kind === "full") {
+              const h = e.h;
               const outfit = e.isMine
-                ? [0.92, 0.90, 0.86]
-                : (e.occ?.isHost ? [0.76, 0.20, 0.24] : OUTFIT_PALETTE[h % OUTFIT_PALETTE.length]);
-              // Đầu mỗi khán giả tự động ngoảnh góc tự nhiên hướng thẳng về tâm màn chiếu!
-              const headYaw = Math.atan2(-s.x * 0.78, Math.max(3.5, 10.35 + s.z)) * 0.85;
-              appendPart(bTpl, s, outfit, 0, 0, 0);
-              appendPart(hTpl, s, null, headYaw, 0.93, 0.19);
-            }
-            if (e.pop) {
-              appendPart(pTpl, s, null, 0, 0, 0);
+                ? [0.84, 0.82, 0.78]
+                : (e.occ?.isHost ? [0.68, 0.16, 0.20] : OUTFIT_PALETTE[(typeof e.occ?.forceStyle === "number" ? e.occ.forceStyle : h) % OUTFIT_PALETTE.length]);
+              const skin = SKIN_PALETTE[(h >>> 5) % SKIN_PALETTE.length];
+              const hair = HAIR_PALETTE[(h >>> 7) % HAIR_PALETTE.length];
+              const scaleH = 1.13 + ((h & 15) / 15) * 0.09; // Chiều cao ngồi đa dạng: thân người nhô cao hơn gối tựa đầu như ngoài đời
+              const headLift = (1.055 - 0.35) * (scaleH - 1.0) + 0.045;
+
+              // Góc đầu hướng tự nhiên về tâm màn chiếu theo đúng hàng và cột ghế
+              const dzScr = 10.15 + s.z;
+              const headYaw = Math.atan2(-s.x * 0.82, Math.max(3.2, dzScr)) * 0.86;
+              const headPitch = Math.atan2(3.85 - (s.y + 1.05), Math.hypot(s.x, dzScr)) * 0.55;
+
+              appendPart(e.bTpl, s, { outfit, skin, hair }, 0, 0, 0, 0, scaleH);
+              appendPart(e.hTpl, s, { outfit, skin, hair }, headYaw, -headPitch, 0.88, 0.175, 1.0, headLift);
+              if (e.pop) appendPart(pTpl, s, null, 0, 0, 0, 0, 1.0);
+            } else if (e.kind === "selfPov") {
+              appendPart(selfTpl, s, null, 0, 0, 0, 0, 1.0);
+              if (e.pop) appendPart(pTpl, s, null, 0, 0, 0, 0, 1.0);
             }
           }
 
@@ -16422,8 +16733,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                   r += d[idx]; g += d[idx + 1]; b += d[idx + 2]; n++;
                 }
               }
-              const k = 1.38 / 255;
-              return [Math.min(1, Math.max(0.08, (r / n) * k)), Math.min(1, Math.max(0.08, (g / n) * k)), Math.min(1, Math.max(0.08, (b / n) * k))];
+              const k = 1.48 / 255;
+              return [Math.min(1, Math.max(0.06, (r / n) * k)), Math.min(1, Math.max(0.06, (g / n) * k)), Math.min(1, Math.max(0.06, (b / n) * k))];
             };
             st.targetLightL = zone(0, 5);
             st.targetLightC = zone(5, 11);
@@ -16457,7 +16768,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           img.src = corsSrc;
         }
 
-        // Chỉ vẽ & upload PosterTexture ĐÚNG 1 LẦN khi posterDirty = true (triệt tiêu 100% nghẽn CPU->GPU 60Hz!)
         function ensureStaticPosterUploaded(statusLabel = "") {
           if (!st.posterDirty && st.lastPosterStatus === statusLabel) return;
           st.posterDirty = false;
@@ -16472,20 +16782,22 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             else { dw = w * 1.03; dh = dw / (ir || 1); }
             pctx.drawImage(img, (w - dw) * 0.5, (h - dh) * 0.32, dw, dh);
             const g = pctx.createRadialGradient(w * 0.5, h * 0.35, 10, w * 0.5, h * 0.5, w * 0.65);
-            g.addColorStop(0, "rgba(255,255,255,0.06)");
-            g.addColorStop(1, "rgba(0,0,0,0.30)");
+            g.addColorStop(0, "rgba(255,255,255,0.05)");
+            g.addColorStop(1, "rgba(0,0,0,0.28)");
             pctx.fillStyle = g; pctx.fillRect(0, 0, w, h);
           } else {
             const g = pctx.createLinearGradient(0, 0, 0, h);
             g.addColorStop(0, "#15809e"); g.addColorStop(0.45, "#0369a1"); g.addColorStop(1, "#020c18");
             pctx.fillStyle = g; pctx.fillRect(0, 0, w, h);
           }
-          pctx.fillStyle = "rgba(0,0,0,0.52)";
-          pctx.fillRect(0, h - 26, w, 26);
-          pctx.fillStyle = statusLabel ? "#FDE047" : "rgba(255,255,255,0.88)";
-          pctx.font = "700 11px system-ui, sans-serif";
-          pctx.textAlign = "center";
-          pctx.fillText(statusLabel ? `⏸ ${statusLabel} • ${st.movieTitle}` : st.movieTitle, w * 0.5, h - 9);
+          if (statusLabel || !cfg.useLiveVideo) {
+            pctx.fillStyle = "rgba(0,0,0,0.52)";
+            pctx.fillRect(0, h - 26, w, 26);
+            pctx.fillStyle = statusLabel ? "#FDE047" : "rgba(255,255,255,0.88)";
+            pctx.font = "700 11px system-ui, sans-serif";
+            pctx.textAlign = "center";
+            pctx.fillText(statusLabel ? `⏸ ${statusLabel} • ${st.movieTitle}` : st.movieTitle, w * 0.5, h - 9);
+          }
 
           gl.activeTexture(gl.TEXTURE0);
           gl.bindTexture(gl.TEXTURE_2D, posterTexture);
@@ -16493,7 +16805,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         }
 
         function sampleLiveVideoLight(videoEl, nowMs) {
-          if (nowMs - st.lastVideoProbeMs < 240) return;
+          if (nowMs - st.lastVideoProbeMs < 200) return;
           st.lastVideoProbeMs = nowMs;
           try {
             probeCtx.drawImage(videoEl, 0, 0, 16, 9);
@@ -16506,11 +16818,11 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                   r += d[idx]; g += d[idx + 1]; b += d[idx + 2]; n++;
                 }
               }
-              const k = 1.45 / 255;
+              const k = 1.55 / 255;
               return [
-                Math.min(1, Math.max(0.06, (r / n) * k)),
-                Math.min(1, Math.max(0.06, (g / n) * k)),
-                Math.min(1, Math.max(0.06, (b / n) * k))
+                Math.min(1, Math.max(0.04, (r / n) * k)),
+                Math.min(1, Math.max(0.04, (g / n) * k)),
+                Math.min(1, Math.max(0.04, (b / n) * k))
               ];
             };
             st.targetLightL = zone(0, 5);
@@ -16540,7 +16852,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             return p;
           };
 
-          // Shader Kiến trúc Rạp + Rèm GPU Vertex + Nhịp thở Khán giả 3D + Tán xạ viền màn hình (Screen-Rim Backscatter)
+          // ===================================================================
+          // PBR CINEMA SHADER: QUANG HỌC RẠP TỐI ĐỜI THỰC + SUBSURFACE SKIN + ANISOTROPIC HAIR RIM
+          // ===================================================================
           progRoom = compile(`
             attribute vec3 aPos, aNorm, aCol;
             attribute float aMat, aAO;
@@ -16551,31 +16865,32 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             void main() {
               vec3 wPos = aPos;
               vec3 wNorm = aNorm;
-              // Biến hình đóng/mở Rèm nhung trực tiếp trên GPU (0ms CPU!)
-              bool isCurtL = (aMat > 4.05 && aMat < 4.15) || (aMat > 2.05 && aMat < 2.15);
-              bool isCurtR = (aMat > 4.15 && aMat < 4.25) || (aMat > 2.15 && aMat < 2.25);
+              // Rèm nhung GPU: khi uCurtainOpen -> 1.0 tự rút hẳn vào sau hốc tường đen (x = ±6.75..±7.15) để lộ trọn màn chiếu hiện đại!
+              bool isCurtL = (aMat > 4.05 && aMat < 4.15);
+              bool isCurtR = (aMat > 4.15 && aMat < 4.25);
               if (isCurtL || isCurtR) {
                 float side = isCurtL ? -1.0 : 1.0;
                 float s = aPos.x;
-                float v = clamp((aPos.y - 1.06) / 5.76, 0.0, 1.0);
-                float xOuter = side * 6.56;
-                float catenary = sin(v * 3.14159265) * uCurtainOpen * 0.22 * side;
-                float xInner = side * (0.01 + uCurtainOpen * 5.76) + catenary;
+                float v = clamp((aPos.y - 1.12) / 5.76, 0.0, 1.0);
+                float xOuter = side * 7.12;
+                float xInner = side * (0.01 + uCurtainOpen * 6.82);
                 float xCur = mix(xOuter, xInner, s);
-                float uScr = clamp((xCur + 6.48) / 12.96, 0.0, 1.0);
-                float baseZ = -9.90 - cos((uScr - 0.5) * 3.14159265) * 0.70;
+                float uScr = clamp((xCur + 6.56) / 13.12, 0.0, 1.0);
+                float baseZ = -9.96 - cos((uScr - 0.5) * 3.14159265) * 0.52;
                 float wave = sin(s * 28.27433);
-                float amp = (0.055 + uCurtainOpen * 0.095) * (1.25 - 0.45 * v);
+                float amp = (0.05 + uCurtainOpen * 0.08) * (1.20 - 0.35 * v);
                 wPos.x = xCur;
                 wPos.z = baseZ + wave * amp + aPos.z;
-                float dWave = cos(s * 28.27433) * 1.35 * aNorm.z;
+                float dWave = cos(s * 28.27433) * 1.25 * aNorm.z;
                 wNorm = normalize(vec3(-dWave * side, 0.03, aNorm.z));
               } else if (aMat > 7.8 && aMat < 8.5) {
-                // Nhịp thở tự nhiên & cử động vi mô sống động của từng khán giả đang xem phim!
-                float ph = aPos.x * 3.3 + aPos.z * 2.7;
-                wPos.y += sin(uTime * 1.45 + ph) * 0.0042;
-                if (aMat > 8.1) {
-                  wPos.x += cos(uTime * 0.75 + ph) * 0.0038;
+                // Chuyển động vi mô sinh học tự nhiên của người thật: nhịp thở lồng ngực & độ nghiêng đầu khẽ theo nhịp phim
+                float ph = floor(aPos.x * 2.0 + 0.5) * 2.17 + floor(aPos.z * 1.5 + 0.5) * 3.41;
+                float breath = sin(uTime * 1.28 + ph);
+                wPos.y += breath * 0.0032;
+                if (aMat > 8.15) {
+                  wPos.x += sin(uTime * 0.42 + ph * 1.7) * 0.0045;
+                  wPos.y += cos(uTime * 0.58 + ph) * 0.0018;
                 }
               }
               vWorldPos = wPos; vNorm = wNorm; vCol = aCol; vMat = aMat; vAO = aAO;
@@ -16595,16 +16910,17 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               return fract(p.x * p.y);
             }
 
-            vec3 evalSconce(vec3 lp, vec3 N, bool sideMatch, float sconcePower, float wallPower) {
+            vec3 evalWallWasher(vec3 lp, vec3 N, bool sideMatch, float power) {
+              if (power < 0.002) return vec3(0.0);
               vec3 toL = lp - vWorldPos;
               float d2 = dot(toL, toL);
-              if (d2 > 56.0) return vec3(0.0);
-              float att = 1.0 / (1.0 + 0.14 * d2);
-              vec3 c = vec3(1.0, 0.76, 0.38) * (max(dot(N, toL * inversesqrt(max(d2, 0.0001))), 0.0) * 0.75 + 0.25) * att * sconcePower;
+              if (d2 > 42.0) return vec3(0.0);
+              float att = 1.0 / (1.0 + 0.18 * d2);
+              vec3 c = vec3(1.0, 0.78, 0.44) * (max(dot(N, toL * inversesqrt(max(d2, 0.0001))), 0.0) * 0.75 + 0.25) * att * power;
               if (sideMatch) {
-                float dz = abs(vWorldPos.z - lp.z), dy = abs(vWorldPos.y - 4.85);
-                float fan = smoothstep(dy * 0.58 + 0.14, dy * 0.12 + 0.03, dz) * exp(-dy * 0.58);
-                c += vec3(1.0, 0.80, 0.44) * fan * wallPower;
+                float dz = abs(vWorldPos.z - lp.z), dy = abs(vWorldPos.y - lp.y);
+                float fan = smoothstep(dy * 0.55 + 0.12, dy * 0.10 + 0.02, dz) * exp(-dy * 0.65);
+                c += vec3(1.0, 0.82, 0.48) * fan * power * 1.35;
               }
               return c;
             }
@@ -16612,114 +16928,182 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             void main() {
               vec3 N = normalize(vNorm);
               vec3 V = normalize(uCamPos - vWorldPos);
-              float ao = clamp(vAO, 0.05, 1.0);
+              float ao = clamp(vAO, 0.04, 1.0);
               vec3 baseAlbedo = vCol;
 
-              if (vMat > 2.5 && vMat < 3.5) {
+              // Emissive cố định: biển EXIT xanh lá, đèn bậc thang xanh lá, chấm LED đỏ, đèn rọi tròn lối đi (mat = 3.0)
+              if (vMat > 2.85 && vMat < 3.10) {
                 gl_FragColor = vec4(vCol, 1.0);
                 return;
               }
+              // Emissive đèn trần / đèn tường (mat = 3.2): TẮT HẲN 100% KHI XEM PHIM (uLights = 0) đúng chuẩn rạp thật!
+              if (vMat >= 3.10 && vMat < 3.35) {
+                float bulbOn = pow(clamp(uLights, 0.0, 1.0), 1.35);
+                vec3 offCol = vec3(0.035, 0.034, 0.040) * ao;
+                gl_FragColor = vec4(mix(offCol, vCol, bulbOn), 1.0);
+                return;
+              }
+
+              // Rãnh nỉ tiêu âm tường (mat = 6)
               if (vMat > 5.5 && vMat < 6.5) {
-                float slat = vWorldPos.z * 26.0;
+                float slat = vWorldPos.z * 28.0;
                 float g = sin(slat);
-                N = normalize(N + vec3(0.0, 0.0, cos(slat) * 0.38));
-                ao *= (0.72 + 0.28 * smoothstep(-0.8, 0.6, g));
-                baseAlbedo *= (0.86 + 0.18 * smoothstep(-0.5, 0.8, g));
+                N = normalize(N + vec3(0.0, 0.0, cos(slat) * 0.34));
+                ao *= (0.70 + 0.30 * smoothstep(-0.8, 0.6, g));
               }
-              if (vMat > 3.5 && vMat < 4.5) {
-                float m = sin(vWorldPos.x * 22.0 + vWorldPos.z * 18.0);
-                N = normalize(N + vec3(m * 0.12, 0.0, m * 0.16));
-              }
+              // Hoa văn xoáy thảm nhung đỏ Lotte trên bậc thang lối đi (mat = 7)
               if (vMat > 6.5 && vMat < 7.5) {
-                baseAlbedo *= (0.90 + 0.18 * hash21(floor(vWorldPos.xz * 95.0)));
+                float swirl = sin(vWorldPos.x * 7.5 + sin(vWorldPos.z * 6.0) * 1.8) * cos(vWorldPos.z * 7.5 - cos(vWorldPos.x * 6.0) * 1.8);
+                float carpetPattern = smoothstep(0.15, 0.75, swirl);
+                baseAlbedo = mix(baseAlbedo * 0.78, baseAlbedo * 1.36 + vec3(0.06, 0.015, 0.01), carpetPattern * 0.55);
+                baseAlbedo *= (0.92 + 0.14 * hash21(floor(vWorldPos.xz * 110.0)));
+              }
+              // Nếp dệt vải tinh tế trên áo khoác / khăn choàng của khán giả (mat = 8.0)
+              if (vMat > 7.85 && vMat < 8.10) {
+                float weave = sin(vWorldPos.x * 85.0 + vWorldPos.y * 65.0) * 0.025;
+                baseAlbedo *= (0.98 + weave);
               }
 
-              float scrGate = 0.10 + 0.90 * uCurtainOpen;
-              vec3 scrPosL = vec3(-4.6, 3.95, -10.2);
-              vec3 scrPosC = vec3( 0.0, 3.95, -10.65);
-              vec3 scrPosR = vec3( 4.6, 3.95, -10.2);
+              // ÁNH SÁNG TÁN XẠ THỜI GIAN THỰC TỪ MÀN CHIẾU (99% nguồn sáng trong rạp tối đến từ khung hình phim!)
+              float scrGate = 0.08 + 0.92 * uCurtainOpen;
+              vec3 scrPosL = vec3(-4.5, 3.95, -10.05);
+              vec3 scrPosC = vec3( 0.0, 3.95, -10.35);
+              vec3 scrPosR = vec3( 4.5, 3.95, -10.05);
               vec3 dL = scrPosL - vWorldPos, dC = scrPosC - vWorldPos, dR = scrPosR - vWorldPos;
-              float attL = 1.0 / (1.0 + 0.017 * dot(dL, dL));
-              float attC = 1.0 / (1.0 + 0.013 * dot(dC, dC));
-              float attR = 1.0 / (1.0 + 0.017 * dot(dR, dR));
+              float attL = 1.0 / (1.0 + 0.015 * dot(dL, dL));
+              float attC = 1.0 / (1.0 + 0.011 * dot(dC, dC));
+              float attR = 1.0 / (1.0 + 0.015 * dot(dR, dR));
               vec3 dirC = normalize(dC);
-              vec3 screenIrr = (
-                uScreenColL * (max(dot(N, normalize(dL)), 0.0) * 0.80 + 0.24) * attL +
-                uScreenColC * (max(dot(N, dirC), 0.0) * 0.95 + 0.28) * attC +
-                uScreenColR * (max(dot(N, normalize(dR)), 0.0) * 0.80 + 0.24) * attR
-              ) * 1.62 * scrGate;
 
-              // Halation quầng sáng quanh khung màn chiếu như mắt người nhìn trong phòng tối thật
-              if (vWorldPos.z < -9.55) {
-                float haloMask = exp(-max(0.0, vWorldPos.z - (-10.35)) * 1.8);
-                screenIrr += uScreenColC * haloMask * 0.42 * scrGate;
+              // Wrap-lighting tự nhiên cho da người (8.3) và vải áo (8.0) để không bị gắt bóng đen cứng
+              bool isCloth = (vMat > 7.85 && vMat < 8.10);
+              bool isHair  = (vMat > 8.15 && vMat < 8.25);
+              bool isSkin  = (vMat > 8.25 && vMat < 8.40);
+              bool isHuman = (isCloth || isHair || isSkin);
+              float wrap = isSkin ? 0.42 : (isHuman ? 0.30 : 0.18);
+
+              vec3 screenIrr = (
+                uScreenColL * (max((dot(N, normalize(dL)) + wrap) / (1.0 + wrap), 0.0) * 0.88 + 0.12) * attL +
+                uScreenColC * (max((dot(N, dirC) + wrap) / (1.0 + wrap), 0.0) * 1.05 + 0.16) * attC +
+                uScreenColR * (max((dot(N, normalize(dR)) + wrap) / (1.0 + wrap), 0.0) * 0.88 + 0.12) * attR
+              ) * 1.52 * scrGate;
+
+              // Quầng sáng hắt nhẹ lên vòm trần đen mờ và hốc màn chiếu (giống hệt vùng trần sáng dịu trong Ảnh 1, 2, 4!)
+              if (vWorldPos.y > 7.1) {
+                float ceilGrazing = exp(-max(0.0, vWorldPos.z - (-9.8)) * 0.16);
+                screenIrr += uScreenColC * ceilGrazing * 0.55 * scrGate;
+              }
+              if (vWorldPos.z < -9.35) {
+                float haloMask = exp(-max(0.0, vWorldPos.z - (-10.15)) * 2.1);
+                screenIrr += uScreenColC * haloMask * 0.24 * scrGate;
               }
 
-              float sconcePower = mix(0.42, 1.55, uLights);
-              float wallPower = mix(0.72, 1.65, uLights);
-              bool sideL = (vWorldPos.x < -8.65);
-              bool sideR = (vWorldPos.x >  8.65);
-              vec3 sconceLight =
-                evalSconce(vec3(-8.82, 4.85, -5.8), N, sideL, sconcePower, wallPower) +
-                evalSconce(vec3(-8.82, 4.85, -0.8), N, sideL, sconcePower, wallPower) +
-                evalSconce(vec3(-8.82, 4.85,  4.2), N, sideL, sconcePower, wallPower) +
-                evalSconce(vec3( 8.82, 4.85, -5.8), N, sideR, sconcePower, wallPower) +
-                evalSconce(vec3( 8.82, 4.85, -0.8), N, sideR, sconcePower, wallPower) +
-                evalSconce(vec3( 8.82, 4.85,  4.2), N, sideR, sconcePower, wallPower);
+              // Ánh sáng xanh ngọc hắt nhẹ quanh hốc biển EXIT bên phải màn chiếu (x=7.36, y=3.04, z=-9.44)
+              vec3 dExit = vec3(7.32, 2.98, -9.38) - vWorldPos;
+              float exitD2 = dot(dExit, dExit);
+              vec3 exitGlow = exitD2 < 5.5 ? vec3(0.04, 0.88, 0.38) * (0.28 / (1.0 + 3.2 * exitD2)) : vec3(0.0);
 
-              float centerAisle = exp(-abs(vWorldPos.x) * 1.25) * exp(-max(0.0, vWorldPos.y - 5.2) * 0.9);
-              vec3 stepGlow = vec3(1.0, 0.78, 0.24) * centerAisle * 0.26;
-              vec3 houseLight = mix(vec3(0.052, 0.048, 0.082), vec3(0.78, 0.68, 0.56), uLights) * (max(N.y, 0.0) * 0.65 + 0.35);
+              // Quầng đèn rọi tròn trắng ấm trên mặt thảm bậc thang 2 lối đi (x = ±2.86 ở hàng B, D, F — đúng chấm đèn sáng tròn trong Ảnh 1 & 2!)
+              vec3 aislePool = vec3(0.0);
+              if (vWorldPos.y < 3.5 && (abs(abs(vWorldPos.x) - 2.95) < 1.05)) {
+                float axSign = vWorldPos.x < 0.0 ? -2.86 : 2.86;
+                for (int k = 0; k < 3; k++) {
+                  float rIdxF = float(k * 2 + 1);
+                  vec3 puckPos = vec3(axSign, 0.28 + rIdxF * 0.49, -5.12 + rIdxF * 1.94 + 0.52);
+                  vec3 dp = vWorldPos - puckPos;
+                  float dist2 = dp.x * dp.x + dp.z * dp.z + dp.y * dp.y * 4.0;
+                  aislePool += vec3(1.0, 0.90, 0.72) * exp(-dist2 * 14.0) * 0.75;
+                }
+                // Ánh xanh lá li ti hắt sát mép bậc thang từ bảng số ghế LED xanh
+                float edgeDist = abs(abs(vWorldPos.x) - 3.58);
+                if (edgeDist < 0.35) {
+                  aislePool += vec3(0.03, 0.75, 0.28) * exp(-edgeDist * 12.0) * 0.14;
+                }
+              }
+
+              // Đèn tường chỉ bật khi uLights > 0 (bật đèn rạp); khi tắt đèn xem phim = 0.0 tuyệt đối!
+              float lampPow = pow(clamp(uLights, 0.0, 1.0), 1.4) * 1.45;
+              bool sideL = (vWorldPos.x < -8.25);
+              bool sideR = (vWorldPos.x >  8.25);
+              vec3 sconceLight = lampPow > 0.002 ? (
+                evalWallWasher(vec3(-8.42, 3.85, -3.9), N, sideL, lampPow) +
+                evalWallWasher(vec3(-8.42, 3.85,  0.5), N, sideL, lampPow) +
+                evalWallWasher(vec3(-8.42, 3.85,  4.9), N, sideL, lampPow) +
+                evalWallWasher(vec3( 8.42, 3.85, -3.9), N, sideR, lampPow) +
+                evalWallWasher(vec3( 8.42, 3.85,  0.5), N, sideR, lampPow) +
+                evalWallWasher(vec3( 8.42, 3.85,  4.9), N, sideR, lampPow)
+              ) : vec3(0.0);
+
+              // Nền tối sâu thẳm chân thực khi tắt đèn (0.0065 thay vì 0.052 sáng giả tạo!)
+              vec3 houseLight = mix(vec3(0.007, 0.007, 0.010), vec3(0.74, 0.66, 0.56), uLights) * (max(N.y, 0.0) * 0.65 + 0.35);
 
               bool isMetal = (vMat > 1.8 && vMat < 2.5);
-              bool isViewer = (vMat > 7.8 && vMat < 8.5);
-              vec3 envLight = vec3(0.042, 0.038, 0.062) + houseLight + screenIrr + sconceLight + stepGlow;
+              vec3 envLight = vec3(0.005, 0.005, 0.008) + houseLight + screenIrr + sconceLight + aislePool + exitGlow;
+
+              // Subsurface tán xạ hồng ấm dưới da người thật (tai, má, cổ, bàn tay)
+              if (isSkin) {
+                float sss = clamp(0.35 - dot(N, dirC), 0.0, 1.0) * 0.22 * scrGate;
+                envLight += uScreenColC * vec3(1.05, 0.52, 0.38) * sss;
+              }
+
               vec3 color = isMetal
-                ? baseAlbedo * (vec3(0.22, 0.18, 0.12) + sconceLight * 0.55 + houseLight * 0.65 + length(screenIrr) * 0.22) * ao
+                ? baseAlbedo * (vec3(0.04, 0.04, 0.05) + sconceLight * 0.60 + houseLight * 0.70 + screenIrr * 0.55) * ao
                 : baseAlbedo * envLight * ao;
 
               vec3 Hscr = normalize(dirC + V);
               float ndh = max(dot(N, Hscr), 0.0);
               float ndv = max(dot(N, V), 0.0);
-              float fresnel = pow(1.0 - ndv, 3.6);
+              float fresnel = pow(1.0 - ndv, 3.4);
+              vec3 localScrCol = vWorldPos.x < -1.6 ? mix(uScreenColC, uScreenColL, 0.65) : (vWorldPos.x > 1.6 ? mix(uScreenColC, uScreenColR, 0.65) : uScreenColC);
 
-              // Tán xạ ánh sáng viền màn chiếu (Screen-Rim Backscatter) lên đầu/vai khán giả phía trước & thành ghế da!
-              if ((vMat > 0.5 && vMat < 1.5) || (vMat > 3.5 && vMat < 4.5) || isViewer) {
-                float velvetRim = pow(1.0 - ndv, isViewer ? 2.15 : 2.65);
-                float forwardScatter = smoothstep(-0.2, 0.85, dot(-V, dirC));
-                vec3 localScrCol = vWorldPos.x < -1.8 ? mix(uScreenColC, uScreenColL, 0.65) : (vWorldPos.x > 1.8 ? mix(uScreenColC, uScreenColR, 0.65) : uScreenColC);
-                vec3 rimTint = isViewer
-                  ? (localScrCol * (0.92 + 0.72 * forwardScatter) + baseAlbedo * 0.48 + vec3(0.11, 0.10, 0.14))
-                  : mix(baseAlbedo * 2.1 + vec3(0.06), localScrCol * 0.90 + baseAlbedo, 0.48 * scrGate);
-                color += (rimTint * velvetRim * (isViewer ? (0.46 + 0.20 * uLights) : (0.28 + 0.22 * uLights)) + localScrCol * pow(ndh, 16.0) * 0.18 * scrGate) * ao;
+              // TÁN XẠ VIỀN MÀN CHIẾU (SCREEN-RIM BACKSCATTER) LÊN ĐỈNH GHẾ DA ĐỎ, TÓC, VAI ÁO CHOÀNG & DA NGƯỜI (Linh hồn của 4 bức ảnh thật!)
+              if ((vMat > 0.5 && vMat < 1.5) || isHuman) {
+                float forwardScatter = smoothstep(-0.25, 0.88, dot(-V, dirC));
+                float topFacing = clamp(N.y * 0.65 + 0.35, 0.0, 1.0);
+                if (isHair) {
+                  // Phản xạ sợi tóc Anisotropic + Halo viền tóc óng mượt nổi bật trên nền tối
+                  float hairRim = pow(1.0 - ndv, 2.25) * (0.45 + 0.55 * topFacing);
+                  float anisoSheen = pow(1.0 - abs(N.y * 0.82 - 0.22), 8.0) * max(dot(N, dirC) + 0.35, 0.0);
+                  color += (localScrCol * (0.52 * hairRim * (0.65 + 0.65 * forwardScatter) + 0.16 * anisoSheen) * scrGate) * ao;
+                } else if (isSkin) {
+                  float skinRim = pow(1.0 - ndv, 2.8) * (0.4 + 0.6 * forwardScatter);
+                  color += (localScrCol * 0.34 * skinRim + localScrCol * pow(ndh, 22.0) * 0.14) * scrGate * ao;
+                } else if (isCloth) {
+                  // Nếp vải hoodie / khăn choàng bắt sáng viền dịu như nhung cotton (giống hệt vai áo trong Ảnh 2 & 4!)
+                  float clothRim = pow(1.0 - ndv, 2.65) * (0.45 + 0.55 * topFacing);
+                  color += (localScrCol * baseAlbedo * 0.72 * clothRim * (0.55 + 0.55 * forwardScatter) * scrGate) * ao;
+                } else {
+                  // Viền da đỏ trên đỉnh gối tựa đầu ghế trước bắt sáng màn chiếu ấm áp (giống hệt hàng ghế trước trong Ảnh 1, 2, 4!)
+                  float leatherRim = pow(1.0 - ndv, 2.85) * topFacing;
+                  color += (mix(baseAlbedo * 1.6, localScrCol * 0.65 + baseAlbedo, 0.55) * leatherRim * (0.34 * scrGate + 0.18 * uLights)
+                            + localScrCol * pow(ndh, 20.0) * 0.14 * scrGate) * ao;
+                }
               }
+
+              // Tia phản chiếu sắc nét trên gọng kính mảnh, vành đèn âm trần & giá loa
               if (isMetal) {
-                vec3 Hup = normalize(vec3(0.15, 0.92, 0.35) + V);
-                color += baseAlbedo * (pow(ndh, 36.0) * 0.95 * scrGate + pow(max(dot(N, Hup), 0.0), 26.0) * (0.65 + 0.85 * uLights) + fresnel * 0.32);
+                color += (localScrCol * pow(ndh, 42.0) * 0.85 * scrGate + baseAlbedo * fresnel * 0.25 * scrGate);
               }
+
+              // Phản chiếu mờ sàn đen trước màn chiếu
               if (vMat > 4.5 && vMat < 5.5 && N.y > 0.7) {
                 vec3 R = reflect(-V, vec3(0.0, 1.0, 0.0));
                 if (R.z < -0.05) {
-                  float tHit = (-10.30 - vWorldPos.z) / R.z;
+                  float tHit = (-10.12 - vWorldPos.z) / R.z;
                   vec3 hit = vWorldPos + R * tHit;
-                  float u = (hit.x + 6.48) / 12.96, v = 1.0 - (hit.y - 1.08) / 5.78;
+                  float u = (hit.x + 6.48) / 12.96, v = 1.0 - (hit.y - 1.15) / 5.72;
                   if (u > 0.0 && u < 1.0 && v > 0.0 && v < 1.0) {
-                    vec3 r1 = texture2D(uScreenTex, vec2(clamp(u - 0.015, 0.01, 0.99), clamp(v, 0.01, 0.99))).rgb;
-                    vec3 r2 = texture2D(uScreenTex, vec2(clamp(u, 0.01, 0.99), clamp(v, 0.01, 0.99))).rgb;
-                    vec3 r3 = texture2D(uScreenTex, vec2(clamp(u + 0.015, 0.01, 0.99), clamp(v, 0.01, 0.99))).rgb;
-                    vec3 refl = (r1 + r2 * 2.0 + r3) * 0.25;
-                    float edgeMask = smoothstep(0.0, 0.06, u) * smoothstep(1.0, 0.94, u) * smoothstep(0.0, 0.08, v) * smoothstep(1.0, 0.82, v);
-                    float distFade = exp(-max(0.0, vWorldPos.z - (-9.8)) * 0.42);
-                    color += refl * edgeMask * distFade * (0.30 + 0.48 * fresnel) * scrGate;
+                    vec3 refl = texture2D(uScreenTex, vec2(clamp(u, 0.02, 0.98), clamp(v, 0.02, 0.98))).rgb;
+                    float distFade = exp(-max(0.0, vWorldPos.z - (-9.6)) * 0.65);
+                    color += refl * distFade * (0.12 + 0.22 * fresnel) * scrGate;
                   }
                 }
               }
 
-              float distCam = length(uCamPos - vWorldPos);
-              color = mix(color, (vec3(0.014, 0.013, 0.020) + uScreenColC * 0.022 * scrGate), clamp((distCam - 14.0) * 0.014, 0.0, 0.20));
+              // ACES Filmic Tone Mapping chuẩn điện ảnh giữ độ tương phản sâu đen tuyền của phòng chiếu thật
               color = (color * (2.51 * color + 0.03)) / (color * (2.43 * color + 0.59) + 0.14);
-              color = pow(clamp(color, 0.0, 1.0), vec3(0.95));
-              float filmGrain = (hash21(gl_FragCoord.xy + fract(uTime)) - 0.5) * 0.010;
+              color = pow(clamp(color, 0.0, 1.0), vec3(0.96));
+              float filmGrain = (hash21(gl_FragCoord.xy + fract(uTime)) - 0.5) * 0.008;
               gl_FragColor = vec4(clamp(color + filmGrain, 0.0, 1.0), 1.0);
             }
           `);
@@ -16740,15 +17124,17 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 if (ratio < 1.0) {
                   uv.y = (uv.y - 0.5) / ratio + 0.5;
                 } else {
-                  float softFit = mix(1.0, ratio, 0.20);
+                  float softFit = mix(1.0, ratio, 0.18);
                   uv.x = (uv.x - 0.5) * softFit + 0.5;
                 }
               }
               if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
-                gl_FragColor = vec4(0.008, 0.008, 0.012, 1.0);
+                gl_FragColor = vec4(0.003, 0.003, 0.005, 1.0);
                 return;
               }
-              vec3 c = texture2D(uTex, uv).rgb;
+              // Viền đen mịn 0.6% sát mép khung masking thực tế
+              float edge = smoothstep(0.0, 0.006, uv.x) * smoothstep(1.0, 0.994, uv.x) * smoothstep(0.0, 0.008, uv.y) * smoothstep(1.0, 0.992, uv.y);
+              vec3 c = texture2D(uTex, uv).rgb * edge;
               gl_FragColor = vec4(c, 1.0);
             }
           `);
@@ -16759,7 +17145,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             void main() {
               vAlpha = aAlpha; vWPos = aPos;
               gl_Position = uProj * uView * vec4(aPos, 1.0);
-              gl_PointSize = clamp(44.0 / gl_Position.w, 1.6, 5.0);
+              gl_PointSize = clamp(36.0 / gl_Position.w, 1.4, 4.2);
             }
           `, `
             precision mediump float; varying float vAlpha; varying vec3 vWPos;
@@ -16769,14 +17155,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               if (uIsPoint > 0.5) {
                 float r = length(gl_PointCoord - vec2(0.5));
                 if (r > 0.5) discard;
-                mask = smoothstep(0.5, 0.04, r);
+                mask = smoothstep(0.5, 0.05, r);
               }
-              float ray = 0.82 + 0.18 * sin(vWPos.x * 4.4 + uTime * 1.6);
+              float ray = 0.85 + 0.15 * sin(vWPos.x * 4.2 + uTime * 1.4);
               gl_FragColor = vec4(uBeamCol * ray, vAlpha * mask);
             }
           `);
 
-          // Cache 1 lần toàn bộ vị trí Uniform & Attribute (tránh 24 lệnh tra chuỗi mỗi frame!)
           locRoom = {
             aPos: gl.getAttribLocation(progRoom, "aPos"),
             aNorm: gl.getAttribLocation(progRoom, "aNorm"),
@@ -16840,12 +17225,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
           avatarGPU = { bPos: gl.createBuffer(), bNorm: gl.createBuffer(), bCol: gl.createBuffer(), bMat: gl.createBuffer(), bAO: gl.createBuffer(), bIdx: gl.createBuffer(), count: 0 };
 
+          // Màn chiếu phẳng cong cực nhẹ chuẩn Multiplex hiện đại (độ cong 0.34m tinh tế thay vì cong gắt)
           const scrVerts = [], scrUVs = [], scrIdx = [];
           for (let i = 0; i <= 32; i++) {
             const u = i / 32;
             const x = -6.48 + u * 12.96;
-            const z = -10.12 - Math.cos((u - 0.5) * Math.PI) * 0.74;
-            scrVerts.push(x, 1.08, z, x, 6.86, z);
+            const z = -10.02 - Math.cos((u - 0.5) * Math.PI) * 0.34;
+            scrVerts.push(x, 1.15, z, x, 6.87, z);
             scrUVs.push(u, 1.0, u, 0.0);
             if (i < 32) { const b = i * 2; scrIdx.push(b, b + 1, b + 3, b, b + 3, b + 2); }
           }
@@ -16865,19 +17251,18 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           ensureStaticPosterUploaded("");
           initOrGetVideoTexture();
 
+          // Tia sáng máy chiếu siêu mỏng tinh tế từ ô kính hậu (không bị mù sương giả tạo)
           const beamPos = [
-             0.0, 6.65, 9.32, -6.35, 6.84, -10.12,  6.35, 6.84, -10.12,
-             0.0, 6.65, 9.32, -6.35, 1.10, -10.12,  6.35, 1.10, -10.12,
-             0.0, 6.65, 9.32, -6.35, 6.84, -10.12, -6.35, 1.10, -10.12,
-             0.0, 6.65, 9.32,  6.35, 6.84, -10.12,  6.35, 1.10, -10.12,
-             0.0, 6.65, 9.32, -4.10, 4.10, -10.45,  4.10, 4.10, -10.45
+             0.0, 6.35, 7.90, -6.35, 6.84, -10.02,  6.35, 6.84, -10.02,
+             0.0, 6.35, 7.90, -6.35, 1.16, -10.02,  6.35, 1.16, -10.02,
+             0.0, 6.35, 7.90, -4.10, 4.10, -10.25,  4.10, 4.10, -10.25
           ];
-          const beamAlpha = [0.11,0.008,0.008, 0.07,0.005,0.005, 0.09,0.007,0.007, 0.09,0.007,0.007, 0.14,0.012,0.012];
+          const beamAlpha = [0.055,0.003,0.003, 0.035,0.002,0.002, 0.075,0.005,0.005];
           beamBuffers = {
             bPos: mkB(new Float32Array(beamPos), gl.ARRAY_BUFFER),
             bAlpha: mkB(new Float32Array(beamAlpha), gl.ARRAY_BUFFER),
             dPos: gl.createBuffer(),
-            dAlpha: mkB(new Float32Array(DUST_COUNT).fill(0.40), gl.ARRAY_BUFFER)
+            dAlpha: mkB(new Float32Array(DUST_COUNT).fill(0.24), gl.ARRAY_BUFFER)
           };
 
           if (typeof ResizeObserver === "function") {
@@ -16899,7 +17284,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           syncChairHighlightsO1();
           syncAvatarsBatch();
 
-          // Warm-up 1 lệnh vẽ siêu nhỏ để trình biên dịch ANGLE/D3D11 hoàn tất biên dịch HLSL ngay trong lúc rảnh!
+          // Warm-up biên dịch HLSL ngay trong lúc rảnh
           gl.viewport(0, 0, 16, 16);
           gl.useProgram(progRoom);
           gl.activeTexture(gl.TEXTURE0);
@@ -16918,7 +17303,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           return true;
         }
 
-        // Không gọi getBoundingClientRect() mỗi frame nữa -> triệt tiêu 100% Forced Layout Reflow!
         function resize(forceMeasure = false) {
           if (!glCanvas || !gl) return;
           if (forceMeasure || st.obsW < 20 || st.obsH < 20) {
@@ -16957,7 +17341,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               lastX = e.clientX; lastY = e.clientY;
               if (st.mode === "seat" || st.mode === "focus") {
                 st.tPovYaw = Math.max(-2.75, Math.min(2.75, st.tPovYaw - dx * 0.0055));
-                st.tPovPitch = Math.max(-0.58, Math.min(0.68, st.tPovPitch + dy * 0.0048));
+                st.tPovPitch = Math.max(-0.62, Math.min(0.68, st.tPovPitch + dy * 0.0048));
               } else {
                 st.tYaw -= dx * 0.007;
                 st.tPitch = Math.max(0.12, Math.min(1.16, st.tPitch + dy * 0.006));
@@ -17014,7 +17398,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           glCanvas.addEventListener("wheel", (e) => {
             if (st.mode === "orbit") {
               e.preventDefault();
-              st.tDist = Math.max(10.5, Math.min(27.5, st.tDist + e.deltaY * 0.013));
+              st.tDist = Math.max(10.0, Math.min(25.5, st.tDist + e.deltaY * 0.013));
               wakeUp();
             }
           }, { passive: false });
@@ -17065,7 +17449,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           if (st.mode === "focus") {
             st.povYaw += (st.tPovYaw - st.povYaw) * 0.14;
             st.povPitch += (st.tPovPitch - st.povPitch) * 0.14;
-            const fx = mySeat.x * 0.15, fy = 3.95, fz = -3.65;
+            const fx = mySeat.x * 0.12, fy = 3.98, fz = -3.65;
             const yaw = st.povYaw * 0.35, pitch = st.povPitch * 0.35;
             desPos = [fx, fy, fz];
             desLook = [
@@ -17077,36 +17461,37 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           } else if (st.mode === "seat") {
             st.povYaw += (st.tPovYaw - st.povYaw) * 0.15;
             st.povPitch += (st.tPovPitch - st.povPitch) * 0.15;
-            // Nhịp thở rất nhẹ (±1.6mm) khi ngồi xem trực tiếp trong rạp cho cảm giác cơ thể thật
-            const breathY = cfg.useLiveVideo ? Math.sin(tSec * 1.32) * 0.0018 : 0.0;
-            const ex = mySeat.x, ey = mySeat.y + 1.18 + breathY, ez = mySeat.z + 0.09;
-            const scrAimX = mySeat.x * 0.16;
-            const scrAimY = 3.48 + (2 - mySeat.rIdx) * 0.06;
-            const scrAimZ = -10.35;
+            // Tầm mắt ngồi thực tế (+1.07m từ sàn ghế) để thấy tự nhiên viền đỏ tựa ghế phía trước, bậc thang LED & vòm trần đúng tỉ lệ 4 bức ảnh thật!
+            const breathY = cfg.useLiveVideo ? Math.sin(tSec * 1.28) * 0.0016 : 0.0;
+            const ex = mySeat.x, ey = mySeat.y + 1.07 + breathY, ez = mySeat.z + 0.08;
+            const scrAimX = mySeat.x * 0.14;
+            const scrAimY = 3.56 + (2 - mySeat.rIdx) * 0.08;
+            const scrAimZ = -10.15;
             const baseYaw = Math.atan2(scrAimX - ex, -(scrAimZ - ez));
             const basePitch = Math.atan2(scrAimY - ey, Math.hypot(scrAimX - ex, scrAimZ - ez));
             const finalYaw = baseYaw + st.povYaw;
-            const finalPitch = Math.max(-0.65, Math.min(0.75, basePitch + st.povPitch));
+            const finalPitch = Math.max(-0.68, Math.min(0.75, basePitch + st.povPitch));
             desPos = [ex, ey, ez];
             desLook = [
               ex + Math.sin(finalYaw) * Math.cos(finalPitch) * 8.0,
               ey + Math.sin(finalPitch) * 8.0,
               ez - Math.cos(finalYaw) * Math.cos(finalPitch) * 8.0
             ];
-            const rowFovTable = [0.86, 0.80, 0.76, 0.72, 0.69, 0.66];
-            targetFov = rowFovTable[mySeat.rIdx] || 0.74;
+            // Góc rộng ống kính mắt người / camera 26mm chuẩn điện ảnh (thấy được cả vòm trần, lối đi bậc thang LED & hàng ghế trước)
+            const rowFovTable = [1.02, 0.98, 0.94, 0.91, 0.88, 0.85];
+            targetFov = rowFovTable[mySeat.rIdx] || 0.80;
           } else {
             st.yaw += (st.tYaw - st.yaw) * 0.14;
             st.pitch += (st.tPitch - st.pitch) * 0.14;
             st.dist += (st.tDist - st.dist) * 0.14;
-            const target = [0.0, 2.35, -1.2];
+            const target = [0.0, 2.25, -1.6];
             desPos = [
               target[0] + Math.sin(st.yaw) * Math.cos(st.pitch) * st.dist,
               target[1] + Math.sin(st.pitch) * st.dist,
               target[2] + Math.cos(st.yaw) * Math.cos(st.pitch) * st.dist
             ];
             desLook = target;
-            targetFov = 0.75;
+            targetFov = 0.76;
           }
 
           let maxDelta = Math.abs(targetFov - st.curFov);
@@ -17186,7 +17571,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           const dlCurtain = st.curtainTarget - st.curtainOpen;
           st.curtainOpen += dlCurtain * 0.085;
 
-          // Chọn VideoTexture trực tiếp hoặc PosterTexture (không vẽ lại canvas mỗi frame!)
           let activeTex = posterTexture;
           let activeAspect = 0.0;
           let posterZoom = 1.0;
@@ -17225,11 +17609,11 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             if (activeTex === posterTexture) {
               const statusTxt = hostPausedCurtain ? "TẠM DỪNG CHIẾU" : (isUpcoming ? "SUẤT CHIẾU SẮP BẮT ĐẦU" : "");
               ensureStaticPosterUploaded(statusTxt);
-              posterZoom = 1.015 + 0.012 * Math.sin(t * 0.45);
+              posterZoom = 1.012 + 0.008 * Math.sin(t * 0.45);
             }
           } else {
             ensureStaticPosterUploaded("");
-            posterZoom = 1.012;
+            posterZoom = 1.010;
           }
 
           let dlColor = 0;
@@ -17238,23 +17622,23 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             const dC = st.targetLightC[i] - st.lightC[i];
             const dR = st.targetLightR[i] - st.lightR[i];
             dlColor = Math.max(dlColor, Math.abs(dL), Math.abs(dC), Math.abs(dR));
-            st.lightL[i] += dL * 0.10;
-            st.lightC[i] += dC * 0.10;
-            st.lightR[i] += dR * 0.10;
-            st.beamCol[i] = Math.min(1.0, st.lightC[i] * 1.12 + 0.06);
+            st.lightL[i] += dL * 0.11;
+            st.lightC[i] += dC * 0.11;
+            st.lightR[i] += dR * 0.11;
+            st.beamCol[i] = Math.min(1.0, st.lightC[i] * 1.08 + 0.04);
           }
 
-          const mySeat = seatById[st.mySeatId] || seats3D[28];
+          const mySeat = seatById[st.mySeatId] || seats3D[27];
           const camDelta = lerpCamera3D(mySeat, t);
 
           const viewAspect = st.W / Math.max(1, st.H);
           const effFov = viewAspect < 1.15
             ? Math.min(1.68, 2.0 * Math.atan(Math.tan(st.curFov * 0.5) * (1.28 / Math.max(0.42, viewAspect))))
             : st.curFov;
-          const mProj = mat4Perspective(effFov, viewAspect, 0.20, 70.0);
+          const mProj = mat4Perspective(effFov, viewAspect, 0.16, 65.0);
           const mView = mat4LookAt(st.camPos, st.camLook, [0, 1, 0]);
 
-          gl.clearColor(0.014, 0.012, 0.020, 1.0);
+          gl.clearColor(0.004, 0.004, 0.006, 1.0);
           gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
           gl.enable(gl.DEPTH_TEST);
           gl.disable(gl.BLEND);
@@ -17278,13 +17662,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           if (st.isCoupleOnly) drawMesh(chairGPU, chairGPU.bIdxCouple, chairGPU.countCouple);
           else drawMesh(chairGPU, chairGPU.bIdxAll, chairGPU.countAll);
           drawMesh(avatarGPU);
-          drawMesh(gpuCurtain);
+          if (st.curtainOpen < 0.992) drawMesh(gpuCurtain);
 
           const isInside = st.mode !== "orbit";
           if (isInside || st.camPos[0] > -6.5) drawMesh(gpuL);
           if (isInside || st.camPos[0] <  6.5) drawMesh(gpuR);
-          if (isInside || st.camPos[2] <  7.5) drawMesh(gpuRear);
-          if (isInside || st.camPos[1] <  7.6) drawMesh(gpuCeil);
+          if (isInside || st.camPos[2] <  6.8) drawMesh(gpuRear);
+          if (isInside || st.camPos[1] <  7.4) drawMesh(gpuCeil);
 
           // Màn chiếu 3D Unlit SRGB
           gl.useProgram(progScreen);
@@ -17292,15 +17676,15 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           gl.uniformMatrix4fv(locScreen.uView, false, mView);
           gl.uniform1i(locScreen.uTex, 0);
           gl.uniform1f(locScreen.uSrcAspect, activeAspect);
-          gl.uniform1f(locScreen.uScreenAspect, 12.96 / 5.78);
+          gl.uniform1f(locScreen.uScreenAspect, 12.96 / 5.72);
           gl.uniform1f(locScreen.uPosterZoom, posterZoom);
           gl.bindBuffer(gl.ARRAY_BUFFER, scrBuffers.bPos); gl.enableVertexAttribArray(locScreen.aPos); gl.vertexAttribPointer(locScreen.aPos, 3, gl.FLOAT, false, 0, 0);
           gl.bindBuffer(gl.ARRAY_BUFFER, scrBuffers.bUV); gl.enableVertexAttribArray(locScreen.aUV); gl.vertexAttribPointer(locScreen.aUV, 2, gl.FLOAT, false, 0, 0);
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, scrBuffers.bIdx);
           gl.drawElements(gl.TRIANGLES, scrBuffers.count, idxType, 0);
 
-          // Luồng tia máy chiếu Volumetric + bụi lơ lửng
-          const beamVis = Math.max(0.0, (1.0 - st.lightsLevel * 0.80) * (0.20 + 0.80 * st.curtainOpen));
+          // Luồng tia máy chiếu Volumetric mảnh nhẹ
+          const beamVis = Math.max(0.0, (1.0 - st.lightsLevel * 0.85) * (0.15 + 0.85 * st.curtainOpen));
           if (beamVis > 0.02 && st.mode !== "focus") {
             gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE); gl.depthMask(false);
             gl.useProgram(progBeam);
@@ -17312,14 +17696,14 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             gl.uniform1f(locBeam.uIsPoint, 0.0);
             gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.bPos); gl.enableVertexAttribArray(locBeam.aPos); gl.vertexAttribPointer(locBeam.aPos, 3, gl.FLOAT, false, 0, 0);
             gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.bAlpha); gl.enableVertexAttribArray(locBeam.aAlpha); gl.vertexAttribPointer(locBeam.aAlpha, 1, gl.FLOAT, false, 0, 0);
-            gl.drawArrays(gl.TRIANGLES, 0, 15);
+            gl.drawArrays(gl.TRIANGLES, 0, 9);
 
             gl.uniform1f(locBeam.uIsPoint, 1.0);
             for (let i = 0; i < DUST_COUNT; i++) {
-              const d = dustSeeds[i], prog = (d.t + t * 0.02 * d.sp) % 1.0;
-              dustFloatArr[i*3]   = d.u * (0.28 + prog * 5.4) + Math.sin(t * 0.8 + d.ph) * 0.16;
-              dustFloatArr[i*3+1] = (6.65 - prog * 2.65) + d.v * (0.16 + prog * 2.2) + Math.cos(t * 0.7 + d.ph) * 0.12;
-              dustFloatArr[i*3+2] = 9.2 - prog * 19.0;
+              const d = dustSeeds[i], prog = (d.t + t * 0.018 * d.sp) % 1.0;
+              dustFloatArr[i*3]   = d.u * (0.24 + prog * 5.2) + Math.sin(t * 0.7 + d.ph) * 0.14;
+              dustFloatArr[i*3+1] = (6.35 - prog * 2.45) + d.v * (0.14 + prog * 2.0) + Math.cos(t * 0.6 + d.ph) * 0.10;
+              dustFloatArr[i*3+2] = 7.8 - prog * 17.5;
             }
             gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.dPos); gl.bufferData(gl.ARRAY_BUFFER, dustFloatArr, gl.DYNAMIC_DRAW); gl.vertexAttribPointer(locBeam.aPos, 3, gl.FLOAT, false, 0, 0);
             gl.bindBuffer(gl.ARRAY_BUFFER, beamBuffers.dAlpha); gl.vertexAttribPointer(locBeam.aAlpha, 1, gl.FLOAT, false, 0, 0);
@@ -17328,24 +17712,24 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           }
 
           // ===================================================================
-          // LỚP HUD 2D KHÔNG GIAN 3D: NHÃN KHÁN GIẢ CÙNG PHÒNG, MIC SÓNG ÂM, CHAT & EMOJI BAY
+          // LỚP HUD 2D KHÔNG GIAN 3D: NHÃN KHÁN GIẢ THẬT CÙNG PHÒNG, MIC SÓNG ÂM, CHAT & EMOJI BAY
           // ===================================================================
           hctx.clearRect(0, 0, st.W, st.H);
           if (st.mode === "orbit") {
             for (const s of seats3D) {
-              const hp = projectHUD([s.x, s.y + 0.55, s.z + 0.10], mView, mProj);
+              const hp = projectHUD([s.x, s.y + 0.52, s.z + 0.10], mView, mProj);
               s._hit = hp ? { x: hp.x, y: hp.y, w: hp.w, r: Math.max(8, 195 / hp.w) } : null;
             }
             hctx.font = "700 10px ui-monospace, monospace"; hctx.textAlign = "center";
             ROWS_3D.forEach((row, rIdx) => {
               if (st.isCoupleOnly && row !== "F") return;
-              const p = projectHUD([0, 0.39 + rIdx * 0.56, -4.15 + rIdx * 2.25], mView, mProj);
+              const p = projectHUD([-3.02, 0.34 + rIdx * 0.49, -4.20 + rIdx * 1.94], mView, mProj);
               if (p && p.w < 30) {
                 hctx.fillStyle = row === "F" ? "#fde047" : (row === "D" || row === "E") ? "#fda4af" : "rgba(255,255,255,0.68)";
                 hctx.fillText(row, p.x, p.y);
               }
             });
-            const mp = projectHUD([mySeat.x, mySeat.y + 1.44, mySeat.z + 0.19], mView, mProj);
+            const mp = projectHUD([mySeat.x, mySeat.y + 1.36, mySeat.z + 0.18], mView, mProj);
             if (mp) renderViewerBadge2D(mp.x, mp.y, `Ghế ${mySeat.id} (Bạn)`, { isMine: true });
           }
 
@@ -17362,12 +17746,12 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             }
             st.nameplateAlpha += (targetTagAlpha - st.nameplateAlpha) * 0.12;
 
-            // Vẽ nhãn tên / trạng thái nói Mic / đang gõ phím / bong bóng chat của từng khán giả cùng phòng!
             for (const [sid, occ] of Object.entries(st.occupied)) {
               if (sid === st.mySeatId && st.mode === "seat") continue;
+              if (!occ.name) continue;
               const sObj = seatById[sid];
               if (!sObj) continue;
-              const hp = projectHUD([sObj.x, sObj.y + 1.38, sObj.z + 0.19], mView, mProj);
+              const hp = projectHUD([sObj.x, sObj.y + 1.32, sObj.z + 0.18], mView, mProj);
               if (!hp || hp.w > 26 || hp.x < -60 || hp.x > st.W + 60 || hp.y < -30 || hp.y > st.H + 30) continue;
 
               const bVal = state.seatBubbles?.[prefix + sid];
@@ -17389,7 +17773,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               }
             }
 
-            // Vẽ các Emoji cảm xúc bay 3D trực tiếp từ ghế của người vừa thả cảm xúc!
             if (st.floatingEmojis3D.length) {
               hctx.save();
               hctx.textAlign = "center";
@@ -17400,7 +17783,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 if (age >= 1.0) { st.floatingEmojis3D.splice(i, 1); continue; }
                 const sObj = seatById[fe.seatId];
                 if (!sObj) continue;
-                const riseY = sObj.y + 1.32 + age * 1.75;
+                const riseY = sObj.y + 1.28 + age * 1.70;
                 const swayX = sObj.x + Math.sin(age * 6.5 + fe.seed) * 0.18;
                 const ep = projectHUD([swayX, riseY, sObj.z + 0.15], mView, mProj);
                 if (!ep || ep.w > 28) continue;
@@ -17412,16 +17795,15 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               hctx.restore();
             }
           } else if (!cfg.useLiveVideo && st.mode === "orbit") {
-            // Hiển thị tên khách đã đặt ghế khi xoay Toàn cảnh 3D trong hộp thoại Đặt vé
             for (const [sid, occ] of Object.entries(st.occupied)) {
+              if (!occ.name) continue;
               const sObj = seatById[sid];
               if (!sObj) continue;
-              const hp = projectHUD([sObj.x, sObj.y + 1.38, sObj.z + 0.19], mView, mProj);
+              const hp = projectHUD([sObj.x, sObj.y + 1.32, sObj.z + 0.18], mView, mProj);
               if (hp && hp.w < 24) renderViewerBadge2D(hp.x, hp.y, `${occ.name} (${sid})`, { alpha: 0.85 });
             }
           }
 
-          // Chế độ Ngủ Thông Minh 0% GPU trong hộp thoại Đặt vé khi camera, rèm & đèn đã hội tụ êm!
           if (!cfg.useLiveVideo && !st.dragging && camDelta < 0.00035 && Math.abs(dlCurtain) < 0.0005 && Math.abs(dlLights) < 0.0005 && dlColor < 0.001) {
             st.running = false;
             st.rafId = 0;
@@ -17492,7 +17874,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         }
       });
 
-      // Biên dịch sẵn hình học 3D & shader WebGL theo 2 nhịp rảnh rỗi để không tạo Long Task
       const schedule3DIdle = (fn, ms) => {
         if (typeof requestIdleCallback === "function") requestIdleCallback(fn, { timeout: ms + 600 });
         else setTimeout(fn, ms);
@@ -17537,6 +17918,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         setMode(mode) {
           bookingInst.st.mode = mode === "orbit" ? "orbit" : "seat";
           if (bookingInst.st.mode === "seat") { bookingInst.st.tPovYaw = 0; bookingInst.st.tPovPitch = 0; }
+          if (bookingInst.st.initialized) bookingInst.syncChairHighlightsO1();
           if (bookingInst.st.initialized) bookingInst.syncAvatarsBatch();
           syncBookingHud();
           bookingInst.wakeUp();
@@ -17552,7 +17934,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           bookingInst.wakeUp();
         },
         syncBooking(room, seatId) {
-          // Nếu modal còn đang ẩn, chỉ ghi nhận dữ liệu nhẹ mà không ép khởi tạo đồng bộ gây khựng click!
           const m = document.getElementById("booking-modal");
           const isModalVisible = Boolean(m && !m.classList.contains("hidden"));
           if (!bookingInst.st.initialized && !isModalVisible) return;
@@ -17583,7 +17964,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           }
           bookingInst.loadPoster(room?.poster || "");
 
-          const nextSeat = seatId || (st.isCoupleOnly ? "F4" : "B4");
+          const nextSeat = seatId || (st.isCoupleOnly ? "F4" : "D4");
           if (st.mySeatId !== nextSeat && seatId) {
             st.mode = "seat";
             st.tPovYaw = 0; st.tPovPitch = 0;
@@ -17629,7 +18010,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         document.getElementById("r3d-btn-focus")?.classList.toggle("is-active", st.mode === "focus");
         document.getElementById("r3d-btn-orbit")?.classList.toggle("is-active", st.mode === "orbit");
         const seatLbl = document.getElementById("r3d-seat-lbl");
-        if (seatLbl) seatLbl.textContent = st.mySeatId || "D5";
+        if (seatLbl) seatLbl.textContent = st.mySeatId || "D4";
         const barLbl = document.getElementById("bar-3d-view-label");
         if (barLbl) {
           barLbl.textContent = st.mode === "focus" ? "Góc tập trung" : (st.mode === "orbit" ? "Toàn cảnh 3D" : `Ghế ${st.mySeatId}`);
@@ -17665,7 +18046,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           roomInst.st.mode = valid;
           roomInst.st.tPovYaw = 0;
           roomInst.st.tPovPitch = 0;
-          if (roomInst.st.initialized) roomInst.syncAvatarsBatch();
+          if (roomInst.st.initialized) {
+            roomInst.syncChairHighlightsO1();
+            roomInst.syncAvatarsBatch();
+          }
           syncRoom3DHud();
           resetDimmedHudAutoHide();
         },
@@ -17733,7 +18117,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           }
           roomInst.loadPoster(room.poster || "");
 
-          const mySeat = getMySeatInRoom(roomId) || state.bookedTicketsByRoom?.[roomId]?.seatId || (st.isCoupleOnly ? "F4" : "D5");
+          const mySeat = getMySeatInRoom(roomId) || state.bookedTicketsByRoom?.[roomId]?.seatId || (st.isCoupleOnly ? "F4" : "D4");
           if (st.mySeatId !== mySeat) {
             st.mySeatId = mySeat;
             st.tPovYaw = 0;
