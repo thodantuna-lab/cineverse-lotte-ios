@@ -38093,7 +38093,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         }
         const offLink = document.getElementById("hn-selected-official-link");
         if (offLink) {
-          const branchSourceUrl = HANOI_PRICE_DATA?.branches?.[selected.id]?.source || selected.officialUrl || "";
+          const branchSourceUrl = (typeof CINEVERSE_HANOI_DATA !== "undefined" && CINEVERSE_HANOI_DATA?.branches?.[selected.id]?.source) || selected.officialUrl || "";
           offLink.href = branchSourceUrl || selBasket.ticketQuote?.source || pCfg.officialUrl;
           offLink.setAttribute("data-cinema-id", selected.id);
           offLink.setAttribute("data-cinema-name", selected.name);
