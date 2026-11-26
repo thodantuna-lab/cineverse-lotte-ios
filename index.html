@@ -18,13 +18,32 @@
   </script>
   <link rel="apple-touch-icon" href="assets/web-logo.png" />
   <link rel="preload" as="image" href="assets/web-logo.png" fetchpriority="high" />
+  <link rel="preconnect" href="https://cineverse-ea320-default-rtdb.asia-southeast1.firebasedatabase.app" crossorigin />
   <link rel="preconnect" href="https://image.tmdb.org" crossorigin />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preload" as="image" fetchpriority="high"
-        href="https://image.tmdb.org/t/p/w780/ilXdDgVbJUXuBiH8AAvzdjVgAUF.jpg"
-        imagesrcset="https://image.tmdb.org/t/p/w300/ilXdDgVbJUXuBiH8AAvzdjVgAUF.jpg 300w, https://image.tmdb.org/t/p/w500/ilXdDgVbJUXuBiH8AAvzdjVgAUF.jpg 500w, https://image.tmdb.org/t/p/w780/ilXdDgVbJUXuBiH8AAvzdjVgAUF.jpg 780w"
-        imagesizes="(max-width: 640px) 96vw, (max-width: 1024px) 92vw, 780px" />
+  <script>
+    window.__earlyLobbyFetch = fetch("https://cineverse-ea320-default-rtdb.asia-southeast1.firebasedatabase.app/lobby_config/rooms.json", { cache: "no-store" })
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .catch(function() { return null; });
+  </script>
+  <style>
+    #netflix-billboard[data-boot-syncing="1"] #hero-bg-poster,
+    #netflix-billboard[data-boot-syncing="1"] #hero-stage-ambient-glow,
+    #netflix-billboard[data-boot-syncing="1"] #hero-cinema-ambient-halo {
+      opacity: 0 !important;
+    }
+    .cv-nav-count-chip.hidden {
+      display: none !important;
+    }
+    @media (max-width: 639px) {
+      #booking-header-poster,
+      .cv-hide-xs { display: none !important; }
+    }
+    @media (min-width: 640px) {
+      .sm\:inline-flex { display: inline-flex !important; }
+    }
+  </style>
   <style id="tw-precompiled">*,::before,::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x:;--tw-pan-y:;--tw-pinch-zoom:;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position:;--tw-gradient-via-position:;--tw-gradient-to-position:;--tw-ordinal:;--tw-slashed-zero:;--tw-numeric-figure:;--tw-numeric-spacing:;--tw-numeric-fraction:;--tw-ring-inset:;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur:;--tw-brightness:;--tw-contrast:;--tw-grayscale:;--tw-hue-rotate:;--tw-invert:;--tw-saturate:;--tw-sepia:;--tw-drop-shadow:;--tw-backdrop-blur:;--tw-backdrop-brightness:;--tw-backdrop-contrast:;--tw-backdrop-grayscale:;--tw-backdrop-hue-rotate:;--tw-backdrop-invert:;--tw-backdrop-opacity:;--tw-backdrop-saturate:;--tw-backdrop-sepia:;--tw-contain-size:;--tw-contain-layout:;--tw-contain-paint:;--tw-contain-style:}::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x:;--tw-pan-y:;--tw-pinch-zoom:;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position:;--tw-gradient-via-position:;--tw-gradient-to-position:;--tw-ordinal:;--tw-slashed-zero:;--tw-numeric-figure:;--tw-numeric-spacing:;--tw-numeric-fraction:;--tw-ring-inset:;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur:;--tw-brightness:;--tw-contrast:;--tw-grayscale:;--tw-hue-rotate:;--tw-invert:;--tw-saturate:;--tw-sepia:;--tw-drop-shadow:;--tw-backdrop-blur:;--tw-backdrop-brightness:;--tw-backdrop-contrast:;--tw-backdrop-grayscale:;--tw-backdrop-hue-rotate:;--tw-backdrop-invert:;--tw-backdrop-opacity:;--tw-backdrop-saturate:;--tw-backdrop-sepia:;--tw-contain-size:;--tw-contain-layout:;--tw-contain-paint:;--tw-contain-style:}*,::before,::after{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::before,::after{--tw-content:''}html,:host{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-0.25em}sup{top:-0.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type='button']),input:where([type='reset']),input:where([type='submit']){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type='search']{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dl,dd,h1,h2,h3,h4,h5,h6,hr,figure,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}ol,ul,menu{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}button,[role="button"]{cursor:pointer}:disabled{cursor:default}img,svg,video,canvas,audio,iframe,embed,object{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden="until-found"])){display:none}.\!container{width:100% !important}.container{width:100%}@media (min-width:640px){.\!container{max-width:640px !important}.container{max-width:640px}}@media (min-width:768px){.\!container{max-width:768px !important}.container{max-width:768px}}@media (min-width:1024px){.\!container{max-width:1024px !important}.container{max-width:1024px}}@media (min-width:1280px){.\!container{max-width:1280px !important}.container{max-width:1280px}}@media (min-width:1536px){.\!container{max-width:1536px !important}.container{max-width:1536px}}.pointer-events-none{pointer-events:none}.pointer-events-auto{pointer-events:auto}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0px}.inset-x-0{left:0px;right:0px}.inset-x-1{left:0.25rem;right:0.25rem}.inset-x-1\.5{left:0.375rem;right:0.375rem}.inset-x-3{left:0.75rem;right:0.75rem}.inset-x-4{left:1rem;right:1rem}.inset-x-6{left:1.5rem;right:1.5rem}.-bottom-0\.5{bottom:-0.125rem}.-left-\[9999px\]{left:-9999px}.-right-0\.5{right:-0.125rem}.-right-1{right:-0.25rem}.-right-2\.5{right:-0.625rem}.-top-1{top:-0.25rem}.bottom-0{bottom:0px}.bottom-0\.5{bottom:0.125rem}.bottom-1{bottom:0.25rem}.bottom-1\.5{bottom:0.375rem}.bottom-2{bottom:0.5rem}.bottom-2\.5{bottom:0.625rem}.bottom-3{bottom:0.75rem}.bottom-4{bottom:1rem}.bottom-full{bottom:100%}.left-0{left:0px}.left-1\.5{left:0.375rem}.left-1\/2{left:50%}.left-2{left:0.5rem}.left-2\.5{left:0.625rem}.left-3\.5{left:0.875rem}.left-4{left:1rem}.right-0{right:0px}.right-1{right:0.25rem}.right-1\.5{right:0.375rem}.right-2{right:0.5rem}.right-3{right:0.75rem}.right-4{right:1rem}.top-0{top:0px}.top-1\.5{top:0.375rem}.top-1\/2{top:50%}.top-2{top:0.5rem}.top-2\.5{top:0.625rem}.top-3{top:0.75rem}.top-4{top:1rem}.top-full{top:100%}.z-10{z-index:10}.z-20{z-index:20}.z-30{z-index:30}.z-40{z-index:40}.z-50{z-index:50}.z-\[10000\]{z-index:10000}.z-\[75\]{z-index:75}.z-\[90\]{z-index:90}.z-\[99999\]{z-index:99999}.z-\[9999\]{z-index:9999}.order-1{order:1}.order-2{order:2}.order-3{order:3}.col-span-full{grid-column:1 / -1}.mx-1{margin-left:0.25rem;margin-right:0.25rem}.mx-auto{margin-left:auto;margin-right:auto}.my-2{margin-top:0.5rem;margin-bottom:0.5rem}.mb-0\.5{margin-bottom:0.125rem}.mb-1{margin-bottom:0.25rem}.mb-1\.5{margin-bottom:0.375rem}.mb-2{margin-bottom:0.5rem}.mb-2\.5{margin-bottom:0.625rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.ml-0\.5{margin-left:0.125rem}.ml-1{margin-left:0.25rem}.ml-6{margin-left:1.5rem}.ml-auto{margin-left:auto}.mr-0\.5{margin-right:0.125rem}.mr-1{margin-right:0.25rem}.mr-1\.5{margin-right:0.375rem}.mr-2{margin-right:0.5rem}.mr-4{margin-right:1rem}.mr-auto{margin-right:auto}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.mt-1\.5{margin-top:0.375rem}.mt-2{margin-top:0.5rem}.mt-2\.5{margin-top:0.625rem}.mt-3{margin-top:0.75rem}.mt-6{margin-top:1.5rem}.line-clamp-1{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1}.line-clamp-2{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}.line-clamp-3{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.inline-flex{display:inline-flex}.\!grid{display:grid !important}.grid{display:grid}.contents{display:contents}.hidden{display:none}.aspect-\[16\/10\]{aspect-ratio:16/10}.aspect-video{aspect-ratio:16 / 9}.h-1{height:0.25rem}.h-1\.5{height:0.375rem}.h-10{height:2.5rem}.h-11{height:2.75rem}.h-12{height:3rem}.h-14{height:3.5rem}.h-16{height:4rem}.h-2{height:0.5rem}.h-2\.5{height:0.625rem}.h-20{height:5rem}.h-3{height:0.75rem}.h-3\.5{height:0.875rem}.h-4{height:1rem}.h-40{height:10rem}.h-48{height:12rem}.h-5{height:1.25rem}.h-52{height:13rem}.h-56{height:14rem}.h-6{height:1.5rem}.h-64{height:16rem}.h-7{height:1.75rem}.h-8{height:2rem}.h-9{height:2.25rem}.h-\[430px\]{height:430px}.h-\[620px\]{height:620px}.h-full{height:100%}.h-px{height:1px}.max-h-56{max-height:14rem}.max-h-60{max-height:15rem}.max-h-64{max-height:16rem}.max-h-\[340px\]{max-height:340px}.max-h-\[360px\]{max-height:360px}.max-h-\[70vh\]{max-height:70vh}.max-h-\[90vh\]{max-height:90vh}.max-h-\[92vh\]{max-height:92vh}.max-h-\[93vh\]{max-height:93vh}.min-h-\[430px\]{min-height:430px}.min-h-screen{min-height:100vh}.w-1\.5{width:0.375rem}.w-10{width:2.5rem}.w-11{width:2.75rem}.w-12{width:3rem}.w-14{width:3.5rem}.w-16{width:4rem}.w-2{width:0.5rem}.w-2\.5{width:0.625rem}.w-3{width:0.75rem}.w-3\.5{width:0.875rem}.w-32{width:8rem}.w-4{width:1rem}.w-4\/5{width:80%}.w-40{width:10rem}.w-5{width:1.25rem}.w-56{width:14rem}.w-6{width:1.5rem}.w-7{width:1.75rem}.w-72{width:18rem}.w-8{width:2rem}.w-9{width:2.25rem}.w-\[330px\]{width:330px}.w-\[92vw\]{width:92vw}.w-full{width:100%}.w-px{width:1px}.min-w-0{min-width:0px}.min-w-\[20px\]{min-width:20px}.min-w-\[34px\]{min-width:34px}.min-w-\[48px\]{min-width:48px}.max-w-2xl{max-width:42rem}.max-w-4xl{max-width:56rem}.max-w-5xl{max-width:64rem}.max-w-6xl{max-width:72rem}.max-w-7xl{max-width:80rem}.max-w-\[140px\]{max-width:140px}.max-w-\[1620px\]{max-width:1620px}.max-w-\[180px\]{max-width:180px}.max-w-\[200px\]{max-width:200px}.max-w-\[260px\]{max-width:260px}.max-w-\[85\%\]{max-width:85%}.max-w-\[88\%\]{max-width:88%}.max-w-\[90\%\]{max-width:90%}.max-w-\[92\%\]{max-width:92%}.max-w-\[92vw\]{max-width:92vw}.max-w-full{max-width:100%}.max-w-lg{max-width:32rem}.max-w-md{max-width:28rem}.max-w-sm{max-width:24rem}.max-w-xs{max-width:20rem}.flex-1{flex:1 1 0%}.flex-shrink{flex-shrink:1}.shrink-0{flex-shrink:0}.-translate-x-1\/2{--tw-translate-x:-50%;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.-translate-y-1\/2{--tw-translate-y:-50%;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.scale-90{--tw-scale-x:.9;--tw-scale-y:.9;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.scale-\[1\.03\]{--tw-scale-x:1.03;--tw-scale-y:1.03;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.scale-x-\[-1\]{--tw-scale-x:-1;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes ping{75%,100%{transform:scale(2);opacity:0}}.animate-ping{animation:ping 1s cubic-bezier(0,0,0.2,1) infinite}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4,0,0.6,1) infinite}.cursor-not-allowed{cursor:not-allowed}.cursor-pointer{cursor:pointer}.select-none{user-select:none}.resize{resize:both}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.items-stretch{align-items:stretch}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.justify-around{justify-content:space-around}.gap-0\.5{gap:0.125rem}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-3{gap:0.75rem}.gap-3\.5{gap:0.875rem}.gap-4{gap:1rem}.gap-5{gap:1.25rem}.gap-6{gap:1.5rem}.-space-x-1\.5 >:not([hidden]) ~:not([hidden]){--tw-space-x-reverse:0;margin-right:calc(-0.375rem * var(--tw-space-x-reverse));margin-left:calc(-0.375rem * calc(1 - var(--tw-space-x-reverse)))}.space-y-0\.5 >:not([hidden]) ~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.125rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.125rem * var(--tw-space-y-reverse))}.space-y-1 >:not([hidden]) ~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-1\.5 >:not([hidden]) ~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.375rem * var(--tw-space-y-reverse))}.space-y-2 >:not([hidden]) ~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-2\.5 >:not([hidden]) ~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.625rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.625rem * var(--tw-space-y-reverse))}.space-y-3 >:not([hidden]) ~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-3\.5 >:not([hidden]) ~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.875rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.875rem * var(--tw-space-y-reverse))}.space-y-4 >:not([hidden]) ~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-5 >:not([hidden]) ~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.space-y-6 >:not([hidden]) ~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.self-start{align-self:flex-start}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.overflow-x-clip{overflow-x:clip}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.break-words{overflow-wrap:break-word}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-\[26px\]{border-radius:26px}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-sm{border-radius:0.125rem}.rounded-xl{border-radius:0.75rem}.rounded-b-2xl{border-bottom-right-radius:1rem;border-bottom-left-radius:1rem}.rounded-t-2xl{border-top-left-radius:1rem;border-top-right-radius:1rem}.rounded-t-\[50\%\]{border-top-left-radius:50%;border-top-right-radius:50%}.rounded-t-sm{border-top-left-radius:0.125rem;border-top-right-radius:0.125rem}.rounded-bl-sm{border-bottom-left-radius:0.125rem}.rounded-br-sm{border-bottom-right-radius:0.125rem}.rounded-tl-none{border-top-left-radius:0px}.rounded-tr-none{border-top-right-radius:0px}.border{border-width:1px}.border-0{border-width:0px}.border-2{border-width:2px}.border-x{border-left-width:1px;border-right-width:1px}.border-b{border-bottom-width:1px}.border-l-4{border-left-width:4px}.border-t{border-top-width:1px}.border-t-2{border-top-width:2px}.border-dashed{border-style:dashed}.border-amber-200{--tw-border-opacity:1;border-color:rgb(253 230 138 / var(--tw-border-opacity,1))}.border-amber-300{--tw-border-opacity:1;border-color:rgb(252 211 77 / var(--tw-border-opacity,1))}.border-amber-400{--tw-border-opacity:1;border-color:rgb(251 191 36 / var(--tw-border-opacity,1))}.border-amber-400\/25{border-color:rgb(251 191 36 / 0.25)}.border-amber-400\/30{border-color:rgb(251 191 36 / 0.3)}.border-amber-400\/35{border-color:rgb(251 191 36 / 0.35)}.border-amber-400\/40{border-color:rgb(251 191 36 / 0.4)}.border-amber-400\/45{border-color:rgb(251 191 36 / 0.45)}.border-amber-400\/50{border-color:rgb(251 191 36 / 0.5)}.border-amber-400\/60{border-color:rgb(251 191 36 / 0.6)}.border-amber-400\/70{border-color:rgb(251 191 36 / 0.7)}.border-amber-400\/75{border-color:rgb(251 191 36 / 0.75)}.border-amber-500{--tw-border-opacity:1;border-color:rgb(245 158 11 / var(--tw-border-opacity,1))}.border-amber-500\/30{border-color:rgb(245 158 11 / 0.3)}.border-amber-500\/35{border-color:rgb(245 158 11 / 0.35)}.border-amber-500\/40{border-color:rgb(245 158 11 / 0.4)}.border-emerald-400{--tw-border-opacity:1;border-color:rgb(52 211 153 / var(--tw-border-opacity,1))}.border-emerald-400\/30{border-color:rgb(52 211 153 / 0.3)}.border-emerald-400\/35{border-color:rgb(52 211 153 / 0.35)}.border-emerald-400\/40{border-color:rgb(52 211 153 / 0.4)}.border-emerald-400\/50{border-color:rgb(52 211 153 / 0.5)}.border-emerald-500{--tw-border-opacity:1;border-color:rgb(16 185 129 / var(--tw-border-opacity,1))}.border-emerald-500\/30{border-color:rgb(16 185 129 / 0.3)}.border-emerald-500\/35{border-color:rgb(16 185 129 / 0.35)}.border-emerald-500\/40{border-color:rgb(16 185 129 / 0.4)}.border-indigo-400\/40{border-color:rgb(129 140 248 / 0.4)}.border-indigo-400\/70{border-color:rgb(129 140 248 / 0.7)}.border-indigo-500\/40{border-color:rgb(99 102 241 / 0.4)}.border-neutral-700{--tw-border-opacity:1;border-color:rgb(64 64 64 / var(--tw-border-opacity,1))}.border-neutral-700\/80{border-color:rgb(64 64 64 / 0.8)}.border-neutral-800{--tw-border-opacity:1;border-color:rgb(38 38 38 / var(--tw-border-opacity,1))}.border-orange-300{--tw-border-opacity:1;border-color:rgb(253 186 116 / var(--tw-border-opacity,1))}.border-orange-400\/35{border-color:rgb(251 146 60 / 0.35)}.border-pink-500\/35{border-color:rgb(236 72 153 / 0.35)}.border-purple-400\/35{border-color:rgb(192 132 252 / 0.35)}.border-purple-400\/40{border-color:rgb(192 132 252 / 0.4)}.border-purple-500\/35{border-color:rgb(168 85 247 / 0.35)}.border-purple-500\/45{border-color:rgb(168 85 247 / 0.45)}.border-red-300{--tw-border-opacity:1;border-color:rgb(252 165 165 / var(--tw-border-opacity,1))}.border-rose-300{--tw-border-opacity:1;border-color:rgb(253 164 175 / var(--tw-border-opacity,1))}.border-rose-400{--tw-border-opacity:1;border-color:rgb(251 113 133 / var(--tw-border-opacity,1))}.border-rose-400\/30{border-color:rgb(251 113 133 / 0.3)}.border-rose-400\/40{border-color:rgb(251 113 133 / 0.4)}.border-rose-400\/50{border-color:rgb(251 113 133 / 0.5)}.border-rose-500{--tw-border-opacity:1;border-color:rgb(244 63 94 / var(--tw-border-opacity,1))}.border-rose-500\/35{border-color:rgb(244 63 94 / 0.35)}.border-rose-500\/40{border-color:rgb(244 63 94 / 0.4)}.border-rose-500\/60{border-color:rgb(244 63 94 / 0.6)}.border-rose-600{--tw-border-opacity:1;border-color:rgb(225 29 72 / var(--tw-border-opacity,1))}.border-rose-700{--tw-border-opacity:1;border-color:rgb(190 18 60 / var(--tw-border-opacity,1))}.border-sky-300{--tw-border-opacity:1;border-color:rgb(125 211 252 / var(--tw-border-opacity,1))}.border-sky-400\/35{border-color:rgb(56 189 248 / 0.35)}.border-sky-400\/40{border-color:rgb(56 189 248 / 0.4)}.border-sky-400\/70{border-color:rgb(56 189 248 / 0.7)}.border-sky-500\/25{border-color:rgb(14 165 233 / 0.25)}.border-sky-500\/30{border-color:rgb(14 165 233 / 0.3)}.border-sky-500\/40{border-color:rgb(14 165 233 / 0.4)}.border-slate-400{--tw-border-opacity:1;border-color:rgb(148 163 184 / var(--tw-border-opacity,1))}.border-slate-500{--tw-border-opacity:1;border-color:rgb(100 116 139 / var(--tw-border-opacity,1))}.border-stone-950{--tw-border-opacity:1;border-color:rgb(12 10 9 / var(--tw-border-opacity,1))}.border-white{--tw-border-opacity:1;border-color:rgb(255 255 255 / var(--tw-border-opacity,1))}.border-white\/10{border-color:rgb(255 255 255 / 0.1)}.border-white\/15{border-color:rgb(255 255 255 / 0.15)}.border-white\/20{border-color:rgb(255 255 255 / 0.2)}.border-white\/25{border-color:rgb(255 255 255 / 0.25)}.border-white\/30{border-color:rgb(255 255 255 / 0.3)}.border-white\/40{border-color:rgb(255 255 255 / 0.4)}.border-white\/5{border-color:rgb(255 255 255 / 0.05)}.bg-amber-400{--tw-bg-opacity:1;background-color:rgb(251 191 36 / var(--tw-bg-opacity,1))}.bg-amber-500{--tw-bg-opacity:1;background-color:rgb(245 158 11 / var(--tw-bg-opacity,1))}.bg-amber-500\/10{background-color:rgb(245 158 11 / 0.1)}.bg-amber-500\/15{background-color:rgb(245 158 11 / 0.15)}.bg-amber-500\/20{background-color:rgb(245 158 11 / 0.2)}.bg-amber-500\/25{background-color:rgb(245 158 11 / 0.25)}.bg-amber-900{--tw-bg-opacity:1;background-color:rgb(120 53 15 / var(--tw-bg-opacity,1))}.bg-amber-900\/80{background-color:rgb(120 53 15 / 0.8)}.bg-amber-950\/50{background-color:rgb(69 26 3 / 0.5)}.bg-amber-950\/90{background-color:rgb(69 26 3 / 0.9)}.bg-black{--tw-bg-opacity:1;background-color:rgb(0 0 0 / var(--tw-bg-opacity,1))}.bg-black\/30{background-color:rgb(0 0 0 / 0.3)}.bg-black\/35{background-color:rgb(0 0 0 / 0.35)}.bg-black\/40{background-color:rgb(0 0 0 / 0.4)}.bg-black\/45{background-color:rgb(0 0 0 / 0.45)}.bg-black\/50{background-color:rgb(0 0 0 / 0.5)}.bg-black\/55{background-color:rgb(0 0 0 / 0.55)}.bg-black\/60{background-color:rgb(0 0 0 / 0.6)}.bg-black\/65{background-color:rgb(0 0 0 / 0.65)}.bg-black\/70{background-color:rgb(0 0 0 / 0.7)}.bg-black\/75{background-color:rgb(0 0 0 / 0.75)}.bg-black\/80{background-color:rgb(0 0 0 / 0.8)}.bg-black\/85{background-color:rgb(0 0 0 / 0.85)}.bg-black\/90{background-color:rgb(0 0 0 / 0.9)}.bg-emerald-400{--tw-bg-opacity:1;background-color:rgb(52 211 153 / var(--tw-bg-opacity,1))}.bg-emerald-400\/80{background-color:rgb(52 211 153 / 0.8)}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity,1))}.bg-emerald-500\/10{background-color:rgb(16 185 129 / 0.1)}.bg-emerald-500\/15{background-color:rgb(16 185 129 / 0.15)}.bg-emerald-500\/20{background-color:rgb(16 185 129 / 0.2)}.bg-emerald-500\/25{background-color:rgb(16 185 129 / 0.25)}.bg-emerald-600{--tw-bg-opacity:1;background-color:rgb(5 150 105 / var(--tw-bg-opacity,1))}.bg-emerald-600\/20{background-color:rgb(5 150 105 / 0.2)}.bg-emerald-600\/30{background-color:rgb(5 150 105 / 0.3)}.bg-emerald-900\/40{background-color:rgb(6 78 59 / 0.4)}.bg-emerald-950\/15{background-color:rgb(2 44 34 / 0.15)}.bg-emerald-950\/40{background-color:rgb(2 44 34 / 0.4)}.bg-indigo-500\/20{background-color:rgb(99 102 241 / 0.2)}.bg-indigo-500\/85{background-color:rgb(99 102 241 / 0.85)}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity,1))}.bg-indigo-600\/30{background-color:rgb(79 70 229 / 0.3)}.bg-indigo-600\/40{background-color:rgb(79 70 229 / 0.4)}.bg-neutral-900{--tw-bg-opacity:1;background-color:rgb(23 23 23 / var(--tw-bg-opacity,1))}.bg-neutral-950{--tw-bg-opacity:1;background-color:rgb(10 10 10 / var(--tw-bg-opacity,1))}.bg-orange-500{--tw-bg-opacity:1;background-color:rgb(249 115 22 / var(--tw-bg-opacity,1))}.bg-purple-500\/20{background-color:rgb(168 85 247 / 0.2)}.bg-purple-600{--tw-bg-opacity:1;background-color:rgb(147 51 234 / var(--tw-bg-opacity,1))}.bg-purple-600\/25{background-color:rgb(147 51 234 / 0.25)}.bg-purple-950\/40{background-color:rgb(59 7 100 / 0.4)}.bg-red-600{--tw-bg-opacity:1;background-color:rgb(220 38 38 / var(--tw-bg-opacity,1))}.bg-rose-500\/15{background-color:rgb(244 63 94 / 0.15)}.bg-rose-500\/20{background-color:rgb(244 63 94 / 0.2)}.bg-rose-600{--tw-bg-opacity:1;background-color:rgb(225 29 72 / var(--tw-bg-opacity,1))}.bg-rose-600\/25{background-color:rgb(225 29 72 / 0.25)}.bg-rose-600\/95{background-color:rgb(225 29 72 / 0.95)}.bg-rose-700{--tw-bg-opacity:1;background-color:rgb(190 18 60 / var(--tw-bg-opacity,1))}.bg-rose-800{--tw-bg-opacity:1;background-color:rgb(159 18 57 / var(--tw-bg-opacity,1))}.bg-rose-950{--tw-bg-opacity:1;background-color:rgb(76 5 25 / var(--tw-bg-opacity,1))}.bg-rose-950\/80{background-color:rgb(76 5 25 / 0.8)}.bg-rose-950\/90{background-color:rgb(76 5 25 / 0.9)}.bg-sky-400{--tw-bg-opacity:1;background-color:rgb(56 189 248 / var(--tw-bg-opacity,1))}.bg-sky-500{--tw-bg-opacity:1;background-color:rgb(14 165 233 / var(--tw-bg-opacity,1))}.bg-sky-500\/15{background-color:rgb(14 165 233 / 0.15)}.bg-sky-500\/25{background-color:rgb(14 165 233 / 0.25)}.bg-sky-600{--tw-bg-opacity:1;background-color:rgb(2 132 199 / var(--tw-bg-opacity,1))}.bg-sky-600\/25{background-color:rgb(2 132 199 / 0.25)}.bg-sky-950\/40{background-color:rgb(8 47 73 / 0.4)}.bg-slate-700{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity,1))}.bg-slate-900\/90{background-color:rgb(15 23 42 / 0.9)}.bg-stone-800{--tw-bg-opacity:1;background-color:rgb(41 37 36 / var(--tw-bg-opacity,1))}.bg-stone-800\/85{background-color:rgb(41 37 36 / 0.85)}.bg-stone-900{--tw-bg-opacity:1;background-color:rgb(28 25 23 / var(--tw-bg-opacity,1))}.bg-stone-900\/50{background-color:rgb(28 25 23 / 0.5)}.bg-stone-900\/70{background-color:rgb(28 25 23 / 0.7)}.bg-stone-900\/90{background-color:rgb(28 25 23 / 0.9)}.bg-stone-900\/95{background-color:rgb(28 25 23 / 0.95)}.bg-stone-950{--tw-bg-opacity:1;background-color:rgb(12 10 9 / var(--tw-bg-opacity,1))}.bg-stone-950\/50{background-color:rgb(12 10 9 / 0.5)}.bg-stone-950\/80{background-color:rgb(12 10 9 / 0.8)}.bg-stone-950\/90{background-color:rgb(12 10 9 / 0.9)}.bg-stone-950\/95{background-color:rgb(12 10 9 / 0.95)}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity,1))}.bg-white\/10{background-color:rgb(255 255 255 / 0.1)}.bg-white\/15{background-color:rgb(255 255 255 / 0.15)}.bg-white\/5{background-color:rgb(255 255 255 / 0.05)}.bg-white\/\[0\.01\]{background-color:rgb(255 255 255 / 0.01)}.bg-white\/\[0\.02\]{background-color:rgb(255 255 255 / 0.02)}.bg-white\/\[0\.03\]{background-color:rgb(255 255 255 / 0.03)}.bg-white\/\[0\.04\]{background-color:rgb(255 255 255 / 0.04)}.bg-white\/\[0\.06\]{background-color:rgb(255 255 255 / 0.06)}.bg-\[radial-gradient\(circle_at_80\%_30\%\2c transparent_25\%\2c \#090809_100\%\)\]{background-image:radial-gradient(circle at 80% 30%,transparent 25%,#090809 100%)}.bg-gradient-to-b{background-image:linear-gradient(to bottom,var(--tw-gradient-stops))}.bg-gradient-to-br{background-image:linear-gradient(to bottom right,var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right,var(--tw-gradient-stops))}.bg-gradient-to-t{background-image:linear-gradient(to top,var(--tw-gradient-stops))}.from-\[\#090809\]{--tw-gradient-from:#090809 var(--tw-gradient-from-position);--tw-gradient-to:rgb(9 8 9 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-\[\#0A0C10\]{--tw-gradient-from:#0A0C10 var(--tw-gradient-from-position);--tw-gradient-to:rgb(10 12 16 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-\[\#180e29\]{--tw-gradient-from:#180e29 var(--tw-gradient-from-position);--tw-gradient-to:rgb(24 14 41 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-\[\#1a0b1e\]{--tw-gradient-from:#1a0b1e var(--tw-gradient-from-position);--tw-gradient-to:rgb(26 11 30 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-\[\#363d33\]{--tw-gradient-from:#363d33 var(--tw-gradient-from-position);--tw-gradient-to:rgb(54 61 51 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-\[\#383645\]{--tw-gradient-from:#383645 var(--tw-gradient-from-position);--tw-gradient-to:rgb(56 54 69 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-\[\#3d3b37\]{--tw-gradient-from:#3d3b37 var(--tw-gradient-from-position);--tw-gradient-to:rgb(61 59 55 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-\[\#42323a\]{--tw-gradient-from:#42323a var(--tw-gradient-from-position);--tw-gradient-to:rgb(66 50 58 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-\[\#4a352a\]{--tw-gradient-from:#4a352a var(--tw-gradient-from-position);--tw-gradient-to:rgb(74 53 42 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-amber-400{--tw-gradient-from:#fbbf24 var(--tw-gradient-from-position);--tw-gradient-to:rgb(251 191 36 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-amber-500{--tw-gradient-from:#f59e0b var(--tw-gradient-from-position);--tw-gradient-to:rgb(245 158 11 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-amber-950\/60{--tw-gradient-from:rgb(69 26 3 / 0.6) var(--tw-gradient-from-position);--tw-gradient-to:rgb(69 26 3 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-black{--tw-gradient-from:#000 var(--tw-gradient-from-position);--tw-gradient-to:rgb(0 0 0 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-black\/90{--tw-gradient-from:rgb(0 0 0 / 0.9) var(--tw-gradient-from-position);--tw-gradient-to:rgb(0 0 0 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-emerald-400{--tw-gradient-from:#34d399 var(--tw-gradient-from-position);--tw-gradient-to:rgb(52 211 153 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-emerald-500{--tw-gradient-from:#10b981 var(--tw-gradient-from-position);--tw-gradient-to:rgb(16 185 129 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-emerald-600{--tw-gradient-from:#059669 var(--tw-gradient-from-position);--tw-gradient-to:rgb(5 150 105 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-emerald-950\/70{--tw-gradient-from:rgb(2 44 34 / 0.7) var(--tw-gradient-from-position);--tw-gradient-to:rgb(2 44 34 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-indigo-950\/80{--tw-gradient-from:rgb(30 27 75 / 0.8) var(--tw-gradient-from-position);--tw-gradient-to:rgb(30 27 75 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-orange-500{--tw-gradient-from:#f97316 var(--tw-gradient-from-position);--tw-gradient-to:rgb(249 115 22 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-orange-950\/60{--tw-gradient-from:rgb(67 20 7 / 0.6) var(--tw-gradient-from-position);--tw-gradient-to:rgb(67 20 7 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-purple-500{--tw-gradient-from:#a855f7 var(--tw-gradient-from-position);--tw-gradient-to:rgb(168 85 247 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-purple-950\/45{--tw-gradient-from:rgb(59 7 100 / 0.45) var(--tw-gradient-from-position);--tw-gradient-to:rgb(59 7 100 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-purple-950\/60{--tw-gradient-from:rgb(59 7 100 / 0.6) var(--tw-gradient-from-position);--tw-gradient-to:rgb(59 7 100 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-rose-600{--tw-gradient-from:#e11d48 var(--tw-gradient-from-position);--tw-gradient-to:rgb(225 29 72 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-rose-950\/60{--tw-gradient-from:rgb(76 5 25 / 0.6) var(--tw-gradient-from-position);--tw-gradient-to:rgb(76 5 25 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-rose-950\/70{--tw-gradient-from:rgb(76 5 25 / 0.7) var(--tw-gradient-from-position);--tw-gradient-to:rgb(76 5 25 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-sky-500\/20{--tw-gradient-from:rgb(14 165 233 / 0.2) var(--tw-gradient-from-position);--tw-gradient-to:rgb(14 165 233 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-stone-900{--tw-gradient-from:#1c1917 var(--tw-gradient-from-position);--tw-gradient-to:rgb(28 25 23 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-stone-950{--tw-gradient-from:#0c0a09 var(--tw-gradient-from-position);--tw-gradient-to:rgb(12 10 9 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.via-\[\#090809\]\/85{--tw-gradient-to:rgb(9 8 9 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),rgb(9 8 9 / 0.85) var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-\[\#0A0C10\]\/35{--tw-gradient-to:rgb(10 12 16 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),rgb(10 12 16 / 0.35) var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-amber-400{--tw-gradient-to:rgb(251 191 36 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),#fbbf24 var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-amber-500{--tw-gradient-to:rgb(245 158 11 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),#f59e0b var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-black\/30{--tw-gradient-to:rgb(0 0 0 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),rgb(0 0 0 / 0.3) var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-black\/35{--tw-gradient-to:rgb(0 0 0 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),rgb(0 0 0 / 0.35) var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-black\/55{--tw-gradient-to:rgb(0 0 0 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),rgb(0 0 0 / 0.55) var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-pink-900\/50{--tw-gradient-to:rgb(131 24 67 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),rgb(131 24 67 / 0.5) var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-rose-500{--tw-gradient-to:rgb(244 63 94 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),#f43f5e var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-slate-900\/80{--tw-gradient-to:rgb(15 23 42 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),rgb(15 23 42 / 0.8) var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-stone-900{--tw-gradient-to:rgb(28 25 23 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),#1c1917 var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-stone-900\/30{--tw-gradient-to:rgb(28 25 23 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),rgb(28 25 23 / 0.3) var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-stone-950{--tw-gradient-to:rgb(12 10 9 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),#0c0a09 var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-stone-950\/35{--tw-gradient-to:rgb(12 10 9 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),rgb(12 10 9 / 0.35) var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-transparent{--tw-gradient-to:rgb(0 0 0 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),transparent var(--tw-gradient-via-position),var(--tw-gradient-to)}.to-\[\#1c1008\]{--tw-gradient-to:#1c1008 var(--tw-gradient-to-position)}.to-\[\#21261f\]{--tw-gradient-to:#21261f var(--tw-gradient-to-position)}.to-\[\#22212b\]{--tw-gradient-to:#22212b var(--tw-gradient-to-position)}.to-\[\#240e1a\]{--tw-gradient-to:#240e1a var(--tw-gradient-to-position)}.to-\[\#262522\]{--tw-gradient-to:#262522 var(--tw-gradient-to-position)}.to-\[\#291e23\]{--tw-gradient-to:#291e23 var(--tw-gradient-to-position)}.to-\[\#2e2019\]{--tw-gradient-to:#2e2019 var(--tw-gradient-to-position)}.to-amber-400{--tw-gradient-to:#fbbf24 var(--tw-gradient-to-position)}.to-amber-500{--tw-gradient-to:#f59e0b var(--tw-gradient-to-position)}.to-amber-950\/40{--tw-gradient-to:rgb(69 26 3 / 0.4) var(--tw-gradient-to-position)}.to-black\/10{--tw-gradient-to:rgb(0 0 0 / 0.1) var(--tw-gradient-to-position)}.to-black\/40{--tw-gradient-to:rgb(0 0 0 / 0.4) var(--tw-gradient-to-position)}.to-indigo-950\/80{--tw-gradient-to:rgb(30 27 75 / 0.8) var(--tw-gradient-to-position)}.to-purple-600{--tw-gradient-to:#9333ea var(--tw-gradient-to-position)}.to-rose-500{--tw-gradient-to:#f43f5e var(--tw-gradient-to-position)}.to-rose-600{--tw-gradient-to:#e11d48 var(--tw-gradient-to-position)}.to-rose-950\/45{--tw-gradient-to:rgb(76 5 25 / 0.45) var(--tw-gradient-to-position)}.to-rose-950\/70{--tw-gradient-to:rgb(76 5 25 / 0.7) var(--tw-gradient-to-position)}.to-stone-900{--tw-gradient-to:#1c1917 var(--tw-gradient-to-position)}.to-teal-600{--tw-gradient-to:#0d9488 var(--tw-gradient-to-position)}.to-transparent{--tw-gradient-to:transparent var(--tw-gradient-to-position)}.object-contain{object-fit:contain}.object-cover{object-fit:cover}.object-center{object-position:center}.object-top{object-position:top}.p-1{padding:0.25rem}.p-1\.5{padding:0.375rem}.p-2\.5{padding:0.625rem}.p-3{padding:0.75rem}.p-3\.5{padding:0.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-1\.5{padding-left:0.375rem;padding-right:0.375rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.px-8{padding-left:2rem;padding-right:2rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-12{padding-top:3rem;padding-bottom:3rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.py-8{padding-top:2rem;padding-bottom:2rem}.pb-0\.5{padding-bottom:0.125rem}.pb-1{padding-bottom:0.25rem}.pb-1\.5{padding-bottom:0.375rem}.pb-2{padding-bottom:0.5rem}.pb-2\.5{padding-bottom:0.625rem}.pb-3{padding-bottom:0.75rem}.pl-4{padding-left:1rem}.pl-7{padding-left:1.75rem}.pl-9{padding-left:2.25rem}.pr-0\.5{padding-right:0.125rem}.pr-1{padding-right:0.25rem}.pr-16{padding-right:4rem}.pr-3{padding-right:0.75rem}.pr-6{padding-right:1.5rem}.pt-0\.5{padding-top:0.125rem}.pt-1{padding-top:0.25rem}.pt-1\.5{padding-top:0.375rem}.pt-2{padding-top:0.5rem}.pt-2\.5{padding-top:0.625rem}.pt-3{padding-top:0.75rem}.pt-4{padding-top:1rem}.pt-5{padding-top:1.25rem}.pt-6{padding-top:1.5rem}.text-left{text-align:left}.text-center{text-align:center}.text-right{text-align:right}.font-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-\[8\.5px\]{font-size:8.5px}.text-\[8px\]{font-size:8px}.text-\[9px\]{font-size:9px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.italic{font-style:italic}.leading-\[1\.12\]{line-height:1.12}.leading-relaxed{line-height:1.625}.leading-snug{line-height:1.375}.leading-tight{line-height:1.25}.tracking-\[0\.22em\]{letter-spacing:0.22em}.tracking-\[0\.25em\]{letter-spacing:0.25em}.tracking-\[0\.28em\]{letter-spacing:0.28em}.tracking-\[0\.35em\]{letter-spacing:0.35em}.tracking-tight{letter-spacing:-0.025em}.tracking-wide{letter-spacing:0.025em}.tracking-wider{letter-spacing:0.05em}.tracking-widest{letter-spacing:0.1em}.text-amber-100{--tw-text-opacity:1;color:rgb(254 243 199 / var(--tw-text-opacity,1))}.text-amber-100\/75{color:rgb(254 243 199 / 0.75)}.text-amber-200{--tw-text-opacity:1;color:rgb(253 230 138 / var(--tw-text-opacity,1))}.text-amber-200\/90{color:rgb(253 230 138 / 0.9)}.text-amber-300{--tw-text-opacity:1;color:rgb(252 211 77 / var(--tw-text-opacity,1))}.text-amber-400{--tw-text-opacity:1;color:rgb(251 191 36 / var(--tw-text-opacity,1))}.text-black{--tw-text-opacity:1;color:rgb(0 0 0 / var(--tw-text-opacity,1))}.text-emerald-200{--tw-text-opacity:1;color:rgb(167 243 208 / var(--tw-text-opacity,1))}.text-emerald-300{--tw-text-opacity:1;color:rgb(110 231 183 / var(--tw-text-opacity,1))}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity,1))}.text-emerald-400\/70{color:rgb(52 211 153 / 0.7)}.text-indigo-100{--tw-text-opacity:1;color:rgb(224 231 255 / var(--tw-text-opacity,1))}.text-indigo-200{--tw-text-opacity:1;color:rgb(199 210 254 / var(--tw-text-opacity,1))}.text-indigo-300{--tw-text-opacity:1;color:rgb(165 180 252 / var(--tw-text-opacity,1))}.text-orange-300{--tw-text-opacity:1;color:rgb(253 186 116 / var(--tw-text-opacity,1))}.text-orange-400{--tw-text-opacity:1;color:rgb(251 146 60 / var(--tw-text-opacity,1))}.text-pink-200{--tw-text-opacity:1;color:rgb(251 207 232 / var(--tw-text-opacity,1))}.text-pink-300{--tw-text-opacity:1;color:rgb(249 168 212 / var(--tw-text-opacity,1))}.text-purple-200{--tw-text-opacity:1;color:rgb(233 213 255 / var(--tw-text-opacity,1))}.text-purple-300{--tw-text-opacity:1;color:rgb(216 180 254 / var(--tw-text-opacity,1))}.text-purple-400{--tw-text-opacity:1;color:rgb(192 132 252 / var(--tw-text-opacity,1))}.text-red-500{--tw-text-opacity:1;color:rgb(239 68 68 / var(--tw-text-opacity,1))}.text-rose-100{--tw-text-opacity:1;color:rgb(255 228 230 / var(--tw-text-opacity,1))}.text-rose-300{--tw-text-opacity:1;color:rgb(253 164 175 / var(--tw-text-opacity,1))}.text-rose-400{--tw-text-opacity:1;color:rgb(251 113 133 / var(--tw-text-opacity,1))}.text-rose-500{--tw-text-opacity:1;color:rgb(244 63 94 / var(--tw-text-opacity,1))}.text-rose-600{--tw-text-opacity:1;color:rgb(225 29 72 / var(--tw-text-opacity,1))}.text-sky-200{--tw-text-opacity:1;color:rgb(186 230 253 / var(--tw-text-opacity,1))}.text-sky-300{--tw-text-opacity:1;color:rgb(125 211 252 / var(--tw-text-opacity,1))}.text-sky-300\/75{color:rgb(125 211 252 / 0.75)}.text-slate-100{--tw-text-opacity:1;color:rgb(241 245 249 / var(--tw-text-opacity,1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity,1))}.text-slate-200\/90{color:rgb(226 232 240 / 0.9)}.text-slate-200\/95{color:rgb(226 232 240 / 0.95)}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity,1))}.text-slate-300\/75{color:rgb(203 213 225 / 0.75)}.text-slate-300\/80{color:rgb(203 213 225 / 0.8)}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity,1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity,1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity,1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity,1))}.text-slate-950{--tw-text-opacity:1;color:rgb(2 6 23 / var(--tw-text-opacity,1))}.text-stone-400{--tw-text-opacity:1;color:rgb(168 162 158 / var(--tw-text-opacity,1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity,1))}.text-white\/20{color:rgb(255 255 255 / 0.2)}.underline{text-decoration-line:underline}.line-through{text-decoration-line:line-through}.placeholder-slate-500::placeholder{--tw-placeholder-opacity:1;color:rgb(100 116 139 / var(--tw-placeholder-opacity,1))}.accent-amber-400{accent-color:#fbbf24}.accent-amber-500{accent-color:#f59e0b}.accent-rose-500{accent-color:#f43f5e}.opacity-0{opacity:0}.opacity-100{opacity:1}.opacity-40{opacity:0.4}.opacity-45{opacity:0.45}.opacity-50{opacity:0.5}.opacity-55{opacity:0.55}.opacity-65{opacity:0.65}.opacity-75{opacity:0.75}.opacity-80{opacity:0.8}.opacity-90{opacity:0.9}.shadow{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1),0 1px 2px -1px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color),0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_0_12px_\#10b981\]{--tw-shadow:0 0 12px #10b981;--tw-shadow-colored:0 0 12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_0_15px_rgba\(245\2c 158\2c 11\2c 0\.3\)\]{--tw-shadow:0 0 15px rgba(245,158,11,0.3);--tw-shadow-colored:0 0 15px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_0_15px_rgba\(245\2c 158\2c 11\2c 0\.45\)\]{--tw-shadow:0 0 15px rgba(245,158,11,0.45);--tw-shadow-colored:0 0 15px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_0_16px_rgba\(245\2c 158\2c 11\2c 0\.35\)\]{--tw-shadow:0 0 16px rgba(245,158,11,0.35);--tw-shadow-colored:0 0 16px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_0_16px_rgba\(34\2c 197\2c 94\2c 0\.85\)\]{--tw-shadow:0 0 16px rgba(34,197,94,0.85);--tw-shadow-colored:0 0 16px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_0_6px_\#34d399\]{--tw-shadow:0 0 6px #34d399;--tw-shadow-colored:0 0 6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_0_80px_rgba\(244\2c 63\2c 94\2c 0\.2\)\]{--tw-shadow:0 0 80px rgba(244,63,94,0.2);--tw-shadow-colored:0 0 80px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_10px_30px_rgba\(225\2c 29\2c 72\2c 0\.4\)\]{--tw-shadow:0 10px 30px rgba(225,29,72,0.4);--tw-shadow-colored:0 10px 30px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_10px_30px_rgba\(225\2c 29\2c 72\2c 0\.45\)\]{--tw-shadow:0 10px 30px rgba(225,29,72,0.45);--tw-shadow-colored:0 10px 30px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_12px_36px_rgba\(0\2c 0\2c 0\2c 0\.9\)\]{--tw-shadow:0 12px 36px rgba(0,0,0,0.9);--tw-shadow-colored:0 12px 36px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_20px_60px_rgba\(0\2c 0\2c 0\2c 0\.7\)\]{--tw-shadow:0 20px 60px rgba(0,0,0,0.7);--tw-shadow-colored:0 20px 60px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_25px_70px_rgba\(0\2c 0\2c 0\2c 0\.95\)\]{--tw-shadow:0 25px 70px rgba(0,0,0,0.95);--tw-shadow-colored:0 25px 70px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_25px_80px_rgba\(0\2c 0\2c 0\2c 0\.95\)\]{--tw-shadow:0 25px 80px rgba(0,0,0,0.95);--tw-shadow-colored:0 25px 80px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_25px_80px_rgba\(0\2c 0\2c 0\2c 0\.98\)\]{--tw-shadow:0 25px 80px rgba(0,0,0,0.98);--tw-shadow-colored:0 25px 80px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_25px_90px_rgba\(0\2c 0\2c 0\2c 0\.98\)\]{--tw-shadow:0 25px 90px rgba(0,0,0,0.98);--tw-shadow-colored:0 25px 90px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_6px_20px_rgba\(245\2c 158\2c 11\2c 0\.3\)\]{--tw-shadow:0 6px 20px rgba(245,158,11,0.3);--tw-shadow-colored:0 6px 20px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-\[0_8px_24px_rgba\(0\2c 0\2c 0\2c 0\.95\)\]{--tw-shadow:0 8px 24px rgba(0,0,0,0.95);--tw-shadow-colored:0 8px 24px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-inner{--tw-shadow:inset 0 2px 4px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:inset 0 2px 4px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1),0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color),0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1),0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color),0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1),0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color),0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-emerald-600\/30{--tw-shadow-color:rgb(5 150 105 / 0.3);--tw-shadow:var(--tw-shadow-colored)}.shadow-red-600\/40{--tw-shadow-color:rgb(220 38 38 / 0.4);--tw-shadow:var(--tw-shadow-colored)}.outline-none{outline:2px solid transparent;outline-offset:2px}.ring-2{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow,0 0 #0000)}.ring-inset{--tw-ring-inset:inset}.ring-amber-400\/40{--tw-ring-color:rgb(251 191 36 / 0.4)}.ring-amber-400\/90{--tw-ring-color:rgb(251 191 36 / 0.9)}.ring-rose-500\/80{--tw-ring-color:rgb(244 63 94 / 0.8)}.blur{--tw-blur:blur(8px);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow{--tw-drop-shadow:drop-shadow(0 1px 2px rgb(0 0 0 / 0.1)) drop-shadow(0 1px 1px rgb(0 0 0 / 0.06));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow-\[0_6px_24px_rgba\(0\2c 0\2c 0\2c 0\.95\)\]{--tw-drop-shadow:drop-shadow(0 6px 24px rgba(0,0,0,0.95));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur-2xl{--tw-backdrop-blur:blur(40px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-xl{--tw-backdrop-blur:blur(24px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-filter{-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-timing-function:cubic-bezier(0.4,0,0.2,1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4,0,0.2,1);transition-duration:150ms}.transition-opacity{transition-property:opacity;transition-timing-function:cubic-bezier(0.4,0,0.2,1);transition-duration:150ms}.duration-150{transition-duration:150ms}.duration-200{transition-duration:200ms}.duration-300{transition-duration:300ms}.duration-500{transition-duration:500ms}.duration-700{transition-duration:700ms}.ease-in-out{transition-timing-function:cubic-bezier(0.4,0,0.2,1)}.ease-out{transition-timing-function:cubic-bezier(0,0,0.2,1)}.selection\:bg-rose-500 *::selection{--tw-bg-opacity:1;background-color:rgb(244 63 94 / var(--tw-bg-opacity,1))}.selection\:text-white *::selection{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity,1))}.selection\:bg-rose-500::selection{--tw-bg-opacity:1;background-color:rgb(244 63 94 / var(--tw-bg-opacity,1))}.selection\:text-white::selection{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity,1))}.placeholder\:text-slate-500::placeholder{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity,1))}.hover\:scale-105:hover{--tw-scale-x:1.05;--tw-scale-y:1.05;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:scale-\[1\.02\]:hover{--tw-scale-x:1.02;--tw-scale-y:1.02;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:border-amber-400\/50:hover{border-color:rgb(251 191 36 / 0.5)}.hover\:border-amber-400\/60:hover{border-color:rgb(251 191 36 / 0.6)}.hover\:border-emerald-400:hover{--tw-border-opacity:1;border-color:rgb(52 211 153 / var(--tw-border-opacity,1))}.hover\:border-emerald-400\/50:hover{border-color:rgb(52 211 153 / 0.5)}.hover\:border-indigo-400\/60:hover{border-color:rgb(129 140 248 / 0.6)}.hover\:border-white\/30:hover{border-color:rgb(255 255 255 / 0.3)}.hover\:bg-amber-400:hover{--tw-bg-opacity:1;background-color:rgb(251 191 36 / var(--tw-bg-opacity,1))}.hover\:bg-amber-500:hover{--tw-bg-opacity:1;background-color:rgb(245 158 11 / var(--tw-bg-opacity,1))}.hover\:bg-amber-500\/15:hover{background-color:rgb(245 158 11 / 0.15)}.hover\:bg-amber-500\/20:hover{background-color:rgb(245 158 11 / 0.2)}.hover\:bg-amber-500\/35:hover{background-color:rgb(245 158 11 / 0.35)}.hover\:bg-amber-500\/40:hover{background-color:rgb(245 158 11 / 0.4)}.hover\:bg-amber-900\/70:hover{background-color:rgb(120 53 15 / 0.7)}.hover\:bg-black\/90:hover{background-color:rgb(0 0 0 / 0.9)}.hover\:bg-emerald-500:hover{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity,1))}.hover\:bg-emerald-500\/35:hover{background-color:rgb(16 185 129 / 0.35)}.hover\:bg-emerald-500\/40:hover{background-color:rgb(16 185 129 / 0.4)}.hover\:bg-emerald-500\/45:hover{background-color:rgb(16 185 129 / 0.45)}.hover\:bg-emerald-600:hover{--tw-bg-opacity:1;background-color:rgb(5 150 105 / var(--tw-bg-opacity,1))}.hover\:bg-emerald-950\/30:hover{background-color:rgb(2 44 34 / 0.3)}.hover\:bg-indigo-500:hover{--tw-bg-opacity:1;background-color:rgb(99 102 241 / var(--tw-bg-opacity,1))}.hover\:bg-indigo-600\/50:hover{background-color:rgb(79 70 229 / 0.5)}.hover\:bg-purple-500:hover{--tw-bg-opacity:1;background-color:rgb(168 85 247 / var(--tw-bg-opacity,1))}.hover\:bg-rose-500:hover{--tw-bg-opacity:1;background-color:rgb(244 63 94 / var(--tw-bg-opacity,1))}.hover\:bg-rose-500\/30:hover{background-color:rgb(244 63 94 / 0.3)}.hover\:bg-rose-600:hover{--tw-bg-opacity:1;background-color:rgb(225 29 72 / var(--tw-bg-opacity,1))}.hover\:bg-rose-600\/90:hover{background-color:rgb(225 29 72 / 0.9)}.hover\:bg-rose-900\/90:hover{background-color:rgb(136 19 55 / 0.9)}.hover\:bg-sky-400:hover{--tw-bg-opacity:1;background-color:rgb(56 189 248 / var(--tw-bg-opacity,1))}.hover\:bg-sky-500:hover{--tw-bg-opacity:1;background-color:rgb(14 165 233 / var(--tw-bg-opacity,1))}.hover\:bg-sky-500\/40:hover{background-color:rgb(14 165 233 / 0.4)}.hover\:bg-sky-600\/45:hover{background-color:rgb(2 132 199 / 0.45)}.hover\:bg-stone-700:hover{--tw-bg-opacity:1;background-color:rgb(68 64 60 / var(--tw-bg-opacity,1))}.hover\:bg-stone-700\/90:hover{background-color:rgb(68 64 60 / 0.9)}.hover\:bg-stone-800:hover{--tw-bg-opacity:1;background-color:rgb(41 37 36 / var(--tw-bg-opacity,1))}.hover\:bg-stone-900\/85:hover{background-color:rgb(28 25 23 / 0.85)}.hover\:bg-white\/10:hover{background-color:rgb(255 255 255 / 0.1)}.hover\:bg-white\/15:hover{background-color:rgb(255 255 255 / 0.15)}.hover\:bg-white\/20:hover{background-color:rgb(255 255 255 / 0.2)}.hover\:bg-white\/\[0\.03\]:hover{background-color:rgb(255 255 255 / 0.03)}.hover\:from-amber-300:hover{--tw-gradient-from:#fcd34d var(--tw-gradient-from-position);--tw-gradient-to:rgb(252 211 77 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.hover\:from-amber-400:hover{--tw-gradient-from:#fbbf24 var(--tw-gradient-from-position);--tw-gradient-to:rgb(251 191 36 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.hover\:from-emerald-500:hover{--tw-gradient-from:#10b981 var(--tw-gradient-from-position);--tw-gradient-to:rgb(16 185 129 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.hover\:from-orange-400:hover{--tw-gradient-from:#fb923c var(--tw-gradient-from-position);--tw-gradient-to:rgb(251 146 60 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.hover\:from-rose-500:hover{--tw-gradient-from:#f43f5e var(--tw-gradient-from-position);--tw-gradient-to:rgb(244 63 94 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.hover\:to-amber-400:hover{--tw-gradient-to:#fbbf24 var(--tw-gradient-to-position)}.hover\:to-purple-500:hover{--tw-gradient-to:#a855f7 var(--tw-gradient-to-position)}.hover\:to-rose-400:hover{--tw-gradient-to:#fb7185 var(--tw-gradient-to-position)}.hover\:to-rose-500:hover{--tw-gradient-to:#f43f5e var(--tw-gradient-to-position)}.hover\:to-teal-500:hover{--tw-gradient-to:#14b8a6 var(--tw-gradient-to-position)}.hover\:text-amber-300:hover{--tw-text-opacity:1;color:rgb(252 211 77 / var(--tw-text-opacity,1))}.hover\:text-rose-400:hover{--tw-text-opacity:1;color:rgb(251 113 133 / var(--tw-text-opacity,1))}.hover\:text-slate-950:hover{--tw-text-opacity:1;color:rgb(2 6 23 / var(--tw-text-opacity,1))}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity,1))}.hover\:opacity-100:hover{opacity:1}.focus\:border-amber-400:focus{--tw-border-opacity:1;border-color:rgb(251 191 36 / var(--tw-border-opacity,1))}.focus\:border-orange-400:focus{--tw-border-opacity:1;border-color:rgb(251 146 60 / var(--tw-border-opacity,1))}.focus\:border-purple-400:focus{--tw-border-opacity:1;border-color:rgb(192 132 252 / var(--tw-border-opacity,1))}.focus\:border-rose-500:focus{--tw-border-opacity:1;border-color:rgb(244 63 94 / var(--tw-border-opacity,1))}.focus\:border-rose-500\/70:focus{border-color:rgb(244 63 94 / 0.7)}.focus\:border-sky-400:focus{--tw-border-opacity:1;border-color:rgb(56 189 248 / var(--tw-border-opacity,1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.active\:scale-95:active{--tw-scale-x:.95;--tw-scale-y:.95;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.disabled\:opacity-50:disabled{opacity:0.5}.group:hover .group-hover\:scale-100{--tw-scale-x:1;--tw-scale-y:1;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:hover .group-hover\:scale-105{--tw-scale-x:1.05;--tw-scale-y:1.05;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:hover .group-hover\:scale-110{--tw-scale-x:1.1;--tw-scale-y:1.1;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:hover .group-hover\:text-amber-200{--tw-text-opacity:1;color:rgb(253 230 138 / var(--tw-text-opacity,1))}.group:hover .group-hover\:opacity-100{opacity:1}@media (min-width:640px){.sm\:col-span-3{grid-column:span 3 / span 3}.sm\:col-span-4{grid-column:span 4 / span 4}.sm\:col-span-5{grid-column:span 5 / span 5}.sm\:block{display:block}.sm\:inline{display:inline}.sm\:flex{display:flex}.sm\:h-10{height:2.5rem}.sm\:h-14{height:3.5rem}.sm\:h-16{height:4rem}.sm\:h-64{height:16rem}.sm\:h-72{height:18rem}.sm\:max-h-\[420px\]{max-height:420px}.sm\:min-h-\[480px\]{min-height:480px}.sm\:w-10{width:2.5rem}.sm\:w-12{width:3rem}.sm\:w-14{width:3.5rem}.sm\:w-20{width:5rem}.sm\:w-64{width:16rem}.sm\:w-80{width:20rem}.sm\:w-\[360px\]{width:360px}.sm\:w-\[440px\]{width:440px}.sm\:w-auto{width:auto}.sm\:max-w-xs{max-width:20rem}.sm\:grid-cols-12{grid-template-columns:repeat(12,minmax(0,1fr))}.sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.sm\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.sm\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.sm\:grid-cols-6{grid-template-columns:repeat(6,minmax(0,1fr))}.sm\:flex-row{flex-direction:row}.sm\:flex-wrap{flex-wrap:wrap}.sm\:items-start{align-items:flex-start}.sm\:items-center{align-items:center}.sm\:gap-2{gap:0.5rem}.sm\:gap-3{gap:0.75rem}.sm\:gap-4{gap:1rem}.sm\:gap-6{gap:1.5rem}.sm\:space-y-3 >:not([hidden]) ~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.sm\:space-y-4 >:not([hidden]) ~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.sm\:space-y-5 >:not([hidden]) ~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.sm\:space-y-6 >:not([hidden]) ~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.sm\:self-auto{align-self:auto}.sm\:whitespace-normal{white-space:normal}.sm\:rounded-full{border-radius:9999px}.sm\:p-3\.5{padding:0.875rem}.sm\:p-4{padding:1rem}.sm\:p-5{padding:1.25rem}.sm\:p-6{padding:1.5rem}.sm\:p-7{padding:1.75rem}.sm\:px-10{padding-left:2.5rem;padding-right:2.5rem}.sm\:px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.sm\:px-4{padding-left:1rem;padding-right:1rem}.sm\:px-5{padding-left:1.25rem;padding-right:1.25rem}.sm\:py-6{padding-top:1.5rem;padding-bottom:1.5rem}.sm\:pt-3{padding-top:0.75rem}.sm\:text-2xl{font-size:1.5rem;line-height:2rem}.sm\:text-4xl{font-size:2.25rem;line-height:2.5rem}.sm\:text-\[10px\]{font-size:10px}.sm\:text-\[11px\]{font-size:11px}.sm\:text-base{font-size:1rem;line-height:1.5rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}.sm\:text-xl{font-size:1.25rem;line-height:1.75rem}.sm\:text-xs{font-size:0.75rem;line-height:1rem}}@media (min-width:768px){.md\:col-span-2{grid-column:span 2 / span 2}.md\:col-span-3{grid-column:span 3 / span 3}.md\:col-span-4{grid-column:span 4 / span 4}.md\:col-span-5{grid-column:span 5 / span 5}.md\:col-span-7{grid-column:span 7 / span 7}.md\:inline{display:inline}.md\:hidden{display:none}.md\:max-w-md{max-width:28rem}.md\:grid-cols-12{grid-template-columns:repeat(12,minmax(0,1fr))}.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\:grid-cols-5{grid-template-columns:repeat(5,minmax(0,1fr))}.md\:grid-cols-8{grid-template-columns:repeat(8,minmax(0,1fr))}.md\:items-center{align-items:center}}@media (min-width:1024px){.lg\:order-1{order:1}.lg\:order-2{order:2}.lg\:col-span-2{grid-column:span 2 / span 2}.lg\:col-span-3{grid-column:span 3 / span 3}.lg\:col-span-5{grid-column:span 5 / span 5}.lg\:col-span-7{grid-column:span 7 / span 7}.lg\:col-span-9{grid-column:span 9 / span 9}.lg\:inline{display:inline}.lg\:h-72{height:18rem}.lg\:h-\[660px\]{height:660px}.lg\:max-h-\[880px\]{max-height:880px}.lg\:max-h-none{max-height:none}.lg\:grid-cols-12{grid-template-columns:repeat(12,minmax(0,1fr))}.lg\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.lg\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.lg\:text-5xl{font-size:3rem;line-height:1}}</style>
   <script>
     // Nạp Hls.js theo nhu cầu khi vào phòng phát nguồn .m3u8 (tránh chặn render đầu sảnh)
@@ -2031,20 +2050,20 @@
     /* ======================================================= */
     #cv-discover-hover-popup {
       position: fixed;
-      z-index: 90;
+      z-index: 35;
       display: flex;
       flex-direction: column;
       border-radius: 24px;
       overflow: hidden;
       background: linear-gradient(
         162deg,
-        rgba(46, 40, 52, 0.54) 0%,
-        rgba(20, 17, 25, 0.72) 48%,
-        rgba(10, 9, 15, 0.86) 100%
+        rgba(28, 24, 36, 0.97) 0%,
+        rgba(16, 14, 22, 0.985) 48%,
+        rgba(9, 8, 14, 0.995) 100%
       );
-      backdrop-filter: blur(34px) saturate(195%) brightness(1.06);
-      -webkit-backdrop-filter: blur(34px) saturate(195%) brightness(1.06);
-      border: 1px solid rgba(255, 255, 255, 0.28);
+      backdrop-filter: blur(34px) saturate(195%) brightness(1.04);
+      -webkit-backdrop-filter: blur(34px) saturate(195%) brightness(1.04);
+      border: 1px solid rgba(245, 197, 24, 0.32);
       box-shadow:
         inset 0 1.5px 0 rgba(255, 255, 255, 0.44),
         inset 1px 0 0 rgba(255, 255, 255, 0.16),
@@ -2834,17 +2853,31 @@
 
     #rophim-totop {
       position: fixed;
-      right: 1.25rem;
-      bottom: 5.5rem;
-      z-index: 45;
-      background: var(--cv-black-surface);
+      right: max(12px, env(safe-area-inset-right));
+      bottom: 4.85rem;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border-radius: 999px;
+      z-index: 38;
+      background: rgba(18, 16, 22, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       color: var(--cv-gold-accent);
-      border: 1px solid rgba(245, 197, 24, 0.4);
-      transition: all 0.3s ease;
+      border: 1px solid rgba(245, 197, 24, 0.42);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.65);
+      transition: transform 0.22s ease, background-color 0.22s ease, color 0.22s ease;
     }
     #rophim-totop:hover {
       background: var(--cv-gold-accent);
       color: var(--cv-black-bg);
+      transform: translateY(-2px);
+    }
+    .cv-lobby-footer {
+      margin-top: 28px;
+      padding: 24px 20px 84px;
+      border-top: 1px solid rgba(245, 197, 24, 0.16);
+      background: radial-gradient(ellipse 70% 90% at 50% 0%, rgba(245, 197, 24, 0.05) 0%, rgba(9, 8, 12, 0) 70%);
     }
 
     /* Tách tầng GPU riêng cho màn hình video 1080p để phát mượt tối đa */
@@ -4549,6 +4582,13 @@
       border-top: 1px solid rgba(255, 255, 255, 0.12);
       padding: 10px 14px max(12px, env(safe-area-inset-bottom));
     }
+    @media (min-width: 640px) {
+      #booking-footer-bar {
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+      }
+    }
     body.booking-modal-open #owner-chat-widget {
       top: calc(58px + env(safe-area-inset-top)) !important;
       bottom: auto !important;
@@ -4589,14 +4629,26 @@
         display: none !important;
       }
       #booking-modal-panel {
-        max-height: 92dvh;
+        max-height: 95dvh;
+      }
+      #booking-scroll-body {
+        padding: 12px 18px !important;
       }
       #booking-footer-bar {
-        padding: 12px 20px;
+        padding: 10px 20px;
       }
       #booking-summary-card {
         position: sticky;
         top: 0;
+      }
+      #booking-seat-grid:not(.is-compact-grid) {
+        gap: 5px !important;
+      }
+      #booking-seat-grid:not(.is-compact-grid) > .cv-booking-seat-row {
+        margin-top: 0 !important;
+      }
+      #booking-seat-grid:not(.is-compact-grid) .booking-mini-seat {
+        height: 34px;
       }
     }
 
@@ -7197,6 +7249,29 @@
       #btn-hero-watch-party,#btn-hero-detail { height: 44px; min-height: 44px !important; }
       #hero-synopsis { display: none; }
     }
+    @media (max-width: 1023px) and (max-height: 800px) {
+      .cv-stage-auditorium {
+        max-height: clamp(230px, 44dvh, 330px) !important;
+      }
+      .cv-stage-info {
+        padding-top: 10px !important;
+        padding-bottom: 12px !important;
+        gap: 6px !important;
+      }
+      .cv-hero-title {
+        font-size: clamp(20px, 3.2vw, 26px) !important;
+      }
+    }
+    @media (min-width: 1024px) and (max-height: 760px) {
+      .cv-cinema-hero,
+      .cv-stage-left,
+      .cv-rooms-panel {
+        min-height: calc(100dvh - 76px) !important;
+      }
+      .cv-stage-info {
+        padding: 34px 24px 16px !important;
+      }
+    }
     @media (min-width:1024px) {
       #lobby-view { padding-inline: clamp(20px, 2.2vw, 40px) !important; }
       body:has(#lobby-view:not(.hidden)) #owner-chat-widget { right: max(12px,env(safe-area-inset-right)); }
@@ -7972,7 +8047,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     .cv-booking-3d-viewport {
       position: relative;
       width: 100%;
-      height: 192px;
+      height: 176px;
       border-radius: 14px;
       overflow: hidden;
       background: #050408;
@@ -7980,10 +8055,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 14px 32px rgba(0, 0, 0, 0.72);
     }
     @media (min-width: 640px) {
-      .cv-booking-3d-viewport { height: 214px; }
+      .cv-booking-3d-viewport { height: 196px; }
     }
-    @media (min-width: 1280px) {
-      .cv-booking-3d-viewport { height: 228px; }
+    @media (min-width: 1024px) {
+      .cv-booking-3d-viewport { height: 184px; }
+    }
+    @media (min-width: 1280px) and (min-height: 960px) {
+      .cv-booking-3d-viewport { height: 220px; }
     }
     .cv-b3d-hud-pill {
       background: rgba(11, 10, 16, 0.76);
@@ -8372,7 +8450,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             <button type="button" data-nav-tab="tickets" onclick="window.appActions.openMemoryCapsuleModal()"
               class="cv-nav-link">
               <span>Tủ Vé NFT</span>
-              <span id="capsule-count-badge" class="cv-nav-count-chip">1</span>
+              <span id="capsule-count-badge" class="hidden cv-nav-count-chip">0</span>
             </button>
 
             <button type="button" id="btn-admin-panel" data-nav-tab="admin"
@@ -8443,7 +8521,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       <button type="button" data-nav-tab="tickets" onclick="window.appActions.openMemoryCapsuleModal(); window.appActions.toggleMobileNavMenu(false);"
         class="cv-nav-mobile-item">
         <span>Tủ Vé NFT</span>
-        <span id="mobile-capsule-count-badge" class="cv-nav-count-chip">1</span>
+        <span id="mobile-capsule-count-badge" class="hidden cv-nav-count-chip">0</span>
       </button>
       <button type="button" id="mobile-btn-admin-panel" data-nav-tab="admin"
         onclick="window.appActions.openAdminPanelModal(); window.appActions.toggleMobileNavMenu(false);"
@@ -8484,6 +8562,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
   <main id="lobby-view" class="flex-1 w-full space-y-7">
     <!-- 1. KHU MÀN CHIẾU HÀNG F (68%) + BẢNG CHỌN 6 PHÒNG (32%) -->
     <section id="netflix-billboard"
+         data-boot-syncing="1"
          onmouseenter="window.appActions.pauseHeroSlider(true)"
          onmouseleave="window.appActions.pauseHeroSlider(false)"
          onfocusin="window.appActions.pauseHeroSlider(true)"
@@ -8493,7 +8572,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
       <!-- LỚP 3A: Quầng sáng Ambient Cinema Glow phía sau Hero Banner theo tông màu poster đang chiếu -->
       <img id="hero-cinema-ambient-halo"
-           src="https://image.tmdb.org/t/p/w300/ilXdDgVbJUXuBiH8AAvzdjVgAUF.jpg"
+           src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
            alt="" aria-hidden="true" decoding="async"
            onerror="this.style.opacity='0';"
            class="cv-hero-ambient-halo" />
@@ -8504,7 +8583,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           <div class="cv-wall-sconce-l" aria-hidden="true"></div>
           <div class="cv-wall-sconce-r" aria-hidden="true"></div>
           <img id="hero-stage-ambient-glow"
-               src="https://image.tmdb.org/t/p/w300/ilXdDgVbJUXuBiH8AAvzdjVgAUF.jpg"
+               src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
                alt="" aria-hidden="true" decoding="async"
                onerror="this.style.opacity='0';"
                class="cv-stage-ambient-glow" />
@@ -8514,8 +8593,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           <div id="hero-stage-screen-box" class="cv-stage-screen-box">
             <img id="hero-bg-ambient-blur" alt="" aria-hidden="true" width="1280" height="720" decoding="async" class="hidden" />
             <img id="hero-bg-poster"
-                 src="https://image.tmdb.org/t/p/w780/ilXdDgVbJUXuBiH8AAvzdjVgAUF.jpg"
-                 srcset="https://image.tmdb.org/t/p/w300/ilXdDgVbJUXuBiH8AAvzdjVgAUF.jpg 300w, https://image.tmdb.org/t/p/w500/ilXdDgVbJUXuBiH8AAvzdjVgAUF.jpg 500w, https://image.tmdb.org/t/p/w780/ilXdDgVbJUXuBiH8AAvzdjVgAUF.jpg 780w"
+                 src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
                  sizes="(max-width: 640px) 96vw, (max-width: 1024px) 92vw, 780px"
                  width="780" height="439"
                  fetchpriority="high"
@@ -8570,15 +8648,15 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               <span>• Đang chiếu</span>
             </span>
             <span id="hero-age-rating" class="cv-hero-meta-outline">T13+</span>
-            <span id="hero-year" class="cv-hero-meta-outline">2009</span>
-            <span id="hero-duration" class="cv-hero-meta-outline">2h 30m</span>
+            <span id="hero-year" class="cv-hero-meta-outline">2026</span>
+            <span id="hero-duration" class="cv-hero-meta-outline">Full HD</span>
             <span id="hero-live-viewers" class="hidden sm:inline-flex cv-hero-meta-outline gap-1.5">
               <span class="w-1.5 h-1.5 rounded-full animate-ping" style="background:#E50914"></span>
               <span>0/48 ghế</span>
             </span>
           </div>
 
-          <h1 id="hero-movie-title" class="cv-hero-title">Transformers: Bại Binh Phục Hận (2009)</h1>
+          <h1 id="hero-movie-title" class="cv-hero-title">Đang đồng bộ phòng chiếu trực tuyến…</h1>
 
           <div id="hero-genre-pills" class="hidden"></div>
           <span id="hero-genre" class="hidden"></span>
@@ -8587,7 +8665,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           <span id="hero-match-score" class="hidden"></span>
 
           <p id="hero-synopsis" class="text-xs sm:text-sm leading-relaxed line-clamp-2" style="color:#D4D4D8;">
-            Sam Witwicky nắm giữ ký hiệu cổ đại dẫn tới nguồn năng lượng Energon trên Trái Đất, buộc Optimus Prime và liên minh Autobots phải chiến đấu chống lại sự trỗi dậy của The Fallen và đội quân Decepticons.
+            Đang kết nối lịch chiếu trực tiếp và tình trạng ghế ngồi thời gian thực tại CineVerse Lotte…
           </p>
 
           <div class="cv-hero-actions" style="margin-top:4px;">
@@ -8800,11 +8878,37 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     <div id="lobby-rooms-grid" class="hidden"></div>
     <div id="hero-thumbs-strip" class="hidden"></div>
 
-    <!-- Nút Lên Đầu Trang -->
+    <!-- Chân trang Điện ảnh CineVerse Lotte -->
+    <footer id="cv-lobby-footer" class="cv-lobby-footer" aria-label="Thông tin rạp CineVerse Lotte">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+        <div class="space-y-1.5 max-w-xl">
+          <div class="flex items-center gap-2.5">
+            <img src="assets/web-logo.png" alt="CineVerse Lotte" width="28" height="28" loading="lazy" class="w-7 h-7 rounded-full object-cover border border-amber-400/40" />
+            <span class="cv-serif text-sm sm:text-base font-bold tracking-wider text-white uppercase">CineVerse Lotte</span>
+            <span class="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-400/35 text-[10px] font-extrabold text-amber-300">3D WebGL Cinema</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Không gian rạp chiếu phim trực tuyến góc nhìn Hàng F chân thực — đồng bộ khung hình thời gian thực, âm thanh vòm và đặt suất chiếu riêng cùng bạn bè.
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-300">
+          <button type="button" onclick="window.appActions.navGoToSection('home')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition cursor-pointer">Sảnh chiếu chính</button>
+          <button type="button" onclick="window.appActions.navGoToSection('watchparty')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition cursor-pointer">Lịch hẹn riêng</button>
+          <button type="button" onclick="window.appActions.navGoToSection('top10')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition cursor-pointer">Top phim tuần</button>
+          <button type="button" onclick="window.appActions.openHanoiCinemaFinder()" class="px-3 py-1.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-400/30 text-amber-200 transition cursor-pointer">Tìm rạp Hà Nội</button>
+        </div>
+      </div>
+      <div class="max-w-7xl mx-auto mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
+        <span>© 2026 CineVerse Lotte • Trải nghiệm điện ảnh trực tuyến thế hệ mới</span>
+        <span>Hỗ trợ trực tuyến góc dưới bên phải màn hình • Múi giờ Asia/Ho_Chi_Minh (GMT+7)</span>
+      </div>
+    </footer>
+
+    <!-- Nút Lên Đầu Trang (tinh gọn, không đè nút thẻ phòng) -->
     <button id="rophim-totop" type="button" onclick="window.appActions.scrollToTopSmooth()"
-      class="hidden px-3 py-2 rounded-xl font-black text-[11px] shadow-xl flex items-center gap-1.5 cursor-pointer">
-      <i class="fa-solid fa-arrow-up"></i>
-      <span>ĐẦU TRANG</span>
+      aria-label="Cuộn lên đầu trang" title="Lên đầu trang"
+      class="hidden shadow-xl flex items-center justify-center cursor-pointer">
+      <i class="fa-solid fa-arrow-up text-xs" aria-hidden="true"></i>
     </button>
   </main>
 
@@ -8877,7 +8981,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       <div class="flex items-start sm:items-center justify-between gap-3 pb-3 border-b border-amber-400/20">
         <div class="min-w-0 flex-1">
           <div class="flex flex-wrap items-center gap-2">
-            <h1 class="text-lg sm:text-2xl font-black text-white tracking-tight leading-tight">Tìm rạp Hà Nội</h1>
+            <h2 class="text-lg sm:text-2xl font-black text-white tracking-tight leading-tight">Tìm rạp Hà Nội</h2>
             <span id="hn-cinema-count-label" class="px-2.5 py-0.5 rounded-full bg-amber-400/15 border border-amber-400/35 text-amber-300 text-[10px] font-black">17 cụm rạp</span>
           </div>
           <div class="hn-origin-bar" id="hn-origin-bar">
@@ -8992,7 +9096,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 <i class="fa-solid fa-moon mr-1"></i><span>Bản đồ tối</span>
               </button>
 
-              <!-- Google Maps thực tế (ẩn hộp place-card góc trên trái bằng bù trừ top âm) -->
+              <!-- Google Maps thực tế theo tọa độ GPS rạp (không kích hoạt Places API không khóa) -->
               <iframe id="hn-google-map-iframe"
                 title="Bản đồ Rạp Phim Hà Nội"
                 class="w-full border-0 hn-map-iframe-dark"
@@ -9000,7 +9104,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 loading="lazy"
                 referrerpolicy="no-referrer-when-downgrade"
                 src="about:blank"
-                data-src="https://maps.google.com/maps?q=Lotte+Mall+West+Lake+Hanoi+272+Vo+Chi+Cong+Ha+Noi&t=&z=15&ie=UTF8&iwloc=near&output=embed">
+                data-src="https://maps.google.com/maps?q=21.0761,105.8124&ll=21.0761,105.8124&hl=vi&z=16&output=embed">
               </iframe>
 
               <!-- Thẻ nổi Rạp đang chọn góc dưới bản đồ -->
@@ -10721,10 +10825,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       </div>
       <div id="auth-wp-context-banner" class="hidden p-3.5 rounded-2xl space-y-1.5" style="background:rgba(245,197,24,0.10);border:1px solid rgba(245,197,24,0.38);">
         <div class="flex items-center gap-2 text-amber-300 font-extrabold text-xs">
-          <i class="fa-solid fa-clapperboard"></i>
-          <span>Đăng nhập để lưu lịch hẹn</span>
+          <i id="auth-ctx-banner-icon" class="fa-solid fa-clapperboard"></i>
+          <span id="auth-ctx-banner-heading">Đăng nhập để lưu lịch hẹn</span>
         </div>
-        <p class="text-[11px] text-slate-200 leading-relaxed">Lựa chọn của bạn đã được giữ lại. Đăng nhập để lưu lịch, quản lý và mời bạn bè tham gia.</p>
+        <p id="auth-ctx-banner-desc" class="text-[11px] text-slate-200 leading-relaxed">Lựa chọn của bạn đã được giữ lại. Đăng nhập để lưu lịch, quản lý và mời bạn bè tham gia.</p>
         <p id="auth-wp-draft-summary" class="text-[11px] font-bold text-amber-200"></p>
       </div>
       <p id="name-modal-subtitle" class="text-xs text-slate-300 leading-relaxed">Vui lòng <strong class="text-amber-300">đăng ký tài khoản (xác thực Gmail OTP)</strong> hoặc <strong class="text-sky-300">đăng nhập</strong> để bắt đầu sử dụng rạp chiếu phim và đặt vé CineVerse.</p>
@@ -11069,13 +11173,19 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="space-y-1">
-            <label for="wp-form-date" class="block font-bold text-slate-200">2. Ngày bắt đầu (GMT+7)</label>
-            <input id="wp-form-date" type="date" onchange="window.appActions.onWatchPartyMovieOrTimeChange()" oninput="window.appActions.onWatchPartyMovieOrTimeChange()"
+            <label for="wp-form-date" class="flex items-center justify-between gap-1 font-bold text-slate-200">
+              <span>2. Ngày bắt đầu (GMT+7)</span>
+              <span id="wp-date-vn-badge" class="text-[11px] font-extrabold text-amber-300"></span>
+            </label>
+            <input id="wp-form-date" type="date" lang="vi" onchange="window.appActions.onWatchPartyMovieOrTimeChange()" oninput="window.appActions.onWatchPartyMovieOrTimeChange()"
               class="w-full min-h-[44px] px-3 py-2 rounded-xl bg-stone-950 border border-white/15 text-xs text-white font-bold focus:outline-none focus:border-amber-400" />
           </div>
           <div class="space-y-1">
-            <label for="wp-form-time" class="block font-bold text-slate-200">Giờ bắt đầu (GMT+7)</label>
-            <input id="wp-form-time" type="time" onchange="window.appActions.onWatchPartyMovieOrTimeChange()" oninput="window.appActions.onWatchPartyMovieOrTimeChange()"
+            <label for="wp-form-time" class="flex items-center justify-between gap-1 font-bold text-slate-200">
+              <span>Giờ bắt đầu (24h GMT+7)</span>
+              <span id="wp-time-vn-badge" class="text-[11px] font-extrabold text-amber-300"></span>
+            </label>
+            <input id="wp-form-time" type="time" lang="vi" onchange="window.appActions.onWatchPartyMovieOrTimeChange()" oninput="window.appActions.onWatchPartyMovieOrTimeChange()"
               class="w-full min-h-[44px] px-3 py-2 rounded-xl bg-stone-950 border border-white/15 text-xs text-white font-bold focus:outline-none focus:border-amber-400" />
           </div>
         </div>
@@ -11475,29 +11585,29 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     <div id="booking-modal-panel" tabindex="-1" class="rounded-2xl sm:rounded-3xl max-w-6xl w-full flex flex-col overflow-hidden focus:outline-none">
       <div id="booking-sr-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
       <!-- A. ĐẦU MÀN HÌNH ĐẶT VÉ (Cố định trên cùng, chừa safe-area, luôn thấy tiêu đề & nút đóng) -->
-      <div id="booking-modal-header" class="shrink-0 px-3.5 sm:px-5 py-2.5 sm:py-3.5 border-b border-white/10 flex items-center justify-between gap-2.5" style="background:#16161D;">
-        <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+      <div id="booking-modal-header" class="shrink-0 px-3 sm:px-5 py-2.5 sm:py-3.5 border-b border-white/10 flex items-center justify-between gap-2" style="background:#16161D;">
+        <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 overflow-hidden">
           <img id="booking-header-poster" src="./assets/web-logo.png" alt="Poster phim" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover border border-amber-400/40 shadow-lg shrink-0" />
-          <div class="min-w-0 flex-1">
-            <div class="flex flex-wrap items-center gap-1.5">
-              <span id="booking-header-room-chip" class="px-2 py-0.5 rounded-md text-[10px] font-black" style="background:#E50914;color:#FFFFFF;">Phòng 01</span>
-              <span id="booking-modal-mode-badge" class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase" style="background:rgba(245,197,24,0.16);border:1px solid rgba(245,197,24,0.55);color:#F5C518;">CHẾ ĐỘ FREE</span>
+          <div class="min-w-0 flex-1 overflow-hidden">
+            <div class="flex items-center gap-1.5 whitespace-nowrap">
+              <span id="booking-header-room-chip" class="px-2 py-0.5 rounded-md text-[10px] font-black shrink-0" style="background:#E50914;color:#FFFFFF;">Phòng 01</span>
+              <span id="booking-modal-mode-badge" class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase whitespace-nowrap shrink-0" style="background:rgba(245,197,24,0.16);border:1px solid rgba(245,197,24,0.55);color:#F5C518;">CHẾ ĐỘ FREE</span>
             </div>
-            <h3 id="booking-modal-title" class="text-sm sm:text-base font-black text-white leading-snug line-clamp-2 mt-0.5">Đặt Vé Rạp Chiếu Phim Trực Tuyến</h3>
+            <h3 id="booking-modal-title" class="text-xs sm:text-base font-black text-white leading-snug line-clamp-1 sm:line-clamp-2 mt-0.5">Đặt Vé Rạp Chiếu Phim Trực Tuyến</h3>
             <p id="booking-modal-subtitle" class="hidden sm:block text-[11px]" style="color:#A1A1AA;">Chọn suất chiếu, bấm chọn ghế trên sơ đồ và xác nhận vé ngay</p>
           </div>
         </div>
         <div class="flex items-center gap-1.5 shrink-0">
           <button type="button" id="btn-toggle-booking-meta" onclick="window.appActions.toggleBookingMetaDrawer()"
             aria-expanded="false"
-            class="lg:hidden px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-white cursor-pointer"
+            class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-white cursor-pointer whitespace-nowrap shrink-0"
             style="background:#0B0B0F;border:1px solid rgba(245,197,24,0.45);color:#F5C518;">
-            Đổi phòng/suất
+            <span>Đổi phòng</span><span class="cv-hide-xs">/suất</span>
           </button>
           <button type="button" id="booking-header-chat-btn" onclick="window.appActions.toggleOwnerChatWidget()"
             aria-label="Nhắn Chủ Rạp"
             title="Nhắn Chủ Rạp"
-            class="w-9 h-9 rounded-full flex items-center justify-center transition cursor-pointer shrink-0"
+            class="hidden sm:flex w-9 h-9 rounded-full items-center justify-center transition cursor-pointer shrink-0"
             style="background:#E50914;color:#FFFFFF;border:1.5px solid rgba(245,197,24,0.55);">
             <i class="fa-solid fa-comment-dots text-xs" style="color:#F5C518;"></i>
           </button>
@@ -11512,9 +11622,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
       <!-- B. THÂN MÀN HÌNH (1 vùng cuộn dọc chính duy nhất, cuộn được tới đầu & cuối) -->
       <div id="booking-scroll-body" class="p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 text-xs items-start">
-        <!-- Cột Trái: Đổi Phòng/Suất (thu gọn mặc định trên mobile) + Sơ Đồ Ghế -->
-        <div class="lg:col-span-7 xl:col-span-8 space-y-3.5">
-          <div id="booking-meta-drawer" class="hidden lg:block cv-booking-card p-3.5 space-y-3">
+        <!-- Cột Trái: Đổi Phòng/Suất (thu gọn gọn gàng cho tới khi bấm Đổi phòng/suất) + Sơ Đồ Ghế -->
+        <div class="lg:col-span-7 xl:col-span-8 space-y-2.5">
+          <div id="booking-meta-drawer" class="hidden cv-booking-card p-3.5 space-y-3">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div class="space-y-1">
                 <label for="booking-room-select" class="text-[11px] font-extrabold uppercase tracking-wider block" style="color:#F5C518;">1. Chọn Phim &amp; Phòng Chiếu</label>
@@ -11555,7 +11665,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 <span id="booking-pov-seat-chip" class="px-2 py-0.5 rounded-md text-[10px] font-black" style="background:#F5C518;color:#0B0B0F;">Ghế F4</span>
                 <i id="booking-pov-chevron" class="fa-solid fa-chevron-down text-[10px] transition-transform" style="color:#A1A1AA;transform:rotate(180deg);"></i>
               </button>
-              <span id="booking-pov-desc" class="text-[10.5px] font-medium truncate max-w-full sm:max-w-[55%]" style="color:rgba(255,255,255,0.72);">
+              <span id="booking-pov-desc" class="hidden sm:inline text-[10.5px] font-medium truncate flex-1 text-right" style="color:rgba(255,255,255,0.72);">
                 Chọn ghế bên dưới để tự động bay tới góc nhìn thực tế • Kéo để xoay 360°
               </span>
             </div>
@@ -11658,12 +11768,17 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 </div>
               </div>
 
-              <div class="space-y-1">
+              <div class="space-y-1.5">
                 <label for="booking-user-name" class="text-[11px] font-bold" style="color:#A1A1AA;">Tên người đặt vé (in lên Vé &amp; Thẻ NFT):</label>
-                <input id="booking-user-name" type="text" maxlength="24" placeholder="Nhập tên của bạn..."
+                <input id="booking-user-name" type="text" maxlength="24" placeholder="Nhập tên hiển thị của bạn (VD: Minh Quân)..."
                   onfocus="setTimeout(() => this.scrollIntoView({ block: 'center', behavior: 'smooth' }), 180)"
                   style="background:#0B0B0F;border:1px solid rgba(255,255,255,0.16);"
                   class="w-full px-3 py-2.5 rounded-xl text-white font-bold text-xs focus:outline-none focus:border-amber-400" />
+                <div id="booking-guest-auth-notice" class="hidden px-2.5 py-2 rounded-xl text-[11px] leading-snug flex items-start gap-2"
+                  style="background:rgba(245,197,24,0.10);border:1px solid rgba(245,197,24,0.34);color:#FDE68A;">
+                  <i class="fa-solid fa-user-check mt-0.5 shrink-0" style="color:#F5C518;" aria-hidden="true"></i>
+                  <span><strong>Khách mới chưa có tài khoản:</strong> Chọn ghế trước thoải mái — bước tiếp theo xác thực <strong>Gmail OTP 1 lần</strong> để nhận vé &amp; vào thẳng ghế ngồi.</span>
+                </div>
               </div>
 
               <!-- Thông báo lỗi inline màu đỏ (#E50914) -->
@@ -11689,9 +11804,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                     <span style="color:#A1A1AA;">Combo đi kèm:</span>
                     <strong id="booking-free-combo-label" class="font-bold text-white">🍿🥤 Combo Solo Bắp + Pepsi</strong>
                   </div>
-                  <div class="flex justify-between items-center">
+                  <div class="flex justify-between items-center gap-2">
                     <span style="color:#A1A1AA;">Chế độ phòng rạp:</span>
-                    <strong class="text-emerald-400 font-black">🆓 Đặt ghế Free • Vào thẳng ghế</strong>
+                    <strong id="booking-free-entry-mode-label" class="text-emerald-400 font-black text-right">🆓 Đặt ghế Free • Vào thẳng ghế</strong>
                   </div>
                   <div class="flex justify-between items-center">
                     <span style="color:#A1A1AA;">Quy định đổi ghế:</span>
@@ -12637,7 +12752,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     function saveMemberAccountSession(email, displayName, verifiedUid) {
       const payload = JSON.stringify({ email, displayName, verifiedUid: verifiedUid || "", ts: Date.now() });
       setMemberCookie("cv_member_session", payload, 30);
-      try { localStorage.setItem("cv_member_session", payload); } catch (_) {}
+      try {
+        localStorage.setItem("cv_member_session", payload);
+        localStorage.setItem("cv_has_registered_before", "1");
+      } catch (_) {}
     }
 
     function loadSavedEmail() {
@@ -13667,6 +13785,16 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           synopsis: "Phòng livestream như Discord dành cho tối đa 10 người: chia sẻ màn hình máy tính/điện thoại kèm tiếng và trò chuyện trực tiếp độ trễ cực thấp."
         },
         {
+          test: () => t.includes("sword art online") || t.includes("ordinal scale") || t.includes("ranh gioi hu a") || t.includes("kiem than vuc"),
+          year: "2017",
+          duration: "1h 59m",
+          durationSec: 7140,
+          ageRating: "T13+",
+          genre: "Anime • Hành động • Khoa học viễn tưởng",
+          cast: "Yoshitsugu Matsuoka, Haruka Tomatsu, Sayaka Kanda",
+          synopsis: "Năm 2026, thiết bị thực tế tăng cường Augma và trò chơi Ordinal Scale gây sốt toàn cầu. Kirito cùng Asuna phát hiện âm mưu đánh cắp ký ức những người sống sót từ Sword Art Online và buộc phải bước vào trận chiến sinh tử ngoài đời thực."
+        },
+        {
           test: () => t.includes("thang tu") || t.includes("ha anh tuan"),
           year: "2016",
           duration: "05:52",
@@ -13695,11 +13823,12 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         return DYNAMIC_MOVIE_META_CACHE[t];
       }
 
-      const isSameAsBase = baseRoom && String(baseRoom.movieTitle || "").trim() === raw;
+      const isSameAsBase = Boolean(baseRoom && String(baseRoom.movieTitle || "").trim() === raw);
       if (isSameAsBase && baseRoom.synopsis) {
         return {
           year: parsedYear || "2026",
           duration: baseRoom.duration || "2h 00m",
+          durationSec: Number(baseRoom.durationSec) || 0,
           ageRating: baseRoom.ageRating || "T13+",
           genre: baseRoom.genre || "Điện ảnh • Chiếu rạp",
           cast: baseRoom.cast || "CineVerse Lotte",
@@ -13707,13 +13836,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         };
       }
 
-      // Clean title & infer accurate fallback duration/metadata for any new movie
+      // Clean title & infer accurate fallback duration/metadata without leaking baseRoom's runtime to a different movie
       const cleanName = sanitizeMovieTitle(raw) || raw;
       const isEp = /\btập\s*\d+\b/i.test(raw);
-      const secDur = Number(baseRoom?.durationSec) || 0;
-      const inferredDuration = (baseRoom && String(baseRoom.movieTitle || "").trim() === raw && baseRoom.duration && baseRoom.duration !== "2h 00m")
+      const secDur = isSameAsBase ? (Number(baseRoom?.durationSec) || 0) : (isEp ? 2700 : 6780);
+      const inferredDuration = (isSameAsBase && baseRoom.duration && baseRoom.duration !== "2h 00m")
         ? baseRoom.duration
-        : (formatDurationHoursMin(secDur) || (isEp ? "45m / tập" : "1h 52m"));
+        : (formatDurationHoursMin(secDur) || (isEp ? "45m / tập" : "1h 53m"));
 
       // Trigger non-blocking background Wikipedia lookup to enrich unknown future titles
       if (raw && !DYNAMIC_MOVIE_META_PENDING.has(t)) {
@@ -13728,6 +13857,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               DYNAMIC_MOVIE_META_CACHE[t] = {
                 year: parsedYear || "2025",
                 duration: inferredDuration,
+                durationSec: secDur,
                 ageRating: "T13+",
                 genre: "Điện ảnh • Chiếu rạp HD",
                 cast: cleanName,
@@ -13757,6 +13887,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       return {
         year: parsedYear || "2025",
         duration: inferredDuration,
+        durationSec: secDur,
         ageRating: "T13+",
         genre: "Điện ảnh • Chiếu rạp HD",
         cast: cleanName,
@@ -13870,19 +14001,20 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       const modalInput = document.getElementById("modal-name-input");
       const bookingName = document.getElementById("booking-user-name");
       const profileCapsuleName = document.getElementById("profile-capsule-username");
+      const authed = isAccountAuthenticated();
       if (headerName) {
-        headerName.textContent = state.gmailVerified && state.userEmail
+        headerName.textContent = authed
           ? `${state.userName} ✓`
-          : state.userName;
-        headerName.title = state.gmailVerified && state.userEmail
+          : "Đăng nhập";
+        headerName.title = authed
           ? `Đã xác thực Gmail: ${state.userEmail}`
-          : "Chưa xác thực Gmail";
+          : "Đăng nhập hoặc tạo tài khoản thành viên";
       }
       if (hostBadge) hostBadge.textContent = state.userName;
-      if (inlineInput && document.activeElement !== inlineInput) inlineInput.value = state.userName;
-      if (modalInput && document.activeElement !== modalInput) modalInput.value = state.userName;
-      if (bookingName && document.activeElement !== bookingName) bookingName.value = state.userName;
-      if (profileCapsuleName) profileCapsuleName.textContent = state.userName;
+      if (inlineInput && document.activeElement !== inlineInput) inlineInput.value = authed ? state.userName : "";
+      if (modalInput && document.activeElement !== modalInput) modalInput.value = authed ? state.userName : "";
+      if (bookingName && document.activeElement !== bookingName) bookingName.value = authed ? state.userName : "";
+      if (profileCapsuleName) profileCapsuleName.textContent = authed ? state.userName : "Khách tham quan";
     }
 
     // =========================================================
@@ -14196,7 +14328,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         const heroMaxCap = room.maxSeats || 48;
         viewersEl.innerHTML = `
           <span class="w-1.5 h-1.5 rounded-full animate-ping" style="background:${isShowing ? '#E50914' : '#F5C518'}"></span>
-          <span>${hasSyncedInitialRoomSeats[room.id] ? `${viewerCount}/${heroMaxCap} ghế` : "Đang cập nhật ghế"}</span>
+          <span>${hasSyncedInitialRoomSeats[room.id] ? `${viewerCount}/${heroMaxCap} ghế` : "Mở chọn ghế"}</span>
         `;
       }
 
@@ -14219,7 +14351,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       const mobMovieLbl = document.getElementById("mobile-active-room-movie");
       const heroMaxCap2 = room.maxSeats || 48;
       if (mobRoomLbl) {
-        const seatText = !hasSyncedInitialRoomSeats[room.id] ? "Đang cập nhật" : `${viewerCount}/${heroMaxCap2} ghế`;
+        const seatText = !hasSyncedInitialRoomSeats[room.id] ? "Mở chọn ghế" : `${viewerCount}/${heroMaxCap2} ghế`;
         mobRoomLbl.textContent = `${room.number} • ${seatText}`;
       }
       if (mobMovieLbl) {
@@ -15003,7 +15135,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           const occupied = seats ? Object.keys(seats).length : 0;
           const isFull = occupied >= maxCap;
           const seatStatus = !hasSyncedInitialRoomSeats[room.id]
-            ? "Đang cập nhật"
+            ? "Mở chọn ghế"
             : (isFull ? `Hết ghế (${occupied}/${maxCap})` : `${occupied}/${maxCap} ghế`);
           const title = room.displayTitle || sanitizeMovieTitle(room.movieTitle);
           const thumbSrc = getOptimizedPosterUrl(
@@ -15407,6 +15539,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
       state.currentRoomId = roomId;
       state.roomEnteredAt = Date.now();
+      renderTheaterLeftMovieList();
       try { window.__setAmbientTunaPaused?.(true); } catch (_) {}
       try { syncMyOnlinePresence?.(); } catch (_) {}
       try { logMemberActivity?.("join_room", `Khán giả vào ${room.number || roomId} (${room.movieTitle || "Phim"})`, { roomId, roomNumber: room.number }); } catch (_) {}
@@ -17359,18 +17492,17 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         }
       });
 
-      // Biên dịch sẵn cả hình học 3D VÀ shader WebGL/HLSL trong lúc trình duyệt rảnh!
-      const prewarmAll3D = () => {
-        try {
-          getSharedCinemaCache();
-          bookingInst.ensureInit();
-        } catch (_) {}
+      // Biên dịch sẵn hình học 3D & shader WebGL theo 2 nhịp rảnh rỗi để không tạo Long Task
+      const schedule3DIdle = (fn, ms) => {
+        if (typeof requestIdleCallback === "function") requestIdleCallback(fn, { timeout: ms + 600 });
+        else setTimeout(fn, ms);
       };
-      if (typeof requestIdleCallback === "function") {
-        requestIdleCallback(prewarmAll3D, { timeout: 1500 });
-      } else {
-        setTimeout(prewarmAll3D, 700);
-      }
+      schedule3DIdle(() => {
+        try { getSharedCinemaCache(); } catch (_) {}
+        schedule3DIdle(() => {
+          try { bookingInst.ensureInit(); } catch (_) {}
+        }, 180);
+      }, 320);
 
       function syncBookingHud() {
         const st = bookingInst.st;
@@ -17749,7 +17881,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         chipEl.style.color = "#0B0B0F";
       }
       if (descEl) {
-        descEl.textContent = `${zoneText} • ${angleText} • Đang mô phỏng trực tiếp tầm mắt ghế ${seatId}`;
+        descEl.textContent = `${zoneText} • ${angleText}`;
       }
       window.cvBooking3D?.syncBooking(room, seatId);
     }
@@ -20120,9 +20252,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       if (selectEl && state.currentRoomId) {
         selectEl.value = state.currentRoomId;
       }
+      document.getElementById("video-vault-modal")?.classList.remove("hidden");
       updateVaultBadgeCount();
       renderVideoVaultGrid();
-      document.getElementById("video-vault-modal")?.classList.remove("hidden");
     }
 
     function closeVideoVaultModal() {
@@ -20847,6 +20979,12 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         countBadge.textContent = normQuery ? `${entries.length}/${groupedAll.length}` : String(groupedAll.length);
       }
 
+      // Không dựng hàng ngàn DOM node ẩn khi người dùng đang ở Sảnh chính (chưa vào phòng)
+      if (!state.currentRoomId) {
+        if (container.innerHTML) container.innerHTML = "";
+        return;
+      }
+
       if (entries.length === 0) {
         container.innerHTML = normQuery
           ? `
@@ -21020,7 +21158,12 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     function renderVideoVaultGrid() {
       renderTheaterLeftMovieList();
       const grid = document.getElementById("vault-items-grid");
+      const vaultModal = document.getElementById("video-vault-modal");
       if (!grid) return;
+      if (vaultModal && vaultModal.classList.contains("hidden")) {
+        if (grid.innerHTML) grid.innerHTML = "";
+        return;
+      }
 
       if (state.vaultVideos.length === 0) {
         grid.innerHTML = `
@@ -22793,6 +22936,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
     function syncAuthWatchPartyContextUI() {
       const ctxBanner = document.getElementById("auth-wp-context-banner");
+      const bannerIcon = document.getElementById("auth-ctx-banner-icon");
+      const bannerHeading = document.getElementById("auth-ctx-banner-heading");
+      const bannerDesc = document.getElementById("auth-ctx-banner-desc");
       const summaryEl = document.getElementById("auth-wp-draft-summary");
       const titleEl = document.getElementById("name-modal-title");
       const subtitleEl = document.getElementById("name-modal-subtitle");
@@ -22803,11 +22949,26 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         if (titleEl) {
           titleEl.innerHTML = `<i class="fa-solid fa-clapperboard mr-2" style="color:#F5C518;"></i>Đăng nhập để lưu lịch hẹn`;
         }
+        if (bannerIcon) bannerIcon.className = "fa-solid fa-clapperboard";
+        if (bannerHeading) bannerHeading.textContent = "Đăng nhập để lưu lịch hẹn";
+        if (bannerDesc) bannerDesc.textContent = "Lựa chọn của bạn đã được giữ lại. Đăng nhập để lưu lịch, quản lý và mời bạn bè tham gia.";
         subtitleEl?.classList.add("hidden");
         ctxBanner?.classList.remove("hidden");
         if (summaryEl && typeof formatWpDraftSummary === "function") {
           summaryEl.textContent = formatWpDraftSummary(draft);
         }
+      } else if (pendingBookingArgs && pendingBookingArgs.seat && pendingBookingArgs.roomId) {
+        const bRoom = getEffectiveRoom(pendingBookingArgs.roomId);
+        const cleanTitle = bRoom.displayTitle || sanitizeMovieTitle(bRoom.movieTitle || "");
+        if (titleEl) {
+          titleEl.innerHTML = `<i class="fa-solid fa-ticket mr-2" style="color:#F5C518;"></i>Xác Thực Vé &amp; Vào Ghế ${escapeHTML(pendingBookingArgs.seat)}`;
+        }
+        if (bannerIcon) bannerIcon.className = "fa-solid fa-couch";
+        if (bannerHeading) bannerHeading.textContent = `Đang giữ lựa chọn Ghế ${pendingBookingArgs.seat} • ${bRoom.number}`;
+        if (bannerDesc) bannerDesc.textContent = "Tạo tài khoản mới (hoặc đăng nhập) chỉ 1 lần duy nhất — hệ thống sẽ tự động xuất vé và đưa bạn vào thẳng ghế ngồi ngay sau khi hoàn tất.";
+        subtitleEl?.classList.add("hidden");
+        ctxBanner?.classList.remove("hidden");
+        if (summaryEl) summaryEl.textContent = `🎬 ${cleanTitle}`;
       } else {
         if (titleEl) {
           titleEl.innerHTML = `<i class="fa-solid fa-user-shield mr-2" style="color:#F5C518;"></i>Tài Khoản CineVerse`;
@@ -22976,8 +23137,23 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         return;
       }
       if (bookArgs) {
-        if (bookArgs.quickBar) await quickBookFromLobbyBar();
-        else openBookingModal(bookArgs.roomId, bookArgs.showtime, bookArgs.seat);
+        if (bookArgs.quickBar) {
+          await quickBookFromLobbyBar();
+        } else if (bookArgs.autoConfirmAfterAuth && isAccountAuthenticated()) {
+          state.bookingDraft.roomId = bookArgs.roomId || state.bookingDraft.roomId;
+          if (bookArgs.showtime) state.bookingDraft.showtime = bookArgs.showtime;
+          if (bookArgs.seat) state.bookingDraft.seatId = bookArgs.seat;
+          if (bookArgs.comboIcon !== undefined) state.bookingDraft.comboIcon = bookArgs.comboIcon;
+          if (bookArgs.comboPrice !== undefined) state.bookingDraft.comboPrice = bookArgs.comboPrice;
+          if (bookArgs.comboName !== undefined) state.bookingDraft.comboName = bookArgs.comboName;
+          const bNameInp = document.getElementById("booking-user-name");
+          if (bNameInp && state.userName && !isDefaultGuestName(state.userName)) {
+            bNameInp.value = state.userName;
+          }
+          await confirmCinemaBooking(false);
+        } else {
+          openBookingModal(bookArgs.roomId, bookArgs.showtime, bookArgs.seat);
+        }
       } else if (targetRoom) {
         enterRoom(targetRoom);
         if (inviteInfo && inviteInfo.roomId === targetRoom) {
@@ -22998,9 +23174,23 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       const input = document.getElementById("modal-name-input");
       const otpInput = document.getElementById("modal-otp-input");
       if (otpInput) otpInput.value = "";
-      if (requireForRoom && input) {
+      if (!state.accountLoggedIn) {
+        let hasPriorAccount = false;
+        try {
+          hasPriorAccount = Boolean(localStorage.getItem("cv_has_registered_before") || loadMemberAccountSession()?.email);
+        } catch (_) {}
+        state.authTab = hasPriorAccount ? "login" : "register";
+      }
+      if (input) {
+        const draftTyped = (pendingBookingArgs?.draftName || "").trim();
         const saved = loadSavedName();
-        input.value = (saved && !isDefaultGuestName(saved)) ? saved : "";
+        if (draftTyped && !isDefaultGuestName(draftTyped)) {
+          input.value = draftTyped;
+        } else if (saved && !isDefaultGuestName(saved)) {
+          input.value = saved;
+        } else if (requireForRoom || state.authTab === "register") {
+          input.value = "";
+        }
       }
       refreshGmailModalUI();
       syncAuthWatchPartyContextUI();
@@ -31083,7 +31273,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       if (povChev) povChev.style.transform = "rotate(180deg)";
 
       const nameInput = document.getElementById("booking-user-name");
-      if (nameInput) nameInput.value = state.userName;
+      if (nameInput) {
+        nameInput.value = (state.userName && !isDefaultGuestName(state.userName)) ? state.userName : "";
+      }
       setBookingInlineError("");
 
       renderBookingModalUI();
@@ -31232,9 +31424,12 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         btnZoom.setAttribute("aria-pressed", isZoom ? "true" : "false");
       }
       if (hintEl) {
-        hintEl.textContent = isZoom
-          ? "Đang phóng to (ghế ≥44px) • Vuốt ngang sơ đồ để chọn"
-          : "Toàn cảnh vừa màn hình • Bật Phóng to để chạm ≥44px";
+        const isDesktopNow = typeof window !== "undefined" && window.innerWidth >= 1024;
+        hintEl.textContent = isDesktopNow
+          ? "Chạm vào ghế bất kỳ để tự động mô phỏng góc nhìn 3D thực tế"
+          : (isZoom
+              ? "Đang phóng to (ghế ≥44px) • Vuốt ngang sơ đồ để chọn"
+              : "Toàn cảnh vừa màn hình • Bật Phóng to để chạm ≥44px");
       }
       if (isZoom && !opts.silent && seatGrid) {
         requestAnimationFrame(() => {
@@ -31374,8 +31569,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       if (modeBadgeEl) {
         modeBadgeEl.textContent = !isPaidMode ? "🆓 CHẾ ĐỘ FREE" : "IMAX Laser 70mm";
         modeBadgeEl.className = !isPaidMode
-          ? "px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10px] font-black uppercase"
-          : "px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[10px] font-black uppercase";
+          ? "px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10px] font-black uppercase whitespace-nowrap shrink-0"
+          : "px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[10px] font-black uppercase whitespace-nowrap shrink-0";
       }
 
       // 1. Render dropdown chọn phòng phim & cập nhật nhãn Combo Bắp Nước (ẩn giá khi ở Chế độ Free)
@@ -31383,7 +31578,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       if (roomSelect && !renderOpts.preserveFocusSeatId) {
         roomSelect.innerHTML = DEFAULT_ROOMS.map(r => {
           const eff = getEffectiveRoom(r.id);
-          return `<option value="${eff.id}" ${eff.id === roomId ? "selected" : ""}>${escapeHTML(eff.number)} — ${escapeHTML(eff.movieTitle)} (${escapeHTML(eff.quality || "IMAX")})</option>`;
+          const cleanOptTitle = eff.displayTitle || sanitizeMovieTitle(eff.movieTitle);
+          return `<option value="${eff.id}" ${eff.id === roomId ? "selected" : ""}>${escapeHTML(eff.number)} — ${escapeHTML(cleanOptTitle)} (${escapeHTML(eff.quality || "IMAX")})</option>`;
         }).join("");
       }
 
@@ -31561,7 +31757,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       const roomEl = document.getElementById("booking-preview-room");
       if (roomEl) roomEl.textContent = `${room.number} • ${room.quality || "IMAX 70MM"}`;
       const titleEl = document.getElementById("booking-preview-title");
-      if (titleEl) titleEl.textContent = room.movieTitle;
+      if (titleEl) titleEl.textContent = room.displayTitle || sanitizeMovieTitle(room.movieTitle);
       const timeEl = document.getElementById("booking-preview-time");
       if (timeEl) {
         timeEl.textContent = formatShowtimeForCurrentMode(state.bookingDraft.showtime);
@@ -31593,8 +31789,18 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       if (paidPriceRows) paidPriceRows.classList.toggle("hidden", !isPaidMode);
       if (buyoutLabelWrap) buyoutLabelWrap.classList.toggle("hidden", !isPaidMode);
 
+      const isAuthedNow = isAccountAuthenticated();
+      const guestNoticeEl = document.getElementById("booking-guest-auth-notice");
+      if (guestNoticeEl) guestNoticeEl.classList.toggle("hidden", isAuthedNow);
+
       if (!isPaidMode) {
         backToBookingSummary();
+        const freeEntryModeEl = document.getElementById("booking-free-entry-mode-label");
+        if (freeEntryModeEl) {
+          freeEntryModeEl.textContent = isAuthedNow
+            ? "🆓 Đặt ghế Free • Vào thẳng ghế"
+            : "🆓 Vé 0đ • Xác thực Gmail để vào rạp";
+        }
         const freeComboEl = document.getElementById("booking-free-combo-label");
         if (freeComboEl) {
           freeComboEl.textContent = state.bookingDraft.comboIcon
@@ -31667,6 +31873,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           btnTextEl.textContent = `Xác Nhận Đổi Sang Ghế ${selectedSeat} Ngay`;
         } else if (state.currentRoomId === roomId) {
           btnTextEl.textContent = `Ngồi Vào Ghế ${selectedSeat} Ngay`;
+        } else if (!isAuthedNow) {
+          btnTextEl.textContent = `Đăng Ký / Đăng Nhập & Vào Ghế ${selectedSeat}`;
         } else {
           btnTextEl.textContent = `Đặt Ghế ${selectedSeat} & Vào Phòng Ngay`;
         }
@@ -32062,17 +32270,19 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         return;
       }
 
-      // Yêu cầu đăng nhập đúng lúc khách xác nhận đặt ghế; sau khi đăng nhập sẽ khôi phục đúng phim, phòng và ghế
+      // Yêu cầu đăng nhập đúng lúc khách xác nhận đặt ghế; sau khi đăng nhập sẽ tự động xuất vé & vào thẳng ghế đã chọn
       if (!state.accountLoggedIn || !state.gmailVerified || !state.userEmail) {
+        const typedDraftName = (document.getElementById("booking-user-name")?.value || "").trim();
         pendingBookingArgs = {
           roomId: targetRoomId,
           showtime,
           seat: targetSeatId,
           comboIcon: state.bookingDraft.comboIcon,
           comboPrice: state.bookingDraft.comboPrice,
-          comboName: state.bookingDraft.comboName
+          comboName: state.bookingDraft.comboName,
+          draftName: (!isDefaultGuestName(typedDraftName) ? typedDraftName : ""),
+          autoConfirmAfterAuth: true
         };
-        showToast(`🔐 Vui lòng đăng nhập để xác nhận đặt ghế ${targetSeatId} (${roomObj.number})!`, "warning");
         openNameModal(false);
         return;
       }
@@ -32580,10 +32790,17 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
     function renderMemoryCapsulesUI() {
       const list = state.memoryCapsules || [];
+      const visibleCount = isAccountAuthenticated() ? list.length : 0;
       const countBadge = document.getElementById("capsule-count-badge");
-      if (countBadge) countBadge.textContent = String(list.length);
+      if (countBadge) {
+        countBadge.textContent = String(visibleCount);
+        countBadge.classList.toggle("hidden", visibleCount === 0);
+      }
       const mobCountBadge = document.getElementById("mobile-capsule-count-badge");
-      if (mobCountBadge) mobCountBadge.textContent = String(list.length);
+      if (mobCountBadge) {
+        mobCountBadge.textContent = String(visibleCount);
+        mobCountBadge.classList.toggle("hidden", visibleCount === 0);
+      }
 
       // Cập nhật thống kê Hồ sơ Điện ảnh (Cinematic Profile)
       const totalEl = document.getElementById("profile-capsule-total");
@@ -37876,7 +38093,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         }
         const offLink = document.getElementById("hn-selected-official-link");
         if (offLink) {
-          offLink.href = selBasket.ticketQuote?.source || pCfg.officialUrl;
+          const branchSourceUrl = HANOI_PRICE_DATA?.branches?.[selected.id]?.source || selected.officialUrl || "";
+          offLink.href = branchSourceUrl || selBasket.ticketQuote?.source || pCfg.officialUrl;
           offLink.setAttribute("data-cinema-id", selected.id);
           offLink.setAttribute("data-cinema-name", selected.name);
         }
@@ -37884,7 +38102,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         const mapIframe = document.getElementById("hn-google-map-iframe");
         const finderVisible = !document.getElementById("hanoi-cinema-finder-view")?.classList.contains("hidden");
         if (mapIframe && finderVisible) {
-          const nextMapSrc = `https://maps.google.com/maps?q=${selected.mapQuery}&hl=vi&z=15&output=embed`;
+          const nextMapSrc = `https://maps.google.com/maps?q=${selected.lat},${selected.lng}&ll=${selected.lat},${selected.lng}&hl=vi&z=16&output=embed`;
           if (mapIframe.getAttribute("data-src") !== nextMapSrc || mapIframe.getAttribute("src") === "about:blank") {
             mapIframe.setAttribute("data-src", nextMapSrc);
             mapIframe.src = nextMapSrc;
@@ -39094,10 +39312,12 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         const rect = cardEl.getBoundingClientRect();
         if (!rect.width || !rect.height) return;
 
-        // Kích thước đúng bằng 1.5 lần khung gốc, giữ nguyên dáng hình chữ nhật dọc
+        // Kích thước đúng bằng 1.5 lần khung gốc, giữ nguyên dáng hình chữ nhật dọc và luôn nằm dưới thanh điều hướng cố định
+        const navBarEl = document.getElementById("ios-liquid-nav-bar");
+        const minTopBound = Math.max(16, Math.ceil((navBarEl ? navBarEl.getBoundingClientRect().bottom : 64) + 10));
         const aspect = rect.width / rect.height;
         const maxW = Math.max(240, window.innerWidth - 32);
-        const maxH = Math.max(340, window.innerHeight - 32);
+        const maxH = Math.max(300, window.innerHeight - minTopBound - 16);
         let targetW = Math.round(rect.width * 1.5);
         let targetH = Math.round(rect.height * 1.5);
         if (targetW > maxW) {
@@ -39128,7 +39348,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         left = Math.max(16, Math.min(window.innerWidth - targetW - 16, left));
 
         let top = Math.round(rect.top + (rect.height - targetH) / 2);
-        top = Math.max(16, Math.min(window.innerHeight - targetH - 16, top));
+        top = Math.max(minTopBound, Math.min(window.innerHeight - targetH - 16, top));
 
         const meta = getDiscoverMovieRichMeta(item);
         const posterUrl = getOptimizedPosterUrl(item.poster || "assets/web-logo.png", "w342");
@@ -39408,12 +39628,14 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 <i class="fa-solid ${escapeHTML(top1.primaryIcon)}" aria-hidden="true"></i>
                 <span>${escapeHTML(top1.primaryLabel)}</span>
               </button>
-              <button type="button"
-                onclick="window.appActions.openTop10MovieDetail('${escapeHTML(top1EncodedId)}')"
-                class="cv-top10-cta-secondary">
-                <span>Chi tiết</span>
-                <i class="fa-solid fa-chevron-right text-[10px]" aria-hidden="true"></i>
-              </button>
+              ${top1.primaryLabel !== "Xem chi tiết" ? `
+                <button type="button"
+                  onclick="window.appActions.openTop10MovieDetail('${escapeHTML(top1EncodedId)}')"
+                  class="cv-top10-cta-secondary">
+                  <span>Chi tiết</span>
+                  <i class="fa-solid fa-chevron-right text-[10px]" aria-hidden="true"></i>
+                </button>
+              ` : ""}
             </div>
           </div>
         </article>
@@ -39454,13 +39676,15 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 </div>
               </div>
             </button>
-            <button type="button"
-              onclick="window.appActions.openTop10MovieDetail('${escapeHTML(encId)}')"
-              class="cv-top10-row-detail-btn"
-              aria-label="Xem chi tiết ${escapeHTML(item.title)}"
-              title="Xem chi tiết phim">
-              <i class="fa-solid fa-chevron-right text-xs" aria-hidden="true"></i>
-            </button>
+            ${item.primaryLabel !== "Xem chi tiết" ? `
+              <button type="button"
+                onclick="window.appActions.openTop10MovieDetail('${escapeHTML(encId)}')"
+                class="cv-top10-row-detail-btn"
+                aria-label="Xem chi tiết ${escapeHTML(item.title)}"
+                title="Xem chi tiết phim">
+                <i class="fa-solid fa-chevron-right text-xs" aria-hidden="true"></i>
+              </button>
+            ` : ""}
           </div>
         `;
       };
@@ -39489,8 +39713,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
       if (footerNoteEl) {
         const countLabel = resolvedItems.length < 10
-          ? `Đang hiển thị ${resolvedItems.length} phim có lượt xem hợp lệ tuần này (chưa đủ 10 phim đạt chuẩn)`
-          : `Đủ 10/10 phim có lượt xem hợp lệ tuần này`;
+          ? `Bảng xếp hạng Top ${resolvedItems.length} phim dẫn đầu lượt xem hợp lệ tuần này`
+          : `Bảng xếp hạng Top 10 phim dẫn đầu lượt xem hợp lệ tuần này`;
         footerNoteEl.textContent = `${countLabel} • Múi giờ ${data?.timezone || "Asia/Ho_Chi_Minh"}`;
       }
     }
@@ -40391,11 +40615,26 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     function onWatchPartyMovieOrTimeChange(persistDraft = true) {
       updateWatchPartyMoviePreviewCard();
       const { movieObj, durationSec, startsAt, endsAt, bufMin } = getWatchPartyFormTimes();
+      const dateVal = document.getElementById("wp-form-date")?.value || "";
+      const timeVal = document.getElementById("wp-form-time")?.value || "";
+      const dateVnBadge = document.getElementById("wp-date-vn-badge");
+      const timeVnBadge = document.getElementById("wp-time-vn-badge");
+      if (dateVnBadge) {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
+          const [yy, mm, dd] = dateVal.split("-");
+          dateVnBadge.textContent = `${dd}/${mm}/${yy}`;
+        } else {
+          dateVnBadge.textContent = "";
+        }
+      }
+      if (timeVnBadge) {
+        timeVnBadge.textContent = /^\d{2}:\d{2}/.test(timeVal) ? `${timeVal.slice(0, 5)} (24h)` : "";
+      }
       const durBadge = document.getElementById("wp-preview-duration-badge");
       const txtEl = document.getElementById("wp-preview-time-text");
       if (durBadge) {
         durBadge.textContent = durationSec > 0
-          ? `${Math.round(durationSec / 60)} phút + ${bufMin} phút đệm`
+          ? `${formatDurationHoursMin(durationSec) || `${Math.round(durationSec / 60)} phút`} (${Math.round(durationSec / 60)}p + ${bufMin}p đệm)`
           : `Nhập thời lượng + ${bufMin} phút đệm`;
       }
       if (txtEl) {
@@ -41004,7 +41243,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         }
         const cBadge = document.getElementById("capsule-count-badge");
         const mobCBadge = document.getElementById("mobile-capsule-count-badge");
-        if (cBadge && mobCBadge) mobCBadge.textContent = cBadge.textContent || "0";
+        if (cBadge && mobCBadge) {
+          mobCBadge.textContent = cBadge.textContent || "0";
+          mobCBadge.classList.toggle("hidden", cBadge.classList.contains("hidden"));
+        }
       }
     }
 
@@ -41509,13 +41751,34 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       window.upgradeSelectsInContainer?.(document.getElementById("room-view"));
     };
 
-    // Khởi chạy nhanh Sảnh chính ngay ở frame đầu tiên; tách phần Phòng chiếu / Kho / R2 / Firebase sang idle để không tạo Long Task
+    function applyEarlyLobbySnapshot(roomsData) {
+      if (roomsData && typeof roomsData === "object") {
+        state.lobbyConfigRooms = roomsData;
+        Object.keys(roomsData).forEach((rid) => {
+          const cfg = roomsData[rid];
+          if (cfg && state.bookedTicketsByRoom?.[rid]) {
+            if (cfg.movieTitle) state.bookedTicketsByRoom[rid].movieTitle = cfg.movieTitle;
+            if (cfg.movieVersion) state.bookedTicketsByRoom[rid].movieVersion = String(cfg.movieVersion);
+          }
+        });
+        saveAppStateToStorage();
+        return true;
+      }
+      return false;
+    }
+
+    // Khởi chạy nhanh Sảnh chính: nếu đã có cache phòng chiếu thì vẽ ngay, nếu tải lạnh lần đầu thì chờ snapshot sớm từ <head> để không chớp nhầm phim mặc định
     const persistedBootState = loadAppStateFromStorage();
     updateNameUI();
-    renderHeroBillboard();
+    renderMemoryCapsulesUI();
+    const hasWarmLobbyRooms = Object.keys(state.lobbyConfigRooms || {}).length > 0;
+    if (hasWarmLobbyRooms) {
+      document.getElementById("netflix-billboard")?.removeAttribute("data-boot-syncing");
+      renderHeroBillboard();
+      renderLobby();
+    }
     setupHeroVisibilityObserver();
     startHeroAutoSlide();
-    renderLobby();
 
     const scheduleIdleWork = (fn, fallbackMs = 120) => {
       if (typeof requestIdleCallback === "function") {
@@ -41979,35 +42242,37 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
     async function prefetchLobbyConfigRoomsOnBoot() {
       try {
-        const res = await fetch(`${RTDB_URL}/lobby_config/rooms.json?t=${Date.now()}`, { cache: "no-store" });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!data || typeof data !== "object") return;
-        state.lobbyConfigRooms = data;
-        Object.keys(data).forEach((rid) => {
-          const cfg = data[rid];
-          if (cfg && state.bookedTicketsByRoom?.[rid]) {
-            if (cfg.movieTitle) state.bookedTicketsByRoom[rid].movieTitle = cfg.movieTitle;
-            if (cfg.movieVersion) state.bookedTicketsByRoom[rid].movieVersion = String(cfg.movieVersion);
-          }
-        });
-        saveAppStateToStorage();
+        let roomsData = null;
+        if (window.__earlyLobbyFetch) {
+          roomsData = await Promise.race([
+            window.__earlyLobbyFetch,
+            new Promise((resolve) => setTimeout(() => resolve(null), 900))
+          ]);
+          window.__earlyLobbyFetch = null;
+        }
+        if (!roomsData) {
+          const res = await fetch(`${RTDB_URL}/lobby_config/rooms.json?t=${Date.now()}`, { cache: "no-store" });
+          if (res.ok) roomsData = await res.json();
+        }
+        applyEarlyLobbySnapshot(roomsData);
+      } catch (e) {} finally {
+        document.getElementById("netflix-billboard")?.removeAttribute("data-boot-syncing");
         renderHeroBillboard();
         renderLobby();
         if (state.currentRoomId) {
           updateRoomHeaderUI();
           renderTheaterLeftMovieList();
         }
-      } catch (e) {}
+      }
     }
 
     initCustomSelectMenus();
+    prefetchLobbyConfigRoomsOnBoot();
+    initFirebase();
     requestAnimationFrame(() => {
       setTimeout(() => {
-        prefetchLobbyConfigRoomsOnBoot();
         if (typeof fetchWeeklyTop10 === "function") fetchWeeklyTop10(false);
         if (typeof fetchWatchPartyList === "function") fetchWatchPartyList(false);
-        initFirebase();
       }, 0);
     });
     setTimeout(() => { if (typeof subscribeWatchPartiesRealtime === "function") subscribeWatchPartiesRealtime(); }, 1500);
