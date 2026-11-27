@@ -10169,17 +10169,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               <div id="wp-hist-stats" class="flex flex-wrap items-center gap-1.5"></div>
             </div>
             <div class="flex flex-wrap items-center gap-1.5">
-              <div class="inline-flex rounded-full p-0.5 border border-white/10 bg-black/50" role="group" aria-label="Chế độ xem lịch sử vé">
-                <button type="button" id="btn-wp-hist-mode-ring" onclick="window.CineVerseHistoryStage?.setViewMode('ring')" class="cv-wp-mode-pill is-active" aria-pressed="true">Vòng xoay 3D</button>
-                <button type="button" id="btn-wp-hist-mode-list" onclick="window.CineVerseHistoryStage?.setViewMode('list')" class="cv-wp-mode-pill" aria-pressed="false">Danh sách dọc</button>
-              </div>
               <button type="button" id="btn-wp-hist-skip" class="cv-wp-intro-skip" onclick="window.CineVerseHistoryStage?.skipIntro()" title="Bỏ qua mở màn">
                 <i class="fa-solid fa-forward-step text-[10px]" aria-hidden="true"></i>
                 <span>Bỏ qua</span>
-              </button>
-              <button type="button" id="btn-wp-hist-replay" onclick="window.CineVerseHistoryStage?.playOpening(true)" class="cv-wp-mode-pill" title="Phát lại hiệu ứng mở màn">
-                <i class="fa-solid fa-rotate-right text-[10px]" aria-hidden="true"></i>
-                <span>Mở màn lại</span>
               </button>
             </div>
           </div>
@@ -10277,31 +10269,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     <!-- Giữ container tương thích cũ (ẩn) để không lỗi tham chiếu -->
     <div id="lobby-rooms-grid" class="hidden"></div>
     <div id="hero-thumbs-strip" class="hidden"></div>
-
-    <!-- Chân trang Điện ảnh CineVerse Lotte -->
-    <footer id="cv-lobby-footer" class="cv-lobby-footer" aria-label="Thông tin rạp CineVerse Lotte">
-      <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
-        <div class="space-y-1.5 max-w-xl">
-          <div class="flex items-center gap-2.5">
-            <img src="assets/web-logo.png" alt="CineVerse Lotte" width="28" height="28" loading="lazy" class="w-7 h-7 rounded-full object-cover border border-amber-400/40" />
-            <span class="cv-serif text-sm sm:text-base font-bold tracking-wider text-white uppercase">CineVerse Lotte</span>
-            <span class="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-400/35 text-[10px] font-extrabold text-amber-300">3D WebGL Cinema</span>
-          </div>
-          <p class="text-xs text-slate-400 leading-relaxed">
-            Không gian rạp chiếu phim trực tuyến góc nhìn Hàng F chân thực — đồng bộ khung hình thời gian thực, âm thanh vòm và đặt suất chiếu riêng cùng bạn bè.
-          </p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-300">
-          <button type="button" onclick="window.appActions.navGoToSection('home')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition cursor-pointer">Sảnh chiếu chính</button>
-          <button type="button" onclick="window.appActions.navGoToSection('watchparty')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition cursor-pointer">Lịch hẹn riêng</button>
-          <button type="button" onclick="window.appActions.navGoToSection('top10')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition cursor-pointer">Top phim tuần</button>
-          <button type="button" onclick="window.appActions.openHanoiCinemaFinder()" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition cursor-pointer">Tìm rạp Hà Nội</button>
-        </div>
-      </div>
-      <div class="max-w-7xl mx-auto mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
-        <span>© 2026 CineVerse Lotte • Trải nghiệm điện ảnh trực tuyến thế hệ mới</span>
-      </div>
-    </footer>
 
     <!-- Nút Lên Đầu Trang (tinh gọn, không đè nút thẻ phòng) -->
     <button id="rophim-totop" type="button" onclick="window.appActions.scrollToTopSmooth()"
