@@ -8681,32 +8681,37 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       }
       .cv-carousel-nav-btn.is-prev { left: 10px !important; right: auto !important; }
       .cv-carousel-nav-btn.is-next { right: 10px !important; left: auto !important; }
+      .cv-carousel-nav-btn.is-hidden-nav {
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
     }
     .cv-focus-carousel {
       display: flex !important;
       flex-wrap: nowrap !important;
       align-items: stretch;
+      justify-content: safe center;
       gap: 18px !important;
       overflow-x: auto;
       overflow-y: visible;
       padding-top: 22px;
       padding-bottom: 18px;
-      padding-inline: max(20px, calc(50% - 104px));
+      padding-inline: 16px;
       scroll-snap-type: x mandatory;
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    @media (min-width: 768px) {
+      .cv-focus-carousel {
+        padding-inline: 54px;
+      }
     }
     .cv-focus-carousel::-webkit-scrollbar {
-      height: 5px;
-    }
-    .cv-focus-carousel::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .cv-focus-carousel::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.16);
-      border-radius: 999px;
+      display: none;
+      width: 0;
+      height: 0;
     }
     #lobby-view .cv-focus-carousel > [data-carousel-card] {
       flex: 0 0 clamp(166px, 20vw, 212px);
@@ -8808,7 +8813,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       }
       .cv-focus-carousel {
         gap: 14px !important;
-        padding-inline: max(16px, calc(50% - 84px));
+        padding-inline: 16px;
       }
       .cv-focus-carousel > [data-carousel-card] {
         flex: 0 0 164px;
@@ -40976,27 +40981,37 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         `;
       }
 
-      const top10CarouselHtml = resolvedItems.length > 1 ? `
-        <div class="cv-carousel-shell mb-3">
+      const top10CarouselHtml = `
+        <div class="cv-carousel-shell">
           <button type="button" class="cv-carousel-nav-btn absolute is-prev" onclick="window.CineVerseMotion?.scrollCarousel(this, -1)" aria-label="Cuộn Top 10 sang trái">‹</button>
           <div class="cv-focus-carousel cv-top10-poster-rail" data-focus-carousel="top10" role="region" aria-label="Băng chuyền poster Top 10 tuần này">
             ${resolvedItems.map((it) => {
               const encItId = encodeURIComponent(it.movieId);
               const rnk = String(it.displayRank).padStart(2, "0");
+              const moveHtml = renderTop10MovementBadge(it, hasPrev);
+              const roomPill = it.roomInfo
+                ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold" style="background:rgba(11,6,7,0.82);border:1px solid rgba(229,9,20,0.45);color:#FFE4E6;">${escapeHTML(it.roomInfo.roomNumber)}</span>`
+                : "";
               return `
                 <button type="button"
                   data-carousel-card
                   onclick="window.appActions.openTop10PrimaryAction('${escapeHTML(encItId)}')"
-                  class="cv-top10-poster-card"
-                  aria-label="Hạng ${rnk}: ${escapeHTML(it.title)}">
+                  class="cv-top10-poster-card ${it.rankChanged ? "cv-rank-changed" : ""}"
+                  aria-label="Hạng ${rnk}: ${escapeHTML(it.title)} — ${escapeHTML(it.primaryLabel)}">
                   <img src="${escapeHTML(getOptimizedPosterUrl(it.poster, "w342"))}" alt="${escapeHTML(it.title)}" width="342" height="513" loading="lazy" decoding="async"
                     onerror="this.onerror=null;this.src='assets/web-logo.png';"
                     style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />
-                  <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(11,6,7,0.48) 0%, rgba(11,6,7,0.08) 38%, rgba(11,6,7,0.92) 100%);pointer-events:none;"></div>
-                  <span class="relative z-10 cv-serif italic text-2xl font-extrabold" style="color:#F5C518;text-shadow:0 2px 12px rgba(0,0,0,0.9);">#${rnk}</span>
-                  <div class="relative z-10 space-y-0.5">
+                  <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(11,6,7,0.52) 0%, rgba(11,6,7,0.08) 38%, rgba(11,6,7,0.94) 100%);pointer-events:none;"></div>
+                  <div class="relative z-10 flex items-center justify-between gap-1.5">
+                    <span class="cv-serif italic text-2xl font-extrabold" style="color:${it.displayRank === 1 ? '#F5C518' : it.displayRank === 2 ? '#F4F4F5' : '#E5C158'};text-shadow:0 2px 12px rgba(0,0,0,0.9);">#${rnk}</span>
+                    ${roomPill}
+                  </div>
+                  <div class="relative z-10 space-y-1">
                     <div class="cv-serif italic text-sm font-bold text-white leading-tight line-clamp-2">${escapeHTML(it.title)}</div>
-                    <div class="text-[11px] font-medium" style="color:rgba(255,255,255,0.72);">${escapeHTML(formatTop10ViewsText(it.validViews))}</div>
+                    <div class="flex items-center gap-1.5 text-[11px] font-medium" style="color:rgba(255,255,255,0.75);">
+                      <span>${escapeHTML(formatTop10ViewsText(it.validViews))}</span>
+                      ${moveHtml}
+                    </div>
                   </div>
                 </button>
               `;
@@ -41004,14 +41019,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           </div>
           <button type="button" class="cv-carousel-nav-btn absolute is-next" onclick="window.CineVerseMotion?.scrollCarousel(this, 1)" aria-label="Cuộn Top 10 sang phải">›</button>
         </div>
-      ` : "";
+      `;
 
       body.innerHTML = `
         ${top10CarouselHtml}
-        <div class="cv-top10-layout">
-          ${featuredHtml}
-          ${rightColumnsHtml}
-        </div>
         ${buildDiscoverSectionHtml(true)}
       `;
       window.CineVerseMotion?.initFocusCarousel?.();
@@ -43874,9 +43885,20 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       const carouselControllers = new WeakMap();
       const activeCarousels = new Set();
 
+      function syncCarouselNavVisibility(track) {
+        const shell = track?.closest?.(".cv-carousel-shell");
+        if (!shell) return;
+        const canScroll = track.scrollWidth > track.clientWidth + 8;
+        const prevBtn = shell.querySelector(".cv-carousel-nav-btn.is-prev");
+        const nextBtn = shell.querySelector(".cv-carousel-nav-btn.is-next");
+        if (prevBtn) prevBtn.classList.toggle("is-hidden-nav", !canScroll || track.scrollLeft <= 6);
+        if (nextBtn) nextBtn.classList.toggle("is-hidden-nav", !canScroll || track.scrollLeft + track.clientWidth >= track.scrollWidth - 6);
+      }
+
       function syncNearestCenterFocal(track) {
         const cards = Array.from(track.querySelectorAll("[data-carousel-card]"));
         if (!cards.length) return;
+        syncCarouselNavVisibility(track);
         const tRect = track.getBoundingClientRect();
         const centerX = tRect.left + tRect.width * 0.5;
         let bestCard = cards[0];
