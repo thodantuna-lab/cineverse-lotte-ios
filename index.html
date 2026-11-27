@@ -8843,6 +8843,427 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         transform: none !important;
       }
     }
+
+    /* ===================================================================== */
+    /* 6. LỊCH SỬ BUỔI HẸN — DYU_DESIGN 3D TICKET OPENING & CURVED SHOWCASE   */
+    /* Giữ nguyên .cv-wp-ticket (Foil, Holo 3D Tilt, CV-DHV6 Scramble)        */
+    /* ===================================================================== */
+    #wp-history-summary::-webkit-details-marker {
+      display: none;
+    }
+    #wp-history-details[open] #wp-history-chevron {
+      transform: rotate(180deg);
+    }
+    .cv-wp-history-stage {
+      position: relative;
+      border-radius: 20px;
+      padding: 16px 14px 14px;
+      background:
+        radial-gradient(ellipse 78% 68% at 68% 28%, rgba(136, 19, 39, 0.28) 0%, rgba(18, 9, 13, 0.96) 58%),
+        var(--cv-bg-void, #0b0607);
+      border: 1px solid rgba(245, 197, 24, 0.22);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 24px 56px rgba(0, 0, 0, 0.78);
+      clip-path: inset(0% 0% 0% 0% round 20px);
+      overflow: hidden;
+      transform-origin: center top;
+      transition:
+        clip-path 900ms cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 340ms ease,
+        transform 340ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .cv-wp-history-stage.is-preclip {
+      clip-path: inset(10% 4% 10% 4% round 28px);
+      opacity: 0.25;
+    }
+    .cv-wp-history-stage.is-collapsing {
+      opacity: 0;
+      transform: scale(0.975) translate3d(0, -6px, 0);
+      pointer-events: none;
+    }
+
+    /* Lớp Intro phủ trong giai đoạn 1-2 (0ms -> 950ms) */
+    .cv-wp-intro-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 25;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 550ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .cv-wp-history-stage[data-stage-state="intro"] .cv-wp-intro-layer {
+      opacity: 1;
+    }
+    .cv-wp-intro-wordmark {
+      position: absolute;
+      top: 18px;
+      left: 22px;
+      font-size: clamp(28px, 4.2vw, 54px);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.025em;
+      color: #FFF8EA;
+      text-shadow: 0 4px 24px rgba(0, 0, 0, 0.85);
+      white-space: nowrap;
+      transition: transform 780ms cubic-bezier(0.65, 0, 0.35, 1), opacity 420ms ease;
+    }
+    .cv-wp-history-stage[data-stage-state="revealing"] .cv-wp-intro-wordmark {
+      transform: translate3d(-6px, -6px, 0) scale(0.42);
+      transform-origin: top left;
+      opacity: 0;
+    }
+    .cv-wp-letter-mask {
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: bottom;
+      padding-bottom: 4px;
+    }
+    .cv-wp-letter {
+      display: inline-block;
+      transform: translate3d(0, 108%, 0) rotate(8deg);
+      transform-origin: left bottom;
+      will-change: transform;
+    }
+    .cv-wp-letter-dot {
+      color: #F5C518;
+    }
+    @keyframes cvWpLetterRise {
+      from { transform: translate3d(0, 108%, 0) rotate(8deg); }
+      to   { transform: translate3d(0, 0, 0) rotate(0deg); }
+    }
+    .cv-wp-history-stage.is-animating-letters .cv-wp-letter {
+      animation: cvWpLetterRise 720ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation-delay: calc(var(--li, 0) * 45ms + 60ms);
+    }
+    .cv-wp-intro-skip {
+      position: absolute !important;
+      left: 20px;
+      bottom: 18px;
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(11, 6, 7, 0.85);
+      border: 1px solid rgba(245, 197, 24, 0.42);
+      color: #F5C518;
+      pointer-events: auto;
+      cursor: pointer;
+      transition: transform 200ms ease, border-color 200ms ease, opacity 300ms ease;
+    }
+    .cv-wp-intro-skip:hover {
+      transform: scale(1.06);
+      border-color: rgba(245, 197, 24, 0.85);
+    }
+    .cv-wp-odometer-wrap {
+      position: absolute;
+      right: 22px;
+      bottom: 16px;
+      text-align: right;
+      overflow: hidden;
+    }
+    .cv-wp-odo-caption {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: rgba(231, 210, 154, 0.78);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .cv-wp-odometer {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(40px, 6.2vw, 76px);
+      font-weight: 800;
+      line-height: 0.92;
+      letter-spacing: -0.05em;
+      color: #FFFFFF;
+      transform: translate3d(0, 108%, 0);
+      transition: transform 550ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .cv-wp-history-stage[data-stage-state="intro"] .cv-wp-odometer {
+      transform: translate3d(0, 0, 0);
+    }
+    .cv-wp-history-stage[data-stage-state="revealing"] .cv-wp-odometer,
+    .cv-wp-history-stage[data-stage-state="settled"] .cv-wp-odometer {
+      transform: translate3d(0, -115%, 0);
+      transition: transform 420ms cubic-bezier(0.6, 0, 0.8, 0.4);
+    }
+    .cv-wp-odo-unit {
+      font-size: 0.44em;
+      color: #F5C518;
+      margin-left: 2px;
+    }
+
+    /* HUD Settled (Staggered Cascade khi Stage 4 kết thúc mở màn) */
+    .cv-wp-stage-hud {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      opacity: 0;
+      transform: translate3d(0, 12px, 0);
+      transition:
+        opacity 640ms cubic-bezier(0.22, 1, 0.36, 1),
+        transform 640ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .cv-wp-history-stage[data-stage-state="settled"] .cv-wp-stage-hud,
+    .cv-wp-history-stage[data-stage-state="revealing"] .cv-wp-stage-topbar {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+    .cv-wp-stage-bottombar {
+      margin-top: 6px;
+      justify-content: center;
+      gap: 16px;
+      transition-delay: 120ms;
+    }
+    .cv-wp-history-stage[data-view-mode="list"] .cv-wp-stage-bottombar {
+      display: none !important;
+    }
+    .cv-wp-stat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      color: #E4E4E7;
+      opacity: 0;
+      transform: translate3d(0, 10px, 0);
+      transition:
+        opacity 520ms cubic-bezier(0.22, 1, 0.36, 1) var(--std, 0ms),
+        transform 520ms cubic-bezier(0.22, 1, 0.36, 1) var(--std, 0ms);
+    }
+    .cv-wp-history-stage[data-stage-state="settled"] .cv-wp-stat-pill {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+    .cv-wp-mode-pill {
+      min-height: 32px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #D4D4D8;
+      background: transparent;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+    }
+    .cv-wp-mode-pill:hover {
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .cv-wp-mode-pill.is-active {
+      background: #F5C518;
+      color: #0B0607;
+      font-weight: 800;
+    }
+    #btn-wp-hist-replay {
+      border-color: rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .cv-wp-nav-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      line-height: 1;
+      color: #FFFFFF;
+      background: rgba(11, 6, 7, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      cursor: pointer;
+      transition: transform 200ms ease, border-color 200ms ease;
+    }
+    .cv-wp-nav-circle:hover {
+      transform: scale(1.06);
+      border-color: rgba(245, 197, 24, 0.55);
+    }
+
+    /* Khung Sân Khấu 3D Ring & Phản Chiếu Sàn Rạp */
+    .cv-wp-reel-viewport {
+      position: relative;
+      width: 100%;
+      min-height: 292px;
+      margin-top: 8px;
+      overflow: hidden;
+      touch-action: pan-y;
+      cursor: grab;
+    }
+    .cv-wp-reel-viewport.is-dragging {
+      cursor: grabbing;
+      user-select: none;
+    }
+    .cv-wp-reel-lens {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: inherit;
+      perspective: 1100px;
+      perspective-origin: 50% 48%;
+    }
+    .cv-wp-reel-center {
+      position: absolute;
+      left: 50%;
+      top: 48%;
+      width: 100%;
+      height: 0;
+      transform-style: preserve-3d;
+      transform:
+        translate3d(var(--wp-ix, 0px), var(--wp-iy, 0px), 0px)
+        rotateZ(var(--wp-iroll, 0deg))
+        rotateX(var(--wp-itilt, 0deg))
+        scale3d(var(--wp-is, 1), var(--wp-is, 1), var(--wp-is, 1));
+    }
+    .cv-wp-reel-slot {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: min(92%, 780px);
+      transform-style: preserve-3d;
+      will-change: transform, opacity;
+      isolation: isolate;
+    }
+    .cv-wp-reel-slot.is-front .cv-wp-ticket {
+      background-color: #14080c !important;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.92), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+    }
+    .cv-wp-reel-slot:not(.is-front) {
+      cursor: pointer;
+    }
+    .cv-wp-reel-slot:not(.is-front) .cv-wp-ticket {
+      pointer-events: none;
+    }
+    .cv-wp-history-stage[data-stage-state="intro"] .cv-wp-reel-slot,
+    .cv-wp-history-stage[data-stage-state="revealing"] .cv-wp-reel-slot {
+      pointer-events: none;
+    }
+    .cv-wp-slot-ghost {
+      min-height: 214px;
+      border-radius: 18px;
+      background:
+        radial-gradient(ellipse 70% 80% at 65% 40%, rgba(136, 19, 39, 0.35), rgba(20, 9, 13, 0.88));
+      border: 1px solid rgba(245, 197, 24, 0.28);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 18px 36px rgba(0, 0, 0, 0.65);
+    }
+    .cv-wp-slot-reflection {
+      position: absolute;
+      left: 4%;
+      right: 4%;
+      bottom: -24px;
+      height: 22px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(245, 197, 24, 0.20) 0%, rgba(136, 19, 39, 0.14) 45%, transparent 75%);
+      filter: blur(8px);
+      pointer-events: none;
+      opacity: 0.72;
+    }
+    /* Khung viền Art-Deco vàng quét clip-path khi hover thẻ trung tâm (cảm hứng từ Dyu_Design) */
+    .cv-wp-slot-frame {
+      position: absolute;
+      inset: -4px;
+      border-radius: 21px;
+      border: 1.5px solid rgba(245, 197, 24, 0.68);
+      clip-path: inset(0 100% 0 0 round 21px);
+      pointer-events: none;
+      z-index: 8;
+      transition: clip-path 520ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .cv-wp-reel-slot.is-front:hover .cv-wp-slot-frame {
+      clip-path: inset(0 0 0 0 round 21px);
+    }
+
+    /* Chế độ Danh sách dọc (Cascade mượt mà giữ nguyên full-width grid cũ) */
+    @keyframes cvWpListCascade {
+      from { opacity: 0; transform: translate3d(0, 18px, 0); }
+      to   { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
+    .cv-wp-history-stage[data-view-mode="list"] .cv-wp-reel-viewport {
+      min-height: 0 !important;
+      height: auto !important;
+      overflow: visible;
+      cursor: default;
+      margin-top: 12px;
+    }
+    .cv-wp-history-stage[data-view-mode="list"] .cv-wp-reel-lens {
+      perspective: none;
+      height: auto;
+      min-height: 0;
+    }
+    .cv-wp-history-stage[data-view-mode="list"] .cv-wp-reel-center {
+      position: static;
+      left: auto;
+      top: auto;
+      height: auto;
+      transform: none !important;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .cv-wp-history-stage[data-view-mode="list"] .cv-wp-reel-slot {
+      position: relative;
+      left: auto;
+      top: auto;
+      width: 100%;
+      transform: none !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      animation: cvWpListCascade 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation-delay: calc(var(--li, 0) * 55ms);
+    }
+    .cv-wp-history-stage[data-view-mode="list"] .cv-wp-reel-slot .cv-wp-ticket {
+      pointer-events: auto !important;
+    }
+    .cv-wp-history-stage[data-view-mode="list"] .cv-wp-reel-slot.is-ghost,
+    .cv-wp-history-stage[data-view-mode="list"] .cv-wp-slot-reflection {
+      display: none !important;
+    }
+
+    @media (max-width: 767px) {
+      .cv-wp-history-stage {
+        padding: 12px 8px 12px;
+        border-radius: 16px;
+      }
+      .cv-wp-reel-viewport {
+        min-height: 455px;
+      }
+      .cv-wp-reel-slot {
+        width: calc(100% - 12px);
+      }
+      .cv-wp-intro-wordmark {
+        top: 14px;
+        left: 14px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cv-wp-intro-layer {
+        display: none !important;
+      }
+      .cv-wp-history-stage,
+      .cv-wp-stage-hud,
+      .cv-wp-stat-pill,
+      .cv-wp-slot-frame,
+      .cv-wp-reel-slot {
+        transition: opacity 180ms linear !important;
+        animation: none !important;
+      }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-rose-500 selection:text-white">
@@ -9359,12 +9780,57 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         <p role="status" class="cv-wp-empty-card">Đang tải lịch hẹn…</p>
       </div>
 
-      <details id="wp-history-details" class="hidden rounded-xl p-3" style="background:rgba(11,11,15,0.68);border:1px solid rgba(255,255,255,0.08);">
-        <summary class="cursor-pointer min-h-[44px] flex items-center justify-between text-xs font-bold text-slate-300 select-none">
-          <span><i class="fa-solid fa-clock-rotate-left mr-1.5" style="color:#F5C518;"></i>Lịch sử buổi hẹn đã kết thúc / đã hủy (<span id="wp-history-count">0</span>)</span>
-          <span class="text-[11px] text-slate-400">Bấm để mở rộng</span>
+      <details id="wp-history-details" class="hidden rounded-2xl p-3 sm:p-4" style="background:rgba(11,6,7,0.84);border:1px solid rgba(255,255,255,0.08);box-shadow:inset 0 1px 0 rgba(255,255,255,0.06);">
+        <summary id="wp-history-summary" class="cursor-pointer min-h-[44px] flex items-center justify-between gap-2 text-xs sm:text-sm font-bold text-slate-200 select-none list-none">
+          <span class="flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left" style="color:#F5C518;"></i><span>Lịch sử buổi hẹn đã kết thúc / đã hủy (<span id="wp-history-count">0</span>)</span></span>
+          <span class="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-400">
+            <span id="wp-history-toggle-hint">Bấm để mở rộng</span>
+            <i id="wp-history-chevron" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300" style="color:#F5C518;"></i>
+          </span>
         </summary>
-        <div id="wp-history-list" class="cv-wp-list-grid pt-3"></div>
+        <div id="wp-history-stage" class="cv-wp-history-stage mt-3" data-stage-state="idle" data-view-mode="ring">
+          <div class="cv-wp-intro-layer" aria-hidden="true">
+            <div class="cv-wp-intro-wordmark cv-serif italic">
+              <span class="cv-wp-letter-mask"><span class="cv-wp-letter" style="--li:0">K</span></span><span class="cv-wp-letter-mask"><span class="cv-wp-letter" style="--li:1">ý</span></span><span class="cv-wp-letter-mask"><span class="cv-wp-letter" style="--li:2">&nbsp;</span></span><span class="cv-wp-letter-mask"><span class="cv-wp-letter" style="--li:3">Ứ</span></span><span class="cv-wp-letter-mask"><span class="cv-wp-letter" style="--li:4">c</span></span><span class="cv-wp-letter-mask"><span class="cv-wp-letter" style="--li:5">&nbsp;</span></span><span class="cv-wp-letter-mask"><span class="cv-wp-letter" style="--li:6">R</span></span><span class="cv-wp-letter-mask"><span class="cv-wp-letter" style="--li:7">ạ</span></span><span class="cv-wp-letter-mask"><span class="cv-wp-letter" style="--li:8">p</span></span><span class="cv-wp-letter-mask"><span class="cv-wp-letter cv-wp-letter-dot" style="--li:9">.</span></span>
+            </div>
+            <button type="button" id="btn-wp-hist-skip" class="cv-wp-intro-skip absolute" onclick="window.CineVerseHistoryStage?.skipIntro()" title="Bỏ qua mở màn">
+              <i class="fa-solid fa-arrow-up-right-from-square text-[11px]" aria-hidden="true"></i>
+            </button>
+            <div class="cv-wp-odometer-wrap">
+              <div class="cv-wp-odo-caption">ĐỒNG BỘ KHO VÉ • <span id="wp-hist-odo-total">0</span> BUỔI HẸN</div>
+              <div class="cv-wp-odometer"><span id="wp-hist-odo-pct">00</span><span class="cv-wp-odo-unit">%</span></div>
+            </div>
+          </div>
+
+          <div class="cv-wp-stage-hud cv-wp-stage-topbar">
+            <div class="flex flex-wrap items-center gap-2.5">
+              <span class="cv-serif italic text-base sm:text-lg font-bold text-white tracking-tight">Ký Ức Rạp<span style="color:#F5C518;">.</span></span>
+              <div id="wp-hist-stats" class="flex flex-wrap items-center gap-1.5"></div>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5">
+              <div class="inline-flex rounded-full p-0.5 border border-white/10 bg-black/50" role="group" aria-label="Chế độ xem lịch sử vé">
+                <button type="button" id="btn-wp-hist-mode-ring" onclick="window.CineVerseHistoryStage?.setViewMode('ring')" class="cv-wp-mode-pill is-active" aria-pressed="true">Vòng xoay 3D</button>
+                <button type="button" id="btn-wp-hist-mode-list" onclick="window.CineVerseHistoryStage?.setViewMode('list')" class="cv-wp-mode-pill" aria-pressed="false">Danh sách dọc</button>
+              </div>
+              <button type="button" id="btn-wp-hist-replay" onclick="window.CineVerseHistoryStage?.playOpening(true)" class="cv-wp-mode-pill" title="Phát lại hiệu ứng mở màn 3D">
+                <i class="fa-solid fa-rotate-right text-[10px]" aria-hidden="true"></i>
+                <span>Mở màn lại</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="wp-hist-reel-viewport" class="cv-wp-reel-viewport">
+            <div class="cv-wp-reel-lens">
+              <div id="wp-history-list" class="cv-wp-reel-center"></div>
+            </div>
+          </div>
+
+          <div class="cv-wp-stage-hud cv-wp-stage-bottombar">
+            <button type="button" id="btn-wp-hist-prev" onclick="window.CineVerseHistoryStage?.stepBy(-1)" class="cv-wp-nav-circle" aria-label="Vé trước">‹</button>
+            <div id="wp-hist-active-indicator" class="text-[11px] font-mono font-bold tracking-wider text-amber-200/90">Vé 01 / 01 • Kéo ngang để xoay</div>
+            <button type="button" id="btn-wp-hist-next" onclick="window.CineVerseHistoryStage?.stepBy(1)" class="cv-wp-nav-circle" aria-label="Vé tiếp theo">›</button>
+          </div>
+        </div>
       </details>
     </section>
 
@@ -41738,7 +42204,20 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       if (histWrap && histEl) {
         histWrap.classList.toggle("hidden", history.length === 0);
         if (histCntEl) histCntEl.textContent = String(history.length);
-        histEl.innerHTML = history.map(renderWatchPartyTicketCardHtml).join("");
+        const histSig = history.map(ev => `${ev.eventId}:${ev.status}:${ev.approvedCount || 0}`).join("|");
+        if (histEl.dataset.histSig !== histSig) {
+          histEl.dataset.histSig = histSig;
+          histEl.innerHTML = history.map((ev, idx) => `
+            <div class="cv-wp-reel-slot" data-wp-slot-idx="${idx}" style="--li:${idx}">
+              <div class="cv-wp-slot-frame" aria-hidden="true"></div>
+              ${renderWatchPartyTicketCardHtml(ev)}
+              <div class="cv-wp-slot-reflection" aria-hidden="true"></div>
+            </div>
+          `).join("");
+          window.CineVerseHistoryStage?.syncHistoryItems?.(history);
+        } else {
+          window.CineVerseHistoryStage?.syncStatsOnly?.(history);
+        }
       }
       window.CineVerseMotion?.initScrambleReveal?.({ scope: document.getElementById("lobby-watch-party-section") });
     }
@@ -44265,6 +44744,579 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           initScrambleReveal();
         }
       });
+    })();
+
+    // =========================================================================
+    // CINEVERSE LOTTE — LỊCH SỬ BUỔI HẸN (DYU_DESIGN 3D TICKET OPENING STAGE)
+    // Stage 1: Velvet Vault unclip + chữ "Ký Ức Rạp." trồi khỏi mask + Odometer
+    // Stage 2: Vòng xoay 3D thu nhỏ nghiêng (-18deg, -20deg) quay trong không gian tối
+    // Stage 3-4: Un-tilt 0deg + overshoot +18px->0px + bung rẽ quạt 3D / Danh sách
+    // =========================================================================
+    (function initCineVerseWatchPartyHistoryStage() {
+      const reducedMotionMQ = window.matchMedia
+        ? window.matchMedia("(prefers-reduced-motion: reduce)")
+        : { matches: false };
+      const isReduced = () => Boolean(reducedMotionMQ.matches);
+      const isWebGLBusy = () =>
+        Boolean(
+          state.currentRoomId ||
+          document.body.classList.contains("in-room-active") ||
+          document.body.classList.contains("booking-modal-open")
+        );
+
+      const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+      const easeOutBack = (t) => {
+        const c1 = 1.70158;
+        const c3 = c1 + 1;
+        return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+      };
+
+      const st = {
+        history: [],
+        viewMode: "ring", // "ring" | "list"
+        stageState: "idle", // "idle" | "intro" | "revealing" | "settled"
+        rotAngle: 0,
+        targetRotAngle: 0,
+        activeIdx: 0,
+        stepDeg: 45,
+        introX: 0,
+        introY: 0,
+        introRoll: 0,
+        introTilt: 0,
+        introScale: 1,
+        radius: 560,
+        rafId: 0,
+        phaseTimer1: 0,
+        phaseTimer2: 0,
+        animStartMs: 0,
+        inIntroAnim: false,
+        dragging: false,
+        inView: true
+      };
+
+      const getEls = () => ({
+        details: document.getElementById("wp-history-details"),
+        summary: document.getElementById("wp-history-summary"),
+        hint: document.getElementById("wp-history-toggle-hint"),
+        stage: document.getElementById("wp-history-stage"),
+        viewport: document.getElementById("wp-hist-reel-viewport"),
+        center: document.getElementById("wp-history-list"),
+        odoPct: document.getElementById("wp-hist-odo-pct"),
+        odoTotal: document.getElementById("wp-hist-odo-total"),
+        stats: document.getElementById("wp-hist-stats"),
+        indicator: document.getElementById("wp-hist-active-indicator"),
+        btnRing: document.getElementById("btn-wp-hist-mode-ring"),
+        btnList: document.getElementById("btn-wp-hist-mode-list")
+      });
+
+      function stopRafAndTimers() {
+        if (st.rafId) {
+          cancelAnimationFrame(st.rafId);
+          st.rafId = 0;
+        }
+        if (st.phaseTimer1) {
+          clearTimeout(st.phaseTimer1);
+          st.phaseTimer1 = 0;
+        }
+        if (st.phaseTimer2) {
+          clearTimeout(st.phaseTimer2);
+          st.phaseTimer2 = 0;
+        }
+      }
+
+      function removeGhostSlots(center) {
+        if (!center) return;
+        center.querySelectorAll(".cv-wp-reel-slot.is-ghost").forEach((g) => g.remove());
+      }
+
+      function ensureGhostSlotsDuringIntro(center, realCount) {
+        removeGhostSlots(center);
+        if (!center || realCount >= 3 || realCount === 0) return;
+        const needed = 3 - realCount;
+        for (let g = 0; g < needed; g++) {
+          const ghost = document.createElement("div");
+          ghost.className = "cv-wp-reel-slot is-ghost";
+          ghost.setAttribute("aria-hidden", "true");
+          ghost.innerHTML = `<div class="cv-wp-slot-ghost"></div>`;
+          center.appendChild(ghost);
+        }
+      }
+
+      function updateViewportHeightAndIndicator(frontSlot, realCount) {
+        const { viewport, indicator, center } = getEls();
+        if (viewport && st.viewMode === "ring" && frontSlot) {
+          const ticketEl = frontSlot.querySelector(".cv-wp-ticket");
+          const h = ticketEl ? ticketEl.offsetHeight : (window.innerWidth < 768 ? 410 : 220);
+          if (h > 40) viewport.style.minHeight = `${Math.max(276, h + 56)}px`;
+        }
+        if (indicator) {
+          const idxHuman = String(Math.min(realCount, st.activeIdx + 1)).padStart(2, "0");
+          const totHuman = String(Math.max(1, realCount)).padStart(2, "0");
+          indicator.textContent = `Vé ${idxHuman} / ${totHuman} • Kéo ngang hoặc bấm vé bên để xem`;
+        }
+        if (center) {
+          center.querySelectorAll(".cv-wp-reel-slot:not(.is-ghost)").forEach((slot, i) => {
+            slot.classList.toggle("is-front", i === st.activeIdx);
+          });
+        }
+      }
+
+      function layoutRingFrame() {
+        const { center } = getEls();
+        if (!center || st.viewMode === "list") return;
+        const slots = Array.from(center.querySelectorAll(".cv-wp-reel-slot"));
+        const count = slots.length;
+        if (!count) return;
+
+        // Áp dụng tọa độ ống kính + góc nghiêng intro lên .cv-wp-reel-center
+        center.style.setProperty("--wp-ix", `${st.introX.toFixed(2)}px`);
+        center.style.setProperty("--wp-iy", `${st.introY.toFixed(2)}px`);
+        center.style.setProperty("--wp-iroll", `${st.introRoll.toFixed(2)}deg`);
+        center.style.setProperty("--wp-itilt", `${st.introTilt.toFixed(2)}deg`);
+        center.style.setProperty("--wp-is", `${st.introScale.toFixed(4)}`);
+
+        const realCount = slots.filter((s) => !s.classList.contains("is-ghost")).length;
+        const settledStep = count === 1 ? 360 : (count === 2 ? 42 : Math.min(46, 360 / Math.max(count, 4)));
+        const step = st.inIntroAnim ? (360 / Math.max(3, count)) : settledStep;
+        st.stepDeg = settledStep;
+
+        let frontSlot = null;
+        let minAbsDeg = Infinity;
+
+        slots.forEach((slot, i) => {
+          const isGhost = slot.classList.contains("is-ghost");
+          let relDeg = i * step - st.rotAngle;
+          if (st.inIntroAnim || count >= 4) {
+            const totalSpan = st.inIntroAnim ? 360 : (count * settledStep);
+            relDeg = ((relDeg % totalSpan) + totalSpan) % totalSpan;
+            if (relDeg > totalSpan / 2) relDeg -= totalSpan;
+          }
+          const rad = (relDeg * Math.PI) / 180;
+          const depthZ = Math.cos(rad) * st.radius - st.radius;
+          const absDeg = Math.abs(relDeg);
+
+          // Trong giai đoạn intro giữ hình khối vòng xoay 360°, khi settled chỉ hiện cung phía trước sắc nét
+          const maxVisibleDeg = st.inIntroAnim ? 175 : 96;
+          if (absDeg > maxVisibleDeg) {
+            slot.style.opacity = "0";
+            slot.style.pointerEvents = "none";
+            slot.style.transform = `translate3d(-50%, -50%, -900px)`;
+            return;
+          }
+
+          if (!isGhost && absDeg < minAbsDeg) {
+            minAbsDeg = absDeg;
+            frontSlot = slot;
+            st.activeIdx = i;
+          }
+
+          const edgeFade = st.inIntroAnim
+            ? (isGhost ? 0.52 : Math.max(0.42, Math.cos(rad * 0.45)))
+            : (isGhost ? 0 : (absDeg < 8 ? 1 : Math.max(0.22, 0.56 - Math.pow(absDeg / 98, 1.2) * 0.34)));
+          const slotScale = st.inIntroAnim
+            ? 0.88
+            : (absDeg < 8 ? 1 : Math.max(0.74, 0.88 - Math.min(0.18, absDeg * 0.0025)));
+          const xOffset = Math.sin(rad) * st.radius * (st.inIntroAnim ? 1.05 : 1.02);
+
+          slot.style.opacity = edgeFade.toFixed(3);
+          slot.style.zIndex = String(Math.round(500 - absDeg * 4));
+          slot.style.transform =
+            `translate3d(calc(-50% + ${xOffset.toFixed(1)}px), -50%, ${depthZ.toFixed(1)}px) ` +
+            `rotateY(${(relDeg * (st.inIntroAnim ? 0.95 : 0.72)).toFixed(2)}deg) ` +
+            `scale(${slotScale.toFixed(4)})`;
+          slot.style.pointerEvents = (!st.inIntroAnim && !isGhost) ? "auto" : "none";
+        });
+
+        updateViewportHeightAndIndicator(frontSlot, realCount);
+      }
+
+      function settleNow(replayScramble = true) {
+        const { stage, center, details, hint } = getEls();
+        stopRafAndTimers();
+        st.inIntroAnim = false;
+        st.stageState = "settled";
+        st.introX = 0;
+        st.introY = 0;
+        st.introRoll = 0;
+        st.introTilt = 0;
+        st.introScale = 1;
+        st.rotAngle = st.activeIdx * st.stepDeg;
+        st.targetRotAngle = st.rotAngle;
+
+        if (center) {
+          removeGhostSlots(center);
+          const vw = window.innerWidth;
+          st.radius = vw < 640 ? 340 : 720;
+        }
+        if (stage) {
+          stage.classList.remove("is-preclip", "is-collapsing", "is-animating-letters");
+          stage.setAttribute("data-stage-state", "settled");
+        }
+        if (details && details.open && hint) {
+          hint.textContent = "Bấm để thu gọn";
+        }
+        layoutRingFrame();
+
+        if (replayScramble && center) {
+          const front = center.querySelector(".cv-wp-reel-slot.is-front") || center;
+          window.CineVerseMotion?.initScrambleReveal?.({ scope: front, forceReplay: true });
+        }
+      }
+
+      function tickLoop(now) {
+        const { stage, odoPct } = getEls();
+        if (!stage || isWebGLBusy()) {
+          settleNow(false);
+          return;
+        }
+        const details = document.getElementById("wp-history-details");
+        if (!details || !details.open) {
+          stopRafAndTimers();
+          return;
+        }
+        const dRect = details.getBoundingClientRect();
+        if (dRect.bottom < -160 || dRect.top > window.innerHeight + 160) {
+          stopRafAndTimers();
+          return;
+        }
+
+        if (st.inIntroAnim) {
+          const elapsed = now - st.animStartMs;
+          const totalDur = 1900;
+          const spinPart = 950;
+
+          if (elapsed <= spinPart) {
+            // Stage 1-2: Vòng xoay thu nhỏ nghiêng -16deg / -22deg quay trong khoảng không bên phải, nhường góc trên trái cho "Ký Ức Rạp."
+            const p1 = Math.min(1, elapsed / spinPart);
+            const easedOdo = Math.round(easeOutCubic(p1) * 100);
+            if (odoPct) odoPct.textContent = String(easedOdo).padStart(2, "0");
+
+            st.introX = window.innerWidth < 640 ? 0 : 96;
+            st.introY = window.innerWidth < 640 ? -8 : -10;
+            st.introRoll = -16;
+            st.introTilt = -22;
+            st.introScale = window.innerWidth < 640 ? 0.42 : 0.37;
+            st.radius = window.innerWidth < 640 ? 340 : 680;
+            st.rotAngle = -140 + easeOutCubic(p1) * 120;
+          } else if (elapsed < totalDur) {
+            // Stage 3-4: Hủy nghiêng 0deg, Overshoot dọc (+18px -> 0px), mở bán kính bung rẽ quạt
+            if (st.stageState !== "revealing") {
+              st.stageState = "revealing";
+              stage.setAttribute("data-stage-state", "revealing");
+              if (odoPct) odoPct.textContent = "100";
+            }
+            const p2 = Math.min(1, (elapsed - spinPart) / (totalDur - spinPart));
+            const e2 = easeOutCubic(p2);
+            const springY = easeOutBack(p2);
+
+            st.introX = (window.innerWidth < 640 ? 0 : 96) * (1 - e2);
+            st.introY = (window.innerWidth < 640 ? -8 : -10) * (1 - springY) + Math.sin(p2 * Math.PI) * 18;
+            st.introRoll = -16 * (1 - e2);
+            st.introTilt = -22 * (1 - e2);
+            const startS = window.innerWidth < 640 ? 0.42 : 0.37;
+            st.introScale = startS + (1 - startS) * e2;
+            const rStart = window.innerWidth < 640 ? 340 : 680;
+            const rEnd = window.innerWidth < 640 ? 340 : 720;
+            st.radius = rStart + (rEnd - rStart) * e2;
+            st.rotAngle = -20 * (1 - e2) + st.targetRotAngle * e2;
+          } else {
+            settleNow(true);
+            return;
+          }
+
+          layoutRingFrame();
+          st.rafId = requestAnimationFrame(tickLoop);
+          return;
+        }
+
+        // Chế độ xoay tương tác sau intro: nội suy mượt tới targetRotAngle rồi DỪNG hẳn rAF
+        const diff = st.targetRotAngle - st.rotAngle;
+        if (Math.abs(diff) < 0.08 && !st.dragging) {
+          st.rotAngle = st.targetRotAngle;
+          layoutRingFrame();
+          st.rafId = 0;
+          const center = document.getElementById("wp-history-list");
+          const front = center?.querySelector(".cv-wp-reel-slot.is-front");
+          if (front) window.CineVerseMotion?.initScrambleReveal?.({ scope: front, forceReplay: true });
+          return;
+        }
+        st.rotAngle += diff * 0.16;
+        layoutRingFrame();
+        st.rafId = requestAnimationFrame(tickLoop);
+      }
+
+      function wakeRaf() {
+        if (!st.rafId) {
+          st.rafId = requestAnimationFrame(tickLoop);
+        }
+      }
+
+      function playOpening(fromUser = true) {
+        const { details, stage, center, hint, odoPct, odoTotal } = getEls();
+        if (!details || !stage || !center) return;
+
+        syncStatsOnly(st.history);
+        details.open = true;
+        if (hint) hint.textContent = "Bấm để thu gọn";
+
+        if (isReduced() || isWebGLBusy() || st.viewMode === "list") {
+          settleNow(true);
+          return;
+        }
+
+        stopRafAndTimers();
+        const realCount = center.querySelectorAll(".cv-wp-reel-slot:not(.is-ghost)").length;
+        ensureGhostSlotsDuringIntro(center, realCount);
+
+        st.activeIdx = 0;
+        st.targetRotAngle = 0;
+        st.inIntroAnim = Boolean(fromUser || true);
+        st.stageState = "intro";
+        st.animStartMs = performance.now();
+        st.introX = window.innerWidth < 640 ? 0 : 96;
+        st.introY = window.innerWidth < 640 ? -8 : -10;
+        st.introRoll = -16;
+        st.introTilt = -22;
+        st.introScale = window.innerWidth < 640 ? 0.42 : 0.37;
+        st.radius = window.innerWidth < 640 ? 340 : 680;
+        st.rotAngle = -140;
+
+        if (odoTotal) odoTotal.textContent = String(realCount);
+        if (odoPct) odoPct.textContent = "00";
+
+        stage.classList.remove("is-collapsing", "is-animating-letters");
+        stage.classList.add("is-preclip");
+        stage.setAttribute("data-stage-state", "intro");
+        layoutRingFrame();
+        void stage.offsetWidth;
+
+        requestAnimationFrame(() => {
+          stage.classList.remove("is-preclip");
+          stage.classList.add("is-animating-letters");
+          wakeRaf();
+        });
+      }
+
+      function skipIntro() {
+        settleNow(true);
+      }
+
+      function closeSmoothly() {
+        const { details, stage, hint } = getEls();
+        if (!details) return;
+        stopRafAndTimers();
+        if (isReduced() || !stage) {
+          details.open = false;
+          if (hint) hint.textContent = "Bấm để mở rộng";
+          return;
+        }
+        stage.classList.add("is-collapsing");
+        st.phaseTimer1 = setTimeout(() => {
+          details.open = false;
+          stage.classList.remove("is-collapsing");
+          stage.setAttribute("data-stage-state", "idle");
+          if (hint) hint.textContent = "Bấm để mở rộng";
+        }, 320);
+      }
+
+      function stepBy(delta = 1) {
+        const { center } = getEls();
+        if (!center) return;
+        const realSlots = center.querySelectorAll(".cv-wp-reel-slot:not(.is-ghost)");
+        const total = realSlots.length;
+        if (total <= 1) return;
+        if (st.inIntroAnim) settleNow(false);
+
+        const nextIdx = (st.activeIdx + delta + total) % total;
+        focusSlotByIndex(nextIdx);
+      }
+
+      function focusSlotByIndex(idx) {
+        const { center } = getEls();
+        if (!center) return;
+        const realCount = center.querySelectorAll(".cv-wp-reel-slot:not(.is-ghost)").length;
+        if (!realCount) return;
+        const clamped = ((idx % realCount) + realCount) % realCount;
+        st.activeIdx = clamped;
+        const step = st.stepDeg || 45;
+        st.targetRotAngle = clamped * step;
+        if (isReduced() || st.viewMode === "list") {
+          st.rotAngle = st.targetRotAngle;
+          layoutRingFrame();
+        } else {
+          wakeRaf();
+        }
+      }
+
+      function setViewMode(mode = "ring") {
+        const valid = mode === "list" ? "list" : "ring";
+        st.viewMode = valid;
+        const { stage, center, btnRing, btnList } = getEls();
+        if (stage) stage.setAttribute("data-view-mode", valid);
+        if (btnRing) {
+          btnRing.classList.toggle("is-active", valid === "ring");
+          btnRing.setAttribute("aria-pressed", valid === "ring" ? "true" : "false");
+        }
+        if (btnList) {
+          btnList.classList.toggle("is-active", valid === "list");
+          btnList.setAttribute("aria-pressed", valid === "list" ? "true" : "false");
+        }
+        if (valid === "list") {
+          stopRafAndTimers();
+          st.inIntroAnim = false;
+          if (center) {
+            removeGhostSlots(center);
+            center.querySelectorAll(".cv-wp-reel-slot").forEach((s) => {
+              s.style.transform = "";
+              s.style.opacity = "";
+              s.style.zIndex = "";
+              s.style.pointerEvents = "";
+            });
+          }
+          if (stage) stage.setAttribute("data-stage-state", "settled");
+          window.CineVerseMotion?.initScrambleReveal?.({ scope: center || document, forceReplay: false });
+        } else {
+          st.stageState = "settled";
+          if (stage) stage.setAttribute("data-stage-state", "settled");
+          layoutRingFrame();
+        }
+      }
+
+      function syncStatsOnly(history = st.history) {
+        st.history = Array.isArray(history) ? history : [];
+        const { stats, odoTotal } = getEls();
+        const total = st.history.length;
+        if (odoTotal) odoTotal.textContent = String(total);
+        if (!stats) return;
+        const endedCount = st.history.filter((e) => e.status === "ended").length;
+        const cancelCount = st.history.filter((e) => e.status === "cancelled").length;
+        stats.innerHTML = [
+          `<span class="cv-wp-stat-pill" style="--std:80ms;color:#F5C518;border-color:rgba(245,197,24,0.34);">${total} vé lưu trữ</span>`,
+          endedCount ? `<span class="cv-wp-stat-pill" style="--std:160ms;">${endedCount} đã chiếu xong</span>` : "",
+          cancelCount ? `<span class="cv-wp-stat-pill" style="--std:240ms;color:#FDA4AF;">${cancelCount} đã hủy</span>` : ""
+        ].filter(Boolean).join("");
+      }
+
+      function syncHistoryItems(history = []) {
+        st.history = Array.isArray(history) ? history : [];
+        st.activeIdx = 0;
+        st.rotAngle = 0;
+        st.targetRotAngle = 0;
+        syncStatsOnly(st.history);
+        const details = document.getElementById("wp-history-details");
+        if (details && details.open) {
+          settleNow(false);
+        }
+      }
+
+      function bindInteractions() {
+        const { details, summary, viewport } = getEls();
+        if (summary && details && !summary.dataset.cvHistBound) {
+          summary.dataset.cvHistBound = "1";
+          summary.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (details.open) closeSmoothly();
+            else playOpening(true);
+          });
+        }
+
+        if (viewport && !viewport.dataset.cvReelBound) {
+          viewport.dataset.cvReelBound = "1";
+          let startX = 0, startY = 0, startRot = 0, tracking = false, draggingMoved = false;
+
+          viewport.addEventListener("pointerdown", (e) => {
+            if (st.viewMode !== "ring" || st.inIntroAnim) return;
+            if (e.target && e.target.closest && e.target.closest("button, a, input")) return;
+            tracking = true;
+            draggingMoved = false;
+            startX = e.clientX;
+            startY = e.clientY;
+            startRot = st.rotAngle;
+          });
+
+          window.addEventListener("pointermove", (e) => {
+            if (!tracking) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            if (!draggingMoved) {
+              if (Math.abs(dx) > 6 && Math.abs(dx) > Math.abs(dy)) {
+                draggingMoved = true;
+                st.dragging = true;
+                viewport.classList.add("is-dragging");
+              } else if (Math.abs(dy) > 10) {
+                tracking = false;
+              }
+              return;
+            }
+            const realCount = viewport.querySelectorAll(".cv-wp-reel-slot:not(.is-ghost)").length;
+            const step = st.stepDeg || 45;
+            const minAngle = -step * 0.35;
+            const maxAngle = Math.max(0, (realCount - 1) * step) + step * 0.35;
+            st.targetRotAngle = Math.max(minAngle, Math.min(maxAngle, startRot - dx * 0.24));
+            st.rotAngle = st.targetRotAngle;
+            layoutRingFrame();
+          }, { passive: true });
+
+          const endDrag = () => {
+            if (!tracking) return;
+            tracking = false;
+            if (draggingMoved) {
+              st.dragging = false;
+              viewport.classList.remove("is-dragging");
+              const realCount = viewport.querySelectorAll(".cv-wp-reel-slot:not(.is-ghost)").length;
+              const step = st.stepDeg || 45;
+              const nearestIdx = Math.max(0, Math.min(realCount - 1, Math.round(st.rotAngle / step)));
+              focusSlotByIndex(nearestIdx);
+            }
+          };
+          window.addEventListener("pointerup", endDrag, { passive: true });
+          window.addEventListener("pointercancel", endDrag, { passive: true });
+
+          viewport.addEventListener("click", (e) => {
+            if (draggingMoved) {
+              draggingMoved = false;
+              return;
+            }
+            const slot = e.target && e.target.closest ? e.target.closest(".cv-wp-reel-slot:not(.is-ghost)") : null;
+            if (slot && !slot.classList.contains("is-front") && st.viewMode === "ring") {
+              e.preventDefault();
+              e.stopPropagation();
+              const idx = Number(slot.dataset.wpSlotIdx || 0);
+              focusSlotByIndex(idx);
+            }
+          });
+
+          if (details) {
+            const obs = new IntersectionObserver((entries) => {
+              const en = entries[0];
+              st.inView = Boolean(en && en.isIntersecting);
+              if (!st.inView && st.inIntroAnim && details.open && en && en.boundingClientRect.height > 40) {
+                settleNow(false);
+              }
+            }, { threshold: 0.01 });
+            obs.observe(details);
+          }
+        }
+      }
+
+      window.addEventListener("resize", () => {
+        if (document.getElementById("wp-history-details")?.open && st.viewMode === "ring" && !st.inIntroAnim) {
+          st.radius = window.innerWidth < 640 ? 340 : 620;
+          layoutRingFrame();
+        }
+      }, { passive: true });
+
+      bindInteractions();
+      window.CineVerseHistoryStage = {
+        playOpening,
+        skipIntro,
+        closeSmoothly,
+        stepBy,
+        focusSlotByIndex,
+        setViewMode,
+        syncHistoryItems,
+        syncStatsOnly
+      };
     })();
   </script>
 </body>
