@@ -831,21 +831,46 @@ Khán giả: ${qTrim}`;
 
 function buildRegexMovieMeta(rawTitle) {
   const s = String(rawTitle || "");
+  const norm = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[đĐ]/g, "d").toLowerCase();
+  const canonicalAliases = [
+    [/chua te cua nhung chiec nhan.*quyen nang|rings of power/i, "The Lord of the Rings: The Rings of Power", "tv", "2022"],
+    [/chua te cua nhung chiec nhan.*hai toa thap|two towers/i, "The Lord of the Rings: The Two Towers", "movie", "2002"],
+    [/chua te cua nhung chiec nhan.*su tro lai|return of the king/i, "The Lord of the Rings: The Return of the King", "movie", "2003"],
+    [/chua te cua nhung chiec nhan.*rohirrim|rohirrim/i, "The Lord of the Rings: The War of the Rohirrim", "movie", "2024"],
+    [/chu he trong canh dong ngo|clown in a cornfield/i, "Clown in a Cornfield", "movie", "2025"],
+    [/chu thuat hoi chien\s*0|jujutsu kaisen\s*0/i, "Jujutsu Kaisen 0", "anime", "2021"],
+    [/chu thuat hoi chien|jujutsu kaisen|tu diet hoi du/i, "Jujutsu Kaisen", "anime", "2020"],
+    [/biet doi danh thue\s*4|expend4bles/i, "Expend4bles", "movie", "2023"],
+    [/biet doi danh thue\s*3|expendables\s*3/i, "The Expendables 3", "movie", "2014"],
+    [/wakanda bat diet|wakanda forever/i, "Black Panther: Wakanda Forever", "movie", "2022"],
+    [/venom.*doi mat tu thu|carnage/i, "Venom: Let There Be Carnage", "movie", "2021"],
+    [/venom.*keo cuoi|last dance/i, "Venom: The Last Dance", "movie", "2024"],
+    [/bi kip luyen rong|how to train your dragon/i, "How to Train Your Dragon", "movie", "2025"],
+    [/transformers.*bai binh phuc han|revenge of the fallen/i, "Transformers: Revenge of the Fallen", "movie", "2009"],
+    [/vung dat quy du.*dao tu than|death island/i, "Resident Evil: Death Island", "movie", "2023"],
+    [/vung dat quy du.*2026|resident evil.*2026/i, "Resident Evil: Welcome to Raccoon City", "movie", "2021"]
+  ];
+  for (const [re, aliasQ, aliasType, aliasYear] of canonicalAliases) {
+    if (re.test(norm)) {
+      return { query: aliasQ, type: aliasType, year: aliasYear };
+    }
+  }
+
   const yearMatch = s.match(/\b(19\d{2}|20\d{2})\b/);
   const year = yearMatch ? yearMatch[1] : "";
   // Ưu tiên tên tiếng Anh nằm trong ngoặc đơn (vd: "(The Nun 2)", "(Clown in a Cornfield)", "(Resident Evil 2026)")
   const parenMatches = [...s.matchAll(/\(([^)]+)\)/g)].map(m => m[1].trim());
   const parenTitle = parenMatches.find(p =>
     !/^\d{4}$/.test(p) &&
-    !/^(vietsub|thuyết minh|lồng tiếng|full|1080p|720p|4k|bluray|webrip|x264|x265|hevc)/i.test(p) &&
+    !/^(vietsub|thuyết minh|lồng tiếng|full|phần\s*\d+|tập\s*\d+|1080p|720p|4k|bluray|webrip|x264|x265|hevc)/i.test(p) &&
     /[a-zA-Z]{2,}/.test(p)
   );
   const baseStr = parenTitle || s.replace(/\[[^\]]*\]|\([^)]*\)/g, " ");
   const query = baseStr
     .replace(/^xem\s+/i, " ")
-    .replace(/\b(phimmoi(?:\.fun|z)?|tập\s*full|tập\s*\d+|vietsub|thuyết\s*minh|lồng\s*tiếng|miễn\s*phí|full\s*hd|fhd|1080p|720p|4k|webrip|bluray|x264|x265|hevc|aac5?\.1|hindi|ozlem|rarbg|upco\s*cinema|mọt\s*chill|motchill|motphim|8phimx|ani-one(?:\s*vietnam)?|yts\.(?:mx|gg|bz))\b/gi, " ")
-    .replace(/\b(19\d{2}|20\d{2})\b/g, " ")
+    .replace(/\b(phimmoi(?:\.fun|z)?|tập\s*full|tập\s*\d+|phần\s*\d+|vietsub|thuyết\s*minh|lồng\s*tiếng|miễn\s*phí|full\s*hd|full|fhd|1080p|720p|4k|webrip|bluray|x264|x265|hevc|aac5?\.1|hindi|ozlem|rarbg|upco\s*cinema|mọt\s*chill|motchill|motphim|8phimx|ani-one(?:\s*vietnam)?|yts\.(?:mx|gg|bz))\b/gi, " ")
     .replace(/[._-]+/g, " ")
+    .replace(/\b(19\d{2}|20\d{2})\b/g, " ")
     .replace(/\s+/g, " ")
     .trim();
   return {
@@ -899,25 +924,30 @@ async function extractCleanMovieMetaWithAI(rawTitle, env, ctx, colo = "EDGE") {
 
 async function lookupPosterByMeta(q, type, rawTitle, env) {
   let posterUrl = "";
+  let backdropUrl = "";
   let source = "";
 
-  // 1. TMDB (nếu có TMDB_API_KEY)
+  // 1. TMDB (nếu có TMDB_API_KEY) — ưu tiên artwork chuẩn studio gốc (original 2000x3000 & 3840x2160)
   if (!posterUrl && env.TMDB_API_KEY) {
-    try {
-      const tmdbRes = await fetch(
-        `https://api.themoviedb.org/3/search/multi?api_key=${encodeURIComponent(env.TMDB_API_KEY)}&query=${encodeURIComponent(q)}&language=vi-VN`,
-        { signal: AbortSignal.timeout(6000) }
-      );
-      const tmdbData = await tmdbRes.json();
-      const hit = (tmdbData.results || []).find(r => r.poster_path);
-      if (hit?.poster_path) {
-        posterUrl = `https://image.tmdb.org/t/p/w780${hit.poster_path}`;
-        source = "tmdb";
-      }
-    } catch (e) {}
+    for (const lang of ["en-US", "vi-VN"]) {
+      try {
+        const tmdbRes = await fetch(
+          `https://api.themoviedb.org/3/search/multi?api_key=${encodeURIComponent(env.TMDB_API_KEY)}&query=${encodeURIComponent(q)}&language=${lang}`,
+          { signal: AbortSignal.timeout(6000) }
+        );
+        const tmdbData = await tmdbRes.json();
+        const hit = (tmdbData.results || []).find(r => r.poster_path || r.backdrop_path);
+        if (hit) {
+          if (hit.poster_path) posterUrl = `https://image.tmdb.org/t/p/original${hit.poster_path}`;
+          if (hit.backdrop_path) backdropUrl = `https://image.tmdb.org/t/p/original${hit.backdrop_path}`;
+          source = "tmdb";
+          if (posterUrl) break;
+        }
+      } catch (e) {}
+    }
   }
 
-  // 2. IMDb Suggestion API (Miễn phí, không cần key, poster chuẩn cho hầu hết phim lẻ/series)
+  // 2. IMDb Suggestion API (Miễn phí, lấy chuẩn UX1280 QL90)
   if (!posterUrl) {
     try {
       const imdbSlug = q.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
@@ -932,7 +962,7 @@ async function lookupPosterByMeta(q, type, rawTitle, env) {
       const imdbData = await imdbRes.json();
       const hit = (imdbData.d || []).find(item => item?.i?.imageUrl && (!item.qid || /movie|tvSeries|tvMiniSeries/i.test(item.qid)));
       if (hit?.i?.imageUrl) {
-        posterUrl = hit.i.imageUrl.replace(/\._V1_\./i, "._V1_UX600_.");
+        posterUrl = hit.i.imageUrl.replace(/\._V1_.*$/i, "._V1_FMjpg_QL90_UX1280_.jpg");
         source = "imdb";
       }
     } catch (e) {}
@@ -954,7 +984,7 @@ async function lookupPosterByMeta(q, type, rawTitle, env) {
     } catch (e) {}
   }
 
-  // 4. iTunes Search API (Miễn phí, không cần API key, poster phim lẻ HD)
+  // 4. iTunes Search API (Poster chuẩn phim lẻ 1200x1800)
   if (!posterUrl) {
     try {
       const itunesRes = await fetch(
@@ -964,29 +994,39 @@ async function lookupPosterByMeta(q, type, rawTitle, env) {
       const itunesData = await itunesRes.json();
       const art = itunesData?.results?.[0]?.artworkUrl100;
       if (art) {
-        posterUrl = art.replace(/100x100bb\./i, "600x600bb.");
+        posterUrl = art.replace(/100x100bb\./i, "1200x1800bb.");
         source = "itunes";
       }
     } catch (e) {}
   }
 
-  // 5. TVMaze API (Miễn phí, không cần API key, cho phim bộ/series)
-  if (!posterUrl) {
+  // 5. TVMaze API (Miễn phí cho series: lấy cả poster dọc & backdrop 16:9 gốc)
+  if (!posterUrl || (!backdropUrl && type === "tv")) {
     try {
       const tvRes = await fetch(
-        `https://api.tvmaze.com/search/shows?q=${encodeURIComponent(q)}`,
+        `https://api.tvmaze.com/singlesearch/shows?q=${encodeURIComponent(q)}&embed=images`,
         { signal: AbortSignal.timeout(6000) }
       );
       const tvData = await tvRes.json();
-      const img = tvData?.[0]?.show?.image?.original || tvData?.[0]?.show?.image?.medium;
-      if (img) {
-        posterUrl = img;
-        source = "tvmaze";
+      if (!posterUrl) {
+        const img = tvData?.image?.original || tvData?.image?.medium;
+        if (img) {
+          posterUrl = img;
+          source = source || "tvmaze";
+        }
+      }
+      if (!backdropUrl && Array.isArray(tvData?._embedded?.images)) {
+        const bgs = tvData._embedded.images
+          .filter(x => x.type === "background" && x.resolutions?.original?.url)
+          .sort((a, b) => (b.resolutions.original.width || 0) - (a.resolutions.original.width || 0));
+        if (bgs[0]?.resolutions?.original?.url) {
+          backdropUrl = bgs[0].resolutions.original.url;
+        }
       }
     } catch (e) {}
   }
 
-  return { posterUrl, source };
+  return { posterUrl, backdropUrl, source };
 }
 
 async function handlePosterLookup(request, env, ctx) {
@@ -999,10 +1039,10 @@ async function handlePosterLookup(request, env, ctx) {
   const cached = await cache.match(cacheKey);
   if (cached) return cached;
 
-  // Ưu tiên làm sạch tên bằng regex trước để tiết kiệm Gemini RPM (tránh chạm 15 RPM Free Tier)
+  // Ưu tiên làm sạch tên bằng regex trước để tiết kiệm Gemini RPM
   const regexMeta = buildRegexMovieMeta(rawTitle);
   let q = regexMeta.query || rawTitle;
-  let { posterUrl, source } = await lookupPosterByMeta(q, regexMeta.type, rawTitle, env);
+  let { posterUrl, backdropUrl, source } = await lookupPosterByMeta(q, regexMeta.type, rawTitle, env);
 
   // Chỉ gọi Gemini AI trích xuất tên quốc tế khi fast-path regex không tìm được poster
   if (!posterUrl) {
@@ -1010,17 +1050,17 @@ async function handlePosterLookup(request, env, ctx) {
     const aiMeta = await extractCleanMovieMetaWithAI(rawTitle, env, ctx, colo);
     if (aiMeta.query && aiMeta.query.toLowerCase() !== q.toLowerCase()) {
       q = aiMeta.query;
-      ({ posterUrl, source } = await lookupPosterByMeta(q, aiMeta.type, rawTitle, env));
+      ({ posterUrl, backdropUrl, source } = await lookupPosterByMeta(q, aiMeta.type, rawTitle, env));
     }
   }
 
   const response = new Response(
-    JSON.stringify({ ok: Boolean(posterUrl), query: q, poster: posterUrl, source }),
+    JSON.stringify({ ok: Boolean(posterUrl || backdropUrl), query: q, poster: posterUrl, backdrop: backdropUrl, source }),
     {
       status: 200,
       headers: {
         ...CORS_HEADERS,
-        "Cache-Control": posterUrl ? "public, max-age=604800" : "public, max-age=3600",
+        "Cache-Control": (posterUrl || backdropUrl) ? "public, max-age=604800" : "public, max-age=3600",
         "Content-Type": "application/json; charset=utf-8"
       }
     }
