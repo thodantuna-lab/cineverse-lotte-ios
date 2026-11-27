@@ -1077,7 +1077,7 @@
     .cv-top-runner-card {
       position: relative;
       flex: 1 1 0;
-      min-height: 168px;
+      min-height: 176px;
       border-radius: 16px;
       overflow: hidden;
       display: flex;
@@ -42306,7 +42306,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                   ${top1MoveHtml}
                 </div>
               </div>
-              ${top1.synopsis ? `<p class="hidden sm:line-clamp-2 text-xs text-slate-300/85 leading-relaxed">${escapeHTML(top1.synopsis)}</p>` : ""}
+              ${top1.synopsis ? `<p class="line-clamp-2 text-xs text-slate-300/85 leading-relaxed">${escapeHTML(top1.synopsis)}</p>` : ""}
               <div class="flex flex-wrap items-center gap-2.5 pt-0.5">
                 <button type="button"
                   onclick="window.appActions.openTop10PrimaryAction('${escapeHTML(top1EncodedId)}')"
