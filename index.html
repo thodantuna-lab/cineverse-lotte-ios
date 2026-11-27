@@ -1873,6 +1873,11 @@
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.36), 0 6px 18px rgba(0, 0, 0, 0.35);
       transform: translateY(-1px);
     }
+    @media (max-width: 639px) {
+      #btn-nav-help {
+        display: none !important;
+      }
+    }
     #ios-liquid-nav-bar button:focus-visible,
     #mobile-nav-drawer button:focus-visible {
       outline: 2px solid #F5C518;
@@ -7274,6 +7279,14 @@
     .cv-stage-pov-pill { padding: 0 12px; }
     .cv-stage-pov-switcher { right: auto; left: 14px; top: 12px; bottom: auto; transform: none; background: rgba(18, 14, 18, 0.72); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.14); }
     .cv-preview-controls { top: 12px !important; right: 14px !important; }
+    @media (max-width: 767px) {
+      .cv-stage-pov-switcher { left: 10px; top: 8px; padding: 2px; gap: 2px; }
+      .cv-stage-pov-pill { min-height: 36px !important; padding: 0 9px; font-size: 11px !important; }
+      .cv-preview-controls { top: 8px !important; right: 10px !important; }
+      #btn-hero-play-trailer { min-height: 36px !important; padding: 0 10px !important; font-size: 11px !important; }
+      #btn-hero-mute { width: 36px !important; height: 36px !important; }
+      .cv-projection { inset: 54px 4% 25% !important; }
+    }
     .cv-mobile-room-bar { padding: 8px 10px; gap: 6px; margin-top: 6px; background: #151116; }
     .cv-mobile-room-bar > div { flex: 1; }
     .cv-contact-lobby { flex: 0 0 44px; height: 44px; background: #28161b; border: 1px solid #694347; border-radius: 12px; color: #efcc94; }
@@ -8664,8 +8677,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         transform: translate3d(0, -50%, 0) scale(1.06);
         border-color: rgba(255, 255, 255, 0.36);
       }
-      .cv-carousel-nav-btn.is-prev { left: 10px !important; right: auto !important; }
-      .cv-carousel-nav-btn.is-next { right: 10px !important; left: auto !important; }
+      .cv-carousel-nav-btn.is-prev { left: 6px !important; right: auto !important; }
+      .cv-carousel-nav-btn.is-next { right: 6px !important; left: auto !important; }
       .cv-carousel-nav-btn.is-hidden-nav {
         opacity: 0 !important;
         pointer-events: none !important;
@@ -8690,7 +8703,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
     @media (min-width: 768px) {
       .cv-focus-carousel {
-        padding-inline: 54px;
+        padding-inline: 58px;
       }
     }
     .cv-focus-carousel::-webkit-scrollbar {
@@ -8760,6 +8773,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       justify-content: space-between;
       padding: 12px;
     }
+    .cv-top10-poster-card[data-rank="1"] {
+      border-color: rgba(245, 197, 24, 0.55) !important;
+      box-shadow: var(--cv-card-top-specular), 0 22px 44px -12px rgba(245, 197, 24, 0.22), 0 18px 38px -12px rgba(0, 0, 0, 0.85);
+    }
 
     /* 4. TABULAR-NUMS CHỐNG GIẬT NGANG CHO SỐ LIỆU */
     .tabular-nums {
@@ -8794,11 +8811,11 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         max-height: calc(100svh - 82px) !important;
       }
       .cv-projection {
-        inset: 2% 4% 28% !important;
+        inset: 2% 4% 29% !important;
       }
       .cv-stage-info {
-        padding: 32px 24px 16px !important;
-        gap: 6px !important;
+        padding: 24px 24px 20px !important;
+        gap: 5px !important;
       }
       #hero-movie-title.cv-hero-title {
         font-size: clamp(24px, 2.5vw, 35px) !important;
@@ -9506,6 +9523,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           </nav>
 
           <div class="cv-nav-utils">
+            <button type="button" id="btn-nav-help" onclick="window.appActions.openCinemaGuideModal()"
+              class="cv-nav-icon-btn"
+              aria-label="Hướng dẫn nhanh và phím tắt"
+              title="Hướng dẫn &amp; Phím tắt">
+              <i class="fa-regular fa-circle-question text-[16px]" aria-hidden="true"></i>
+            </button>
+
             <button type="button" id="btn-nav-search" onclick="window.appActions.focusLobbySearch()"
               class="cv-nav-icon-btn"
               aria-label="Tìm tên phim hoặc số phòng"
@@ -9565,6 +9589,11 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         class="cv-nav-mobile-item">
         <span>Tủ Vé NFT</span>
         <span id="mobile-capsule-count-badge" class="cv-nav-count-chip tabular-nums">0</span>
+      </button>
+      <button type="button" onclick="window.appActions.openCinemaGuideModal(); window.appActions.toggleMobileNavMenu(false);"
+        class="cv-nav-mobile-item">
+        <span>Hướng dẫn &amp; Phím tắt</span>
+        <i class="fa-regular fa-circle-question text-xs text-amber-300" aria-hidden="true"></i>
       </button>
       <button type="button" id="mobile-btn-admin-panel" data-nav-tab="admin"
         onclick="window.appActions.openAdminPanelModal(); window.appActions.toggleMobileNavMenu(false);"
@@ -9681,11 +9710,11 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             <div class="cv-seat-plane middle"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
             <div class="cv-seat-plane near"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
           </div>
-          <!-- Bộ chuyển góc nhìn đa hàng ghế trực tiếp trên màn chiếu (Rê chuột xem trước POV, Bấm để Zoom-through vào 3D) -->
+          <!-- Bộ chuyển góc nhìn đa hàng ghế trực tiếp trên màn chiếu (Rê chuột hoặc bấm để xem trước góc nhìn POV từng hạng ghế) -->
           <div class="cv-stage-pov-switcher" role="group" aria-label="Chọn góc nhìn hàng ghế trong rạp">
-            <button type="button" id="hero-pov-btn-front" data-zoom-pov="front" onmouseenter="window.appActions.setHeroPovZone('front', true)" onfocus="window.appActions.setHeroPovZone('front', true)" onclick="window.appActions.triggerPovCinemaZoom('front')" class="cv-stage-pov-pill" aria-pressed="false">Hàng A–C</button>
-            <button type="button" id="hero-pov-btn-rowD" data-zoom-pov="rowD" onmouseenter="window.appActions.setHeroPovZone('rowD', true)" onfocus="window.appActions.setHeroPovZone('rowD', true)" onclick="window.appActions.triggerPovCinemaZoom('rowD')" class="cv-stage-pov-pill" aria-pressed="false">VIP D–E</button>
-            <button type="button" id="hero-pov-btn-rowF" data-zoom-pov="rowF" onmouseenter="window.appActions.setHeroPovZone('rowF', true)" onfocus="window.appActions.setHeroPovZone('rowF', true)" onclick="window.appActions.triggerPovCinemaZoom('rowF')" class="cv-stage-pov-pill is-active" aria-pressed="true">Hàng F</button>
+            <button type="button" id="hero-pov-btn-front" data-zoom-pov="front" onmouseenter="window.appActions.setHeroPovZone('front', true)" onfocus="window.appActions.setHeroPovZone('front', true)" onclick="window.appActions.setHeroPovZone('front', false)" class="cv-stage-pov-pill" aria-pressed="false">Hàng A–C</button>
+            <button type="button" id="hero-pov-btn-rowD" data-zoom-pov="rowD" onmouseenter="window.appActions.setHeroPovZone('rowD', true)" onfocus="window.appActions.setHeroPovZone('rowD', true)" onclick="window.appActions.setHeroPovZone('rowD', false)" class="cv-stage-pov-pill" aria-pressed="false">VIP D–E</button>
+            <button type="button" id="hero-pov-btn-rowF" data-zoom-pov="rowF" onmouseenter="window.appActions.setHeroPovZone('rowF', true)" onfocus="window.appActions.setHeroPovZone('rowF', true)" onclick="window.appActions.setHeroPovZone('rowF', false)" class="cv-stage-pov-pill is-active" aria-pressed="true">Hàng F</button>
           </div>
         </div>
 
@@ -9899,7 +9928,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       <div class="cv-top10-header">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div class="flex flex-wrap items-center gap-3">
-            <h2 class="cv-serif cv-top10-heading">Top 10 tuần này</h2>
+            <h2 id="top10-section-heading" class="cv-serif cv-top10-heading">Top 10 tuần này</h2>
             <span class="cv-top10-divider" aria-hidden="true"></span>
             <span id="top10-week-range" class="text-sm font-semibold" style="color:#E4E4E7;">Tuần Thứ Hai – Chủ nhật (GMT+7)</span>
           </div>
@@ -10002,7 +10031,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           <button type="button" onclick="window.appActions.navGoToSection('home')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition cursor-pointer">Sảnh chiếu chính</button>
           <button type="button" onclick="window.appActions.navGoToSection('watchparty')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition cursor-pointer">Lịch hẹn riêng</button>
           <button type="button" onclick="window.appActions.navGoToSection('top10')" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition cursor-pointer">Top phim tuần</button>
-          <button type="button" onclick="window.appActions.openHanoiCinemaFinder()" class="px-3 py-1.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-400/30 text-amber-200 transition cursor-pointer">Tìm rạp Hà Nội</button>
+          <button type="button" onclick="window.appActions.openHanoiCinemaFinder()" class="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition cursor-pointer">Tìm rạp Hà Nội</button>
         </div>
       </div>
       <div class="max-w-7xl mx-auto mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
@@ -10038,12 +10067,12 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       </div>
       <div class="px-4 pt-3 pb-2">
         <div class="relative">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs" style="color:#A1A1AA;" aria-hidden="true"></i>
+          <i class="fa-solid fa-magnifying-glass absolute top-1/2 -translate-y-1/2 text-xs" style="left:12px;color:#A1A1AA;pointer-events:none;" aria-hidden="true"></i>
           <input id="mobile-room-search" type="search" oninput="window.appActions.setSearchQuery(this.value)"
             placeholder="Tìm tên phim hoặc số phòng..."
             aria-label="Tìm tên phim hoặc số phòng"
-            style="background:#0B0B0F;border:1px solid rgba(255,255,255,0.16);"
-            class="w-full pl-9 pr-3 py-2.5 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400" />
+            style="background:#0B0B0F;border:1px solid rgba(255,255,255,0.16);padding-left:36px;"
+            class="w-full pr-3 py-2.5 rounded-xl text-xs text-white focus:outline-none focus:border-amber-400" />
         </div>
       </div>
       <div id="mobile-rooms-list" class="flex-1 overflow-y-auto px-3 pb-3 space-y-1.5" role="listbox" aria-label="Danh sách 6 phòng chiếu"></div>
@@ -12402,14 +12431,17 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
   </div>
 
   <!-- MODAL CHI TIẾT PHIM CHUẨN PHONG CÁCH NETFLIX -->
-  <div id="hero-detail-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+  <div id="hero-detail-modal" role="dialog" aria-modal="true" aria-labelledby="detail-modal-title"
+    onclick="if(event.target===this){window.appActions.closeHeroDetailModal();}"
+    class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-stone-950 border border-white/15 rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl">
       <div class="relative h-64 sm:h-72 bg-black">
-        <img id="detail-modal-poster" src="" alt="Poster" class="w-full h-full object-cover opacity-80" />
+        <img id="detail-modal-poster" src="" alt="Poster phim" class="w-full h-full object-cover opacity-80" />
         <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/35 to-transparent"></div>
         <button type="button" onclick="window.appActions.closeHeroDetailModal()"
+          aria-label="Đóng chi tiết phim"
           class="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/75 hover:bg-rose-600 text-white flex items-center justify-center transition cursor-pointer">
-          <i class="fa-solid fa-xmark"></i>
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
         </button>
         <div class="absolute bottom-4 inset-x-6 space-y-2">
           <div class="flex items-center gap-2">
@@ -12699,7 +12731,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             aria-expanded="false"
             class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold text-white cursor-pointer whitespace-nowrap shrink-0"
             style="background:#0B0B0F;border:1px solid rgba(245,197,24,0.45);color:#F5C518;">
-            <span>Đổi phòng</span><span class="cv-hide-xs">/suất</span>
+            <span>Đổi phòng</span><span class="cv-hide-xs"> / suất</span>
           </button>
           <button type="button" id="booking-header-chat-btn" onclick="window.appActions.toggleOwnerChatWidget()"
             aria-label="Nhắn Chủ Rạp"
@@ -12710,7 +12742,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           </button>
           <button type="button" id="booking-close-btn" onclick="window.appActions.closeBookingModal()"
             aria-label="Đóng màn đặt vé"
-            class="w-9 h-9 rounded-full text-white flex items-center justify-center transition cursor-pointer shrink-0"
+            class="relative z-20 w-9 h-9 rounded-full text-white flex items-center justify-center transition cursor-pointer shrink-0"
             style="background:#1D1D27;border:1px solid rgba(255,255,255,0.22);">
             <i class="fa-solid fa-xmark"></i>
           </button>
@@ -12757,7 +12789,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 class="min-h-[30px] flex items-center gap-2 text-left cursor-pointer shrink-0">
                 <span class="text-[11px] font-extrabold uppercase tracking-wider flex items-center gap-2" style="color:#F5C518;">
                   <i class="fa-solid fa-cube" aria-hidden="true"></i>
-                  <span>Mô hình 3D góc nhìn từ ghế</span>
+                  <span>Mô hình 3D góc nhìn</span>
                 </span>
                 <span id="booking-pov-seat-chip" class="px-2 py-0.5 rounded-md text-[10px] font-black" style="background:#F5C518;color:#0B0B0F;">Ghế F4</span>
                 <i id="booking-pov-chevron" class="fa-solid fa-chevron-down text-[10px] transition-transform" style="color:#A1A1AA;transform:rotate(180deg);"></i>
@@ -13038,11 +13070,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL 4: 🎴 CINEMATIC NFT & MEMORY CAPSULE (TỦ TRƯNG BÀY KÝ ỨC VĨNH VIỄN) -->
+  <!-- MODAL 4: 🎴 TỦ VÉ KỶ NIỆM & HỒ SƠ ĐIỆN ẢNH -->
   <!-- ========================================================================= -->
-  <div id="memory-capsule-modal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+  <div id="memory-capsule-modal" role="dialog" aria-modal="true" aria-labelledby="memory-capsule-title"
+    onclick="if(event.target===this){window.appActions.closeMemoryCapsuleModal();}"
+    class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div class="bg-stone-950 border border-purple-500/45 rounded-3xl max-w-6xl w-full max-h-[93vh] flex flex-col overflow-hidden shadow-[0_25px_90px_rgba(0,0,0,0.98)]">
-      <!-- Header Cinematic Profile -->
+      <!-- Header Hồ sơ điện ảnh -->
       <div class="px-5 py-4 bg-gradient-to-r from-[#180e29] via-stone-950 to-[#240e1a] border-b border-white/10 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-3.5">
           <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 via-rose-500 to-amber-400 flex items-center justify-center text-white text-2xl font-black shadow-lg">
@@ -13050,7 +13084,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           </div>
           <div>
             <div class="flex flex-wrap items-center gap-2">
-              <h3 class="text-base sm:text-xl font-black text-white">Cinematic Profile & Memory Capsule</h3>
+              <h3 id="memory-capsule-title" class="text-base sm:text-xl font-black text-white">Tủ Vé Kỷ Niệm &amp; Hồ Sơ Điện Ảnh</h3>
               <span id="profile-capsule-rank" class="px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 text-[10px] font-black uppercase">
                 ★ Nhà Sưu Tập Điện Ảnh VIP
               </span>
@@ -13063,28 +13097,29 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
         <div class="flex items-center gap-2">
           <div class="hidden sm:flex items-center gap-3 px-3.5 py-1.5 rounded-2xl bg-stone-900/90 border border-white/10 text-xs">
-            <span>Bộ sưu tập: <strong id="profile-capsule-total" class="text-amber-400">1</strong> thẻ NFT</span>
+            <span>Bộ sưu tập: <strong id="profile-capsule-total" class="text-amber-400">1</strong> vé</span>
             <span class="text-white/20">|</span>
             <span>Ghế yêu thích: <strong id="profile-capsule-fav-seat" class="text-rose-400">F4</strong></span>
           </div>
           <button type="button" onclick="window.appActions.closeMemoryCapsuleModal()"
+            aria-label="Đóng tủ vé kỷ niệm"
             class="w-9 h-9 rounded-full bg-stone-800 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer">
-            <i class="fa-solid fa-xmark"></i>
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
           </button>
         </div>
       </div>
 
-      <!-- Body: Xưởng Đúc Thẻ Ký Ức Nhanh + Tủ Trưng Bày Thẻ Holographic NFT -->
+      <!-- Body: Lưu giữ Vé Kỷ Niệm + Tủ Trưng Bày Vé -->
       <div class="p-4 sm:p-6 overflow-y-auto space-y-5 text-xs">
 
-        <!-- Thanh Đúc (Mint) Thẻ Ký Ức Điện Ảnh Độc Bản -->
+        <!-- Thanh Lưu Vé Kỷ Niệm Độc Bản -->
         <div class="rounded-2xl bg-gradient-to-r from-purple-950/45 via-stone-900 to-rose-950/45 border border-purple-400/35 p-4 space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2">
               <i class="fa-solid fa-wand-magic-sparkles text-amber-400 text-sm"></i>
-              <span class="font-black text-white text-xs sm:text-sm">Đóng Gói Khoảnh Khắc Hiện Tại Thành Thẻ Ký Ức NFT Độc Bản</span>
+              <span class="font-black text-white text-xs sm:text-sm">Lưu Giữ Khoảnh Khắc Hiện Tại Thành Vé Kỷ Niệm Độc Bản</span>
             </div>
-            <span class="text-[11px] text-purple-200">Tự động gắn chữ ký số & Mã bảo mật SHA-256</span>
+            <span class="text-[11px] text-purple-200">Tự động gắn mã xác thực độc bản cho từng tấm vé</span>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
@@ -13106,7 +13141,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               <button type="button" onclick="window.appActions.mintCurrentMomentCapsule(true)"
                 class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-400 via-rose-500 to-purple-600 hover:from-amber-300 hover:to-purple-500 text-slate-950 font-black text-xs shadow-lg transition cursor-pointer flex items-center justify-center gap-1.5">
                 <i class="fa-solid fa-stamp"></i>
-                <span>Đúc Thẻ Ký Ức NFT</span>
+                <span>Lưu Vé Kỷ Niệm</span>
               </button>
             </div>
           </div>
@@ -13114,6 +13149,53 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
         <!-- Lưới Tủ Trưng Bày Các Thẻ Ký Ức Điện Ảnh -->
         <div id="memory-capsules-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL HƯỚNG DẪN NHANH & PHÍM TẮT -->
+  <div id="cinema-guide-modal" role="dialog" aria-modal="true" aria-labelledby="cinema-guide-title"
+    onclick="if(event.target===this){window.appActions.closeCinemaGuideModal();}"
+    class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-stone-950 border border-amber-400/35 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl">
+      <div class="px-5 py-4 bg-stone-900/90 border-b border-white/10 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <span class="w-9 h-9 rounded-xl flex items-center justify-center text-amber-300" style="background:rgba(245,197,24,0.12);border:1px solid rgba(245,197,24,0.35);">
+            <i class="fa-regular fa-circle-question" aria-hidden="true"></i>
+          </span>
+          <div>
+            <h3 id="cinema-guide-title" class="text-base font-black text-white">Hướng Dẫn Rạp &amp; Phím Tắt</h3>
+            <p class="text-[11px] text-slate-400">Hạng ghế, Suất chiếu riêng và thao tác nhanh</p>
+          </div>
+        </div>
+        <button type="button" onclick="window.appActions.closeCinemaGuideModal()"
+          aria-label="Đóng hướng dẫn rạp"
+          class="w-9 h-9 rounded-full bg-stone-800 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer">
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="p-5 space-y-3.5 text-xs text-slate-200 leading-relaxed">
+        <div class="p-3 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
+          <div class="font-extrabold text-amber-300">1. Hạng ghế &amp; Góc nhìn 3D</div>
+          <p class="text-slate-300">Chọn <strong>Hàng A–C</strong> (Tiêu chuẩn cận màn), <strong>VIP D–E</strong> (tâm rạp cân bằng) hoặc <strong>Sweetbox F</strong> (ghế đôi hàng cuối). Chạm từng ghế trong modal đặt vé để xem trước góc nhìn 3D.</p>
+        </div>
+        <div class="p-3 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
+          <div class="font-extrabold text-amber-300">2. Suất Chiếu Riêng &amp; Mã Mời</div>
+          <p class="text-slate-300">Bấm <strong>Đặt Suất Riêng</strong> để tạo lịch hẹn kèm mã mời (dạng <span class="font-mono text-amber-300">CV-XXXX</span>). Phòng tự mở đúng giờ và tự đóng sau thời lượng phim + 10 phút đệm.</p>
+        </div>
+        <div class="p-3 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
+          <div class="font-extrabold text-amber-300">3. Phím tắt &amp; Điều khiển nhanh</div>
+          <ul class="space-y-1 text-slate-300">
+            <li><kbd class="px-1.5 py-0.5 rounded bg-stone-800 border border-white/15 font-mono text-[10px]">Esc</kbd> Đóng hộp thoại / bảng danh sách đang mở.</li>
+            <li><kbd class="px-1.5 py-0.5 rounded bg-stone-800 border border-white/15 font-mono text-[10px]">↑ / ↓</kbd> Chuyển nhanh giữa 6 phòng chiếu đang live.</li>
+            <li><kbd class="px-1.5 py-0.5 rounded bg-stone-800 border border-white/15 font-mono text-[10px]">Nháy đúp</kbd> Căn giữa lại góc nhìn màn chiếu 3D WebGL.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="px-5 py-3 bg-stone-900/60 border-t border-white/10 flex justify-end">
+        <button type="button" onclick="window.appActions.closeCinemaGuideModal()"
+          class="px-5 py-2 rounded-xl font-black text-xs text-slate-950 cursor-pointer"
+          style="background:#F5C518;">Đã hiểu</button>
       </div>
     </div>
   </div>
@@ -14208,11 +14290,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         .replace(/\b(?:2160p|1080p|720p|4k|fhd|full\s*hd|web[-\s]?rip|web[-\s]?dl|bluray|hdrip|dvdrip|x264|x265|hevc|10bit|aac5?\.1|aac|hindi)\b/gi, " ")
         .replace(/\b(?:tập\s*full|vietsub|thuyết\s*minh|lồng\s*tiếng|miễn\s*phí)\b/gi, " ")
         .replace(/5\.1/g, " ")
-        .replace(/\bfull\b\s*$/gi, " ")
+        .replace(/\bfull\s*(?:\(\s*\d+\s*\))?\s*$/gi, " ")
+        .replace(/\(\s*[1-9]\s*\)\s*$/g, " ")
         .replace(/\b(19\d{2}|20\d{2})\b/g, " ")
         .replace(/\(\s*\)|\[\s*\]/g, " ")
         .replace(/\s-\s+/g, ": ")
         .replace(/-\s+(?=[A-ZÀ-Ỵ0-9])/g, ": ")
+        .replace(/(?:\s*\.\s*){2,}/g, " ")
         .replace(/[.]+(?=[A-Za-z0-9])/g, " ")
         .replace(/_+/g, " ")
         .replace(/[\s\-–—:|+]+$/g, "")
@@ -14229,6 +14313,18 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         return `${cleaned} (${year})`;
       }
       return cleaned;
+    }
+
+    function parseDurationLabelToSec(label = "") {
+      const s = String(label || "").trim();
+      if (!s) return 0;
+      const hm = s.match(/(\d+)\s*h(?:\s*(\d+)\s*(?:m|p)?)?/i);
+      if (hm) return Number(hm[1]) * 3600 + Number(hm[2] || 0) * 60;
+      const mmss = s.match(/^(\d{1,3}):(\d{2})$/);
+      if (mmss) return Number(mmss[1]) * 60 + Number(mmss[2]);
+      const mins = s.match(/\b(\d{1,3})\s*(?:m|p|phút)\b/i);
+      if (mins) return Number(mins[1]) * 60;
+      return 0;
     }
 
     function formatDurationHoursMin(sec = 0) {
@@ -14892,6 +14988,56 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           synopsis: "Năm 2026, thiết bị thực tế tăng cường Augma và trò chơi Ordinal Scale gây sốt toàn cầu. Kirito cùng Asuna phát hiện âm mưu đánh cắp ký ức những người sống sót từ Sword Art Online và buộc phải bước vào trận chiến sinh tử ngoài đời thực."
         },
         {
+          test: () => t.includes("chu he trong canh dong ngo") || t.includes("canh dong ngo") || t.includes("clown in a cornfield"),
+          year: "2025",
+          duration: "1h 36m",
+          durationSec: 5760,
+          ageRating: "T18+",
+          genre: "Kinh dị • Sát nhân • Giật gân",
+          cast: "Katie Douglas, Carson MacCormac, Aaron Abrams, Kevin Durand",
+          synopsis: "Chuyển đến thị trấn nhỏ Kettle Springs vùng Trung Tây để bắt đầu cuộc sống mới, Quinn và nhóm bạn trẻ bất ngờ trở thành con mồi trong cuộc săn lùng đẫm máu của tên sát nhân mang mặt nạ chú hề Frendo."
+        },
+        {
+          test: () => t.includes("biet doi danh thue 4") || t.includes("expend4bles") || t.includes("expendables 4"),
+          year: "2023",
+          duration: "1h 43m",
+          durationSec: 6180,
+          ageRating: "T18+",
+          genre: "Hành động • Phiêu lưu • Bom tấn",
+          cast: "Jason Statham, Sylvester Stallone, 50 Cent, Megan Fox, Tony Jaa",
+          synopsis: "Được trang bị vũ khí tối tân nhất, Lee Christmas và những chiến binh kỳ cựu của Biệt Đội Đánh Thuê kết hợp các tân binh thực hiện nhiệm vụ sinh tử ngăn chặn âm mưu kích hoạt chiến tranh hạt nhân."
+        },
+        {
+          test: () => t.includes("biet doi danh thue 3") || t.includes("expendables 3"),
+          year: "2014",
+          duration: "2h 06m",
+          durationSec: 7560,
+          ageRating: "T16+",
+          genre: "Hành động • Phiêu lưu",
+          cast: "Sylvester Stallone, Jason Statham, Antonio Banderas, Harrison Ford, Mel Gibson",
+          synopsis: "Barney Ross chiêu mộ thế hệ chiến binh trẻ am hiểu công nghệ để đối đầu với Conrad Stonebanks — nhà đồng sáng lập tàn nhẫn năm xưa của Biệt Đội Đánh Thuê nay trở thành tay buôn vũ khí."
+        },
+        {
+          test: () => t.includes("eternals") || t.includes("chung toc bat tu"),
+          year: "2021",
+          duration: "2h 36m",
+          durationSec: 9360,
+          ageRating: "T13+",
+          genre: "Hành động • Khoa học viễn tưởng • Marvel",
+          cast: "Gemma Chan, Richard Madden, Angelina Jolie, Salma Hayek, Kumail Nanjiani",
+          synopsis: "Sau biến cố Endgame, những thực thể bất tử Eternals ẩn mình suốt 7.000 năm trên Trái Đất buộc phải tái hợp để chống lại chủng tộc Deviants cổ đại trỗi dậy."
+        },
+        {
+          test: () => t.includes("khong gia dinh") || t.includes("remi"),
+          year: "2018",
+          duration: "1h 45m",
+          durationSec: 6300,
+          ageRating: "P",
+          genre: "Gia đình • Phiêu lưu • Tâm lý",
+          cast: "Maleaume Paquin, Daniel Auteuil, Virginie Ledoyen, Ludivine Sagnier",
+          synopsis: "Cậu bé mồ côi Rémi theo chân nghệ sĩ đường phố Vitalis cùng chú chó Capi và khỉ Joli-Coeur chu du khắp nước Pháp, trải qua nhiều thử thách để khám phá bí mật nguồn gốc thân thế của mình."
+        },
+        {
           test: () => t.includes("thang tu") || t.includes("ha anh tuan"),
           year: "2016",
           duration: "05:52",
@@ -14907,7 +15053,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           return {
             year: entry.year || parsedYear || "2025",
             duration: entry.duration || "2h 00m",
-            durationSec: Number(entry.durationSec) || 0,
+            durationSec: Number(entry.durationSec) || parseDurationLabelToSec(entry.duration),
             ageRating: entry.ageRating || "T13+",
             genre: entry.genre,
             cast: entry.cast,
@@ -14957,7 +15103,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 durationSec: secDur,
                 ageRating: "T13+",
                 genre: "Điện ảnh • Chiếu rạp HD",
-                cast: cleanName,
+                cast: "Đang cập nhật diễn viên",
                 synopsis: sum.extract.slice(0, 260) + (sum.extract.length > 260 ? "..." : "")
               };
               try {
@@ -14987,7 +15133,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         durationSec: secDur,
         ageRating: "T13+",
         genre: "Điện ảnh • Chiếu rạp HD",
-        cast: cleanName,
+        cast: "Đang cập nhật diễn viên",
         synopsis: `Thưởng thức bộ phim "${cleanName}" với chất lượng hình ảnh và âm thanh vòm sống động trên màn hình cong IMAX tại CineVerse Lotte.`
       };
     }
@@ -15054,7 +15200,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       merged.cast = meta.cast;
       merged.genre = meta.genre;
       merged.duration = meta.duration;
-      merged.durationSec = Number(meta.durationSec) || (String(merged.movieTitle || "") === String(base.movieTitle || "") ? Number(base.durationSec || 0) : 0) || Number(adminCfg.durationSec || custom.durationSec || 0) || 6780;
+      const metaDurSec = Number(meta.durationSec) || parseDurationLabelToSec(meta.duration);
+      merged.durationSec = metaDurSec || (String(merged.movieTitle || "") === String(base.movieTitle || "") ? Number(base.durationSec || 0) : 0) || Number(adminCfg.durationSec || custom.durationSec || 0) || 6780;
       merged.ageRating = meta.ageRating;
       merged.year = meta.year;
       merged.movieId = getCanonicalMovieId(merged);
@@ -15778,9 +15925,20 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       }
       const base = DEFAULT_ROOMS[state.heroIndex] || DEFAULT_ROOMS[0];
       const room = getEffectiveRoom(base.id);
-      document.getElementById("detail-modal-poster").src = room.poster;
+      const detailPosterEl = document.getElementById("detail-modal-poster");
+      if (detailPosterEl) {
+        const rawArt = typeof resolveMovieBackdrop === "function"
+          ? resolveMovieBackdrop(room.movieTitle, room.poster, room.youtubeId)
+          : (room.poster || "assets/web-logo.png");
+        detailPosterEl.style.objectPosition = "center center";
+        detailPosterEl.onload = () => {
+          const isLandscape = detailPosterEl.naturalWidth > detailPosterEl.naturalHeight * 1.15;
+          detailPosterEl.style.objectPosition = isLandscape ? "center center" : "center 20%";
+        };
+        detailPosterEl.src = getOptimizedPosterUrl(rawArt, "w1280");
+      }
       document.getElementById("detail-modal-room").textContent = `${room.number} • ${room.status === "showing" ? "Đang chiếu" : "Sắp chiếu"}`;
-      document.getElementById("detail-modal-match").textContent = room.matchScore || "98% Phù hợp";
+      document.getElementById("detail-modal-match").textContent = `${room.quality || "Full HD"} • ${room.year || "2025"}`;
       document.getElementById("detail-modal-rating").textContent = room.ageRating || "T13+";
       document.getElementById("detail-modal-title").textContent = room.displayTitle || sanitizeMovieTitle(room.movieTitle);
       document.getElementById("detail-modal-synopsis").textContent = room.synopsis || "";
@@ -16345,20 +16503,80 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
       const desktopList = document.getElementById("desktop-rooms-list");
       const mobileList = document.getElementById("mobile-rooms-list");
-      const focusedRow = document.activeElement?.closest("[data-lobby-room-id]");
-      const prevDesktopFocusId = desktopList?.contains(focusedRow) ? focusedRow.dataset.lobbyRoomId : "";
-      const prevMobileFocusId = mobileList?.contains(focusedRow) ? focusedRow.dataset.lobbyRoomId : "";
-      const prevDesktopScroll = desktopList ? desktopList.scrollTop : 0;
-      if (desktopList) {
-        desktopList.innerHTML = buildRoomRowsHTML(false);
-        desktopList.scrollTop = prevDesktopScroll;
-        if (prevDesktopFocusId) {
-          desktopList.querySelector(`button[data-lobby-room-id="${prevDesktopFocusId}"]`)?.focus({ preventScroll: true });
+      const updateOrRenderList = (listEl, isMobileSheet) => {
+        if (!listEl) return;
+        const rowIdsSig = filteredStandard.map(r => r.id).join("|");
+        const existingBtns = filteredStandard.length > 0 ? Array.from(listEl.querySelectorAll("button[data-lobby-room-id]")) : [];
+        const existingSig = existingBtns.map(b => b.dataset.lobbyRoomId).join("|");
+        if (filteredStandard.length > 0 && existingSig === rowIdsSig && existingBtns.length === filteredStandard.length) {
+          filteredStandard.forEach((room, idx) => {
+            const btn = existingBtns[idx];
+            if (!btn) return;
+            const numMatch = String(room.number || "").match(/\d+/);
+            const shortNum = numMatch ? numMatch[0].padStart(2, "0") : String(idx + 1).padStart(2, "0");
+            const isCur = activeRoom && activeRoom.id === room.id;
+            const seats = state.seatsByRoom[room.id];
+            const maxCap = room.maxSeats || 48;
+            const occupied = seats ? Object.keys(seats).length : 0;
+            const isFull = occupied >= maxCap;
+            const seatStatus = !hasSyncedInitialRoomSeats[room.id]
+              ? "Mở chọn ghế"
+              : (isFull ? `Hết ghế (${occupied}/${maxCap})` : `${occupied}/${maxCap} ghế`);
+            const title = room.displayTitle || sanitizeMovieTitle(room.movieTitle);
+            const thumbSrc = getOptimizedPosterUrl(
+              typeof resolveMovieBackdrop === "function"
+                ? resolveMovieBackdrop(room.movieTitle, room.poster, room.youtubeId)
+                : (room.poster || resolveMoviePoster(room.movieTitle, "", room.youtubeId)),
+              "w780"
+            );
+            btn.classList.toggle("is-active", Boolean(isCur));
+            btn.setAttribute("aria-selected", isCur ? "true" : "false");
+            btn.setAttribute("aria-current", isCur ? "true" : "false");
+            const numEl = btn.querySelector(".cv-room-row-num");
+            if (numEl && numEl.textContent !== shortNum) numEl.textContent = shortNum;
+            const imgEl = btn.querySelector(".cv-room-row-thumb img");
+            if (imgEl && imgEl.getAttribute("src") !== thumbSrc) imgEl.src = thumbSrc;
+            const titleEl = btn.querySelector(".cv-room-row-title");
+            if (titleEl && titleEl.textContent !== title) titleEl.textContent = title;
+            const metaWrap = titleEl?.nextElementSibling;
+            if (metaWrap) {
+              metaWrap.style.color = isFull ? "#FCA5A5" : "#A1A1AA";
+              const spans = metaWrap.querySelectorAll("span");
+              if (spans[0] && spans[0].textContent !== (room.duration || "HD")) spans[0].textContent = room.duration || "HD";
+              if (spans[2] && spans[2].textContent !== seatStatus) spans[2].textContent = seatStatus;
+            }
+          });
+          return;
         }
+        const focusedRow = document.activeElement?.closest("[data-lobby-room-id]");
+        const prevFocusId = listEl.contains(focusedRow) ? focusedRow.dataset.lobbyRoomId : "";
+        const prevScroll = listEl.scrollTop || 0;
+        listEl.innerHTML = buildRoomRowsHTML(isMobileSheet);
+        listEl.scrollTop = prevScroll;
+        if (prevFocusId) {
+          listEl.querySelector(`button[data-lobby-room-id="${CSS.escape(prevFocusId)}"]`)?.focus({ preventScroll: true });
+        }
+      };
+
+      if (desktopList) {
+        if (!desktopList.dataset.kbNavBound) {
+          desktopList.dataset.kbNavBound = "1";
+          desktopList.addEventListener("keydown", (ev) => {
+            if (ev.key !== "ArrowDown" && ev.key !== "ArrowUp") return;
+            const btns = Array.from(desktopList.querySelectorAll("button[data-lobby-room-id]"));
+            if (!btns.length) return;
+            const idx = btns.indexOf(document.activeElement?.closest?.("button[data-lobby-room-id]"));
+            if (idx < 0) return;
+            ev.preventDefault();
+            const nextIdx = ev.key === "ArrowDown" ? (idx + 1) % btns.length : (idx - 1 + btns.length) % btns.length;
+            const targetId = btns[nextIdx]?.dataset?.lobbyRoomId;
+            if (targetId) selectHeroRoomById(targetId, { preserveFocusId: targetId });
+          });
+        }
+        updateOrRenderList(desktopList, false);
       }
       if (mobileList) {
-        mobileList.innerHTML = buildRoomRowsHTML(true);
-        if (prevMobileFocusId) mobileList.querySelector(`[data-lobby-room-id="${CSS.escape(prevMobileFocusId)}"]`)?.focus({preventScroll:true});
+        updateOrRenderList(mobileList, true);
       }
 
       // Render 2 thẻ phòng đặc biệt: Sweetbox (room-7) & Phòng Stream (room-8)
@@ -33282,7 +33500,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
     function formatShowtimeForCurrentMode(st = "") {
       const raw = String(st || "");
-      return state.paymentMode === "paid" ? raw : raw.replace(/\s*\(\+50\.000đ\)/g, "");
+      if (state.paymentMode === "paid") return raw;
+      return raw
+        .replace(/\s*•\s*Suất VIP\s*\(\+50\.000đ\)/gi, " • Miễn phí")
+        .replace(/\s*\(\+50\.000đ\)/g, "");
     }
 
     function getSeatPriceAndTier(seatId = "F4") {
@@ -33451,6 +33672,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
 
     function closeBookingModal() {
+      window.CineVerseMotion?.cancelCinemaZoom?.();
       window.cvBooking3D?.stop();
       if (!state.currentRoomId && !document.hidden) window.__setAmbientTunaPaused?.(false);
       backToBookingSummary();
@@ -33877,6 +34099,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             const isOccupiedOther = Boolean(occ && occ.uid !== state.uid);
             const isSelected = !isOccupiedOther && Boolean(selectedSeat) && sId === selectedSeat;
             const tierLabel = isCouple ? "Sweetbox" : (isVIP ? "VIP" : "Standard");
+            const statusLabel = isOccupiedOther
+              ? `đã có người (${occ.userName || "khách khác"})`
+              : (isSelected ? "đang chọn" : "trống");
             let cls = "flex-1 booking-mini-seat ";
             let sym = "□";
             if (isOccupiedOther) { cls += "seat-taken"; sym = "✕"; }
@@ -33886,6 +34111,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             if (btn.className !== cls) btn.className = cls;
             const iconSpan = btn.firstElementChild;
             if (iconSpan && iconSpan.textContent !== sym) iconSpan.textContent = sym;
+            btn.setAttribute("aria-label", `Ghế ${sId}, hạng ${tierLabel}, ${statusLabel}`);
             btn.setAttribute("aria-pressed", isSelected ? "true" : "false");
             btn.setAttribute("aria-disabled", isOccupiedOther ? "true" : "false");
             btn.title = isOccupiedOther ? `Ghế ${sId} đã có ${occ.userName || "khách khác"} ngồi` : `Ghế ${sId} (${tierLabel}) - ${isSelected ? "Bấm để bỏ chọn" : "Bấm để chọn"}`;
@@ -41063,7 +41289,18 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       const item = window.__resolvedTop10ItemsById?.[movieId];
       if (!item) return;
 
-      document.getElementById("detail-modal-poster").src = item.poster || "assets/web-logo.png";
+      const detailPosterEl = document.getElementById("detail-modal-poster");
+      if (detailPosterEl) {
+        const rawArt = typeof resolveMovieBackdrop === "function"
+          ? resolveMovieBackdrop(item.title, item.poster || "", "")
+          : (item.poster || "assets/web-logo.png");
+        detailPosterEl.style.objectPosition = "center center";
+        detailPosterEl.onload = () => {
+          const isLandscape = detailPosterEl.naturalWidth > detailPosterEl.naturalHeight * 1.15;
+          detailPosterEl.style.objectPosition = isLandscape ? "center center" : "center 20%";
+        };
+        detailPosterEl.src = getOptimizedPosterUrl(rawArt, "w1280");
+      }
       document.getElementById("detail-modal-room").textContent = item.roomInfo
         ? `${item.roomInfo.roomNumber} • ${item.roomInfo.statusText} (${item.roomInfo.seatText})`
         : "Top 10 CineVerse • Kho Phim";
@@ -41331,14 +41568,28 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       const item = window.__discoverVaultMoviesById?.[vaultId];
       if (!item || !item.vaultItem) return;
 
-      document.getElementById("detail-modal-poster").src = item.poster || "assets/web-logo.png";
+      const meta = typeof resolveMovieMetadata === "function"
+        ? resolveMovieMetadata(item.rawTitle || item.title, item.vaultItem || {})
+        : {};
+      const detailPosterEl = document.getElementById("detail-modal-poster");
+      if (detailPosterEl) {
+        const rawArt = typeof resolveMovieBackdrop === "function"
+          ? resolveMovieBackdrop(item.rawTitle || item.title, item.poster || "", item.vaultItem?.youtubeId || "")
+          : (item.poster || "assets/web-logo.png");
+        detailPosterEl.style.objectPosition = "center center";
+        detailPosterEl.onload = () => {
+          const isLandscape = detailPosterEl.naturalWidth > detailPosterEl.naturalHeight * 1.15;
+          detailPosterEl.style.objectPosition = isLandscape ? "center center" : "center 20%";
+        };
+        detailPosterEl.src = getOptimizedPosterUrl(rawArt, "w1280");
+      }
       document.getElementById("detail-modal-room").textContent = "Khám phá • Kho Phim CineVerse";
-      document.getElementById("detail-modal-match").textContent = "Đề xuất ngẫu nhiên từ Kho phim";
-      document.getElementById("detail-modal-rating").textContent = "T13+";
+      document.getElementById("detail-modal-match").textContent = `Năm ${meta.year || item.year || "2025"} • HD`;
+      document.getElementById("detail-modal-rating").textContent = meta.ageRating || item.ageRating || "T13+";
       document.getElementById("detail-modal-title").textContent = item.title;
-      document.getElementById("detail-modal-synopsis").textContent = `Bộ phim "${item.title}" hiện có sẵn trong Kho Phim CineVerse. Bạn có thể chọn ghế vào phòng để yêu cầu chiếu hoặc Đặt Suất Chiếu Riêng.`;
-      document.getElementById("detail-modal-cast").textContent = "Nguồn: Kho Phim Cloudflare R2 / CineVerse";
-      document.getElementById("detail-modal-genre").textContent = `${item.genre}${item.duration ? ` • ${item.duration}` : ""}`;
+      document.getElementById("detail-modal-synopsis").textContent = meta.synopsis || `Bộ phim "${item.title}" hiện có sẵn trong Kho Phim CineVerse. Bạn có thể chọn ghế vào phòng để yêu cầu chiếu hoặc Đặt Suất Chiếu Riêng.`;
+      document.getElementById("detail-modal-cast").textContent = meta.cast || "Đang cập nhật diễn viên";
+      document.getElementById("detail-modal-genre").textContent = `${meta.genre || item.genre}${(meta.duration || item.duration) ? ` • ${meta.duration || item.duration}` : ""}`;
 
       const ctaBtn = document.getElementById("detail-modal-cta-btn");
       const fallbackRoomId = "room-1";
@@ -41704,9 +41955,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
         return discoverCardsHtml ? `
           <div id="lobby-discover-movies" class="${withTopDivider ? "mt-6 pt-5 border-t border-white/10" : ""}">
-            <div class="flex items-center justify-between gap-2 mb-1">
-              <h3 class="cv-serif text-lg sm:text-xl font-bold text-white">Khám phá phim <span class="text-xs font-sans font-normal text-slate-400">(${discoverMovies.length} phim ngẫu nhiên • Tự chạy vòng lặp)</span></h3>
-              <button type="button" onclick="window.appActions.reshuffleDiscoverMovies()" class="cv-top10-info-btn text-[11px] inline-flex items-center gap-1.5" title="Đổi 10 phim gợi ý ngẫu nhiên khác từ Kho phim">
+            <div class="flex items-start sm:items-center justify-between gap-2 mb-1">
+              <h3 class="cv-serif text-lg sm:text-xl font-bold text-white min-w-0">Khám phá phim <span class="block sm:inline text-xs font-sans font-normal text-slate-400 mt-0.5 sm:mt-0 sm:ml-1">(${discoverMovies.length} phim ngẫu nhiên • Tự chạy vòng lặp)</span></h3>
+              <button type="button" onclick="window.appActions.reshuffleDiscoverMovies()" class="cv-top10-info-btn text-[11px] inline-flex items-center gap-1.5 whitespace-nowrap shrink-0" title="Đổi 10 phim gợi ý ngẫu nhiên khác từ Kho phim">
                 <i class="fa-solid fa-shuffle text-[10px]"></i>
                 <span>Đổi gợi ý</span>
               </button>
@@ -41937,6 +42188,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               return `
                 <button type="button"
                   data-carousel-card
+                  data-rank="${it.displayRank}"
                   onclick="window.appActions.openTop10PrimaryAction('${escapeHTML(encItId)}')"
                   class="cv-top10-poster-card ${it.rankChanged ? "cv-rank-changed" : ""}"
                   aria-label="Hạng ${rnk}: ${escapeHTML(it.title)} — ${escapeHTML(it.primaryLabel)}">
@@ -41969,6 +42221,12 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       `;
       window.CineVerseMotion?.initFocusCarousel?.();
 
+      const headingEl = document.getElementById("top10-section-heading");
+      if (headingEl) {
+        headingEl.textContent = resolvedItems.length >= 10
+          ? "Top 10 tuần này"
+          : (resolvedItems.length > 0 ? `Top ${resolvedItems.length} tuần này` : "Top phim tuần này");
+      }
       if (footerNoteEl) {
         const countLabel = resolvedItems.length < 10
           ? `Bảng xếp hạng Top ${resolvedItems.length} phim dẫn đầu lượt xem hợp lệ tuần này`
@@ -42268,14 +42526,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         if (!mId || seen.has(mId)) return;
         seen.add(mId);
         const meta = typeof resolveMovieMetadata === "function" ? resolveMovieMetadata(title, obj) : {};
-        let durSec = Number(meta.durationSec || obj.durationSec || 0);
-        if (!durSec && meta.duration) {
-          const hm = String(meta.duration).match(/(\d+)\s*h\s*(\d+)?/i);
-          const mm = String(meta.duration).match(/^(\d{1,3}):(\d{2})$/);
-          const pm = String(meta.duration).match(/(\d+)\s*(?:p|phút)/i);
-          if (hm) durSec = Number(hm[1]) * 3600 + Number(hm[2] || 0) * 60;
-          else if (mm) durSec = Number(mm[1]) * 60 + Number(mm[2]);
-          else if (pm) durSec = Number(pm[1]) * 60;
+        const parsedMetaDur = typeof parseDurationLabelToSec === "function" ? parseDurationLabelToSec(meta.duration) : 0;
+        let durSec = Number(meta.durationSec || 0) || parsedMetaDur || Number(obj.durationSec || 0);
+        if (!durSec && obj.duration) {
+          durSec = typeof parseDurationLabelToSec === "function" ? parseDurationLabelToSec(obj.duration) : 0;
         }
         const yearMatch = String(obj.movieTitle || title).match(/\b(19\d{2}|20\d{2})\b/);
         list.push({
@@ -42647,9 +42901,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         }
         upEl.innerHTML = `
           <div class="cv-wp-empty-card">
-            <div class="flex flex-wrap items-center gap-2.5">
+            <div class="flex flex-wrap items-center gap-2">
               <span class="font-bold text-white">Chưa có lịch hẹn</span>
-              <span class="text-xs text-slate-400">• Mã mẫu phòng riêng: <strong class="text-amber-300 font-mono tabular-nums">CV-DHV6</strong></span>
+              <span class="text-white/30" aria-hidden="true">•</span>
+              <span class="text-xs text-slate-400">Mã mẫu phòng riêng: <strong class="text-amber-300 font-mono tabular-nums">CV-DHV6</strong></span>
             </div>
             <button type="button" onclick="window.appActions.openCreateWatchPartyModal()"
               class="cv-wp-cta-primary shrink-0">
@@ -43580,6 +43835,14 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       if (ev.key === "Escape") toggleMobileNavMenu(false);
     });
 
+    function openCinemaGuideModal() {
+      document.getElementById("cinema-guide-modal")?.classList.remove("hidden");
+    }
+
+    function closeCinemaGuideModal() {
+      document.getElementById("cinema-guide-modal")?.classList.add("hidden");
+    }
+
     window.appActions = {
       setActiveNavTab,
       navGoToSection,
@@ -43677,6 +43940,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       enterHeroRoom,
       openHeroDetailModal,
       closeHeroDetailModal,
+      openCinemaGuideModal,
+      closeCinemaGuideModal,
       enterHeroRoomFromModal,
       enterRoom,
       leaveRoom,
@@ -43987,6 +44252,24 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       }
       document.addEventListener("keydown", (ev) => {
         if (ev.key === "Escape") {
+          const guideModal = document.getElementById("cinema-guide-modal");
+          if (guideModal && !guideModal.classList.contains("hidden")) {
+            ev.preventDefault();
+            closeCinemaGuideModal();
+            return;
+          }
+          const detailModal = document.getElementById("hero-detail-modal");
+          if (detailModal && !detailModal.classList.contains("hidden")) {
+            ev.preventDefault();
+            closeHeroDetailModal();
+            return;
+          }
+          const capsuleModal = document.getElementById("memory-capsule-modal");
+          if (capsuleModal && !capsuleModal.classList.contains("hidden")) {
+            ev.preventDefault();
+            closeMemoryCapsuleModal();
+            return;
+          }
           const settingsPop = document.getElementById("stream-settings-popover");
           if (settingsPop && !settingsPop.classList.contains("hidden")) {
             toggleStreamSettingsMenu(false);
@@ -44754,6 +45037,28 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       // 2. CHUYỂN CẢNH ZOOM XUYÊN MÀN HÌNH VÀO PHÒNG 3D WEBGL (triggerCinemaZoom)
       // -----------------------------------------------------------------------
       let zoomInProgress = false;
+      let zoomVeilTimer = null;
+      let zoomFinishTimer = null;
+
+      function cancelCinemaZoom() {
+        if (zoomVeilTimer) {
+          clearTimeout(zoomVeilTimer);
+          zoomVeilTimer = null;
+        }
+        if (zoomFinishTimer) {
+          clearTimeout(zoomFinishTimer);
+          zoomFinishTimer = null;
+        }
+        zoomInProgress = false;
+        const lobbyEl = document.getElementById("lobby-view");
+        const veilEl = document.getElementById("cv-cinema-zoom-veil");
+        veilEl?.classList.remove("is-active");
+        if (lobbyEl) {
+          lobbyEl.classList.remove("is-cinema-zooming");
+          lobbyEl.style.transformOrigin = "";
+          lobbyEl.style.removeProperty("--cv-zoom-scale");
+        }
+      }
 
       function triggerCinemaZoom(onComplete, opts = {}) {
         const completeSafe = typeof onComplete === "function" ? onComplete : () => {};
@@ -44798,14 +45103,19 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         lobbyEl.style.setProperty("--cv-zoom-scale", scaleNeeded.toFixed(3));
 
         requestAnimationFrame(() => {
+          if (!zoomInProgress) return;
           lobbyEl.classList.add("is-cinema-zooming");
         });
 
-        setTimeout(() => {
+        zoomVeilTimer = setTimeout(() => {
+          zoomVeilTimer = null;
+          if (!zoomInProgress) return;
           veilEl?.classList.add("is-active");
         }, 800);
 
-        setTimeout(() => {
+        zoomFinishTimer = setTimeout(() => {
+          zoomFinishTimer = null;
+          if (!zoomInProgress) return;
           completeSafe();
           const roomViewEl = document.getElementById("room-view");
           const bookingModalEl = document.getElementById("booking-modal");
@@ -44859,6 +45169,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         if (!cards.length) return;
         syncCarouselNavVisibility(track);
         if (track.getAttribute("data-focus-carousel") === "discover") return;
+        if (track.getAttribute("data-focus-carousel") === "top10" && track.scrollWidth <= track.clientWidth + 8) {
+          const rank1 = cards.find((c) => c.dataset.rank === "1") || cards[0];
+          for (const card of cards) {
+            card.classList.toggle("is-focal", card === rank1);
+          }
+          return;
+        }
         const tRect = track.getBoundingClientRect();
         const centerX = tRect.left + tRect.width * 0.5;
         let bestCard = cards[0];
@@ -45108,6 +45425,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           cardObserver = new IntersectionObserver(
             (entries) => {
               if (isWebGLActive()) return;
+              if (track.getAttribute("data-focus-carousel") === "top10" && track.scrollWidth <= track.clientWidth + 8) {
+                syncNearestCenterFocal(track);
+                return;
+              }
               let matchedFocal = false;
               entries.forEach((entry) => {
                 if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
@@ -45258,6 +45579,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       window.CineVerseMotion = {
         initRoomLighting,
         triggerCinemaZoom,
+        cancelCinemaZoom,
         initFocusCarousel,
         scrollCarousel,
         initScrambleReveal,
