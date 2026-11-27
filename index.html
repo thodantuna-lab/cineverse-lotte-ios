@@ -8651,16 +8651,16 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
     @media (min-width: 768px) {
       .cv-carousel-nav-btn {
-        position: absolute;
-        top: 50%;
+        position: absolute !important;
+        top: 50% !important;
         transform: translate3d(0, -50%, 0);
         z-index: 8;
-        width: 36px;
-        height: 36px;
+        width: 38px;
+        height: 38px;
         border-radius: 999px;
-        background: rgba(11, 6, 7, 0.84);
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        background: rgba(11, 6, 7, 0.88);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 8px 20px rgba(0, 0, 0, 0.65);
         color: #FFFFFF;
         font-size: 20px;
         line-height: 1;
@@ -8668,7 +8668,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        opacity: 0.78;
+        opacity: 0.86;
         transition:
           transform 220ms var(--cv-ease-entrance),
           opacity 220ms ease,
@@ -8677,10 +8677,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       .cv-carousel-nav-btn:hover {
         opacity: 1;
         transform: translate3d(0, -50%, 0) scale(1.06);
-        border-color: rgba(255, 255, 255, 0.34);
+        border-color: rgba(255, 255, 255, 0.36);
       }
-      .cv-carousel-nav-btn.is-prev { left: 8px; }
-      .cv-carousel-nav-btn.is-next { right: 8px; }
+      .cv-carousel-nav-btn.is-prev { left: 10px !important; right: auto !important; }
+      .cv-carousel-nav-btn.is-next { right: 10px !important; left: auto !important; }
     }
     .cv-focus-carousel {
       display: flex !important;
@@ -40769,9 +40769,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               </button>
             </div>
             <div class="cv-carousel-shell">
-              <button type="button" class="cv-carousel-nav-btn is-prev" onclick="window.CineVerseMotion?.scrollCarousel(this, -1)" aria-label="Cuộn sang trái">‹</button>
+              <button type="button" class="cv-carousel-nav-btn absolute is-prev" onclick="window.CineVerseMotion?.scrollCarousel(this, -1)" aria-label="Cuộn sang trái">‹</button>
               <div class="cv-discover-grid cv-focus-carousel" data-focus-carousel="discover" role="region" aria-label="Băng chuyền khám phá phim">${discoverCardsHtml}</div>
-              <button type="button" class="cv-carousel-nav-btn is-next" onclick="window.CineVerseMotion?.scrollCarousel(this, 1)" aria-label="Cuộn sang phải">›</button>
+              <button type="button" class="cv-carousel-nav-btn absolute is-next" onclick="window.CineVerseMotion?.scrollCarousel(this, 1)" aria-label="Cuộn sang phải">›</button>
             </div>
           </div>` : `
           <div id="lobby-discover-movies" class="${withTopDivider ? "mt-5 pt-4 border-t border-white/10 " : ""}text-xs text-slate-400 py-2">Đang tải danh sách phim từ Kho phim...</div>`;
@@ -40978,7 +40978,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
       const top10CarouselHtml = resolvedItems.length > 1 ? `
         <div class="cv-carousel-shell mb-3">
-          <button type="button" class="cv-carousel-nav-btn is-prev" onclick="window.CineVerseMotion?.scrollCarousel(this, -1)" aria-label="Cuộn Top 10 sang trái">‹</button>
+          <button type="button" class="cv-carousel-nav-btn absolute is-prev" onclick="window.CineVerseMotion?.scrollCarousel(this, -1)" aria-label="Cuộn Top 10 sang trái">‹</button>
           <div class="cv-focus-carousel cv-top10-poster-rail" data-focus-carousel="top10" role="region" aria-label="Băng chuyền poster Top 10 tuần này">
             ${resolvedItems.map((it) => {
               const encItId = encodeURIComponent(it.movieId);
@@ -41002,7 +41002,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               `;
             }).join("")}
           </div>
-          <button type="button" class="cv-carousel-nav-btn is-next" onclick="window.CineVerseMotion?.scrollCarousel(this, 1)" aria-label="Cuộn Top 10 sang phải">›</button>
+          <button type="button" class="cv-carousel-nav-btn absolute is-next" onclick="window.CineVerseMotion?.scrollCarousel(this, 1)" aria-label="Cuộn Top 10 sang phải">›</button>
         </div>
       ` : "";
 
