@@ -1011,7 +1011,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 310px;
+      min-height: 300px;
       border-radius: 18px;
       overflow: hidden;
       background: #120b0e;
@@ -1021,7 +1021,7 @@
     }
     @media (min-width: 1024px) {
       .cv-top-champion {
-        min-height: 404px;
+        min-height: 368px;
         height: 100%;
       }
     }
@@ -1073,11 +1073,12 @@
       flex-direction: column;
       gap: 14px;
       min-width: 0;
+      height: 100%;
     }
     .cv-top-runner-card {
       position: relative;
-      flex: 1 1 0;
-      min-height: 190px;
+      flex: 1 1 auto;
+      min-height: 176px;
       border-radius: 16px;
       overflow: hidden;
       display: flex;
@@ -1118,8 +1119,9 @@
       position: relative;
       z-index: 2;
       flex: 1 1 auto;
+      width: 100%;
       min-width: 0;
-      padding: 12px 14px;
+      padding: 16px 18px;
       display: flex;
       align-items: center;
       gap: 14px;
@@ -1128,7 +1130,7 @@
       cursor: pointer;
     }
     .cv-top-runner-poster {
-      width: 78px;
+      width: 80px;
       flex-shrink: 0;
       aspect-ratio: 2 / 3;
       border-radius: 10px;
@@ -9089,8 +9091,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
 
     /* ===================================================================== */
-    /* 6. LỊCH SỬ BUỔI HẸN — CINERAMA 2.39:1 APERTURE & CHRONOS FAN DECK     */
-    /* Sân khấu Đỏ Rượu Vang – Vàng Kim Art-Deco • Composite 60/120fps       */
+    /* 6. LỊCH SỬ BUỔI HẸN — KHE NHẢ VÉ RẠP PHIM (CINEMA TICKET DISPENSER)  */
+    /* 4 Nhịp cơ học (~1.25s) • Composite GPU (transform/opacity/clip-path)  */
     /* ===================================================================== */
     #wp-history-summary::-webkit-details-marker {
       display: none;
@@ -9099,6 +9101,16 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       transform: rotate(180deg);
     }
     .cv-wp-history-stage {
+      /* Biến tinh chỉnh tốc độ cho từng nhịp mở màn */
+      --cv-disp-beat1-dur: 280ms;       /* Nhịp 1: Khe sáng vàng gold mở rộng */
+      --cv-disp-beat2-delay: 200ms;     /* Nhịp 2: Trễ bắt đầu nhả vé trung tâm */
+      --cv-disp-beat2-dur: 580ms;       /* Nhịp 2: Thời lượng nhả vé (200ms -> 780ms) */
+      --cv-disp-beat3-delay: 620ms;     /* Nhịp 3: Trễ bung vé phụ & tắt khe sáng */
+      --cv-disp-beat3-dur: 430ms;       /* Nhịp 3: Thời lượng bung vé phụ (620ms -> 1050ms) */
+      --cv-disp-beat4-delay: 850ms;     /* Nhịp 4: Quét shimmer 25° & hiện điều khiển */
+      --cv-disp-beat4-dur: 400ms;       /* Nhịp 4: Hoàn thiện (850ms -> 1250ms) */
+      --cv-dispenser-y: 24px;           /* Tọa độ khe sáng khớp mép trên vé trung tâm */
+
       position: relative;
       border-radius: 20px;
       padding: 18px 16px 18px;
@@ -9109,22 +9121,12 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 24px 56px rgba(0, 0, 0, 0.8);
       overflow: hidden;
       transform-origin: center top;
-      clip-path: inset(0% 0% 0% 0% round 20px);
-      will-change: transform, opacity, clip-path;
-      transition:
-        opacity 320ms ease,
-        transform 460ms cubic-bezier(0.16, 1, 0.3, 1),
-        clip-path 560ms cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .cv-wp-history-stage[data-stage-state="closed-gate"] {
-      opacity: 0.12;
-      transform: scale(0.96) translate3d(0, 8px, 0);
-      clip-path: inset(42% 10% 42% 10% round 28px);
+      will-change: transform, opacity;
+      transition: opacity 260ms ease, transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
     }
     .cv-wp-history-stage.is-collapsing {
       opacity: 0;
-      transform: scale(0.98) translate3d(0, -4px, 0);
-      clip-path: inset(22% 6% 22% 6% round 24px);
+      transform: scale(0.985) translate3d(0, -4px, 0);
       pointer-events: none;
     }
 
@@ -9154,74 +9156,128 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       opacity: 0.55;
     }
 
-    /* Prism Light-Portal & Volumetric Overhead Spotlight (Pure Composite GPU) */
-    .cv-wp-intro-layer {
+    /* --- NHỊP 1 (0ms - 280ms): Dịu sáng nền & Kích hoạt khe nhả vé vàng gold --- */
+    .cv-wp-dispenser-ambient {
       position: absolute;
       inset: 0;
-      z-index: 25;
+      z-index: 2;
       pointer-events: none;
-      overflow: hidden;
+      background: radial-gradient(circle at 50% 24%, transparent 0%, rgba(11, 6, 7, 0.56) 72%);
+      opacity: 0;
+      will-change: opacity;
     }
-    .cv-wp-projector-cone {
+    @keyframes cvDispAmbientDim {
+      0%   { opacity: 0; }
+      24%  { opacity: 1; }
+      72%  { opacity: 0.85; }
+      100% { opacity: 0; }
+    }
+    .cv-wp-history-stage[data-stage-state="opening"] .cv-wp-dispenser-ambient {
+      animation: cvDispAmbientDim 1120ms ease both;
+    }
+
+    .cv-wp-dispenser-slot {
       position: absolute;
+      top: var(--cv-dispenser-y, 24px);
       left: 50%;
-      top: -12%;
-      width: min(82%, 680px);
-      height: 92%;
-      transform: translate3d(-50%, 0, 0) scaleY(0.5);
-      transform-origin: 50% 0%;
-      background: radial-gradient(ellipse 52% 68% at 50% 18%, rgba(245, 197, 24, 0.24) 0%, rgba(229, 9, 20, 0.14) 44%, transparent 76%);
-      opacity: 0;
-      will-change: transform, opacity;
+      width: min(98%, 804px);
+      height: 82px;
+      transform: translate3d(-50%, 0, 0);
+      z-index: 24;
+      pointer-events: none;
     }
-    @keyframes cvWpConeBloom {
-      0%   { opacity: 0; transform: translate3d(-50%, 0, 0) scaleY(0.5); }
-      35%  { opacity: 1; transform: translate3d(-50%, 0, 0) scaleY(1.04); }
-      100% { opacity: 0.18; transform: translate3d(-50%, 0, 0) scaleY(1); }
+    .cv-wp-history-stage[data-view-mode="list"] .cv-wp-dispenser-slot {
+      width: 100%;
     }
-    .cv-wp-history-stage[data-stage-state="opening"] .cv-wp-projector-cone {
-      animation: cvWpConeBloom 880ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    .cv-wp-history-stage[data-stage-state="settled"] .cv-wp-projector-cone {
-      opacity: 0.16;
-      transform: translate3d(-50%, 0, 0) scaleY(1);
-    }
-    .cv-wp-prism-beam {
-      position: absolute;
-      top: 48%;
-      left: -4%;
-      right: -4%;
-      height: 2px;
-      margin-top: -1px;
-      background: linear-gradient(90deg, transparent 0%, rgba(245, 197, 24, 0.92) 28%, #FFF7D6 50%, rgba(245, 197, 24, 0.92) 72%, transparent 100%);
-      opacity: 0;
-      transform: scaleX(0.06);
-      will-change: transform, opacity;
-    }
-    .cv-wp-prism-beam::after {
+    /* Thanh khe sáng ngang màu vàng gold (#f5c518) */
+    .cv-wp-dispenser-slot::before {
       content: "";
       position: absolute;
-      left: 10%;
-      right: 10%;
-      top: -24px;
-      height: 50px;
-      background: radial-gradient(ellipse 52% 50% at 50% 50%, rgba(245, 197, 24, 0.5) 0%, rgba(229, 9, 20, 0.24) 48%, transparent 78%);
-      pointer-events: none;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent 0%, rgba(245, 197, 24, 0.92) 16%, #FFF9DB 50%, rgba(245, 197, 24, 0.92) 84%, transparent 100%);
+      box-shadow: 0 0 18px rgba(245, 197, 24, 0.98), 0 4px 28px rgba(245, 197, 24, 0.65);
+      transform-origin: center center;
+      transform: scaleX(0);
+      opacity: 0;
+      will-change: transform, opacity;
     }
-    @keyframes cvWpPrismFlash {
-      0%   { opacity: 0; transform: scaleX(0.06); }
-      24%  { opacity: 1; transform: scaleX(1.02); }
-      100% { opacity: 0; transform: scaleX(1.16); }
+    /* Quầng sáng radial tỏa xuống phía dưới khe nhả vé */
+    .cv-wp-dispenser-slot::after {
+      content: "";
+      position: absolute;
+      left: 4%;
+      right: 4%;
+      top: 2px;
+      height: 76px;
+      background: radial-gradient(ellipse 56% 100% at 50% 0%, rgba(245, 197, 24, 0.44) 0%, rgba(158, 22, 46, 0.18) 52%, transparent 82%);
+      transform-origin: center top;
+      transform: scaleX(0) scaleY(0.75);
+      opacity: 0;
+      will-change: transform, opacity;
     }
-    .cv-wp-history-stage[data-stage-state="opening"] .cv-wp-prism-beam {
-      animation: cvWpPrismFlash 680ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    /* Timeline tổng khe sáng: 0-280ms mở rộng (26.7%) -> 280-620ms giữ sáng nhả vé (59%) -> 620-1050ms thu hẹp tắt dần (100%) */
+    @keyframes cvDispSlotBar {
+      0%   { opacity: 0; transform: scaleX(0); }
+      27%  { opacity: 1; transform: scaleX(1); }
+      59%  { opacity: 1; transform: scaleX(1); }
+      100% { opacity: 0; transform: scaleX(0); }
     }
-    @keyframes cvWpHeroSheen {
-      0%   { opacity: 0; transform: translate3d(-135%, 0, 0) skewX(-22deg); }
-      35%  { opacity: 0.72; }
-      100% { opacity: 0; transform: translate3d(235%, 0, 0) skewX(-22deg); }
+    @keyframes cvDispSlotGlow {
+      0%   { opacity: 0; transform: scaleX(0) scaleY(0.65); }
+      27%  { opacity: 1; transform: scaleX(1) scaleY(1); }
+      59%  { opacity: 0.9; transform: scaleX(1) scaleY(1); }
+      100% { opacity: 0; transform: scaleX(0) scaleY(0.5); }
     }
-    .cv-wp-hero-sheen {
+    .cv-wp-history-stage[data-stage-state="opening"] .cv-wp-dispenser-slot::before {
+      animation: cvDispSlotBar 1050ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .cv-wp-history-stage[data-stage-state="opening"] .cv-wp-dispenser-slot::after {
+      animation: cvDispSlotGlow 1050ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* --- NHỊP 2 (200ms - 780ms): Vé trung tâm trượt dọc chui ra từ khe sáng --- */
+    .cv-wp-ticket-shell {
+      position: relative;
+      border-radius: 18px;
+      will-change: transform, clip-path, opacity;
+    }
+    /* Chặn lóe 1 frame khi chuẩn bị replay hoặc mở màn */
+    .cv-wp-history-stage[data-stage-state="preparing"] .cv-wp-reel-slot.is-dispense-hero .cv-wp-ticket-shell {
+      opacity: 0;
+      transform: translate3d(0, -100%, 0);
+      clip-path: inset(100% 0 0 0 round 18px);
+    }
+    .cv-wp-history-stage[data-stage-state="preparing"] .cv-wp-slot-reflection {
+      opacity: 0;
+    }
+    @keyframes cvDispReflectionIn {
+      from { opacity: 0; }
+      to   { opacity: 0.72; }
+    }
+    .cv-wp-history-stage[data-stage-state="opening"] .cv-wp-reel-slot.is-dispense-hero .cv-wp-slot-reflection {
+      animation: cvDispReflectionIn 320ms ease 540ms both;
+    }
+    /* Khi dịch xuống -100% và mở dần clip-path từ mép trên (100% -> 0%), ranh giới cắt cố định đúng tại vị trí khe y=0 */
+    @keyframes cvDispTicketEject {
+      0%   { opacity: 1; transform: translate3d(0, -100%, 0); clip-path: inset(100% 0 0 0 round 18px); }
+      100% { opacity: 1; transform: translate3d(0, 0, 0); clip-path: inset(0% 0 0 0 round 18px); }
+    }
+    .cv-wp-history-stage[data-stage-state="opening"] .cv-wp-reel-slot.is-dispense-hero .cv-wp-ticket-shell {
+      animation: cvDispTicketEject var(--cv-disp-beat2-dur) cubic-bezier(0.22, 1.15, 0.36, 1) var(--cv-disp-beat2-delay) both;
+    }
+
+    /* --- NHỊP 3 (620ms - 1050ms): Nối đuôi cho chế độ Danh sách dọc (Vòng xoay 3D do rAF điều phối) --- */
+    @keyframes cvDispListCascade {
+      from { opacity: 0; transform: translate3d(0, -24px, 0); }
+      to   { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
+
+    /* --- NHỊP 4 (850ms - 1250ms): Vệt ánh kim Gold Shimmer ~25° & Nút điều khiển --- */
+    .cv-wp-ticket-shimmer {
       position: absolute;
       inset: 0;
       border-radius: 18px;
@@ -9229,55 +9285,64 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       pointer-events: none;
       z-index: 9;
     }
-    .cv-wp-hero-sheen::before {
+    .cv-wp-ticket-shimmer::after {
       content: "";
       position: absolute;
-      top: -10%;
-      bottom: -10%;
+      top: -12%;
+      bottom: -12%;
       left: 0;
-      width: 46%;
-      background: linear-gradient(90deg, transparent 0%, rgba(255, 244, 202, 0.24) 48%, rgba(245, 197, 24, 0.34) 52%, transparent 100%);
+      width: 36%;
+      background: linear-gradient(90deg, transparent 0%, rgba(245, 197, 24, 0.22) 40%, rgba(255, 248, 214, 0.62) 50%, rgba(245, 197, 24, 0.22) 60%, transparent 100%);
+      transform: translate3d(-150%, 0, 0) skewX(-25deg);
       opacity: 0;
       will-change: transform, opacity;
     }
-    .cv-wp-reel-slot.is-sheen-sweep .cv-wp-hero-sheen::before {
-      animation: cvWpHeroSheen 620ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    @keyframes cvDispGoldShimmer {
+      0%   { opacity: 0; transform: translate3d(-145%, 0, 0) skewX(-25deg); }
+      25%  { opacity: 0.95; }
+      78%  { opacity: 0.85; }
+      100% { opacity: 0; transform: translate3d(335%, 0, 0) skewX(-25deg); }
     }
+    .cv-wp-history-stage[data-stage-state="opening"] .cv-wp-reel-slot.is-dispense-hero .cv-wp-ticket-shimmer::after {
+      animation: cvDispGoldShimmer var(--cv-disp-beat4-dur) cubic-bezier(0.22, 1, 0.36, 1) var(--cv-disp-beat4-delay) forwards;
+    }
+    .cv-wp-reel-slot.is-sheen-sweep .cv-wp-ticket-shimmer::after {
+      animation: cvDispGoldShimmer 480ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Nút Bỏ qua (hiển thị cạnh Mở màn lại trong lúc mở màn) & Icon xoay 360° khi Replay */
     .cv-wp-intro-skip {
-      position: absolute !important;
-      right: 14px;
-      top: 15px;
-      z-index: 28;
       min-height: 32px;
       padding: 4px 12px;
       border-radius: 999px;
       font-size: 11px;
       font-weight: 700;
-      display: inline-flex;
+      display: none;
       align-items: center;
       gap: 6px;
       background: rgba(11, 6, 7, 0.92);
-      border: 1px solid rgba(245, 197, 24, 0.45);
+      border: 1px solid rgba(245, 197, 24, 0.55);
       color: #F5C518;
-      pointer-events: none;
-      opacity: 0;
       cursor: pointer;
-      transition: opacity 240ms ease, transform 200ms ease, border-color 200ms ease;
+      transition: transform 200ms ease, border-color 200ms ease, background-color 200ms ease;
     }
     .cv-wp-history-stage[data-stage-state="opening"] .cv-wp-intro-skip {
-      opacity: 1;
-      pointer-events: auto;
-    }
-    .cv-wp-history-stage[data-stage-state="closed-gate"] #btn-wp-hist-replay,
-    .cv-wp-history-stage[data-stage-state="opening"] #btn-wp-hist-replay {
-      display: none !important;
+      display: inline-flex;
     }
     .cv-wp-intro-skip:hover {
       transform: scale(1.04);
-      border-color: rgba(245, 197, 24, 0.85);
+      border-color: rgba(245, 197, 24, 0.9);
+      background: rgba(245, 197, 24, 0.14);
+    }
+    @keyframes cvWpIconSpin360 {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    #btn-wp-hist-replay.is-spin-360 i {
+      animation: cvWpIconSpin360 480ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
 
-    /* HUD Sân Khấu */
+    /* HUD Sân Khấu & Điều khiển fade-in ở Nhịp 4 */
     .cv-wp-stage-hud {
       position: relative;
       z-index: 10;
@@ -9286,18 +9351,26 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      opacity: 0;
-      transition: opacity 380ms ease;
-    }
-    .cv-wp-history-stage[data-stage-state="opening"] .cv-wp-stage-topbar,
-    .cv-wp-history-stage[data-stage-state="settled"] .cv-wp-stage-hud {
-      opacity: 1;
     }
     .cv-wp-stage-bottombar {
       margin-top: 12px;
       padding-bottom: 2px;
       justify-content: center;
       gap: 12px;
+    }
+    @keyframes cvDispControlsIn {
+      from { opacity: 0; transform: translate3d(0, 6px, 0); }
+      to   { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
+    .cv-wp-history-stage[data-stage-state="opening"] .cv-wp-stage-bottombar {
+      opacity: 0;
+      pointer-events: none;
+      animation: cvDispControlsIn var(--cv-disp-beat4-dur) cubic-bezier(0.22, 1, 0.36, 1) var(--cv-disp-beat4-delay) forwards;
+    }
+    .cv-wp-history-stage[data-stage-state="settled"] .cv-wp-stage-bottombar {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
     }
     .cv-wp-history-stage[data-view-mode="list"] .cv-wp-stage-bottombar {
       display: none !important;
@@ -9384,7 +9457,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       border-color: rgba(245, 197, 24, 0.55);
     }
 
-    /* Khung Sân Khấu 3D Kinetic Collector's Fan (Composite Only, Không Cắt Đầu/Đáy Vé) */
+    /* Khung Sân Khấu 3D Vòng Xoay (Không cắt đầu/đáy vé) */
     .cv-wp-reel-viewport {
       position: relative;
       z-index: 4;
@@ -9434,17 +9507,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     .cv-wp-reel-slot:not(.is-front) .cv-wp-ticket {
       pointer-events: none;
     }
-    .cv-wp-history-stage[data-stage-state="closed-gate"] .cv-wp-reel-slot,
     .cv-wp-history-stage[data-stage-state="opening"] .cv-wp-reel-slot {
       pointer-events: none;
-    }
-    .cv-wp-slot-ghost {
-      min-height: 214px;
-      border-radius: 18px;
-      background:
-        radial-gradient(ellipse 70% 80% at 65% 40%, rgba(136, 19, 39, 0.35), rgba(20, 9, 13, 0.88));
-      border: 1px solid rgba(245, 197, 24, 0.28);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 18px 36px rgba(0, 0, 0, 0.65);
     }
     .cv-wp-slot-reflection {
       position: absolute;
@@ -9472,10 +9536,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
 
     /* Chế độ Danh sách dọc */
-    @keyframes cvWpListCascade {
-      from { opacity: 0; transform: translate3d(0, 14px, 0); }
-      to   { opacity: 1; transform: translate3d(0, 0, 0); }
-    }
     .cv-wp-history-stage[data-view-mode="list"] .cv-wp-reel-viewport {
       min-height: 0 !important;
       height: auto !important;
@@ -9506,13 +9566,15 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       transform: none !important;
       opacity: 1 !important;
       pointer-events: auto !important;
-      animation: cvWpListCascade 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
-      animation-delay: calc(var(--li, 0) * 45ms);
+    }
+    /* Khi mở màn ở chế độ Danh sách dọc: vé đầu nhả từ khe (Nhịp 2), các vé tiếp theo nối đuôi stagger 70ms (Nhịp 3) */
+    .cv-wp-history-stage[data-view-mode="list"][data-stage-state="opening"] .cv-wp-reel-slot:not(.is-dispense-hero) {
+      animation: cvDispListCascade 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation-delay: calc(var(--cv-disp-beat3-delay) + (var(--li, 1) - 1) * 70ms);
     }
     .cv-wp-history-stage[data-view-mode="list"] .cv-wp-reel-slot .cv-wp-ticket {
       pointer-events: auto !important;
     }
-    .cv-wp-history-stage[data-view-mode="list"] .cv-wp-reel-slot.is-ghost,
     .cv-wp-history-stage[data-view-mode="list"] .cv-wp-slot-reflection {
       display: none !important;
     }
@@ -9531,13 +9593,16 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .cv-wp-intro-layer,
-      .cv-wp-hero-sheen {
+      .cv-wp-dispenser-ambient,
+      .cv-wp-dispenser-slot,
+      .cv-wp-ticket-shimmer {
         display: none !important;
       }
       .cv-wp-history-stage,
       .cv-wp-stage-hud,
+      .cv-wp-stage-bottombar,
       .cv-wp-slot-frame,
+      .cv-wp-ticket-shell,
       .cv-wp-reel-slot {
         clip-path: none !important;
         transition: opacity 180ms linear !important;
@@ -10093,14 +10158,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               <line x1="300" y1="18" x2="300" y2="302" stroke="rgba(245,197,24,0.08)" stroke-width="1" />
             </svg>
           </div>
-          <div class="cv-wp-intro-layer" aria-hidden="true">
-            <div class="cv-wp-projector-cone"></div>
-            <div class="cv-wp-prism-beam"></div>
-          </div>
-          <button type="button" id="btn-wp-hist-skip" class="cv-wp-intro-skip absolute" onclick="window.CineVerseHistoryStage?.skipIntro()" title="Bỏ qua mở màn">
-            <i class="fa-solid fa-forward-step text-[10px]" aria-hidden="true"></i>
-            <span>Bỏ qua</span>
-          </button>
+          <div class="cv-wp-dispenser-ambient" aria-hidden="true"></div>
 
           <div class="cv-wp-stage-hud cv-wp-stage-topbar">
             <div class="flex flex-wrap items-center gap-2.5">
@@ -10115,7 +10173,11 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 <button type="button" id="btn-wp-hist-mode-ring" onclick="window.CineVerseHistoryStage?.setViewMode('ring')" class="cv-wp-mode-pill is-active" aria-pressed="true">Vòng xoay 3D</button>
                 <button type="button" id="btn-wp-hist-mode-list" onclick="window.CineVerseHistoryStage?.setViewMode('list')" class="cv-wp-mode-pill" aria-pressed="false">Danh sách dọc</button>
               </div>
-              <button type="button" id="btn-wp-hist-replay" onclick="window.CineVerseHistoryStage?.playOpening(true)" class="cv-wp-mode-pill" title="Phát lại hiệu ứng mở màn 3D">
+              <button type="button" id="btn-wp-hist-skip" class="cv-wp-intro-skip" onclick="window.CineVerseHistoryStage?.skipIntro()" title="Bỏ qua mở màn">
+                <i class="fa-solid fa-forward-step text-[10px]" aria-hidden="true"></i>
+                <span>Bỏ qua</span>
+              </button>
+              <button type="button" id="btn-wp-hist-replay" onclick="window.CineVerseHistoryStage?.playOpening(true)" class="cv-wp-mode-pill" title="Phát lại hiệu ứng mở màn">
                 <i class="fa-solid fa-rotate-right text-[10px]" aria-hidden="true"></i>
                 <span>Mở màn lại</span>
               </button>
@@ -10123,6 +10185,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           </div>
 
           <div id="wp-hist-reel-viewport" class="cv-wp-reel-viewport">
+            <div class="cv-wp-dispenser-slot" aria-hidden="true"></div>
             <div class="cv-wp-reel-lens">
               <div id="wp-history-list" class="cv-wp-reel-center"></div>
             </div>
@@ -41472,7 +41535,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         year,
         ageRating: matchedRoom?.ageRating || meta.ageRating || "T13+",
         duration: matchedRoom?.duration || matchedVault?.duration || meta.duration || "HD",
-        synopsis: matchedRoom?.synopsis || meta.synopsis || "Phim thịnh hành được khán giả CineVerse bình chọn và xem nhiều nhất tuần.",
+        synopsis: String(matchedRoom?.synopsis || meta.synopsis || "").trim(),
         cast: matchedRoom?.cast || meta.cast || "Đang cập nhật dàn diễn viên",
         liveRoom: matchedRoom,
         vaultItem: matchedVault,
@@ -41506,7 +41569,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       document.getElementById("detail-modal-match").textContent = `Hạng #${String(item.rank).padStart(2, "0")} • ${formatTop10ViewsText(item.validViews)}`;
       document.getElementById("detail-modal-rating").textContent = item.ageRating || "T13+";
       document.getElementById("detail-modal-title").textContent = item.title;
-      document.getElementById("detail-modal-synopsis").textContent = item.synopsis || "";
+      document.getElementById("detail-modal-synopsis").textContent = item.synopsis || "Đang cập nhật nội dung phim.";
       document.getElementById("detail-modal-cast").textContent = item.cast || "";
       document.getElementById("detail-modal-genre").textContent = `${item.genre}${item.duration ? ` • Thời lượng ${item.duration}` : ""}`;
 
@@ -42354,7 +42417,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             </span>`
           : "";
         return `
-          <article class="cv-top-runner-card ${item.rankChanged ? "cv-rank-changed" : ""}" data-rank="${item.displayRank}">
+          <article class="cv-top-runner-card group ${item.rankChanged ? "cv-rank-changed" : ""}" data-rank="${item.displayRank}">
             <img src="${escapeHTML(runnerBg)}" alt="" width="780" height="439" loading="lazy" decoding="async"
               onerror="this.style.display='none';"
               class="cv-top-runner-bg" />
@@ -42364,25 +42427,25 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               class="cv-top-runner-main"
               aria-label="Hạng ${rankStr}: ${escapeHTML(item.title)} — ${escapeHTML(item.primaryLabel)}">
               <div class="cv-top-runner-poster">
-                <img src="${escapeHTML(runnerPoster)}" ${runnerSrcset ? `srcset="${escapeHTML(runnerSrcset)}" sizes="(max-width:640px) 78px, 92px"` : ""} alt="${escapeHTML(item.title)}" width="342" height="513" loading="lazy" decoding="async"
+                <img src="${escapeHTML(runnerPoster)}" ${runnerSrcset ? `srcset="${escapeHTML(runnerSrcset)}" sizes="(max-width:640px) 80px, 92px"` : ""} alt="${escapeHTML(item.title)}" width="342" height="513" loading="lazy" decoding="async"
                   onerror="this.onerror=null;this.src='assets/web-logo.png';this.removeAttribute('srcset');"
                   class="w-full h-full object-cover" />
               </div>
-              <div class="min-w-0 flex-1 space-y-1">
+              <div class="min-w-0 flex-1 space-y-1.5">
                 <div class="flex items-center justify-between gap-2">
-                  <span class="cv-serif italic text-2xl sm:text-[26px] font-extrabold leading-none" style="color:${rankColor};">#${rankStr}</span>
+                  <span class="cv-serif italic text-2xl font-extrabold leading-none" style="color:${rankColor};">#${rankStr}</span>
                   ${liveBadgeHtml}
                 </div>
-                <h3 class="cv-serif text-base sm:text-lg lg:text-xl font-bold text-white leading-snug line-clamp-2">${escapeHTML(item.title)}</h3>
+                <h3 class="cv-serif text-base sm:text-lg font-bold text-white leading-snug line-clamp-2">${escapeHTML(item.title)}</h3>
                 <div class="cv-top10-meta-line text-xs" style="color:#D4D4D8;">
                   ${metaParts ? `<span>${escapeHTML(metaParts)}</span><span aria-hidden="true">•</span>` : ""}
                   <span class="font-bold text-white tabular-nums">${escapeHTML(formatTop10ViewsText(item.validViews))}</span>
                   ${moveHtml}
                 </div>
-                ${item.synopsis ? `<p class="line-clamp-2 text-[11.5px] text-slate-300/80 leading-relaxed">${escapeHTML(item.synopsis)}</p>` : ""}
+                ${item.synopsis ? `<p class="line-clamp-2 text-xs text-slate-300/80 leading-snug">${escapeHTML(item.synopsis)}</p>` : ""}
               </div>
-              <span class="shrink-0 w-9 h-9 rounded-full flex items-center justify-center border border-white/15 bg-white/5 text-amber-300" aria-hidden="true">
-                <i class="fa-solid ${escapeHTML(item.primaryIcon || 'fa-chevron-right')} text-xs"></i>
+              <span class="shrink-0 w-9 h-9 rounded-full flex items-center justify-center border border-white/15 bg-white/5 text-slate-300 group-hover:border-amber-400/60 group-hover:text-amber-300 transition-colors" aria-hidden="true">
+                <i class="fa-solid ${escapeHTML(item.roomInfo ? (item.primaryIcon || 'fa-chevron-right') : 'fa-chevron-right')} text-xs"></i>
               </span>
             </button>
           </article>
@@ -43143,10 +43206,12 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         if (histEl.dataset.histSig !== histSig) {
           histEl.dataset.histSig = histSig;
           histEl.innerHTML = history.map((ev, idx) => `
-            <div class="cv-wp-reel-slot" data-wp-slot-idx="${idx}" style="--li:${idx}">
+            <div class="cv-wp-reel-slot ${idx === 0 ? "is-dispense-hero" : ""}" data-wp-slot-idx="${idx}" style="--li:${idx}">
               <div class="cv-wp-slot-frame" aria-hidden="true"></div>
-              <div class="cv-wp-hero-sheen" aria-hidden="true"></div>
-              ${renderWatchPartyTicketCardHtml(ev)}
+              <div class="cv-wp-ticket-shell">
+                <div class="cv-wp-ticket-shimmer" aria-hidden="true"></div>
+                ${renderWatchPartyTicketCardHtml(ev)}
+              </div>
               <div class="cv-wp-slot-reflection" aria-hidden="true"></div>
             </div>
           `).join("");
@@ -45828,10 +45893,20 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           document.body.classList.contains("booking-modal-open")
         );
 
+      // =========================================================================
+      // KHO VÉ BUỔI HẸN — ĐIỀU PHỐI MỞ MÀN "KHE NHẢ VÉ RẠP PHIM" (4 NHỊP ~1.25s)
+      // =========================================================================
+      const TIMING = {
+        BEAT2_START: 200,   // Nhịp 2: Bắt đầu nhả vé chính từ khe sáng
+        BEAT3_START: 620,   // Nhịp 3: Bắt đầu bung vé phụ & thu khe sáng
+        BEAT3_DUR: 430,     // Nhịp 3: Thời lượng bung vé phụ (620ms -> 1050ms)
+        TOTAL_MS: 1250      // Nhịp 4: Hoàn tất vệt shimmer 25° & điều khiển fade-in
+      };
+
       const st = {
         history: [],
         viewMode: "ring", // "ring" | "list"
-        stageState: "idle", // "idle" | "closed-gate" | "opening" | "settled"
+        stageState: "idle", // "idle" | "preparing" | "opening" | "settled"
         rotAngle: 0,
         targetRotAngle: 0,
         activeIdx: 0,
@@ -45861,7 +45936,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         dots: document.getElementById("wp-hist-dots"),
         indicator: document.getElementById("wp-hist-active-indicator"),
         btnRing: document.getElementById("btn-wp-hist-mode-ring"),
-        btnList: document.getElementById("btn-wp-hist-mode-list")
+        btnList: document.getElementById("btn-wp-hist-mode-list"),
+        btnReplay: document.getElementById("btn-wp-hist-replay")
       });
 
       function stopRafAndTimers() {
@@ -45881,17 +45957,12 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         center.querySelectorAll(".cv-wp-reel-slot.is-ghost").forEach((g) => g.remove());
       }
 
-      function ensureGhostSlotsDuringIntro(center, realCount) {
-        removeGhostSlots(center);
-        if (!center || realCount >= 3 || realCount === 0) return;
-        const needed = 3 - realCount;
-        for (let g = 0; g < needed; g++) {
-          const ghost = document.createElement("div");
-          ghost.className = "cv-wp-reel-slot is-ghost";
-          ghost.setAttribute("aria-hidden", "true");
-          ghost.innerHTML = `<div class="cv-wp-slot-ghost"></div>`;
-          center.appendChild(ghost);
-        }
+      function triggerReplayIconSpin() {
+        const { btnReplay } = getEls();
+        if (!btnReplay || isReduced()) return;
+        btnReplay.classList.remove("is-spin-360");
+        void btnReplay.offsetWidth;
+        btnReplay.classList.add("is-spin-360");
       }
 
       function bindTicketResizeObserver(targetTicket) {
@@ -45908,13 +45979,20 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         st.resizeObs.observe(targetTicket);
       }
 
-      // Chỉ đọc offsetHeight/scrollHeight bên ngoài rAF để tránh layout thrashing & tuyệt đối không cắt đỉnh/đáy thẻ
+      // Chỉ đọc offsetHeight/scrollHeight bên ngoài rAF để tránh layout thrashing & căn khe nhả vé chuẩn mép trên vé
       function measureStageMetrics() {
-        const { viewport, center } = getEls();
+        const { stage, viewport, center } = getEls();
         const isMobile = window.innerWidth < 640;
         st.radius = isMobile ? 340 : 720;
-        if (!viewport || !center || st.viewMode !== "ring") return;
-        const tickets = Array.from(center.querySelectorAll(".cv-wp-reel-slot:not(.is-ghost) .cv-wp-ticket"));
+        if (!viewport || !center) return;
+
+        if (st.viewMode !== "ring") {
+          viewport.style.minHeight = "";
+          if (stage) stage.style.setProperty("--cv-dispenser-y", "0px");
+          return;
+        }
+
+        const tickets = Array.from(center.querySelectorAll(".cv-wp-reel-slot .cv-wp-ticket"));
         let maxH = 0;
         for (const tk of tickets) {
           const h = Math.max(tk.offsetHeight || 0, tk.scrollHeight || 0);
@@ -45924,8 +46002,15 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         st.cachedCardH = maxH;
         const padV = isMobile ? 76 : 92;
         const floorH = isMobile ? 468 : 332;
-        viewport.style.minHeight = `${Math.max(floorH, maxH + padV)}px`;
+        const viewportH = Math.max(floorH, maxH + padV);
+        viewport.style.minHeight = `${viewportH}px`;
+
         const frontTk = center.querySelector(".cv-wp-reel-slot.is-front .cv-wp-ticket") || tickets[0];
+        const heroH = frontTk ? Math.max(frontTk.offsetHeight || 0, frontTk.scrollHeight || 0) : maxH;
+        const topEdgeY = Math.max(8, Math.round((viewportH - (heroH || maxH)) / 2));
+        if (stage) {
+          stage.style.setProperty("--cv-dispenser-y", `${topEdgeY}px`);
+        }
         if (frontTk) bindTicketResizeObserver(frontTk);
       }
 
@@ -45934,6 +46019,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         slotEl.classList.remove("is-sheen-sweep");
         void slotEl.offsetWidth;
         slotEl.classList.add("is-sheen-sweep");
+      }
+
+      function markDispenseHero(center, heroIdx = 0) {
+        if (!center) return;
+        center.querySelectorAll(".cv-wp-reel-slot").forEach((slot, i) => {
+          slot.classList.toggle("is-dispense-hero", i === heroIdx);
+        });
       }
 
       function syncFrontDomIfChanged(realCount) {
@@ -45959,7 +46051,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           }
         }
         if (center) {
-          center.querySelectorAll(".cv-wp-reel-slot:not(.is-ghost)").forEach((slot, i) => {
+          center.querySelectorAll(".cv-wp-reel-slot").forEach((slot, i) => {
             const isFrontNow = i === st.activeIdx;
             slot.classList.toggle("is-front", isFrontNow);
             if (isFrontNow && !st.inIntroAnim && prevIdx !== st.activeIdx) {
@@ -45976,14 +46068,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         return rel;
       }
 
-      function springOutNormalized(u) {
-        if (u <= 0) return 0;
-        if (u >= 1) return 1;
-        const damped = 1 - Math.exp(-5.4 * u) * Math.cos(4.1 * u);
-        const norm = 1 - Math.exp(-5.4) * Math.cos(4.1);
-        return Math.min(1.06, damped / norm);
-      }
-
       function layoutRingFrame(nowMs = performance.now()) {
         const { center } = getEls();
         if (!center || st.viewMode === "list") return;
@@ -45991,24 +46075,21 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         const count = slots.length;
         if (!count) return;
 
-        const realCount = slots.filter((s) => !s.classList.contains("is-ghost")).length;
         const settledStep = count === 1 ? 360 : (count === 2 ? 44 : Math.min(46, 360 / Math.max(count, 4)));
         st.stepDeg = settledStep;
         const useWrap = count >= 3;
         const totalSpan = count * settledStep;
 
-        const OPEN_TOTAL_MS = 1080;
-        const elapsed = st.inIntroAnim ? Math.max(0, nowMs - st.animStartMs) : OPEN_TOTAL_MS;
+        const elapsed = st.inIntroAnim ? Math.max(0, nowMs - st.animStartMs) : TIMING.TOTAL_MS;
 
         let frontSlotIdx = 0;
         let minAbsDeg = Infinity;
 
         slots.forEach((slot, i) => {
-          const isGhost = slot.classList.contains("is-ghost");
           const baseRelDeg = getWrappedRelDeg(i * settledStep - st.rotAngle, totalSpan, useWrap);
           const absBase = Math.abs(baseRelDeg);
 
-          if (!isGhost && absBase < minAbsDeg) {
+          if (absBase < minAbsDeg) {
             minAbsDeg = absBase;
             frontSlotIdx = i;
           }
@@ -46022,46 +46103,31 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             return;
           }
 
-          const settledOpacity = isGhost
-            ? 0
-            : (absBase < 8 ? 1 : Math.max(0.28, 0.62 - Math.pow(absBase / 106, 1.15) * 0.34));
+          const settledOpacity = absBase < 8 ? 1 : Math.max(0.32, 0.68 - Math.pow(absBase / 106, 1.15) * 0.36);
           const settledScale = absBase < 8 ? 1 : Math.max(0.76, 0.89 - Math.min(0.15, absBase * 0.002));
 
           let effDeg = baseRelDeg;
           let extraZ = 0;
-          let extraY = 0;
-          let pitchX = 0;
-          let rollZ = 0;
           let finalScale = settledScale;
           let finalOpacity = settledOpacity;
 
           if (st.inIntroAnim) {
             const rank = Math.min(4, Math.round(absBase / Math.max(1, settledStep)));
             if (rank === 0) {
-              const uHero = Math.max(0, Math.min(1, elapsed / 540));
-              const eHero = 1 - Math.pow(1 - uHero, 4);
+              // Vé trung tâm đứng cố định theo khung 3D; chuyển động nhả từ khe do CSS cvDispTicketEject điều khiển
               effDeg = 0;
-              extraZ = (1 - eHero) * -280;
-              extraY = (1 - eHero) * 14;
-              pitchX = (1 - eHero) * 12;
-              finalScale = settledScale * (0.86 + 0.14 * eHero);
-              finalOpacity = settledOpacity * Math.min(1, uHero * 3.2);
+              extraZ = 0;
+              finalScale = 1;
+              finalOpacity = 1;
             } else {
-              const delayMs = 70 + rank * 55;
-              const durMs = Math.max(520, OPEN_TOTAL_MS - delayMs);
-              const u = Math.max(0, Math.min(1, (elapsed - delayMs) / durMs));
-              const eSpring = springOutNormalized(u);
-              const eEase = 1 - Math.pow(1 - u, 4);
-
-              effDeg = baseRelDeg * eSpring;
-              extraZ = (1 - eEase) * (-360 - rank * 44);
-              extraY = (1 - eEase) * (18 + rank * 6);
-              pitchX = (1 - eEase) * 16;
-              rollZ = (1 - eEase) * (baseRelDeg >= 0 ? 4 : -4);
-              finalScale = settledScale * (0.80 + 0.20 * eEase);
-              finalOpacity = isGhost
-                ? 0.44 * Math.sin(u * Math.PI)
-                : settledOpacity * Math.min(1, u * 2.8);
+              // Nhịp 3 (620ms -> 1050ms): Vé phụ nấp sau vé chính, sau đó trượt ngang vào góc vòng xoay 3D
+              const delayMs = TIMING.BEAT3_START + (rank - 1) * 45;
+              const u = Math.max(0, Math.min(1, (elapsed - delayMs) / Math.max(240, TIMING.BEAT3_DUR - (rank - 1) * 45)));
+              const eOut = 1 - Math.pow(1 - u, 3);
+              effDeg = baseRelDeg * eOut;
+              extraZ = (1 - eOut) * (-120 - rank * 35);
+              finalScale = 0.84 + (settledScale - 0.84) * eOut;
+              finalOpacity = elapsed < TIMING.BEAT3_START ? 0 : settledOpacity * Math.min(1, u * 1.45);
             }
           }
 
@@ -46073,16 +46139,14 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           slot.style.opacity = finalOpacity.toFixed(3);
           slot.style.zIndex = String(Math.round(500 - Math.abs(effDeg) * 4));
           slot.style.transform =
-            `translate3d(calc(-50% + ${xOffset.toFixed(1)}px), calc(-50% + ${extraY.toFixed(1)}px), ${depthZ.toFixed(1)}px) ` +
-            `rotateX(${pitchX.toFixed(2)}deg) ` +
-            `rotateZ(${rollZ.toFixed(2)}deg) ` +
+            `translate3d(calc(-50% + ${xOffset.toFixed(1)}px), -50%, ${depthZ.toFixed(1)}px) ` +
             `rotateY(${rotY.toFixed(2)}deg) ` +
             `scale(${finalScale.toFixed(4)})`;
-          slot.style.pointerEvents = (!st.inIntroAnim && !isGhost) ? "auto" : "none";
+          slot.style.pointerEvents = !st.inIntroAnim ? "auto" : "none";
         });
 
         st.activeIdx = frontSlotIdx;
-        syncFrontDomIfChanged(realCount);
+        syncFrontDomIfChanged(count);
       }
 
       function settleNow() {
@@ -46093,8 +46157,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
         if (center) {
           removeGhostSlots(center);
+          center.querySelectorAll(".cv-wp-reel-slot").forEach((s) => s.classList.remove("is-dispense-hero"));
         }
-        const realCount = center ? center.querySelectorAll(".cv-wp-reel-slot:not(.is-ghost)").length : 0;
+        const realCount = center ? center.querySelectorAll(".cv-wp-reel-slot").length : 0;
         const settledStep = realCount === 1 ? 360 : (realCount === 2 ? 44 : Math.min(46, 360 / Math.max(realCount, 4)));
         st.stepDeg = settledStep;
         if (realCount > 0) {
@@ -46111,10 +46176,15 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           hint.textContent = "Bấm để thu gọn";
         }
         measureStageMetrics();
-        layoutRingFrame(performance.now());
-        if (center) {
-          const heroSlot = center.querySelector(".cv-wp-reel-slot.is-front");
-          triggerHeroSheen(heroSlot);
+        if (st.viewMode === "ring") {
+          layoutRingFrame(performance.now());
+        } else if (center) {
+          center.querySelectorAll(".cv-wp-reel-slot").forEach((s) => {
+            s.style.transform = "";
+            s.style.opacity = "";
+            s.style.zIndex = "";
+            s.style.pointerEvents = "";
+          });
         }
       }
 
@@ -46135,7 +46205,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
         if (st.inIntroAnim) {
           const elapsed = now - st.animStartMs;
-          if (elapsed >= 1080) {
+          if (elapsed >= TIMING.TOTAL_MS) {
             settleNow();
             return;
           }
@@ -46173,36 +46243,50 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         syncStatsOnly(st.history);
         details.open = true;
         if (hint) hint.textContent = "Bấm để thu gọn";
+        if (fromUser) triggerReplayIconSpin();
 
-        if (isReduced() || isWebGLBusy() || st.viewMode === "list") {
+        if (isReduced() || isWebGLBusy()) {
           settleNow();
           return;
         }
 
+        // Reset sạch trạng thái + ép reflow để bấm "Mở màn lại" nhiều lần vẫn phát mượt từ đầu
         stopRafAndTimers();
-        const realCount = center.querySelectorAll(".cv-wp-reel-slot:not(.is-ghost)").length;
-        ensureGhostSlotsDuringIntro(center, realCount);
+        removeGhostSlots(center);
+        const realCount = center.querySelectorAll(".cv-wp-reel-slot").length;
+        if (!realCount) {
+          settleNow();
+          return;
+        }
 
         st.activeIdx = 0;
         st.lastRenderedActiveIdx = -1;
         st.rotAngle = 0;
         st.targetRotAngle = 0;
-        st.inIntroAnim = Boolean(fromUser || true);
-        st.stageState = "closed-gate";
-        st.animStartMs = performance.now();
+        st.inIntroAnim = true;
+        st.stageState = "preparing";
 
-        measureStageMetrics();
+        markDispenseHero(center, 0);
         stage.classList.remove("is-collapsing");
-        stage.setAttribute("data-stage-state", "closed-gate");
-        layoutRingFrame(st.animStartMs);
+        stage.setAttribute("data-stage-state", "preparing");
+        measureStageMetrics();
+        if (st.viewMode === "ring") {
+          st.animStartMs = performance.now();
+          layoutRingFrame(st.animStartMs);
+        }
         void stage.offsetWidth;
 
-        requestAnimationFrame(() => {
-          st.animStartMs = performance.now();
-          st.stageState = "opening";
-          stage.setAttribute("data-stage-state", "opening");
+        // Kích hoạt đồng bộ chuỗi 4 nhịp (1.25s) ở frame kế tiếp
+        st.animStartMs = performance.now();
+        st.stageState = "opening";
+        stage.setAttribute("data-stage-state", "opening");
+
+        if (st.viewMode === "list") {
+          const listFinishMs = Math.max(TIMING.TOTAL_MS, Math.min(2000, TIMING.BEAT3_START + Math.max(0, Math.min(realCount - 1, 10)) * 70 + 400));
+          st.phaseTimer1 = setTimeout(() => settleNow(), listFinishMs);
+        } else {
           wakeRaf();
-        });
+        }
       }
 
       function skipIntro() {
@@ -46224,13 +46308,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           stage.classList.remove("is-collapsing");
           stage.setAttribute("data-stage-state", "idle");
           if (hint) hint.textContent = "Bấm để mở rộng";
-        }, 300);
+        }, 280);
       }
 
       function stepBy(delta = 1) {
         const { center } = getEls();
         if (!center) return;
-        const realCount = center.querySelectorAll(".cv-wp-reel-slot:not(.is-ghost)").length;
+        const realCount = center.querySelectorAll(".cv-wp-reel-slot").length;
         if (realCount <= 1) return;
         if (st.inIntroAnim) settleNow();
 
@@ -46252,7 +46336,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       function focusSlotByIndex(idx) {
         const { center } = getEls();
         if (!center) return;
-        const realCount = center.querySelectorAll(".cv-wp-reel-slot:not(.is-ghost)").length;
+        const realCount = center.querySelectorAll(".cv-wp-reel-slot").length;
         if (!realCount) return;
         const clamped = ((idx % realCount) + realCount) % realCount;
         const step = st.stepDeg || 46;
@@ -46277,7 +46361,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         const valid = mode === "list" ? "list" : "ring";
         st.viewMode = valid;
         const { stage, center, btnRing, btnList } = getEls();
-        if (stage) stage.setAttribute("data-view-mode", valid);
+        stopRafAndTimers();
+        st.inIntroAnim = false;
+        st.stageState = "settled";
+        if (stage) {
+          stage.setAttribute("data-view-mode", valid);
+          stage.setAttribute("data-stage-state", "settled");
+        }
         if (btnRing) {
           btnRing.classList.toggle("is-active", valid === "ring");
           btnRing.setAttribute("aria-pressed", valid === "ring" ? "true" : "false");
@@ -46287,22 +46377,19 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           btnList.setAttribute("aria-pressed", valid === "list" ? "true" : "false");
         }
         if (valid === "list") {
-          stopRafAndTimers();
-          st.inIntroAnim = false;
           if (center) {
             removeGhostSlots(center);
             center.querySelectorAll(".cv-wp-reel-slot").forEach((s) => {
+              s.classList.remove("is-dispense-hero");
               s.style.transform = "";
               s.style.opacity = "";
               s.style.zIndex = "";
               s.style.pointerEvents = "";
             });
           }
-          if (stage) stage.setAttribute("data-stage-state", "settled");
+          measureStageMetrics();
         } else {
-          st.stageState = "settled";
           st.lastRenderedActiveIdx = -1;
-          if (stage) stage.setAttribute("data-stage-state", "settled");
           measureStageMetrics();
           layoutRingFrame(performance.now());
         }
