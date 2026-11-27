@@ -989,6 +989,165 @@
         align-items: stretch;
       }
     }
+    /* Bố cục Sân khấu Top Phim Tuần (Full-Width Adaptive Editorial Podium) */
+    .cv-top-podium {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      width: 100%;
+    }
+    @media (min-width: 1024px) {
+      .cv-top-podium {
+        grid-template-columns: minmax(0, 1.38fr) minmax(0, 1fr);
+        gap: 18px;
+        align-items: stretch;
+      }
+      .cv-top-podium.is-single {
+        grid-template-columns: 1fr;
+      }
+    }
+    .cv-top-champion {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 310px;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #120b0e;
+      border: 1px solid rgba(245, 197, 24, 0.36);
+      box-shadow: inset 0 1px 0 rgba(255, 232, 163, 0.18), 0 22px 48px rgba(0, 0, 0, 0.78);
+      transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), border-color 220ms ease, box-shadow 220ms ease;
+    }
+    @media (min-width: 1024px) {
+      .cv-top-champion {
+        min-height: 376px;
+        height: 100%;
+      }
+    }
+    .cv-top-champion:hover,
+    .cv-top-champion:focus-within {
+      transform: translateY(-2px);
+      border-color: rgba(245, 197, 24, 0.72);
+      box-shadow: inset 0 1px 0 rgba(255, 232, 163, 0.28), 0 26px 56px rgba(0, 0, 0, 0.88), 0 0 32px -8px rgba(245, 197, 24, 0.24);
+    }
+    .cv-top-champion-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 22%;
+      opacity: 0.9;
+      transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms ease;
+    }
+    .cv-top-champion:hover .cv-top-champion-bg {
+      transform: scale(1.03);
+      opacity: 0.96;
+    }
+    .cv-top-champion-scrim {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(180deg, rgba(11, 6, 7, 0.62) 0%, rgba(11, 6, 7, 0.14) 36%, rgba(11, 6, 7, 0.88) 72%, rgba(11, 6, 7, 0.98) 100%),
+        linear-gradient(90deg, rgba(11, 6, 7, 0.88) 0%, rgba(11, 6, 7, 0.36) 54%, transparent 100%);
+    }
+    .cv-top-champion-poster {
+      width: 82px;
+      flex-shrink: 0;
+      aspect-ratio: 2 / 3;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #0b0607;
+      border: 1px solid rgba(245, 197, 24, 0.52);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.88);
+    }
+    @media (min-width: 640px) {
+      .cv-top-champion-poster {
+        width: 108px;
+      }
+    }
+    .cv-top-runners {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+    }
+    .cv-top-runner-card {
+      position: relative;
+      flex: 1 1 0;
+      min-height: 168px;
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      align-items: stretch;
+      background: linear-gradient(135deg, rgba(28, 14, 20, 0.94), rgba(14, 9, 12, 0.98));
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 14px 30px rgba(0, 0, 0, 0.58);
+      transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), border-color 200ms ease, box-shadow 200ms ease;
+    }
+    .cv-top-runner-card:hover,
+    .cv-top-runner-card:focus-within {
+      transform: translateY(-2px);
+      border-color: rgba(245, 197, 24, 0.48);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 18px 38px rgba(0, 0, 0, 0.78);
+    }
+    .cv-top-runner-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 22%;
+      opacity: 0.24;
+      transition: opacity 240ms ease, transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: none;
+    }
+    .cv-top-runner-card:hover .cv-top-runner-bg {
+      opacity: 0.36;
+      transform: scale(1.03);
+    }
+    .cv-top-runner-scrim {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(90deg, rgba(14, 9, 12, 0.94) 0%, rgba(14, 9, 12, 0.82) 55%, rgba(14, 9, 12, 0.68) 100%);
+    }
+    .cv-top-runner-main {
+      position: relative;
+      z-index: 2;
+      flex: 1 1 auto;
+      min-width: 0;
+      padding: 14px 12px 14px 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-align: left;
+      background: transparent;
+      cursor: pointer;
+    }
+    .cv-top-runner-poster {
+      width: 78px;
+      flex-shrink: 0;
+      aspect-ratio: 2 / 3;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #0b0607;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.72);
+    }
+    @media (min-width: 640px) {
+      .cv-top-runner-poster {
+        width: 92px;
+      }
+    }
+    .cv-top-more-grid {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+    }
     .cv-top10-featured {
       position: relative;
       display: flex;
@@ -8942,26 +9101,34 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     .cv-wp-history-stage {
       position: relative;
       border-radius: 20px;
-      padding: 16px 14px 14px;
+      padding: 18px 16px 18px;
       background:
-        radial-gradient(ellipse 72% 56% at 50% 8%, rgba(148, 22, 42, 0.28) 0%, rgba(18, 9, 13, 0.96) 58%),
+        radial-gradient(ellipse 78% 58% at 50% 6%, rgba(158, 22, 46, 0.30) 0%, rgba(18, 9, 13, 0.97) 58%),
         var(--cv-bg-void, #0b0607);
-      border: 1px solid rgba(245, 197, 24, 0.22);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 24px 56px rgba(0, 0, 0, 0.78);
+      border: 1px solid rgba(245, 197, 24, 0.24);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 24px 56px rgba(0, 0, 0, 0.8);
       overflow: hidden;
       transform-origin: center top;
-      will-change: transform, opacity;
+      clip-path: inset(0% 0% 0% 0% round 20px);
+      will-change: transform, opacity, clip-path;
       transition:
-        opacity 300ms ease,
-        transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+        opacity 320ms ease,
+        transform 460ms cubic-bezier(0.16, 1, 0.3, 1),
+        clip-path 560ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .cv-wp-history-stage[data-stage-state="closed-gate"] {
+      opacity: 0.12;
+      transform: scale(0.96) translate3d(0, 8px, 0);
+      clip-path: inset(42% 10% 42% 10% round 28px);
     }
     .cv-wp-history-stage.is-collapsing {
       opacity: 0;
       transform: scale(0.98) translate3d(0, -4px, 0);
+      clip-path: inset(22% 6% 22% 6% round 24px);
       pointer-events: none;
     }
 
-    /* Bốn góc Art-Deco Vàng Kim & Khung đo quang học 35mm */
+    /* Bốn góc Art-Deco Vàng Kim & Nền quỹ đạo quang học */
     .cv-wp-deco-corner {
       position: absolute;
       width: 14px;
@@ -8987,7 +9154,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       opacity: 0.55;
     }
 
-    /* Màn trập Anamorphic 2.39:1 & Tia sáng ống kính CinemaScope (Pure Transform/Opacity) */
+    /* Prism Light-Portal & Volumetric Overhead Spotlight (Pure Composite GPU) */
     .cv-wp-intro-layer {
       position: absolute;
       inset: 0;
@@ -8995,60 +9162,86 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       pointer-events: none;
       overflow: hidden;
     }
-    .cv-wp-aperture-shutter {
+    .cv-wp-projector-cone {
       position: absolute;
-      left: 0;
-      right: 0;
-      height: 51%;
-      background:
-        radial-gradient(ellipse 80% 70% at 50% 50%, rgba(36, 12, 18, 0.94) 0%, #090406 78%);
-      will-change: transform;
-      transform: scaleY(1);
-      transition: transform 720ms cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .cv-wp-aperture-shutter.is-top {
-      top: 0;
-      transform-origin: top center;
-      border-bottom: 1px solid rgba(245, 197, 24, 0.38);
-    }
-    .cv-wp-aperture-shutter.is-bottom {
-      bottom: 0;
-      transform-origin: bottom center;
-      border-top: 1px solid rgba(245, 197, 24, 0.38);
-    }
-    .cv-wp-history-stage[data-stage-state="opening"] .cv-wp-aperture-shutter,
-    .cv-wp-history-stage[data-stage-state="settled"] .cv-wp-aperture-shutter {
-      transform: scaleY(0);
-    }
-    .cv-wp-anamorphic-flare {
-      position: absolute;
-      top: 50%;
-      left: -6%;
-      right: -6%;
-      height: 2px;
-      margin-top: -1px;
-      background: linear-gradient(90deg, transparent 0%, rgba(245, 197, 24, 0.88) 32%, #FFF7D6 50%, rgba(245, 197, 24, 0.88) 68%, transparent 100%);
+      left: 50%;
+      top: -12%;
+      width: min(82%, 680px);
+      height: 92%;
+      transform: translate3d(-50%, 0, 0) scaleY(0.5);
+      transform-origin: 50% 0%;
+      background: radial-gradient(ellipse 52% 68% at 50% 18%, rgba(245, 197, 24, 0.24) 0%, rgba(229, 9, 20, 0.14) 44%, transparent 76%);
       opacity: 0;
-      transform: scaleX(0.05);
       will-change: transform, opacity;
     }
-    .cv-wp-anamorphic-flare::after {
+    @keyframes cvWpConeBloom {
+      0%   { opacity: 0; transform: translate3d(-50%, 0, 0) scaleY(0.5); }
+      35%  { opacity: 1; transform: translate3d(-50%, 0, 0) scaleY(1.04); }
+      100% { opacity: 0.18; transform: translate3d(-50%, 0, 0) scaleY(1); }
+    }
+    .cv-wp-history-stage[data-stage-state="opening"] .cv-wp-projector-cone {
+      animation: cvWpConeBloom 880ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .cv-wp-history-stage[data-stage-state="settled"] .cv-wp-projector-cone {
+      opacity: 0.16;
+      transform: translate3d(-50%, 0, 0) scaleY(1);
+    }
+    .cv-wp-prism-beam {
+      position: absolute;
+      top: 48%;
+      left: -4%;
+      right: -4%;
+      height: 2px;
+      margin-top: -1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(245, 197, 24, 0.92) 28%, #FFF7D6 50%, rgba(245, 197, 24, 0.92) 72%, transparent 100%);
+      opacity: 0;
+      transform: scaleX(0.06);
+      will-change: transform, opacity;
+    }
+    .cv-wp-prism-beam::after {
       content: "";
       position: absolute;
-      left: 12%;
-      right: 12%;
-      top: -21px;
-      height: 44px;
-      background: radial-gradient(ellipse 52% 50% at 50% 50%, rgba(245, 197, 24, 0.45) 0%, rgba(190, 24, 52, 0.22) 46%, transparent 78%);
+      left: 10%;
+      right: 10%;
+      top: -24px;
+      height: 50px;
+      background: radial-gradient(ellipse 52% 50% at 50% 50%, rgba(245, 197, 24, 0.5) 0%, rgba(229, 9, 20, 0.24) 48%, transparent 78%);
       pointer-events: none;
     }
-    @keyframes cvWpAnamorphicFlash {
-      0%   { opacity: 0; transform: scaleX(0.05); }
-      22%  { opacity: 1; transform: scaleX(1); }
-      100% { opacity: 0; transform: scaleX(1.12); }
+    @keyframes cvWpPrismFlash {
+      0%   { opacity: 0; transform: scaleX(0.06); }
+      24%  { opacity: 1; transform: scaleX(1.02); }
+      100% { opacity: 0; transform: scaleX(1.16); }
     }
-    .cv-wp-history-stage[data-stage-state="opening"] .cv-wp-anamorphic-flare {
-      animation: cvWpAnamorphicFlash 860ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    .cv-wp-history-stage[data-stage-state="opening"] .cv-wp-prism-beam {
+      animation: cvWpPrismFlash 680ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes cvWpHeroSheen {
+      0%   { opacity: 0; transform: translate3d(-135%, 0, 0) skewX(-22deg); }
+      35%  { opacity: 0.72; }
+      100% { opacity: 0; transform: translate3d(235%, 0, 0) skewX(-22deg); }
+    }
+    .cv-wp-hero-sheen {
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 9;
+    }
+    .cv-wp-hero-sheen::before {
+      content: "";
+      position: absolute;
+      top: -10%;
+      bottom: -10%;
+      left: 0;
+      width: 46%;
+      background: linear-gradient(90deg, transparent 0%, rgba(255, 244, 202, 0.24) 48%, rgba(245, 197, 24, 0.34) 52%, transparent 100%);
+      opacity: 0;
+      will-change: transform, opacity;
+    }
+    .cv-wp-reel-slot.is-sheen-sweep .cv-wp-hero-sheen::before {
+      animation: cvWpHeroSheen 620ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
     .cv-wp-intro-skip {
       position: absolute !important;
@@ -9077,15 +9270,14 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
     .cv-wp-history-stage[data-stage-state="closed-gate"] #btn-wp-hist-replay,
     .cv-wp-history-stage[data-stage-state="opening"] #btn-wp-hist-replay {
-      opacity: 0;
-      pointer-events: none;
+      display: none !important;
     }
     .cv-wp-intro-skip:hover {
       transform: scale(1.04);
       border-color: rgba(245, 197, 24, 0.85);
     }
 
-    /* HUD Sân Khấu (Fade mượt không giật chữ) */
+    /* HUD Sân Khấu */
     .cv-wp-stage-hud {
       position: relative;
       z-index: 10;
@@ -9102,12 +9294,34 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       opacity: 1;
     }
     .cv-wp-stage-bottombar {
-      margin-top: 6px;
+      margin-top: 12px;
+      padding-bottom: 2px;
       justify-content: center;
-      gap: 16px;
+      gap: 12px;
     }
     .cv-wp-history-stage[data-view-mode="list"] .cv-wp-stage-bottombar {
       display: none !important;
+    }
+    .cv-wp-dots {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .cv-wp-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.24);
+      cursor: pointer;
+      transition: width 220ms cubic-bezier(0.22, 1, 0.36, 1), background-color 220ms ease;
+    }
+    .cv-wp-dot:hover {
+      background: rgba(245, 197, 24, 0.6);
+    }
+    .cv-wp-dot.is-active {
+      width: 20px;
+      background: #F5C518;
+      box-shadow: 0 0 10px rgba(245, 197, 24, 0.55);
     }
     .cv-wp-stat-pill {
       display: inline-flex;
@@ -9170,12 +9384,12 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       border-color: rgba(245, 197, 24, 0.55);
     }
 
-    /* Khung Sân Khấu 3D Chronos Fan & Phản Chiếu Sàn Rạp (Composite Only) */
+    /* Khung Sân Khấu 3D Kinetic Collector's Fan (Composite Only, Không Cắt Đầu/Đáy Vé) */
     .cv-wp-reel-viewport {
       position: relative;
       z-index: 4;
       width: 100%;
-      min-height: 292px;
+      min-height: 332px;
       margin-top: 8px;
       overflow: hidden;
       touch-action: pan-y;
@@ -9243,7 +9457,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       pointer-events: none;
       opacity: 0.72;
     }
-    /* Khung viền Art-Deco vàng quét clip-path khi hover thẻ trung tâm */
     .cv-wp-slot-frame {
       position: absolute;
       inset: -4px;
@@ -9306,11 +9519,11 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
     @media (max-width: 767px) {
       .cv-wp-history-stage {
-        padding: 12px 8px 12px;
+        padding: 14px 10px 14px;
         border-radius: 16px;
       }
       .cv-wp-reel-viewport {
-        min-height: 455px;
+        min-height: 468px;
       }
       .cv-wp-reel-slot {
         width: calc(100% - 12px);
@@ -9318,13 +9531,15 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .cv-wp-intro-layer {
+      .cv-wp-intro-layer,
+      .cv-wp-hero-sheen {
         display: none !important;
       }
       .cv-wp-history-stage,
       .cv-wp-stage-hud,
       .cv-wp-slot-frame,
       .cv-wp-reel-slot {
+        clip-path: none !important;
         transition: opacity 180ms linear !important;
         animation: none !important;
       }
@@ -9879,9 +10094,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             </svg>
           </div>
           <div class="cv-wp-intro-layer" aria-hidden="true">
-            <div class="cv-wp-aperture-shutter is-top"></div>
-            <div class="cv-wp-aperture-shutter is-bottom"></div>
-            <div class="cv-wp-anamorphic-flare"></div>
+            <div class="cv-wp-projector-cone"></div>
+            <div class="cv-wp-prism-beam"></div>
           </div>
           <button type="button" id="btn-wp-hist-skip" class="cv-wp-intro-skip absolute" onclick="window.CineVerseHistoryStage?.skipIntro()" title="Bỏ qua mở màn">
             <i class="fa-solid fa-forward-step text-[10px]" aria-hidden="true"></i>
@@ -9916,15 +10130,16 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
           <div class="cv-wp-stage-hud cv-wp-stage-bottombar">
             <button type="button" id="btn-wp-hist-prev" onclick="window.CineVerseHistoryStage?.stepBy(-1)" class="cv-wp-nav-circle" aria-label="Vé trước">‹</button>
-            <div id="wp-hist-active-indicator" class="text-[11px] font-mono tabular-nums font-bold tracking-wider text-amber-200/90">Vé 01 / 01 • Kéo ngang hoặc bấm vé bên để xem</div>
+            <div id="wp-hist-dots" class="cv-wp-dots" role="tablist" aria-label="Chọn nhanh vé"></div>
+            <div id="wp-hist-active-indicator" class="text-[11px] font-mono tabular-nums font-bold tracking-wider text-amber-200/90">01 / 01</div>
             <button type="button" id="btn-wp-hist-next" onclick="window.CineVerseHistoryStage?.stepBy(1)" class="cv-wp-nav-circle" aria-label="Vé tiếp theo">›</button>
           </div>
         </div>
       </details>
     </section>
 
-    <!-- 1B. BẢNG XẾP HẠNG TOP 10 TUẦN NÀY (DƯỚI BANNER, TRƯỚC XEM TIẾP) -->
-    <section id="lobby-top10-section" class="cv-top10-shell" aria-label="Top 10 tuần này">
+    <!-- 1B. BẢNG XẾP HẠNG TOP PHIM TUẦN NÀY (DƯỚI BANNER, TRƯỚC XEM TIẾP) -->
+    <section id="lobby-top10-section" class="cv-top10-shell" aria-label="Top phim tuần này">
       <div class="cv-top10-header">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div class="flex flex-wrap items-center gap-3">
@@ -9932,27 +10147,20 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             <span class="cv-top10-divider" aria-hidden="true"></span>
             <span id="top10-week-range" class="text-sm font-semibold" style="color:#E4E4E7;">Tuần Thứ Hai – Chủ nhật (GMT+7)</span>
           </div>
-          <span id="top10-updated-at" class="text-[11px] font-medium" style="color:#A1A1AA;">Đang đồng bộ máy chủ…</span>
-        </div>
-
-        <div id="top10-toolbar" class="cv-top10-toolbar">
-          <div class="flex items-center gap-2">
-            <span class="cv-top10-tab-active" role="status">
-              <i class="fa-solid fa-crown text-xs" style="color:#F5C518;" aria-hidden="true"></i>
-              <span>Được xem nhiều trong CineVerse</span>
-            </span>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="text-xs italic" style="color:#A1A1AA;">Xếp theo lượt xem hợp lệ trong tuần</span>
+          <div id="top10-toolbar" class="flex items-center gap-2 shrink-0">
             <button type="button" id="btn-top10-rules"
               onclick="window.appActions.toggleTop10FormulaInfo()"
               class="cv-top10-info-btn"
-              style="min-height:44px;padding:0 12px;"
+              style="min-height:40px;padding:0 12px;"
               aria-expanded="false"
               aria-controls="top10-formula-info">
               <i class="fa-solid fa-circle-info text-xs" style="color:#F5C518;" aria-hidden="true"></i>
               <span>Cách tính</span>
+            </button>
+            <button type="button" onclick="window.appActions.refreshWeeklyTop10()"
+              aria-label="Cập nhật bảng xếp hạng" title="Cập nhật bảng xếp hạng"
+              class="cv-top10-info-btn" style="min-height:40px;width:40px;padding:0;justify-content:center;">
+              <i class="fa-solid fa-rotate text-xs" aria-hidden="true"></i>
             </button>
           </div>
         </div>
@@ -9961,7 +10169,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           style="background:rgba(11,11,15,0.92);border:1px solid rgba(245,197,24,0.3);color:#D4D4D8;">
           <div class="flex flex-wrap items-center justify-between gap-2 text-white font-bold">
             <span><i class="fa-solid fa-scale-balanced mr-1.5" style="color:#F5C518;"></i>Phép tính xếp hạng máy chủ CineVerse</span>
-            <span id="top10-exact-window" class="text-[11px] font-semibold" style="color:#F5C518;"></span>
+            <span class="flex flex-wrap items-center gap-2 text-[11px] font-semibold" style="color:#F5C518;">
+              <span id="top10-exact-window"></span>
+              <span id="top10-updated-at" class="text-slate-400 font-normal">Đang đồng bộ…</span>
+            </span>
           </div>
           <p id="top10-formula-desc" class="leading-relaxed">
             Mỗi tài khoản xem tích lũy tối thiểu <strong class="text-white">10 phút</strong> trong tuần (Thứ Hai–Chủ nhật, múi giờ <code class="text-amber-300">Asia/Ho_Chi_Minh</code>) được tính tối đa <strong class="text-white">1 lượt hợp lệ/phim/tuần</strong>; loại trừ tài khoản kiểm thử và khách vãng lai theo cấu hình.
@@ -9974,15 +10185,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
       <div id="lobby-top10-body" aria-live="polite">
         <p role="status" class="py-2 text-sm text-slate-300">Đang tải bảng xếp hạng…</p>
-      </div>
-
-      <div id="lobby-top10-footer" class="mt-3 pt-2.5 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-[11px]" style="color:#A1A1AA;">
-        <span id="top10-footer-note">Dữ liệu thực từ máy chủ CineVerse • Múi giờ Asia/Ho_Chi_Minh</span>
-        <button type="button" onclick="window.appActions.refreshWeeklyTop10()"
-          class="cv-top10-info-btn" style="min-height:44px;padding:0 12px;">
-          <i class="fa-solid fa-rotate text-[11px]" aria-hidden="true"></i>
-          <span>Cập nhật bảng</span>
-        </button>
       </div>
     </section>
 
@@ -10005,7 +10207,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     <section id="lobby-special-section" class="space-y-3" aria-label="Phòng Sweetbox và Phòng Stream">
       <div class="flex items-center justify-between gap-2">
         <h2 class="cv-serif text-xl sm:text-2xl font-bold text-white">Không gian riêng tư</h2>
-        <span class="text-xs" style="color:#A1A1AA;">Trải nghiệm 2 người &amp; phòng xem chung nhóm</span>
       </div>
       <div id="lobby-special-rooms" class="cv-special-grid"></div>
     </section>
@@ -10036,7 +10237,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       </div>
       <div class="max-w-7xl mx-auto mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
         <span>© 2026 CineVerse Lotte • Trải nghiệm điện ảnh trực tuyến thế hệ mới</span>
-        <span>Hỗ trợ trực tuyến góc dưới bên phải màn hình • Múi giờ Asia/Ho_Chi_Minh (GMT+7)</span>
       </div>
     </footer>
 
@@ -10056,7 +10256,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       <div class="px-4 py-3.5 border-b border-white/10 flex items-center justify-between gap-2">
         <div>
           <h2 id="mobile-rooms-sheet-title" class="cv-serif text-lg font-bold text-white">Chọn phòng chiếu</h2>
-          <p class="text-[11px]" style="color:#A1A1AA;">Chọn 1 trong 6 phòng thường để xem trên màn chiếu</p>
         </div>
         <button type="button" id="mobile-rooms-sheet-close" onclick="window.appActions.closeMobileRoomsSheet()"
           aria-label="Đóng danh sách phòng"
@@ -41955,9 +42154,9 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
         return discoverCardsHtml ? `
           <div id="lobby-discover-movies" class="${withTopDivider ? "mt-6 pt-5 border-t border-white/10" : ""}">
-            <div class="flex items-start sm:items-center justify-between gap-2 mb-1">
-              <h3 class="cv-serif text-lg sm:text-xl font-bold text-white min-w-0">Khám phá phim <span class="block sm:inline text-xs font-sans font-normal text-slate-400 mt-0.5 sm:mt-0 sm:ml-1">(${discoverMovies.length} phim ngẫu nhiên • Tự chạy vòng lặp)</span></h3>
-              <button type="button" onclick="window.appActions.reshuffleDiscoverMovies()" class="cv-top10-info-btn text-[11px] inline-flex items-center gap-1.5 whitespace-nowrap shrink-0" title="Đổi 10 phim gợi ý ngẫu nhiên khác từ Kho phim">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <h3 class="cv-serif text-lg sm:text-xl font-bold text-white min-w-0">Khám phá phim</h3>
+              <button type="button" onclick="window.appActions.reshuffleDiscoverMovies()" class="cv-top10-info-btn text-[11px] inline-flex items-center gap-1.5 whitespace-nowrap shrink-0" title="Đổi gợi ý phim mới">
                 <i class="fa-solid fa-shuffle text-[10px]"></i>
                 <span>Đổi gợi ý</span>
               </button>
@@ -41973,10 +42172,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
       // 1. Trạng thái Đang tải
       const toolbarEl = document.getElementById("top10-toolbar");
-      const footerEl = document.getElementById("lobby-top10-footer");
       if (state.top10.status === "loading" || state.top10.status === "idle") {
-        if (toolbarEl) toolbarEl.style.display = "";
-        if (footerEl) footerEl.style.display = "none";
+        if (toolbarEl) toolbarEl.style.display = "none";
         body.innerHTML = `
           <div class="space-y-4">
             <p role="status" class="py-1 text-sm text-slate-300">Đang tải bảng xếp hạng…</p>
@@ -41984,14 +42181,12 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           </div>
         `;
         window.CineVerseMotion?.initFocusCarousel?.();
-        if (footerNoteEl) footerNoteEl.textContent = "Đang tải dữ liệu xếp hạng thực tế từ máy chủ CineVerse…";
         return;
       }
 
       // 2. Trạng thái Lỗi tải
       if (state.top10.status === "error" && !data) {
-        if (toolbarEl) toolbarEl.style.display = "";
-        if (footerEl) footerEl.style.display = "";
+        if (toolbarEl) toolbarEl.style.display = "flex";
         body.innerHTML = `
           <div class="space-y-4">
             <div class="rounded-2xl p-5 sm:p-6 text-center space-y-3" style="background:rgba(20,20,28,0.86);border:1px solid rgba(229,9,20,0.35);">
@@ -41999,7 +42194,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 <i class="fa-solid fa-triangle-exclamation text-lg" aria-hidden="true"></i>
               </div>
               <div class="space-y-1">
-                <h3 class="text-sm sm:text-base font-extrabold text-white">Không tải được Top 10 tuần này</h3>
+                <h3 class="text-sm sm:text-base font-extrabold text-white">Không tải được bảng xếp hạng</h3>
                 <p class="text-xs max-w-md mx-auto" style="color:#A1A1AA;">${escapeHTML(state.top10.error || "Kết nối máy chủ xếp hạng gián đoạn. Vui lòng thử lại.")}</p>
               </div>
               <button type="button" onclick="window.appActions.refreshWeeklyTop10()"
@@ -42012,7 +42207,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           </div>
         `;
         window.CineVerseMotion?.initFocusCarousel?.();
-        if (footerNoteEl) footerNoteEl.textContent = "Tải bảng xếp hạng thất bại • Bấm Thử lại để đồng bộ lại.";
         return;
       }
 
@@ -42032,11 +42226,16 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       resolvedItems.forEach(item => lastShownRanks.set(item.movieId, item.displayRank));
       window.__resolvedTop10ItemsById = nextLookup;
 
-      // 3. Trạng thái Chưa có lượt xem hợp lệ trong tuần -> Gọn + nút "Cách tính" + mục "Khám phá phim" (ngẫu nhiên 10 phim từ Kho Phim, loại trừ phim đang chiếu ở các phòng)
+      const headingEl = document.getElementById("top10-section-heading");
+      if (headingEl) {
+        headingEl.textContent = resolvedItems.length >= 10
+          ? "Top 10 tuần này"
+          : (resolvedItems.length > 0 ? `Top ${resolvedItems.length} tuần này` : "Top phim tuần này");
+      }
+
+      // 3. Trạng thái Chưa có lượt xem hợp lệ trong tuần
       if (resolvedItems.length === 0) {
         if (toolbarEl) toolbarEl.style.display = "none";
-        if (footerEl) footerEl.style.display = "none";
-
         body.innerHTML = `
           <div class="space-y-3">
             <div class="flex items-center justify-between gap-2">
@@ -42050,71 +42249,149 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         return;
       }
 
-      // 4. Trạng thái Có dữ liệu (1..10 phim thực tế)
-      if (toolbarEl) toolbarEl.style.display = "";
-      if (footerEl) footerEl.style.display = "";
+      // 4. Trạng thái Có dữ liệu -> Full-Width Adaptive Editorial Podium (1..10 phim thực tế)
+      if (toolbarEl) toolbarEl.style.display = "flex";
       const hasPrev = Boolean(data?.hasPreviousWeekData);
       const top1 = resolvedItems[0];
-      const rest = resolvedItems.slice(1, 10);
+      const podiumRunners = resolvedItems.slice(1, resolvedItems.length >= 5 ? 4 : resolvedItems.length);
+      const overflowItems = resolvedItems.length >= 5 ? resolvedItems.slice(4) : [];
+
       const top1EncodedId = encodeURIComponent(top1.movieId);
       const top1RankStr = String(top1.displayRank).padStart(2, "0");
       const top1MoveHtml = renderTop10MovementBadge(top1, hasPrev);
       const top1MetaParts = [top1.genre.split("•")[0].trim(), top1.year].filter(Boolean).join(" • ");
+      const top1Backdrop = getOptimizedPosterUrl(
+        typeof resolveMovieBackdrop === "function"
+          ? resolveMovieBackdrop(top1.title, top1.poster, "")
+          : top1.poster,
+        "w1280"
+      );
+      const top1PosterSrc = getOptimizedPosterUrl(
+        typeof resolveMoviePoster === "function"
+          ? resolveMoviePoster(top1.title, top1.poster, "")
+          : top1.poster,
+        "w780"
+      );
+      const top1PosterSrcset = buildResponsivePosterSrcset(top1PosterSrc, "card");
 
-      const top1FeaturedArt = typeof resolveMovieBackdrop === "function"
-        ? resolveMovieBackdrop(top1.title, top1.poster, "")
-        : top1.poster;
-      const featuredHtml = `
-        <article class="cv-top10-featured ${top1.rankChanged ? "cv-rank-changed" : ""}" aria-label="Hạng ${top1RankStr}: ${escapeHTML(top1.title)}">
-          <img src="${escapeHTML(getOptimizedPosterUrl(top1FeaturedArt, "w1280"))}" alt="${escapeHTML(top1.title)}" width="1280" height="720" loading="lazy" decoding="async"
+      const championHtml = `
+        <article class="cv-top-champion ${top1.rankChanged ? "cv-rank-changed" : ""}" data-rank="${top1.displayRank}" aria-label="Hạng ${top1RankStr}: ${escapeHTML(top1.title)}">
+          <img src="${escapeHTML(top1Backdrop)}" alt="" width="1280" height="720" loading="lazy" decoding="async"
             onerror="this.onerror=null;this.src='assets/web-logo.png';"
-            class="cv-top10-featured-bg" />
-          <div class="cv-top10-featured-overlay"></div>
+            class="cv-top-champion-bg" />
+          <div class="cv-top-champion-scrim"></div>
 
           <div class="relative z-10 p-4 sm:p-5 flex items-start justify-between gap-2">
-            <span class="cv-top10-featured-num">${top1RankStr}</span>
+            <span class="cv-top10-featured-num">#${top1RankStr}</span>
             ${top1.roomInfo
               ? `<span class="cv-top10-live-pill">
                   <span class="w-1.5 h-1.5 rounded-full animate-pulse" style="background:${top1.roomInfo.isShowing ? '#E50914' : '#F5C518'};"></span>
                   <span>${escapeHTML(top1.roomInfo.roomNumber)} • ${escapeHTML(top1.roomInfo.statusText)} • ${escapeHTML(top1.roomInfo.seatText)}</span>
                 </span>`
-              : `<span class="px-2.5 py-1 rounded-full text-[10px] font-bold" style="background:rgba(11,11,15,0.78);border:1px solid rgba(255,255,255,0.16);color:#E4E4E7;">Kho Phim CineVerse</span>`}
+              : ""}
           </div>
 
-          <div class="relative z-10 p-4 sm:p-5 space-y-2.5">
-            <div class="space-y-1">
-              <h3 class="cv-serif text-xl sm:text-2xl font-bold text-white leading-tight line-clamp-2">${escapeHTML(top1.title)}</h3>
-              <div class="cv-top10-meta-line text-xs" style="color:#D4D4D8;">
-                ${top1MetaParts ? `<span>${escapeHTML(top1MetaParts)}</span><span aria-hidden="true">•</span>` : ""}
-                <span class="font-semibold text-white">${escapeHTML(formatTop10ViewsText(top1.validViews))}</span>
-                ${top1MoveHtml}
-              </div>
+          <div class="relative z-10 p-4 sm:p-5 flex items-end gap-4">
+            <div class="cv-top-champion-poster">
+              <img src="${escapeHTML(top1PosterSrc)}" ${top1PosterSrcset ? `srcset="${escapeHTML(top1PosterSrcset)}" sizes="(max-width:640px) 96px, 112px"` : ""} alt="${escapeHTML(top1.title)}" width="342" height="513" loading="lazy" decoding="async"
+                onerror="this.onerror=null;this.src='assets/web-logo.png';this.removeAttribute('srcset');"
+                class="w-full h-full object-cover" />
             </div>
-
-            <div class="flex flex-wrap items-center gap-2.5 pt-1">
-              <button type="button"
-                onclick="window.appActions.openTop10PrimaryAction('${escapeHTML(top1EncodedId)}')"
-                class="cv-top10-cta-primary flex-1 sm:flex-none">
-                <i class="fa-solid ${escapeHTML(top1.primaryIcon)}" aria-hidden="true"></i>
-                <span>${escapeHTML(top1.primaryLabel)}</span>
-              </button>
-              ${top1.primaryLabel !== "Xem chi tiết" ? `
+            <div class="min-w-0 flex-1 space-y-2">
+              <div class="space-y-1">
+                <h3 class="cv-serif text-xl sm:text-2xl lg:text-3xl font-bold text-white leading-tight line-clamp-2">${escapeHTML(top1.title)}</h3>
+                <div class="cv-top10-meta-line text-xs" style="color:#E4E4E7;">
+                  ${top1MetaParts ? `<span>${escapeHTML(top1MetaParts)}</span><span aria-hidden="true">•</span>` : ""}
+                  <span class="font-bold text-amber-300 tabular-nums">${escapeHTML(formatTop10ViewsText(top1.validViews))}</span>
+                  ${top1MoveHtml}
+                </div>
+              </div>
+              ${top1.synopsis ? `<p class="hidden sm:line-clamp-2 text-xs text-slate-300/85 leading-relaxed">${escapeHTML(top1.synopsis)}</p>` : ""}
+              <div class="flex flex-wrap items-center gap-2.5 pt-0.5">
                 <button type="button"
-                  onclick="window.appActions.openTop10MovieDetail('${escapeHTML(top1EncodedId)}')"
-                  class="cv-top10-cta-secondary">
-                  <span>Chi tiết</span>
-                  <i class="fa-solid fa-chevron-right text-[10px]" aria-hidden="true"></i>
+                  onclick="window.appActions.openTop10PrimaryAction('${escapeHTML(top1EncodedId)}')"
+                  class="cv-top10-cta-primary">
+                  <i class="fa-solid ${escapeHTML(top1.primaryIcon)}" aria-hidden="true"></i>
+                  <span>${escapeHTML(top1.primaryLabel)}</span>
                 </button>
-              ` : ""}
+                ${top1.primaryLabel !== "Xem chi tiết" ? `
+                  <button type="button"
+                    onclick="window.appActions.openTop10MovieDetail('${escapeHTML(top1EncodedId)}')"
+                    class="cv-top10-cta-secondary">
+                    <span>Chi tiết</span>
+                    <i class="fa-solid fa-chevron-right text-[10px]" aria-hidden="true"></i>
+                  </button>
+                ` : ""}
+              </div>
             </div>
           </div>
         </article>
       `;
 
+      const renderRunnerCardHtml = (item) => {
+        const encId = encodeURIComponent(item.movieId);
+        const rankStr = String(item.displayRank).padStart(2, "0");
+        const rankColor = item.displayRank === 2 ? "#F4F4F5" : "#E5C158";
+        const moveHtml = renderTop10MovementBadge(item, hasPrev);
+        const metaParts = [item.genre.split("•")[0].trim(), item.year].filter(Boolean).join(" • ");
+        const runnerBg = getOptimizedPosterUrl(
+          typeof resolveMovieBackdrop === "function"
+            ? resolveMovieBackdrop(item.title, item.poster, "")
+            : item.poster,
+          "w780"
+        );
+        const runnerPoster = getOptimizedPosterUrl(
+          typeof resolveMoviePoster === "function"
+            ? resolveMoviePoster(item.title, item.poster, "")
+            : item.poster,
+          "w780"
+        );
+        const runnerSrcset = buildResponsivePosterSrcset(runnerPoster, "card");
+        const liveBadgeHtml = item.roomInfo
+          ? `<span class="cv-top10-live-pill">
+              <span class="w-1.5 h-1.5 rounded-full" style="background:${item.roomInfo.isShowing ? '#E50914' : '#F5C518'};"></span>
+              <span>${escapeHTML(item.roomInfo.roomNumber)} • ${escapeHTML(item.roomInfo.statusText)}</span>
+            </span>`
+          : "";
+        return `
+          <article class="cv-top-runner-card ${item.rankChanged ? "cv-rank-changed" : ""}" data-rank="${item.displayRank}">
+            <img src="${escapeHTML(runnerBg)}" alt="" width="780" height="439" loading="lazy" decoding="async"
+              onerror="this.style.display='none';"
+              class="cv-top-runner-bg" />
+            <div class="cv-top-runner-scrim"></div>
+            <button type="button"
+              onclick="window.appActions.openTop10PrimaryAction('${escapeHTML(encId)}')"
+              class="cv-top-runner-main"
+              aria-label="Hạng ${rankStr}: ${escapeHTML(item.title)} — ${escapeHTML(item.primaryLabel)}">
+              <div class="cv-top-runner-poster">
+                <img src="${escapeHTML(runnerPoster)}" ${runnerSrcset ? `srcset="${escapeHTML(runnerSrcset)}" sizes="(max-width:640px) 78px, 92px"` : ""} alt="${escapeHTML(item.title)}" width="342" height="513" loading="lazy" decoding="async"
+                  onerror="this.onerror=null;this.src='assets/web-logo.png';this.removeAttribute('srcset');"
+                  class="w-full h-full object-cover" />
+              </div>
+              <div class="min-w-0 flex-1 space-y-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="cv-serif italic text-2xl sm:text-[26px] font-extrabold leading-none" style="color:${rankColor};">#${rankStr}</span>
+                  ${liveBadgeHtml}
+                </div>
+                <h3 class="cv-serif text-base sm:text-lg lg:text-xl font-bold text-white leading-snug line-clamp-2">${escapeHTML(item.title)}</h3>
+                <div class="cv-top10-meta-line text-xs" style="color:#D4D4D8;">
+                  ${metaParts ? `<span>${escapeHTML(metaParts)}</span><span aria-hidden="true">•</span>` : ""}
+                  <span class="font-bold text-white tabular-nums">${escapeHTML(formatTop10ViewsText(item.validViews))}</span>
+                  ${moveHtml}
+                </div>
+                ${item.synopsis ? `<p class="line-clamp-2 text-[11.5px] text-slate-300/80 leading-relaxed">${escapeHTML(item.synopsis)}</p>` : ""}
+              </div>
+              <span class="shrink-0 w-9 h-9 rounded-full flex items-center justify-center border border-white/15 bg-white/5 text-amber-300" aria-hidden="true">
+                <i class="fa-solid ${escapeHTML(item.primaryIcon || 'fa-chevron-right')} text-xs"></i>
+              </span>
+            </button>
+          </article>
+        `;
+      };
+
       const renderRowHtml = (item) => {
         const encId = encodeURIComponent(item.movieId);
         const rankStr = String(item.displayRank).padStart(2, "0");
-        const numCls = item.displayRank === 2 ? "top-2" : item.displayRank === 3 ? "top-3" : "";
         const moveHtml = renderTop10MovementBadge(item, hasPrev);
         const liveBadgeHtml = item.roomInfo
           ? `<span class="cv-top10-live-pill">
@@ -42122,23 +42399,20 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               <span>${escapeHTML(item.roomInfo.roomNumber)} • ${escapeHTML(item.roomInfo.statusText)}</span>
             </span>`
           : "";
-
         return `
-          <div class="cv-top10-row ${item.rankChanged ? "cv-rank-changed" : ""}">
+          <div class="cv-top10-row ${item.rankChanged ? "cv-rank-changed" : ""}" data-rank="${item.displayRank}">
             <button type="button"
               onclick="window.appActions.openTop10PrimaryAction('${escapeHTML(encId)}')"
               class="cv-top10-row-main"
               aria-label="Hạng ${rankStr}: ${escapeHTML(item.title)} — ${escapeHTML(item.primaryLabel)}">
-              <span class="cv-top10-row-num ${numCls}">${rankStr}</span>
+              <span class="cv-top10-row-num">${rankStr}</span>
               <div class="cv-top10-row-thumb">
                 <img src="${escapeHTML(getOptimizedPosterUrl(typeof resolveMovieBackdrop === "function" ? resolveMovieBackdrop(item.title, item.poster, "") : item.poster, "w780"))}" alt="" width="72" height="48" loading="lazy" decoding="async"
                   onerror="this.onerror=null;this.src='assets/web-logo.png';"
                   class="w-full h-full object-cover" />
               </div>
               <div class="min-w-0 flex-1 space-y-1">
-                <div class="flex items-start justify-between gap-1.5">
-                  <span class="text-[13px] font-extrabold text-white leading-snug line-clamp-2">${escapeHTML(item.title)}</span>
-                </div>
+                <span class="text-[13px] font-extrabold text-white leading-snug line-clamp-2">${escapeHTML(item.title)}</span>
                 <div class="cv-top10-meta-line text-[11px]" style="color:#A1A1AA;">
                   <span class="text-slate-200 font-medium">${escapeHTML(formatTop10ViewsText(item.validViews))}</span>
                   ${moveHtml}
@@ -42146,93 +42420,23 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 </div>
               </div>
             </button>
-            ${item.primaryLabel !== "Xem chi tiết" ? `
-              <button type="button"
-                onclick="window.appActions.openTop10MovieDetail('${escapeHTML(encId)}')"
-                class="cv-top10-row-detail-btn"
-                aria-label="Xem chi tiết ${escapeHTML(item.title)}"
-                title="Xem chi tiết phim">
-                <i class="fa-solid fa-chevron-right text-xs" aria-hidden="true"></i>
-              </button>
-            ` : ""}
           </div>
         `;
       };
 
-      let rightColumnsHtml = "";
-      if (rest.length > 0) {
-        // Desktop: chia cột trái (02–05) và cột phải (06–10) giữ thứ tự đọc dọc rõ ràng
-        const col1Count = rest.length === 9 ? 4 : Math.ceil(rest.length / 2);
-        const col1Items = rest.slice(0, col1Count);
-        const col2Items = rest.slice(col1Count);
-        rightColumnsHtml = `
-          <div class="cv-top10-columns">
-            <div class="cv-top10-col">${col1Items.map(renderRowHtml).join("")}</div>
-            ${col2Items.length > 0 ? `<div class="cv-top10-col">${col2Items.map(renderRowHtml).join("")}</div>` : ""}
-          </div>
-        `;
-      }
-
-      const top10CarouselHtml = `
-        <div class="cv-carousel-shell">
-          <button type="button" class="cv-carousel-nav-btn absolute is-prev" onclick="window.CineVerseMotion?.scrollCarousel(this, -1)" aria-label="Cuộn Top 10 sang trái">‹</button>
-          <div class="cv-focus-carousel cv-top10-poster-rail" data-focus-carousel="top10" role="region" aria-label="Băng chuyền poster Top 10 tuần này">
-            ${resolvedItems.map((it) => {
-              const encItId = encodeURIComponent(it.movieId);
-              const rnk = String(it.displayRank).padStart(2, "0");
-              const moveHtml = renderTop10MovementBadge(it, hasPrev);
-              const roomPill = it.roomInfo
-                ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold" style="background:rgba(11,6,7,0.82);border:1px solid rgba(229,9,20,0.45);color:#FFE4E6;">${escapeHTML(it.roomInfo.roomNumber)}</span>`
-                : "";
-              const top10CardSrcset = buildResponsivePosterSrcset(it.poster, "card");
-              return `
-                <button type="button"
-                  data-carousel-card
-                  data-rank="${it.displayRank}"
-                  onclick="window.appActions.openTop10PrimaryAction('${escapeHTML(encItId)}')"
-                  class="cv-top10-poster-card ${it.rankChanged ? "cv-rank-changed" : ""}"
-                  aria-label="Hạng ${rnk}: ${escapeHTML(it.title)} — ${escapeHTML(it.primaryLabel)}">
-                  <img src="${escapeHTML(getOptimizedPosterUrl(it.poster, "w780"))}" ${top10CardSrcset ? `srcset="${escapeHTML(top10CardSrcset)}" sizes="(max-width:640px) 48vw, (max-width:1024px) 30vw, 260px"` : ""} alt="${escapeHTML(it.title)}" width="342" height="513" loading="lazy" decoding="async"
-                    onerror="this.onerror=null;this.src='assets/web-logo.png';this.removeAttribute('srcset');"
-                    style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 20%;" />
-                  <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(11,6,7,0.52) 0%, rgba(11,6,7,0.08) 38%, rgba(11,6,7,0.94) 100%);pointer-events:none;"></div>
-                  <div class="relative z-10 flex items-center justify-between gap-1.5">
-                    <span class="cv-serif italic text-2xl font-extrabold" style="color:${it.displayRank === 1 ? '#F5C518' : it.displayRank === 2 ? '#F4F4F5' : '#E5C158'};text-shadow:0 2px 12px rgba(0,0,0,0.9);">#${rnk}</span>
-                    ${roomPill}
-                  </div>
-                  <div class="relative z-10 space-y-1">
-                    <div class="cv-serif italic text-sm font-bold text-white leading-tight line-clamp-2">${escapeHTML(it.title)}</div>
-                    <div class="flex items-center gap-1.5 text-[11px] font-medium" style="color:rgba(255,255,255,0.75);">
-                      <span>${escapeHTML(formatTop10ViewsText(it.validViews))}</span>
-                      ${moveHtml}
-                    </div>
-                  </div>
-                </button>
-              `;
-            }).join("")}
-          </div>
-          <button type="button" class="cv-carousel-nav-btn absolute is-next" onclick="window.CineVerseMotion?.scrollCarousel(this, 1)" aria-label="Cuộn Top 10 sang phải">›</button>
+      const podiumHtml = `
+        <div class="cv-top-podium ${podiumRunners.length === 0 ? "is-single" : ""}">
+          ${championHtml}
+          ${podiumRunners.length > 0 ? `<div class="cv-top-runners">${podiumRunners.map(renderRunnerCardHtml).join("")}</div>` : ""}
         </div>
+        ${overflowItems.length > 0 ? `<div class="cv-top-more-grid">${overflowItems.map(renderRowHtml).join("")}</div>` : ""}
       `;
 
       body.innerHTML = `
-        ${top10CarouselHtml}
+        ${podiumHtml}
         ${buildDiscoverSectionHtml(true)}
       `;
       window.CineVerseMotion?.initFocusCarousel?.();
-
-      const headingEl = document.getElementById("top10-section-heading");
-      if (headingEl) {
-        headingEl.textContent = resolvedItems.length >= 10
-          ? "Top 10 tuần này"
-          : (resolvedItems.length > 0 ? `Top ${resolvedItems.length} tuần này` : "Top phim tuần này");
-      }
-      if (footerNoteEl) {
-        const countLabel = resolvedItems.length < 10
-          ? `Bảng xếp hạng Top ${resolvedItems.length} phim dẫn đầu lượt xem hợp lệ tuần này`
-          : `Bảng xếp hạng Top 10 phim dẫn đầu lượt xem hợp lệ tuần này`;
-        footerNoteEl.textContent = `${countLabel} • Múi giờ ${data?.timezone || "Asia/Ho_Chi_Minh"}`;
-      }
     }
 
     function isPlaybackActiveInCurrentRoom() {
@@ -42941,6 +43145,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           histEl.innerHTML = history.map((ev, idx) => `
             <div class="cv-wp-reel-slot" data-wp-slot-idx="${idx}" style="--li:${idx}">
               <div class="cv-wp-slot-frame" aria-hidden="true"></div>
+              <div class="cv-wp-hero-sheen" aria-hidden="true"></div>
               ${renderWatchPartyTicketCardHtml(ev)}
               <div class="cv-wp-slot-reflection" aria-hidden="true"></div>
             </div>
@@ -45606,10 +45811,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     })();
 
     // =========================================================================
-    // CINEVERSE LOTTE — LỊCH SỬ BUỔI HẸN (CINERAMA 2.39:1 APERTURE & CHRONOS FAN)
-    // Stage 1: Màn trập Anamorphic CinemaScope mở dọc + Tia sáng vàng kim ngang
-    // Stage 2: Các tấm vé trồi từ khoang 3D (-460px -> 0) theo sóng quạt đối xứng 2 cánh
-    // Settled: Cung tròn nhà hát đối xứng hai bên + Vật lý dt 60/120fps không đọc DOM
+    // CINEVERSE LOTTE — LỊCH SỬ BUỔI HẸN (PRISM LIGHT-PORTAL & KINETIC COLLECTOR FAN)
+    // Stage 1: Light-Portal mở khẩu độ sáng + Tia Prism Laser & Spotlight Cone
+    // Stage 2: Thẻ chính trồi mạnh + 2 cánh vé quạt đối xứng bung nhịp 60/120fps
+    // Settled: Ánh kim lướt thẻ trung tâm + Thanh chấm tương tác + Không cắt góc
     // =========================================================================
     (function initCineVerseWatchPartyHistoryStage() {
       const reducedMotionMQ = window.matchMedia
@@ -45634,14 +45839,15 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         lastRenderedCount: -1,
         stepDeg: 46,
         radius: 720,
-        cachedCardH: 220,
+        cachedCardH: 256,
         rafId: 0,
         phaseTimer1: 0,
         animStartMs: 0,
         lastTickMs: 0,
         inIntroAnim: false,
         dragging: false,
-        inView: true
+        inView: true,
+        resizeObs: null
       };
 
       const getEls = () => ({
@@ -45652,6 +45858,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         viewport: document.getElementById("wp-hist-reel-viewport"),
         center: document.getElementById("wp-history-list"),
         stats: document.getElementById("wp-hist-stats"),
+        dots: document.getElementById("wp-hist-dots"),
         indicator: document.getElementById("wp-hist-active-indicator"),
         btnRing: document.getElementById("btn-wp-hist-mode-ring"),
         btnList: document.getElementById("btn-wp-hist-mode-list")
@@ -45687,34 +45894,77 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         }
       }
 
-      // Chỉ đọc offsetHeight bên ngoài rAF (khi mở, đổi chế độ, hoặc resize) để tránh layout thrashing
+      function bindTicketResizeObserver(targetTicket) {
+        if (typeof ResizeObserver !== "function" || !targetTicket) return;
+        if (!st.resizeObs) {
+          st.resizeObs = new ResizeObserver(() => {
+            const details = document.getElementById("wp-history-details");
+            if (details && details.open && st.viewMode === "ring") {
+              measureStageMetrics();
+            }
+          });
+        }
+        st.resizeObs.disconnect();
+        st.resizeObs.observe(targetTicket);
+      }
+
+      // Chỉ đọc offsetHeight/scrollHeight bên ngoài rAF để tránh layout thrashing & tuyệt đối không cắt đỉnh/đáy thẻ
       function measureStageMetrics() {
         const { viewport, center } = getEls();
         const isMobile = window.innerWidth < 640;
         st.radius = isMobile ? 340 : 720;
         if (!viewport || !center || st.viewMode !== "ring") return;
-        const front = center.querySelector(".cv-wp-reel-slot.is-front .cv-wp-ticket") ||
-                      center.querySelector(".cv-wp-reel-slot:not(.is-ghost) .cv-wp-ticket");
-        const measuredH = front ? front.offsetHeight : (isMobile ? 410 : 220);
-        if (measuredH > 40) {
-          st.cachedCardH = measuredH;
-          viewport.style.minHeight = `${Math.max(276, measuredH + 56)}px`;
+        const tickets = Array.from(center.querySelectorAll(".cv-wp-reel-slot:not(.is-ghost) .cv-wp-ticket"));
+        let maxH = 0;
+        for (const tk of tickets) {
+          const h = Math.max(tk.offsetHeight || 0, tk.scrollHeight || 0);
+          if (h > maxH) maxH = h;
         }
+        if (maxH <= 40) maxH = isMobile ? 410 : 256;
+        st.cachedCardH = maxH;
+        const padV = isMobile ? 76 : 92;
+        const floorH = isMobile ? 468 : 332;
+        viewport.style.minHeight = `${Math.max(floorH, maxH + padV)}px`;
+        const frontTk = center.querySelector(".cv-wp-reel-slot.is-front .cv-wp-ticket") || tickets[0];
+        if (frontTk) bindTicketResizeObserver(frontTk);
+      }
+
+      function triggerHeroSheen(slotEl) {
+        if (!slotEl || isReduced()) return;
+        slotEl.classList.remove("is-sheen-sweep");
+        void slotEl.offsetWidth;
+        slotEl.classList.add("is-sheen-sweep");
       }
 
       function syncFrontDomIfChanged(realCount) {
         if (st.lastRenderedActiveIdx === st.activeIdx && st.lastRenderedCount === realCount) return;
+        const prevIdx = st.lastRenderedActiveIdx;
         st.lastRenderedActiveIdx = st.activeIdx;
         st.lastRenderedCount = realCount;
-        const { indicator, center } = getEls();
+        const { indicator, center, dots } = getEls();
         if (indicator) {
           const idxHuman = String(Math.min(Math.max(1, realCount), st.activeIdx + 1)).padStart(2, "0");
           const totHuman = String(Math.max(1, realCount)).padStart(2, "0");
-          indicator.textContent = `Vé ${idxHuman} / ${totHuman} • Kéo ngang hoặc bấm vé bên để xem`;
+          indicator.textContent = `${idxHuman} / ${totHuman}`;
+        }
+        if (dots) {
+          if (dots.childElementCount !== realCount) {
+            dots.innerHTML = realCount > 1
+              ? Array.from({ length: realCount }, (_, i) =>
+                  `<button type="button" class="cv-wp-dot ${i === st.activeIdx ? "is-active" : ""}" data-wp-dot="${i}" onclick="window.CineVerseHistoryStage?.focusSlotByIndex(${i})" aria-label="Xem vé ${i + 1}"></button>`
+                ).join("")
+              : "";
+          } else {
+            Array.from(dots.children).forEach((d, i) => d.classList.toggle("is-active", i === st.activeIdx));
+          }
         }
         if (center) {
           center.querySelectorAll(".cv-wp-reel-slot:not(.is-ghost)").forEach((slot, i) => {
-            slot.classList.toggle("is-front", i === st.activeIdx);
+            const isFrontNow = i === st.activeIdx;
+            slot.classList.toggle("is-front", isFrontNow);
+            if (isFrontNow && !st.inIntroAnim && prevIdx !== st.activeIdx) {
+              triggerHeroSheen(slot);
+            }
           });
         }
       }
@@ -45724,6 +45974,14 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         let rel = ((rawDeg % totalSpan) + totalSpan) % totalSpan;
         if (rel > totalSpan * 0.5) rel -= totalSpan;
         return rel;
+      }
+
+      function springOutNormalized(u) {
+        if (u <= 0) return 0;
+        if (u >= 1) return 1;
+        const damped = 1 - Math.exp(-5.4 * u) * Math.cos(4.1 * u);
+        const norm = 1 - Math.exp(-5.4) * Math.cos(4.1);
+        return Math.min(1.06, damped / norm);
       }
 
       function layoutRingFrame(nowMs = performance.now()) {
@@ -45739,7 +45997,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         const useWrap = count >= 3;
         const totalSpan = count * settledStep;
 
-        const OPEN_TOTAL_MS = 1380;
+        const OPEN_TOTAL_MS = 1080;
         const elapsed = st.inIntroAnim ? Math.max(0, nowMs - st.animStartMs) : OPEN_TOTAL_MS;
 
         let frontSlotIdx = 0;
@@ -45766,8 +46024,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
           const settledOpacity = isGhost
             ? 0
-            : (absBase < 8 ? 1 : Math.max(0.24, 0.58 - Math.pow(absBase / 106, 1.15) * 0.34));
-          const settledScale = absBase < 8 ? 1 : Math.max(0.75, 0.88 - Math.min(0.16, absBase * 0.0022));
+            : (absBase < 8 ? 1 : Math.max(0.28, 0.62 - Math.pow(absBase / 106, 1.15) * 0.34));
+          const settledScale = absBase < 8 ? 1 : Math.max(0.76, 0.89 - Math.min(0.15, absBase * 0.002));
 
           let effDeg = baseRelDeg;
           let extraZ = 0;
@@ -45779,23 +46037,31 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
           if (st.inIntroAnim) {
             const rank = Math.min(4, Math.round(absBase / Math.max(1, settledStep)));
-            const delayMs = rank * 65;
-            const durMs = OPEN_TOTAL_MS - 4 * 65; // 1120ms: toàn bộ các thẻ kết thúc đúng tại 1380ms
-            const u = Math.max(0, Math.min(1, (elapsed - delayMs) / durMs));
-            const e = 1 - Math.pow(1 - u, 4); // Quartic out C1 mượt mà, đạo hàm tại u=1 bằng 0
-            const arcLift = Math.sin(u * Math.PI) * (1 - u) * 22;
-
-            effDeg = baseRelDeg * e;
-            extraZ = (1 - e) * (-460 - rank * 52);
-            extraY = (1 - e) * (28 + rank * 8) - arcLift;
-            pitchX = (1 - e) * 24;
-            rollZ = (1 - e) * (effDeg >= 0 ? 5 : -5);
-            finalScale = settledScale * (0.78 + 0.22 * e);
-
-            if (isGhost) {
-              finalOpacity = 0.42 * Math.sin(u * Math.PI);
+            if (rank === 0) {
+              const uHero = Math.max(0, Math.min(1, elapsed / 540));
+              const eHero = 1 - Math.pow(1 - uHero, 4);
+              effDeg = 0;
+              extraZ = (1 - eHero) * -280;
+              extraY = (1 - eHero) * 14;
+              pitchX = (1 - eHero) * 12;
+              finalScale = settledScale * (0.86 + 0.14 * eHero);
+              finalOpacity = settledOpacity * Math.min(1, uHero * 3.2);
             } else {
-              finalOpacity = settledOpacity * Math.min(1, u * 2.6);
+              const delayMs = 70 + rank * 55;
+              const durMs = Math.max(520, OPEN_TOTAL_MS - delayMs);
+              const u = Math.max(0, Math.min(1, (elapsed - delayMs) / durMs));
+              const eSpring = springOutNormalized(u);
+              const eEase = 1 - Math.pow(1 - u, 4);
+
+              effDeg = baseRelDeg * eSpring;
+              extraZ = (1 - eEase) * (-360 - rank * 44);
+              extraY = (1 - eEase) * (18 + rank * 6);
+              pitchX = (1 - eEase) * 16;
+              rollZ = (1 - eEase) * (baseRelDeg >= 0 ? 4 : -4);
+              finalScale = settledScale * (0.80 + 0.20 * eEase);
+              finalOpacity = isGhost
+                ? 0.44 * Math.sin(u * Math.PI)
+                : settledOpacity * Math.min(1, u * 2.8);
             }
           }
 
@@ -45846,6 +46112,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         }
         measureStageMetrics();
         layoutRingFrame(performance.now());
+        if (center) {
+          const heroSlot = center.querySelector(".cv-wp-reel-slot.is-front");
+          triggerHeroSheen(heroSlot);
+        }
       }
 
       function tickLoop(now) {
@@ -45865,7 +46135,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
         if (st.inIntroAnim) {
           const elapsed = now - st.animStartMs;
-          if (elapsed >= 1380) {
+          if (elapsed >= 1080) {
             settleNow();
             return;
           }
@@ -45874,7 +46144,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           return;
         }
 
-        // Chế độ xoay tương tác sau mở màn: lò xo hàm mũ độc lập tần số quét (60/120Hz mượt như nhau)
+        // Chế độ xoay tương tác sau mở màn: lò xo hàm mũ độc lập tần số quét (60/120Hz)
         const diff = st.targetRotAngle - st.rotAngle;
         if (Math.abs(diff) < 0.04 && !st.dragging) {
           st.rotAngle = st.targetRotAngle;
@@ -46043,13 +46313,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         const { stats } = getEls();
         const total = st.history.length;
         if (!stats) return;
-        const endedCount = st.history.filter((e) => e.status === "ended").length;
-        const cancelCount = st.history.filter((e) => e.status === "cancelled").length;
-        stats.innerHTML = [
-          `<span class="cv-wp-stat-pill tabular-nums" style="color:#F5C518;border-color:rgba(245,197,24,0.34);">${total} vé lưu trữ</span>`,
-          endedCount ? `<span class="cv-wp-stat-pill tabular-nums">${endedCount} đã chiếu xong</span>` : "",
-          cancelCount ? `<span class="cv-wp-stat-pill tabular-nums" style="color:#FDA4AF;">${cancelCount} đã hủy</span>` : ""
-        ].filter(Boolean).join("");
+        stats.innerHTML = `<span class="cv-wp-stat-pill tabular-nums" style="color:#F5C518;border-color:rgba(245,197,24,0.34);">${total} vé</span>`;
       }
 
       function syncHistoryItems(history = []) {
@@ -46137,7 +46401,6 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           window.addEventListener("pointerup", endDrag, { passive: true });
           window.addEventListener("pointercancel", endDrag, { passive: true });
 
-          // Cuộn touchpad ngang trên sân khấu 3D
           viewport.addEventListener("wheel", (e) => {
             if (st.viewMode !== "ring" || st.inIntroAnim) return;
             if (Math.abs(e.deltaX) > Math.abs(e.deltaY) + 4) {
