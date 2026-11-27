@@ -8385,15 +8385,11 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       --cv-stagger-step: 80ms;
       --cv-card-light-border: 1px solid rgba(255, 255, 255, 0.08);
       --cv-card-top-specular: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      transition:
+        --room-r var(--cv-dur-light) ease,
+        --room-g var(--cv-dur-light) ease,
+        --room-b var(--cv-dur-light) ease;
     }
-
-    /* Preset bảng màu khởi tạo theo phòng (sẽ được cập nhật động theo poster thực tế) */
-    [data-room-accent="room-1"] { --room-r: 234; --room-g: 158; --room-b: 38; }
-    [data-room-accent="room-2"] { --room-r: 214; --room-g: 36;  --room-b: 54; }
-    [data-room-accent="room-3"] { --room-r: 72;  --room-g: 149; --room-b: 239; }
-    [data-room-accent="room-4"] { --room-r: 155; --room-g: 93;  --room-b: 229; }
-    [data-room-accent="room-5"] { --room-r: 243; --room-g: 114; --room-b: 44; }
-    [data-room-accent="room-6"] { --room-r: 45;  --room-g: 198; --room-b: 146; }
 
     /* 1. QUY TẮC "MỘT NGUỒN SÁNG DUY NHẤT" (SINGLE LIGHT SOURCE) & NỀN #0b0607 */
     html,
@@ -8404,26 +8400,15 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     body.in-room-active #room-view {
       min-height: 100svh !important;
     }
-    #lobby-view[data-room-accent],
-    #netflix-billboard[data-room-accent] {
-      transition:
-        --room-r var(--cv-dur-light) ease,
-        --room-g var(--cv-dur-light) ease,
-        --room-b var(--cv-dur-light) ease;
-    }
     body:has(#lobby-view:not(.hidden)) #ambient-tuna-backdrop {
       background:
         radial-gradient(
           ellipse 78% 54% at 34% 22%,
-          rgba(var(--room-r), var(--room-g), var(--room-b), 0.13) 0%,
+          rgba(var(--room-r), var(--room-g), var(--room-b), 0.14) 0%,
           rgba(11, 6, 7, 0.94) 62%,
           var(--cv-bg-void) 100%
         ) !important;
-      transition:
-        --room-r var(--cv-dur-light) ease,
-        --room-g var(--cv-dur-light) ease,
-        --room-b var(--cv-dur-light) ease,
-        background var(--cv-dur-light) ease;
+      transition: background var(--cv-dur-light) ease;
     }
 
     /* Tắt 2 lớp ảnh blur(110px) nặng GPU cũ, thay bằng 1 lớp radial-gradient vật lý duy nhất */
@@ -8433,22 +8418,39 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
     .cv-single-light-bleed {
       position: absolute;
-      inset: -40px -24px -56px -24px;
+      inset: -72px -36px -96px -36px;
       z-index: 0;
       pointer-events: none;
       background:
         radial-gradient(
-          ellipse 62% 58% at var(--screen-light-x, 34%) var(--screen-light-y, 38%),
-          rgba(var(--room-r), var(--room-g), var(--room-b), 0.34) 0%,
-          rgba(var(--room-r), var(--room-g), var(--room-b), 0.12) 42%,
-          rgba(11, 6, 7, 0) 74%
+          ellipse 64% 60% at var(--screen-light-x, 34%) var(--screen-light-y, 38%),
+          rgba(var(--room-r), var(--room-g), var(--room-b), 0.38) 0%,
+          rgba(var(--room-r), var(--room-g), var(--room-b), 0.15) 44%,
+          rgba(11, 6, 7, 0) 76%
         );
       transition:
-        --room-r var(--cv-dur-light) ease,
-        --room-g var(--cv-dur-light) ease,
-        --room-b var(--cv-dur-light) ease,
         background var(--cv-dur-light) ease,
         opacity var(--cv-dur-light) ease;
+    }
+    #hero-stage-screen-box {
+      box-shadow:
+        0 0 52px -6px rgba(var(--room-r), var(--room-g), var(--room-b), 0.50),
+        0 18px 64px -10px rgba(var(--room-r), var(--room-g), var(--room-b), 0.32),
+        0 4px 20px rgba(0, 0, 0, 0.85) !important;
+      transition:
+        transform 300ms ease,
+        box-shadow var(--cv-dur-light) ease,
+        filter 600ms ease;
+    }
+    #lobby-view.is-cinema-zooming #hero-stage-screen-box {
+      filter: brightness(1.14);
+    }
+    .cv-seat-plane i {
+      border-top-color: rgba(var(--room-r), var(--room-g), var(--room-b), 0.45) !important;
+      transition:
+        transform 300ms ease,
+        opacity 300ms ease,
+        border-top-color var(--cv-dur-light) ease;
     }
     .cv-stage-auditorium::before {
       content: "";
@@ -8641,6 +8643,45 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     }
 
     /* 3. BĂNG CHUYỀN SCROLL-SNAP NÂNG TÂM ĐIỂM (TOP 10 & KHÁM PHÁ PHIM) */
+    .cv-carousel-shell {
+      position: relative;
+    }
+    .cv-carousel-nav-btn {
+      display: none;
+    }
+    @media (min-width: 768px) {
+      .cv-carousel-nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translate3d(0, -50%, 0);
+        z-index: 8;
+        width: 36px;
+        height: 36px;
+        border-radius: 999px;
+        background: rgba(11, 6, 7, 0.84);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        color: #FFFFFF;
+        font-size: 20px;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0.78;
+        transition:
+          transform 220ms var(--cv-ease-entrance),
+          opacity 220ms ease,
+          border-color 220ms ease;
+      }
+      .cv-carousel-nav-btn:hover {
+        opacity: 1;
+        transform: translate3d(0, -50%, 0) scale(1.06);
+        border-color: rgba(255, 255, 255, 0.34);
+      }
+      .cv-carousel-nav-btn.is-prev { left: 8px; }
+      .cv-carousel-nav-btn.is-next { right: 8px; }
+    }
     .cv-focus-carousel {
       display: flex !important;
       flex-wrap: nowrap !important;
@@ -8648,7 +8689,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       gap: 18px !important;
       overflow-x: auto;
       overflow-y: visible;
-      padding-top: 20px;
+      padding-top: 22px;
       padding-bottom: 18px;
       padding-inline: max(20px, calc(50% - 104px));
       scroll-snap-type: x mandatory;
@@ -8667,23 +8708,25 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       background: rgba(255, 255, 255, 0.16);
       border-radius: 999px;
     }
-    .cv-focus-carousel > [data-carousel-card] {
+    #lobby-view .cv-focus-carousel > [data-carousel-card] {
       flex: 0 0 clamp(166px, 20vw, 212px);
       aspect-ratio: 2 / 3;
       scroll-snap-align: center;
-      opacity: 0.9;
-      transform: translate3d(0, 0, 0) scale(1);
       will-change: transform, opacity;
       transition:
         transform 480ms var(--cv-ease-entrance),
         opacity 360ms ease,
         border-color 360ms ease !important;
     }
-    .cv-focus-carousel > [data-carousel-card].is-focal {
-      opacity: 1;
+    #lobby-view .cv-focus-carousel > [data-carousel-card]:not(.is-focal) {
+      opacity: 0.9 !important;
+      transform: translate3d(0, 0, 0) scale(1) !important;
+    }
+    #lobby-view .cv-focus-carousel > [data-carousel-card].is-focal {
+      opacity: 1 !important;
       transform: translate3d(0, -12px, 0) scale(1.06) !important;
       z-index: 4;
-      border-color: rgba(255, 255, 255, 0.22) !important;
+      border-color: rgba(255, 255, 255, 0.24) !important;
     }
     .cv-top10-poster-card {
       position: relative;
@@ -8976,7 +9019,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             <button type="button" data-nav-tab="tickets" onclick="window.appActions.openMemoryCapsuleModal()"
               class="cv-nav-link">
               <span>Tủ Vé NFT</span>
-              <span id="capsule-count-badge" class="hidden cv-nav-count-chip scramble" data-scramble-text="0" aria-label="0"><span aria-hidden="true">0</span></span>
+              <span id="capsule-count-badge" class="cv-nav-count-chip scramble" data-scramble-text="0" aria-label="0"><span aria-hidden="true">0</span></span>
             </button>
 
             <button type="button" id="btn-admin-panel" data-nav-tab="admin"
@@ -9047,7 +9090,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       <button type="button" data-nav-tab="tickets" onclick="window.appActions.openMemoryCapsuleModal(); window.appActions.toggleMobileNavMenu(false);"
         class="cv-nav-mobile-item">
         <span>Tủ Vé NFT</span>
-        <span id="mobile-capsule-count-badge" class="hidden cv-nav-count-chip scramble" data-scramble-text="0" aria-label="0"><span aria-hidden="true">0</span></span>
+        <span id="mobile-capsule-count-badge" class="cv-nav-count-chip scramble" data-scramble-text="0" aria-label="0"><span aria-hidden="true">0</span></span>
       </button>
       <button type="button" id="mobile-btn-admin-panel" data-nav-tab="admin"
         onclick="window.appActions.openAdminPanelModal(); window.appActions.toggleMobileNavMenu(false);"
@@ -34012,12 +34055,12 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       };
       const countBadge = document.getElementById("capsule-count-badge");
       if (countBadge) {
-        countBadge.classList.toggle("hidden", visibleCount === 0);
+        countBadge.classList.remove("hidden");
         syncScrambleChip(countBadge, String(visibleCount));
       }
       const mobCountBadge = document.getElementById("mobile-capsule-count-badge");
       if (mobCountBadge) {
-        mobCountBadge.classList.toggle("hidden", visibleCount === 0);
+        mobCountBadge.classList.remove("hidden");
         syncScrambleChip(mobCountBadge, String(visibleCount));
       }
 
@@ -40725,7 +40768,11 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 <span>Đổi gợi ý</span>
               </button>
             </div>
-            <div class="cv-discover-grid cv-focus-carousel" data-focus-carousel="discover" role="region" aria-label="Băng chuyền khám phá phim">${discoverCardsHtml}</div>
+            <div class="cv-carousel-shell">
+              <button type="button" class="cv-carousel-nav-btn is-prev" onclick="window.CineVerseMotion?.scrollCarousel(this, -1)" aria-label="Cuộn sang trái">‹</button>
+              <div class="cv-discover-grid cv-focus-carousel" data-focus-carousel="discover" role="region" aria-label="Băng chuyền khám phá phim">${discoverCardsHtml}</div>
+              <button type="button" class="cv-carousel-nav-btn is-next" onclick="window.CineVerseMotion?.scrollCarousel(this, 1)" aria-label="Cuộn sang phải">›</button>
+            </div>
           </div>` : `
           <div id="lobby-discover-movies" class="${withTopDivider ? "mt-5 pt-4 border-t border-white/10 " : ""}text-xs text-slate-400 py-2">Đang tải danh sách phim từ Kho phim...</div>`;
       };
@@ -40930,28 +40977,32 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       }
 
       const top10CarouselHtml = resolvedItems.length > 1 ? `
-        <div class="cv-focus-carousel cv-top10-poster-rail mb-3" data-focus-carousel="top10" role="region" aria-label="Băng chuyền poster Top 10 tuần này">
-          ${resolvedItems.map((it) => {
-            const encItId = encodeURIComponent(it.movieId);
-            const rnk = String(it.displayRank).padStart(2, "0");
-            return `
-              <button type="button"
-                data-carousel-card
-                onclick="window.appActions.openTop10PrimaryAction('${escapeHTML(encItId)}')"
-                class="cv-top10-poster-card"
-                aria-label="Hạng ${rnk}: ${escapeHTML(it.title)}">
-                <img src="${escapeHTML(getOptimizedPosterUrl(it.poster, "w342"))}" alt="${escapeHTML(it.title)}" width="342" height="513" loading="lazy" decoding="async"
-                  onerror="this.onerror=null;this.src='assets/web-logo.png';"
-                  style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />
-                <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(11,6,7,0.48) 0%, rgba(11,6,7,0.08) 38%, rgba(11,6,7,0.92) 100%);pointer-events:none;"></div>
-                <span class="relative z-10 cv-serif italic text-2xl font-extrabold" style="color:#F5C518;text-shadow:0 2px 12px rgba(0,0,0,0.9);">#${rnk}</span>
-                <div class="relative z-10 space-y-0.5">
-                  <div class="cv-serif italic text-sm font-bold text-white leading-tight line-clamp-2">${escapeHTML(it.title)}</div>
-                  <div class="text-[11px] font-medium" style="color:rgba(255,255,255,0.72);">${escapeHTML(formatTop10ViewsText(it.validViews))}</div>
-                </div>
-              </button>
-            `;
-          }).join("")}
+        <div class="cv-carousel-shell mb-3">
+          <button type="button" class="cv-carousel-nav-btn is-prev" onclick="window.CineVerseMotion?.scrollCarousel(this, -1)" aria-label="Cuộn Top 10 sang trái">‹</button>
+          <div class="cv-focus-carousel cv-top10-poster-rail" data-focus-carousel="top10" role="region" aria-label="Băng chuyền poster Top 10 tuần này">
+            ${resolvedItems.map((it) => {
+              const encItId = encodeURIComponent(it.movieId);
+              const rnk = String(it.displayRank).padStart(2, "0");
+              return `
+                <button type="button"
+                  data-carousel-card
+                  onclick="window.appActions.openTop10PrimaryAction('${escapeHTML(encItId)}')"
+                  class="cv-top10-poster-card"
+                  aria-label="Hạng ${rnk}: ${escapeHTML(it.title)}">
+                  <img src="${escapeHTML(getOptimizedPosterUrl(it.poster, "w342"))}" alt="${escapeHTML(it.title)}" width="342" height="513" loading="lazy" decoding="async"
+                    onerror="this.onerror=null;this.src='assets/web-logo.png';"
+                    style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />
+                  <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(11,6,7,0.48) 0%, rgba(11,6,7,0.08) 38%, rgba(11,6,7,0.92) 100%);pointer-events:none;"></div>
+                  <span class="relative z-10 cv-serif italic text-2xl font-extrabold" style="color:#F5C518;text-shadow:0 2px 12px rgba(0,0,0,0.9);">#${rnk}</span>
+                  <div class="relative z-10 space-y-0.5">
+                    <div class="cv-serif italic text-sm font-bold text-white leading-tight line-clamp-2">${escapeHTML(it.title)}</div>
+                    <div class="text-[11px] font-medium" style="color:rgba(255,255,255,0.72);">${escapeHTML(formatTop10ViewsText(it.validViews))}</div>
+                  </div>
+                </button>
+              `;
+            }).join("")}
+          </div>
+          <button type="button" class="cv-carousel-nav-btn is-next" onclick="window.CineVerseMotion?.scrollCarousel(this, 1)" aria-label="Cuộn Top 10 sang phải">›</button>
         </div>
       ` : "";
 
@@ -41643,7 +41694,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         }
         upEl.innerHTML = `
           <div class="cv-wp-empty-card">
-            <span class="font-bold text-white">Chưa có lịch hẹn</span>
+            <div class="flex flex-wrap items-center gap-2.5">
+              <span class="font-bold text-white">Chưa có lịch hẹn</span>
+              <span class="text-xs text-slate-400">• Mã mẫu phòng riêng: <strong class="text-amber-300 font-mono"><span class="scramble" data-scramble-text="CV-DHV6" aria-label="CV-DHV6"><span aria-hidden="true">CV-DHV6</span></span></strong></span>
+            </div>
             <button type="button" onclick="window.appActions.openCreateWatchPartyModal()"
               class="cv-wp-cta-primary shrink-0">
               <i class="fa-regular fa-calendar-plus" aria-hidden="true"></i>
@@ -43613,14 +43667,22 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       function computePosterDominantRGB(posterUrl, roomId) {
         const fallback = ROOM_FALLBACK_RGB[roomId] || [229, 9, 20];
         if (!posterUrl || !sampleCtx) return Promise.resolve(fallback);
-        if (posterColorCache.has(posterUrl)) return Promise.resolve(posterColorCache.get(posterUrl));
+        const cacheKey = `${roomId || "room-1"}::${posterUrl}`;
+        if (posterColorCache.has(cacheKey)) return Promise.resolve(posterColorCache.get(cacheKey));
 
         return new Promise((resolve) => {
+          const isLocal = /^(assets\/|\.\/assets\/|data:)/i.test(posterUrl);
+          const directSrc = isLocal ? posterUrl : getOptimizedPosterUrl(posterUrl, "w185");
+          const proxySrc = isLocal
+            ? posterUrl
+            : `https://wsrv.nl/?url=${encodeURIComponent(posterUrl)}&w=64&h=64&fit=cover&output=jpg`;
+          let triedProxy = isLocal;
+
           const img = new Image();
           img.crossOrigin = "anonymous";
           img.decoding = "async";
           const finish = (rgb) => {
-            posterColorCache.set(posterUrl, rgb);
+            posterColorCache.set(cacheKey, rgb);
             resolve(rgb);
           };
           img.onload = () => {
@@ -43647,20 +43709,32 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 finish(fallback);
                 return;
               }
-              // Đẩy nhẹ độ bão hòa điện ảnh nhưng tránh cháy sáng trên nền #0b0607
-              const rr = Math.min(245, Math.max(48, Math.round(rSum / wSum)));
-              const gg = Math.min(235, Math.max(28, Math.round(gSum / wSum)));
-              const bb = Math.min(245, Math.max(36, Math.round(bSum / wSum)));
+              // Pha 88% màu chủ đạo poster + 12% sắc độ đặc trưng từng phòng để chuyển 01–06 luôn rõ nhịp 600ms
+              const baseR = rSum / wSum;
+              const baseG = gSum / wSum;
+              const baseB = bSum / wSum;
+              const rr = Math.min(245, Math.max(48, Math.round(baseR * 0.88 + fallback[0] * 0.12)));
+              const gg = Math.min(235, Math.max(28, Math.round(baseG * 0.88 + fallback[1] * 0.12)));
+              const bb = Math.min(245, Math.max(36, Math.round(baseB * 0.88 + fallback[2] * 0.12)));
               finish([rr, gg, bb]);
             } catch (_) {
+              if (!triedProxy) {
+                triedProxy = true;
+                img.src = proxySrc;
+              } else {
+                finish(fallback);
+              }
+            }
+          };
+          img.onerror = () => {
+            if (!triedProxy) {
+              triedProxy = true;
+              img.src = proxySrc;
+            } else {
               finish(fallback);
             }
           };
-          img.onerror = () => finish(fallback);
-          const isLocal = /^(assets\/|\.\/assets\/|data:)/i.test(posterUrl);
-          img.src = isLocal
-            ? posterUrl
-            : `https://wsrv.nl/?url=${encodeURIComponent(posterUrl)}&w=64&h=64&fit=cover&output=jpg`;
+          img.src = directSrc;
         });
       }
 
@@ -43684,14 +43758,15 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         const root = document.documentElement;
         const lobby = document.getElementById("lobby-view");
         const billboard = document.getElementById("netflix-billboard");
-        [root, lobby, billboard].forEach((el) => {
-          if (!el) return;
-          el.style.setProperty("--room-r", String(r));
-          el.style.setProperty("--room-g", String(g));
-          el.style.setProperty("--room-b", String(b));
-          el.style.setProperty("--room-accent-rgb", `${r}, ${g}, ${b}`);
-          if (el !== root && roomId) el.setAttribute("data-room-accent", roomId);
-        });
+        root.style.setProperty("--room-r", String(r));
+        root.style.setProperty("--room-g", String(g));
+        root.style.setProperty("--room-b", String(b));
+        root.style.setProperty("--room-accent-rgb", `${r}, ${g}, ${b}`);
+        if (roomId) {
+          root.setAttribute("data-room-accent", roomId);
+          lobby?.setAttribute("data-room-accent", roomId);
+          billboard?.setAttribute("data-room-accent", roomId);
+        }
       }
 
       function initRoomLighting(activeRoom = null) {
@@ -43700,7 +43775,8 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         if (!room) return;
         syncScreenLightOrigin();
         const fallback = ROOM_FALLBACK_RGB[room.id] || [229, 9, 20];
-        if (!posterColorCache.has(room.poster || "")) {
+        const cacheKey = `${room.id}::${room.poster || ""}`;
+        if (!posterColorCache.has(cacheKey)) {
           applyRoomRGBTokens(fallback, room.id);
         }
         const token = ++lightingReqToken;
@@ -43904,7 +43980,35 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       }
 
       function initFocusCarousel(selector = "[data-focus-carousel]") {
-        document.querySelectorAll(selector).forEach((track) => setupSingleCarousel(track));
+        document.querySelectorAll(selector).forEach((track) => {
+          setupSingleCarousel(track);
+          if (!track.dataset.focusSnapBound) {
+            track.dataset.focusSnapBound = "1";
+            track.addEventListener("focusin", (e) => {
+              const card = e.target?.closest?.("[data-carousel-card]");
+              if (!card) return;
+              try {
+                card.scrollIntoView({
+                  behavior: isReducedMotion() ? "auto" : "smooth",
+                  inline: "center",
+                  block: "nearest"
+                });
+              } catch (_) {}
+            });
+          }
+        });
+      }
+
+      function scrollCarousel(btnOrTrack, dir = 1) {
+        const shell = btnOrTrack?.closest?.(".cv-carousel-shell");
+        const track = btnOrTrack?.matches?.("[data-focus-carousel]")
+          ? btnOrTrack
+          : shell?.querySelector?.("[data-focus-carousel]");
+        if (!track) return;
+        track.scrollBy({
+          left: (Number(dir) || 1) * 224,
+          behavior: isReducedMotion() ? "auto" : "smooth"
+        });
       }
 
       // -----------------------------------------------------------------------
@@ -44063,10 +44167,26 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         }
       }
 
+      function triggerHeroInitialEntrance() {
+        const billboard = document.getElementById("netflix-billboard");
+        if (!billboard || isWebGLActive()) return;
+        const isTrailerPlaying = billboard.getAttribute("data-trailer-playing") === "1";
+        if (!isTrailerPlaying && !isReducedMotion()) {
+          billboard.querySelectorAll(".cv-hero-stagger-item").forEach((item) => {
+            item.classList.remove("is-entering");
+            void item.offsetWidth;
+            item.classList.add("is-entering");
+          });
+        }
+        initScrambleReveal({ scope: document, forceReplay: !isTrailerPlaying });
+      }
+
       function onHeroRoomUpdated(room, _idx, isTrailerPlaying) {
         initRoomLighting(room);
         const roomChanged = lastLitRoomId !== room.id;
         lastLitRoomId = room.id;
+
+        if (window.__cineverseSplashDone === false) return;
 
         const billboard = document.getElementById("netflix-billboard");
         if (roomChanged && billboard && !isTrailerPlaying && !isReducedMotion() && !isWebGLActive()) {
@@ -44106,6 +44226,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         initRoomLighting,
         triggerCinemaZoom,
         initFocusCarousel,
+        scrollCarousel,
         initScrambleReveal,
         setScrambleValue,
         onHeroRoomUpdated
@@ -44114,7 +44235,13 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       requestAnimationFrame(() => {
         initRoomLighting();
         initFocusCarousel();
-        initScrambleReveal();
+        if (typeof window.__onCineverseSplashDone === "function") {
+          window.__onCineverseSplashDone(() => {
+            requestAnimationFrame(triggerHeroInitialEntrance);
+          });
+        } else {
+          initScrambleReveal();
+        }
       });
     })();
   </script>
