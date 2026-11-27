@@ -8349,6 +8349,453 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       pointer-events: none !important;
     }
   </style>
+  <style id="cv-awwwards-cinema-motion">
+    /* ===================================================================== */
+    /* CINEVERSE LOTTE — AWWWARDS CINEMA LIGHTING & MOTION ARCHITECTURE      */
+    /* Single Light Source (#0b0607) • 60fps Composite-Only • WebGL-Safe     */
+    /* ===================================================================== */
+    @property --room-r {
+      syntax: "<number>";
+      inherits: true;
+      initial-value: 229;
+    }
+    @property --room-g {
+      syntax: "<number>";
+      inherits: true;
+      initial-value: 9;
+    }
+    @property --room-b {
+      syntax: "<number>";
+      inherits: true;
+      initial-value: 20;
+    }
+
+    :root {
+      --cv-bg-void: #0b0607;
+      --room-r: 229;
+      --room-g: 9;
+      --room-b: 20;
+      --room-accent-rgb: 229, 9, 20;
+      --cv-ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+      --cv-ease-zoom: cubic-bezier(0.65, 0, 0.35, 1);
+      --cv-dur-light: 600ms;
+      --cv-dur-entrance: 960ms;
+      --cv-dur-zoom: 1200ms;
+      --cv-dur-crossfade: 400ms;
+      --cv-stagger-step: 80ms;
+      --cv-card-light-border: 1px solid rgba(255, 255, 255, 0.08);
+      --cv-card-top-specular: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    /* Preset bảng màu khởi tạo theo phòng (sẽ được cập nhật động theo poster thực tế) */
+    [data-room-accent="room-1"] { --room-r: 234; --room-g: 158; --room-b: 38; }
+    [data-room-accent="room-2"] { --room-r: 214; --room-g: 36;  --room-b: 54; }
+    [data-room-accent="room-3"] { --room-r: 72;  --room-g: 149; --room-b: 239; }
+    [data-room-accent="room-4"] { --room-r: 155; --room-g: 93;  --room-b: 229; }
+    [data-room-accent="room-5"] { --room-r: 243; --room-g: 114; --room-b: 44; }
+    [data-room-accent="room-6"] { --room-r: 45;  --room-g: 198; --room-b: 146; }
+
+    /* 1. QUY TẮC "MỘT NGUỒN SÁNG DUY NHẤT" (SINGLE LIGHT SOURCE) & NỀN #0b0607 */
+    html,
+    body {
+      background-color: var(--cv-bg-void) !important;
+      min-height: 100svh;
+    }
+    body.in-room-active #room-view {
+      min-height: 100svh !important;
+    }
+    #lobby-view[data-room-accent],
+    #netflix-billboard[data-room-accent] {
+      transition:
+        --room-r var(--cv-dur-light) ease,
+        --room-g var(--cv-dur-light) ease,
+        --room-b var(--cv-dur-light) ease;
+    }
+    body:has(#lobby-view:not(.hidden)) #ambient-tuna-backdrop {
+      background:
+        radial-gradient(
+          ellipse 78% 54% at 34% 22%,
+          rgba(var(--room-r), var(--room-g), var(--room-b), 0.13) 0%,
+          rgba(11, 6, 7, 0.94) 62%,
+          var(--cv-bg-void) 100%
+        ) !important;
+      transition:
+        --room-r var(--cv-dur-light) ease,
+        --room-g var(--cv-dur-light) ease,
+        --room-b var(--cv-dur-light) ease,
+        background var(--cv-dur-light) ease;
+    }
+
+    /* Tắt 2 lớp ảnh blur(110px) nặng GPU cũ, thay bằng 1 lớp radial-gradient vật lý duy nhất */
+    #hero-cinema-ambient-halo,
+    #hero-stage-ambient-glow {
+      display: none !important;
+    }
+    .cv-single-light-bleed {
+      position: absolute;
+      inset: -40px -24px -56px -24px;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(
+          ellipse 62% 58% at var(--screen-light-x, 34%) var(--screen-light-y, 38%),
+          rgba(var(--room-r), var(--room-g), var(--room-b), 0.34) 0%,
+          rgba(var(--room-r), var(--room-g), var(--room-b), 0.12) 42%,
+          rgba(11, 6, 7, 0) 74%
+        );
+      transition:
+        --room-r var(--cv-dur-light) ease,
+        --room-g var(--cv-dur-light) ease,
+        --room-b var(--cv-dur-light) ease,
+        background var(--cv-dur-light) ease,
+        opacity var(--cv-dur-light) ease;
+    }
+    .cv-stage-auditorium::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(
+          ellipse 74% 64% at 50% 34%,
+          rgba(var(--room-r), var(--room-g), var(--room-b), 0.28) 0%,
+          rgba(var(--room-r), var(--room-g), var(--room-b), 0.08) 48%,
+          rgba(11, 6, 7, 0.92) 86%
+        );
+      transition:
+        --room-r var(--cv-dur-light) ease,
+        --room-g var(--cv-dur-light) ease,
+        --room-b var(--cv-dur-light) ease,
+        background var(--cv-dur-light) ease;
+    }
+    .cv-stage-left {
+      background: var(--cv-bg-void) !important;
+      z-index: 1;
+    }
+    .cv-rooms-panel {
+      background:
+        radial-gradient(
+          ellipse 90% 55% at 0% 32%,
+          rgba(var(--room-r), var(--room-g), var(--room-b), 0.11) 0%,
+          transparent 64%
+        ),
+        linear-gradient(180deg, rgba(18, 12, 14, 0.94) 0%, rgba(11, 6, 7, 0.98) 100%) !important;
+      transition:
+        --room-r var(--cv-dur-light) ease,
+        --room-g var(--cv-dur-light) ease,
+        --room-b var(--cv-dur-light) ease,
+        background var(--cv-dur-light) ease;
+      z-index: 1;
+    }
+
+    /* Viền thẻ mô phỏng ánh sáng phản quang cạnh trên thay vì nét vẽ cứng */
+    .cv-stage-left,
+    .cv-rooms-panel,
+    .cv-mobile-room-bar,
+    #desktop-rooms-list .cv-room-row,
+    .cv-top10-shell,
+    .cv-top10-featured,
+    .cv-top10-row,
+    .cv-discover-card,
+    .cv-wp-ticket,
+    .cv-wp-empty-card,
+    .cv-ticket-stub {
+      border: var(--cv-card-light-border) !important;
+      box-shadow:
+        var(--cv-card-top-specular),
+        0 20px 44px -14px rgba(0, 0, 0, 0.82) !important;
+    }
+    #desktop-rooms-list .cv-room-row.is-active {
+      border-color: rgba(var(--room-r), var(--room-g), var(--room-b), 0.48) !important;
+      background:
+        linear-gradient(
+          102deg,
+          rgba(var(--room-r), var(--room-g), var(--room-b), 0.20) 0%,
+          rgba(20, 13, 15, 0.86) 72%
+        ) !important;
+      box-shadow:
+        inset 2px 0 0 rgba(var(--room-r), var(--room-g), var(--room-b), 0.92),
+        var(--cv-card-top-specular),
+        0 14px 30px -10px rgba(0, 0, 0, 0.78) !important;
+    }
+
+    /* Xử lý quang học cho Video/Trailer nền, Lớp phủ Scrim & 3 lớp Text-Shadow */
+    #hero-bg-video,
+    .cv-stage-screen-box video {
+      filter: brightness(0.7) contrast(1.1) saturate(0.9) !important;
+    }
+    .cv-stage-info {
+      isolation: isolate;
+    }
+    .cv-hero-title-scrim {
+      position: absolute;
+      inset: -28px -16px -14px -16px;
+      z-index: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.55) 0%, transparent 70%);
+    }
+    .cv-stage-info > :not(.cv-hero-title-scrim) {
+      position: relative;
+      z-index: 1;
+    }
+    #hero-movie-title.cv-hero-title {
+      text-shadow:
+        0 0 20px rgba(0, 0, 0, 0.92),
+        0 0 60px rgba(0, 0, 0, 0.78),
+        0 0 120px rgba(var(--room-r), var(--room-g), var(--room-b), 0.45);
+    }
+
+    /* Entrance sang trọng (0.96s, stagger 80ms) & Quy tắc Tiết chế 1 chuyển động duy nhất */
+    @keyframes cvHeroLuxuryReveal {
+      from {
+        opacity: 0;
+        transform: translate3d(0, 14px, 0);
+      }
+      to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+      }
+    }
+    #netflix-billboard[data-trailer-playing="0"] .cv-hero-stagger-item.is-entering {
+      animation: cvHeroLuxuryReveal var(--cv-dur-entrance) var(--cv-ease-entrance) both;
+      animation-delay: calc(var(--stagger-idx, 0) * var(--cv-stagger-step));
+    }
+
+    /* Chỉ DUY NHẤT nút CTA chính mang ánh sáng màu chủ đạo; các nút phụ giữ tĩnh, không glow */
+    #btn-hero-watch-now.cv-hero-btn-watch {
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.42),
+        0 10px 28px -4px rgba(var(--room-r), var(--room-g), var(--room-b), 0.44),
+        0 4px 14px rgba(245, 197, 24, 0.24) !important;
+      transition:
+        transform 320ms var(--cv-ease-entrance),
+        opacity 320ms ease,
+        box-shadow var(--cv-dur-light) ease !important;
+    }
+    #btn-hero-watch-party,
+    #btn-hero-detail,
+    .cv-wp-cta-secondary,
+    .cv-top10-cta-secondary,
+    .cv-top10-info-btn {
+      box-shadow: var(--cv-card-top-specular) !important;
+    }
+
+    /* Khi Trailer đang phát: khóa đứng yên toàn bộ chữ & danh sách phòng để mắt chỉ tập trung vào màn chiếu */
+    #netflix-billboard[data-trailer-playing="1"] .cv-hero-stagger-item,
+    #netflix-billboard[data-trailer-playing="1"] #desktop-rooms-list .cv-room-row,
+    #netflix-billboard[data-trailer-playing="1"] .cv-wall-sconce-l,
+    #netflix-billboard[data-trailer-playing="1"] .cv-wall-sconce-r,
+    #netflix-billboard[data-trailer-playing="1"] .animate-ping,
+    #netflix-billboard[data-trailer-playing="1"] .animate-pulse {
+      animation: none !important;
+      transition: none !important;
+      transform: none !important;
+    }
+
+    /* 2. CHUYỂN CẢNH ZOOM XUYÊN MÀN HÌNH (1.2s cubic-bezier(0.65, 0, 0.35, 1) + 400ms Crossfade) */
+    #lobby-view {
+      transform-origin: var(--cv-zoom-origin-x, 50%) var(--cv-zoom-origin-y, 28%);
+    }
+    #lobby-view.is-cinema-zooming {
+      will-change: transform, opacity;
+      pointer-events: none !important;
+      transition:
+        transform var(--cv-dur-zoom) var(--cv-ease-zoom),
+        opacity var(--cv-dur-crossfade) ease 800ms;
+      transform: scale(var(--cv-zoom-scale, 3.35));
+      opacity: 0;
+    }
+    #cv-cinema-zoom-veil {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100svh;
+      z-index: 9995;
+      pointer-events: none;
+      opacity: 0;
+      background:
+        radial-gradient(
+          circle at 50% 45%,
+          rgba(var(--room-r), var(--room-g), var(--room-b), 0.16) 0%,
+          var(--cv-bg-void) 68%
+        );
+      will-change: opacity;
+      transition: opacity var(--cv-dur-crossfade) ease;
+    }
+    #cv-cinema-zoom-veil.is-active {
+      opacity: 1;
+    }
+    @keyframes cv3DSpaceCrossfade {
+      from {
+        opacity: 0;
+        transform: scale(0.985);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    .cv-3d-crossfade-enter {
+      animation: cv3DSpaceCrossfade var(--cv-dur-crossfade) var(--cv-ease-entrance) both;
+    }
+
+    /* 3. BĂNG CHUYỀN SCROLL-SNAP NÂNG TÂM ĐIỂM (TOP 10 & KHÁM PHÁ PHIM) */
+    .cv-focus-carousel {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      align-items: stretch;
+      gap: 18px !important;
+      overflow-x: auto;
+      overflow-y: visible;
+      padding-top: 20px;
+      padding-bottom: 18px;
+      padding-inline: max(20px, calc(50% - 104px));
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+    }
+    .cv-focus-carousel::-webkit-scrollbar {
+      height: 5px;
+    }
+    .cv-focus-carousel::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .cv-focus-carousel::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.16);
+      border-radius: 999px;
+    }
+    .cv-focus-carousel > [data-carousel-card] {
+      flex: 0 0 clamp(166px, 20vw, 212px);
+      aspect-ratio: 2 / 3;
+      scroll-snap-align: center;
+      opacity: 0.9;
+      transform: translate3d(0, 0, 0) scale(1);
+      will-change: transform, opacity;
+      transition:
+        transform 480ms var(--cv-ease-entrance),
+        opacity 360ms ease,
+        border-color 360ms ease !important;
+    }
+    .cv-focus-carousel > [data-carousel-card].is-focal {
+      opacity: 1;
+      transform: translate3d(0, -12px, 0) scale(1.06) !important;
+      z-index: 4;
+      border-color: rgba(255, 255, 255, 0.22) !important;
+    }
+    .cv-top10-poster-card {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #120a0d;
+      border: var(--cv-card-light-border);
+      box-shadow: var(--cv-card-top-specular), 0 18px 38px -12px rgba(0, 0, 0, 0.82);
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 12px;
+    }
+
+    /* 4. HIỆU ỨNG GIẢI MÃ KÝ TỰ (SCRAMBLE REVEAL + TABULAR-NUMS CHỐNG GIẬT NGANG) */
+    .scramble {
+      display: inline-block;
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1;
+      white-space: pre;
+    }
+
+    /* 5. CHUẨN KHUNG CHIỀU CAO 100SVH & ĐÁP ỨNG ĐA THIẾT BỊ (MOBILE, IPAD, DESKTOP) */
+    @media (min-width: 1024px) {
+      .cv-cinema-hero,
+      .cv-stage-left,
+      .cv-rooms-panel {
+        min-height: calc(100svh - 96px) !important;
+      }
+    }
+    @media (min-width: 1024px) and (max-height: 760px) {
+      .cv-cinema-hero,
+      .cv-stage-left,
+      .cv-rooms-panel {
+        min-height: calc(100svh - 76px) !important;
+      }
+    }
+    @media (min-width: 1024px) and (max-width: 1279px) {
+      #ios-liquid-nav-bar {
+        padding-inline: 14px !important;
+      }
+      #header-lobby-actions {
+        gap: 10px !important;
+      }
+      .cv-nav-links {
+        gap: 2px !important;
+      }
+      .cv-nav-link {
+        font-size: 13px !important;
+        padding-inline: 8px !important;
+        white-space: nowrap;
+      }
+      .cv-nav-brand-title {
+        font-size: 16.5px !important;
+      }
+      .cv-nav-username {
+        max-width: 96px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 13px !important;
+      }
+    }
+    #booking-modal-panel {
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    #booking-scroll-body > * {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    /* Trên màn hình nhỏ (<=768px): rút gọn text-shadow xuống 1 lớp để bảo vệ GPU điện thoại */
+    @media (max-width: 768px) {
+      #hero-movie-title.cv-hero-title {
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.88) !important;
+      }
+      .cv-focus-carousel {
+        gap: 14px !important;
+        padding-inline: max(16px, calc(50% - 84px));
+      }
+      .cv-focus-carousel > [data-carousel-card] {
+        flex: 0 0 164px;
+      }
+    }
+
+    /* Hỗ trợ đầy đủ Accessibility prefers-reduced-motion: tắt zoom-through, tắt scramble, fade đơn giản */
+    @media (prefers-reduced-motion: reduce) {
+      #lobby-view,
+      #lobby-view.is-cinema-zooming {
+        transition: opacity 220ms linear !important;
+        transform: none !important;
+      }
+      .cv-hero-stagger-item,
+      .cv-hero-stagger-item.is-entering,
+      .cv-3d-crossfade-enter {
+        animation: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+      }
+      .cv-focus-carousel {
+        scroll-behavior: auto;
+      }
+      .cv-focus-carousel > [data-carousel-card],
+      .cv-focus-carousel > [data-carousel-card].is-focal {
+        transition: opacity 180ms linear !important;
+        transform: none !important;
+      }
+    }
+  </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-rose-500 selection:text-white">
 
@@ -8529,7 +8976,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             <button type="button" data-nav-tab="tickets" onclick="window.appActions.openMemoryCapsuleModal()"
               class="cv-nav-link">
               <span>Tủ Vé NFT</span>
-              <span id="capsule-count-badge" class="hidden cv-nav-count-chip">0</span>
+              <span id="capsule-count-badge" class="hidden cv-nav-count-chip scramble" data-scramble-text="0" aria-label="0"><span aria-hidden="true">0</span></span>
             </button>
 
             <button type="button" id="btn-admin-panel" data-nav-tab="admin"
@@ -8600,7 +9047,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       <button type="button" data-nav-tab="tickets" onclick="window.appActions.openMemoryCapsuleModal(); window.appActions.toggleMobileNavMenu(false);"
         class="cv-nav-mobile-item">
         <span>Tủ Vé NFT</span>
-        <span id="mobile-capsule-count-badge" class="hidden cv-nav-count-chip">0</span>
+        <span id="mobile-capsule-count-badge" class="hidden cv-nav-count-chip scramble" data-scramble-text="0" aria-label="0"><span aria-hidden="true">0</span></span>
       </button>
       <button type="button" id="mobile-btn-admin-panel" data-nav-tab="admin"
         onclick="window.appActions.openAdminPanelModal(); window.appActions.toggleMobileNavMenu(false);"
@@ -8638,16 +9085,22 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
   <!-- ========================================================= -->
   <!-- VIEW 1: SẢNH CHỜ RẠP PHIM HÀNG F (LOBBY VIEW) -->
   <!-- ========================================================= -->
-  <main id="lobby-view" class="flex-1 w-full space-y-7">
+  <div id="cv-cinema-zoom-veil" aria-hidden="true"></div>
+  <main id="lobby-view" data-room-accent="room-1" class="flex-1 w-full space-y-7">
     <!-- 1. KHU MÀN CHIẾU HÀNG F (68%) + BẢNG CHỌN 6 PHÒNG (32%) -->
     <section id="netflix-billboard"
          data-boot-syncing="1"
+         data-room-accent="room-1"
+         data-trailer-playing="0"
          onmouseenter="window.appActions.pauseHeroSlider(true)"
          onmouseleave="window.appActions.pauseHeroSlider(false)"
          onfocusin="window.appActions.pauseHeroSlider(true)"
          onfocusout="window.appActions.handleHeroFocusOut(event)"
          class="cv-cinema-hero"
          aria-label="Khu màn chiếu rạp phim và chọn phòng">
+
+      <!-- LỚP NGUỒN SÁNG DUY NHẤT (Single Light Source Radial Bleed hắt từ màn hình Hero) -->
+      <div id="hero-single-light-bleed" class="cv-single-light-bleed" aria-hidden="true"></div>
 
       <!-- LỚP 3A: Quầng sáng Ambient Cinema Glow phía sau Hero Banner theo tông màu poster đang chiếu -->
       <img id="hero-cinema-ambient-halo"
@@ -8711,17 +9164,18 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             <div class="cv-seat-plane middle"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
             <div class="cv-seat-plane near"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
           </div>
-          <!-- Bộ chuyển góc nhìn đa hàng ghế trực tiếp trên màn chiếu -->
+          <!-- Bộ chuyển góc nhìn đa hàng ghế trực tiếp trên màn chiếu (Rê chuột xem trước POV, Bấm để Zoom-through vào 3D) -->
           <div class="cv-stage-pov-switcher" role="group" aria-label="Chọn góc nhìn hàng ghế trong rạp">
-            <button type="button" id="hero-pov-btn-front" onclick="window.appActions.setHeroPovZone('front')" class="cv-stage-pov-pill" aria-pressed="false">Hàng A–C</button>
-            <button type="button" id="hero-pov-btn-rowD" onclick="window.appActions.setHeroPovZone('rowD')" class="cv-stage-pov-pill" aria-pressed="false">VIP D–E</button>
-            <button type="button" id="hero-pov-btn-rowF" onclick="window.appActions.setHeroPovZone('rowF')" class="cv-stage-pov-pill is-active" aria-pressed="true">Hàng F</button>
+            <button type="button" id="hero-pov-btn-front" data-zoom-pov="front" onmouseenter="window.appActions.setHeroPovZone('front', true)" onfocus="window.appActions.setHeroPovZone('front', true)" onclick="window.appActions.triggerPovCinemaZoom('front')" class="cv-stage-pov-pill" aria-pressed="false">Hàng A–C</button>
+            <button type="button" id="hero-pov-btn-rowD" data-zoom-pov="rowD" onmouseenter="window.appActions.setHeroPovZone('rowD', true)" onfocus="window.appActions.setHeroPovZone('rowD', true)" onclick="window.appActions.triggerPovCinemaZoom('rowD')" class="cv-stage-pov-pill" aria-pressed="false">VIP D–E</button>
+            <button type="button" id="hero-pov-btn-rowF" data-zoom-pov="rowF" onmouseenter="window.appActions.setHeroPovZone('rowF', true)" onfocus="window.appActions.setHeroPovZone('rowF', true)" onclick="window.appActions.triggerPovCinemaZoom('rowF')" class="cv-stage-pov-pill is-active" aria-pressed="true">Hàng F</button>
           </div>
         </div>
 
         <!-- Khối thông tin phim & nút chọn ghế -->
         <div id="hero-content-col" class="cv-stage-info">
-          <div class="cv-hero-meta-row" style="margin-top:0;">
+          <div class="cv-hero-title-scrim" aria-hidden="true"></div>
+          <div class="cv-hero-meta-row cv-hero-stagger-item" style="margin-top:0;--stagger-idx:0;">
             <span id="hero-room-badge" class="cv-hero-meta-gold">
               <span style="color:#F5C518">Phòng 01</span>
               <span>• Đang chiếu</span>
@@ -8731,11 +9185,11 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             <span id="hero-duration" class="cv-hero-meta-outline">Full HD</span>
             <span id="hero-live-viewers" class="hidden sm:inline-flex cv-hero-meta-outline gap-1.5">
               <span class="w-1.5 h-1.5 rounded-full animate-ping" style="background:#E50914"></span>
-              <span>0/48 ghế</span>
+              <span id="hero-seat-scramble" class="scramble" data-scramble-text="0/48 ghế" aria-label="0/48 ghế"><span aria-hidden="true">0/48 ghế</span></span>
             </span>
           </div>
 
-          <h1 id="hero-movie-title" class="cv-hero-title">Đang đồng bộ phòng chiếu trực tuyến…</h1>
+          <h1 id="hero-movie-title" class="cv-hero-title cv-hero-stagger-item" style="--stagger-idx:1;">Đang đồng bộ phòng chiếu trực tuyến…</h1>
 
           <div id="hero-genre-pills" class="hidden"></div>
           <span id="hero-genre" class="hidden"></span>
@@ -8743,11 +9197,11 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           <span id="hero-rank-badge" class="hidden"></span>
           <span id="hero-match-score" class="hidden"></span>
 
-          <p id="hero-synopsis" class="text-xs sm:text-sm leading-relaxed line-clamp-2" style="color:#D4D4D8;">
+          <p id="hero-synopsis" class="text-xs sm:text-sm leading-relaxed line-clamp-2 cv-hero-stagger-item" style="color:#D4D4D8;--stagger-idx:2;">
             Đang kết nối lịch chiếu trực tiếp và tình trạng ghế ngồi thời gian thực tại CineVerse Lotte…
           </p>
 
-          <div class="cv-hero-actions" style="margin-top:4px;">
+          <div class="cv-hero-actions cv-hero-stagger-item" style="margin-top:4px;--stagger-idx:3;">
             <button type="button" id="btn-hero-watch-now" onclick="window.appActions.enterHeroRoomNow()" style="touch-action: manipulation;"
               class="cv-hero-btn-watch flex-1 sm:flex-none">
               <i id="btn-hero-watch-icon" class="fa-solid fa-couch" aria-hidden="true"></i>
@@ -11692,7 +12146,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       <!-- B. THÂN MÀN HÌNH (1 vùng cuộn dọc chính duy nhất, cuộn được tới đầu & cuối) -->
       <div id="booking-scroll-body" class="p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 text-xs items-start">
         <!-- Cột Trái: Đổi Phòng/Suất (thu gọn gọn gàng cho tới khi bấm Đổi phòng/suất) + Sơ Đồ Ghế -->
-        <div class="lg:col-span-7 xl:col-span-8 space-y-2.5">
+        <div class="min-w-0 max-w-full lg:col-span-7 xl:col-span-8 space-y-2.5">
           <div id="booking-meta-drawer" class="hidden cv-booking-card p-3.5 space-y-3">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div class="space-y-1">
@@ -14201,6 +14655,11 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       const muteBtn = document.getElementById("btn-hero-mute");
       const previewSrc = room.videoUrl || room.previewVideoUrl || "";
       const shouldPlayTrailer = Boolean(state.heroTrailerPlaying && state.heroTrailerRoomId === room.id && previewSrc && !state.currentRoomId && !document.hidden);
+      if (billboardEl) {
+        billboardEl.setAttribute("data-trailer-playing", shouldPlayTrailer ? "1" : "0");
+        billboardEl.setAttribute("data-room-accent", room.id);
+      }
+      document.getElementById("lobby-view")?.setAttribute("data-room-accent", room.id);
 
       if (trailerBtn) {
         trailerBtn.classList.toggle("hidden", !previewSrc);
@@ -14395,9 +14854,11 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       const viewersEl = document.getElementById("hero-live-viewers");
       if (viewersEl) {
         const heroMaxCap = room.maxSeats || 48;
+        const seatLabelTxt = hasSyncedInitialRoomSeats[room.id] ? `${viewerCount}/${heroMaxCap} ghế` : "Mở chọn ghế";
+        const escSeatTxt = escapeHTML(seatLabelTxt);
         viewersEl.innerHTML = `
           <span class="w-1.5 h-1.5 rounded-full animate-ping" style="background:${isShowing ? '#E50914' : '#F5C518'}"></span>
-          <span>${hasSyncedInitialRoomSeats[room.id] ? `${viewerCount}/${heroMaxCap} ghế` : "Mở chọn ghế"}</span>
+          <span id="hero-seat-scramble" class="scramble" data-scramble-room="${escapeHTML(room.id)}" data-scramble-text="${escSeatTxt}" aria-label="${escSeatTxt}"><span aria-hidden="true">${escSeatTxt}</span></span>
         `;
       }
 
@@ -14421,11 +14882,14 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       const heroMaxCap2 = room.maxSeats || 48;
       if (mobRoomLbl) {
         const seatText = !hasSyncedInitialRoomSeats[room.id] ? "Mở chọn ghế" : `${viewerCount}/${heroMaxCap2} ghế`;
-        mobRoomLbl.textContent = `${room.number} • ${seatText}`;
+        const escMobSeat = escapeHTML(`${room.number} • ${seatText}`);
+        mobRoomLbl.innerHTML = `<span class="scramble" data-scramble-room="${escapeHTML(room.id)}" data-scramble-text="${escMobSeat}" aria-label="${escMobSeat}"><span aria-hidden="true">${escMobSeat}</span></span>`;
       }
       if (mobMovieLbl) {
         mobMovieLbl.textContent = room.displayTitle || sanitizeMovieTitle(room.movieTitle);
       }
+
+      window.CineVerseMotion?.onHeroRoomUpdated?.(room, idx, shouldPlayTrailer);
 
       // Cập nhật trạng thái active trên danh sách 6 phòng (Desktop & Mobile Sheet) mà không mất focus/scroll
       document.querySelectorAll("[data-lobby-room-id]").forEach(btn => {
@@ -14501,6 +14965,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
       state.heroTrailerPlaying = false;
       state.heroTrailerRoomId = "";
+      document.getElementById("netflix-billboard")?.setAttribute("data-trailer-playing", "0");
       if (!opts.keepPaused) state.heroPaused = false;
 
       if (videoEl) {
@@ -15232,7 +15697,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
                 <span class="flex items-center gap-2 text-[11px]" style="color:${isFull ? '#FCA5A5' : '#A1A1AA'};">
                   <span>${escapeHTML(room.duration || "HD")}</span>
                   <span>•</span>
-                  <span>${escapeHTML(seatStatus)}</span>
+                  <span class="scramble" data-scramble-text="${escapeHTML(seatStatus)}" aria-label="${escapeHTML(seatStatus)}"><span aria-hidden="true">${escapeHTML(seatStatus)}</span></span>
                 </span>
               </span>
               <span class="cv-room-marker" aria-hidden="true"></span>
@@ -15257,6 +15722,10 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
       if (mobileList) {
         mobileList.innerHTML = buildRoomRowsHTML(true);
         if (prevMobileFocusId) mobileList.querySelector(`[data-lobby-room-id="${CSS.escape(prevMobileFocusId)}"]`)?.focus({preventScroll:true});
+      }
+      if (desktopList) window.CineVerseMotion?.initScrambleReveal?.({ scope: desktopList });
+      if (mobileList && !document.getElementById("mobile-rooms-sheet")?.classList.contains("hidden")) {
+        window.CineVerseMotion?.initScrambleReveal?.({ scope: mobileList });
       }
 
       // Render 2 thẻ phòng đặc biệt: Sweetbox (room-7) & Phòng Stream (room-8)
@@ -32066,7 +32535,14 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     function enterHeroRoomNow() {
       const room = DEFAULT_ROOMS[state.heroIndex] || DEFAULT_ROOMS[0];
       state.heroUserLocked = true;
-      openBookingModal(room.id, null, getPreferredSeatForHeroPov(room), { forceNewBooking: hasValidTicketForRoom(room.id) });
+      const preferredSeat = getPreferredSeatForHeroPov(room);
+      const hasTicket = hasValidTicketForRoom(room.id);
+      const runTarget = () => openBookingModal(room.id, null, preferredSeat, { forceNewBooking: hasTicket });
+      if (window.CineVerseMotion?.triggerCinemaZoom) {
+        window.CineVerseMotion.triggerCinemaZoom(runTarget, { roomId: room.id, povZone: state.heroPovZone || "rowF" });
+      } else {
+        runTarget();
+      }
     }
 
     function openBookingModalFromBar() {
@@ -33524,20 +34000,33 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
     function renderMemoryCapsulesUI() {
       const list = state.memoryCapsules || [];
       const visibleCount = isAccountAuthenticated() ? list.length : 0;
+      const syncScrambleChip = (el, valStr) => {
+        if (!el) return;
+        if (window.CineVerseMotion?.setScrambleValue) {
+          window.CineVerseMotion.setScrambleValue(el, valStr, true);
+        } else {
+          el.setAttribute("aria-label", valStr);
+          el.setAttribute("data-scramble-text", valStr);
+          el.innerHTML = `<span aria-hidden="true">${escapeHTML(valStr)}</span>`;
+        }
+      };
       const countBadge = document.getElementById("capsule-count-badge");
       if (countBadge) {
-        countBadge.textContent = String(visibleCount);
         countBadge.classList.toggle("hidden", visibleCount === 0);
+        syncScrambleChip(countBadge, String(visibleCount));
       }
       const mobCountBadge = document.getElementById("mobile-capsule-count-badge");
       if (mobCountBadge) {
-        mobCountBadge.textContent = String(visibleCount);
         mobCountBadge.classList.toggle("hidden", visibleCount === 0);
+        syncScrambleChip(mobCountBadge, String(visibleCount));
       }
 
       // Cập nhật thống kê Hồ sơ Điện ảnh (Cinematic Profile)
       const totalEl = document.getElementById("profile-capsule-total");
-      if (totalEl) totalEl.textContent = String(list.length);
+      if (totalEl) {
+        totalEl.classList.add("scramble");
+        syncScrambleChip(totalEl, String(list.length));
+      }
       const nameEl = document.getElementById("profile-capsule-username");
       if (nameEl) nameEl.textContent = state.userName;
       const rankEl = document.getElementById("profile-capsule-rank");
@@ -40209,6 +40698,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           const encId = encodeURIComponent(m.id);
           return `
           <button type="button"
+            data-carousel-card
             onclick="window.appActions.openDiscoverVaultMovie('${escapeHTML(encId)}')"
             onmouseenter="window.appActions.onDiscoverCardHoverEnter(this, '${escapeHTML(encId)}')"
             onmouseleave="window.appActions.onDiscoverCardHoverLeave()"
@@ -40217,7 +40707,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               alt="${escapeHTML(m.title)}" width="342" height="513" loading="lazy" decoding="async"
               onerror="this.onerror=null;this.src='assets/web-logo.png';this.removeAttribute('srcset');"
               style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />
-            <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(11,11,15,0.06) 25%, rgba(14,8,10,0.92) 100%);pointer-events:none;"></div>
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(11,6,7,0.06) 25%, rgba(11,6,7,0.92) 100%);pointer-events:none;"></div>
             <div class="relative z-10 space-y-1">
               <div class="cv-serif italic text-sm sm:text-base font-bold text-white leading-tight line-clamp-2">${escapeHTML(m.title)}</div>
               <div class="text-[11px] font-medium truncate" style="color:#D4D4D8;">${escapeHTML(m.subtitle)}</div>
@@ -40228,14 +40718,14 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
 
         return discoverCardsHtml ? `
           <div id="lobby-discover-movies" class="${withTopDivider ? "mt-6 pt-5 border-t border-white/10" : ""}">
-            <div class="flex items-center justify-between gap-2 mb-3">
-              <h3 class="cv-serif text-lg sm:text-xl font-bold text-white">Khám phá phim <span class="text-xs font-sans font-normal text-slate-400">(${discoverMovies.length} phim ngẫu nhiên từ Kho phim)</span></h3>
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <h3 class="cv-serif text-lg sm:text-xl font-bold text-white">Khám phá phim <span class="text-xs font-sans font-normal text-slate-400">(${discoverMovies.length} phim ngẫu nhiên • Cuộn ngang chọn tâm điểm)</span></h3>
               <button type="button" onclick="window.appActions.reshuffleDiscoverMovies()" class="cv-top10-info-btn text-[11px] inline-flex items-center gap-1.5" title="Đổi 10 phim gợi ý ngẫu nhiên khác từ Kho phim">
                 <i class="fa-solid fa-shuffle text-[10px]"></i>
                 <span>Đổi gợi ý</span>
               </button>
             </div>
-            <div class="cv-discover-grid">${discoverCardsHtml}</div>
+            <div class="cv-discover-grid cv-focus-carousel" data-focus-carousel="discover" role="region" aria-label="Băng chuyền khám phá phim">${discoverCardsHtml}</div>
           </div>` : `
           <div id="lobby-discover-movies" class="${withTopDivider ? "mt-5 pt-4 border-t border-white/10 " : ""}text-xs text-slate-400 py-2">Đang tải danh sách phim từ Kho phim...</div>`;
       };
@@ -40252,6 +40742,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             ${buildDiscoverSectionHtml(false)}
           </div>
         `;
+        window.CineVerseMotion?.initFocusCarousel?.();
         if (footerNoteEl) footerNoteEl.textContent = "Đang tải dữ liệu xếp hạng thực tế từ máy chủ CineVerse…";
         return;
       }
@@ -40279,6 +40770,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             ${buildDiscoverSectionHtml(true)}
           </div>
         `;
+        window.CineVerseMotion?.initFocusCarousel?.();
         if (footerNoteEl) footerNoteEl.textContent = "Tải bảng xếp hạng thất bại • Bấm Thử lại để đồng bộ lại.";
         return;
       }
@@ -40313,6 +40805,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
             ${buildDiscoverSectionHtml(false)}
           </div>
         `;
+        window.CineVerseMotion?.initFocusCarousel?.();
         return;
       }
 
@@ -40436,13 +40929,41 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         `;
       }
 
+      const top10CarouselHtml = resolvedItems.length > 1 ? `
+        <div class="cv-focus-carousel cv-top10-poster-rail mb-3" data-focus-carousel="top10" role="region" aria-label="Băng chuyền poster Top 10 tuần này">
+          ${resolvedItems.map((it) => {
+            const encItId = encodeURIComponent(it.movieId);
+            const rnk = String(it.displayRank).padStart(2, "0");
+            return `
+              <button type="button"
+                data-carousel-card
+                onclick="window.appActions.openTop10PrimaryAction('${escapeHTML(encItId)}')"
+                class="cv-top10-poster-card"
+                aria-label="Hạng ${rnk}: ${escapeHTML(it.title)}">
+                <img src="${escapeHTML(getOptimizedPosterUrl(it.poster, "w342"))}" alt="${escapeHTML(it.title)}" width="342" height="513" loading="lazy" decoding="async"
+                  onerror="this.onerror=null;this.src='assets/web-logo.png';"
+                  style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />
+                <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(11,6,7,0.48) 0%, rgba(11,6,7,0.08) 38%, rgba(11,6,7,0.92) 100%);pointer-events:none;"></div>
+                <span class="relative z-10 cv-serif italic text-2xl font-extrabold" style="color:#F5C518;text-shadow:0 2px 12px rgba(0,0,0,0.9);">#${rnk}</span>
+                <div class="relative z-10 space-y-0.5">
+                  <div class="cv-serif italic text-sm font-bold text-white leading-tight line-clamp-2">${escapeHTML(it.title)}</div>
+                  <div class="text-[11px] font-medium" style="color:rgba(255,255,255,0.72);">${escapeHTML(formatTop10ViewsText(it.validViews))}</div>
+                </div>
+              </button>
+            `;
+          }).join("")}
+        </div>
+      ` : "";
+
       body.innerHTML = `
+        ${top10CarouselHtml}
         <div class="cv-top10-layout">
           ${featuredHtml}
           ${rightColumnsHtml}
         </div>
         ${buildDiscoverSectionHtml(true)}
       `;
+      window.CineVerseMotion?.initFocusCarousel?.();
 
       if (footerNoteEl) {
         const countLabel = resolvedItems.length < 10
@@ -41031,7 +41552,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           <div class="cv-wp-stub">
             <div class="text-center space-y-1">
               <div class="text-[9.5px] uppercase tracking-[0.2em]" style="color:#D4D4D8;">Mã lời mời</div>
-              <div class="text-base sm:text-lg font-extrabold tracking-widest text-white font-mono">${escapeHTML(ev.inviteCode || "CV-INV")}</div>
+              <div class="text-base sm:text-lg font-extrabold tracking-widest text-white font-mono"><span class="scramble" data-scramble-text="${escapeHTML(ev.inviteCode || "CV-INV")}" aria-label="${escapeHTML(ev.inviteCode || "CV-INV")}"><span aria-hidden="true">${escapeHTML(ev.inviteCode || "CV-INV")}</span></span></div>
               <div class="cv-wp-barcode" aria-hidden="true"></div>
             </div>
 
@@ -41154,6 +41675,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         if (histCntEl) histCntEl.textContent = String(history.length);
         histEl.innerHTML = history.map(renderWatchPartyTicketCardHtml).join("");
       }
+      window.CineVerseMotion?.initScrambleReveal?.({ scope: document.getElementById("lobby-watch-party-section") });
     }
 
     function setWatchPartyCreateError(msg = "") {
@@ -41705,7 +42227,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
               class="cv-wp-invite-poster" />
             <div class="cv-wp-invite-head">
               <div class="flex flex-wrap items-center justify-between gap-2">
-                <span class="text-[10.5px] font-extrabold uppercase tracking-widest text-amber-300">${escapeHTML(ev.roomTypeLabel)} • ${escapeHTML(ev.inviteCode)}</span>
+                <span class="text-[10.5px] font-extrabold uppercase tracking-widest text-amber-300">${escapeHTML(ev.roomTypeLabel)} • <span class="scramble font-mono" data-scramble-text="${escapeHTML(ev.inviteCode)}" aria-label="${escapeHTML(ev.inviteCode)}"><span aria-hidden="true">${escapeHTML(ev.inviteCode)}</span></span></span>
                 <span class="px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold" style="background:${stUi.bg};border:1px solid ${stUi.border};color:${stUi.color};">${escapeHTML(stUi.badge)}</span>
               </div>
               <h4 class="cv-serif italic text-xl sm:text-2xl font-bold text-white leading-tight">${escapeHTML(ev.movieTitle)}</h4>
@@ -41748,6 +42270,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
         ${pendingHtml}
         ${actionSectionHtml}
       `;
+      window.CineVerseMotion?.initScrambleReveal?.({ scope: bodyEl, forceReplay: true });
     }
 
     function loginForWatchPartyInvite(token) {
@@ -43051,6 +43574,548 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           renderTheaterLeftMovieList();
         };
       }
+    })();
+
+    // =========================================================================
+    // CINEVERSE LOTTE — MODULAR VANILLA JS MOTION & LIGHTING ENGINE (60FPS GPU)
+    // 1. initRoomLighting()   — Single Light Source 600ms theo màu Poster
+    // 2. triggerCinemaZoom()  — Zoom-through 1.2s + Crossfade 400ms sang 3D WebGL
+    // 3. initFocusCarousel()  — Scroll-Snap + IntersectionObserver (0.6) nâng tâm điểm
+    // 4. initScrambleReveal() — Giải mã ký tự 30ms / 1.2s + Accessibility + Tabular-Nums
+    // =========================================================================
+    (function initCineVerseAwwwardsMotion() {
+      const reducedMotionMQ = window.matchMedia
+        ? window.matchMedia("(prefers-reduced-motion: reduce)")
+        : { matches: false };
+      const isReducedMotion = () => Boolean(reducedMotionMQ.matches);
+      const isWebGLActive = () =>
+        Boolean(
+          state.currentRoomId ||
+          document.body.classList.contains("in-room-active") ||
+          document.body.classList.contains("booking-modal-open")
+        );
+
+      // Bảng màu điện ảnh dự phòng an toàn CORS cho 6 phòng chiếu
+      const ROOM_FALLBACK_RGB = {
+        "room-1": [234, 158, 38],
+        "room-2": [214, 36, 54],
+        "room-3": [72, 149, 239],
+        "room-4": [155, 93, 229],
+        "room-5": [243, 114, 44],
+        "room-6": [45, 198, 146]
+      };
+      const posterColorCache = new Map();
+      const sampleCanvas = document.createElement("canvas");
+      sampleCanvas.width = 16;
+      sampleCanvas.height = 16;
+      const sampleCtx = sampleCanvas.getContext("2d", { willReadFrequently: true });
+
+      function computePosterDominantRGB(posterUrl, roomId) {
+        const fallback = ROOM_FALLBACK_RGB[roomId] || [229, 9, 20];
+        if (!posterUrl || !sampleCtx) return Promise.resolve(fallback);
+        if (posterColorCache.has(posterUrl)) return Promise.resolve(posterColorCache.get(posterUrl));
+
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.decoding = "async";
+          const finish = (rgb) => {
+            posterColorCache.set(posterUrl, rgb);
+            resolve(rgb);
+          };
+          img.onload = () => {
+            try {
+              sampleCtx.clearRect(0, 0, 16, 16);
+              sampleCtx.drawImage(img, 0, 0, 16, 16);
+              const data = sampleCtx.getImageData(0, 0, 16, 16).data;
+              let rSum = 0, gSum = 0, bSum = 0, wSum = 0;
+              for (let i = 0; i < data.length; i += 4) {
+                const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+                if (a < 128) continue;
+                const max = Math.max(r, g, b);
+                const min = Math.min(r, g, b);
+                const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                if (luma < 22 || luma > 242) continue;
+                const sat = max > 0 ? (max - min) / max : 0;
+                const weight = 0.35 + sat * 1.65;
+                rSum += r * weight;
+                gSum += g * weight;
+                bSum += b * weight;
+                wSum += weight;
+              }
+              if (wSum < 1) {
+                finish(fallback);
+                return;
+              }
+              // Đẩy nhẹ độ bão hòa điện ảnh nhưng tránh cháy sáng trên nền #0b0607
+              const rr = Math.min(245, Math.max(48, Math.round(rSum / wSum)));
+              const gg = Math.min(235, Math.max(28, Math.round(gSum / wSum)));
+              const bb = Math.min(245, Math.max(36, Math.round(bSum / wSum)));
+              finish([rr, gg, bb]);
+            } catch (_) {
+              finish(fallback);
+            }
+          };
+          img.onerror = () => finish(fallback);
+          const isLocal = /^(assets\/|\.\/assets\/|data:)/i.test(posterUrl);
+          img.src = isLocal
+            ? posterUrl
+            : `https://wsrv.nl/?url=${encodeURIComponent(posterUrl)}&w=64&h=64&fit=cover&output=jpg`;
+        });
+      }
+
+      let lastLitRoomId = "";
+      let lightingReqToken = 0;
+
+      function syncScreenLightOrigin() {
+        const billboard = document.getElementById("netflix-billboard");
+        const screenBox = document.getElementById("hero-stage-screen-box");
+        if (!billboard || !screenBox || isWebGLActive()) return;
+        const bRect = billboard.getBoundingClientRect();
+        const sRect = screenBox.getBoundingClientRect();
+        if (bRect.width <= 0 || bRect.height <= 0) return;
+        const pctX = (((sRect.left + sRect.width * 0.5 - bRect.left) / bRect.width) * 100).toFixed(1);
+        const pctY = (((sRect.top + sRect.height * 0.5 - bRect.top) / bRect.height) * 100).toFixed(1);
+        billboard.style.setProperty("--screen-light-x", `${pctX}%`);
+        billboard.style.setProperty("--screen-light-y", `${pctY}%`);
+      }
+
+      function applyRoomRGBTokens([r, g, b], roomId) {
+        const root = document.documentElement;
+        const lobby = document.getElementById("lobby-view");
+        const billboard = document.getElementById("netflix-billboard");
+        [root, lobby, billboard].forEach((el) => {
+          if (!el) return;
+          el.style.setProperty("--room-r", String(r));
+          el.style.setProperty("--room-g", String(g));
+          el.style.setProperty("--room-b", String(b));
+          el.style.setProperty("--room-accent-rgb", `${r}, ${g}, ${b}`);
+          if (el !== root && roomId) el.setAttribute("data-room-accent", roomId);
+        });
+      }
+
+      function initRoomLighting(activeRoom = null) {
+        const rooms = DEFAULT_ROOMS.map((r) => getEffectiveRoom(r.id));
+        const room = activeRoom || rooms[state.heroIndex] || rooms[0];
+        if (!room) return;
+        syncScreenLightOrigin();
+        const fallback = ROOM_FALLBACK_RGB[room.id] || [229, 9, 20];
+        if (!posterColorCache.has(room.poster || "")) {
+          applyRoomRGBTokens(fallback, room.id);
+        }
+        const token = ++lightingReqToken;
+        computePosterDominantRGB(room.poster || "", room.id).then((rgb) => {
+          if (token !== lightingReqToken) return;
+          applyRoomRGBTokens(rgb, room.id);
+        });
+      }
+
+      // -----------------------------------------------------------------------
+      // 2. CHUYỂN CẢNH ZOOM XUYÊN MÀN HÌNH VÀO PHÒNG 3D WEBGL (triggerCinemaZoom)
+      // -----------------------------------------------------------------------
+      let zoomInProgress = false;
+
+      function triggerCinemaZoom(onComplete, opts = {}) {
+        const completeSafe = typeof onComplete === "function" ? onComplete : () => {};
+        if (zoomInProgress) return;
+
+        const lobbyEl = document.getElementById("lobby-view");
+        const screenEl = document.getElementById("hero-stage-screen-box");
+        const veilEl = document.getElementById("cv-cinema-zoom-veil");
+
+        if (!lobbyEl || !screenEl || lobbyEl.classList.contains("hidden") || isReducedMotion()) {
+          completeSafe();
+          const targetModal = document.getElementById("booking-modal");
+          const targetRoom = document.getElementById("room-view");
+          const shownTarget = (targetRoom && !targetRoom.classList.contains("hidden")) ? targetRoom : targetModal;
+          if (shownTarget && !shownTarget.classList.contains("hidden")) {
+            shownTarget.classList.remove("cv-3d-crossfade-enter");
+            void shownTarget.offsetWidth;
+            shownTarget.classList.add("cv-3d-crossfade-enter");
+          }
+          return;
+        }
+
+        zoomInProgress = true;
+        stopHeroTrailer({ keepPaused: true });
+
+        const sRect = screenEl.getBoundingClientRect();
+        const lRect = lobbyEl.getBoundingClientRect();
+        const screenCenterX = sRect.left + sRect.width * 0.5;
+        const screenCenterY = sRect.top + sRect.height * 0.5;
+        const originX = screenCenterX - lRect.left;
+        const originY = screenCenterY - lRect.top;
+
+        const scaleNeeded = Math.min(
+          5.2,
+          Math.max(
+            2.85,
+            Math.max(window.innerWidth / Math.max(120, sRect.width), window.innerHeight / Math.max(80, sRect.height)) * 1.18
+          )
+        );
+
+        lobbyEl.style.transformOrigin = `${originX.toFixed(1)}px ${originY.toFixed(1)}px`;
+        lobbyEl.style.setProperty("--cv-zoom-scale", scaleNeeded.toFixed(3));
+
+        requestAnimationFrame(() => {
+          lobbyEl.classList.add("is-cinema-zooming");
+        });
+
+        setTimeout(() => {
+          veilEl?.classList.add("is-active");
+        }, 800);
+
+        setTimeout(() => {
+          completeSafe();
+          const roomViewEl = document.getElementById("room-view");
+          const bookingModalEl = document.getElementById("booking-modal");
+          const active3DSurface =
+            roomViewEl && !roomViewEl.classList.contains("hidden")
+              ? roomViewEl
+              : bookingModalEl && !bookingModalEl.classList.contains("hidden")
+              ? bookingModalEl
+              : null;
+
+          if (active3DSurface) {
+            active3DSurface.classList.remove("cv-3d-crossfade-enter");
+            void active3DSurface.offsetWidth;
+            active3DSurface.classList.add("cv-3d-crossfade-enter");
+          }
+
+          requestAnimationFrame(() => {
+            veilEl?.classList.remove("is-active");
+            lobbyEl.classList.remove("is-cinema-zooming");
+            lobbyEl.style.transformOrigin = "";
+            lobbyEl.style.removeProperty("--cv-zoom-scale");
+            zoomInProgress = false;
+          });
+        }, 1200);
+      }
+
+      // -----------------------------------------------------------------------
+      // 3. BĂNG CHUYỀN SCROLL-SNAP NÂNG TÂM ĐIỂM (initFocusCarousel)
+      // -----------------------------------------------------------------------
+      const carouselControllers = new WeakMap();
+      const activeCarousels = new Set();
+
+      function syncNearestCenterFocal(track) {
+        const cards = Array.from(track.querySelectorAll("[data-carousel-card]"));
+        if (!cards.length) return;
+        const tRect = track.getBoundingClientRect();
+        const centerX = tRect.left + tRect.width * 0.5;
+        let bestCard = cards[0];
+        let bestDist = Infinity;
+        for (const card of cards) {
+          const cRect = card.getBoundingClientRect();
+          const dist = Math.abs(cRect.left + cRect.width * 0.5 - centerX);
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestCard = card;
+          }
+        }
+        for (const card of cards) {
+          card.classList.toggle("is-focal", card === bestCard);
+        }
+      }
+
+      function setupSingleCarousel(track) {
+        if (!track) return;
+        const prev = carouselControllers.get(track);
+        if (prev) prev.destroy();
+
+        let cardObserver = null;
+        let scrollRaf = 0;
+
+        const connectCardObserver = () => {
+          if (cardObserver || isWebGLActive()) return;
+          const cards = track.querySelectorAll("[data-carousel-card]");
+          if (!cards.length) return;
+          cardObserver = new IntersectionObserver(
+            (entries) => {
+              if (isWebGLActive()) return;
+              let matchedFocal = false;
+              entries.forEach((entry) => {
+                if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+                  matchedFocal = true;
+                  track.querySelectorAll("[data-carousel-card].is-focal").forEach((c) => {
+                    if (c !== entry.target) c.classList.remove("is-focal");
+                  });
+                  entry.target.classList.add("is-focal");
+                }
+              });
+              if (!matchedFocal && !track.querySelector("[data-carousel-card].is-focal")) {
+                syncNearestCenterFocal(track);
+              }
+            },
+            {
+              root: track,
+              rootMargin: "0px -32% 0px -32%",
+              threshold: [0.6]
+            }
+          );
+          cards.forEach((c) => cardObserver.observe(c));
+          syncNearestCenterFocal(track);
+        };
+
+        const disconnectCardObserver = () => {
+          if (cardObserver) {
+            cardObserver.disconnect();
+            cardObserver = null;
+          }
+          if (scrollRaf) {
+            cancelAnimationFrame(scrollRaf);
+            scrollRaf = 0;
+          }
+        };
+
+        const onTrackScroll = () => {
+          if (scrollRaf || isWebGLActive()) return;
+          scrollRaf = requestAnimationFrame(() => {
+            scrollRaf = 0;
+            syncNearestCenterFocal(track);
+          });
+        };
+
+        const viewportObserver = new IntersectionObserver(
+          (entries) => {
+            const visible = entries.some((e) => e.isIntersecting);
+            if (visible && !isWebGLActive()) connectCardObserver();
+            else disconnectCardObserver();
+          },
+          { threshold: 0.05 }
+        );
+
+        viewportObserver.observe(track);
+        track.addEventListener("scroll", onTrackScroll, { passive: true });
+        syncNearestCenterFocal(track);
+
+        const ctrl = {
+          pause: disconnectCardObserver,
+          resume: () => { if (!isWebGLActive()) connectCardObserver(); },
+          destroy: () => {
+            disconnectCardObserver();
+            viewportObserver.disconnect();
+            track.removeEventListener("scroll", onTrackScroll);
+            activeCarousels.delete(ctrl);
+          }
+        };
+        carouselControllers.set(track, ctrl);
+        activeCarousels.add(ctrl);
+      }
+
+      function initFocusCarousel(selector = "[data-focus-carousel]") {
+        document.querySelectorAll(selector).forEach((track) => setupSingleCarousel(track));
+      }
+
+      // -----------------------------------------------------------------------
+      // 4. HIỆU ỨNG GIẢI MÃ KÝ TỰ (initScrambleReveal — 30ms step, 1.2s total)
+      // -----------------------------------------------------------------------
+      const SCRAMBLE_GLYPHS = ["*", "#", "%", "&", "/"];
+      const SCRAMBLE_STEP_MS = 30;
+      const SCRAMBLE_DURATION_MS = 1200;
+      const activeScrambleJobs = new Map();
+      let scrambleRafId = 0;
+
+      function ensureScrambleInnerSpan(el) {
+        let inner = el.querySelector("[aria-hidden='true']");
+        const raw = el.getAttribute("data-scramble-text") || el.getAttribute("aria-label") || el.textContent || "";
+        el.setAttribute("aria-label", raw);
+        el.setAttribute("data-scramble-text", raw);
+        if (!inner) {
+          el.textContent = "";
+          inner = document.createElement("span");
+          inner.setAttribute("aria-hidden", "true");
+          inner.textContent = raw;
+          el.appendChild(inner);
+        }
+        return { inner, target: raw };
+      }
+
+      function stepScrambleLoop(now) {
+        if (isWebGLActive() || isReducedMotion()) {
+          activeScrambleJobs.forEach((job, el) => {
+            job.inner.textContent = job.target;
+            activeScrambleJobs.delete(el);
+          });
+          scrambleRafId = 0;
+          return;
+        }
+
+        activeScrambleJobs.forEach((job, el) => {
+          if (!el.isConnected) {
+            if (job.fallbackTimer) clearTimeout(job.fallbackTimer);
+            activeScrambleJobs.delete(el);
+            return;
+          }
+          const elapsed = now - job.startTime;
+          if (elapsed >= SCRAMBLE_DURATION_MS) {
+            if (job.fallbackTimer) clearTimeout(job.fallbackTimer);
+            job.inner.textContent = job.target;
+            activeScrambleJobs.delete(el);
+            return;
+          }
+          if (now - job.lastTick < SCRAMBLE_STEP_MS) return;
+          job.lastTick = now;
+
+          const progress = Math.min(1, Math.max(0, elapsed / SCRAMBLE_DURATION_MS));
+          const chars = Array.from(job.target);
+          const lockCount = Math.floor(progress * chars.length);
+          let out = "";
+          for (let i = 0; i < chars.length; i++) {
+            const ch = chars[i];
+            if (i < lockCount || /\s/.test(ch)) {
+              out += ch;
+            } else {
+              out += SCRAMBLE_GLYPHS[(Math.random() * SCRAMBLE_GLYPHS.length) | 0];
+            }
+          }
+          job.inner.textContent = out;
+        });
+
+        if (activeScrambleJobs.size > 0) {
+          scrambleRafId = requestAnimationFrame(stepScrambleLoop);
+        } else {
+          scrambleRafId = 0;
+        }
+      }
+
+      function runScrambleOnElement(el, forceReplay = false) {
+        if (!el) return;
+        const { inner, target } = ensureScrambleInnerSpan(el);
+        if (!target) return;
+        if (!forceReplay && el.dataset.scrambleDone === "1") return;
+        el.dataset.scrambleDone = "1";
+
+        const prevJob = activeScrambleJobs.get(el);
+        if (prevJob?.fallbackTimer) clearTimeout(prevJob.fallbackTimer);
+
+        if (isReducedMotion() || isWebGLActive()) {
+          inner.textContent = target;
+          activeScrambleJobs.delete(el);
+          return;
+        }
+
+        const now = performance.now();
+        const fallbackTimer = setTimeout(() => {
+          inner.textContent = target;
+          activeScrambleJobs.delete(el);
+        }, SCRAMBLE_DURATION_MS + 40);
+
+        activeScrambleJobs.set(el, {
+          inner,
+          target,
+          startTime: now,
+          lastTick: 0,
+          fallbackTimer
+        });
+        stepScrambleLoop(now);
+        if (!scrambleRafId && activeScrambleJobs.size > 0) {
+          scrambleRafId = requestAnimationFrame(stepScrambleLoop);
+        }
+      }
+
+      const scrambleViewportObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            const el = entry.target;
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+              runScrambleOnElement(el, false);
+              scrambleViewportObserver.unobserve(el);
+            } else if (!entry.isIntersecting && activeScrambleJobs.has(el)) {
+              const job = activeScrambleJobs.get(el);
+              if (job) job.inner.textContent = job.target;
+              activeScrambleJobs.delete(el);
+            }
+          });
+        },
+        { threshold: [0, 0.5] }
+      );
+
+      function initScrambleReveal(opts = {}) {
+        const root = opts.scope || document;
+        const forceReplay = Boolean(opts.forceReplay);
+        root.querySelectorAll(".scramble").forEach((el) => {
+          ensureScrambleInnerSpan(el);
+          if (forceReplay) {
+            el.dataset.scrambleDone = "0";
+            const rect = el.getBoundingClientRect();
+            const inView = rect.width > 0 && rect.bottom > 0 && rect.top < window.innerHeight;
+            if (inView) runScrambleOnElement(el, true);
+            else scrambleViewportObserver.observe(el);
+          } else if (el.dataset.scrambleDone !== "1") {
+            scrambleViewportObserver.observe(el);
+          }
+        });
+      }
+
+      function setScrambleValue(el, nextText, replayIfVisible = false) {
+        if (!el) return;
+        const clean = String(nextText ?? "");
+        const prev = el.getAttribute("data-scramble-text");
+        el.setAttribute("aria-label", clean);
+        el.setAttribute("data-scramble-text", clean);
+        ensureScrambleInnerSpan(el);
+        if (replayIfVisible && prev !== null && prev !== clean && !el.classList.contains("hidden")) {
+          runScrambleOnElement(el, true);
+        } else {
+          const inner = el.querySelector("[aria-hidden='true']");
+          if (inner) inner.textContent = clean;
+        }
+      }
+
+      function onHeroRoomUpdated(room, _idx, isTrailerPlaying) {
+        initRoomLighting(room);
+        const roomChanged = lastLitRoomId !== room.id;
+        lastLitRoomId = room.id;
+
+        const billboard = document.getElementById("netflix-billboard");
+        if (roomChanged && billboard && !isTrailerPlaying && !isReducedMotion() && !isWebGLActive()) {
+          billboard.querySelectorAll(".cv-hero-stagger-item").forEach((item) => {
+            item.classList.remove("is-entering");
+            void item.offsetWidth;
+            item.classList.add("is-entering");
+          });
+        }
+        initScrambleReveal({
+          scope: billboard || document,
+          forceReplay: roomChanged && !isTrailerPlaying
+        });
+        initScrambleReveal({
+          scope: document.getElementById("desktop-rooms-list") || document,
+          forceReplay: false
+        });
+      }
+
+      // Gắn sự kiện bấm nút chọn góc nhìn (Hàng A–C / VIP D–E / Hàng F) -> Zoom-through vào 3D WebGL
+      if (window.appActions) {
+        window.appActions.triggerPovCinemaZoom = function (zone = "rowF") {
+          setHeroPovZone(zone, false);
+          const room = DEFAULT_ROOMS[state.heroIndex] || DEFAULT_ROOMS[0];
+          const preferredSeat = getPreferredSeatForHeroPov(room);
+          const hasTicket = hasValidTicketForRoom(room.id);
+          triggerCinemaZoom(
+            () => openBookingModal(room.id, null, preferredSeat, { forceNewBooking: hasTicket }),
+            { roomId: room.id, povZone: zone }
+          );
+        };
+      }
+
+      window.addEventListener("resize", syncScreenLightOrigin, { passive: true });
+
+      window.CineVerseMotion = {
+        initRoomLighting,
+        triggerCinemaZoom,
+        initFocusCarousel,
+        initScrambleReveal,
+        setScrambleValue,
+        onHeroRoomUpdated
+      };
+
+      requestAnimationFrame(() => {
+        initRoomLighting();
+        initFocusCarousel();
+        initScrambleReveal();
+      });
     })();
   </script>
 </body>
