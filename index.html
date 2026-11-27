@@ -12246,7 +12246,7 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
   </div>
 
   <!-- MODAL TẠO / SỬA LỊCH HẸN XEM CÙNG BẠN BÈ -->
-  <div id="watch-party-create-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="wp-create-modal-title">
+  <div id="watch-party-create-modal" onclick="if(event.target===this){window.appActions.closeCreateWatchPartyModal();}" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="wp-create-modal-title">
     <div class="cv-wp-modal-sheet cv-wp-create-sheet w-full rounded-t-3xl sm:rounded-2xl space-y-2.5 shadow-2xl">
       <div class="flex items-center justify-between gap-2 pb-2 border-b border-white/10">
         <div class="flex items-center gap-3 min-w-0">
@@ -44268,6 +44268,18 @@ body.theater-dimmed:not(.stream-room-active) #room-view #theater-center-auditori
           if (capsuleModal && !capsuleModal.classList.contains("hidden")) {
             ev.preventDefault();
             closeMemoryCapsuleModal();
+            return;
+          }
+          const wpCreateModal = document.getElementById("watch-party-create-modal");
+          if (wpCreateModal && !wpCreateModal.classList.contains("hidden") && !document.querySelector(".cv-select-portal-menu")) {
+            ev.preventDefault();
+            closeCreateWatchPartyModal();
+            return;
+          }
+          const wpInviteModal = document.getElementById("watch-party-invite-modal");
+          if (wpInviteModal && !wpInviteModal.classList.contains("hidden")) {
+            ev.preventDefault();
+            closeWatchPartyInviteModal();
             return;
           }
           const settingsPop = document.getElementById("stream-settings-popover");
